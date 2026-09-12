@@ -130,7 +130,10 @@
           <div><p class="eyebrow gold">Session d’apprentissage</p><h1 id="dashboard-title"><span id="greeting-prefix">Bonsoir</span> <span id="dashboard-name">Richard</span>.</h1><p id="personalized-next">Une étape claire pour continuer à progresser.</p>
             <ol class="dashboard-loop" aria-label="Boucle d’apprentissage DDA"><li>Learn</li><li class="now">Practice</li><li>Analyze</li><li>Measure</li><li>Prove</li></ol>
           </div>
-          <div class="week-score"><span>Cette semaine</span><strong id="week-xp">+20 XP</strong></div>
+          <div class="cockpit-stats">
+            <div class="week-score"><span>Cette semaine</span><strong id="week-xp">+20 XP</strong></div>
+            <div class="week-score stat-days"><span>Activité</span><strong id="active-days">0 jour</strong></div>
+          </div>
         </div>
 
         <article class="continue-card">
@@ -156,13 +159,23 @@
             </ol>
           </section>
 
-          <section class="panel insight">
-            <p class="eyebrow gold"><svg class="icon"><use href="#icon-spark"/></svg> DDA Insight</p>
-            <h3>Un gain ne prouve pas qu’une décision était bonne.</h3>
-            <p>DDA évaluera progressivement la qualité de ton processus, pas seulement le résultat.</p>
-            <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Aperçu de la vision DDA</span>
+          <section class="panel activity-panel">
+            <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-check-circle"/></svg> Dernière activité</p><h3>Ce que tu as accompli</h3></div></div>
+            <ol class="activity-list" id="recent-activity-list"></ol>
           </section>
         </div>
+
+        <div class="cockpit-alert" id="cockpit-alert">
+          <svg class="icon"><use href="#icon-spark"/></svg>
+          <div>
+            <p class="eyebrow gold">DDA Insight</p>
+            <p class="cockpit-alert-cue" id="cockpit-alert-cue" hidden></p>
+            <h3>Un gain ne prouve pas qu’une décision était bonne.</h3>
+            <p>DDA évaluera progressivement la qualité de ton processus, pas seulement le résultat.</p>
+          </div>
+          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Aperçu de la vision DDA</span>
+        </div>
+
         <div class="terminal-dock" aria-label="Accès rapides du Terminal">
           <button data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg><strong>Marchés & BRVM</strong><small>Comprendre l’actualité</small></button>
           <button data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg><strong>Broker Hub</strong><small>Comparer avec transparence</small></button>

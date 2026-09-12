@@ -21,7 +21,7 @@
 | Accès | Connexion | ABSENT | À préparer pour authentification future |
 | Accès | Récupération de compte | FUTUR | Après authentification réelle |
 | Accès | Onboarding | SIMULÉ | Deux étapes, sauvegarde locale |
-| Apprenant | Darius Terminal | CONSTRUIT | Accueil, prochaine action, progression et raccourcis |
+| Apprenant | Darius Terminal | CONSTRUIT | Restructuré en véritable cockpit (directive CEO §7) : hors « où j'en suis » (carte de reprise + anneau de progression) et « prochaine action » déjà présents, deux zones réelles ajoutées — « Dernière activité » (accomplissements tirés du journal d'événements réel `state.events`, jamais fabriqués) et un indicateur « Activité » (jours distincts d'usage sur cet appareil, calculé, pas simulé) ; le bloc DDA Insight est sorti de la grille de cartes uniformes pour devenir une bannière d'attention distincte avec un message dynamique sur la prochaine étape réelle |
 | Apprenant | Parcours M0–M9 | PARTIEL | M0.1 seul module réellement authored et jouable ; les 10 modules (M0–M9) sont désormais représentés dans le curriculum et rendus dynamiquement sur Parcours/Progression avec leurs états (verrouillé/prochainement/disponible/en cours/terminé) — aucun contenu M0.2–M9 inventé, seulement la structure |
 | Apprenant | Module / Leçon / Lecteur | PARTIEL | M0.1 fonctionnel ; lecteur média final absent |
 | Apprenant | Résumé / Exercice / Quiz | CONSTRUIT | M0.1 avec déverrouillage progressif |
@@ -50,7 +50,7 @@
 | Compétence / badge / certificat | PARTIEL | affichage et règles à compléter |
 | Formule / droits / Premium | SIMULÉ | Free/Premium local, sans abonnement |
 | Consentement | SIMULÉ | consentement de stockage local |
-| Analytics produit | SIMULÉ | événements locaux anonymes sur appareil |
+| Analytics produit | SIMULÉ | événements locaux anonymes sur appareil ; un sous-ensemble (jalons d'apprentissage réels) est désormais aussi affiché à l'utilisateur lui-même dans « Dernière activité » du Terminal |
 | Subscription Engine | FUTUR | architecture à préserver, aucun paiement |
 | Affiliate Revenue Engine | FUTUR | disclosure et attribution à préparer, aucun lien réel |
 | Referral/Ambassador Engine | FUTUR | distinct de l’affiliation, non activé |
