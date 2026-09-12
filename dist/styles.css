@@ -32,6 +32,19 @@ a{color:inherit}
 button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--blue-2);outline-offset:3px;border-radius:6px}
 
+/* ---------- Editorial photography slot ----------
+   Placeholder visual until licensed DDA photography is supplied — swap the
+   inner content for an <img> without touching layout. Never a broken image. */
+.photo-frame{position:relative;overflow:hidden;border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px}
+.photo-frame img{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0}
+.photo-frame .icon{width:15%;height:15%;min-width:22px;min-height:22px;max-width:38px;max-height:38px;opacity:.55}
+.photo-frame span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:800;opacity:.6}
+.photo-frame.light{background:linear-gradient(150deg,#efe6cf,#ddd0ab);color:#8a7346}
+.photo-frame.dark{background:linear-gradient(150deg,var(--navy-700),var(--navy-900));color:var(--muted)}
+.photo-frame.ratio-portrait{aspect-ratio:4/5}
+.photo-frame.ratio-wide{aspect-ratio:16/10}
+.photo-frame.ratio-square{aspect-ratio:1}
+
 /* ---------- Icons ---------- */
 .icon{width:1.3em;height:1.3em;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .icon-fill{fill:currentColor;stroke:none}
@@ -302,13 +315,23 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .guardrail-list .icon{color:var(--red);flex:none;width:18px;height:18px}
 
 /* ---------- Markets ---------- */
-.market-strip{display:grid;grid-template-columns:1fr;gap:1px;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--line);margin-bottom:18px}
-.market-strip article{padding:16px;background:var(--navy-700);display:grid;gap:4px}
-.market-strip span{font-size:11px;color:var(--gold-soft);font-weight:900;letter-spacing:.06em}
-.market-strip small{color:var(--muted)}
+.index-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:20px}
+.index-card{padding:18px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-700);display:grid;gap:10px}
+.index-card-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.index-card-head strong{font-size:15px}
+.index-sparkline{width:100%;height:30px;stroke:var(--line);stroke-width:2;stroke-dasharray:3 4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.index-card p{color:var(--muted);font-size:13px;margin:0}
+.data-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 9px;white-space:nowrap}
+.data-badge .icon{width:11px;height:11px}
 .market-layout{display:grid;grid-template-columns:1fr;gap:16px}
-.market-brief,.brvm-panel{padding:22px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800)}
-.market-brief h2,.brvm-panel h2{font-size:26px}
+.market-main{display:grid;gap:16px}
+.market-brief,.brvm-panel,.market-calendar{padding:22px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800)}
+.market-brief h2,.brvm-panel h2,.market-calendar h2{font-size:26px}
+.market-calendar p{color:var(--muted);font-size:14px}
+#market-calendar-list{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:8px}
+#market-calendar-list li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:11px}
+#market-calendar-list strong{font-size:14px;display:block}
+#market-calendar-list small{color:var(--muted)}
 .brief-step{display:grid;grid-template-columns:36px 1fr;gap:13px;padding:16px 0;border-top:1px solid var(--line)}
 .brief-step:first-of-type{border-top:0}
 .brief-step>span{color:var(--gold-soft);font-family:Georgia,serif;font-size:19px}
@@ -391,6 +414,7 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 /* ---------- Access / onboarding ---------- */
 .access-shell{display:grid;grid-template-columns:1fr;gap:28px}
 .access-illustration{display:none}
+.access-photo{height:clamp(150px,32vw,220px);aspect-ratio:auto;margin-bottom:22px}
 .access-copy>p{color:var(--muted);font-size:15px;max-width:560px}
 .trust-list{list-style:none;padding:0;margin:22px 0;display:grid;gap:12px}
 .trust-list li{display:flex;align-items:center;gap:10px;font-size:14px}
@@ -504,7 +528,7 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
   .membership-status{border-left:1px solid var(--gold)}
   .plan-card h2{font-size:36px}
 
-  .market-strip{grid-template-columns:repeat(3,1fr)}
+  .index-grid{grid-template-columns:repeat(2,1fr)}
   .market-layout{grid-template-columns:1.35fr .65fr}
 
   .broker-controls{display:flex;gap:14px}

@@ -8,6 +8,18 @@ const activeLessonId = lessonView.dataset.lessonId || DDA.primaryLessonId;
 const titles = { dashboard: 'Aujourd’hui', access: 'Accès pilote', path: 'Mon parcours', lesson: 'Leçon en cours', progress: 'Progression', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
 const viewPermissions = { path: 'path', lesson: 'lesson_m01', progress: 'progress', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile' };
 const MODULE_STATUS_LABEL = { completed: 'Terminé', in_progress: 'En cours', available: 'Disponible', locked: 'Verrouillé', coming_soon: 'Prochainement' };
+// Structural demo only — no real index value, date or amount. Swap for a real feed's response later without touching the markup.
+const MARKET_DEMO = {
+  indices: [
+    { label: 'BRVM Composite', description: 'Indice large de la cote BRVM.' },
+    { label: 'BRVM 30', description: 'Indice des valeurs les plus liquides de la cote.' }
+  ],
+  calendar: [
+    { company: 'Société A', event: 'Détachement de dividende' },
+    { company: 'Société B', event: 'Mise en paiement' },
+    { company: 'Société C', event: 'Assemblée générale' }
+  ]
+};
 let prototypeState = DDA.load();
 
 function saveState(update) {
@@ -81,6 +93,25 @@ function renderModulesRecap() {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
     return `<li><span class="module-id">${module.id}</span><strong>${module.title}</strong><span class="module-pill ${status}">${MODULE_STATUS_LABEL[status] || status}</span></li>`;
   }).join('');
+}
+
+function renderMarketIntelligence() {
+  const indices = document.getElementById('market-indices');
+  if (indices) {
+    indices.innerHTML = MARKET_DEMO.indices.map(item => `
+      <article class="index-card">
+        <div class="index-card-head"><strong>${item.label}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Non connecté</span></div>
+        <svg class="index-sparkline" viewBox="0 0 120 30" aria-hidden="true"><path d="M2 18 L22 18 L42 12 L62 20 L82 10 L102 16 L118 14"/></svg>
+        <p>${item.description}</p>
+      </article>
+    `).join('');
+  }
+  const calendar = document.getElementById('market-calendar-list');
+  if (calendar) {
+    calendar.innerHTML = MARKET_DEMO.calendar.map(row => `
+      <li><div><strong>${row.company}</strong><small>${row.event}</small></div><span class="data-badge"><svg class="icon"><use href="#icon-clock"/></svg>À confirmer</span></li>
+    `).join('');
+  }
 }
 
 function resolveContinueTarget() {
@@ -415,6 +446,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 }
 
 renderState();
+renderMarketIntelligence();
 
 const initialView = location.hash.replace('#', '');
 if (titles[initialView]) showView(initialView);
