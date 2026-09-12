@@ -31,13 +31,13 @@
 | Credentials | Certification interne | PARTIEL | Fondations documentées, émission réelle absente |
 | Ressources | Bibliothèque / Glossaire | CONSTRUIT | Guides locaux, lecteur intégré |
 | Compte | Profil / Préférences | CONSTRUIT | Profil local et mode économie de données |
-| Monétisation | Premium / upgrade | SIMULÉ | Aperçu local, aucun paiement |
+| Monétisation | Premium / upgrade | SIMULÉ | Aperçu local, aucun paiement ; montée en gamme éditoriale : tagline par formule, teaser de la Premium Value Stack (Journal & Plan → ... → Trader DNA, explicitement non activée) et rappel visuel des garde-fous de reprise directement sourcé du registre |
 | Communauté | Espace communauté | FUTUR | Non activé |
-| Marchés | Market Intelligence / BRVM | SIMULÉ | Cadre pédagogique, pas de données temps réel |
-| Partenaires | Broker Hub | SIMULÉ | Comparaison démonstrative, aucun lien partenaire |
-| Support | FAQ / Support | SIMULÉ | Formulaire local, aucun envoi |
+| Marchés | Market Intelligence / BRVM | SIMULÉ | Cadre pédagogique, pas de données temps réel ; modèle FAIT→POURQUOI→NOTION rendu plus visuel (icônes par étape), focus BRVM enrichi (icônes par ressource), aucune donnée réelle ajoutée |
+| Partenaires | Broker Hub | SIMULÉ | Comparaison démonstrative, aucun lien partenaire ; grille de lecture ajoutée (disponibilité/transparence/vérification) et badge « à vérifier » explicite sur chaque fiche pour ne jamais laisser croire à une validation réelle |
+| Support | FAQ / Support | SIMULÉ | Formulaire local, aucun envoi ; FAQ complétée d'une question honnête sur la non-synchronisation multi-appareil, identité visuelle alignée sur le reste du produit |
 | Système | Loading / empty / locked / success / offline / error | PARTIEL | États homogénéisés visuellement (spinner de chargement, verrouillage, résultat, hors-ligne) sur les écrans réels ; couverture des écrans FUTUR/ABSENT encore à définir |
-| UI/UX | Couche visuelle responsive et micro-interactions | PARTIEL | Montée en gamme de la direction artistique (identité navy/bleu/cyan/or, typographie, système d'icônes SVG, illustrations pédagogiques inline) et refonte mobile-first sur Terminal, Parcours, Leçon M0.1/Exercice/Quiz/Résultat, Progression, Ressources, Profil ; navigation, entitlements, persistance locale et PWA inchangés et revérifiés ; audit visuel Markets/Broker Hub/Support/Membership fait mais moins prioritaire ; photographie/illustration étendue, contenu M0.2+ et back-office visuel restent à faire |
+| UI/UX | Couche visuelle responsive et micro-interactions | PARTIEL | Montée en gamme de la direction artistique (identité navy/bleu/cyan/or, typographie, système d'icônes SVG, illustrations pédagogiques inline) et refonte mobile-first sur Terminal, Parcours, Leçon M0.1/Exercice/Quiz/Résultat, Progression, Ressources, Profil, **puis Membership, Markets/BRVM, Broker Hub et Support** (iconographie cohérente, blocs de contexte/narration, sans donnée ni fonctionnalité inventée) ; navigation, entitlements, persistance locale et PWA inchangés et revérifiés ; photographie/illustration étendue, contenu M0.2+ et back-office visuel restent à faire |
 
 ## Fondations produit et données
 

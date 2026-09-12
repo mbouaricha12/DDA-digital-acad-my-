@@ -276,6 +276,8 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .plan-grid{display:grid;grid-template-columns:1fr;gap:16px}
 .plan-card{padding:24px;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--navy-800)}
 .plan-card h2{font-size:30px}
+.plan-tagline{color:var(--muted);font-size:14px;margin:8px 0 0}
+.premium-plan .plan-tagline{color:#5b5f72}
 .plan-card ul{list-style:none;padding:0;margin:22px 0;display:grid;gap:11px}
 .plan-card li{display:flex;align-items:center;gap:10px}
 .plan-card li:before{content:'';width:16px;height:16px;flex:none;background:var(--green);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M4 12l5 5L20 6'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M4 12l5 5L20 6'/%3E%3C/svg%3E") center/contain no-repeat}
@@ -291,6 +293,13 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .gate-card h2{font-size:26px}
 .gate-card>p:not(.eyebrow){color:var(--muted)}
 .gate-card .primary-action{margin-top:14px}
+.membership-roadmap,.membership-guardrails{margin-top:16px}
+.membership-roadmap p{color:var(--muted);font-size:14px;max-width:680px}
+.roadmap-track{list-style:none;padding:0;margin:18px 0 16px;display:flex;flex-wrap:wrap;gap:8px}
+.roadmap-track li{border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;color:var(--muted)}
+.guardrail-list{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:10px}
+.guardrail-list li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)}
+.guardrail-list .icon{color:var(--red);flex:none;width:18px;height:18px}
 
 /* ---------- Markets ---------- */
 .market-strip{display:grid;grid-template-columns:1fr;gap:1px;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--line);margin-bottom:18px}
@@ -305,9 +314,16 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .brief-step>span{color:var(--gold-soft);font-family:Georgia,serif;font-size:19px}
 .brief-step p,.brvm-panel p,.brvm-panel li{color:var(--muted);font-size:14px}
 .brvm-panel{background:linear-gradient(165deg,#171d3d,#0c1124)}
-.brvm-panel ul{padding-left:18px;display:grid;gap:9px}
+.brvm-panel ul{padding-left:0;list-style:none;display:grid;gap:10px}
+.brvm-panel li{display:flex;align-items:flex-start;gap:9px}
+.brvm-panel li .icon{color:var(--gold-soft);flex:none;width:16px;height:16px;margin-top:2px}
 
 /* ---------- Broker Hub ---------- */
+.broker-read-guide{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:22px}
+.broker-read-guide>div{display:flex;gap:12px;padding:16px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800)}
+.broker-read-guide .icon{color:var(--gold-soft);flex:none;margin-top:2px}
+.broker-read-guide strong{display:block;margin-bottom:4px;font-size:14px}
+.broker-read-guide p{color:var(--muted);font-size:13px;margin:0}
 .broker-controls{display:grid;gap:12px;margin-bottom:20px}
 .broker-controls label{display:grid;gap:6px;color:var(--muted);font-size:13px}
 .broker-controls select{width:100%;min-height:48px;background:var(--navy-800);color:var(--white);border:1px solid var(--line);padding:12px;border-radius:11px;font:inherit}
@@ -315,14 +331,16 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .broker-card{padding:22px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800)}
 .broker-card>div:first-child{display:flex;justify-content:space-between;align-items:center;gap:14px}
 .broker-monogram{display:grid;place-items:center;width:50px;height:50px;border-radius:16px;background:var(--ivory);color:var(--navy-950);font-family:Georgia,serif;font-weight:900;font-size:21px}
-.verification{color:var(--gold-soft);font-size:10px;text-transform:uppercase;font-weight:900;text-align:right}
+.verification{color:var(--gold-soft);font-size:10px;text-transform:uppercase;font-weight:900;text-align:right;display:flex;align-items:center;gap:5px;justify-content:flex-end}
+.verification .icon{width:13px;height:13px}
 .broker-card h2{margin:20px 0 8px;font-size:24px}
 .broker-card>p{color:var(--muted);font-size:14px}
 .broker-card dl{display:grid;gap:1px;background:var(--line);margin:20px 0;border-radius:10px;overflow:hidden}
 .broker-card dl div{background:var(--navy-700);padding:12px;display:flex;justify-content:space-between;gap:15px;font-size:13px}
 .broker-card dt{color:var(--muted)}
 .broker-card dd{margin:0;text-align:right}
-.disclosure{margin-top:18px;padding:16px;border-left:2px solid var(--gold);color:var(--muted);font-size:13px}
+.disclosure{margin-top:18px;padding:16px;border-left:2px solid var(--gold);color:var(--muted);font-size:13px;display:flex;align-items:flex-start;gap:10px}
+.disclosure .icon{color:var(--gold-soft);flex:none;margin-top:2px}
 .broker-empty{padding:34px 20px;text-align:center;border:1px dashed var(--line);border-radius:var(--r-md)}
 
 /* ---------- Support ---------- */
@@ -417,6 +435,7 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
   .plan-grid,.resource-grid,.skills-grid{grid-template-columns:repeat(2,1fr)}
   .broker-grid,.support-grid{grid-template-columns:repeat(2,1fr)}
   .broker-controls{grid-template-columns:1fr 1fr}
+  .broker-read-guide{grid-template-columns:repeat(3,1fr)}
   .profile-fields{grid-template-columns:1fr 1fr}
   .access-shell{grid-template-columns:1fr}
   .continue-grid{grid-template-columns:1fr 150px;align-items:end}
