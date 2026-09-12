@@ -262,7 +262,11 @@ function bindQuestion(name, successText) {
     if (correct && name === 'quiz') {
       saveState({ progress: { ...prototypeState.progress, quizComplete: true, moduleProgress: 100, xp: 120 } });
       trackEvent('quiz_complete', { lesson: 'M0.1' });
-      document.getElementById('result-card').hidden = false;
+      const resultCard = document.getElementById('result-card');
+      resultCard.hidden = false;
+      resultCard.classList.add('just-completed');
+      resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => resultCard.classList.remove('just-completed'), 900);
       document.getElementById('saved-state').textContent = 'Exercice et quiz validés localement — aucune donnée envoyée';
     }
   }));

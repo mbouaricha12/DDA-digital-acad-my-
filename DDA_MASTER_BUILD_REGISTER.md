@@ -36,8 +36,8 @@
 | Marchés | Market Intelligence / BRVM | SIMULÉ | Cadre pédagogique, pas de données temps réel |
 | Partenaires | Broker Hub | SIMULÉ | Comparaison démonstrative, aucun lien partenaire |
 | Support | FAQ / Support | SIMULÉ | Formulaire local, aucun envoi |
-| Système | Loading / empty / locked / success / offline / error | PARTIEL | États principaux présents, couverture à homogénéiser |
-| UI/UX | Couche visuelle responsive et micro-interactions | PARTIEL | Profondeur, transitions, focus et feedback renforcés ; audit multi-appareils restant |
+| Système | Loading / empty / locked / success / offline / error | PARTIEL | États homogénéisés visuellement (spinner de chargement, verrouillage, résultat, hors-ligne) sur les écrans réels ; couverture des écrans FUTUR/ABSENT encore à définir |
+| UI/UX | Couche visuelle responsive et micro-interactions | PARTIEL | Montée en gamme de la direction artistique (identité navy/bleu/cyan/or, typographie, système d'icônes SVG, illustrations pédagogiques inline) et refonte mobile-first sur Terminal, Parcours, Leçon M0.1/Exercice/Quiz/Résultat, Progression, Ressources, Profil ; navigation, entitlements, persistance locale et PWA inchangés et revérifiés ; audit visuel Markets/Broker Hub/Support/Membership fait mais moins prioritaire ; photographie/illustration étendue, contenu M0.2+ et back-office visuel restent à faire |
 
 ## Fondations produit et données
 
