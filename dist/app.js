@@ -280,6 +280,7 @@ const JOURNAL_FIELD_LABELS = {
   note: 'Note personnelle'
 };
 let journalEditingId = null;
+let journalComposerTrigger = null;
 let journalStep = 1;
 
 function formatJournalDate(iso) {
@@ -356,8 +357,9 @@ function goToJournalStep(step) {
   document.getElementById('journal-step-save').hidden = step !== 3;
 }
 
-function openJournalComposer(entry) {
+function openJournalComposer(entry, trigger) {
   journalEditingId = entry ? entry.id : null;
+  journalComposerTrigger = trigger || null;
   const fields = entry || DDA.emptyJournalEntry();
   document.getElementById('journal-market').value = fields.market || '';
   document.getElementById('journal-context').value = fields.context || '';
@@ -381,6 +383,12 @@ function closeJournalComposer() {
   document.getElementById('journal-composer').hidden = true;
   document.getElementById('journal-entries-panel').hidden = false;
   journalEditingId = null;
+  const trigger = journalComposerTrigger;
+  journalComposerTrigger = null;
+  // The trigger can be a now-detached node if the list was just re-rendered
+  // (e.g. right after saving an edit) — fall back to a button that always exists.
+  if (trigger && document.body.contains(trigger)) trigger.focus();
+  else document.getElementById('journal-new-entry').focus();
 }
 
 function switchJournalTab(tab) {
@@ -620,6 +628,7 @@ document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;
   if (!document.getElementById('gate-layer').hidden) closeGate();
   else if (!document.getElementById('resource-reader').hidden) closeReader();
+  else if (!document.getElementById('journal-composer').hidden) closeJournalComposer();
 });
 document.getElementById('preview-premium').addEventListener('click', () => {
   prototypeState = DDA.setPlan(prototypeState, 'premium');
@@ -652,7 +661,7 @@ document.querySelectorAll('.broker-detail').forEach(button => button.addEventLis
 
 document.getElementById('journal-tab-entries').addEventListener('click', () => switchJournalTab('entries'));
 document.getElementById('journal-tab-plan').addEventListener('click', () => switchJournalTab('plan'));
-document.getElementById('journal-new-entry').addEventListener('click', () => openJournalComposer(null));
+document.getElementById('journal-new-entry').addEventListener('click', event => openJournalComposer(null, event.currentTarget));
 document.getElementById('journal-composer-back').addEventListener('click', closeJournalComposer);
 document.getElementById('journal-step-prev').addEventListener('click', () => goToJournalStep(journalStep - 1));
 document.getElementById('journal-step-next').addEventListener('click', () => goToJournalStep(journalStep + 1));
@@ -689,7 +698,7 @@ document.getElementById('journal-list').addEventListener('click', event => {
   const deleteButton = event.target.closest('.journal-entry-delete');
   if (editButton) {
     const entry = (prototypeState.journal?.entries || []).find(item => item.id === editButton.dataset.id);
-    if (entry) openJournalComposer(entry);
+    if (entry) openJournalComposer(entry, editButton);
   } else if (deleteButton) {
     deleteJournalEntry(deleteButton.dataset.id);
     trackEvent('journal_entry_deleted', {});
