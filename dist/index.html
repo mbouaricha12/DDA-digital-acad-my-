@@ -198,6 +198,12 @@
             <p class="eyebrow gold">Fondations des marchés · Leçon 1</p>
             <h1 id="lesson-title">Le trading comme commerce</h1>
             <p class="lesson-lead">Avant de lire un graphique, commence par comprendre ce qui se passe réellement sur un marché.</p>
+            <ol class="lesson-loop" id="lesson-loop" aria-label="Progression dans la leçon">
+              <li data-step="lesson">Comprendre</li>
+              <li data-step="exercise">Exercice</li>
+              <li data-step="quiz">Quiz</li>
+              <li data-step="review">Résultat</li>
+            </ol>
             <div class="video-stage">
               <div class="exchange-visual">
                 <svg class="exchange-diagram" viewBox="0 0 320 130" aria-hidden="true">
@@ -219,15 +225,22 @@
               <p>Le trading est une forme de commerce. Sur un marché, certains participants souhaitent acheter un actif et d’autres souhaitent le vendre. Le prix évolue lorsque l’équilibre entre ces intentions change.</p>
               <div class="principle"><svg class="icon"><use href="#icon-compass"/></svg><div><span>Principe essentiel</span><strong>Ton rôle n’est pas de deviner. Ton rôle est d’observer, comprendre et décider selon un plan.</strong></div></div>
             </div>
+            <div class="comparison-block">
+              <p class="eyebrow gold">Comparaison</p><h2>Deux façons d’aborder le même marché</h2>
+              <div class="comparison-grid">
+                <div class="comparison-col bad"><span><svg class="icon"><use href="#icon-blocked"/></svg> Réaction impulsive</span><ul><li>Suivre le mouvement sans le comprendre</li><li>Décider sous le coup de l’émotion</li><li>Chercher un gain immédiat</li></ul></div>
+                <div class="comparison-col good"><span><svg class="icon"><use href="#icon-check-circle"/></svg> Décision méthodique</span><ul><li>Observer avant d’agir</li><li>Suivre un plan écrit à l’avance</li><li>Accepter un risque défini</li></ul></div>
+              </div>
+            </div>
             <section class="learning-check" id="exercise-block">
               <p class="eyebrow gold">Exercice</p><h2>Qui échange quoi ?</h2>
               <p>Un participant achète de l’or tandis qu’un autre accepte de le vendre. Quelle affirmation décrit le mieux le marché ?</p>
-              <div class="answer-grid" data-question="exercise"><button data-correct="false">Le prix monte toujours après un achat.</button><button data-correct="true">Le marché met en relation des intentions d’achat et de vente.</button><button data-correct="false">Le vendeur connaît forcément l’avenir.</button></div>
+              <div class="answer-grid" data-question="exercise"><button data-correct="false" data-feedback="Un achat ne garantit rien sur la suite : le prix dépend de l’équilibre entre toutes les intentions d’achat et de vente, pas d’une seule transaction.">Le prix monte toujours après un achat.</button><button data-correct="true">Le marché met en relation des intentions d’achat et de vente.</button><button data-correct="false" data-feedback="Personne ne connaît l’avenir avec certitude. Le vendeur accepte simplement de céder l’actif à ce prix, maintenant.">Le vendeur connaît forcément l’avenir.</button></div>
               <p class="feedback" id="exercise-feedback" aria-live="polite"></p>
             </section>
             <section class="learning-check locked-check" id="quiz-block" aria-disabled="true">
               <p class="eyebrow gold">Quiz de validation</p><h2>Avant toute décision, que faut-il privilégier ?</h2>
-              <div class="answer-grid" data-question="quiz"><button data-correct="false">Entrer rapidement pour ne rien manquer.</button><button data-correct="false">Chercher un gain immédiat.</button><button data-correct="true">Observer, comprendre et suivre un plan.</button></div>
+              <div class="answer-grid" data-question="quiz"><button data-correct="false" data-feedback="La précipitation est justement ce que ce module déconseille : observer avant d’agir protège ton capital.">Entrer rapidement pour ne rien manquer.</button><button data-correct="false" data-feedback="Un gain isolé ne prouve rien sur la qualité d’une décision — c’est le principe essentiel vu plus haut.">Chercher un gain immédiat.</button><button data-correct="true">Observer, comprendre et suivre un plan.</button></div>
               <p class="feedback" id="quiz-feedback" aria-live="polite"></p>
             </section>
             <section class="result-card" id="result-card" hidden><span class="result-icon">✓</span><div><p class="eyebrow">Validation locale</p><h2>Première compétence confirmée.</h2><p>Tu as compris que le processus de décision passe avant le résultat.</p><div class="result-actions"><button class="secondary-action result-action" data-view="dashboard">Voir mon Terminal</button><button class="text-action result-feedback" data-view="support">Donner mon retour de test</button></div></div></section>
