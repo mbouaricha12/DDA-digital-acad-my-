@@ -409,6 +409,7 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .broker-read-guide .icon{color:var(--gold-soft);flex:none;margin-top:2px}
 .broker-read-guide strong{display:block;margin-bottom:4px;font-size:14px}
 .broker-read-guide p{color:var(--muted);font-size:13px;margin:0}
+.broker-orient-cue{color:var(--muted);font-size:13px;margin:0 0 14px}
 .broker-controls{display:grid;gap:12px;margin-bottom:20px}
 .broker-controls label{display:grid;gap:6px;color:var(--muted);font-size:13px}
 .broker-controls select{width:100%;min-height:48px;background:var(--navy-800);color:var(--white);border:1px solid var(--line);padding:12px;border-radius:11px;font:inherit}
