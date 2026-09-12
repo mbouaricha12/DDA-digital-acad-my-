@@ -30,6 +30,26 @@ const ACTIVITY_LABELS = {
   plan_preview: metadata => (metadata.plan === 'premium' ? 'Aperçu Premium activé' : 'Retour à DDA Free')
 };
 const NEXT_STEP_PHRASE = { lesson: 'voir la leçon', exercise: 'réussir l’exercice', quiz: 'valider le quiz' };
+// Fixed, honest path for the one real lesson — done/pending only, no fabricated dates.
+const PROOF_MILESTONES = [
+  { label: 'Parcours pilote créé', eventName: 'onboarding_complete', done: () => Boolean(prototypeState.onboarding?.complete) },
+  { label: 'Leçon comprise', eventName: 'lesson_understood', done: lp => lp.lessonViewed },
+  { label: 'Exercice validé', eventName: 'exercise_complete', done: lp => lp.exerciseComplete },
+  { label: 'Quiz validé — compétence confirmée', eventName: 'quiz_complete', done: lp => lp.quizComplete }
+];
+
+function competencyLevel(lessonProgress) {
+  if (lessonProgress.quizComplete) return 4;
+  if (lessonProgress.exerciseComplete) return 3;
+  if (lessonProgress.lessonViewed) return 2;
+  return 0;
+}
+
+function setLevelMeter(id, level) {
+  const meter = document.getElementById(id);
+  if (!meter) return;
+  [...meter.children].forEach((segment, index) => segment.classList.toggle('filled', index < level));
+}
 
 function relativeTime(iso) {
   const minutes = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
@@ -152,6 +172,32 @@ function renderRecentActivity() {
   `).join('');
 }
 
+function renderProofTimeline() {
+  const container = document.getElementById('proof-timeline');
+  if (!container) return;
+  const lessonProgress = DDALearning.getLessonProgress(prototypeState, activeLessonId);
+  const events = prototypeState.events || [];
+  container.innerHTML = PROOF_MILESTONES.map(milestone => {
+    const done = milestone.done(lessonProgress);
+    const event = [...events].reverse().find(e => e.name === milestone.eventName);
+    const when = done ? (event ? relativeTime(event.at) : 'Complété') : 'À venir';
+    const icon = done ? '<svg class="icon"><use href="#icon-check-circle"/></svg>' : '';
+    return `<li class="${done ? 'done' : 'pending'}"><span class="proof-dot">${icon}</span><div><strong>${milestone.label}</strong><small>${when}</small></div></li>`;
+  }).join('');
+}
+
+function renderProgressHero() {
+  const startedEl = document.getElementById('progress-modules-started');
+  if (!startedEl) return;
+  const started = DDA.curriculum.modules.filter(module => {
+    const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
+    return status === DDALearning.MODULE_STATUS.IN_PROGRESS || status === DDALearning.MODULE_STATUS.COMPLETED;
+  }).length;
+  startedEl.textContent = `${started}/${DDA.curriculum.modules.length}`;
+  document.getElementById('progress-total-xp').textContent = String(DDALearning.totalXp(DDA.curriculum, prototypeState));
+  document.getElementById('progress-active-days').textContent = String(countActiveDays(prototypeState.events));
+}
+
 function updateCockpitAlert(continueTarget) {
   const cue = document.getElementById('cockpit-alert-cue');
   if (!cue) return;
@@ -201,7 +247,9 @@ function renderState() {
   renderRecentActivity();
 
   document.getElementById('market-skill-label').textContent = activeLessonProgress.quizComplete ? 'Fondation validée' : activeLessonProgress.exerciseComplete ? 'En progression' : 'En démarrage';
-  document.getElementById('market-skill-bar').style.width = `${progress}%`;
+  setLevelMeter('market-skill-level', competencyLevel(activeLessonProgress));
+  renderProofTimeline();
+  renderProgressHero();
 
   const step = DDALearning.lessonNextStep(activeLessonProgress);
   ['action-lesson', 'action-exercise', 'action-quiz'].forEach(id => document.getElementById(id).classList.remove('done', 'current'));
