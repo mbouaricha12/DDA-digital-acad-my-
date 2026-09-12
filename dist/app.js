@@ -121,21 +121,37 @@ function moduleActionLabel(status, renderable) {
   return renderable ? 'Continuer' : 'Ouvrir';
 }
 
-function renderPathList() {
+// The Parcours screen is a journey, not a stack of identical cards: one rich
+// "current chapter" for the single authored module, then a compact connected
+// rail for the honestly-labeled modules still to come (never a fake card per
+// module). All text comes straight from curriculum data — nothing invented.
+function renderPathJourney() {
   const container = document.getElementById('path-list');
   if (!container) return;
-  container.innerHTML = DDA.curriculum.modules.map((module, index) => {
+  const modules = DDA.curriculum.modules;
+  const currentIndex = modules.findIndex(isRenderableModule);
+  const currentModule = modules[currentIndex];
+  const currentStatus = DDALearning.moduleStatus(DDA.curriculum, currentModule.id, prototypeState);
+  const currentLesson = currentModule.lessons.find(lesson => lesson.id === activeLessonId);
+  const currentNumber = String(currentIndex + 1).padStart(2, '0');
+  const lessonCount = currentModule.lessons.length;
+
+  const rail = modules.map((module, index) => ({ module, index })).filter(({ index }) => index !== currentIndex).map(({ module, index }) => {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
-    const renderable = isRenderableModule(module);
-    const heading = renderable ? module.lessons[0]?.title || module.title : module.title;
-    const summary = module.summary || module.lessons[0]?.summary || 'Contenu en préparation.';
     const number = String(index + 1).padStart(2, '0');
-    const tag = renderable ? 'button' : 'article';
-    const cls = `path-card ${renderable ? 'current' : 'locked'}`;
-    const attrs = renderable ? ' data-view="lesson"' : '';
-    return `<${tag} class="${cls}"${attrs}><span class="path-number">${number}</span><div><small>${moduleStatusLabel(status, renderable)}</small><h3>${heading}</h3><p>${summary}</p></div><span>${moduleActionLabel(status, renderable)}</span></${tag}>`;
+    return `<li class="journey-node ${status}"><span class="journey-dot"></span><span class="path-number">${number}</span><div><small>${moduleStatusLabel(status, false)}</small><strong>${module.title}</strong>${module.summary ? `<p>${module.summary}</p>` : ''}</div></li>`;
   }).join('');
-  container.querySelectorAll('[data-view]').forEach(el => el.addEventListener('click', () => showView(el.dataset.view)));
+
+  container.innerHTML = `
+    <button class="journey-current" data-view="lesson">
+      <div class="journey-current-eyebrow"><span class="path-number">${currentNumber}</span><div><small>${moduleStatusLabel(currentStatus, true)}</small><span class="journey-current-tag">${currentModule.title}</span></div></div>
+      <h2>${currentLesson.title}</h2>
+      <p>${currentLesson.summary}</p>
+      <div class="journey-meta"><span><svg class="icon"><use href="#icon-clock"/></svg>${currentLesson.estimatedMinutes} min</span><span><svg class="icon"><use href="#icon-book"/></svg>${lessonCount} leçon${lessonCount > 1 ? 's' : ''}</span></div>
+      <span class="primary-action">${moduleActionLabel(currentStatus, true)} <span>→</span></span>
+    </button>
+    <ol class="journey-rail" aria-label="Prochains modules du parcours">${rail}</ol>`;
+  container.querySelector('.journey-current').addEventListener('click', () => showView('lesson'));
 }
 
 function renderModulesRecap() {
@@ -360,7 +376,7 @@ function renderState() {
     button.textContent = premium ? 'Ouvrir l’atelier' : 'Voir l’aperçu Premium';
   });
 
-  renderPathList();
+  renderPathJourney();
   renderModulesRecap();
 
   document.getElementById('storage-warning').hidden = DDA.storageAvailable();

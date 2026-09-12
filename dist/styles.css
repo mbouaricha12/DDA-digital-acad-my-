@@ -211,17 +211,35 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .cockpit-alert .future-label{margin-top:0;padding-top:0;border-top:0;flex:none;align-self:center}
 
 /* ---------- Path ---------- */
-.path-list{display:grid;gap:12px}
-.path-card{width:100%;display:grid;grid-template-columns:48px 1fr;align-items:center;text-align:left;gap:16px;padding:18px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800);font:inherit;color:inherit;cursor:pointer;transition:border-color .2s,transform .2s}
-.path-card>span:last-child{grid-column:2;color:var(--blue-2);font-size:12px;font-weight:700;margin-top:2px}
-.path-card:hover{transform:translateY(-2px)}
-.path-card.current{border-color:var(--gold)}
-.path-card.locked{opacity:.55;cursor:default}
-.path-card.locked:hover{transform:none}
-.path-card h3,.path-card p{margin-bottom:3px}
-.path-card p{color:var(--muted);font-size:13px}
-.path-card small{color:var(--gold-soft);font-weight:800;letter-spacing:.09em;font-size:11px}
 .path-number{font-family:Georgia,serif;font-size:24px;color:var(--gold-soft)}
+
+/* ---------- Parcours journey (one real chapter + an honest rail of what's next, never repeated cards) ---------- */
+.journey{display:grid;gap:30px}
+.journey-current{width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;border:1px solid var(--gold);border-radius:var(--r-lg);background:linear-gradient(160deg,var(--navy-800),var(--navy-900) 75%);padding:24px;display:grid;gap:10px;transition:border-color .2s,transform .2s}
+.journey-current:hover{transform:translateY(-2px)}
+.journey-current-eyebrow{display:flex;align-items:center;gap:14px}
+.journey-current-eyebrow .path-number{font-size:20px}
+.journey-current-eyebrow small{display:block;color:var(--gold-soft);font-weight:800;letter-spacing:.09em;font-size:11px;text-transform:uppercase}
+.journey-current-eyebrow .journey-current-tag{color:var(--muted);font-size:12px;font-weight:700}
+.journey-current h2{font-size:22px;margin:0}
+.journey-current p{color:var(--muted);font-size:14px;margin:0}
+.journey-meta{display:flex;gap:16px;color:var(--muted);font-size:12px;font-weight:700}
+.journey-meta span{display:flex;align-items:center;gap:6px}
+.journey-meta .icon{width:1.1em;height:1.1em}
+.journey-current .primary-action{width:auto;justify-self:start;margin-top:4px;pointer-events:none}
+
+.journey-rail{list-style:none;margin:0;padding:0 0 0 22px;position:relative;display:grid;gap:0}
+.journey-rail:before{content:"";position:absolute;left:4px;top:10px;bottom:10px;width:1px;background:var(--line)}
+.journey-node{position:relative;padding:14px 0;display:flex;align-items:flex-start;gap:14px;border-bottom:1px solid var(--line-soft)}
+.journey-node:last-child{border-bottom:0}
+.journey-dot{position:absolute;left:-22px;top:19px;width:9px;height:9px;border-radius:50%;background:var(--navy-700);border:2px solid var(--line)}
+.journey-node.completed .journey-dot{background:var(--teal);border-color:var(--teal)}
+.journey-node.in_progress .journey-dot,.journey-node.available .journey-dot{background:var(--gold);border-color:var(--gold)}
+.journey-node .path-number{font-size:15px;color:var(--muted);min-width:24px}
+.journey-node>div{display:grid;gap:2px}
+.journey-node strong{font-size:14px;font-weight:800}
+.journey-node small{color:var(--muted);font-weight:800;letter-spacing:.05em;font-size:10.5px;text-transform:uppercase}
+.journey-node p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
 
 /* ---------- Lesson ---------- */
 .lesson-layout{display:grid;grid-template-columns:1fr;gap:0}
@@ -589,9 +607,11 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .terminal-dock{grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
   .terminal-dock small{display:block}
 
-  .path-card{grid-template-columns:60px 1fr auto;padding:22px}
-  .path-card>span:last-child{grid-column:auto;margin-top:0}
   .path-number{font-size:28px}
+  .journey-current{padding:34px}
+  .journey-current-eyebrow .path-number{font-size:26px}
+  .journey-current h2{font-size:27px}
+  .journey-node{padding:16px 0}
 
   .lesson-layout{grid-template-columns:minmax(0,1fr) 280px;gap:36px}
   .lesson-outline{display:block;position:sticky;top:110px;align-self:start;border-left:1px solid var(--line);padding-left:22px}
