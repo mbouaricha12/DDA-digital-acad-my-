@@ -12,8 +12,8 @@ const views = document.querySelectorAll('.view');
 const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
-const titles = { dashboard: 'Aujourd’hui', access: 'Accès pilote', path: 'Mon parcours', lesson: 'Leçon en cours', progress: 'Progression', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
-const viewPermissions = { path: 'path', lesson: 'lesson_m01', progress: 'progress', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile' };
+const titles = { dashboard: 'Aujourd’hui', access: 'Accès pilote', path: 'Mon parcours', lesson: 'Leçon en cours', progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
+const viewPermissions = { path: 'path', lesson: 'lesson_m01', progress: 'progress', journal: 'journal', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile' };
 const MODULE_STATUS_LABEL = { completed: 'Terminé', in_progress: 'En cours', available: 'Disponible', locked: 'Verrouillé', coming_soon: 'Prochainement' };
 // Structural demo only — no real index value, date or amount. Swap for a real feed's response later without touching the markup.
 const MARKET_DEMO = {
@@ -34,7 +34,10 @@ const ACTIVITY_LABELS = {
   exercise_complete: () => 'Exercice validé',
   quiz_complete: () => 'Quiz validé — compétence confirmée',
   profile_updated: () => 'Profil mis à jour',
-  plan_preview: metadata => (metadata.plan === 'premium' ? 'Aperçu Premium activé' : 'Retour à DDA Free')
+  plan_preview: metadata => (metadata.plan === 'premium' ? 'Aperçu Premium activé' : 'Retour à DDA Free'),
+  journal_entry_created: () => 'Entrée de journal ajoutée',
+  journal_entry_updated: () => 'Entrée de journal modifiée',
+  journal_plan_saved: () => 'Plan personnel mis à jour'
 };
 const NEXT_STEP_PHRASE = { lesson: 'voir la leçon', exercise: 'réussir l’exercice', quiz: 'valider le quiz' };
 // Fixed, honest path for the one real lesson — done/pending only, no fabricated dates.
@@ -86,6 +89,26 @@ function updateLessonState(lessonId, patch) {
 
 function trackEvent(name, metadata) {
   prototypeState = DDA.track(prototypeState, name, metadata);
+  renderState();
+}
+
+function addJournalEntry(fields) {
+  prototypeState = DDA.addJournalEntry(prototypeState, fields);
+  renderState();
+}
+
+function updateJournalEntry(id, fields) {
+  prototypeState = DDA.updateJournalEntry(prototypeState, id, fields);
+  renderState();
+}
+
+function deleteJournalEntry(id) {
+  prototypeState = DDA.deleteJournalEntry(prototypeState, id);
+  renderState();
+}
+
+function saveJournalPlan(fields) {
+  prototypeState = DDA.saveJournalPlan(prototypeState, fields);
   renderState();
 }
 
@@ -245,6 +268,131 @@ function renderCertificatePreview(lessonProgress) {
   document.getElementById('certificate-date').textContent = date ? `Complété le ${date}` : 'Complété localement';
 }
 
+// ---------- Journal & Plan ----------
+const JOURNAL_FIELD_LABELS = {
+  context: 'Contexte',
+  scenario: 'Scénario envisagé',
+  process: 'Processus suivi',
+  decision: 'Décision prise',
+  outcome: 'Résultat ou issue',
+  whatWorked: 'Ce qui a été bien fait',
+  toImprove: 'Ce qui doit être amélioré',
+  note: 'Note personnelle'
+};
+let journalEditingId = null;
+let journalStep = 1;
+
+function formatJournalDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function renderJournalList() {
+  const list = document.getElementById('journal-list');
+  if (!list) return;
+  const entries = prototypeState.journal?.entries || [];
+  document.getElementById('journal-count').textContent = `${entries.length} entrée${entries.length > 1 ? 's' : ''}`;
+  document.getElementById('journal-empty').hidden = entries.length > 0;
+  list.innerHTML = entries.map(entry => {
+    const detailRows = Object.entries(JOURNAL_FIELD_LABELS)
+      .filter(([field]) => entry[field])
+      .map(([field, label]) => `<div><dt>${label}</dt><dd>${entry[field]}</dd></div>`)
+      .join('');
+    const snippet = entry.decision || entry.scenario || entry.context || 'Aucun détail renseigné.';
+    return `
+      <li class="journal-entry-card">
+        <details>
+          <summary>
+            <span class="journal-entry-market">${entry.market || 'Sans marché précisé'}</span>
+            <span class="journal-entry-date">${formatJournalDate(entry.createdAt)}</span>
+            <span class="journal-entry-snippet">${snippet.slice(0, 90)}</span>
+          </summary>
+          <div class="journal-entry-detail">
+            <dl>${detailRows || '<div><dd>Aucun détail renseigné.</dd></div>'}</dl>
+            <div class="journal-entry-actions">
+              <button class="secondary-action journal-entry-edit" data-id="${entry.id}" type="button">Modifier</button>
+              <button class="text-action journal-entry-delete" data-id="${entry.id}" type="button">Supprimer</button>
+            </div>
+          </div>
+        </details>
+      </li>`;
+  }).join('');
+}
+
+function renderJournalPlan() {
+  const form = document.getElementById('journal-plan-form');
+  if (!form) return;
+  const plan = prototypeState.journal?.plan || {};
+  document.getElementById('plan-markets').value = plan.marketsStudied || '';
+  document.getElementById('plan-slots').value = plan.studySlots || '';
+  document.getElementById('plan-checklist').value = plan.checklist || '';
+  document.getElementById('plan-discipline').value = plan.disciplineRules || '';
+  document.getElementById('plan-goals').value = plan.learningGoals || '';
+  document.getElementById('plan-mistakes').value = plan.mistakesToAvoid || '';
+  document.getElementById('plan-checkpoints').value = plan.pointsToVerify || '';
+  document.getElementById('journal-plan-note').textContent = plan.updatedAt ? `Enregistré ${relativeTime(plan.updatedAt)}` : 'Pas encore enregistré';
+}
+
+function collectJournalFields() {
+  return {
+    market: document.getElementById('journal-market').value,
+    context: document.getElementById('journal-context').value,
+    scenario: document.getElementById('journal-scenario').value,
+    process: document.getElementById('journal-process').value,
+    decision: document.getElementById('journal-decision').value,
+    outcome: document.getElementById('journal-outcome').value,
+    whatWorked: document.getElementById('journal-whatworked').value,
+    toImprove: document.getElementById('journal-toimprove').value,
+    note: document.getElementById('journal-note').value
+  };
+}
+
+function goToJournalStep(step) {
+  journalStep = step;
+  document.querySelectorAll('.journal-step').forEach(el => el.classList.toggle('active', Number(el.dataset.step) === step));
+  [1, 2, 3].forEach(n => document.getElementById(`journal-step-dot-${n}`).classList.toggle('active', n <= step));
+  document.getElementById('journal-step-prev').hidden = step === 1;
+  document.getElementById('journal-step-next').hidden = step === 3;
+  document.getElementById('journal-step-save').hidden = step !== 3;
+}
+
+function openJournalComposer(entry) {
+  journalEditingId = entry ? entry.id : null;
+  const fields = entry || DDA.emptyJournalEntry();
+  document.getElementById('journal-market').value = fields.market || '';
+  document.getElementById('journal-context').value = fields.context || '';
+  document.getElementById('journal-scenario').value = fields.scenario || '';
+  document.getElementById('journal-process').value = fields.process || '';
+  document.getElementById('journal-decision').value = fields.decision || '';
+  document.getElementById('journal-outcome').value = fields.outcome || '';
+  document.getElementById('journal-whatworked').value = fields.whatWorked || '';
+  document.getElementById('journal-toimprove').value = fields.toImprove || '';
+  document.getElementById('journal-note').value = fields.note || '';
+  document.getElementById('journal-composer-eyebrow').textContent = entry ? 'Modifier l’entrée' : 'Nouvelle entrée';
+  document.getElementById('journal-composer-delete').hidden = !entry;
+  document.getElementById('journal-entry-error').textContent = '';
+  goToJournalStep(1);
+  document.getElementById('journal-entries-panel').hidden = true;
+  document.getElementById('journal-composer').hidden = false;
+  document.getElementById('journal-market').focus();
+}
+
+function closeJournalComposer() {
+  document.getElementById('journal-composer').hidden = true;
+  document.getElementById('journal-entries-panel').hidden = false;
+  journalEditingId = null;
+}
+
+function switchJournalTab(tab) {
+  document.getElementById('journal-tab-entries').classList.toggle('active', tab === 'entries');
+  document.getElementById('journal-tab-entries').setAttribute('aria-selected', String(tab === 'entries'));
+  document.getElementById('journal-tab-plan').classList.toggle('active', tab === 'plan');
+  document.getElementById('journal-tab-plan').setAttribute('aria-selected', String(tab === 'plan'));
+  document.getElementById('journal-composer').hidden = true;
+  document.getElementById('journal-entries-panel').hidden = tab !== 'entries';
+  document.getElementById('journal-plan-panel').hidden = tab !== 'plan';
+}
+
 function updateLessonLoop(lessonProgress) {
   const loop = document.getElementById('lesson-loop');
   if (!loop) return;
@@ -332,6 +480,8 @@ function renderState() {
   renderProofTimeline();
   renderProgressHero();
   renderCertificatePreview(activeLessonProgress);
+  renderJournalList();
+  renderJournalPlan();
 
   const step = DDALearning.lessonNextStep(activeLessonProgress);
   ['action-lesson', 'action-exercise', 'action-quiz'].forEach(id => document.getElementById(id).classList.remove('done', 'current'));
@@ -499,6 +649,67 @@ function filterBrokers() {
 document.getElementById('broker-market').addEventListener('change', filterBrokers);
 document.getElementById('broker-use').addEventListener('change', filterBrokers);
 document.querySelectorAll('.broker-detail').forEach(button => button.addEventListener('click', () => showToast('Fiche complète différée jusqu’à vérification réglementaire.')));
+
+document.getElementById('journal-tab-entries').addEventListener('click', () => switchJournalTab('entries'));
+document.getElementById('journal-tab-plan').addEventListener('click', () => switchJournalTab('plan'));
+document.getElementById('journal-new-entry').addEventListener('click', () => openJournalComposer(null));
+document.getElementById('journal-composer-back').addEventListener('click', closeJournalComposer);
+document.getElementById('journal-step-prev').addEventListener('click', () => goToJournalStep(journalStep - 1));
+document.getElementById('journal-step-next').addEventListener('click', () => goToJournalStep(journalStep + 1));
+document.getElementById('journal-composer-delete').addEventListener('click', () => {
+  if (!journalEditingId) return;
+  deleteJournalEntry(journalEditingId);
+  trackEvent('journal_entry_deleted', {});
+  closeJournalComposer();
+  showToast('Entrée supprimée.');
+});
+document.getElementById('journal-entry-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const fields = collectJournalFields();
+  const hasContent = Object.values(fields).some(value => value.trim());
+  if (!hasContent) {
+    document.getElementById('journal-entry-error').textContent = 'Renseigne au moins un champ avant d’enregistrer.';
+    goToJournalStep(1);
+    return;
+  }
+  document.getElementById('journal-entry-error').textContent = '';
+  const editingId = journalEditingId;
+  if (editingId) {
+    updateJournalEntry(editingId, fields);
+    trackEvent('journal_entry_updated', {});
+  } else {
+    addJournalEntry(fields);
+    trackEvent('journal_entry_created', {});
+  }
+  closeJournalComposer();
+  showToast(editingId ? 'Entrée mise à jour.' : 'Entrée enregistrée localement.');
+});
+document.getElementById('journal-list').addEventListener('click', event => {
+  const editButton = event.target.closest('.journal-entry-edit');
+  const deleteButton = event.target.closest('.journal-entry-delete');
+  if (editButton) {
+    const entry = (prototypeState.journal?.entries || []).find(item => item.id === editButton.dataset.id);
+    if (entry) openJournalComposer(entry);
+  } else if (deleteButton) {
+    deleteJournalEntry(deleteButton.dataset.id);
+    trackEvent('journal_entry_deleted', {});
+    showToast('Entrée supprimée.');
+  }
+});
+document.getElementById('journal-plan-form').addEventListener('submit', event => {
+  event.preventDefault();
+  saveJournalPlan({
+    marketsStudied: document.getElementById('plan-markets').value,
+    studySlots: document.getElementById('plan-slots').value,
+    checklist: document.getElementById('plan-checklist').value,
+    disciplineRules: document.getElementById('plan-discipline').value,
+    learningGoals: document.getElementById('plan-goals').value,
+    mistakesToAvoid: document.getElementById('plan-mistakes').value,
+    pointsToVerify: document.getElementById('plan-checkpoints').value
+  });
+  trackEvent('journal_plan_saved', {});
+  showToast('Plan personnel enregistré.');
+});
 
 document.getElementById('support-form').addEventListener('submit', event => {
   event.preventDefault();

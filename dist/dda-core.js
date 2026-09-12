@@ -4,12 +4,12 @@
   const STORAGE_KEY = 'dda-prototype-state-v4';
   const LEGACY_KEYS = ['dda-prototype-state-v3', 'dda-prototype-state-v2', 'dda-prototype-state'];
   const SCHEMA_VERSION = 4;
-  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview']);
+  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved']);
   const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan']);
   const ENTITLEMENTS = Object.freeze({
     visitor: ['dashboard_preview', 'access'],
-    free: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support'],
-    premium: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'resources_premium', 'certificate_preview', 'advanced_modules']
+    free: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal'],
+    premium: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'resources_premium', 'certificate_preview', 'advanced_modules']
   });
 
   // M1-M9 are structural placeholders (empty lessons[]) — no content invented.
@@ -99,6 +99,19 @@
     return { lessonViewed: false, exerciseComplete: false, quizComplete: false };
   }
 
+  function emptyJournalPlan() {
+    return {
+      marketsStudied: '',
+      studySlots: '',
+      checklist: '',
+      disciplineRules: '',
+      learningGoals: '',
+      mistakesToAvoid: '',
+      pointsToVerify: '',
+      updatedAt: null
+    };
+  }
+
   function emptyState() {
     return {
       schemaVersion: SCHEMA_VERSION,
@@ -106,6 +119,13 @@
       membership: { plan: 'free', status: 'demo' },
       onboarding: null,
       lessons: {},
+      // Journal & Plan V1 — a personal record of process, never of performance.
+      // `entries` documents individual reflections (plan → act → review); `plan`
+      // is the single standing document of the learner's own process rules.
+      // Shape kept intentionally flat and generic so later layers (personal
+      // stats, Weekly Review, Decision Replay, Darius AI, Trading Lab, Trader
+      // DNA) can read from it without a migration.
+      journal: { entries: [], plan: emptyJournalPlan() },
       preferences: { lowData: false, reminders: false },
       events: [],
       updatedAt: null
@@ -133,6 +153,35 @@
     return lessons;
   }
 
+  const JOURNAL_TEXT_FIELDS = ['market', 'context', 'scenario', 'process', 'decision', 'outcome', 'whatWorked', 'toImprove', 'note'];
+
+  function sanitizeJournalEntry(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    const entry = { id: sanitizeText(raw.id, 40) || `entry-${Date.now()}-${Math.round(Math.random() * 1000)}` };
+    JOURNAL_TEXT_FIELDS.forEach(field => { entry[field] = sanitizeText(raw[field], 800); });
+    entry.createdAt = sanitizeText(raw.createdAt, 40) || new Date().toISOString();
+    entry.updatedAt = sanitizeText(raw.updatedAt, 40) || entry.createdAt;
+    // An entry with every field blank carries nothing real to keep.
+    if (!JOURNAL_TEXT_FIELDS.some(field => entry[field])) return null;
+    return entry;
+  }
+
+  function sanitizeJournalPlan(raw) {
+    const plan = emptyJournalPlan();
+    if (!raw || typeof raw !== 'object') return plan;
+    Object.keys(plan).forEach(field => {
+      if (field === 'updatedAt') return;
+      plan[field] = sanitizeText(raw[field], 600);
+    });
+    plan.updatedAt = sanitizeText(raw.updatedAt, 40) || null;
+    return plan;
+  }
+
+  function sanitizeJournal(raw) {
+    const entries = Array.isArray(raw?.entries) ? raw.entries.map(sanitizeJournalEntry).filter(Boolean).slice(0, 300) : [];
+    return { entries, plan: sanitizeJournalPlan(raw?.plan) };
+  }
+
   // v3 and earlier stored one flat `progress` object implicitly meaning M0.1.
   function migrateFlatProgress(progress) {
     if (!progress || typeof progress !== 'object') return {};
@@ -156,6 +205,7 @@
         membership: { plan: safePlan(raw.membership?.plan), status: 'demo' },
         preferences: { ...next.preferences, ...raw.preferences },
         lessons: sanitizeLessons(raw.lessons),
+        journal: sanitizeJournal(raw.journal),
         events: Array.isArray(raw.events) ? raw.events.slice(-50) : []
       });
     }
@@ -234,6 +284,33 @@
     updateLesson(state, lessonId, patch) {
       const current = state.lessons?.[lessonId] || emptyLessonProgress();
       return save({ ...state, lessons: { ...state.lessons, [lessonId]: { ...current, ...patch } } });
+    },
+    emptyJournalEntry() {
+      const entry = { id: '' };
+      JOURNAL_TEXT_FIELDS.forEach(field => { entry[field] = ''; });
+      return entry;
+    },
+    addJournalEntry(state, fields) {
+      const now = new Date().toISOString();
+      const entry = sanitizeJournalEntry({ ...fields, id: `entry-${Date.now()}`, createdAt: now, updatedAt: now });
+      if (!entry) return state;
+      const journal = state.journal || { entries: [], plan: emptyJournalPlan() };
+      return save({ ...state, journal: { ...journal, entries: [entry, ...journal.entries] } });
+    },
+    updateJournalEntry(state, id, fields) {
+      const journal = state.journal || { entries: [], plan: emptyJournalPlan() };
+      const now = new Date().toISOString();
+      const entries = journal.entries.map(entry => entry.id === id ? (sanitizeJournalEntry({ ...entry, ...fields, id, updatedAt: now }) || entry) : entry);
+      return save({ ...state, journal: { ...journal, entries } });
+    },
+    deleteJournalEntry(state, id) {
+      const journal = state.journal || { entries: [], plan: emptyJournalPlan() };
+      return save({ ...state, journal: { ...journal, entries: journal.entries.filter(entry => entry.id !== id) } });
+    },
+    saveJournalPlan(state, fields) {
+      const journal = state.journal || { entries: [], plan: emptyJournalPlan() };
+      const plan = sanitizeJournalPlan({ ...fields, updatedAt: new Date().toISOString() });
+      return save({ ...state, journal: { ...journal, plan } });
     },
     track(state, name, metadata) {
       if (!EVENT_NAMES.has(name)) return state;

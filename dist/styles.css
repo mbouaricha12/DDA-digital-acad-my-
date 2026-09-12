@@ -373,6 +373,56 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .certificate-date{margin:6px 0 0;font-size:12px;color:var(--muted-2)}
 .certificate-disclaimer{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--muted);margin:0}
 .certificate-disclaimer .icon{flex:none;margin-top:1px}
+
+/* ---------- Journal & Plan ---------- */
+.journal-tabs{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:999px;background:var(--navy-800);margin-bottom:22px}
+.journal-tab{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:800;font-size:13px;padding:9px 18px;border-radius:999px;cursor:pointer;transition:background .15s,color .15s}
+.journal-tab.active{background:var(--gold);color:var(--navy-950)}
+.journal-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
+.journal-count{color:var(--muted);font-size:13px;font-weight:700;margin:0}
+.journal-toolbar .primary-action{width:auto;display:inline-flex;align-items:center;gap:8px}
+
+.journal-empty{text-align:center;max-width:460px;margin:36px auto;padding:36px 24px;border:1px dashed var(--line);border-radius:var(--r-md)}
+.journal-empty .icon{width:30px;height:30px;color:var(--muted);margin-bottom:14px}
+.journal-empty h2{font-size:19px;margin-bottom:8px}
+.journal-empty p{color:var(--muted);font-size:14px;margin:0}
+.journal-empty[hidden]{display:none}
+
+.journal-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.journal-entry-card{border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800);overflow:hidden}
+.journal-entry-card summary{cursor:pointer;list-style:none;padding:16px 18px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.journal-entry-card summary::-webkit-details-marker{display:none}
+.journal-entry-card summary:before{content:"+";color:var(--gold-soft);font-weight:900;width:14px;flex:none}
+.journal-entry-card details[open] summary:before{content:"–"}
+.journal-entry-market{font-weight:800;font-size:14px}
+.journal-entry-date{color:var(--muted);font-size:12px;font-weight:700}
+.journal-entry-snippet{color:var(--muted);font-size:13px;flex-basis:100%;padding-left:26px}
+.journal-entry-detail{padding:0 18px 18px 44px;display:grid;gap:14px}
+.journal-entry-detail dl{display:grid;gap:10px;margin:0}
+.journal-entry-detail dt{color:var(--gold-soft);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;margin-bottom:2px}
+.journal-entry-detail dd{margin:0;color:#c2c5d8;font-size:14px;white-space:pre-wrap}
+.journal-entry-actions{display:flex;gap:16px;align-items:center}
+
+.journal-composer{max-width:640px}
+.journal-step-indicator{margin:18px 0 26px}
+.journal-step-indicator span{border-color:var(--line);color:var(--muted)}
+.journal-step-indicator span.active{background:var(--gold);color:var(--navy-950);border-color:var(--gold)}
+.journal-step-indicator i{background:var(--line)}
+.journal-step{display:none;flex-direction:column;gap:16px}
+.journal-step.active{display:flex}
+.journal-step-label{color:var(--gold-soft);font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:900;margin:0}
+.journal-composer label{display:grid;gap:7px;color:var(--muted);font-size:13px;font-weight:700}
+.journal-composer input,.journal-composer textarea{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:11px;background:var(--navy-700);color:var(--white);font:inherit;resize:vertical}
+.journal-composer textarea{min-height:88px}
+.journal-composer-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:22px}
+.journal-composer-actions .primary-action,.journal-composer-actions .secondary-action{width:auto}
+
+.journal-plan-intro{color:var(--muted);font-size:14px;max-width:600px;margin-bottom:20px}
+#journal-plan-form{display:grid;gap:16px;max-width:640px}
+#journal-plan-form label{display:grid;gap:7px;color:var(--muted);font-size:13px;font-weight:700}
+#journal-plan-form textarea{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:11px;background:var(--navy-700);color:var(--white);font:inherit;resize:vertical;min-height:70px}
+#journal-plan-form .form-note{color:var(--muted);font-size:12px;margin:0}
+#journal-plan-form .primary-action{width:auto}
 .modules-track strong{flex:1;font-size:14px;font-weight:700;min-width:0}
 .module-pill{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:5px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;flex:none}
 .module-pill.completed{border-color:var(--teal);color:var(--teal)}
@@ -422,7 +472,12 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .membership-roadmap,.membership-guardrails{margin-top:16px}
 .membership-roadmap p{color:var(--muted);font-size:14px;max-width:680px}
 .roadmap-track{list-style:none;padding:0;margin:18px 0 16px;display:flex;flex-wrap:wrap;gap:8px}
-.roadmap-track li{border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;color:var(--muted)}
+.roadmap-track li{border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;color:var(--muted);display:inline-flex;align-items:center;gap:7px}
+.roadmap-track li small{font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;padding:3px 8px;border-radius:999px;background:var(--navy-700);color:var(--muted)}
+.roadmap-track li.status-partial{border-color:var(--teal);color:var(--white)}
+.roadmap-track li.status-partial small{color:var(--teal)}
+.roadmap-track li.status-demo{border-color:var(--gold);color:var(--white)}
+.roadmap-track li.status-demo small{color:var(--gold-soft)}
 .guardrail-list{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:10px}
 .guardrail-list li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)}
 .guardrail-list .icon{color:var(--red);flex:none;width:18px;height:18px}
@@ -631,7 +686,7 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .primary-action,.secondary-action{width:auto}
   .dashboard-grid{gap:20px;margin-top:20px}
   .panel{padding:26px}
-  .terminal-dock{grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+  .terminal-dock{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:22px}
   .terminal-dock small{display:block}
 
   .path-number{font-size:28px}
