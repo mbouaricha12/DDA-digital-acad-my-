@@ -182,11 +182,16 @@
         </div>
 
         <div class="terminal-dock" aria-label="Accès rapides du Terminal">
-          <button data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg><strong>Journal &amp; Plan</strong><small>Documenter ta réflexion</small></button>
-          <button data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg><strong>Marchés & BRVM</strong><small>Comprendre l’actualité</small></button>
-          <button data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg><strong>Broker Hub</strong><small>Comparer avec transparence</small></button>
-          <button data-view="resources"><svg class="icon"><use href="#icon-book"/></svg><strong>Ressources</strong><small>Guides et outils</small></button>
-          <button data-view="support"><svg class="icon"><use href="#icon-help"/></svg><strong>Centre d’aide</strong><small>Trouver une réponse</small></button>
+          <button data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg><div><strong>Journal &amp; Plan</strong><small>Documenter ta réflexion</small></div><span class="dock-arrow">→</span></button>
+          <button data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg><div><strong>Marchés & BRVM</strong><small>Comprendre l’actualité</small></div><span class="dock-arrow">→</span></button>
+          <button data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg><div><strong>Broker Hub</strong><small>Comparer avec transparence</small></div><span class="dock-arrow">→</span></button>
+          <button data-view="resources"><svg class="icon"><use href="#icon-book"/></svg><div><strong>Ressources</strong><small>Guides et outils</small></div><span class="dock-arrow">→</span></button>
+          <button data-view="support"><svg class="icon"><use href="#icon-help"/></svg><div><strong>Centre d’aide</strong><small>Trouver une réponse</small></div><span class="dock-arrow">→</span></button>
+        </div>
+
+        <div class="photo-frame dark dashboard-photo">
+          <svg class="icon"><use href="#icon-photo"/></svg>
+          <span>Photographie à intégrer — équipe DDA</span>
         </div>
       </section>
 
@@ -208,21 +213,23 @@
         <div class="section-intro"><p class="eyebrow gold">Progression</p><h1 id="progress-title">Construis des compétences, pas seulement des habitudes.</h1><p>Ta progression sur M0.1 est mesurée localement, en continu. Le reste du profil de compétences est encore un aperçu de ce que DDA deviendra.</p></div>
 
         <div class="progress-hero">
+          <div class="progress-stat featured"><span>XP total</span><strong id="progress-total-xp">0</strong></div>
           <div class="progress-stat"><span>Modules amorcés</span><strong id="progress-modules-started">0/10</strong></div>
-          <div class="progress-stat"><span>XP total</span><strong id="progress-total-xp">0</strong></div>
           <div class="progress-stat"><span>Jours d’activité</span><strong id="progress-active-days">0</strong></div>
         </div>
 
-        <div class="skills-grid">
-          <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-compass"/></svg><span>Compréhension des marchés</span></div><strong id="market-skill-label">En démarrage</strong><div class="level-meter" id="market-skill-level"><i></i><i></i><i></i><i></i></div></article>
-          <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-shield"/></svg><span>Gestion du risque</span></div><strong>À découvrir</strong><div class="level-meter"><i></i><i></i><i></i><i></i></div></article>
-          <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-target"/></svg><span>Discipline</span></div><strong>À découvrir</strong><div class="level-meter"><i></i><i></i><i></i><i></i></div></article>
-        </div>
+        <div class="progress-columns">
+          <section class="panel proof-panel">
+            <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> Preuves d’apprentissage</p><h3>Ton chemin sur M0.1, étape par étape</h3></div></div>
+            <ol class="proof-timeline" id="proof-timeline"></ol>
+          </section>
 
-        <section class="panel proof-panel">
-          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> Preuves d’apprentissage</p><h3>Ton chemin sur M0.1, étape par étape</h3></div></div>
-          <ol class="proof-timeline" id="proof-timeline"></ol>
-        </section>
+          <div class="skills-grid">
+            <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-compass"/></svg><span>Compréhension des marchés</span></div><strong id="market-skill-label">En démarrage</strong><div class="level-meter" id="market-skill-level"><i></i><i></i><i></i><i></i></div></article>
+            <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-shield"/></svg><span>Gestion du risque</span></div><strong>À découvrir</strong><div class="level-meter"><i></i><i></i><i></i><i></i></div></article>
+            <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-target"/></svg><span>Discipline</span></div><strong>À découvrir</strong><div class="level-meter"><i></i><i></i><i></i><i></i></div></article>
+          </div>
+        </div>
 
         <section class="panel modules-track">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-path"/></svg> Parcours M0–M9</p><h3>Où tu en es sur l’ensemble du curriculum</h3></div></div>
