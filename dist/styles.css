@@ -507,15 +507,24 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .empty-profile{text-align:center;max-width:520px;margin:50px auto;padding:36px 24px;border:1px dashed var(--line);border-radius:var(--r-md)}
 .empty-profile>span{display:grid;place-items:center;width:56px;height:56px;margin:0 auto 18px;border-radius:50%;background:var(--navy-700);color:var(--gold-soft)}
 
-/* ---------- Access / onboarding ---------- */
+/* ---------- Access / onboarding ----------
+   The only public-facing entry point today (there is no separate marketing
+   landing page yet). Direction: public/learning reads lighter, warmer and
+   more editorial than the dark, technical Terminal — same DDA identity,
+   different register. Scoped to #access only; the app chrome stays dark. */
+#access{background:linear-gradient(165deg,var(--ivory),var(--ivory-2) 85%);color:var(--ink)}
+#access .eyebrow.gold{color:var(--blue)}
+#access .trust-list{color:var(--ink)}
+#access .text-action{color:var(--muted-2)}
 .access-shell{display:grid;grid-template-columns:1fr;gap:28px}
 .access-illustration{display:none}
 .access-photo{height:clamp(150px,32vw,220px);aspect-ratio:auto;margin-bottom:22px}
-.access-copy>p{color:var(--muted);font-size:15px;max-width:560px}
+#access-title{color:var(--ink)}
+.access-copy>p{color:var(--muted-2);font-size:15px;max-width:560px}
 .trust-list{list-style:none;padding:0;margin:22px 0;display:grid;gap:12px}
 .trust-list li{display:flex;align-items:center;gap:10px;font-size:14px}
-.trust-list .icon{color:var(--gold-soft);flex:none}
-.access-card{background:var(--ivory);color:var(--ink);padding:24px;border-radius:var(--r-lg);box-shadow:var(--shadow-md)}
+.trust-list .icon{color:var(--blue);flex:none}
+.access-card{background:var(--paper);color:var(--ink);padding:24px;border-radius:var(--r-lg);box-shadow:var(--shadow-md);border:1px solid var(--ivory-2)}
 .access-card h2{font-size:27px}
 .step-indicator{display:flex;align-items:center;margin-bottom:24px}
 .step-indicator span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:1px solid #bbb4a6;color:#777;font-size:13px;font-weight:700;flex:none}
