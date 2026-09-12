@@ -242,10 +242,20 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .play-button{position:absolute;width:58px;height:58px;border-radius:50%;border:0;background:var(--ivory);color:var(--navy-950);font-size:19px;cursor:pointer;box-shadow:var(--shadow-md);display:grid;place-items:center;transition:transform .2s}
 .play-button:hover{transform:scale(1.06)}
 #video-caption{position:absolute;bottom:14px;margin:0;color:var(--muted);font-size:12px;text-align:center;padding:0 14px}
+.lesson-copy{margin-top:30px}
 .lesson-copy p{color:#c2c5d8;font-size:16px}
 .principle{margin:24px 0;padding:20px;border-left:3px solid var(--gold);background:var(--navy-800);border-radius:0 var(--r-sm) var(--r-sm) 0;display:flex;gap:14px;align-items:flex-start}
 .principle .icon{color:var(--gold-soft);flex:none;margin-top:2px}
 .principle span{color:var(--gold-soft);font-size:11px;text-transform:uppercase;font-weight:900;letter-spacing:.1em;display:block;margin-bottom:4px}
+/* A small tick before each narrative-beat eyebrow inside the lesson reader —
+   a quiet echo of the step markers in .lesson-loop, DDA's own rhythm motif
+   rather than a generic section label. */
+.lesson-main > .eyebrow.gold:before,.lesson-copy > .eyebrow.gold:before,.comparison-block > .eyebrow.gold:before,.learning-check > .eyebrow.gold:before{content:"";width:14px;height:1px;background:var(--gold);flex:none}
+
+.example-callout{margin:24px 0;padding:18px 20px;border-radius:var(--r-md);background:rgba(13,166,217,.07);border:1px solid rgba(13,166,217,.25);display:flex;gap:14px;align-items:flex-start}
+.example-callout .icon{color:var(--blue-2);flex:none;margin-top:2px}
+.example-callout span{color:var(--blue-2);font-size:11px;text-transform:uppercase;font-weight:900;letter-spacing:.1em;display:block;margin-bottom:4px}
+.example-callout p{margin:0;font-style:italic;font-size:15px;color:#c2c5d8}
 
 .comparison-block{margin:26px 0}
 .comparison-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}
@@ -280,6 +290,10 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 @keyframes dda-pop{from{opacity:0;transform:scale(.94) translateY(6px)}to{opacity:1;transform:none}}
 .result-icon{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--teal);color:var(--navy-950);font-size:22px;font-weight:900;flex:none}
 .result-card h2{font-size:23px;margin-bottom:8px}
+.result-stats{display:grid;gap:12px;margin:16px 0;padding:14px 16px;border:1px solid rgba(24,155,146,.3);border-radius:var(--r-sm);background:rgba(5,11,20,.35)}
+.result-stats div{display:flex;flex-direction:column;gap:2px}
+.result-stats dt{margin:0;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.result-stats dd{margin:0;font-size:14px;font-weight:800;color:var(--white)}
 .result-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px}
 .result-feedback{color:var(--muted);font-size:13px}
 .lesson-actions{position:sticky;bottom:calc(68px + var(--safe-b));display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:14px 0;margin-top:34px;background:var(--navy-950)}
@@ -584,6 +598,7 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .lesson-outline ol{padding-left:18px;color:var(--muted);margin:0}
   .lesson-outline li{padding:7px 4px}
   .lesson-outline li.active{color:var(--gold-soft);font-weight:800}
+  .result-stats{grid-template-columns:repeat(3,1fr)}
   .lesson-actions{position:static;background:transparent;padding:22px 0 0}
   .video-stage{aspect-ratio:16/9}
   .lesson-lead{font-size:19px}

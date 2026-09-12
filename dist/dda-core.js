@@ -26,9 +26,58 @@
             title: 'Le trading comme commerce',
             summary: 'Acheteurs, vendeurs et échange d’un actif.',
             estimatedMinutes: 12,
-            practice: { id: 'exercise', label: 'Exercice' },
-            evaluation: { id: 'quiz', label: 'Quiz de validation' },
-            xp: Object.freeze({ lessonViewed: 30, exerciseComplete: 60, quizComplete: 120 })
+            competency: { id: 'market_understanding', label: 'Compréhension des marchés' },
+            xp: Object.freeze({ lessonViewed: 30, exerciseComplete: 60, quizComplete: 120 }),
+            // Narrative beats, in reading order — this is the shape every future lesson (M0.2–M9)
+            // will fill in. No content is invented for those; only M0.1 is authored.
+            content: Object.freeze({
+              lead: 'Avant de lire un graphique, commence par comprendre ce qui se passe réellement sur un marché.',
+              concept: Object.freeze({
+                heading: 'Le marché est un lieu d’échange',
+                body: 'Le trading est une forme de commerce. Sur un marché, certains participants souhaitent acheter un actif et d’autres souhaitent le vendre. Le prix évolue lorsque l’équilibre entre ces intentions change.'
+              }),
+              principle: Object.freeze({
+                label: 'Principe essentiel',
+                text: 'Ton rôle n’est pas de deviner. Ton rôle est d’observer, comprendre et décider selon un plan.'
+              }),
+              diagram: 'exchange',
+              example: Object.freeze({
+                label: 'Exemple concret',
+                text: 'Un participant achète de l’or tandis qu’un autre accepte de le vendre.'
+              }),
+              comparison: Object.freeze({
+                heading: 'Deux façons d’aborder le même marché',
+                bad: Object.freeze({ label: 'Réaction impulsive', items: Object.freeze(['Suivre le mouvement sans le comprendre', 'Décider sous le coup de l’émotion', 'Chercher un gain immédiat']) }),
+                good: Object.freeze({ label: 'Décision méthodique', items: Object.freeze(['Observer avant d’agir', 'Suivre un plan écrit à l’avance', 'Accepter un risque défini']) })
+              })
+            }),
+            practice: Object.freeze({
+              id: 'exercise',
+              label: 'Exercice',
+              heading: 'Qui échange quoi ?',
+              prompt: 'Quelle affirmation décrit le mieux ce qui vient de se passer ?',
+              successText: 'Correct. Tu reconnais le mécanisme fondamental de l’échange.',
+              choices: Object.freeze([
+                Object.freeze({ text: 'Le prix monte toujours après un achat.', correct: false, feedback: 'Un achat ne garantit rien sur la suite : le prix dépend de l’équilibre entre toutes les intentions d’achat et de vente, pas d’une seule transaction.' }),
+                Object.freeze({ text: 'Le marché met en relation des intentions d’achat et de vente.', correct: true }),
+                Object.freeze({ text: 'Le vendeur connaît forcément l’avenir.', correct: false, feedback: 'Personne ne connaît l’avenir avec certitude. Le vendeur accepte simplement de céder l’actif à ce prix, maintenant.' })
+              ])
+            }),
+            evaluation: Object.freeze({
+              id: 'quiz',
+              label: 'Quiz de validation',
+              heading: 'Avant toute décision, que faut-il privilégier ?',
+              successText: 'Correct. La discipline du processus passe avant la précipitation.',
+              choices: Object.freeze([
+                Object.freeze({ text: 'Entrer rapidement pour ne rien manquer.', correct: false, feedback: 'La précipitation est justement ce que ce module déconseille : observer avant d’agir protège ton capital.' }),
+                Object.freeze({ text: 'Chercher un gain immédiat.', correct: false, feedback: 'Un gain isolé ne prouve rien sur la qualité d’une décision — c’est le principe essentiel vu plus haut.' }),
+                Object.freeze({ text: 'Observer, comprendre et suivre un plan.', correct: true })
+              ])
+            }),
+            result: Object.freeze({
+              heading: 'Première compétence confirmée.',
+              body: 'Tu as compris que le processus de décision passe avant le résultat.'
+            })
           }
         ])
       },
