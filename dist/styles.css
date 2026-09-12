@@ -264,6 +264,7 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .answer-grid{display:grid;gap:10px;margin-top:18px}
 .answer-grid button{background:var(--navy-700);color:var(--white);border:1px solid var(--line);border-radius:12px;text-align:left;padding:15px;font:inherit;cursor:pointer;min-height:50px;transition:border-color .15s,transform .1s}
 .answer-grid button:hover{border-color:var(--gold)}
+.answer-grid button:disabled{cursor:not-allowed}
 .answer-grid button:active{transform:scale(.99)}
 .answer-grid button.correct{border-color:var(--green);background:rgba(79,190,133,.14)}
 .answer-grid button.incorrect{border-color:var(--red);background:rgba(217,115,115,.12);animation:dda-shake .3s}
@@ -494,6 +495,7 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .access-card .consent{grid-template-columns:auto 1fr;align-items:start;font-weight:500;color:#5f6170;display:grid}
 .access-card .consent input{width:18px;height:18px;margin-top:2px}
 .form-error{min-height:20px;color:#a33;font-size:13px;margin:0}
+input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!important}
 .resume-device{border-top:1px solid #cec5b4;margin-top:8px;padding-top:18px;display:grid;gap:10px}
 .resume-device p{color:#5f6170;margin:0;font-size:13px}
 
@@ -510,6 +512,9 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .loading-layer p{color:var(--muted);margin-top:4px;font-size:13px}
 .toast{position:fixed;left:16px;right:16px;bottom:calc(80px + var(--safe-b));z-index:110;padding:14px 18px;border:1px solid var(--gold);border-radius:12px;background:var(--ivory);color:var(--navy-950);font-weight:800;font-size:14px;box-shadow:var(--shadow-md);text-align:center;animation:dda-toast-in .25s var(--ease)}
 .toast[hidden]{display:none}
+.storage-warning{position:fixed;left:16px;right:16px;bottom:calc(150px + var(--safe-b));z-index:105;display:flex;align-items:center;gap:10px;padding:13px 16px;border:1px solid var(--red);border-radius:12px;background:rgba(217,115,115,.14);backdrop-filter:blur(10px);color:var(--white);font-weight:700;font-size:13px;box-shadow:var(--shadow-md)}
+.storage-warning .icon{flex:none;color:var(--red)}
+.storage-warning[hidden]{display:none}
 @keyframes dda-toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 @media(prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important}}

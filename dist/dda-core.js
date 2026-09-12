@@ -147,11 +147,20 @@
     const safe = normalizeLegacy(state);
     safe.schemaVersion = SCHEMA_VERSION;
     safe.updatedAt = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
+      storageAvailable = true;
+    } catch {
+      storageAvailable = false;
+    }
     return safe;
   }
 
   function clear() { [STORAGE_KEY, ...LEGACY_KEYS].forEach(key => localStorage.removeItem(key)); return emptyState(); }
+
+  // Private/incognito storage limits or a full quota can make setItem throw.
+  // The app must keep working in-memory for this session rather than crash.
+  let storageAvailable = true;
 
   function can(state, permission) {
     const tier = state?.user ? safePlan(state.membership?.plan) : 'visitor';
@@ -170,6 +179,7 @@
     load,
     save,
     clear,
+    storageAvailable() { return storageAvailable; },
     emptyLessonProgress,
     setPlan(state, plan) { return save({ ...state, membership: { plan: safePlan(plan), status: 'demo' } }); },
     updateLesson(state, lessonId, patch) {

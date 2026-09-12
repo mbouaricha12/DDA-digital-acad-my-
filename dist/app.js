@@ -285,6 +285,7 @@ function renderState() {
   const quiz = document.getElementById('quiz-block');
   quiz.classList.toggle('locked-check', !evalUnlocked);
   quiz.setAttribute('aria-disabled', String(!evalUnlocked));
+  quiz.querySelectorAll('[data-question="quiz"] button').forEach(button => { button.disabled = !evalUnlocked; });
 
   document.getElementById('result-card').hidden = !complete;
   if (complete) document.getElementById('saved-state').textContent = 'Exercice et quiz validés localement — aucune donnée envoyée';
@@ -328,6 +329,8 @@ function renderState() {
 
   renderPathList();
   renderModulesRecap();
+
+  document.getElementById('storage-warning').hidden = DDA.storageAvailable();
 }
 
 function showView(id, recordEvent = true) {
@@ -352,25 +355,48 @@ const resources = {
   glossary: { title: 'Les mots essentiels du marché', label: 'Glossaire · DDA Free', body: '<dl><dt>Actif</dt><dd>Ce qui est échangé sur un marché.</dd><dt>Acheteur</dt><dd>Participant qui cherche à acquérir un actif.</dd><dt>Vendeur</dt><dd>Participant qui accepte de céder un actif.</dd><dt>Risque</dt><dd>Part d’incertitude et de perte potentielle à maîtriser avant d’agir.</dd></dl>' }
 };
 
+let readerTrigger = null;
 document.querySelectorAll('.resource-open').forEach(button => button.addEventListener('click', () => {
   const resource = resources[button.dataset.resource];
   document.getElementById('reader-label').textContent = resource.label;
   document.getElementById('reader-title').textContent = resource.title;
   document.getElementById('reader-content').innerHTML = resource.body;
+  readerTrigger = button;
   document.getElementById('resource-reader').hidden = false;
   document.getElementById('resource-reader').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('reader-close').focus();
 }));
-document.getElementById('reader-close').addEventListener('click', () => { document.getElementById('resource-reader').hidden = true; });
+function closeReader() {
+  const reader = document.getElementById('resource-reader');
+  if (reader.hidden) return;
+  reader.hidden = true;
+  if (readerTrigger) { readerTrigger.focus(); readerTrigger = null; }
+}
+document.getElementById('reader-close').addEventListener('click', closeReader);
 
-function closeGate() { document.getElementById('gate-layer').hidden = true; }
+let gateTrigger = null;
+function closeGate() {
+  const gate = document.getElementById('gate-layer');
+  if (gate.hidden) return;
+  gate.hidden = true;
+  if (gateTrigger) { gateTrigger.focus(); gateTrigger = null; }
+}
 document.querySelectorAll('.premium-gate').forEach(button => button.addEventListener('click', () => {
   if (DDA.can(prototypeState, button.dataset.permission)) { showToast('Atelier Premium débloqué dans cette démonstration.'); return; }
+  gateTrigger = button;
   document.getElementById('gate-layer').hidden = false;
+  document.getElementById('gate-close').focus();
   prototypeState = DDA.track(prototypeState, 'access_denied', { permission: button.dataset.permission, plan: 'free' });
 }));
 document.getElementById('gate-close').addEventListener('click', closeGate);
 document.getElementById('gate-layer').addEventListener('click', event => { if (event.target.id === 'gate-layer') closeGate(); });
 document.getElementById('gate-preview').addEventListener('click', () => { closeGate(); showView('membership'); });
+
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape') return;
+  if (!document.getElementById('gate-layer').hidden) closeGate();
+  else if (!document.getElementById('resource-reader').hidden) closeReader();
+});
 document.getElementById('preview-premium').addEventListener('click', () => {
   prototypeState = DDA.setPlan(prototypeState, 'premium');
   prototypeState = DDA.track(prototypeState, 'plan_preview', { plan: 'premium' });
@@ -425,11 +451,16 @@ document.getElementById('mark-understood').addEventListener('click', () => {
 
 document.getElementById('signup-form').addEventListener('submit', event => {
   event.preventDefault();
-  const name = document.getElementById('first-name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const consent = document.getElementById('consent').checked;
+  const nameField = document.getElementById('first-name');
+  const emailField = document.getElementById('email');
+  const consentField = document.getElementById('consent');
+  const name = nameField.value.trim();
+  const email = emailField.value.trim();
+  const consent = consentField.checked;
   const error = document.getElementById('signup-error');
-  if (!name || !email || !consent) { error.textContent = 'Complète les champs et confirme le stockage local.'; return; }
+  const invalidFields = [!name && nameField, !email && emailField, !consent && consentField].filter(Boolean);
+  [nameField, emailField, consentField].forEach(field => field.setAttribute('aria-invalid', String(invalidFields.includes(field))));
+  if (invalidFields.length) { error.textContent = 'Complète les champs et confirme le stockage local.'; invalidFields[0].focus(); return; }
   error.textContent = '';
   saveState({ user: DDA.createUser(name, email) });
   event.currentTarget.hidden = true;
@@ -439,10 +470,16 @@ document.getElementById('signup-form').addEventListener('submit', event => {
 
 document.getElementById('onboarding-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const level = document.getElementById('level').value;
-  const goal = document.getElementById('goal').value;
-  const time = document.getElementById('time').value;
-  if (!level || !goal || !time) { document.getElementById('onboarding-error').textContent = 'Choisis les trois éléments du parcours.'; return; }
+  const levelField = document.getElementById('level');
+  const goalField = document.getElementById('goal');
+  const timeField = document.getElementById('time');
+  const level = levelField.value;
+  const goal = goalField.value;
+  const time = timeField.value;
+  const invalidFields = [!level && levelField, !goal && goalField, !time && timeField].filter(Boolean);
+  [levelField, goalField, timeField].forEach(field => field.setAttribute('aria-invalid', String(invalidFields.includes(field))));
+  if (invalidFields.length) { document.getElementById('onboarding-error').textContent = 'Choisis les trois éléments du parcours.'; invalidFields[0].focus(); return; }
+  document.getElementById('onboarding-error').textContent = '';
   saveState({ onboarding: { level, goal, time, complete: true } });
   updateLessonState(activeLessonId, { lessonViewed: true });
   trackEvent('onboarding_complete', { level, goal });
@@ -524,8 +561,15 @@ document.getElementById('profile-reset').addEventListener('click', resetPilot);
 
 document.getElementById('profile-form').addEventListener('submit', event => {
   event.preventDefault();
-  const name = document.getElementById('profile-first-name').value.trim();
-  if (!name) { document.getElementById('profile-error').textContent = 'Indique ton prénom.'; return; }
+  const nameField = document.getElementById('profile-first-name');
+  const name = nameField.value.trim();
+  if (!name) {
+    nameField.setAttribute('aria-invalid', 'true');
+    document.getElementById('profile-error').textContent = 'Indique ton prénom.';
+    nameField.focus();
+    return;
+  }
+  nameField.setAttribute('aria-invalid', 'false');
   const level = document.getElementById('profile-level').value;
   const goal = document.getElementById('profile-goal').value;
   const time = document.getElementById('profile-time').value;
