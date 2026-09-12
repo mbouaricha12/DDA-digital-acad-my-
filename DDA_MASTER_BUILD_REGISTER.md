@@ -22,7 +22,7 @@
 | Accès | Récupération de compte | FUTUR | Après authentification réelle |
 | Accès | Onboarding | SIMULÉ | Deux étapes, sauvegarde locale |
 | Apprenant | Darius Terminal | CONSTRUIT | Accueil, prochaine action, progression et raccourcis |
-| Apprenant | Parcours M0–M9 | PARTIEL | M0.1 actif ; architecture des autres modules à compléter |
+| Apprenant | Parcours M0–M9 | PARTIEL | M0.1 seul module réellement authored et jouable ; les 10 modules (M0–M9) sont désormais représentés dans le curriculum et rendus dynamiquement sur Parcours/Progression avec leurs états (verrouillé/prochainement/disponible/en cours/terminé) — aucun contenu M0.2–M9 inventé, seulement la structure |
 | Apprenant | Module / Leçon / Lecteur | PARTIEL | M0.1 fonctionnel ; lecteur média final absent |
 | Apprenant | Résumé / Exercice / Quiz | CONSTRUIT | M0.1 avec déverrouillage progressif |
 | Apprenant | Résultat / feedback | CONSTRUIT | Validation locale et retour de test |
@@ -44,8 +44,8 @@
 | Fondation | État | Limite actuelle |
 |---|---|---|
 | Modèle utilisateur | SIMULÉ | localStorage uniquement |
-| Curriculum module → leçon → pratique → évaluation | PARTIEL | M0.1 réel, modèle réutilisable en cours de formalisation |
-| Learning Engine state helpers | CONSTRUIT | États et prochaine action centralisés côté frontal local |
+| Curriculum module → leçon → pratique → évaluation | PARTIEL | Modèle de données réutilisable formalisé (10 modules, lessons[] structurées avec pratique/évaluation/xp) ; seul M0.1 est authored, M1–M9 sont des emplacements structurels vides prêts à recevoir du contenu sans reconstruction |
+| Learning Engine state helpers | CONSTRUIT | `learning-engine.js` réécrit en moteur générique curriculum+état (statuts leçon/module à 4-5 valeurs, déverrouillage séquentiel, prochaine action calculée sur tout le curriculum, XP agrégé) ; état de progression migré vers un schéma par leçon (`state.lessons[id]`, schemaVersion 4) avec migration automatique et sans perte depuis les données v1–v3 déjà déployées ; Terminal, Parcours et Progression consomment ce moteur au lieu de valeurs figées sur M0.1 |
 | Tentative / exercice / quiz / progression | SIMULÉ | événements locaux, aucune base distante |
 | Compétence / badge / certificat | PARTIEL | affichage et règles à compléter |
 | Formule / droits / Premium | SIMULÉ | Free/Premium local, sans abonnement |

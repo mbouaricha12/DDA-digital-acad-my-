@@ -243,6 +243,14 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .skill-card strong{font-family:Georgia,serif;font-size:22px}
 .bar{height:6px;background:var(--line-soft);border-radius:10px;overflow:hidden}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--blue-2));border-radius:10px;transition:width .8s var(--ease)}
+.modules-track{margin-top:16px}
+.modules-track ol{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:8px}
+.modules-track li{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px}
+.modules-track .module-id{font-family:Georgia,serif;color:var(--gold-soft);font-size:13px;width:30px;flex:none}
+.modules-track strong{flex:1;font-size:14px;font-weight:700;min-width:0}
+.module-pill{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:5px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;flex:none}
+.module-pill.completed{border-color:var(--teal);color:var(--teal)}
+.module-pill.in_progress,.module-pill.available{border-color:var(--gold);color:var(--gold-soft)}
 
 /* ---------- Resources ---------- */
 .resource-grid{display:grid;grid-template-columns:1fr;gap:14px}

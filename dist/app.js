@@ -3,12 +3,20 @@ const views = document.querySelectorAll('.view');
 const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
+const lessonView = document.getElementById('lesson');
+const activeLessonId = lessonView.dataset.lessonId || DDA.primaryLessonId;
 const titles = { dashboard: 'Aujourd’hui', access: 'Accès pilote', path: 'Mon parcours', lesson: 'Leçon en cours', progress: 'Progression', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
 const viewPermissions = { path: 'path', lesson: 'lesson_m01', progress: 'progress', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile' };
+const MODULE_STATUS_LABEL = { completed: 'Terminé', in_progress: 'En cours', available: 'Disponible', locked: 'Verrouillé', coming_soon: 'Prochainement' };
 let prototypeState = DDA.load();
 
 function saveState(update) {
   prototypeState = DDA.save({ ...prototypeState, ...update });
+  renderState();
+}
+
+function updateLessonState(lessonId, patch) {
+  prototypeState = DDA.updateLesson(prototypeState, lessonId, patch);
   renderState();
 }
 
@@ -31,61 +39,120 @@ function setLoading(active, message = 'Préparation de ton parcours…') {
   layer.hidden = !active;
 }
 
+// A module card can only be opened today if it holds the one lesson we have a reader view for.
+function isRenderableModule(module) {
+  return module.lessons.some(lesson => lesson.id === activeLessonId);
+}
+
+function moduleStatusLabel(status, renderable) {
+  if (status === DDALearning.MODULE_STATUS.COMPLETED) return 'VALIDÉE';
+  if (status === DDALearning.MODULE_STATUS.LOCKED) return 'VERROUILLÉE';
+  if (status === DDALearning.MODULE_STATUS.COMING_SOON) return 'À SUIVRE';
+  return renderable ? 'EN COURS' : 'DISPONIBLE';
+}
+
+function moduleActionLabel(status, renderable) {
+  if (status === DDALearning.MODULE_STATUS.COMPLETED) return renderable ? 'Revoir' : 'Terminé';
+  if (status === DDALearning.MODULE_STATUS.LOCKED || status === DDALearning.MODULE_STATUS.COMING_SOON) return 'Verrouillée';
+  return renderable ? 'Continuer' : 'Ouvrir';
+}
+
+function renderPathList() {
+  const container = document.getElementById('path-list');
+  if (!container) return;
+  container.innerHTML = DDA.curriculum.modules.map((module, index) => {
+    const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
+    const renderable = isRenderableModule(module);
+    const heading = renderable ? module.lessons[0]?.title || module.title : module.title;
+    const summary = module.summary || module.lessons[0]?.summary || 'Contenu en préparation.';
+    const number = String(index + 1).padStart(2, '0');
+    const tag = renderable ? 'button' : 'article';
+    const cls = `path-card ${renderable ? 'current' : 'locked'}`;
+    const attrs = renderable ? ' data-view="lesson"' : '';
+    return `<${tag} class="${cls}"${attrs}><span class="path-number">${number}</span><div><small>${moduleStatusLabel(status, renderable)}</small><h3>${heading}</h3><p>${summary}</p></div><span>${moduleActionLabel(status, renderable)}</span></${tag}>`;
+  }).join('');
+  container.querySelectorAll('[data-view]').forEach(el => el.addEventListener('click', () => showView(el.dataset.view)));
+}
+
+function renderModulesRecap() {
+  const container = document.getElementById('modules-recap-list');
+  if (!container) return;
+  container.innerHTML = DDA.curriculum.modules.map(module => {
+    const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
+    return `<li><span class="module-id">${module.id}</span><strong>${module.title}</strong><span class="module-pill ${status}">${MODULE_STATUS_LABEL[status] || status}</span></li>`;
+  }).join('');
+}
+
+function resolveContinueTarget() {
+  const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
+  if (next) return next;
+  const found = DDALearning.findLesson(DDA.curriculum, activeLessonId);
+  return found ? { module: found.module, lesson: found.lesson } : null;
+}
+
 function renderState() {
   const name = prototypeState.user?.name || 'Richard';
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'RD';
-  const learningState = DDALearning.lessonState(prototypeState.progress);
-  const progress = learningState === DDALearning.STATUS.COMPLETED ? 100 : prototypeState.progress.exerciseComplete ? 55 : prototypeState.onboarding?.complete ? 25 : 18;
-  const xp = prototypeState.progress.xp || 20;
+  const activeLessonProgress = DDALearning.getLessonProgress(prototypeState, activeLessonId);
+  const progress = DDALearning.lessonProgressPercent(activeLessonProgress);
+  const xp = DDALearning.totalXp(DDA.curriculum, prototypeState) || 20;
+  const complete = Boolean(activeLessonProgress.quizComplete);
+
   document.getElementById('dashboard-name').textContent = name;
   document.getElementById('profile-name').textContent = name;
   document.getElementById('profile-avatar').textContent = initials;
   document.getElementById('module-percent').textContent = `${progress}%`;
   document.getElementById('module-ring').style.setProperty('--progress', progress);
   document.getElementById('week-xp').textContent = `+${xp} XP`;
-  const complete = Boolean(prototypeState.progress.quizComplete);
-  document.getElementById('personalized-next').textContent = complete ? 'M0.1 est validée. Ton prochain module sera bientôt disponible.' : prototypeState.onboarding?.goal ? `Objectif : ${prototypeState.onboarding.goal}. Prochaine étape : terminer M0.1.` : 'Une étape claire pour continuer à progresser.';
-  document.getElementById('path-m01-status').textContent = complete ? 'VALIDÉE' : 'EN COURS';
-  document.getElementById('path-m01-action').textContent = complete ? 'Revoir' : 'Continuer';
-  document.getElementById('lesson-state-pill').textContent = complete ? 'Validée' : 'En cours';
-  document.getElementById('lesson-index-label').textContent = complete ? 'COMPÉTENCE VALIDÉE' : 'LEÇON 1 SUR 7';
-  document.getElementById('lesson-primary-action').innerHTML = complete ? 'Revoir la leçon <span>→</span>' : 'Reprendre la leçon <span>→</span>';
-  document.getElementById('market-skill-label').textContent = prototypeState.progress.quizComplete ? 'Fondation validée' : prototypeState.progress.exerciseComplete ? 'En progression' : 'En démarrage';
+  document.getElementById('personalized-next').textContent = complete
+    ? `${activeLessonId} est validée. Ton prochain module sera bientôt disponible.`
+    : prototypeState.onboarding?.goal
+      ? `Objectif : ${prototypeState.onboarding.goal}. Prochaine étape : terminer ${activeLessonId}.`
+      : 'Une étape claire pour continuer à progresser.';
+
+  const continueTarget = resolveContinueTarget();
+  if (continueTarget) {
+    const continueLessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
+    const continueComplete = continueLessonProgress.quizComplete;
+    document.getElementById('lesson-state-pill').textContent = continueComplete ? 'Validée' : 'En cours';
+    document.getElementById('lesson-index-label').textContent = continueComplete ? 'COMPÉTENCE VALIDÉE' : 'LEÇON 1 SUR 7';
+    document.getElementById('lesson-primary-action').innerHTML = continueComplete ? 'Revoir la leçon <span>→</span>' : 'Reprendre la leçon <span>→</span>';
+  }
+
+  document.getElementById('market-skill-label').textContent = activeLessonProgress.quizComplete ? 'Fondation validée' : activeLessonProgress.exerciseComplete ? 'En progression' : 'En démarrage';
   document.getElementById('market-skill-bar').style.width = `${progress}%`;
+
+  const step = DDALearning.lessonNextStep(activeLessonProgress);
   ['action-lesson', 'action-exercise', 'action-quiz'].forEach(id => document.getElementById(id).classList.remove('done', 'current'));
-  if (prototypeState.progress.quizComplete) {
+  if (step === 'review') {
     ['action-lesson', 'action-exercise', 'action-quiz'].forEach(id => document.getElementById(id).classList.add('done'));
-  } else if (prototypeState.progress.exerciseComplete) {
+  } else if (step === 'quiz') {
     document.getElementById('action-lesson').classList.add('done');
     document.getElementById('action-exercise').classList.add('done');
     document.getElementById('action-quiz').classList.add('current');
   } else {
     document.getElementById('action-lesson').classList.add('current');
   }
+
   const journey = document.querySelector('.journey-button');
-  journey.textContent = complete ? 'Revoir M0.1' : prototypeState.onboarding?.complete ? 'Reprendre M0.1' : 'Tester le parcours';
+  journey.textContent = complete ? `Revoir ${activeLessonId}` : prototypeState.onboarding?.complete ? `Reprendre ${activeLessonId}` : 'Tester le parcours';
   journey.dataset.view = prototypeState.onboarding?.complete ? 'lesson' : 'access';
-  if (prototypeState.progress.exerciseComplete) {
-    const quiz = document.getElementById('quiz-block');
-    quiz.classList.remove('locked-check');
-    quiz.setAttribute('aria-disabled', 'false');
-  }
-  if (prototypeState.progress.quizComplete) {
-    document.getElementById('result-card').hidden = false;
-    document.getElementById('saved-state').textContent = 'Exercice et quiz validés localement — aucune donnée envoyée';
-  }
+
+  const evalUnlocked = DDALearning.evaluationStatus(activeLessonProgress) !== DDALearning.STEP_STATUS.LOCKED;
+  const quiz = document.getElementById('quiz-block');
+  quiz.classList.toggle('locked-check', !evalUnlocked);
+  quiz.setAttribute('aria-disabled', String(!evalUnlocked));
+
+  document.getElementById('result-card').hidden = !complete;
+  if (complete) document.getElementById('saved-state').textContent = 'Exercice et quiz validés localement — aucune donnée envoyée';
+
   document.getElementById('resume-device').hidden = !prototypeState.user;
   document.getElementById('low-data-toggle').checked = Boolean(prototypeState.preferences.lowData);
   document.body.classList.toggle('low-data', Boolean(prototypeState.preferences.lowData));
   const dataButton = document.getElementById('low-data-button');
   dataButton.textContent = prototypeState.preferences.lowData ? 'Data réduite' : 'Data normale';
   dataButton.setAttribute('aria-pressed', String(Boolean(prototypeState.preferences.lowData)));
-  if (!prototypeState.progress.exerciseComplete) {
-    const quiz = document.getElementById('quiz-block');
-    quiz.classList.add('locked-check');
-    quiz.setAttribute('aria-disabled', 'true');
-  }
-  if (!prototypeState.progress.quizComplete) document.getElementById('result-card').hidden = true;
+
   const hasProfile = Boolean(prototypeState.user);
   document.getElementById('profile-form').hidden = !hasProfile;
   document.querySelector('.preference-panel').hidden = !hasProfile;
@@ -103,6 +170,7 @@ function renderState() {
   document.getElementById('profile-reminders').checked = Boolean(prototypeState.preferences.reminders);
   const count = prototypeState.events?.length || 0;
   document.getElementById('event-count').textContent = `${count} événement${count > 1 ? 's' : ''}`;
+
   const premium = prototypeState.membership?.plan === 'premium';
   document.getElementById('sidebar-plan').textContent = premium ? 'DDA Premium · Démo' : 'DDA Free';
   document.getElementById('membership-status').textContent = premium ? 'DDA Premium' : 'DDA Free';
@@ -114,6 +182,9 @@ function renderState() {
   document.querySelectorAll('.premium-gate').forEach(button => {
     button.textContent = premium ? 'Ouvrir l’atelier' : 'Voir l’aperçu Premium';
   });
+
+  renderPathList();
+  renderModulesRecap();
 }
 
 function showView(id, recordEvent = true) {
@@ -206,7 +277,7 @@ document.getElementById('mark-understood').addEventListener('click', () => {
   state.style.borderColor = '#58b88a';
   state.style.color = '#58b88a';
   document.getElementById('exercise-block').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  trackEvent('lesson_understood', { lesson: 'M0.1' });
+  trackEvent('lesson_understood', { lesson: activeLessonId });
 });
 
 document.getElementById('signup-form').addEventListener('submit', event => {
@@ -229,10 +300,8 @@ document.getElementById('onboarding-form').addEventListener('submit', async even
   const goal = document.getElementById('goal').value;
   const time = document.getElementById('time').value;
   if (!level || !goal || !time) { document.getElementById('onboarding-error').textContent = 'Choisis les trois éléments du parcours.'; return; }
-  saveState({
-    onboarding: { level, goal, time, complete: true },
-    progress: { ...prototypeState.progress, lessonViewed: true, moduleProgress: 25, xp: 30 }
-  });
+  saveState({ onboarding: { level, goal, time, complete: true } });
+  updateLessonState(activeLessonId, { lessonViewed: true });
   trackEvent('onboarding_complete', { level, goal });
   setLoading(true);
   if (!prototypeState.preferences.lowData) await new Promise(resolve => setTimeout(resolve, 450));
@@ -240,28 +309,28 @@ document.getElementById('onboarding-form').addEventListener('submit', async even
   showView('lesson');
 });
 
-function bindQuestion(name, successText) {
+function bindQuestion(lessonId, name, successText) {
   const group = document.querySelector(`[data-question="${name}"]`);
   const feedback = document.getElementById(`${name}-feedback`);
   group.querySelectorAll('button').forEach(button => button.addEventListener('click', () => {
     if (group.closest('.locked-check')?.getAttribute('aria-disabled') === 'true') return;
     group.querySelectorAll('button').forEach(item => item.classList.remove('correct', 'incorrect'));
     const correct = button.dataset.correct === 'true';
-    trackEvent(name === 'exercise' ? 'exercise_attempt' : 'quiz_attempt', { correct: String(correct), lesson: 'M0.1' });
+    trackEvent(name === 'exercise' ? 'exercise_attempt' : 'quiz_attempt', { correct: String(correct), lesson: lessonId });
     button.classList.add(correct ? 'correct' : 'incorrect');
     feedback.textContent = correct ? successText : 'Pas encore. Relis le principe, puis essaie à nouveau.';
     feedback.className = `feedback ${correct ? 'success' : 'error'}`;
     if (correct && name === 'exercise') {
-      saveState({ progress: { ...prototypeState.progress, exerciseComplete: true, moduleProgress: 55, xp: 60 } });
-      trackEvent('exercise_complete', { lesson: 'M0.1' });
+      updateLessonState(lessonId, { exerciseComplete: true });
+      trackEvent('exercise_complete', { lesson: lessonId });
       const quiz = document.getElementById('quiz-block');
       quiz.classList.remove('locked-check');
       quiz.setAttribute('aria-disabled', 'false');
       quiz.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     if (correct && name === 'quiz') {
-      saveState({ progress: { ...prototypeState.progress, quizComplete: true, moduleProgress: 100, xp: 120 } });
-      trackEvent('quiz_complete', { lesson: 'M0.1' });
+      updateLessonState(lessonId, { quizComplete: true });
+      trackEvent('quiz_complete', { lesson: lessonId });
       const resultCard = document.getElementById('result-card');
       resultCard.hidden = false;
       resultCard.classList.add('just-completed');
@@ -272,8 +341,8 @@ function bindQuestion(name, successText) {
   }));
 }
 
-bindQuestion('exercise', 'Correct. Tu reconnais le mécanisme fondamental de l’échange.');
-bindQuestion('quiz', 'Correct. La discipline du processus passe avant la précipitation.');
+bindQuestion(activeLessonId, 'exercise', 'Correct. Tu reconnais le mécanisme fondamental de l’échange.');
+bindQuestion(activeLessonId, 'quiz', 'Correct. La discipline du processus passe avant la précipitation.');
 
 function updateNetworkState() {
   const online = navigator.onLine;

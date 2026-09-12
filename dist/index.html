@@ -165,14 +165,10 @@
 
       <section class="view" id="path" aria-labelledby="path-title">
         <div class="section-intro"><p class="eyebrow gold">Darius Free</p><h1 id="path-title">Ton parcours commence par les fondations.</h1><p>Chaque étape se débloque après une vraie validation, jamais après une simple ouverture.</p></div>
-        <div class="path-list">
-          <button class="path-card current" id="path-m01" data-view="lesson"><span class="path-number">01</span><div><small id="path-m01-status">EN COURS</small><h3>Le trading comme commerce</h3><p>Acheteurs, vendeurs et échange d’un actif.</p></div><span id="path-m01-action">Continuer</span></button>
-          <article class="path-card locked"><span class="path-number">02</span><div><small>À SUIVRE</small><h3>Comprendre les marchés financiers</h3><p>Pourquoi les prix évoluent et comment les marchés s’organisent.</p></div><span>Verrouillée</span></article>
-          <article class="path-card locked"><span class="path-number">03</span><div><small>À SUIVRE</small><h3>Risque et discipline</h3><p>Protéger son capital avant de rechercher la performance.</p></div><span>Verrouillée</span></article>
-        </div>
+        <div class="path-list" id="path-list"></div>
       </section>
 
-      <section class="view" id="lesson" aria-labelledby="lesson-title">
+      <section class="view" id="lesson" aria-labelledby="lesson-title" data-lesson-id="M0.1">
         <div class="lesson-layout">
           <article class="lesson-main">
             <button class="back-link" data-view="dashboard">← Retour au Terminal</button>
@@ -229,6 +225,10 @@
           <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-shield"/></svg><span>Gestion du risque</span></div><strong>À découvrir</strong><div class="bar"><i style="width:4%"></i></div></article>
           <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-target"/></svg><span>Discipline</span></div><strong>À découvrir</strong><div class="bar"><i style="width:4%"></i></div></article>
         </div>
+        <section class="panel modules-track">
+          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-path"/></svg> Parcours M0–M9</p><h3>Où tu en es sur l’ensemble du curriculum</h3></div></div>
+          <ol id="modules-recap-list"></ol>
+        </section>
       </section>
 
       <section class="view" id="resources" aria-labelledby="resources-title">
