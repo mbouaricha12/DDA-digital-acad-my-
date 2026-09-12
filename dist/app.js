@@ -20,6 +20,31 @@ const MARKET_DEMO = {
     { company: 'Société C', event: 'Assemblée générale' }
   ]
 };
+// Real accomplishments only — built from DDA.track's own event log, never fabricated.
+const ACTIVITY_LABELS = {
+  onboarding_complete: () => 'Parcours pilote créé',
+  lesson_understood: () => 'Leçon comprise',
+  exercise_complete: () => 'Exercice validé',
+  quiz_complete: () => 'Quiz validé — compétence confirmée',
+  profile_updated: () => 'Profil mis à jour',
+  plan_preview: metadata => (metadata.plan === 'premium' ? 'Aperçu Premium activé' : 'Retour à DDA Free')
+};
+const NEXT_STEP_PHRASE = { lesson: 'voir la leçon', exercise: 'réussir l’exercice', quiz: 'valider le quiz' };
+
+function relativeTime(iso) {
+  const minutes = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (minutes < 1) return 'à l’instant';
+  if (minutes < 60) return `il y a ${minutes} min`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `il y a ${hours} h`;
+  const days = Math.round(hours / 24);
+  return `il y a ${days} j`;
+}
+
+function countActiveDays(events) {
+  return new Set((events || []).map(event => event.at.slice(0, 10))).size;
+}
+
 let prototypeState = DDA.load();
 
 function saveState(update) {
@@ -114,6 +139,27 @@ function renderMarketIntelligence() {
   }
 }
 
+function renderRecentActivity() {
+  const container = document.getElementById('recent-activity-list');
+  if (!container) return;
+  const items = (prototypeState.events || []).filter(event => ACTIVITY_LABELS[event.name]).slice(-4).reverse();
+  if (!items.length) {
+    container.innerHTML = '<li class="activity-empty">Ton activité récente apparaîtra ici.</li>';
+    return;
+  }
+  container.innerHTML = items.map(event => `
+    <li><svg class="icon"><use href="#icon-check-circle"/></svg><div><strong>${ACTIVITY_LABELS[event.name](event.metadata || {})}</strong><small>${relativeTime(event.at)}</small></div></li>
+  `).join('');
+}
+
+function updateCockpitAlert(continueTarget) {
+  const cue = document.getElementById('cockpit-alert-cue');
+  if (!cue) return;
+  const step = continueTarget && NEXT_STEP_PHRASE[DDALearning.lessonNextStep(DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id))];
+  cue.hidden = !step;
+  cue.textContent = step ? `Prochaine étape : ${step} de « ${continueTarget.lesson.title} ».` : '';
+}
+
 function resolveContinueTarget() {
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   if (next) return next;
@@ -135,6 +181,8 @@ function renderState() {
   document.getElementById('module-percent').textContent = `${progress}%`;
   document.getElementById('module-ring').style.setProperty('--progress', progress);
   document.getElementById('week-xp').textContent = `+${xp} XP`;
+  const activeDays = countActiveDays(prototypeState.events);
+  document.getElementById('active-days').textContent = `${activeDays} jour${activeDays > 1 ? 's' : ''}`;
   document.getElementById('personalized-next').textContent = complete
     ? `${activeLessonId} est validée. Ton prochain module sera bientôt disponible.`
     : prototypeState.onboarding?.goal
@@ -149,6 +197,8 @@ function renderState() {
     document.getElementById('lesson-index-label').textContent = continueComplete ? 'COMPÉTENCE VALIDÉE' : 'LEÇON 1 SUR 7';
     document.getElementById('lesson-primary-action').innerHTML = continueComplete ? 'Revoir la leçon <span>→</span>' : 'Reprendre la leçon <span>→</span>';
   }
+  updateCockpitAlert(continueTarget);
+  renderRecentActivity();
 
   document.getElementById('market-skill-label').textContent = activeLessonProgress.quizComplete ? 'Fondation validée' : activeLessonProgress.exerciseComplete ? 'En progression' : 'En démarrage';
   document.getElementById('market-skill-bar').style.width = `${progress}%`;
