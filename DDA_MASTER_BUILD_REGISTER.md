@@ -26,7 +26,7 @@
 | Apprenant | Module / Leçon / Lecteur | PARTIEL | M0.1 fonctionnel ; lecteur média final absent |
 | Apprenant | Résumé / Exercice / Quiz | CONSTRUIT | M0.1 avec déverrouillage progressif |
 | Apprenant | Résultat / feedback | CONSTRUIT | Validation locale et retour de test |
-| Apprenant | Progression / compétences | SIMULÉ | Indicateurs locaux, non synchronisés |
+| Apprenant | Progression / compétences | SIMULÉ | Signature visuelle propre à DDA (directive CEO §10) : bandeau de statistiques réelles (modules amorcés, XP total, jours d'activité), compteurs de compétence en paliers (remplace la barre générique, honnête à zéro tant qu'aucune donnée n'existe), timeline « Preuves d'apprentissage » construite sur les vrais jalons/horodatages de M0.1 (étapes à venir affichées mais jamais marquées faites), aperçu de badges explicitement verrouillés (aucun débloqué, cohérent avec Credentials/Badges = FUTUR) ; toujours local, non synchronisé |
 | Credentials | Badges | FUTUR | À définir après parcours validés |
 | Credentials | Certification interne | PARTIEL | Fondations documentées, émission réelle absente |
 | Ressources | Bibliothèque / Glossaire | CONSTRUIT | Guides locaux, lecteur intégré |
