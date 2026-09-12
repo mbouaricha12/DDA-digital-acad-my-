@@ -355,6 +355,24 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .modules-track ol{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:8px}
 .modules-track li{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px}
 .modules-track .module-id{font-family:Georgia,serif;color:var(--gold-soft);font-size:13px;width:30px;flex:none}
+
+/* ---------- Certification preview (Progression) ---------- */
+.certificate-panel{margin-top:16px}
+.certificate-locked,.certificate-gate{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:26px 16px;margin-top:16px;border:1px dashed var(--line);border-radius:var(--r-md);color:var(--muted)}
+.certificate-locked .icon{color:var(--muted);width:24px;height:24px}
+.certificate-locked p,.certificate-gate p{margin:0;font-size:13px;max-width:360px}
+.certificate-gate .secondary-action{width:auto}
+.certificate-preview{margin-top:16px;display:grid;gap:14px}
+.certificate-mock{position:relative;overflow:hidden;padding:34px 24px;border-radius:var(--r-md);text-align:center;background:linear-gradient(160deg,var(--ivory),var(--ivory-2));color:var(--ink);border:1px solid var(--gold-soft)}
+.certificate-mock:after{content:"";position:absolute;inset:8px;border:1px solid rgba(217,164,65,.4);border-radius:calc(var(--r-md) - 4px);pointer-events:none}
+.certificate-watermark{position:absolute;top:16px;right:-38px;transform:rotate(35deg);background:var(--gold);color:var(--navy-950);font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:4px 42px;z-index:1}
+.certificate-seal{width:32px;height:32px;color:var(--gold);margin-bottom:6px}
+.certificate-eyebrow{margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:var(--muted-2)}
+.certificate-mock h4{margin:10px 0 6px;font-family:Georgia,serif;font-size:24px;color:var(--ink)}
+.certificate-line{margin:0;font-size:14px;color:var(--muted-2)}
+.certificate-date{margin:6px 0 0;font-size:12px;color:var(--muted-2)}
+.certificate-disclaimer{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--muted);margin:0}
+.certificate-disclaimer .icon{flex:none;margin-top:1px}
 .modules-track strong{flex:1;font-size:14px;font-weight:700;min-width:0}
 .module-pill{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:5px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;flex:none}
 .module-pill.completed{border-color:var(--teal);color:var(--teal)}
