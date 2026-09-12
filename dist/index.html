@@ -41,6 +41,8 @@
       <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
       <symbol id="icon-blocked" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M6.3 6.3l11.4 11.4"/></symbol>
       <symbol id="icon-photo" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.5" cy="10" r="1.8"/><path d="M3 16.5l5.5-5 4 3.5 3-2.5L21 16"/></symbol>
+      <symbol id="icon-award" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5.5"/><path d="M9 13.5L7.5 21l4.5-2.5L16.5 21 15 13.5"/></symbol>
+      <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></symbol>
     </defs>
   </svg>
   <div class="prototype-banner">Prototype privé — aucune donnée réelle</div>
@@ -240,15 +242,38 @@
       </section>
 
       <section class="view" id="progress" aria-labelledby="progress-title">
-        <div class="section-intro"><p class="eyebrow gold">Progression</p><h1 id="progress-title">Construis des compétences, pas seulement des habitudes.</h1><p>Les mesures ci-dessous illustrent le futur profil pédagogique DDA. Elles ne représentent pas encore des données réelles.</p></div>
-        <div class="skills-grid">
-          <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-compass"/></svg><span>Compréhension des marchés</span></div><strong id="market-skill-label">En démarrage</strong><div class="bar"><i id="market-skill-bar" style="width:18%"></i></div></article>
-          <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-shield"/></svg><span>Gestion du risque</span></div><strong>À découvrir</strong><div class="bar"><i style="width:4%"></i></div></article>
-          <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-target"/></svg><span>Discipline</span></div><strong>À découvrir</strong><div class="bar"><i style="width:4%"></i></div></article>
+        <div class="section-intro"><p class="eyebrow gold">Progression</p><h1 id="progress-title">Construis des compétences, pas seulement des habitudes.</h1><p>Ta progression sur M0.1 est mesurée localement, en continu. Le reste du profil de compétences est encore un aperçu de ce que DDA deviendra.</p></div>
+
+        <div class="progress-hero">
+          <div class="progress-stat"><span>Modules amorcés</span><strong id="progress-modules-started">0/10</strong></div>
+          <div class="progress-stat"><span>XP total</span><strong id="progress-total-xp">0</strong></div>
+          <div class="progress-stat"><span>Jours d’activité</span><strong id="progress-active-days">0</strong></div>
         </div>
+
+        <div class="skills-grid">
+          <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-compass"/></svg><span>Compréhension des marchés</span></div><strong id="market-skill-label">En démarrage</strong><div class="level-meter" id="market-skill-level"><i></i><i></i><i></i><i></i></div></article>
+          <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-shield"/></svg><span>Gestion du risque</span></div><strong>À découvrir</strong><div class="level-meter"><i></i><i></i><i></i><i></i></div></article>
+          <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-target"/></svg><span>Discipline</span></div><strong>À découvrir</strong><div class="level-meter"><i></i><i></i><i></i><i></i></div></article>
+        </div>
+
+        <section class="panel proof-panel">
+          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> Preuves d’apprentissage</p><h3>Ton chemin sur M0.1, étape par étape</h3></div></div>
+          <ol class="proof-timeline" id="proof-timeline"></ol>
+        </section>
+
         <section class="panel modules-track">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-path"/></svg> Parcours M0–M9</p><h3>Où tu en es sur l’ensemble du curriculum</h3></div></div>
           <ol id="modules-recap-list"></ol>
+        </section>
+
+        <section class="panel badges-panel">
+          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> Badges</p><h3>Les prochaines preuves à débloquer</h3></div></div>
+          <div class="badge-row">
+            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Fondations validées</span></div>
+            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Risque maîtrisé</span></div>
+            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Discipline confirmée</span></div>
+          </div>
+          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Aucun badge actif aujourd’hui — débloqués uniquement après une validation réelle</span>
         </section>
       </section>
 
