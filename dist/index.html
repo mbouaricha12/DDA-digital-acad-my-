@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0B1020">
+  <title>DDA — Espace apprenant</title>
+  <meta name="description" content="Prototype privé de l'expérience apprenant Darius Digital Académie.">
+  <meta name="color-scheme" content="dark">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="alpha-polish.css">
+</head>
+<body>
+  <div class="prototype-banner">Prototype privé — aucune donnée réelle</div>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navigation principale">
+      <a class="brand" href="#dashboard" aria-label="DDA — Accueil">
+        <span class="brand-mark">DDA</span>
+        <span class="brand-name">Darius Digital Académie</span>
+      </a>
+      <nav>
+        <button class="nav-item active" data-view="dashboard"><span>⌂</span> Aujourd’hui</button>
+        <button class="nav-item" data-view="path"><span>◫</span> Mon parcours</button>
+        <button class="nav-item" data-view="lesson"><span>▶</span> Leçon en cours</button>
+        <button class="nav-item" data-view="progress"><span>◔</span> Progression</button>
+        <button class="nav-item" data-view="resources"><span>◇</span> Ressources</button>
+        <button class="nav-item" data-view="markets"><span>⌁</span> Marchés & BRVM</button>
+        <button class="nav-item" data-view="brokers"><span>⇄</span> Broker Hub</button>
+        <button class="nav-item" data-view="membership"><span>✦</span> DDA Premium</button>
+        <button class="nav-item" data-view="support"><span>?</span> Aide & support</button>
+        <button class="nav-item" data-view="profile"><span>◎</span> Profil</button>
+      </nav>
+      <div class="sidebar-foot">
+        <span class="plan-label" id="sidebar-plan">DDA Free</span>
+        <label class="data-toggle"><input type="checkbox" id="low-data-toggle"><span><b>Mode économie de données</b><small>Réduit les animations et médias</small></span></label>
+        <button class="profile-chip"><span class="avatar" id="profile-avatar">RD</span><span><b id="profile-name">Richard</b><br><small>Profil pilote</small></span></button>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <button class="mobile-brand" data-view="dashboard" aria-label="Accueil DDA"><b>DDA</b><small>DIGITAL ACADÉMIE</small></button>
+        <div class="context"><span class="eyebrow">Darius Terminal</span><strong id="context-title">Aujourd’hui</strong></div>
+        <div class="network-state" id="network-state" role="status"><i></i><span>Vérification réseau</span></div>
+        <button class="data-mode-button" id="low-data-button" type="button" aria-pressed="false">Data normale</button>
+        <button class="journey-button" data-view="access">Tester le parcours</button>
+        <button class="icon-button" aria-label="Notifications">♢<span class="notification-dot"></span></button>
+      </header>
+
+      <section class="view" id="access" aria-labelledby="access-title">
+        <div class="access-shell">
+          <div class="access-copy">
+            <p class="eyebrow gold">Parcours pilote M0.1</p>
+            <h1 id="access-title">Commence par une expérience claire.</h1>
+            <p>Cette démonstration simule l’inscription et personnalise localement le premier parcours. Aucun compte réel n’est créé et aucune donnée n’est envoyée.</p>
+            <ul class="trust-list"><li>Une seule prochaine action</li><li>Validation par exercice et quiz</li><li>Progression enregistrée sur cet appareil</li></ul>
+          </div>
+          <div class="access-card">
+            <div class="step-indicator"><span class="active" id="step-dot-1">1</span><i></i><span id="step-dot-2">2</span></div>
+            <form id="signup-form">
+              <p class="eyebrow">Étape 1 sur 2</p><h2>Créer mon espace pilote</h2>
+              <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ex. Richard"></label>
+              <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"></label>
+              <label class="consent"><input id="consent" type="checkbox" required><span>J’accepte que ces informations restent uniquement sur mon appareil pour ce prototype.</span></label>
+              <p class="form-error" id="signup-error" role="alert"></p>
+              <button class="primary-action" type="submit">Continuer <span>→</span></button>
+            </form>
+            <form id="onboarding-form" hidden>
+              <p class="eyebrow">Étape 2 sur 2</p><h2>Quel parcours te correspond ?</h2>
+              <label>Niveau<select id="level" required><option value="">Choisir</option><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select></label>
+              <label>Objectif pédagogique<select id="goal" required><option value="">Choisir</option><option>Comprendre les marchés</option><option>Améliorer ma gestion du risque</option><option>Structurer mes décisions</option></select></label>
+              <label>Temps disponible<select id="time" required><option value="">Choisir</option><option>10 minutes par jour</option><option>20 minutes par jour</option><option>45 minutes, 3 fois par semaine</option></select></label>
+              <p class="form-error" id="onboarding-error" role="alert"></p>
+              <button class="primary-action" type="submit">Construire mon parcours <span>→</span></button>
+            </form>
+            <div class="resume-device" id="resume-device" hidden><p>Un parcours pilote existe déjà sur cet appareil.</p><button class="secondary-action dark-action" id="resume-session" type="button">Reprendre ma session</button><button class="text-action" id="reset-session" type="button">Effacer les données de démonstration</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view active" id="dashboard" aria-labelledby="dashboard-title">
+        <div class="welcome-row">
+          <div><p class="eyebrow gold">Session d’apprentissage</p><h1 id="dashboard-title"><span id="greeting-prefix">Bonsoir</span> <span id="dashboard-name">Richard</span>.</h1><p id="personalized-next">Une étape claire pour continuer à progresser.</p></div>
+          <div class="week-score"><span>Cette semaine</span><strong id="week-xp">+20 XP</strong></div>
+        </div>
+
+        <article class="continue-card">
+          <div class="course-meta"><span class="pill" id="lesson-state-pill">En cours</span><span>Fondations des marchés</span></div>
+          <div class="continue-grid">
+            <div>
+              <p class="lesson-index" id="lesson-index-label">LEÇON 1 SUR 7</p>
+              <h2>Le trading comme commerce</h2>
+              <p>Comprendre l’échange entre acheteurs et vendeurs avant de chercher une opportunité.</p>
+              <button class="primary-action" id="lesson-primary-action" data-view="lesson">Reprendre la leçon <span>→</span></button>
+            </div>
+            <div class="progress-ring" id="module-ring" style="--progress: 18"><strong id="module-percent">18%</strong><span>du module</span></div>
+          </div>
+        </article>
+
+        <div class="dashboard-grid">
+          <section class="panel next-step">
+            <div class="panel-heading"><div><p class="eyebrow">Prochaine action</p><h3>Comprendre, puis vérifier</h3></div><span class="time">12 min</span></div>
+            <ol class="action-list">
+              <li class="current" id="action-lesson"><span>1</span><div><strong>Voir la leçon</strong><small>Le marché comme échange</small></div></li>
+              <li id="action-exercise"><span>2</span><div><strong>Répondre à l’exercice</strong><small>Reconnaître acheteur et vendeur</small></div></li>
+              <li id="action-quiz"><span>3</span><div><strong>Vérifier ta compréhension</strong><small>Quiz de validation</small></div></li>
+            </ol>
+          </section>
+
+          <section class="panel insight">
+            <p class="eyebrow gold">DDA Insight</p>
+            <h3>Un gain ne prouve pas qu’une décision était bonne.</h3>
+            <p>DDA évaluera progressivement la qualité de ton processus, pas seulement le résultat.</p>
+            <span class="future-label">Aperçu de la vision DDA</span>
+          </section>
+        </div>
+        <div class="terminal-dock" aria-label="Accès rapides du Terminal">
+          <button data-view="markets"><span>⌁</span><strong>Marchés & BRVM</strong><small>Comprendre l’actualité</small></button>
+          <button data-view="brokers"><span>⇄</span><strong>Broker Hub</strong><small>Comparer avec transparence</small></button>
+          <button data-view="resources"><span>◇</span><strong>Ressources</strong><small>Guides et outils</small></button>
+          <button data-view="support"><span>?</span><strong>Centre d’aide</strong><small>Trouver une réponse</small></button>
+        </div>
+      </section>
+
+      <section class="view" id="path" aria-labelledby="path-title">
+        <div class="section-intro"><p class="eyebrow gold">Darius Free</p><h1 id="path-title">Ton parcours commence par les fondations.</h1><p>Chaque étape se débloque après une vraie validation, jamais après une simple ouverture.</p></div>
+        <div class="path-list">
+          <button class="path-card current" id="path-m01" data-view="lesson"><span class="path-number">01</span><div><small id="path-m01-status">EN COURS</small><h3>Le trading comme commerce</h3><p>Acheteurs, vendeurs et échange d’un actif.</p></div><span id="path-m01-action">Continuer</span></button>
+          <article class="path-card locked"><span class="path-number">02</span><div><small>À SUIVRE</small><h3>Comprendre les marchés financiers</h3><p>Pourquoi les prix évoluent et comment les marchés s’organisent.</p></div><span>Verrouillée</span></article>
+          <article class="path-card locked"><span class="path-number">03</span><div><small>À SUIVRE</small><h3>Risque et discipline</h3><p>Protéger son capital avant de rechercher la performance.</p></div><span>Verrouillée</span></article>
+        </div>
+      </section>
+
+      <section class="view" id="lesson" aria-labelledby="lesson-title">
+        <div class="lesson-layout">
+          <article class="lesson-main">
+            <button class="back-link" data-view="dashboard">← Retour au Terminal</button>
+            <p class="eyebrow gold">Fondations des marchés · Leçon 1</p>
+            <h1 id="lesson-title">Le trading comme commerce</h1>
+            <p class="lesson-lead">Avant de lire un graphique, commence par comprendre ce qui se passe réellement sur un marché.</p>
+            <div class="video-stage">
+              <div class="exchange-visual"><span class="person">Acheteur</span><span class="asset">Actif</span><span class="person seller">Vendeur</span></div>
+              <button class="play-button" id="play-demo" aria-label="Lire la démonstration">▶</button>
+              <p id="video-caption">Une décision commence par l’observation.</p>
+            </div>
+            <div class="lesson-copy">
+              <h2>Le marché est un lieu d’échange</h2>
+              <p>Le trading est une forme de commerce. Sur un marché, certains participants souhaitent acheter un actif et d’autres souhaitent le vendre. Le prix évolue lorsque l’équilibre entre ces intentions change.</p>
+              <div class="principle"><span>Principe essentiel</span><strong>Ton rôle n’est pas de deviner. Ton rôle est d’observer, comprendre et décider selon un plan.</strong></div>
+            </div>
+            <section class="learning-check" id="exercise-block">
+              <p class="eyebrow gold">Exercice</p><h2>Qui échange quoi ?</h2>
+              <p>Un participant achète de l’or tandis qu’un autre accepte de le vendre. Quelle affirmation décrit le mieux le marché ?</p>
+              <div class="answer-grid" data-question="exercise"><button data-correct="false">Le prix monte toujours après un achat.</button><button data-correct="true">Le marché met en relation des intentions d’achat et de vente.</button><button data-correct="false">Le vendeur connaît forcément l’avenir.</button></div>
+              <p class="feedback" id="exercise-feedback" aria-live="polite"></p>
+            </section>
+            <section class="learning-check locked-check" id="quiz-block" aria-disabled="true">
+              <p class="eyebrow gold">Quiz de validation</p><h2>Avant toute décision, que faut-il privilégier ?</h2>
+              <div class="answer-grid" data-question="quiz"><button data-correct="false">Entrer rapidement pour ne rien manquer.</button><button data-correct="false">Chercher un gain immédiat.</button><button data-correct="true">Observer, comprendre et suivre un plan.</button></div>
+              <p class="feedback" id="quiz-feedback" aria-live="polite"></p>
+            </section>
+            <section class="result-card" id="result-card" hidden><span class="result-icon">✓</span><div><p class="eyebrow">Validation locale</p><h2>Première compétence confirmée.</h2><p>Tu as compris que le processus de décision passe avant le résultat.</p><div class="result-actions"><button class="secondary-action result-action" data-view="dashboard">Voir mon Terminal</button><button class="text-action result-feedback" data-view="support">Donner mon retour de test</button></div></div></section>
+            <div class="lesson-actions"><button class="secondary-action" data-view="dashboard">Quitter</button><button class="primary-action" id="mark-understood">Passer à l’exercice <span>→</span></button></div>
+          </article>
+          <aside class="lesson-outline">
+            <p class="eyebrow">Dans cette leçon</p>
+            <ol><li class="active">Le marché comme échange</li><li>Acheteur et vendeur</li><li>Observer avant de décider</li><li>Exercice de compréhension</li><li>Quiz</li></ol>
+            <div class="saved-state" id="saved-state">Progression non enregistrée — prototype</div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" id="progress" aria-labelledby="progress-title">
+        <div class="section-intro"><p class="eyebrow gold">Progression</p><h1 id="progress-title">Construis des compétences, pas seulement des habitudes.</h1><p>Les mesures ci-dessous illustrent le futur profil pédagogique DDA. Elles ne représentent pas encore des données réelles.</p></div>
+        <div class="skills-grid">
+          <article class="skill-card"><span>Compréhension des marchés</span><strong id="market-skill-label">En démarrage</strong><div class="bar"><i id="market-skill-bar" style="width:18%"></i></div></article>
+          <article class="skill-card"><span>Gestion du risque</span><strong>À découvrir</strong><div class="bar"><i style="width:4%"></i></div></article>
+          <article class="skill-card"><span>Discipline</span><strong>À découvrir</strong><div class="bar"><i style="width:4%"></i></div></article>
+        </div>
+      </section>
+
+      <section class="view" id="resources" aria-labelledby="resources-title">
+        <div class="section-intro"><p class="eyebrow gold">Bibliothèque DDA</p><h1 id="resources-title">Les bons outils, au bon moment.</h1><p>Des ressources courtes pour comprendre, pratiquer et décider avec méthode.</p></div>
+        <div class="resource-grid">
+          <article class="resource-card"><span class="resource-type">Guide · DDA Free</span><div class="resource-icon">01</div><h2>Checklist avant une décision</h2><p>Six vérifications simples pour éviter la précipitation et protéger ton processus.</p><button class="secondary-action resource-open" data-resource="checklist">Consulter le guide</button></article>
+          <article class="resource-card"><span class="resource-type">Glossaire · DDA Free</span><div class="resource-icon">AZ</div><h2>Les mots essentiels du marché</h2><p>Acheteur, vendeur, actif, liquidité et risque expliqués sans jargon.</p><button class="secondary-action resource-open" data-resource="glossary">Ouvrir le glossaire</button></article>
+          <article class="resource-card premium-resource"><span class="resource-type">Atelier · Premium</span><div class="resource-icon">✦</div><h2>Laboratoire de gestion du risque</h2><p>Des scénarios guidés pour travailler sizing, invalidation et discipline.</p><button class="secondary-action premium-gate" data-permission="resources_premium">Voir l’aperçu Premium</button></article>
+        </div>
+        <div class="resource-reader" id="resource-reader" hidden><button class="reader-close" id="reader-close" aria-label="Fermer">×</button><p class="eyebrow gold" id="reader-label">Ressource DDA</p><h2 id="reader-title"></h2><div id="reader-content"></div></div>
+      </section>
+
+      <section class="view" id="membership" aria-labelledby="membership-title">
+        <div class="membership-hero">
+          <div><p class="eyebrow gold">Accès DDA</p><h1 id="membership-title">Grandir à ton rythme.</h1><p>DDA Free pose les fondations. Premium approfondira la pratique, l’évaluation et la preuve de progression. Aucun paiement n’est activé dans ce prototype.</p></div>
+          <div class="membership-status"><span>Formule actuelle</span><strong id="membership-status">DDA Free</strong><small>Mode démonstration local</small></div>
+        </div>
+        <div class="plan-grid">
+          <article class="plan-card current-plan"><p class="eyebrow">Fondations</p><h2>DDA Free</h2><ul><li>Parcours M0</li><li>Exercices et quiz</li><li>Progression locale</li><li>Guides essentiels</li></ul><span class="plan-state" id="free-plan-state">Formule active</span></article>
+          <article class="plan-card premium-plan"><p class="eyebrow gold">Approfondissement</p><h2>DDA Premium</h2><ul><li>Parcours avancés</li><li>Ateliers pratiques</li><li>Ressources Premium</li><li>Aperçu de certification</li></ul><button class="primary-action" id="preview-premium">Simuler l’accès Premium <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Démonstration uniquement — aucun achat</small></article>
+        </div>
+      </section>
+
+      <section class="view" id="markets" aria-labelledby="markets-title">
+        <div class="section-intro"><p class="eyebrow gold">Market Intelligence</p><h1 id="markets-title">Comprendre avant d’agir.</h1><p>Un aperçu éditorial du futur cockpit DDA. Les données affichées ici sont pédagogiques et non diffusées en temps réel.</p></div>
+        <div class="market-strip" role="list"><article role="listitem"><span>OR · XAUUSD</span><strong>Structure à observer</strong><small>Exemple pédagogique</small></article><article role="listitem"><span>BRVM Composite</span><strong>Marché régional</strong><small>Couverture en préparation</small></article><article role="listitem"><span>BTC · Actifs numériques</span><strong>Volatilité élevée</strong><small>Risque prioritaire</small></article></div>
+        <div class="market-layout"><article class="market-brief"><p class="eyebrow gold">Le brief DDA</p><h2>Du marché réel vers le curriculum.</h2><div class="brief-step"><span>01</span><div><strong>Que s’est-il passé ?</strong><p>Identifier le fait, sans exagération ni prédiction.</p></div></div><div class="brief-step"><span>02</span><div><strong>Pourquoi est-ce important ?</strong><p>Relier l’événement à la volatilité, au risque et au comportement.</p></div></div><div class="brief-step"><span>03</span><div><strong>Que faut-il apprendre ?</strong><p>Ouvrir la leçon utile au lieu de fournir un signal.</p></div></div><button class="primary-action" data-view="lesson">Revoir les fondations <span>→</span></button></article><aside class="brvm-panel"><p class="eyebrow">Focus Afrique de l’Ouest</p><h2>BRVM</h2><p>DDA préparera une lecture accessible des sociétés cotées, indices, publications et notions d’investissement régional.</p><ul><li>Fiches pédagogiques</li><li>Glossaire régional</li><li>Calendrier des publications</li><li>Sources officielles uniquement</li></ul><span class="future-label">Données réelles différées jusqu’à connexion validée</span></aside></div>
+      </section>
+
+      <section class="view" id="brokers" aria-labelledby="brokers-title">
+        <div class="section-intro"><p class="eyebrow gold">DDA Broker Hub</p><h1 id="brokers-title">Comparer sans pression commerciale.</h1><p>Filtre les profils de démonstration. Les licences, coûts et disponibilités devront être vérifiés avant publication.</p></div>
+        <div class="broker-controls"><label>Marché<select id="broker-market"><option value="all">Tous</option><option value="forex">Forex & CFD</option><option value="synthetic">Indices synthétiques</option></select></label><label>Usage<select id="broker-use"><option value="all">Tous les usages</option><option value="learning">Débuter / apprendre</option><option value="advanced">Outils avancés</option></select></label></div>
+        <div class="broker-grid" id="broker-grid"><article class="broker-card" data-market="forex synthetic" data-use="learning advanced"><div><span class="broker-monogram">D</span><span class="verification">À vérifier avant publication</span></div><h2>Deriv</h2><p>Profil de démonstration pour marchés dérivés et indices synthétiques.</p><dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div></dl><button class="secondary-action broker-detail">Voir les critères</button></article><article class="broker-card" data-market="forex" data-use="learning advanced"><div><span class="broker-monogram">H</span><span class="verification">À vérifier avant publication</span></div><h2>HFM</h2><p>Profil de démonstration pour Forex et CFD, sous réserve d’éligibilité locale.</p><dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div></dl><button class="secondary-action broker-detail">Voir les critères</button></article></div>
+        <div class="broker-empty" id="broker-empty" hidden><h2>Aucun profil correspondant.</h2><p>Modifie les filtres pour afficher un autre usage.</p></div>
+        <p class="disclosure">DDA ne recommande jamais de déposer davantage, de sur-trader ou de prendre un risque inadapté. Une éventuelle rémunération d’affiliation devra être signalée clairement.</p>
+      </section>
+
+      <section class="view" id="support" aria-labelledby="support-title">
+        <div class="section-intro"><p class="eyebrow gold">Centre d’aide</p><h1 id="support-title">Une réponse claire, sans te perdre.</h1><p>Ce prototype prépare le support avant d’activer les canaux et notifications réels.</p></div>
+        <div class="support-grid"><article class="support-card"><span>01</span><h2>Questions fréquentes</h2><details><summary>Ma progression est-elle enregistrée ?</summary><p>Dans ce prototype, elle reste uniquement sur cet appareil.</p></details><details><summary>Puis-je déjà payer Premium ?</summary><p>Non. Aucun paiement réel n’est activé.</p></details><details><summary>DDA donne-t-elle des signaux ?</summary><p>Non. DDA enseigne le processus, le risque et la compréhension des marchés.</p></details></article><article class="support-card"><span>02</span><h2>Demander de l’aide</h2><form id="support-form"><label>Sujet<select id="support-subject"><option>Problème de progression</option><option>Question sur un cours</option><option>Accès au compte</option></select></label><label>Message<textarea id="support-message" maxlength="500" required placeholder="Décris simplement ce qui bloque…"></textarea></label><button class="primary-action" type="submit">Préparer ma demande <span>→</span></button><p class="support-note" id="support-note">Aucun message n’est envoyé dans le prototype.</p></form></article></div>
+      </section>
+
+      <section class="view" id="profile" aria-labelledby="profile-title">
+        <div class="section-intro profile-intro"><p class="eyebrow gold">Espace personnel</p><h1 id="profile-title">Ton profil d’apprentissage.</h1><p>Modifie uniquement ce qui aide DDA à te proposer la prochaine étape utile.</p></div>
+        <div class="profile-layout">
+          <form class="profile-panel" id="profile-form">
+            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">RD</span><div><p class="eyebrow">Compte pilote</p><h2 id="profile-heading-name">Richard</h2><p id="profile-heading-email">Aucune donnée serveur</p></div></div>
+            <div class="profile-fields">
+              <label>Prénom<input id="profile-first-name" maxlength="60" required></label>
+              <label>Niveau<select id="profile-level"><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select></label>
+              <label class="field-wide">Objectif<select id="profile-goal"><option>Comprendre les marchés</option><option>Améliorer ma gestion du risque</option><option>Structurer mes décisions</option></select></label>
+              <label class="field-wide">Rythme<select id="profile-time"><option>10 minutes par jour</option><option>20 minutes par jour</option><option>45 minutes, 3 fois par semaine</option></select></label>
+            </div>
+            <p class="form-error" id="profile-error" role="alert"></p>
+            <div class="profile-actions"><button class="primary-action" type="submit">Enregistrer</button><button class="secondary-action" id="profile-reset" type="button">Réinitialiser le pilote</button></div>
+          </form>
+          <aside class="preference-panel">
+            <p class="eyebrow gold">Préférences</p><h3>Une expérience adaptée à ton appareil.</h3>
+            <label class="preference-row"><span><b>Économie de données</b><small>Réduit mouvements et médias non essentiels.</small></span><input id="profile-low-data" type="checkbox"></label>
+            <label class="preference-row"><span><b>Rappels pédagogiques</b><small>Préférence enregistrée seulement ; aucun message n’est envoyé.</small></span><input id="profile-reminders" type="checkbox"></label>
+            <div class="privacy-note"><strong>Confidentialité du prototype</strong><p>Les informations restent sur cet appareil. Aucun courtier, paiement ou service publicitaire n’y a accès.</p></div>
+            <div class="activity-summary"><span>Activité locale</span><strong id="event-count">0 événement</strong><small>Mesure pédagogique anonyme sur cet appareil.</small></div>
+          </aside>
+        </div>
+        <div class="empty-profile" id="empty-profile" hidden><span>◎</span><h2>Aucun profil pilote sur cet appareil.</h2><p>Commence l’onboarding pour créer ton premier parcours.</p><button class="primary-action" data-view="access">Commencer</button></div>
+      </section>
+    </main>
+
+    <nav class="mobile-nav" aria-label="Navigation mobile">
+      <button class="active" data-view="dashboard"><span>⌂</span>Accueil</button>
+      <button data-view="path"><span>◫</span>Parcours</button>
+      <button data-view="resources"><span>◇</span>Ressources</button>
+      <button data-view="progress"><span>◔</span>Progression</button>
+      <button data-view="profile"><span>◎</span>Profil</button>
+    </nav>
+  </div>
+  <div class="loading-layer" id="loading-layer" hidden role="status" aria-live="polite"><span class="loading-mark">DDA</span><p>Préparation de ton parcours…</p></div>
+  <div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
+  <div class="gate-layer" id="gate-layer" hidden role="dialog" aria-modal="true" aria-labelledby="gate-title">
+    <div class="gate-card"><button class="reader-close" id="gate-close" aria-label="Fermer">×</button><span class="gate-symbol">✦</span><p class="eyebrow gold">DDA Premium</p><h2 id="gate-title">Cette expérience sera disponible avec Premium.</h2><p>Le prototype vérifie ici le contrôle d’accès. Aucun achat ni paiement réel n’est proposé.</p><button class="primary-action" id="gate-preview">Voir la formule en démonstration <span>→</span></button></div>
+  </div>
+  <script src="dda-core.js"></script>
+  <script src="learning-engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

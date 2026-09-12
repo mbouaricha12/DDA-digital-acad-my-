@@ -1,0 +1,10 @@
+{
+  "name": "Darius Digital Académie",
+  "short_name": "DDA",
+  "description": "Prototype privé de l’expérience d’apprentissage DDA.",
+  "lang": "fr",
+  "start_url": "./#dashboard",
+  "display": "standalone",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020"
+}
