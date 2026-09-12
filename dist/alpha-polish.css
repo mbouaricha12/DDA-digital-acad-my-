@@ -1,0 +1,66 @@
+/* DDA Private Alpha — premium polish layer: depth, motion, identity accents. */
+.brand-mark,.path-number,.lesson-index,.resource-type{color:var(--gold-soft)}
+.eyebrow.gold{color:var(--blue-2)}
+
+body{
+  background-image:
+    radial-gradient(circle at 85% -8%,rgba(11,111,174,.16),transparent 34%),
+    radial-gradient(circle at -5% 30%,rgba(13,166,217,.06),transparent 30%);
+  background-attachment:fixed;
+}
+
+/* elevation on hover for interactive cards */
+.panel,.path-card,.skill-card,.resource-card,.plan-card,.support-card,.market-brief,.brvm-panel,.profile-panel,.preference-panel,.broker-card{
+  transition:transform .22s var(--ease),border-color .22s var(--ease),box-shadow .22s var(--ease);
+}
+@media(hover:hover){
+  .panel:hover,.resource-card:hover,.plan-card:hover{
+    border-color:rgba(13,166,217,.5);box-shadow:0 16px 38px rgba(0,0,0,.28);
+  }
+}
+
+/* stat/skill emphasis */
+.week-score,.membership-status{position:relative}
+.progress-ring{box-shadow:0 0 0 1px rgba(217,164,65,.15)}
+
+/* refined focus & tap feedback across interactive primitives */
+button:active{transform:translateY(1px)}
+.nav-item.active .icon,.mobile-nav button.active .icon{filter:drop-shadow(0 0 6px rgba(217,164,65,.45))}
+
+/* completed / locked state accents */
+.action-list li.done{background:linear-gradient(90deg,rgba(24,155,146,.08),transparent)}
+.learning-check{border-left-color:var(--blue-2)}
+.learning-check.locked-check{border-left-color:var(--line)}
+.result-card{position:relative;overflow:hidden}
+.result-card:before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 12% 20%,rgba(217,164,65,.16),transparent 45%);
+}
+
+/* skeleton-friendly loading spinner accent */
+.loading-spinner{box-shadow:0 0 30px rgba(217,164,65,.12)}
+
+/* offline banner emphasis */
+.network-state.offline{color:var(--gold-soft)}
+
+/* premium gate + membership sparkle accents */
+.gate-symbol,.plan-card.premium-plan h2{position:relative}
+.premium-plan:before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(circle at 88% -10%,rgba(217,164,65,.28),transparent 40%);
+}
+.plan-card{position:relative;overflow:hidden}
+
+/* illustration tinting shared across hero visuals */
+.exchange-diagram,.access-illustration{filter:drop-shadow(0 8px 20px rgba(217,164,65,.12))}
+
+@media(prefers-reduced-motion:reduce){
+  .panel,.path-card,.resource-card,.plan-card{transition:none}
+  .exchange-diagram .flow{animation:none}
+}
+
+@media(max-width:699px){
+  .section-intro h1{max-width:340px}
+  .broker-controls select{min-height:48px}
+  .support-card textarea{min-height:120px}
+}
