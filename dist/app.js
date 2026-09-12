@@ -198,6 +198,19 @@ function renderProgressHero() {
   document.getElementById('progress-active-days').textContent = String(countActiveDays(prototypeState.events));
 }
 
+function updateLessonLoop(lessonProgress) {
+  const loop = document.getElementById('lesson-loop');
+  if (!loop) return;
+  const step = DDALearning.lessonNextStep(lessonProgress);
+  const order = ['lesson', 'exercise', 'quiz', 'review'];
+  const currentIndex = order.indexOf(step);
+  loop.querySelectorAll('li').forEach(item => {
+    const itemIndex = order.indexOf(item.dataset.step);
+    item.classList.toggle('done', itemIndex < currentIndex || step === 'review');
+    item.classList.toggle('now', itemIndex === currentIndex && step !== 'review');
+  });
+}
+
 function updateCockpitAlert(continueTarget) {
   const cue = document.getElementById('cockpit-alert-cue');
   if (!cue) return;
@@ -267,6 +280,7 @@ function renderState() {
   journey.textContent = complete ? `Revoir ${activeLessonId}` : prototypeState.onboarding?.complete ? `Reprendre ${activeLessonId}` : 'Tester le parcours';
   journey.dataset.view = prototypeState.onboarding?.complete ? 'lesson' : 'access';
 
+  updateLessonLoop(activeLessonProgress);
   const evalUnlocked = DDALearning.evaluationStatus(activeLessonProgress) !== DDALearning.STEP_STATUS.LOCKED;
   const quiz = document.getElementById('quiz-block');
   quiz.classList.toggle('locked-check', !evalUnlocked);
@@ -447,7 +461,7 @@ function bindQuestion(lessonId, name, successText) {
     const correct = button.dataset.correct === 'true';
     trackEvent(name === 'exercise' ? 'exercise_attempt' : 'quiz_attempt', { correct: String(correct), lesson: lessonId });
     button.classList.add(correct ? 'correct' : 'incorrect');
-    feedback.textContent = correct ? successText : 'Pas encore. Relis le principe, puis essaie à nouveau.';
+    feedback.textContent = correct ? successText : (button.dataset.feedback || 'Pas encore. Relis le principe, puis essaie à nouveau.');
     feedback.className = `feedback ${correct ? 'success' : 'error'}`;
     if (correct && name === 'exercise') {
       updateLessonState(lessonId, { exerciseComplete: true });
