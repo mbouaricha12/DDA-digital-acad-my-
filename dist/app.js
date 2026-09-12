@@ -221,6 +221,30 @@ function renderProgressHero() {
   document.getElementById('progress-active-days').textContent = String(countActiveDays(prototypeState.events));
 }
 
+// Real data only: learner's own name, the real completed lesson, and the real
+// event timestamp. Unmistakably a preview — never anything resembling a real,
+// verifiable credential.
+function renderCertificatePreview(lessonProgress) {
+  const locked = document.getElementById('certificate-locked');
+  if (!locked) return;
+  const gate = document.getElementById('certificate-gate');
+  const preview = document.getElementById('certificate-preview-block');
+  const eligible = Boolean(lessonProgress.quizComplete);
+  const premium = DDA.can(prototypeState, 'certificate_preview');
+
+  locked.hidden = eligible;
+  gate.hidden = !eligible || premium;
+  preview.hidden = !eligible || !premium;
+  if (!eligible || !premium) return;
+
+  const name = prototypeState.user?.name || 'Richard';
+  const event = [...(prototypeState.events || [])].reverse().find(e => e.name === 'quiz_complete');
+  const date = event ? new Date(event.at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+  document.getElementById('certificate-name').textContent = name;
+  document.getElementById('certificate-module').textContent = `${activeLessonMeta.module.title} — ${activeLessonDef.title}`;
+  document.getElementById('certificate-date').textContent = date ? `Complété le ${date}` : 'Complété localement';
+}
+
 function updateLessonLoop(lessonProgress) {
   const loop = document.getElementById('lesson-loop');
   if (!loop) return;
@@ -307,6 +331,7 @@ function renderState() {
   setLevelMeter('market-skill-level', competencyLevel(activeLessonProgress));
   renderProofTimeline();
   renderProgressHero();
+  renderCertificatePreview(activeLessonProgress);
 
   const step = DDALearning.lessonNextStep(activeLessonProgress);
   ['action-lesson', 'action-exercise', 'action-quiz'].forEach(id => document.getElementById(id).classList.remove('done', 'current'));
