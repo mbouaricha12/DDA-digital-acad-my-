@@ -142,7 +142,7 @@
           <div class="course-meta"><span class="pill" id="lesson-state-pill">En cours</span><span>Fondations des marchés</span></div>
           <div class="continue-grid">
             <div>
-              <p class="lesson-index" id="lesson-index-label">LEÇON 1 SUR 7</p>
+              <p class="lesson-index" id="lesson-index-label">LEÇON</p>
               <h2>Le trading comme commerce</h2>
               <p>Comprendre l’échange entre acheteurs et vendeurs avant de chercher une opportunité.</p>
               <button class="primary-action" id="lesson-primary-action" data-view="lesson">Reprendre la leçon <span>→</span></button>
@@ -191,66 +191,12 @@
         <div class="path-list" id="path-list"></div>
       </section>
 
-      <section class="view" id="lesson" aria-labelledby="lesson-title" data-lesson-id="M0.1">
+      <section class="view" id="lesson" aria-labelledby="lesson-title">
         <div class="lesson-layout">
-          <article class="lesson-main">
+          <article class="lesson-main" id="lesson-main">
             <button class="back-link" data-view="dashboard">← Retour au Terminal</button>
-            <p class="eyebrow gold">Fondations des marchés · Leçon 1</p>
-            <h1 id="lesson-title">Le trading comme commerce</h1>
-            <p class="lesson-lead">Avant de lire un graphique, commence par comprendre ce qui se passe réellement sur un marché.</p>
-            <ol class="lesson-loop" id="lesson-loop" aria-label="Progression dans la leçon">
-              <li data-step="lesson">Comprendre</li>
-              <li data-step="exercise">Exercice</li>
-              <li data-step="quiz">Quiz</li>
-              <li data-step="review">Résultat</li>
-            </ol>
-            <div class="video-stage">
-              <div class="exchange-visual">
-                <svg class="exchange-diagram" viewBox="0 0 320 130" aria-hidden="true">
-                  <line class="lane" x1="20" y1="65" x2="300" y2="65"/>
-                  <path class="flow" d="M65 65h190"/>
-                  <g class="buyer" transform="translate(20,30)"><use href="#icon-buyer" width="42" height="42"/></g>
-                  <g class="seller" transform="translate(258,30)"><use href="#icon-seller" width="42" height="42"/></g>
-                  <circle class="asset" cx="160" cy="65" r="16"/>
-                  <text x="160" y="70" font-size="11" text-anchor="middle" fill="#050B14" font-weight="700" font-family="Inter, sans-serif">$</text>
-                  <text x="41" y="112" font-size="10" text-anchor="middle" fill="#93A6BA" font-family="Inter, sans-serif">Acheteur</text>
-                  <text x="279" y="112" font-size="10" text-anchor="middle" fill="#93A6BA" font-family="Inter, sans-serif">Vendeur</text>
-                </svg>
-              </div>
-              <button class="play-button" id="play-demo" aria-label="Lire la démonstration">▶</button>
-              <p id="video-caption">Une décision commence par l’observation.</p>
-            </div>
-            <div class="lesson-copy">
-              <h2>Le marché est un lieu d’échange</h2>
-              <p>Le trading est une forme de commerce. Sur un marché, certains participants souhaitent acheter un actif et d’autres souhaitent le vendre. Le prix évolue lorsque l’équilibre entre ces intentions change.</p>
-              <div class="principle"><svg class="icon"><use href="#icon-compass"/></svg><div><span>Principe essentiel</span><strong>Ton rôle n’est pas de deviner. Ton rôle est d’observer, comprendre et décider selon un plan.</strong></div></div>
-            </div>
-            <div class="comparison-block">
-              <p class="eyebrow gold">Comparaison</p><h2>Deux façons d’aborder le même marché</h2>
-              <div class="comparison-grid">
-                <div class="comparison-col bad"><span><svg class="icon"><use href="#icon-blocked"/></svg> Réaction impulsive</span><ul><li>Suivre le mouvement sans le comprendre</li><li>Décider sous le coup de l’émotion</li><li>Chercher un gain immédiat</li></ul></div>
-                <div class="comparison-col good"><span><svg class="icon"><use href="#icon-check-circle"/></svg> Décision méthodique</span><ul><li>Observer avant d’agir</li><li>Suivre un plan écrit à l’avance</li><li>Accepter un risque défini</li></ul></div>
-              </div>
-            </div>
-            <section class="learning-check" id="exercise-block">
-              <p class="eyebrow gold">Exercice</p><h2>Qui échange quoi ?</h2>
-              <p>Un participant achète de l’or tandis qu’un autre accepte de le vendre. Quelle affirmation décrit le mieux le marché ?</p>
-              <div class="answer-grid" data-question="exercise"><button data-correct="false" data-feedback="Un achat ne garantit rien sur la suite : le prix dépend de l’équilibre entre toutes les intentions d’achat et de vente, pas d’une seule transaction.">Le prix monte toujours après un achat.</button><button data-correct="true">Le marché met en relation des intentions d’achat et de vente.</button><button data-correct="false" data-feedback="Personne ne connaît l’avenir avec certitude. Le vendeur accepte simplement de céder l’actif à ce prix, maintenant.">Le vendeur connaît forcément l’avenir.</button></div>
-              <p class="feedback" id="exercise-feedback" aria-live="polite"></p>
-            </section>
-            <section class="learning-check locked-check" id="quiz-block" aria-disabled="true">
-              <p class="eyebrow gold">Quiz de validation</p><h2>Avant toute décision, que faut-il privilégier ?</h2>
-              <div class="answer-grid" data-question="quiz"><button data-correct="false" data-feedback="La précipitation est justement ce que ce module déconseille : observer avant d’agir protège ton capital.">Entrer rapidement pour ne rien manquer.</button><button data-correct="false" data-feedback="Un gain isolé ne prouve rien sur la qualité d’une décision — c’est le principe essentiel vu plus haut.">Chercher un gain immédiat.</button><button data-correct="true">Observer, comprendre et suivre un plan.</button></div>
-              <p class="feedback" id="quiz-feedback" aria-live="polite"></p>
-            </section>
-            <section class="result-card" id="result-card" hidden><span class="result-icon">✓</span><div><p class="eyebrow">Validation locale</p><h2>Première compétence confirmée.</h2><p>Tu as compris que le processus de décision passe avant le résultat.</p><div class="result-actions"><button class="secondary-action result-action" data-view="dashboard">Voir mon Terminal</button><button class="text-action result-feedback" data-view="support">Donner mon retour de test</button></div></div></section>
-            <div class="lesson-actions"><button class="secondary-action" data-view="dashboard">Quitter</button><button class="primary-action" id="mark-understood">Passer à l’exercice <span>→</span></button></div>
           </article>
-          <aside class="lesson-outline">
-            <p class="eyebrow">Dans cette leçon</p>
-            <ol><li class="active">Le marché comme échange</li><li>Acheteur et vendeur</li><li>Observer avant de décider</li><li>Exercice de compréhension</li><li>Quiz</li></ol>
-            <div class="saved-state" id="saved-state">Progression non enregistrée — prototype</div>
-          </aside>
+          <aside class="lesson-outline" id="lesson-outline"></aside>
         </div>
       </section>
 
@@ -422,6 +368,7 @@
   </div>
   <script src="dda-core.js"></script>
   <script src="learning-engine.js"></script>
+  <script src="lesson-renderer.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -1,10 +1,17 @@
+// The lesson reader is data-driven: render the active lesson's markup into its
+// mount points before anything below captures [data-view] buttons, so buttons
+// generated inside the lesson (Quitter, Voir ma Progression, …) get bound too.
+const activeLessonId = DDA.primaryLessonId;
+const activeLessonMeta = DDALearning.findLesson(DDA.curriculum, activeLessonId);
+const activeLessonDef = activeLessonMeta.lesson;
+document.getElementById('lesson-main').insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(activeLessonMeta.module, activeLessonDef));
+document.getElementById('lesson-outline').innerHTML = DDALessonRenderer.renderLessonOutline(activeLessonDef);
+
 const buttons = document.querySelectorAll('[data-view]');
 const views = document.querySelectorAll('.view');
 const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
-const lessonView = document.getElementById('lesson');
-const activeLessonId = lessonView.dataset.lessonId || DDA.primaryLessonId;
 const titles = { dashboard: 'Aujourd’hui', access: 'Accès pilote', path: 'Mon parcours', lesson: 'Leçon en cours', progress: 'Progression', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
 const viewPermissions = { path: 'path', lesson: 'lesson_m01', progress: 'progress', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile' };
 const MODULE_STATUS_LABEL = { completed: 'Terminé', in_progress: 'En cours', available: 'Disponible', locked: 'Verrouillé', coming_soon: 'Prochainement' };
@@ -211,6 +218,26 @@ function updateLessonLoop(lessonProgress) {
   });
 }
 
+function updateLessonOutline(step) {
+  document.querySelectorAll('#lesson-outline-list li').forEach(item => {
+    item.classList.toggle('active', item.dataset.outlineStep === step);
+  });
+}
+
+// Real data only: XP already earned on this lesson, the competency it maps to,
+// and the next actionable lesson from the engine — never a fabricated stat.
+function renderResultStats(lesson, lessonProgress) {
+  const stats = document.getElementById('result-stats');
+  if (!stats) return;
+  const xp = DDALearning.lessonXp(lesson, lessonProgress);
+  const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
+  const nextLabel = next ? `${next.lesson.title} — ${NEXT_STEP_PHRASE[next.step] || 'continuer'}` : 'Prochain module bientôt disponible.';
+  stats.innerHTML = `
+    <div><dt>Compétence</dt><dd>${lesson.competency.label} — niveau confirmé</dd></div>
+    <div><dt>XP obtenu sur cette leçon</dt><dd>+${xp} XP</dd></div>
+    <div><dt>Prochaine étape</dt><dd>${nextLabel}</dd></div>`;
+}
+
 function updateCockpitAlert(continueTarget) {
   const cue = document.getElementById('cockpit-alert-cue');
   if (!cue) return;
@@ -253,7 +280,8 @@ function renderState() {
     const continueLessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
     const continueComplete = continueLessonProgress.quizComplete;
     document.getElementById('lesson-state-pill').textContent = continueComplete ? 'Validée' : 'En cours';
-    document.getElementById('lesson-index-label').textContent = continueComplete ? 'COMPÉTENCE VALIDÉE' : 'LEÇON 1 SUR 7';
+    const lessonIndex = continueTarget.module.lessons.findIndex(l => l.id === continueTarget.lesson.id) + 1;
+    document.getElementById('lesson-index-label').textContent = continueComplete ? 'COMPÉTENCE VALIDÉE' : `LEÇON ${lessonIndex} SUR ${continueTarget.module.lessons.length}`;
     document.getElementById('lesson-primary-action').innerHTML = continueComplete ? 'Revoir la leçon <span>→</span>' : 'Reprendre la leçon <span>→</span>';
   }
   updateCockpitAlert(continueTarget);
@@ -281,6 +309,7 @@ function renderState() {
   journey.dataset.view = prototypeState.onboarding?.complete ? 'lesson' : 'access';
 
   updateLessonLoop(activeLessonProgress);
+  updateLessonOutline(step);
   const evalUnlocked = DDALearning.evaluationStatus(activeLessonProgress) !== DDALearning.STEP_STATUS.LOCKED;
   const quiz = document.getElementById('quiz-block');
   quiz.classList.toggle('locked-check', !evalUnlocked);
@@ -288,7 +317,11 @@ function renderState() {
   quiz.querySelectorAll('[data-question="quiz"] button').forEach(button => { button.disabled = !evalUnlocked; });
 
   document.getElementById('result-card').hidden = !complete;
-  if (complete) document.getElementById('saved-state').textContent = 'Exercice et quiz validés localement — aucune donnée envoyée';
+  document.getElementById('mark-understood').hidden = complete;
+  if (complete) {
+    document.getElementById('saved-state').textContent = 'Exercice et quiz validés localement — aucune donnée envoyée';
+    renderResultStats(activeLessonDef, activeLessonProgress);
+  }
 
   document.getElementById('resume-device').hidden = !prototypeState.user;
   document.getElementById('low-data-toggle').checked = Boolean(prototypeState.preferences.lowData);
@@ -521,8 +554,8 @@ function bindQuestion(lessonId, name, successText) {
   }));
 }
 
-bindQuestion(activeLessonId, 'exercise', 'Correct. Tu reconnais le mécanisme fondamental de l’échange.');
-bindQuestion(activeLessonId, 'quiz', 'Correct. La discipline du processus passe avant la précipitation.');
+bindQuestion(activeLessonId, activeLessonDef.practice.id, activeLessonDef.practice.successText);
+bindQuestion(activeLessonId, activeLessonDef.evaluation.id, activeLessonDef.evaluation.successText);
 
 function updateNetworkState() {
   const online = navigator.onLine;
