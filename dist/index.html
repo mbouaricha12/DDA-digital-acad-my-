@@ -43,6 +43,8 @@
       <symbol id="icon-photo" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.5" cy="10" r="1.8"/><path d="M3 16.5l5.5-5 4 3.5 3-2.5L21 16"/></symbol>
       <symbol id="icon-award" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5.5"/><path d="M9 13.5L7.5 21l4.5-2.5L16.5 21 15 13.5"/></symbol>
       <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></symbol>
+      <symbol id="icon-journal" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M4 7h2M4 17h2M8 8h8M8 12h8M8 16h5"/></symbol>
+      <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     </defs>
   </svg>
   <div class="prototype-banner">Prototype privé — aucune donnée réelle</div>
@@ -57,6 +59,7 @@
         <button class="nav-item" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mon parcours</button>
         <button class="nav-item" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Leçon en cours</button>
         <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
+        <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal &amp; Plan</button>
         <button class="nav-item" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
         <button class="nav-item" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg> Marchés & BRVM</button>
         <button class="nav-item" data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg> Broker Hub</button>
@@ -179,6 +182,7 @@
         </div>
 
         <div class="terminal-dock" aria-label="Accès rapides du Terminal">
+          <button data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg><strong>Journal &amp; Plan</strong><small>Documenter ta réflexion</small></button>
           <button data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg><strong>Marchés & BRVM</strong><small>Comprendre l’actualité</small></button>
           <button data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg><strong>Broker Hub</strong><small>Comparer avec transparence</small></button>
           <button data-view="resources"><svg class="icon"><use href="#icon-book"/></svg><strong>Ressources</strong><small>Guides et outils</small></button>
@@ -253,6 +257,80 @@
         </section>
       </section>
 
+      <section class="view" id="journal" aria-labelledby="journal-title">
+        <div class="section-intro"><p class="eyebrow gold">Journal &amp; Plan</p><h1 id="journal-title">Qu’avais-tu prévu ? Qu’as-tu fait ? Qu’en retiens-tu ?</h1><p>Un espace pour documenter ton processus de décision — jamais un signal, jamais un conseil d’achat ou de vente, jamais un chiffre de gain inventé. Conservé uniquement sur cet appareil.</p></div>
+
+        <div class="journal-tabs" role="tablist" aria-label="Sections du Journal">
+          <button class="journal-tab active" id="journal-tab-entries" type="button" role="tab" aria-selected="true" data-journal-tab="entries">Journal</button>
+          <button class="journal-tab" id="journal-tab-plan" type="button" role="tab" aria-selected="false" data-journal-tab="plan">Mon plan</button>
+        </div>
+
+        <section class="journal-panel" id="journal-entries-panel">
+          <div class="journal-toolbar">
+            <p class="journal-count" id="journal-count">0 entrée</p>
+            <button class="primary-action" id="journal-new-entry" type="button"><svg class="icon"><use href="#icon-plus"/></svg> Nouvelle entrée</button>
+          </div>
+          <div class="journal-empty" id="journal-empty">
+            <svg class="icon"><use href="#icon-journal"/></svg>
+            <h2>Aucune entrée pour l’instant.</h2>
+            <p>Documente ta première analyse — ce que tu as prévu, ce que tu as fait, ce que tu en retiens.</p>
+          </div>
+          <ol class="journal-list" id="journal-list"></ol>
+        </section>
+
+        <section class="journal-composer" id="journal-composer" hidden>
+          <button class="back-link" id="journal-composer-back" type="button">← Retour au journal</button>
+          <p class="eyebrow gold" id="journal-composer-eyebrow">Nouvelle entrée</p>
+          <div class="step-indicator journal-step-indicator" aria-label="Étapes de l’entrée">
+            <span class="active" id="journal-step-dot-1">1</span><i></i>
+            <span id="journal-step-dot-2">2</span><i></i>
+            <span id="journal-step-dot-3">3</span>
+          </div>
+          <form id="journal-entry-form">
+            <div class="journal-step active" data-step="1">
+              <p class="journal-step-label">Avant</p>
+              <label>Marché ou instrument<input id="journal-market" maxlength="80" placeholder="Ex. EUR/USD, Or, BRVM Composite…"></label>
+              <label>Contexte<textarea id="journal-context" maxlength="800" rows="3" placeholder="Qu’observais-tu avant de commencer ton analyse ?"></textarea></label>
+              <label>Scénario envisagé<textarea id="journal-scenario" maxlength="800" rows="3" placeholder="Quelle hypothèse avais-tu en tête ?"></textarea></label>
+            </div>
+            <div class="journal-step" data-step="2">
+              <p class="journal-step-label">Pendant</p>
+              <label>Processus suivi<textarea id="journal-process" maxlength="800" rows="3" placeholder="Quelle checklist ou méthode as-tu appliquée ?"></textarea></label>
+              <label>Décision prise<textarea id="journal-decision" maxlength="800" rows="3" placeholder="Qu’as-tu réellement décidé de faire ?"></textarea></label>
+            </div>
+            <div class="journal-step" data-step="3">
+              <p class="journal-step-label">Après</p>
+              <label>Résultat ou issue<textarea id="journal-outcome" maxlength="800" rows="3" placeholder="Que s’est-il passé, sans chiffrer un gain ou une perte ?"></textarea></label>
+              <label>Ce qui a été bien fait<textarea id="journal-whatworked" maxlength="800" rows="2"></textarea></label>
+              <label>Ce qui doit être amélioré<textarea id="journal-toimprove" maxlength="800" rows="2"></textarea></label>
+              <label>Note personnelle<textarea id="journal-note" maxlength="800" rows="2"></textarea></label>
+            </div>
+            <p class="form-error" id="journal-entry-error" role="alert"></p>
+            <div class="journal-composer-actions">
+              <button class="secondary-action" id="journal-step-prev" type="button" hidden>← Précédent</button>
+              <button class="primary-action" id="journal-step-next" type="button">Suivant <span>→</span></button>
+              <button class="primary-action" id="journal-step-save" type="submit" hidden>Enregistrer l’entrée</button>
+              <button class="text-action" id="journal-composer-delete" type="button" hidden>Supprimer cette entrée</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="journal-panel" id="journal-plan-panel" hidden>
+          <p class="journal-plan-intro">Documente ton processus personnel — pas tes objectifs de gain. Ces réponses orientent la manière dont DDA t’accompagne, jamais ce que tu dois trader.</p>
+          <form id="journal-plan-form">
+            <label>Marchés étudiés<textarea id="plan-markets" maxlength="600" rows="2" placeholder="Quels marchés ou instruments souhaites-tu comprendre ?"></textarea></label>
+            <label>Créneaux d’étude<textarea id="plan-slots" maxlength="600" rows="2" placeholder="Quand comptes-tu pratiquer, réalistement ?"></textarea></label>
+            <label>Checklist avant analyse<textarea id="plan-checklist" maxlength="600" rows="3" placeholder="Que vérifies-tu systématiquement avant de commencer ?"></textarea></label>
+            <label>Règles personnelles de discipline<textarea id="plan-discipline" maxlength="600" rows="3"></textarea></label>
+            <label>Objectifs d’apprentissage<textarea id="plan-goals" maxlength="600" rows="2"></textarea></label>
+            <label>Erreurs à éviter<textarea id="plan-mistakes" maxlength="600" rows="3"></textarea></label>
+            <label>Points à vérifier avant une décision<textarea id="plan-checkpoints" maxlength="600" rows="3"></textarea></label>
+            <p class="form-note" id="journal-plan-note">Pas encore enregistré</p>
+            <button class="primary-action" type="submit">Enregistrer mon plan</button>
+          </form>
+        </section>
+      </section>
+
       <section class="view" id="resources" aria-labelledby="resources-title">
         <div class="section-intro"><p class="eyebrow gold">Bibliothèque DDA</p><h1 id="resources-title">Les bons outils, au bon moment.</h1><p>Des ressources courtes pour comprendre, pratiquer et décider avec méthode.</p></div>
         <div class="resource-grid">
@@ -274,17 +352,17 @@
         </div>
         <section class="panel membership-roadmap">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-path"/></svg> Vision DDA</p><h3>Ce que Premium deviendra progressivement</h3></div></div>
-          <p>Journal &amp; Plan sera évalué en premier pour sa valeur récurrente, puis DDA construira le reste de la pile étape par étape — jamais toutes en même temps.</p>
+          <p>Journal &amp; Plan est la première brique réellement construite de cette pile ; DDA l’étoffera puis construira le reste étape par étape — jamais toutes en même temps. Statuts réels ci-dessous, pas une promesse uniforme.</p>
           <ol class="roadmap-track">
-            <li>Journal &amp; Plan</li>
-            <li>Market Intelligence</li>
-            <li>Weekly Review</li>
-            <li>Decision Replay</li>
-            <li>Darius AI</li>
-            <li>Trading Lab</li>
-            <li>Trader DNA</li>
+            <li class="status-partial">Journal &amp; Plan <small>Partiel</small></li>
+            <li class="status-demo">Market Intelligence <small>Démonstration</small></li>
+            <li class="status-future">Weekly Review <small>Futur</small></li>
+            <li class="status-future">Decision Replay <small>Futur</small></li>
+            <li class="status-future">Darius AI <small>Futur</small></li>
+            <li class="status-future">Trading Lab <small>Futur</small></li>
+            <li class="status-future">Trader DNA <small>Futur</small></li>
           </ol>
-          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Aucune de ces briques n’est activée aujourd’hui</span>
+          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Journal &amp; Plan (fondation locale) et Market Intelligence (démonstration) existent déjà ; la couche Premium connectée et personnalisée de cette pile n’est pas encore activée</span>
         </section>
         <section class="panel membership-guardrails">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-shield"/></svg> Garde-fous</p><h3>Ce que DDA n’activera jamais sans le dire clairement</h3></div></div>
