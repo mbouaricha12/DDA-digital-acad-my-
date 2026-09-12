@@ -17,7 +17,7 @@
 | Domaine | Élément | État | Preuve / limite actuelle |
 |---|---|---|---|
 | Public | Landing Page | PARTIEL | Présente dans les archives V10, non intégrée au terminal actuel |
-| Accès | Inscription | SIMULÉ | Formulaire local, aucun compte serveur |
+| Accès | Inscription | SIMULÉ | Formulaire local, aucun compte serveur ; **identité visuelle « public/learning » distincte du Terminal** (directive CEO) : l'écran d'accès (seul point d'entrée public existant à ce jour) adopte un fond éditorial clair (ivoire/papier, encre foncée) au lieu d'hériter du fond sombre du Terminal — chrome de l'application (barre latérale/barre du haut) volontairement inchangé, sombre et technologique ; illustration et placeholder photo adaptés au fond clair |
 | Accès | Connexion | ABSENT | À préparer pour authentification future |
 | Accès | Récupération de compte | FUTUR | Après authentification réelle |
 | Accès | Onboarding | SIMULÉ | Deux étapes, sauvegarde locale |
