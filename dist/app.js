@@ -317,7 +317,7 @@ function renderJournalList() {
           <div class="journal-entry-detail">
             <dl>${detailRows || '<div><dd>Aucun détail renseigné.</dd></div>'}</dl>
             <div class="journal-entry-actions">
-              <button class="secondary-action journal-entry-edit" data-id="${entry.id}" type="button">Modifier</button>
+              <button class="secondary-action dark-action journal-entry-edit" data-id="${entry.id}" type="button">Modifier</button>
               <button class="text-action journal-entry-delete" data-id="${entry.id}" type="button">Supprimer</button>
             </div>
           </div>

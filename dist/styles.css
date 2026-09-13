@@ -503,60 +503,73 @@ body.lesson-focus .journey-button,body.lesson-focus .icon-button{display:none!im
 .certificate-disclaimer .icon{flex:none;margin-top:1px}
 
 /* ---------- Journal & Plan ---------- */
-.journal-tabs{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:999px;background:var(--navy-800);margin-bottom:22px}
-.journal-tab{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:800;font-size:13px;padding:9px 18px;border-radius:999px;cursor:pointer;transition:background .15s,color .15s}
-.journal-tab.active{background:var(--gold);color:var(--navy-950)}
+/* ---------- Journal & Plan — Design System Propagation #3 ----------
+   A personal notebook, not a trading terminal: ivory canvas throughout, navy used
+   only as a single depth accent (the active tab) — never as an omnipresent
+   background the way Terminal/Learning's "doing" panels use it. The one genuine
+   DDA-Journal-specific signature is temporal continuity: a discreet chronological
+   spine connecting entries — never the Fil de maîtrise, which has no real
+   progression meaning here. ---------- */
+#journal{background:linear-gradient(165deg,var(--ivory),var(--ivory-2) 92%);color:var(--ink)}
+#journal .eyebrow.gold{color:var(--blue)}
+
+.journal-tabs{display:inline-flex;gap:4px;padding:4px;border:1px solid #DCD0AF;border-radius:999px;background:var(--paper,#FBF9F3);margin-bottom:22px}
+.journal-tab{border:0;background:transparent;color:var(--muted-2);font:inherit;font-weight:800;font-size:13px;padding:9px 18px;border-radius:999px;cursor:pointer;transition:background .15s,color .15s;min-height:44px}
+.journal-tab.active{background:var(--navy-950);color:var(--ivory)}
 .journal-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
-.journal-count{color:var(--white);font-size:14px;font-weight:800;margin:0}
-.journal-last-entry{color:var(--muted);font-size:12px;margin:2px 0 0}
+.journal-count{color:var(--ink);font-size:14px;font-weight:800;margin:0}
+.journal-last-entry{color:var(--muted-2);font-size:12px;margin:2px 0 0}
 .journal-toolbar .primary-action{width:auto;display:inline-flex;align-items:center;gap:8px}
 
-.journal-empty{text-align:center;max-width:460px;margin:36px auto;padding:36px 24px;border:1px dashed var(--line);border-radius:var(--r-md)}
-.journal-empty .icon{width:30px;height:30px;color:var(--muted);margin-bottom:14px}
-.journal-empty h2{font-size:19px;margin-bottom:8px}
-.journal-empty p{color:var(--muted);font-size:14px;margin:0}
+.journal-empty{text-align:center;max-width:460px;margin:36px auto;padding:36px 24px;border:1px dashed #cfc19a;border-radius:var(--r-md)}
+.journal-empty .icon{width:30px;height:30px;color:#8a6f2e;margin-bottom:14px}
+.journal-empty h2{font-size:19px;margin-bottom:8px;color:var(--ink)}
+.journal-empty p{color:var(--muted-2);font-size:14px;margin:0}
 .journal-empty[hidden]{display:none}
 
-.journal-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.journal-entry-card{border:1px solid var(--line);border-left:3px solid var(--line-soft);border-radius:var(--r-md);background:var(--navy-800);overflow:hidden;transition:border-left-color .2s}
-.journal-entry-card:has(details[open]){border-left-color:var(--gold)}
-.journal-entry-card summary{cursor:pointer;list-style:none;padding:16px 18px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+/* The temporal spine — a thin rail with a marker per entry, oldest to newest. Purely
+   chronological (no done/now/pending states): it never claims a progression this
+   screen doesn't have. */
+.journal-list{list-style:none;margin:0;padding:0 0 0 30px;display:grid;gap:0;position:relative}
+.journal-list:before{content:"";position:absolute;top:10px;bottom:10px;left:9px;width:1px;background:#DCD0AF}
+.journal-entry-card{position:relative;border:0;border-bottom:1px solid #DCD0AF;border-radius:0;background:transparent;overflow:visible}
+.journal-entry-card:last-child{border-bottom:0}
+.journal-entry-card summary{cursor:pointer;list-style:none;padding:16px 0;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;min-height:44px}
 .journal-entry-card summary::-webkit-details-marker{display:none}
-.journal-entry-card summary:before{content:"+";color:var(--gold-soft);font-weight:900;width:14px;flex:none}
+.journal-entry-card summary:before{content:"+";color:#8a6f2e;font-weight:900;width:14px;flex:none}
 .journal-entry-card details[open] summary:before{content:"–"}
-.journal-entry-index{font-family:Georgia,serif;color:var(--gold-soft);font-size:13px;font-weight:700;flex:none}
-.journal-entry-market{font-weight:800;font-size:14px}
-.journal-entry-date{color:var(--muted);font-size:12px;font-weight:700}
-.journal-entry-snippet{color:var(--muted);font-size:13px;flex-basis:100%;padding-left:26px}
-.journal-entry-detail{padding:0 18px 18px 44px;display:grid;gap:14px}
+.journal-entry-index{position:absolute;left:-30px;top:19px;width:19px;height:19px;border-radius:50%;background:var(--paper,#FBF9F3);border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;color:#8a6f2e;font-size:9.5px;font-weight:700}
+.journal-entry-market{font-weight:800;font-size:14px;color:var(--ink)}
+.journal-entry-date{color:var(--muted-2);font-size:12px;font-weight:700}
+.journal-entry-snippet{color:var(--muted-2);font-size:13px;flex-basis:100%;padding-left:26px}
+.journal-entry-detail{padding:0 0 18px 26px;display:grid;gap:14px}
 .journal-entry-detail dl{display:grid;gap:10px;margin:0}
-.journal-entry-detail dt{color:var(--gold-soft);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;margin-bottom:2px}
-.journal-entry-detail dd{margin:0;color:#c2c5d8;font-size:14px;white-space:pre-wrap}
+.journal-entry-detail dt{color:#8a6f2e;font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;margin-bottom:2px}
+.journal-entry-detail dd{margin:0;color:var(--ink);font-size:14px;white-space:pre-wrap}
 .journal-entry-actions{display:flex;gap:16px;align-items:center}
+.journal-entry-actions .text-action{color:var(--muted-2);min-height:44px;display:inline-flex;align-items:center}
+.journal-entry-actions .secondary-action{width:auto}
 
 .journal-composer{max-width:640px}
 .journal-step-indicator{margin:18px 0 26px}
-.journal-step-indicator span{border-color:var(--line);color:var(--muted)}
-.journal-step-indicator span.active{background:var(--gold);color:var(--navy-950);border-color:var(--gold)}
-.journal-step-indicator i{background:var(--line)}
 .journal-step{display:none;flex-direction:column;gap:16px}
 .journal-step.active{display:flex}
-.journal-step-label{color:var(--gold-soft);font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:900;margin:0}
-.journal-composer label{display:grid;gap:7px;color:var(--muted);font-size:13px;font-weight:700}
-.journal-composer input,.journal-composer textarea{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:11px;background:var(--navy-700);color:var(--white);font:inherit;resize:vertical}
+.journal-step-label{color:#8a6f2e;font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:900;margin:0}
+.journal-composer label{display:grid;gap:7px;color:var(--muted-2);font-size:13px;font-weight:700}
+.journal-composer input,.journal-composer textarea{width:100%;padding:13px 14px;border:1px solid #DCD0AF;border-radius:11px;background:var(--paper,#FBF9F3);color:var(--ink);font:inherit;resize:vertical}
 .journal-composer textarea{min-height:88px}
 .journal-composer-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:22px}
 .journal-composer-actions .primary-action,.journal-composer-actions .secondary-action{width:auto}
 
-.journal-plan-intro{color:var(--muted);font-size:14px;max-width:600px;margin-bottom:20px}
+.journal-plan-intro{color:var(--muted-2);font-size:14px;max-width:600px;margin-bottom:20px}
 #journal-plan-form{display:grid;gap:0;max-width:640px}
-.plan-group{border:0;border-top:1px solid var(--line);margin:0;padding:22px 0 0;display:grid;gap:16px}
+.plan-group{border:0;border-top:1px solid #DCD0AF;margin:0;padding:22px 0 0;display:grid;gap:16px}
 .plan-group:first-of-type{border-top:0;padding-top:0}
 .plan-group+.plan-group{margin-top:22px}
-.plan-group legend{padding:0 0 12px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:900;color:var(--gold-soft)}
-#journal-plan-form label{display:grid;gap:7px;color:var(--muted);font-size:13px;font-weight:700}
-#journal-plan-form textarea{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:11px;background:var(--navy-700);color:var(--white);font:inherit;resize:vertical;min-height:70px}
-#journal-plan-form .form-note{color:var(--muted);font-size:12px;margin:22px 0 0}
+.plan-group legend{padding:0 0 12px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:900;color:#8a6f2e}
+#journal-plan-form label{display:grid;gap:7px;color:var(--muted-2);font-size:13px;font-weight:700}
+#journal-plan-form textarea{width:100%;padding:13px 14px;border:1px solid #DCD0AF;border-radius:11px;background:var(--paper,#FBF9F3);color:var(--ink);font:inherit;resize:vertical;min-height:70px}
+#journal-plan-form .form-note{color:var(--muted-2);font-size:12px;margin:22px 0 0}
 #journal-plan-form .primary-action{width:auto;margin-top:14px}
 .modules-track strong{flex:1;font-size:14px;font-weight:700;min-width:0}
 .module-pill{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:5px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap;flex:none}
