@@ -11,6 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="DDA">
   <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="alpha-polish.css">
 </head>
@@ -131,67 +132,81 @@
       </section>
 
       <section class="view active" id="dashboard" aria-labelledby="dashboard-title">
-        <div class="welcome-row">
-          <div><p class="eyebrow gold">Session d’apprentissage</p><h1 id="dashboard-title"><span id="greeting-prefix">Bonsoir</span> <span id="dashboard-name">Richard</span>.</h1><p id="personalized-next">Une étape claire pour continuer à progresser.</p>
-            <ol class="dashboard-loop" aria-label="Boucle d’apprentissage DDA"><li>Learn</li><li class="now">Practice</li><li>Analyze</li><li>Measure</li><li>Prove</li></ol>
-          </div>
-          <div class="cockpit-stats">
-            <div class="week-score"><span>Cette semaine</span><strong id="week-xp">+20 XP</strong></div>
-            <div class="week-score stat-days"><span>Activité</span><strong id="active-days">0 jour</strong></div>
-          </div>
+        <div class="terminal-thread" id="terminal-thread">
+          <span class="terminal-thread-label" id="terminal-thread-label">Compréhension des marchés</span>
+          <div class="terminal-thread-beads" id="terminal-thread-beads" role="img" aria-label="Compétence en cours de construction"><i></i><i></i><i></i><i></i></div>
+          <span class="terminal-thread-next" id="terminal-thread-next" hidden></span>
         </div>
 
-        <article class="continue-card">
-          <div class="course-meta"><span class="pill" id="lesson-state-pill">En cours</span><span>Fondations des marchés</span></div>
-          <div class="continue-grid">
-            <div>
-              <p class="lesson-index" id="lesson-index-label">LEÇON</p>
-              <h2>Le trading comme commerce</h2>
-              <p>Comprendre l’échange entre acheteurs et vendeurs avant de chercher une opportunité.</p>
-              <button class="primary-action" id="lesson-primary-action" data-view="lesson">Reprendre la leçon <span>→</span></button>
+        <div class="terminal-entry">
+          <div>
+            <p class="eyebrow gold">Session d’apprentissage</p>
+            <h1 id="dashboard-title"><span id="greeting-prefix">Bonjour</span> <span id="dashboard-name">Richard</span>.</h1>
+            <p id="personalized-next">Une étape claire pour continuer à progresser.</p>
+          </div>
+          <p class="terminal-entry-state"><span>Cette semaine <strong id="week-xp">+20 XP</strong></span><span>Activité <strong id="active-days">0 jour</strong></span></p>
+        </div>
+
+        <article class="terminal-lead">
+          <div>
+            <p class="terminal-lead-kicker"><span class="pill" id="lesson-state-pill">En cours</span><span id="terminal-lead-module">Fondations des marchés</span><span class="lesson-index" id="lesson-index-label">LEÇON</span></p>
+            <h2 id="terminal-lead-title">Le trading comme commerce</h2>
+            <p id="terminal-lead-summary">Comprendre l’échange entre acheteurs et vendeurs avant de chercher une opportunité.</p>
+            <button class="terminal-lead-go" id="lesson-primary-action" data-view="lesson">Reprendre la leçon <span>→</span></button>
+            <div class="terminal-lead-meta" id="terminal-lead-meta">
+              <div><strong id="terminal-meta-step">—</strong><span>étape actuelle</span></div>
+              <div><strong id="terminal-meta-module">—</strong><span>module actif</span></div>
+              <div><strong id="terminal-meta-xp">—</strong><span>à la clé</span></div>
             </div>
+          </div>
+          <div class="terminal-lead-photo">
             <div class="progress-ring" id="module-ring" style="--progress: 18"><strong id="module-percent">18%</strong><span>du module</span></div>
+            <span>Photographie DDA<br>apprentissage, réflexion</span>
           </div>
         </article>
 
-        <div class="dashboard-grid">
-          <section class="panel next-step">
-            <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-target"/></svg> Prochaine action</p><h3>Comprendre, puis vérifier</h3></div><span class="time">12 min</span></div>
-            <ol class="action-list">
-              <li class="current" id="action-lesson"><span>1</span><div><strong>Voir la leçon</strong><small>Le marché comme échange</small></div></li>
-              <li id="action-exercise"><span>2</span><div><strong>Répondre à l’exercice</strong><small>Reconnaître acheteur et vendeur</small></div></li>
-              <li id="action-quiz"><span>3</span><div><strong>Vérifier ta compréhension</strong><small>Quiz de validation</small></div></li>
-            </ol>
-          </section>
+        <section class="terminal-mi" aria-labelledby="terminal-mi-title">
+          <div class="terminal-mi-head"><div><p class="eyebrow">Intelligence marché</p><h3 id="terminal-mi-title">Ce qui bouge aujourd’hui</h3></div><button class="text-action" data-view="markets">Marchés &amp; BRVM <span>→</span></button></div>
+          <div class="terminal-mi-row" id="terminal-mi-row"></div>
+        </section>
 
-          <section class="panel activity-panel">
-            <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-check-circle"/></svg> Dernière activité</p><h3>Ce que tu as accompli</h3></div></div>
-            <ol class="activity-list" id="recent-activity-list"></ol>
+        <div class="terminal-two">
+          <section aria-labelledby="terminal-journal-title">
+            <p class="eyebrow">Journal &amp; Plan</p>
+            <h4 id="terminal-journal-title">Ton outil de travail</h4>
+            <div class="terminal-journal-note" id="terminal-journal-note"></div>
+            <button class="text-action" data-view="journal">Ouvrir ton Journal <span>→</span></button>
+          </section>
+          <section aria-labelledby="terminal-skills-title">
+            <p class="eyebrow">Profil de compétences</p>
+            <h4 id="terminal-skills-title">Ce que tu construis</h4>
+            <div class="terminal-skillmap" id="terminal-skillmap"></div>
           </section>
         </div>
 
-        <div class="cockpit-alert" id="cockpit-alert">
-          <svg class="icon"><use href="#icon-spark"/></svg>
-          <div>
-            <p class="eyebrow gold">DDA Insight</p>
-            <p class="cockpit-alert-cue" id="cockpit-alert-cue" hidden></p>
-            <h3>Un gain ne prouve pas qu’une décision était bonne.</h3>
-            <p>DDA évaluera progressivement la qualité de ton processus, pas seulement le résultat.</p>
+        <section class="terminal-family" aria-labelledby="terminal-family-title">
+          <div class="photo-frame dark ratio-wide terminal-family-photo"><svg class="icon"><use href="#icon-photo"/></svg><span>Photographie DDA Family — deux apprenants, un même graphique</span></div>
+          <div class="terminal-family-copy">
+            <p class="eyebrow gold">DDA Family</p>
+            <h2 id="terminal-family-title">Les marchés se travaillent aussi ensemble.</h2>
+            <p>Partage tes observations, compare ton raisonnement, apprends des décisions des autres apprenants DDA.</p>
+            <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Aperçu — DDA Family, bientôt disponible</span>
           </div>
-          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Aperçu de la vision DDA</span>
-        </div>
+        </section>
 
-        <div class="terminal-dock" aria-label="Accès rapides du Terminal">
-          <button data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg><div><strong>Journal &amp; Plan</strong><small>Documenter ta réflexion</small></div><span class="dock-arrow">→</span></button>
-          <button data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg><div><strong>Marchés & BRVM</strong><small>Comprendre l’actualité</small></div><span class="dock-arrow">→</span></button>
-          <button data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg><div><strong>Broker Hub</strong><small>Comparer avec transparence</small></div><span class="dock-arrow">→</span></button>
-          <button data-view="resources"><svg class="icon"><use href="#icon-book"/></svg><div><strong>Ressources</strong><small>Guides et outils</small></div><span class="dock-arrow">→</span></button>
-          <button data-view="support"><svg class="icon"><use href="#icon-help"/></svg><div><strong>Centre d’aide</strong><small>Trouver une réponse</small></div><span class="dock-arrow">→</span></button>
-        </div>
+        <section class="terminal-aperture" aria-labelledby="terminal-premium-title">
+          <div>
+            <p class="eyebrow gold">DDA Premium</p>
+            <h3 id="terminal-premium-title">Free t’a donné une vraie compétence. Premium en ouvre la profondeur.</h3>
+            <p>Ateliers pratiques, personnalisation du parcours, continuité au-delà de M0 — la suite logique, pas une offre pressée.</p>
+          </div>
+          <button class="text-action terminal-aperture-go" data-view="membership">Voir en démonstration <span>→</span></button>
+        </section>
 
-        <div class="photo-frame dark dashboard-photo">
-          <svg class="icon"><use href="#icon-photo"/></svg>
-          <span>Photographie à intégrer — équipe DDA</span>
+        <div class="terminal-tools" aria-label="Accès rapides du Terminal">
+          <button data-view="brokers"><strong>Broker Hub</strong><small>Comparer avec transparence</small></button>
+          <button data-view="resources"><strong>Ressources</strong><small>Guides et outils</small></button>
+          <button data-view="support"><strong>Centre d’aide</strong><small>Trouver une réponse</small></button>
         </div>
       </section>
 

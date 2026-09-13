@@ -89,7 +89,7 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .eyebrow{text-transform:uppercase;font-size:11px;letter-spacing:.14em;color:var(--muted);margin:0 0 6px;font-weight:800;display:flex;align-items:center;gap:6px}
 .gold{color:var(--gold-soft)}
 .section-intro{margin-bottom:28px;max-width:640px}
-.section-intro>p:last-child,.welcome-row>div>p:last-child{color:var(--muted);font-size:15px}
+.section-intro>p:last-child{color:var(--muted);font-size:15px}
 
 /* ---------- Buttons ---------- */
 .primary-action,.secondary-action{border:0;border-radius:var(--r-sm);padding:15px 18px;font-weight:800;cursor:pointer;min-height:50px;transition:transform .15s var(--ease),filter .15s var(--ease),background .15s}
@@ -128,93 +128,112 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .mobile-nav button .icon{width:20px;height:20px;margin:0 auto}
 .mobile-nav button.active{color:var(--gold)}
 
-/* ---------- Terminal dock ---------- */
-.terminal-dock{display:grid;grid-template-columns:1fr;gap:0;margin-top:20px;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--navy-800)}
-.terminal-dock button{min-width:0;padding:15px 18px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;color:var(--white);font:inherit;text-align:left;cursor:pointer;display:flex;align-items:center;gap:14px;transition:background .15s}
-.terminal-dock button:last-child{border-bottom:0}
-.terminal-dock button:hover{background:var(--navy-700)}
-.terminal-dock .icon{color:var(--gold-soft);width:20px;height:20px;flex:none}
-.terminal-dock button>div{display:grid;gap:2px;min-width:0}
-.terminal-dock strong{font-size:14px;font-weight:700}
-.terminal-dock small{color:var(--muted);font-size:12px}
-.terminal-dock .dock-arrow{margin-left:auto;color:var(--muted);flex:none}
-.dashboard-photo{margin-top:14px;height:150px}
-
-/* ---------- Dashboard ---------- */
-.welcome-row{margin-bottom:24px}
-.dashboard-loop{display:flex;gap:0;flex-wrap:wrap;margin:14px 0 0;list-style:none;padding:0;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.03em}
-.dashboard-loop li{display:flex;align-items:center;gap:6px}
-.dashboard-loop li:not(:last-child):after{content:"→";margin:0 8px;color:var(--line)}
-.dashboard-loop li.now{color:var(--gold-soft)}
 .lesson-loop{display:flex;gap:0;flex-wrap:wrap;margin:16px 0 0;list-style:none;padding:0;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.03em}
 .lesson-loop li{display:flex;align-items:center;gap:6px}
 .lesson-loop li:not(:last-child):after{content:"→";margin:0 8px;color:var(--line)}
 .lesson-loop li.now{color:var(--gold-soft)}
 .lesson-loop li.done{color:var(--teal)}
-.cockpit-stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
-.week-score{padding:12px 16px;background:var(--navy-800);border-left:3px solid var(--gold);border-radius:0 12px 12px 0;display:grid;flex:1;min-width:130px;max-width:220px}
-.week-score span{color:var(--muted);font-size:12px}
-.week-score strong{color:var(--gold-soft);font-size:21px;font-family:Georgia,serif}
-.week-score.stat-days{border-left-color:var(--blue-2)}
-.week-score.stat-days strong{color:var(--blue-2)}
-
-.continue-card{
-  position:relative;overflow:hidden;background:linear-gradient(150deg,var(--ivory) 0%,var(--ivory-2) 100%);
-  color:var(--ink);border-radius:var(--r-lg);padding:22px;box-shadow:var(--shadow-md);
-}
-.continue-card:after{content:"";position:absolute;width:220px;height:220px;border:1px solid rgba(184,146,63,.32);border-radius:50%;right:-110px;top:-130px}
-.course-meta{display:flex;align-items:center;gap:12px;font-size:12px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding-right:80px}
 .pill{background:var(--navy-950);color:var(--white);padding:6px 11px;border-radius:100px}
-.continue-grid{display:grid;grid-template-columns:1fr;gap:20px;margin-top:28px}
-.continue-grid h2{font-size:26px;max-width:280px}
-.continue-grid p{color:#4a5568;max-width:560px;font-size:14px}
 .lesson-index{color:var(--gold-soft)!important;font-size:11px;font-weight:900;letter-spacing:.13em}
 .progress-ring{
-  --progress:0;position:absolute;right:22px;top:22px;width:78px;aspect-ratio:1;border-radius:50%;
+  --progress:0;position:relative;width:78px;aspect-ratio:1;border-radius:50%;flex:none;
   display:grid;place-content:center;text-align:center;
   background:radial-gradient(circle closest-side,var(--ivory) 76%,transparent 79% 99%),conic-gradient(var(--gold) calc(var(--progress)*1%),rgba(20,22,43,.16) 0);
   transition:background 1.1s var(--ease);
 }
-.progress-ring strong{font-family:Georgia,serif;font-size:18px;display:block}
+.progress-ring strong{font-family:Georgia,serif;font-size:18px;display:block;color:var(--ink)}
 .progress-ring span{font-size:10px;color:#6b6f80;display:none}
-
-.dashboard-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:16px}
 .panel{border:1px solid var(--line);border-radius:var(--r-md);padding:20px;background:var(--navy-800)}
-.next-step{border-top:2px solid var(--gold)}
 .panel-heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
 .panel-heading .icon{color:var(--gold-soft)}
 .time{color:var(--muted);font-size:12px;white-space:nowrap}
-.action-list{list-style:none;padding:0;margin:20px 0 0;display:grid;gap:10px}
-.action-list li{display:flex;align-items:center;gap:14px;padding:13px 14px;border:1px solid var(--line);border-radius:13px;transition:border-color .2s}
-.action-list li>span{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);color:var(--muted);flex:none}
-.action-list .current{border-color:rgba(217,164,65,.55)}
-.action-list .current>span{background:var(--gold);color:var(--navy-950);border-color:var(--gold)}
-.action-list div{display:grid}
-.action-list small{color:var(--muted)}
-.action-list li.done{border-color:rgba(79,190,133,.4)}
-.action-list li.done>span{background:var(--teal);border-color:var(--teal);color:var(--navy-950);font-size:0}
-.action-list li.done>span:after{content:"✓";font-size:15px}
 .future-label{margin-top:auto;padding-top:16px;border-top:1px solid var(--line);color:var(--gold-soft);font-size:11px;display:flex;align-items:center;gap:6px}
 
-.activity-panel{background:linear-gradient(160deg,#122145,#0a1024)}
-.activity-list{list-style:none;padding:0;margin:20px 0 0;display:grid;gap:10px}
-.activity-list li{display:flex;align-items:center;gap:12px;font-size:13px}
-.activity-list li .icon{color:var(--teal);flex:none;width:18px;height:18px}
-.activity-list strong{display:block;font-size:13px;font-weight:700}
-.activity-list small{color:var(--muted)}
-.activity-empty{color:var(--muted);font-size:13px}
+/* ---------- Terminal Master — Institutional Intelligence (Design Gate #3 HYBRID) ----------
+   Scoped to #dashboard only (mandat "Terminal Master Implementation"): the shared app
+   chrome (.sidebar/.topbar) stays exactly as it is everywhere else — the same
+   light-canvas-inside-dark-chrome pattern already used for #access, not a new one. */
+#dashboard{background:linear-gradient(165deg,var(--ivory),var(--ivory-2) 90%);color:var(--ink)}
+#dashboard .eyebrow.gold{color:var(--blue)}
 
-.cockpit-alert{
-  margin-top:16px;padding:18px 20px;border:1px solid var(--line);border-left:3px solid var(--gold);
-  border-radius:var(--r-md);background:linear-gradient(100deg,#171d3d,#0d1226 65%);
-  display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;
-}
-.cockpit-alert>.icon{color:var(--gold-soft);flex:none;width:24px;height:24px;margin-top:2px}
-.cockpit-alert>div{flex:1;min-width:200px}
-.cockpit-alert h3{font-size:17px;margin:2px 0 4px}
-.cockpit-alert p:not(.eyebrow):not(.cockpit-alert-cue){color:var(--muted);font-size:13px;margin:0}
-.cockpit-alert-cue{color:var(--white);font-weight:700;font-size:13px;margin:0 0 6px}
-.cockpit-alert .future-label{margin-top:0;padding-top:0;border-top:0;flex:none;align-self:center}
+/* Signature 1 — the mastery thread: a bead chain, never a generic progress bar.
+   Directly extends the reaction-dot language already shipped in Support & Résistance. */
+.terminal-thread{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;margin:0 0 20px;background:var(--navy-950);border-radius:100px}
+.terminal-thread-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);white-space:nowrap}
+.terminal-thread-beads{display:flex;align-items:center;gap:5px}
+.terminal-thread-beads i{width:8px;height:8px;border-radius:50%;background:var(--navy-700);display:block;box-sizing:border-box}
+.terminal-thread-beads i.on{background:var(--gold-soft)}
+.terminal-thread-beads i.now{width:11px;height:11px;background:var(--navy-950);border:2px solid var(--gold-soft)}
+.terminal-thread-next{margin-left:auto;font-size:11px;color:var(--muted);max-width:100%}
+.terminal-thread-next b{color:var(--gold-soft);font-weight:700}
+
+.terminal-entry{display:flex;flex-direction:column;gap:10px;padding-bottom:20px;border-bottom:1px solid #DCD0AF;margin-bottom:24px}
+.terminal-entry h1{font-size:clamp(22px,5vw,26px);color:var(--ink)}
+.terminal-entry #personalized-next{color:#5B6472;font-size:14px;max-width:560px}
+.terminal-entry-state{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:#8a7f6a;margin:0}
+.terminal-entry-state strong{color:var(--ink);font-family:Georgia,serif;font-size:15px;font-weight:700}
+
+/* Signature-adjacent — the lead story: Primary Action as interactive editorial moment,
+   not a card. Only #module-ring keeps its dark radial styling (reused as-is). */
+.terminal-lead{display:grid;grid-template-columns:1fr;gap:24px;padding-bottom:28px;border-bottom:1px solid #DCD0AF;margin-bottom:28px}
+.terminal-lead-kicker{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.terminal-lead-kicker .lesson-index{color:#8a7f6a!important}
+.terminal-lead h2{font-size:clamp(22px,5vw,28px);color:var(--ink);margin-bottom:10px;max-width:520px}
+.terminal-lead>div>p:not(.terminal-lead-kicker){color:#5B6472;font-size:14px;max-width:460px;margin-bottom:16px}
+.terminal-lead-go{background:none;border:0;border-bottom:2px solid var(--gold);color:var(--ink);font:inherit;font-weight:800;font-size:13.5px;padding:0 0 2px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.terminal-lead-meta{display:flex;gap:22px;margin-top:20px;flex-wrap:wrap}
+.terminal-lead-meta div{display:grid;gap:2px}
+.terminal-lead-meta strong{font-family:Georgia,serif;font-size:16px;color:var(--ink)}
+.terminal-lead-meta span{font-size:10.5px;color:#8a7f6a;text-transform:uppercase;letter-spacing:.04em}
+.terminal-lead-photo{position:relative;aspect-ratio:16/10;border-radius:10px;background:linear-gradient(150deg,#e4dabc,#cabf9d);display:flex;align-items:flex-end;padding:16px;color:#5f5237}
+.terminal-lead-photo .progress-ring{position:absolute;top:14px;right:14px;width:58px}
+.terminal-lead-photo span{font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;line-height:1.4}
+
+/* Market Intelligence — deeper than a link, still no new data source */
+.terminal-mi{padding-bottom:28px;border-bottom:1px solid #DCD0AF;margin-bottom:28px}
+.terminal-mi-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.terminal-mi-head h3{font-size:18px;color:var(--ink);margin:2px 0 0}
+.terminal-mi-head .text-action{color:var(--gold);font-weight:800;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;background:none;border:0;padding:0;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;min-height:44px}
+.terminal-mi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:#DCD0AF;border:1px solid #DCD0AF;border-radius:10px;overflow:hidden}
+.terminal-mi-idx{background:var(--paper,#FBF9F3);padding:14px 16px}
+.terminal-mi-idx .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}
+.terminal-mi-idx b{font-size:13px;color:var(--ink)}
+.terminal-mi-idx .badge{font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:#8a7f6a;white-space:nowrap}
+.terminal-mi-idx svg{width:100%;height:22px;display:block}
+.terminal-mi-idx path{fill:none;stroke:var(--teal);stroke-width:1.6}
+
+/* Journal (real note or honest empty state) + Competency profile — never a second card grid */
+.terminal-two{display:grid;grid-template-columns:1fr;gap:28px;padding-bottom:28px;border-bottom:1px solid #DCD0AF;margin-bottom:28px}
+.terminal-two h4{font-size:16px;color:var(--ink);margin:2px 0 12px}
+.terminal-journal-note{background:#F2ECDA;border-radius:6px;padding:14px 16px;margin-bottom:12px}
+.terminal-journal-note p{font-family:Georgia,serif;font-size:13.5px;font-style:italic;color:var(--ink);line-height:1.5;margin:0}
+.terminal-journal-note small{display:block;margin-top:8px;color:#8a7f6a;font-size:10.5px;font-style:normal;font-family:Inter,sans-serif}
+.terminal-two .text-action{background:none;border:0;padding:0;font:inherit;font-weight:800;font-size:12px;color:var(--ink);border-bottom:1.5px solid var(--gold);cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.terminal-skillmap{display:grid;gap:10px}
+.terminal-skillmap-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.terminal-skillmap-row span{font-size:13px;color:var(--ink)}
+.terminal-skillmap-row small{color:#8a7f6a;font-size:11px}
+.terminal-skillmap-row .terminal-thread-beads i{width:7px;height:7px}
+.terminal-skillmap-row .terminal-thread-beads i.now{width:9px;height:9px}
+
+/* DDA Family — the human moment. Honest preview only, never a fake member/count. */
+.terminal-family{padding-bottom:28px;border-bottom:1px solid #DCD0AF;margin-bottom:28px;display:grid;grid-template-columns:1fr;gap:20px}
+.terminal-family-photo{aspect-ratio:16/10}
+.terminal-family-copy h2{font-size:clamp(20px,4.6vw,26px);color:var(--ink);margin-bottom:10px}
+.terminal-family-copy p{color:#5B6472;font-size:13.5px;margin-bottom:14px;max-width:420px}
+.terminal-family .future-label{border-top:0;padding-top:0;margin-top:0}
+
+/* Signature 2 — the DDA aperture: the one navy surface that pierces the ivory canvas
+   per screen, always asymmetric, reserved for real depth (Premium here). */
+.terminal-aperture{background:linear-gradient(120deg,var(--navy-900),var(--navy-950));border-radius:14px;padding:24px 22px;color:#EDE7D8;display:flex;flex-direction:column;gap:16px;margin-bottom:28px}
+.terminal-aperture h3{font-size:17px;color:#F8F5EC;margin:6px 0 8px}
+.terminal-aperture p{font-size:13px;color:#B9C2D2;margin:0}
+.terminal-aperture-go{background:none;border:0;padding:0;font:inherit;font-weight:800;font-size:12.5px;color:#F3E7CE;border-bottom:1.5px solid var(--gold-soft);cursor:pointer;display:inline-flex;align-items:center;gap:6px;width:fit-content;min-height:44px}
+
+.terminal-tools{display:grid;grid-template-columns:1fr;gap:10px}
+.terminal-tools button{background:none;border:1px solid #DCD0AF;border-radius:10px;padding:14px 16px;text-align:left;font:inherit;cursor:pointer;min-height:44px;color:var(--ink)}
+.terminal-tools strong{display:block;font-size:13px;font-weight:700}
+.terminal-tools small{color:#8a7f6a;font-size:11.5px}
 
 /* ---------- Path ---------- */
 .path-number{font-family:Georgia,serif;font-size:24px;color:var(--gold-soft)}
@@ -750,7 +769,6 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
 /* ---------- Utility states ---------- */
 .low-data *{animation:none!important;transition:none!important}
 .low-data .video-stage{background:var(--navy-700)}
-.low-data .continue-card:after{display:none}
 .loading-layer{position:fixed;inset:0;z-index:100;display:grid;place-content:center;text-align:center;background:rgba(4,7,14,.92);backdrop-filter:blur(8px)}
 .loading-layer[hidden]{display:none}
 .loading-spinner{width:44px;height:44px;margin:0 auto 14px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--gold);animation:dda-spin 1s linear infinite}
@@ -771,7 +789,10 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
    TABLET — from 700px
    ========================================================= */
 @media(min-width:700px){
-  .dashboard-grid{grid-template-columns:1.3fr .9fr}
+  .terminal-lead{grid-template-columns:1.35fr .65fr;align-items:center}
+  .terminal-two{grid-template-columns:1fr 1fr}
+  .terminal-family{grid-template-columns:.9fr 1.1fr;align-items:center}
+  .terminal-tools{grid-template-columns:repeat(3,1fr)}
   .plan-grid,.skills-grid{grid-template-columns:repeat(2,1fr)}
   .broker-grid,.support-grid{grid-template-columns:repeat(2,1fr)}
   .broker-controls{grid-template-columns:1fr 1fr}
@@ -781,7 +802,6 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .comparison-grid{grid-template-columns:1fr 1fr}
   .profile-fields{grid-template-columns:1fr 1fr}
   .access-shell{grid-template-columns:1fr}
-  .continue-grid{grid-template-columns:1fr 150px;align-items:end}
 }
 
 /* =========================================================
@@ -813,20 +833,15 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   h1{margin-bottom:15px}
   .section-intro{margin-bottom:40px}
 
-  .welcome-row{display:flex;justify-content:space-between;align-items:end;gap:32px}
-  .continue-card{padding:clamp(26px,3vw,44px);border-radius:28px}
-  .continue-grid{margin-top:44px;gap:36px}
-  .continue-grid h2{font-size:32px;max-width:none}
-  .progress-ring{position:static;width:140px}
-  .progress-ring span{display:block}
   .primary-action,.secondary-action{width:auto}
-  .dashboard-grid{gap:20px;margin-top:20px}
   .panel{padding:26px}
-  .terminal-dock{grid-template-columns:repeat(5,1fr);margin-top:22px}
-  .terminal-dock button{border-bottom:0;border-right:1px solid var(--line);padding:18px 16px}
-  .terminal-dock button:last-child{border-right:0}
-  .terminal-dock small{display:block}
-  .dashboard-photo{height:190px}
+
+  .terminal-entry{flex-direction:row;justify-content:space-between;align-items:flex-end;gap:32px}
+  .terminal-lead{grid-template-columns:1.5fr .5fr;gap:40px}
+  .terminal-lead-photo{aspect-ratio:4/3}
+  .terminal-lead-photo .progress-ring{width:72px}
+  .terminal-aperture{flex-direction:row;justify-content:space-between;align-items:center;padding:28px 32px}
+  .terminal-aperture>div:first-child{max-width:560px}
 
   .progress-hero{grid-template-columns:1.4fr 1fr 1fr}
   .progress-stat.featured{grid-column:auto}
@@ -877,6 +892,5 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
 @media(min-width:1200px){
   .view{padding-left:clamp(24px,6vw,80px);padding-right:clamp(24px,6vw,80px)}
   h1{font-size:clamp(44px,4.4vw,64px)}
-  .continue-card{padding:52px}
   .lesson-layout{gap:48px}
 }
