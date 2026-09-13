@@ -234,7 +234,7 @@
       </section>
 
       <section class="view" id="progress" aria-labelledby="progress-title">
-        <div class="section-intro"><p class="eyebrow gold">Progression</p><h1 id="progress-title">Construis des compétences, pas seulement des habitudes.</h1><p>Ta progression sur M0.1 est mesurée localement, en continu. Le reste du profil de compétences est encore un aperçu de ce que DDA deviendra.</p></div>
+        <div class="section-intro"><p class="eyebrow gold">Progression</p><h1 id="progress-title">Ce que DDA peut réellement prouver que tu as appris.</h1><p>Chaque niveau ci-dessous repose sur une preuve réelle — une leçon ouverte n’est jamais comptée comme une compétence acquise.</p></div>
 
         <div class="progress-hero">
           <div class="progress-stat featured"><span>XP total</span><strong id="progress-total-xp">0</strong></div>
@@ -242,18 +242,16 @@
           <div class="progress-stat"><span>Jours d’activité</span><strong id="progress-active-days">0</strong></div>
         </div>
 
-        <div class="progress-columns">
-          <section class="panel proof-panel">
-            <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> Preuves d’apprentissage</p><h3>Ton chemin sur M0.1, étape par étape</h3></div></div>
-            <ol class="proof-timeline" id="proof-timeline"></ol>
-          </section>
+        <section class="panel mastery-panel">
+          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-progress"/></svg> Fil de maîtrise</p><h3>Ce que tu as réellement démontré, compétence par compétence</h3></div></div>
+          <div class="mastery-list" id="mastery-list"></div>
+        </section>
 
-          <div class="skills-grid">
-            <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-compass"/></svg><span>Compréhension des marchés</span></div><strong id="market-skill-label">En démarrage</strong><div class="level-meter" id="market-skill-level"><i></i><i></i><i></i><i></i></div></article>
-            <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-shield"/></svg><span>Gestion du risque</span></div><strong>À découvrir</strong><div class="level-meter"><i></i><i></i><i></i><i></i></div></article>
-            <article class="skill-card"><div class="skill-head"><svg class="icon"><use href="#icon-target"/></svg><span>Discipline</span></div><strong>À découvrir</strong><div class="level-meter"><i></i><i></i><i></i><i></i></div></article>
-          </div>
-        </div>
+        <section class="panel next-step-panel">
+          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-compass"/></svg> Prochaine étape réelle</p></div></div>
+          <p id="progress-next-step">—</p>
+          <p class="progress-journal-note" id="progress-journal-note" hidden></p>
+        </section>
 
         <section class="panel modules-track">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-path"/></svg> Parcours M0–M9</p><h3>Où tu en es sur l’ensemble du curriculum</h3></div></div>

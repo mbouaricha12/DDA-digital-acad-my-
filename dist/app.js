@@ -45,25 +45,42 @@ const MARKET_DEMO = {
   ]
 };
 const NEXT_STEP_PHRASE = { lesson: 'voir la leçon', exercise: 'réussir l’exercice', quiz: 'valider le quiz' };
-// Fixed, honest path for the one real lesson — done/pending only, no fabricated dates.
-const PROOF_MILESTONES = [
-  { label: 'Parcours pilote créé', eventName: 'onboarding_complete', done: () => Boolean(prototypeState.onboarding?.complete) },
-  { label: 'Leçon comprise', eventName: 'lesson_understood', done: lp => lp.lessonViewed },
-  { label: 'Exercice validé', eventName: 'exercise_complete', done: lp => lp.exerciseComplete },
-  { label: 'Quiz validé — compétence confirmée', eventName: 'quiz_complete', done: lp => lp.quizComplete }
-];
 
-function competencyLevel(lessonProgress) {
+// The four levels DDA will ever claim for a competency, and the only real signal
+// each one is allowed to rest on. Levels 2-4 come from durably stored lesson
+// progress (state.lessons), so once earned they can never be lost. Level 1
+// (Découvrir) is read from the rolling `events` log (capped at 50 — see
+// competencyLevel below) since the current schema keeps no durable "opened but
+// not yet understood" flag; this is a real, honest signal, just a narrower
+// window than the durable ones above it.
+const COMPETENCY_LEVEL_LABEL = { 0: 'Pas encore commencé', 1: 'Découvert', 2: 'Compris', 3: 'Appliqué', 4: 'Maîtrisé' };
+
+// lessonProgress alone can only ever prove Comprendre/Appliquer/Maîtriser (durable
+// booleans). Découvrir additionally needs lessonId to check the lesson's own
+// view_opened events — never invented, and never claimed once a durable signal
+// above it already exists.
+function competencyLevel(lessonId, lessonProgress) {
   if (lessonProgress.quizComplete) return 4;
   if (lessonProgress.exerciseComplete) return 3;
   if (lessonProgress.lessonViewed) return 2;
-  return 0;
+  const viewId = LESSON_VIEW_ID[lessonId] || lessonId;
+  const discovered = (prototypeState.events || []).some(event => event.name === 'view_opened' && event.metadata?.view === viewId);
+  return discovered ? 1 : 0;
 }
 
-function setLevelMeter(id, level) {
-  const meter = document.getElementById(id);
-  if (!meter) return;
-  [...meter.children].forEach((segment, index) => segment.classList.toggle('filled', index < level));
+// Every lesson with real content shares this exact four-step evidence path — never
+// a fabricated fifth step, never a skipped one. `lesson` metadata on
+// lesson_understood/exercise_complete/quiz_complete already scopes each event to
+// the lesson that produced it (bindMarkUnderstood/bindQuestion), so two lessons'
+// timelines never cross-contaminate each other's "when".
+function lessonProofMilestones(lessonId) {
+  const viewId = LESSON_VIEW_ID[lessonId] || lessonId;
+  return [
+    { level: 1, label: 'Leçon ouverte', matches: event => event.name === 'view_opened' && event.metadata?.view === viewId, done: lp => competencyLevel(lessonId, lp) >= 1 },
+    { level: 2, label: 'Leçon comprise', matches: event => event.name === 'lesson_understood' && event.metadata?.lesson === lessonId, done: lp => lp.lessonViewed },
+    { level: 3, label: 'Exercice validé', matches: event => event.name === 'exercise_complete' && event.metadata?.lesson === lessonId, done: lp => lp.exerciseComplete },
+    { level: 4, label: 'Quiz validé — compétence confirmée', matches: event => event.name === 'quiz_complete' && event.metadata?.lesson === lessonId, done: lp => lp.quizComplete }
+  ];
 }
 
 function relativeTime(iso) {
@@ -219,18 +236,77 @@ function renderMarketIntelligence() {
   }
 }
 
-function renderProofTimeline() {
-  const container = document.getElementById('proof-timeline');
+// The real, curriculum-flattened list of lessons with actual authored content —
+// M1-M9 have none yet (empty lessons[]), so they never appear here. Drives the
+// deep "Fil de maîtrise" view on Progression; Terminal shows only the current
+// lesson via resolveContinueTarget() — same competencyLevel() underneath, so the
+// two screens can never disagree about the same competency's real state.
+function authoredLessons() {
+  const flat = [];
+  DDA.curriculum.modules.forEach(module => module.lessons.forEach(lesson => flat.push({ module, lesson })));
+  return flat;
+}
+
+// The complete, honest Fil de maîtrise for Progression: one real row per authored
+// lesson's own named competency (never a fabricated shared "domain" score merging
+// several lessons into one number), each with its real 4-step evidence trail —
+// plus the competencies nothing authored yet measures, shown as exactly that,
+// never as a guaranteed "next" competency (mandate §7).
+function renderMasteryList() {
+  const container = document.getElementById('mastery-list');
   if (!container) return;
-  const lessonProgress = DDALearning.getLessonProgress(prototypeState, activeLessonId);
   const events = prototypeState.events || [];
-  container.innerHTML = PROOF_MILESTONES.map(milestone => {
-    const done = milestone.done(lessonProgress);
-    const event = [...events].reverse().find(e => e.name === milestone.eventName);
-    const when = done ? (event ? relativeTime(event.at) : 'Complété') : 'À venir';
-    const icon = done ? '<svg class="icon"><use href="#icon-check-circle"/></svg>' : '';
-    return `<li class="${done ? 'done' : 'pending'}"><span class="proof-dot">${icon}</span><div><strong>${milestone.label}</strong><small>${when}</small></div></li>`;
+  const rows = authoredLessons().map(({ lesson }) => {
+    const lessonProgress = DDALearning.getLessonProgress(prototypeState, lesson.id);
+    const level = competencyLevel(lesson.id, lessonProgress);
+    const milestones = lessonProofMilestones(lesson.id).map(milestone => {
+      const done = milestone.done(lessonProgress);
+      const event = [...events].reverse().find(milestone.matches);
+      const when = done ? (event ? relativeTime(event.at) : 'Complété') : 'À venir';
+      const icon = done ? '<svg class="icon"><use href="#icon-check-circle"/></svg>' : '';
+      return `<li class="${done ? 'done' : 'pending'}"><span class="proof-dot">${icon}</span><div><strong>${milestone.label}</strong><small>${when}</small></div></li>`;
+    }).join('');
+    return `
+      <article class="mastery-row">
+        <div class="mastery-row-head">
+          <div><p class="mastery-lesson">${lesson.id} — ${lesson.title}</p><strong>${lesson.competency.label}</strong></div>
+          <div class="mastery-level">
+            <div class="terminal-thread-beads" role="img" aria-label="${beadsAriaLabel(level)}">${renderBeads(level)}</div>
+            <span>${COMPETENCY_LEVEL_LABEL[level]}</span>
+          </div>
+        </div>
+        <ol class="proof-timeline">${milestones}</ol>
+      </article>`;
   }).join('');
+
+  const unmeasured = ['Gestion du risque', 'Discipline'].map(label => `
+      <article class="mastery-row unmeasured">
+        <div class="mastery-row-head">
+          <div><strong>${label}</strong></div>
+          <div class="mastery-level"><span>Pas encore évalué</span></div>
+        </div>
+        <p class="mastery-unmeasured-note">DDA ne propose pas encore de leçon mesurant cette compétence.</p>
+      </article>`).join('');
+
+  container.innerHTML = rows + unmeasured;
+}
+
+// The same nextActionable() call Terminal's "continue" button already uses — never
+// a second, diverging notion of "what's next". Journal's count is shown only as
+// activity/reflection context (mandate §9) — it is never read into the level above.
+function renderProgressNextStep() {
+  const el = document.getElementById('progress-next-step');
+  if (el) {
+    const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
+    el.textContent = next
+      ? `Continuer ${next.lesson.title} (${next.lesson.id}) — ${NEXT_STEP_PHRASE[next.step] || 'continuer'}.`
+      : 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.';
+  }
+  const noteEl = document.getElementById('progress-journal-note');
+  if (!noteEl) return;
+  const count = (prototypeState.journal?.entries || []).length;
+  noteEl.hidden = count === 0;
+  if (count > 0) noteEl.textContent = `${count} réflexion${count > 1 ? 's' : ''} enregistrée${count > 1 ? 's' : ''} dans ton Journal — une preuve de pratique et de réflexion, jamais un niveau de compétence.`;
 }
 
 function renderProgressHero() {
@@ -527,7 +603,7 @@ function renderTerminalThread(continueTarget) {
   const labelEl = document.getElementById('terminal-thread-label');
   if (!labelEl || !continueTarget) return;
   const lessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
-  const level = competencyLevel(lessonProgress);
+  const level = competencyLevel(continueTarget.lesson.id, lessonProgress);
   labelEl.textContent = continueTarget.lesson.competency.label;
   const beadsEl = document.getElementById('terminal-thread-beads');
   beadsEl.innerHTML = renderBeads(level);
@@ -580,13 +656,16 @@ function renderTerminalJournalNote() {
 }
 
 // Only the active lesson's own competency is real; the other two rows mirror the
-// exact "À découvrir" honesty already used on the Progression screen's skill-cards —
-// never a fabricated level for a competency nothing in the curriculum measures yet.
+// exact "À découvrir" honesty already used on the Progression screen's mastery
+// list — never a fabricated level for a competency nothing in the curriculum
+// measures yet. Terminal shows only the one lesson currently pointing forward
+// (a quick glance); Progression is the deep view showing every authored lesson —
+// same underlying competencyLevel(), never a contradictory second logic.
 function renderTerminalSkillmap(continueTarget) {
   const el = document.getElementById('terminal-skillmap');
   if (!el || !continueTarget) return;
   const lessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
-  const level = competencyLevel(lessonProgress);
+  const level = competencyLevel(continueTarget.lesson.id, lessonProgress);
   const rows = [
     { label: continueTarget.lesson.competency.label, real: true },
     { label: 'Gestion du risque', real: false },
@@ -654,9 +733,8 @@ function renderState() {
   renderTerminalJournalNote();
   renderTerminalSkillmap(continueTarget);
 
-  document.getElementById('market-skill-label').textContent = activeLessonProgress.quizComplete ? 'Fondation validée' : activeLessonProgress.exerciseComplete ? 'En progression' : 'En démarrage';
-  setLevelMeter('market-skill-level', competencyLevel(activeLessonProgress));
-  renderProofTimeline();
+  renderMasteryList();
+  renderProgressNextStep();
   renderProgressHero();
   renderCertificatePreview(activeLessonProgress);
   renderJournalList();
