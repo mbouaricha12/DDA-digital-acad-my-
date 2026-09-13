@@ -44,18 +44,6 @@ const MARKET_DEMO = {
     { company: 'Société C', event: 'Assemblée générale' }
   ]
 };
-// Real accomplishments only — built from DDA.track's own event log, never fabricated.
-const ACTIVITY_LABELS = {
-  onboarding_complete: () => 'Parcours pilote créé',
-  lesson_understood: () => 'Leçon comprise',
-  exercise_complete: () => 'Exercice validé',
-  quiz_complete: () => 'Quiz validé — compétence confirmée',
-  profile_updated: () => 'Profil mis à jour',
-  plan_preview: metadata => (metadata.plan === 'premium' ? 'Aperçu Premium activé' : 'Retour à DDA Free'),
-  journal_entry_created: () => 'Entrée de journal ajoutée',
-  journal_entry_updated: () => 'Entrée de journal modifiée',
-  journal_plan_saved: () => 'Plan personnel mis à jour'
-};
 const NEXT_STEP_PHRASE = { lesson: 'voir la leçon', exercise: 'réussir l’exercice', quiz: 'valider le quiz' };
 // Fixed, honest path for the one real lesson — done/pending only, no fabricated dates.
 const PROOF_MILESTONES = [
@@ -229,19 +217,6 @@ function renderMarketIntelligence() {
       <li><div><strong>${row.company}</strong><small>${row.event}</small></div><span class="data-badge"><svg class="icon"><use href="#icon-clock"/></svg>À confirmer</span></li>
     `).join('');
   }
-}
-
-function renderRecentActivity() {
-  const container = document.getElementById('recent-activity-list');
-  if (!container) return;
-  const items = (prototypeState.events || []).filter(event => ACTIVITY_LABELS[event.name]).slice(-4).reverse();
-  if (!items.length) {
-    container.innerHTML = '<li class="activity-empty">Ton activité récente apparaîtra ici.</li>';
-    return;
-  }
-  container.innerHTML = items.map(event => `
-    <li><svg class="icon"><use href="#icon-check-circle"/></svg><div><strong>${ACTIVITY_LABELS[event.name](event.metadata || {})}</strong><small>${relativeTime(event.at)}</small></div></li>
-  `).join('');
 }
 
 function renderProofTimeline() {
@@ -498,14 +473,6 @@ function renderLessonProgressUI(lessonId, lessonDef, ids) {
   return { lessonProgress, step, complete };
 }
 
-function updateCockpitAlert(continueTarget) {
-  const cue = document.getElementById('cockpit-alert-cue');
-  if (!cue) return;
-  const step = continueTarget && NEXT_STEP_PHRASE[DDALearning.lessonNextStep(DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id))];
-  cue.hidden = !step;
-  cue.textContent = step ? `Prochaine étape : ${step} de « ${continueTarget.lesson.title} ».` : '';
-}
-
 function resolveContinueTarget() {
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   if (next) return next;
@@ -513,17 +480,143 @@ function resolveContinueTarget() {
   return found ? { module: found.module, lesson: found.lesson } : null;
 }
 
+// The real, greeting-time-of-day text — never a fixed "Bonsoir" regardless of the hour.
+function greetingPrefix() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Bonjour';
+  if (hour < 18) return 'Bon après-midi';
+  return 'Bonsoir';
+}
+
+// Shared bead-chain renderer — the DDA "fil de maîtrise" signature (Design Gate #3).
+// level: 0 (nothing yet) up to `count` (fully mastered) — the same 0/2/3/4 scale
+// competencyLevel() already returns, just expressed as filled/current/empty beads
+// instead of a generic bar, so it never implies false precision between levels.
+function renderBeads(level, count = 4) {
+  return Array.from({ length: count }, (_, i) => {
+    const idx = i + 1;
+    if (level >= count) return '<i class="on"></i>';
+    if (idx < level) return '<i class="on"></i>';
+    if (idx === Math.max(level, 1) && level < count) return '<i class="now"></i>';
+    return '<i></i>';
+  }).join('');
+}
+
+// Real, level-accurate description for screen-reader users — the visual bead fill
+// must never carry information the accessible name doesn't also state.
+function beadsAriaLabel(level, count = 4) {
+  if (level >= count) return `Compétence validée — ${count} étapes sur ${count}`;
+  if (level <= 0) return `Compétence non démarrée — 0 étape sur ${count}`;
+  return `Compétence en cours — étape ${level} sur ${count}`;
+}
+
+// The next lesson actually authored right after this one in the curriculum — never a
+// guessed or invented competency. Returns null once nothing real follows (M1–M9 are
+// still empty), which is the honest state the thread must show as "no next" then.
+function lessonAfter(curriculum, lessonId) {
+  const flat = [];
+  curriculum.modules.forEach(m => m.lessons.forEach(l => flat.push({ module: m, lesson: l })));
+  const index = flat.findIndex(x => x.lesson.id === lessonId);
+  return index >= 0 && index + 1 < flat.length ? flat[index + 1] : null;
+}
+
+function renderTerminalThread(continueTarget) {
+  const labelEl = document.getElementById('terminal-thread-label');
+  if (!labelEl || !continueTarget) return;
+  const lessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
+  const level = competencyLevel(lessonProgress);
+  labelEl.textContent = continueTarget.lesson.competency.label;
+  const beadsEl = document.getElementById('terminal-thread-beads');
+  beadsEl.innerHTML = renderBeads(level);
+  beadsEl.setAttribute('aria-label', beadsAriaLabel(level));
+  const after = lessonAfter(DDA.curriculum, continueTarget.lesson.id);
+  const nextEl = document.getElementById('terminal-thread-next');
+  const showNext = Boolean(after && after.lesson.competency.label !== continueTarget.lesson.competency.label);
+  nextEl.hidden = !showNext;
+  if (showNext) nextEl.innerHTML = `Prochaine compétence : <b>${after.lesson.competency.label}</b>`;
+}
+
+function renderTerminalMeta(continueTarget) {
+  const stepEl = document.getElementById('terminal-meta-step');
+  if (!stepEl || !continueTarget) return;
+  const lessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
+  const step = DDALearning.lessonNextStep(lessonProgress);
+  stepEl.textContent = step === 'review' ? 'leçon terminée' : (NEXT_STEP_PHRASE[step] || '—');
+  document.getElementById('terminal-meta-module').textContent = continueTarget.lesson.id;
+  const xpKey = step === 'lesson' ? 'lessonViewed' : step === 'exercise' ? 'exerciseComplete' : step === 'quiz' ? 'quizComplete' : null;
+  const nextXp = xpKey && continueTarget.lesson.xp ? continueTarget.lesson.xp[xpKey] : null;
+  document.getElementById('terminal-meta-xp').textContent = nextXp ? `+${nextXp} XP` : '—';
+}
+
+// Reuses the same honest, structurally-labelled demo data as the full Markets screen —
+// no new API, no new figures, same "Non connecté" badge and decorative sparkline path.
+function renderTerminalMarketIntelligence() {
+  const row = document.getElementById('terminal-mi-row');
+  if (!row) return;
+  row.innerHTML = MARKET_DEMO.indices.map(item => `
+    <div class="terminal-mi-idx">
+      <div class="top"><b>${item.label}</b><span class="badge"><svg class="icon"><use href="#icon-blocked"/></svg>Non connecté</span></div>
+      <svg class="index-sparkline" viewBox="0 0 120 30" aria-hidden="true"><path d="M2 18 L22 18 L42 12 L62 20 L82 10 L102 16 L118 14"/></svg>
+    </div>`).join('');
+}
+
+// The learner's own most recent Journal entry, or an honest empty state — never an
+// invented example quote.
+function renderTerminalJournalNote() {
+  const el = document.getElementById('terminal-journal-note');
+  if (!el) return;
+  const entries = prototypeState.journal?.entries || [];
+  if (!entries.length) {
+    el.innerHTML = '<p style="font-style:normal">Aucune entrée pour l’instant — ta prochaine observation apparaîtra ici.</p>';
+    return;
+  }
+  const entry = entries[0];
+  const snippet = entry.decision || entry.scenario || entry.context || entry.note || '';
+  const trimmed = snippet.length > 140 ? `${snippet.slice(0, 140)}…` : snippet;
+  el.innerHTML = `<p>« ${trimmed || 'Entrée enregistrée sans détail.'} »<small>${entry.market || 'Sans marché précisé'} — ${formatJournalDate(entry.createdAt)}</small></p>`;
+}
+
+// Only the active lesson's own competency is real; the other two rows mirror the
+// exact "À découvrir" honesty already used on the Progression screen's skill-cards —
+// never a fabricated level for a competency nothing in the curriculum measures yet.
+function renderTerminalSkillmap(continueTarget) {
+  const el = document.getElementById('terminal-skillmap');
+  if (!el || !continueTarget) return;
+  const lessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
+  const level = competencyLevel(lessonProgress);
+  const rows = [
+    { label: continueTarget.lesson.competency.label, real: true },
+    { label: 'Gestion du risque', real: false },
+    { label: 'Discipline', real: false }
+  ];
+  el.innerHTML = rows.map(row => `
+    <div class="terminal-skillmap-row">
+      <span>${row.label}</span>
+      ${row.real
+        ? `<div class="terminal-thread-beads" role="img" aria-label="${beadsAriaLabel(level)}">${renderBeads(level)}</div>`
+        : '<small>À découvrir</small>'}
+    </div>`).join('');
+}
+
 function renderState() {
   const name = prototypeState.user?.name || 'Richard';
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'RD';
   const activeLessonProgress = DDALearning.getLessonProgress(prototypeState, activeLessonId);
-  const progress = DDALearning.lessonProgressPercent(activeLessonProgress);
   const xp = DDALearning.totalXp(DDA.curriculum, prototypeState) || 20;
   const complete = Boolean(activeLessonProgress.quizComplete);
+  const continueTarget = resolveContinueTarget();
+  // The ring tracks whatever lesson the Terminal is actually pointing the learner to,
+  // not the fixed primary lesson — otherwise it would freeze at 100% forever once M0.1
+  // is done while M0.2 is genuinely in progress.
+  const continueLessonProgress = continueTarget
+    ? DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id)
+    : activeLessonProgress;
+  const progress = DDALearning.lessonProgressPercent(continueLessonProgress);
 
   document.getElementById('dashboard-name').textContent = name;
   document.getElementById('profile-name').textContent = name;
   document.getElementById('profile-avatar').textContent = initials;
+  document.getElementById('greeting-prefix').textContent = greetingPrefix();
   document.getElementById('module-percent').textContent = `${progress}%`;
   document.getElementById('module-ring').style.setProperty('--progress', progress);
   document.getElementById('week-xp').textContent = `+${xp} XP`;
@@ -541,18 +634,22 @@ function renderState() {
       ? `Objectif : ${prototypeState.onboarding.goal}. Prochaine étape : terminer ${activeLessonId}.`
       : 'Une étape claire pour continuer à progresser.';
 
-  const continueTarget = resolveContinueTarget();
   if (continueTarget) {
-    const continueLessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
     const continueComplete = continueLessonProgress.quizComplete;
     document.getElementById('lesson-state-pill').textContent = continueComplete ? 'Validée' : 'En cours';
     const lessonIndex = continueTarget.module.lessons.findIndex(l => l.id === continueTarget.lesson.id) + 1;
     document.getElementById('lesson-index-label').textContent = continueComplete ? 'COMPÉTENCE VALIDÉE' : `LEÇON ${lessonIndex} SUR ${continueTarget.module.lessons.length}`;
     document.getElementById('lesson-primary-action').innerHTML = continueComplete ? 'Revoir la leçon <span>→</span>' : 'Reprendre la leçon <span>→</span>';
     document.getElementById('lesson-primary-action').dataset.view = LESSON_VIEW_ID[continueTarget.lesson.id] || 'lesson';
+    document.getElementById('terminal-lead-module').textContent = continueTarget.module.title;
+    document.getElementById('terminal-lead-title').textContent = continueTarget.lesson.title;
+    document.getElementById('terminal-lead-summary').textContent = continueTarget.lesson.summary;
   }
-  updateCockpitAlert(continueTarget);
-  renderRecentActivity();
+  renderTerminalThread(continueTarget);
+  renderTerminalMeta(continueTarget);
+  renderTerminalMarketIntelligence();
+  renderTerminalJournalNote();
+  renderTerminalSkillmap(continueTarget);
 
   document.getElementById('market-skill-label').textContent = activeLessonProgress.quizComplete ? 'Fondation validée' : activeLessonProgress.exerciseComplete ? 'En progression' : 'En démarrage';
   setLevelMeter('market-skill-level', competencyLevel(activeLessonProgress));
@@ -561,18 +658,6 @@ function renderState() {
   renderCertificatePreview(activeLessonProgress);
   renderJournalList();
   renderJournalPlan();
-
-  const step = DDALearning.lessonNextStep(activeLessonProgress);
-  ['action-lesson', 'action-exercise', 'action-quiz'].forEach(id => document.getElementById(id).classList.remove('done', 'current'));
-  if (step === 'review') {
-    ['action-lesson', 'action-exercise', 'action-quiz'].forEach(id => document.getElementById(id).classList.add('done'));
-  } else if (step === 'quiz') {
-    document.getElementById('action-lesson').classList.add('done');
-    document.getElementById('action-exercise').classList.add('done');
-    document.getElementById('action-quiz').classList.add('current');
-  } else {
-    document.getElementById('action-lesson').classList.add('current');
-  }
 
   const journey = document.querySelector('.journey-button');
   journey.textContent = complete ? `Revoir ${activeLessonId}` : prototypeState.onboarding?.complete ? `Reprendre ${activeLessonId}` : 'Tester le parcours';
