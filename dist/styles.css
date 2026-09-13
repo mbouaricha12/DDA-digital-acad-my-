@@ -80,6 +80,11 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .data-mode-button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
 .journey-button{display:none}
 .icon-button{position:relative;border:1px solid var(--line);width:40px;height:40px;min-width:40px;border-radius:50%;display:grid;place-items:center;background:transparent;cursor:pointer}
+/* Learning Focus Mode — toggled by showView() (app.js) purely via this body class, no
+   new routing. Calms the topbar's two "leave/distract" affordances while inside a
+   lesson (real exit stays available: sidebar nav + the lesson's own back-link);
+   DDA's own identity — logo, context title — stays fully visible. */
+body.lesson-focus .journey-button,body.lesson-focus .icon-button{display:none!important}
 .notification-dot{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--gold);right:8px;top:8px;box-shadow:0 0 0 2px var(--navy-950)}
 
 /* ---------- Views ---------- */
@@ -128,11 +133,17 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .mobile-nav button .icon{width:20px;height:20px;margin:0 auto}
 .mobile-nav button.active{color:var(--gold)}
 
-.lesson-loop{display:flex;gap:0;flex-wrap:wrap;margin:16px 0 0;list-style:none;padding:0;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.03em}
-.lesson-loop li{display:flex;align-items:center;gap:6px}
-.lesson-loop li:not(:last-child):after{content:"→";margin:0 8px;color:var(--line)}
-.lesson-loop li.now{color:var(--gold-soft)}
-.lesson-loop li.done{color:var(--teal)}
+/* Fil de maîtrise — Learning: same bead-chain signature as the Terminal, same real
+   state (updateLessonLoop() in app.js still just toggles .done/.now on these <li>s —
+   nothing here changes what drives it), a rail of real steps instead of a decorative bar. */
+.lesson-loop{display:flex;gap:0;flex-wrap:wrap;align-items:center;margin:18px 0 0;list-style:none;padding:0;font-size:11px;color:#8a7f6a;font-weight:700;letter-spacing:.03em}
+.lesson-loop li{display:flex;align-items:center;gap:7px}
+.lesson-loop li:not(:last-child):after{content:"";width:16px;height:1px;background:#DCD0AF;margin:0 10px;flex:none}
+.loop-bead{width:8px;height:8px;border-radius:50%;background:#DCD0AF;flex:none;box-sizing:border-box;display:block}
+.lesson-loop li.done .loop-bead{background:var(--teal)}
+.lesson-loop li.now .loop-bead{width:11px;height:11px;background:var(--ivory);border:2px solid var(--gold)}
+.lesson-loop li.now{color:var(--ink)}
+.lesson-loop li.done{color:#6b6250}
 .pill{background:var(--navy-950);color:var(--white);padding:6px 11px;border-radius:100px}
 .lesson-index{color:var(--gold-soft)!important;font-size:11px;font-weight:900;letter-spacing:.13em}
 .progress-ring{
@@ -267,9 +278,15 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .journey-node p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
 
 /* ---------- Lesson ---------- */
+/* ---------- Learning Experience Integration — Design System Propagation #1 ----------
+   Systemic Terminal elements imported (typography hierarchy, navy/ivory ratios, editorial
+   rhythm, rail separators, CTA/focus discipline, Fil de maîtrise) — never the Terminal's
+   own disposition or dashboard-specific blocks. #lesson/#lesson-m02 only. */
+#lesson,#lesson-m02{background:linear-gradient(165deg,var(--ivory),var(--ivory-2) 92%);color:var(--ink)}
+#lesson .eyebrow.gold,#lesson-m02 .eyebrow.gold{color:var(--blue)}
 .lesson-layout{display:grid;grid-template-columns:1fr;gap:0}
-.back-link{color:var(--muted);margin-bottom:22px;padding:8px 0;background:none;border:0;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-.lesson-lead{font-size:16px;color:var(--muted)}
+.back-link{color:var(--muted-2);margin-bottom:22px;padding:8px 0;background:none;border:0;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.lesson-lead{font-size:16px;color:var(--muted-2)}
 .video-stage{
   aspect-ratio:16/11;border:1px solid var(--line);border-radius:var(--r-lg);
   background:radial-gradient(circle at 50% 15%,#1c2f57,#070c17 68%);
@@ -286,34 +303,36 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .play-button:hover{transform:scale(1.06)}
 #video-caption{position:absolute;bottom:14px;margin:0;color:var(--muted);font-size:12px;text-align:center;padding:0 14px}
 .lesson-copy{margin-top:30px}
-.lesson-copy p{color:#c2c5d8;font-size:16px}
-.principle{margin:24px 0;padding:20px;border-left:3px solid var(--gold);background:var(--navy-800);border-radius:0 var(--r-sm) var(--r-sm) 0;display:flex;gap:14px;align-items:flex-start}
-.principle .icon{color:var(--gold-soft);flex:none;margin-top:2px}
-.principle span{color:var(--gold-soft);font-size:11px;text-transform:uppercase;font-weight:900;letter-spacing:.1em;display:block;margin-bottom:4px}
+.lesson-copy p{color:var(--muted-2);font-size:16px}
+.principle{margin:24px 0;padding:20px;border-left:3px solid var(--gold);background:#F2ECDA;border-radius:0 var(--r-sm) var(--r-sm) 0;display:flex;gap:14px;align-items:flex-start}
+.principle .icon{color:var(--gold);flex:none;margin-top:2px}
+.principle span{color:#8a6f2e;font-size:11px;text-transform:uppercase;font-weight:900;letter-spacing:.1em;display:block;margin-bottom:4px}
+.principle strong{color:var(--ink)}
 /* A small tick before each narrative-beat eyebrow inside the lesson reader —
    a quiet echo of the step markers in .lesson-loop, DDA's own rhythm motif
    rather than a generic section label. */
 .lesson-main > .eyebrow.gold:before,.lesson-copy > .eyebrow.gold:before,.comparison-block > .eyebrow.gold:before,.learning-check > .eyebrow.gold:before{content:"";width:14px;height:1px;background:var(--gold);flex:none}
 
-.example-callout{margin:24px 0;padding:18px 20px;border-radius:var(--r-md);background:rgba(13,166,217,.07);border:1px solid rgba(13,166,217,.25);display:flex;gap:14px;align-items:flex-start}
-.example-callout .icon{color:var(--blue-2);flex:none;margin-top:2px}
-.example-callout span{color:var(--blue-2);font-size:11px;text-transform:uppercase;font-weight:900;letter-spacing:.1em;display:block;margin-bottom:4px}
-.example-callout p{margin:0;font-style:italic;font-size:15px;color:#c2c5d8}
+.example-callout{margin:24px 0;padding:18px 20px;border-radius:var(--r-md);background:#EAF3F8;border:1px solid rgba(11,111,174,.2);display:flex;gap:14px;align-items:flex-start}
+.example-callout .icon{color:var(--blue);flex:none;margin-top:2px}
+.example-callout span{color:var(--blue);font-size:11px;text-transform:uppercase;font-weight:900;letter-spacing:.1em;display:block;margin-bottom:4px}
+.example-callout p{margin:0;font-style:italic;font-size:15px;color:var(--ink)}
 
 .comparison-block{margin:26px 0}
 .comparison-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}
-.comparison-col{padding:16px;border-radius:var(--r-md);border:1px solid var(--line)}
+.comparison-col{padding:16px;border-radius:var(--r-md);border:1px solid #DCD0AF}
 .comparison-col span{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;margin-bottom:10px}
 .comparison-col ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
-.comparison-col li{font-size:13px;color:var(--muted);padding-left:14px;position:relative}
+.comparison-col li{font-size:13px;color:var(--muted-2);padding-left:14px;position:relative}
 .comparison-col li:before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:currentColor}
-.comparison-col.bad{background:rgba(217,115,115,.06)}
-.comparison-col.bad span{color:var(--red)}
-.comparison-col.good{background:rgba(24,155,146,.08)}
-.comparison-col.good span{color:var(--teal)}
-.learning-check{scroll-margin-top:80px;margin-top:26px;padding:22px;border:1px solid var(--line);border-left:3px solid var(--blue-2);border-radius:var(--r-md);background:var(--navy-800);transition:opacity .3s}
+.comparison-col.bad{background:rgba(217,115,115,.08)}
+.comparison-col.bad span{color:#b64a4a}
+.comparison-col.good{background:rgba(24,155,146,.1)}
+.comparison-col.good span{color:#0f6e64}
+.learning-check{scroll-margin-top:80px;margin-top:26px;padding:22px;border:1px solid var(--line);border-left:3px solid var(--blue-2);border-radius:var(--r-md);background:var(--navy-800);transition:opacity .3s;box-shadow:0 10px 30px -18px rgba(5,11,20,.5)}
 .learning-check.locked-check{border-left-color:var(--line)}
 .learning-check h2{font-size:22px}
+.learning-check .eyebrow.gold{color:var(--gold-soft)!important}
 .answer-grid{display:grid;gap:10px;margin-top:18px}
 .answer-grid button{background:var(--navy-700);color:var(--white);border:1px solid var(--line);border-radius:12px;text-align:left;padding:15px;font:inherit;cursor:pointer;min-height:50px;transition:border-color .15s,transform .1s}
 .answer-grid button:hover{border-color:var(--gold)}
@@ -327,50 +346,57 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .feedback.error{color:#e3a1a1}
 .locked-check{opacity:.45;position:relative}
 .locked-check:after{content:"Termine d'abord l'exercice";position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:0 20px;background:rgba(8,14,25,.75);border-radius:var(--r-md);font-weight:800;font-size:13px}
-.result-card{margin-top:26px;border:1px solid var(--teal);border-radius:var(--r-md);padding:22px;display:flex;gap:16px;background:linear-gradient(135deg,rgba(24,155,146,.14),rgba(11,111,174,.08))}
+/* Proof of learning, not a game reward panel: paper-toned card, competency named
+   before XP (data order unchanged — the stats already lead with competency), no
+   confetti, no invented level, no victory language. */
+.result-card{margin-top:26px;border:1px solid #cfc19a;border-radius:var(--r-md);padding:24px;display:flex;gap:16px;background:var(--paper,#FBF9F3)}
 .result-card[hidden]{display:none}
 .result-card.just-completed{animation:dda-pop .5s var(--ease)}
 @keyframes dda-pop{from{opacity:0;transform:scale(.94) translateY(6px)}to{opacity:1;transform:none}}
-.result-icon{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--teal);color:var(--navy-950);font-size:22px;font-weight:900;flex:none}
-.result-card h2{font-size:23px;margin-bottom:8px}
-.result-stats{display:grid;gap:12px;margin:16px 0;padding:14px 16px;border:1px solid rgba(24,155,146,.3);border-radius:var(--r-sm);background:rgba(5,11,20,.35)}
+.result-icon{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--teal);color:#fff;font-size:22px;font-weight:900;flex:none}
+.result-card .eyebrow{color:var(--muted-2)}
+.result-card h2{font-size:23px;margin-bottom:8px;color:var(--ink)}
+.result-card > div > p{color:var(--muted-2)}
+.result-stats{display:grid;gap:12px;margin:16px 0;padding:14px 16px;border:1px solid #DCD0AF;border-radius:var(--r-sm);background:#F2ECDA}
 .result-stats div{display:flex;flex-direction:column;gap:2px}
-.result-stats dt{margin:0;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
-.result-stats dd{margin:0;font-size:14px;font-weight:800;color:var(--white)}
+.result-stats dt{margin:0;color:var(--muted-2);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.result-stats dd{margin:0;font-size:14px;font-weight:800;color:var(--ink)}
 .result-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px}
-.result-feedback{color:var(--muted);font-size:13px}
+.result-actions .secondary-action{color:var(--ink);border-color:#cfc19a}
+.result-feedback{color:var(--muted-2);font-size:13px}
 .lesson-actions{position:sticky;bottom:calc(68px + var(--safe-b));display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:14px 0;margin-top:34px;background:var(--navy-950)}
 .lesson-outline{display:none}
-.saved-state{font-size:12px;padding:13px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);margin-top:20px}
+.saved-state{font-size:12px;padding:13px;border:1px dashed #cfc19a;border-radius:12px;color:var(--muted-2);margin-top:20px}
 
 /* ---------- Learning & Engagement System V1 — block types ---------- */
 .competency-check-block{display:flex;align-items:center;gap:12px;margin:24px 0;padding:14px 18px;border-radius:var(--r-sm);font-size:13.5px}
-.competency-check-block.targets{background:rgba(13,166,217,.08);border:1px solid rgba(13,166,217,.25);color:#c2c5d8}
-.competency-check-block.targets .icon{color:var(--blue-2)}
-.competency-check-block.confirms{background:rgba(24,155,146,.1);border:1px solid rgba(24,155,146,.3);color:#c2c5d8}
-.competency-check-block.confirms .icon{color:var(--teal)}
+.competency-check-block.targets{background:#EAF3F8;border:1px solid rgba(11,111,174,.2);color:var(--muted-2)}
+.competency-check-block.targets .icon{color:var(--blue)}
+.competency-check-block.confirms{background:rgba(24,155,146,.1);border:1px solid rgba(24,155,146,.3);color:var(--muted-2)}
+.competency-check-block.confirms .icon{color:#0f6e64}
 .competency-check-block .icon{flex:none;width:20px;height:20px}
-.competency-check-block strong{color:var(--white)}
+.competency-check-block strong{color:var(--ink)}
 .competency-check-block p{margin:0}
 
-.journal-link-block{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:26px 0;padding:18px 20px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800)}
+.journal-link-block{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:26px 0;padding:18px 20px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800);box-shadow:0 10px 30px -18px rgba(5,11,20,.5)}
 .journal-link-block .icon{color:var(--gold-soft);flex:none;width:22px;height:22px}
 .journal-link-block p{flex:1;min-width:180px;margin:0;color:var(--muted);font-size:13.5px}
 .journal-link-block .secondary-action{width:auto}
 
 .image-explainer-block{margin:26px 0}
 .image-explainer-block .photo-frame{height:220px}
-.image-explainer-block figcaption{color:var(--muted);font-size:12.5px;margin-top:8px;text-align:center}
+.image-explainer-block figcaption{color:var(--muted-2);font-size:12.5px;margin-top:8px;text-align:center}
 
 .video-explainer-block{margin:26px 0}
 .video-explainer-block video{width:100%;border-radius:var(--r-lg);display:block}
 .video-explainer-block .photo-frame{height:220px}
-.video-explainer-caption{color:var(--muted);font-size:12.5px;margin-top:8px;text-align:center}
+.video-explainer-caption{color:var(--muted-2);font-size:12.5px;margin-top:8px;text-align:center}
 
-.mini-simulation-block,.graphical-exercise-block,.decision-choice-block{margin:26px 0;padding:22px;border:1px solid var(--line);border-left:3px solid var(--blue-2);border-radius:0 var(--r-md) var(--r-md) 0;background:var(--navy-800)}
+.mini-simulation-block,.graphical-exercise-block,.decision-choice-block{margin:26px 0;padding:22px;border:1px solid var(--line);border-left:3px solid var(--blue-2);border-radius:0 var(--r-md) var(--r-md) 0;background:var(--navy-800);box-shadow:0 10px 30px -18px rgba(5,11,20,.5)}
+.mini-simulation-block .eyebrow.gold,.graphical-exercise-block .eyebrow.gold,.decision-choice-block .eyebrow.gold{color:var(--gold-soft)!important}
 .mini-simulation-stage,.graphical-exercise-canvas{margin-top:16px;padding:28px 18px;border:1px dashed var(--line);border-radius:var(--r-sm);text-align:center;color:var(--muted);font-size:13px}
 .decision-choice-options{display:grid;gap:10px;margin-top:16px}
-.decision-option{background:var(--navy-700);color:var(--white);border:1px solid var(--line);border-radius:12px;text-align:left;padding:14px 15px;font:inherit;cursor:pointer;transition:border-color .15s}
+.decision-option{background:var(--navy-700);color:var(--white);border:1px solid var(--line);border-radius:12px;text-align:left;padding:14px 15px;font:inherit;cursor:pointer;transition:border-color .15s;min-height:44px}
 .decision-option:hover{border-color:var(--gold)}
 .decision-choice-options[data-question] .decision-option.correct{border-color:var(--green);background:rgba(79,190,133,.14)}
 .decision-choice-options[data-question] .decision-option.incorrect{border-color:var(--red);background:rgba(217,115,115,.12);animation:dda-shake .3s}
@@ -379,7 +405,8 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 /* ---------- Golden Lesson #2 — synthetic pedagogical chart + zone picker ----------
    Every chart here is hand-authored geometry (dda-core.js), never real market
    data — the caption on every chart says so explicitly, on purpose. */
-.chart-observe-block,.zone-identify-block{margin:26px 0;padding:22px;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 var(--r-md) var(--r-md) 0;background:var(--navy-800)}
+.chart-observe-block,.zone-identify-block{margin:26px 0;padding:22px;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 var(--r-md) var(--r-md) 0;background:var(--navy-800);box-shadow:0 10px 30px -18px rgba(5,11,20,.5)}
+.chart-observe-block .eyebrow.gold,.zone-identify-block .eyebrow.gold{color:var(--gold-soft)!important}
 .chart-prompt{color:var(--muted);margin-top:6px}
 .chart-frame{margin-top:16px;border-radius:var(--r-md);background:var(--navy-900);padding:12px}
 .price-chart{width:100%;height:auto;display:block}

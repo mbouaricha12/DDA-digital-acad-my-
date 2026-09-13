@@ -418,8 +418,11 @@ function updateLessonLoop(lessonDef, lessonProgress, loopId) {
   const currentIndex = order.indexOf(step);
   loop.querySelectorAll('li').forEach(item => {
     const itemIndex = order.indexOf(item.dataset.step);
+    const isNow = itemIndex === currentIndex && step !== 'review';
     item.classList.toggle('done', itemIndex < currentIndex || step === 'review');
-    item.classList.toggle('now', itemIndex === currentIndex && step !== 'review');
+    item.classList.toggle('now', isNow);
+    if (isNow) item.setAttribute('aria-current', 'step');
+    else item.removeAttribute('aria-current');
   });
 }
 
@@ -724,6 +727,7 @@ function showView(id, recordEvent = true) {
   }
   views.forEach(view => view.classList.toggle('active', view.id === id));
   [...desktopItems, ...mobileItems].forEach(item => item.classList.toggle('active', item.dataset.view === id));
+  document.body.classList.toggle('lesson-focus', id === 'lesson' || id === 'lesson-m02');
   contextTitle.textContent = titles[id] || 'DDA';
   history.replaceState(null, '', `#${id}`);
   window.scrollTo({ top: 0, behavior: 'smooth' });
