@@ -75,6 +75,15 @@ function countActiveDays(events) {
   return new Set((events || []).map(event => event.at.slice(0, 10))).size;
 }
 
+// Real, computed from the same event log as countActiveDays — never fabricated —
+// scoped to a single view's own "view_opened" events (e.g. how many distinct days
+// this device has opened Market Intelligence).
+function countActiveDaysForView(events, viewId) {
+  return new Set((events || [])
+    .filter(event => event.name === 'view_opened' && event.metadata?.view === viewId)
+    .map(event => event.at.slice(0, 10))).size;
+}
+
 let prototypeState = DDA.load();
 
 function saveState(update) {
@@ -472,6 +481,12 @@ function renderState() {
   document.getElementById('week-xp').textContent = `+${xp} XP`;
   const activeDays = countActiveDays(prototypeState.events);
   document.getElementById('active-days').textContent = `${activeDays} jour${activeDays > 1 ? 's' : ''}`;
+  const marketVisitDays = countActiveDaysForView(prototypeState.events, 'markets');
+  const marketVisitEl = document.getElementById('market-visit-days');
+  if (marketVisitEl) {
+    marketVisitEl.textContent = String(marketVisitDays);
+    document.getElementById('market-visit-days-suffix').textContent = marketVisitDays > 1 ? 'jours' : 'jour';
+  }
   document.getElementById('personalized-next').textContent = complete
     ? `${activeLessonId} est validée. Ton prochain module sera bientôt disponible.`
     : prototypeState.onboarding?.goal

@@ -542,32 +542,55 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .guardrail-list li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)}
 .guardrail-list .icon{color:var(--red);flex:none;width:18px;height:18px}
 
-/* ---------- Markets ---------- */
-.index-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:20px}
-.index-card{padding:18px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-700);display:grid;gap:10px}
+/* ---------- Markets & BRVM — three distinct zones: vue marché / contexte pédagogique / BRVM ---------- */
+.market-visit-cue{display:flex;align-items:center;gap:10px;margin:16px 0 0;padding:12px 16px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12.5px;width:fit-content}
+.market-visit-cue .icon{color:var(--gold-soft);flex:none;width:16px;height:16px}
+.market-visit-cue strong{color:var(--white)}
+
+.market-zone{margin-top:36px}
+.market-zone:first-of-type{margin-top:22px}
+.zone-label{margin-bottom:14px}
+
+.index-grid{display:grid;grid-template-columns:1fr;gap:0;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--navy-800)}
+.index-card{padding:18px 20px;border-bottom:1px solid var(--line);border-radius:0;background:transparent;display:grid;gap:8px}
+.index-card:last-child{border-bottom:0}
+.index-card:first-child{background:linear-gradient(160deg,#1b2452,#0d1330);padding:28px 24px;gap:12px}
+.index-card:first-child .index-card-head strong{font-family:Georgia,serif;font-size:21px;color:var(--ivory)}
+.index-card:first-child .index-sparkline{height:42px}
+.index-card:first-child p{font-size:14px}
+.index-card:last-child .index-card-head strong{font-size:14px}
+.index-card:last-child .index-sparkline{height:20px;opacity:.6}
 .index-card-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .index-card-head strong{font-size:15px}
 .index-sparkline{width:100%;height:30px;stroke:var(--line);stroke-width:2;stroke-dasharray:3 4;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .index-card p{color:var(--muted);font-size:13px;margin:0}
 .data-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 9px;white-space:nowrap}
 .data-badge .icon{width:11px;height:11px}
-.market-layout{display:grid;grid-template-columns:1fr;gap:16px}
-.market-main{display:grid;gap:16px}
-.market-brief,.brvm-panel,.market-calendar{padding:22px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800)}
-.market-brief h2,.brvm-panel h2,.market-calendar h2{font-size:26px}
+
+.market-brief,.market-calendar{padding:22px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800)}
+.market-brief h2,.market-calendar h2{font-size:26px}
+.market-calendar{margin-top:16px}
 .market-calendar p{color:var(--muted);font-size:14px}
-#market-calendar-list{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:8px}
-#market-calendar-list li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:11px}
+#market-calendar-list{list-style:none;padding:0;margin:18px 0 0;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--navy-700)}
+#market-calendar-list li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);border-radius:0}
+#market-calendar-list li:last-child{border-bottom:0}
 #market-calendar-list strong{font-size:14px;display:block}
 #market-calendar-list small{color:var(--muted)}
 .brief-step{display:grid;grid-template-columns:36px 1fr;gap:13px;padding:16px 0;border-top:1px solid var(--line)}
 .brief-step:first-of-type{border-top:0}
 .brief-step>span{color:var(--gold-soft);font-family:Georgia,serif;font-size:19px}
-.brief-step p,.brvm-panel p,.brvm-panel li{color:var(--muted);font-size:14px}
-.brvm-panel{background:linear-gradient(165deg,#171d3d,#0c1124)}
-.brvm-panel ul{padding-left:0;list-style:none;display:grid;gap:10px}
+.brief-step p{color:var(--muted);font-size:14px}
+
+.brvm-intro{display:grid;gap:16px;margin-bottom:16px}
+.brvm-intro>*{min-width:0}
+.brvm-photo{height:170px}
+.brvm-panel{padding:22px;border:1px solid var(--line);border-radius:var(--r-md);background:linear-gradient(165deg,#171d3d,#0c1124)}
+.brvm-panel h2{font-size:26px}
+.brvm-panel p,.brvm-panel li{color:var(--muted);font-size:14px}
+.brvm-panel ul{padding-left:0;list-style:none;display:grid;gap:10px;margin-top:14px}
 .brvm-panel li{display:flex;align-items:flex-start;gap:9px}
 .brvm-panel li .icon{color:var(--gold-soft);flex:none;width:16px;height:16px;margin-top:2px}
+.market-zone-brvm .future-label{margin-top:16px}
 
 /* ---------- Broker Hub ---------- */
 .broker-read-guide{display:grid;grid-template-columns:1fr;gap:0;margin-bottom:22px;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--navy-800)}
@@ -794,8 +817,8 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .membership-status{border-left:1px solid var(--gold)}
   .plan-card h2{font-size:36px}
 
-  .index-grid{grid-template-columns:repeat(2,1fr)}
-  .market-layout{grid-template-columns:1.35fr .65fr}
+  .brvm-intro{grid-template-columns:.85fr 1.15fr;align-items:stretch}
+  .brvm-photo{width:100%;height:100%;min-height:280px}
 
   .broker-controls{display:flex;gap:14px}
   .broker-controls select{min-width:220px}
