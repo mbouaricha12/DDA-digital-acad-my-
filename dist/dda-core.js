@@ -89,6 +89,21 @@
       heading: 'Première compétence confirmée.',
       body: 'Tu as compris que le processus de décision passe avant le résultat.'
     });
+    // The stepper (.lesson-loop) and its "done"/"now" highlighting are driven entirely
+    // by this declared sequence — lesson-renderer.js and app.js read `steps`, they never
+    // hardcode a count or a set of labels. Step ids must still be phase ids the central
+    // progress engine (learning-engine.js, unchanged) actually emits from
+    // DDALearning.lessonNextStep — 'lesson' | 'exercise' | 'quiz' | 'review' — since that
+    // engine is what decides which step is current; a lesson can use any ordered subset
+    // of them (a short lesson could skip 'exercise', for instance), but not invent new
+    // ones, and a block only advances a step by actually driving the underlying progress
+    // flag (an 'exercise'-step quiz block completing exerciseComplete, etc.).
+    const steps = Object.freeze([
+      Object.freeze({ id: 'lesson', label: 'Comprendre' }),
+      Object.freeze({ id: 'exercise', label: 'Exercice' }),
+      Object.freeze({ id: 'quiz', label: 'Quiz' }),
+      Object.freeze({ id: 'review', label: 'Résultat' })
+    ]);
     const blocks = Object.freeze([
       Object.freeze({ type: 'competency_check', id: 'competency-intro', step: 'lesson', mode: 'targets', competency }),
       Object.freeze({ type: 'text_short', id: 'concept', outline: content.concept.heading, step: 'lesson', eyebrow: 'Le concept', heading: content.concept.heading, body: content.concept.body, principle: content.principle }),
@@ -111,6 +126,7 @@
       practice,
       evaluation,
       result,
+      steps,
       blocks
     });
   }
