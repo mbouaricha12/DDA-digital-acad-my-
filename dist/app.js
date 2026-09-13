@@ -649,8 +649,12 @@ document.getElementById('revert-free').addEventListener('click', () => {
 });
 
 function filterBrokers() {
-  const market = document.getElementById('broker-market').value;
-  const use = document.getElementById('broker-use').value;
+  const marketSelect = document.getElementById('broker-market');
+  const useSelect = document.getElementById('broker-use');
+  const market = marketSelect.value;
+  const use = useSelect.value;
+  marketSelect.classList.toggle('is-filtered', market !== 'all');
+  useSelect.classList.toggle('is-filtered', use !== 'all');
   let visible = 0;
   document.querySelectorAll('.broker-card').forEach(card => {
     const matchMarket = market === 'all' || card.dataset.market.split(' ').includes(market);

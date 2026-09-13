@@ -324,6 +324,36 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .lesson-outline{display:none}
 .saved-state{font-size:12px;padding:13px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);margin-top:20px}
 
+/* ---------- Learning & Engagement System V1 — block types ---------- */
+.competency-check-block{display:flex;align-items:center;gap:12px;margin:24px 0;padding:14px 18px;border-radius:var(--r-sm);font-size:13.5px}
+.competency-check-block.targets{background:rgba(13,166,217,.08);border:1px solid rgba(13,166,217,.25);color:#c2c5d8}
+.competency-check-block.targets .icon{color:var(--blue-2)}
+.competency-check-block.confirms{background:rgba(24,155,146,.1);border:1px solid rgba(24,155,146,.3);color:#c2c5d8}
+.competency-check-block.confirms .icon{color:var(--teal)}
+.competency-check-block .icon{flex:none;width:20px;height:20px}
+.competency-check-block strong{color:var(--white)}
+.competency-check-block p{margin:0}
+
+.journal-link-block{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:26px 0;padding:18px 20px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800)}
+.journal-link-block .icon{color:var(--gold-soft);flex:none;width:22px;height:22px}
+.journal-link-block p{flex:1;min-width:180px;margin:0;color:var(--muted);font-size:13.5px}
+.journal-link-block .secondary-action{width:auto}
+
+.image-explainer-block{margin:26px 0}
+.image-explainer-block .photo-frame{height:220px}
+.image-explainer-block figcaption{color:var(--muted);font-size:12.5px;margin-top:8px;text-align:center}
+
+.video-explainer-block{margin:26px 0}
+.video-explainer-block video{width:100%;border-radius:var(--r-lg);display:block}
+.video-explainer-block .photo-frame{height:220px}
+.video-explainer-caption{color:var(--muted);font-size:12.5px;margin-top:8px;text-align:center}
+
+.mini-simulation-block,.graphical-exercise-block,.decision-choice-block{margin:26px 0;padding:22px;border:1px solid var(--line);border-left:3px solid var(--blue-2);border-radius:0 var(--r-md) var(--r-md) 0;background:var(--navy-800)}
+.mini-simulation-stage,.graphical-exercise-canvas{margin-top:16px;padding:28px 18px;border:1px dashed var(--line);border-radius:var(--r-sm);text-align:center;color:var(--muted);font-size:13px}
+.decision-choice-options{display:grid;gap:10px;margin-top:16px}
+.decision-option{background:var(--navy-700);color:var(--white);border:1px solid var(--line);border-radius:12px;text-align:left;padding:14px 15px;font:inherit;cursor:pointer;transition:border-color .15s}
+.decision-option:hover{border-color:var(--gold)}
+
 /* ---------- Progress ---------- */
 .progress-hero{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;margin-bottom:20px}
 .progress-stat{padding:18px 16px;background:var(--navy-800);display:grid;gap:4px}
@@ -540,28 +570,38 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .brvm-panel li .icon{color:var(--gold-soft);flex:none;width:16px;height:16px;margin-top:2px}
 
 /* ---------- Broker Hub ---------- */
-.broker-read-guide{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:22px}
-.broker-read-guide>div{display:flex;gap:12px;padding:16px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800)}
+.broker-read-guide{display:grid;grid-template-columns:1fr;gap:0;margin-bottom:22px;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--navy-800)}
+.broker-read-guide>div{display:flex;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);border-radius:0;background:transparent}
+.broker-read-guide>div:last-child{border-bottom:0}
 .broker-read-guide .icon{color:var(--gold-soft);flex:none;margin-top:2px}
 .broker-read-guide strong{display:block;margin-bottom:4px;font-size:14px}
 .broker-read-guide p{color:var(--muted);font-size:13px;margin:0}
 .broker-orient-cue{color:var(--muted);font-size:13px;margin:0 0 14px}
 .broker-controls{display:grid;gap:12px;margin-bottom:20px}
 .broker-controls label{display:grid;gap:6px;color:var(--muted);font-size:13px}
-.broker-controls select{width:100%;min-height:48px;background:var(--navy-800);color:var(--white);border:1px solid var(--line);padding:12px;border-radius:11px;font:inherit}
+.broker-control-label{display:flex;align-items:center;gap:7px;font-weight:700}
+.broker-control-label .icon{color:var(--gold-soft);width:15px;height:15px}
+.broker-controls select{width:100%;min-height:48px;background:var(--navy-800);color:var(--white);border:1px solid var(--line);padding:12px;border-radius:11px;font:inherit;transition:border-color .15s}
+.broker-controls select.is-filtered{border-color:rgba(217,164,65,.55)}
 .broker-grid{display:grid;grid-template-columns:1fr;gap:14px}
-.broker-card{padding:22px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800)}
-.broker-card>div:first-child{display:flex;justify-content:space-between;align-items:center;gap:14px}
-.broker-monogram{display:grid;place-items:center;width:50px;height:50px;border-radius:16px;background:var(--ivory);color:var(--navy-950);font-family:Georgia,serif;font-weight:900;font-size:21px}
-.verification{color:var(--gold-soft);font-size:10px;text-transform:uppercase;font-weight:900;text-align:right;display:flex;align-items:center;gap:5px;justify-content:flex-end}
-.verification .icon{width:13px;height:13px}
-.broker-card h2{margin:20px 0 8px;font-size:24px}
-.broker-card>p{color:var(--muted);font-size:14px}
-.broker-card dl{display:grid;gap:1px;background:var(--line);margin:20px 0;border-radius:10px;overflow:hidden}
+.broker-card{padding:22px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800);transition:opacity .2s}
+.broker-card-head{display:flex;align-items:center;gap:14px}
+.broker-monogram{display:grid;place-items:center;width:50px;height:50px;border-radius:16px;background:var(--ivory);color:var(--navy-950);font-family:Georgia,serif;font-weight:900;font-size:21px;flex:none}
+.broker-card-heading h2{font-size:22px;margin-bottom:4px}
+.broker-card-heading p{color:var(--muted);font-size:13.5px;margin:0}
+.broker-photo{margin:18px 0;height:130px}
+.broker-card dl{display:grid;gap:1px;background:var(--line);margin:18px 0;border-radius:10px;overflow:hidden}
 .broker-card dl div{background:var(--navy-700);padding:12px;display:flex;justify-content:space-between;gap:15px;font-size:13px}
+.broker-card dl div:nth-child(-n+2){background:var(--navy-800)}
+.broker-card dl div:nth-child(-n+2) dt{color:var(--gold-soft);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;font-weight:800}
+.broker-card dl div:nth-child(-n+2) dd{color:var(--white);font-weight:700}
 .broker-card dt{color:var(--muted)}
 .broker-card dd{margin:0;text-align:right}
-.disclosure{margin-top:18px;padding:16px;border-left:2px solid var(--gold);color:var(--muted);font-size:13px;display:flex;align-items:flex-start;gap:10px}
+.broker-card-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.verification{color:var(--gold-soft);font-size:10px;text-transform:uppercase;font-weight:900;display:flex;align-items:center;gap:5px}
+.verification .icon{width:13px;height:13px}
+.broker-card-foot .broker-detail{width:auto;margin:0}
+.disclosure{margin-top:18px;padding:16px 18px;border-left:2px solid var(--gold);border-radius:0 var(--r-sm) var(--r-sm) 0;background:var(--navy-800);color:var(--muted);font-size:13px;display:flex;align-items:flex-start;gap:10px}
 .disclosure .icon{color:var(--gold-soft);flex:none;margin-top:2px}
 .broker-empty{padding:34px 20px;text-align:center;border:1px dashed var(--line);border-radius:var(--r-md)}
 
@@ -672,6 +712,8 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .broker-grid,.support-grid{grid-template-columns:repeat(2,1fr)}
   .broker-controls{grid-template-columns:1fr 1fr}
   .broker-read-guide{grid-template-columns:repeat(3,1fr)}
+  .broker-read-guide>div{border-bottom:0;border-right:1px solid var(--line)}
+  .broker-read-guide>div:last-child{border-right:0}
   .comparison-grid{grid-template-columns:1fr 1fr}
   .profile-fields{grid-template-columns:1fr 1fr}
   .access-shell{grid-template-columns:1fr}
