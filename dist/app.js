@@ -294,16 +294,21 @@ function renderJournalList() {
   const entries = prototypeState.journal?.entries || [];
   document.getElementById('journal-count').textContent = `${entries.length} entrée${entries.length > 1 ? 's' : ''}`;
   document.getElementById('journal-empty').hidden = entries.length > 0;
-  list.innerHTML = entries.map(entry => {
+  const lastEntryLine = document.getElementById('journal-last-entry');
+  lastEntryLine.hidden = entries.length === 0;
+  if (entries.length) lastEntryLine.textContent = `Dernière entrée : ${formatJournalDate(entries[0].createdAt)}`;
+  list.innerHTML = entries.map((entry, idx) => {
     const detailRows = Object.entries(JOURNAL_FIELD_LABELS)
       .filter(([field]) => entry[field])
       .map(([field, label]) => `<div><dt>${label}</dt><dd>${entry[field]}</dd></div>`)
       .join('');
     const snippet = entry.decision || entry.scenario || entry.context || 'Aucun détail renseigné.';
+    const entryNumber = String(entries.length - idx).padStart(2, '0');
     return `
       <li class="journal-entry-card">
         <details>
           <summary>
+            <span class="journal-entry-index">${entryNumber}</span>
             <span class="journal-entry-market">${entry.market || 'Sans marché précisé'}</span>
             <span class="journal-entry-date">${formatJournalDate(entry.createdAt)}</span>
             <span class="journal-entry-snippet">${snippet.slice(0, 90)}</span>

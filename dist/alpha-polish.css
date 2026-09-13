@@ -10,11 +10,11 @@ body{
 }
 
 /* elevation on hover for interactive cards */
-.panel,.path-card,.skill-card,.resource-card,.plan-card,.support-card,.market-brief,.brvm-panel,.profile-panel,.preference-panel,.broker-card{
+.panel,.path-card,.skill-card,.library-entry,.resource-feature,.plan-card,.support-card,.market-brief,.brvm-panel,.profile-panel,.preference-panel,.broker-card{
   transition:transform .22s var(--ease),border-color .22s var(--ease),box-shadow .22s var(--ease);
 }
 @media(hover:hover){
-  .panel:hover,.resource-card:hover,.plan-card:hover{
+  .panel:hover,.resource-feature:hover,.plan-card:hover{
     border-color:rgba(13,166,217,.5);box-shadow:0 16px 38px rgba(0,0,0,.28);
   }
 }
@@ -55,7 +55,7 @@ button:active{transform:translateY(1px)}
 .exchange-diagram,.access-illustration{filter:drop-shadow(0 8px 20px rgba(217,164,65,.12))}
 
 @media(prefers-reduced-motion:reduce){
-  .panel,.path-card,.resource-card,.plan-card{transition:none}
+  .panel,.path-card,.library-entry,.resource-feature,.plan-card{transition:none}
   .exchange-diagram .flow{animation:none}
 }
 
