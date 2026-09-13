@@ -197,12 +197,7 @@
       <p class="eyebrow gold">${module.title} · Leçon ${lessonIndex}</p>
       <h1 id="lesson-title">${lesson.title}</h1>
       <p class="lesson-lead">${lesson.content.lead}</p>
-      <ol class="lesson-loop" id="lesson-loop" aria-label="Progression dans la leçon">
-        <li data-step="lesson">Comprendre</li>
-        <li data-step="exercise">Exercice</li>
-        <li data-step="quiz">Quiz</li>
-        <li data-step="review">Résultat</li>
-      </ol>
+      <ol class="lesson-loop" id="lesson-loop" aria-label="Progression dans la leçon">${lesson.steps.map(s => `<li data-step="${s.id}">${s.label}</li>`).join('')}</ol>
 
       ${lesson.blocks.map(renderBlock).join('\n')}
 

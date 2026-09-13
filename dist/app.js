@@ -410,7 +410,9 @@ function updateLessonLoop(lessonProgress) {
   const loop = document.getElementById('lesson-loop');
   if (!loop) return;
   const step = DDALearning.lessonNextStep(lessonProgress);
-  const order = ['lesson', 'exercise', 'quiz', 'review'];
+  // Step count/order/labels are declared per-lesson (lesson.steps) — this function only
+  // ever asks "where does the id learning-engine.js just returned sit in that sequence?"
+  const order = activeLessonDef.steps.map(s => s.id);
   const currentIndex = order.indexOf(step);
   loop.querySelectorAll('li').forEach(item => {
     const itemIndex = order.indexOf(item.dataset.step);
