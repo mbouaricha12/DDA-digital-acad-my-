@@ -12,75 +12,115 @@
     premium: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'resources_premium', 'certificate_preview', 'advanced_modules']
   });
 
+  /* ---------------------------------------------------------------------
+     DDA Learning & Engagement System V1 — architecture, not content.
+     A lesson is no longer a fixed sequence of named sections (concept then
+     diagram then example then comparison then exercise then quiz then
+     result). It is an ordered list of typed BLOCKS. lesson-renderer.js
+     dispatches each block by its `type` to a dedicated render function.
+     Two lessons can freely use a different set of block types, in a
+     different order and count, without any change to lesson-renderer.js,
+     app.js or index.html — that is the property this exists to prove.
+     Supported block types today (each has a real renderer in
+     lesson-renderer.js): text_short, image_explainer, video, diagram,
+     mini_simulation, scenario, case_study, graphical_exercise,
+     decision_choice, quiz, summary, journal_link, competency_check.
+     "feedback_explanatory" is not a standalone block: it is expressed
+     per-choice inside a quiz block (`choice.feedback`), because that is
+     genuinely how explanatory feedback occurs in this product today —
+     inventing a separate block for it would misrepresent the mechanic.
+     M0.1 below only uses the block types it has real, authored content
+     for (text_short, diagram, case_study, scenario, quiz ×2, summary,
+     competency_check, journal_link). image_explainer, video,
+     mini_simulation, graphical_exercise and decision_choice are real,
+     tested renderers with no invented content behind them yet — see
+     test_dda_v18.js, which exercises each directly with explicitly
+     labelled structural fixtures, never through the live product. M0.1
+     is one valid composition of this engine, not the template every
+     future lesson must copy. --------------------------------------------- */
+  function buildM01Lesson() {
+    const competency = Object.freeze({ id: 'market_understanding', label: 'Compréhension des marchés' });
+    const xp = Object.freeze({ lessonViewed: 30, exerciseComplete: 60, quizComplete: 120 });
+    const content = Object.freeze({
+      lead: 'Avant de lire un graphique, commence par comprendre ce qui se passe réellement sur un marché.',
+      concept: Object.freeze({
+        heading: 'Le marché est un lieu d’échange',
+        body: 'Le trading est une forme de commerce. Sur un marché, certains participants souhaitent acheter un actif et d’autres souhaitent le vendre. Le prix évolue lorsque l’équilibre entre ces intentions change.'
+      }),
+      principle: Object.freeze({
+        label: 'Principe essentiel',
+        text: 'Ton rôle n’est pas de deviner. Ton rôle est d’observer, comprendre et décider selon un plan.'
+      }),
+      diagram: 'exchange',
+      example: Object.freeze({
+        label: 'Exemple concret',
+        text: 'Un participant achète de l’or tandis qu’un autre accepte de le vendre.'
+      }),
+      comparison: Object.freeze({
+        heading: 'Deux façons d’aborder le même marché',
+        bad: Object.freeze({ label: 'Réaction impulsive', items: Object.freeze(['Suivre le mouvement sans le comprendre', 'Décider sous le coup de l’émotion', 'Chercher un gain immédiat']) }),
+        good: Object.freeze({ label: 'Décision méthodique', items: Object.freeze(['Observer avant d’agir', 'Suivre un plan écrit à l’avance', 'Accepter un risque défini']) })
+      })
+    });
+    const practice = Object.freeze({
+      id: 'exercise',
+      label: 'Exercice',
+      heading: 'Qui échange quoi ?',
+      prompt: 'Quelle affirmation décrit le mieux ce qui vient de se passer ?',
+      successText: 'Correct. Tu reconnais le mécanisme fondamental de l’échange.',
+      choices: Object.freeze([
+        Object.freeze({ text: 'Le prix monte toujours après un achat.', correct: false, feedback: 'Un achat ne garantit rien sur la suite : le prix dépend de l’équilibre entre toutes les intentions d’achat et de vente, pas d’une seule transaction.' }),
+        Object.freeze({ text: 'Le marché met en relation des intentions d’achat et de vente.', correct: true }),
+        Object.freeze({ text: 'Le vendeur connaît forcément l’avenir.', correct: false, feedback: 'Personne ne connaît l’avenir avec certitude. Le vendeur accepte simplement de céder l’actif à ce prix, maintenant.' })
+      ])
+    });
+    const evaluation = Object.freeze({
+      id: 'quiz',
+      label: 'Quiz de validation',
+      heading: 'Avant toute décision, que faut-il privilégier ?',
+      successText: 'Correct. La discipline du processus passe avant la précipitation.',
+      choices: Object.freeze([
+        Object.freeze({ text: 'Entrer rapidement pour ne rien manquer.', correct: false, feedback: 'La précipitation est justement ce que ce module déconseille : observer avant d’agir protège ton capital.' }),
+        Object.freeze({ text: 'Chercher un gain immédiat.', correct: false, feedback: 'Un gain isolé ne prouve rien sur la qualité d’une décision — c’est le principe essentiel vu plus haut.' }),
+        Object.freeze({ text: 'Observer, comprendre et suivre un plan.', correct: true })
+      ])
+    });
+    const result = Object.freeze({
+      heading: 'Première compétence confirmée.',
+      body: 'Tu as compris que le processus de décision passe avant le résultat.'
+    });
+    const blocks = Object.freeze([
+      Object.freeze({ type: 'competency_check', id: 'competency-intro', step: 'lesson', mode: 'targets', competency }),
+      Object.freeze({ type: 'text_short', id: 'concept', outline: content.concept.heading, step: 'lesson', eyebrow: 'Le concept', heading: content.concept.heading, body: content.concept.body, principle: content.principle }),
+      Object.freeze({ type: 'diagram', id: 'exchange-diagram', step: 'lesson', diagram: content.diagram, caption: 'Une décision commence par l’observation.' }),
+      Object.freeze({ type: 'case_study', id: 'example', outline: content.example.label, step: 'lesson', label: content.example.label, text: content.example.text }),
+      Object.freeze({ type: 'scenario', id: 'comparison', outline: content.comparison.heading, step: 'lesson', heading: content.comparison.heading, bad: content.comparison.bad, good: content.comparison.good }),
+      Object.freeze({ type: 'quiz', id: 'exercise', outline: practice.heading, step: 'exercise', locked: false, data: practice }),
+      Object.freeze({ type: 'quiz', id: 'quiz', outline: evaluation.heading, step: 'quiz', locked: true, data: evaluation }),
+      Object.freeze({ type: 'journal_link', id: 'journal-prompt', step: 'review', prompt: 'Envie de documenter ce que tu retiens de cette leçon avant de continuer ?', cta: 'Ouvrir Journal & Plan' }),
+      Object.freeze({ type: 'summary', id: 'result', step: 'review', data: result })
+    ]);
+    return Object.freeze({
+      id: 'M0.1',
+      title: 'Le trading comme commerce',
+      summary: 'Acheteurs, vendeurs et échange d’un actif.',
+      estimatedMinutes: 12,
+      competency,
+      xp,
+      content,
+      practice,
+      evaluation,
+      result,
+      blocks
+    });
+  }
+
   // M1-M9 are structural placeholders (empty lessons[]) — no content invented.
   const curriculum = Object.freeze({
     id: 'darius-free',
     title: 'Darius Free',
     modules: Object.freeze([
-      {
-        id: 'M0',
-        title: 'Fondations des marchés',
-        lessons: Object.freeze([
-          {
-            id: 'M0.1',
-            title: 'Le trading comme commerce',
-            summary: 'Acheteurs, vendeurs et échange d’un actif.',
-            estimatedMinutes: 12,
-            competency: { id: 'market_understanding', label: 'Compréhension des marchés' },
-            xp: Object.freeze({ lessonViewed: 30, exerciseComplete: 60, quizComplete: 120 }),
-            // Narrative beats, in reading order — this is the shape every future lesson (M0.2–M9)
-            // will fill in. No content is invented for those; only M0.1 is authored.
-            content: Object.freeze({
-              lead: 'Avant de lire un graphique, commence par comprendre ce qui se passe réellement sur un marché.',
-              concept: Object.freeze({
-                heading: 'Le marché est un lieu d’échange',
-                body: 'Le trading est une forme de commerce. Sur un marché, certains participants souhaitent acheter un actif et d’autres souhaitent le vendre. Le prix évolue lorsque l’équilibre entre ces intentions change.'
-              }),
-              principle: Object.freeze({
-                label: 'Principe essentiel',
-                text: 'Ton rôle n’est pas de deviner. Ton rôle est d’observer, comprendre et décider selon un plan.'
-              }),
-              diagram: 'exchange',
-              example: Object.freeze({
-                label: 'Exemple concret',
-                text: 'Un participant achète de l’or tandis qu’un autre accepte de le vendre.'
-              }),
-              comparison: Object.freeze({
-                heading: 'Deux façons d’aborder le même marché',
-                bad: Object.freeze({ label: 'Réaction impulsive', items: Object.freeze(['Suivre le mouvement sans le comprendre', 'Décider sous le coup de l’émotion', 'Chercher un gain immédiat']) }),
-                good: Object.freeze({ label: 'Décision méthodique', items: Object.freeze(['Observer avant d’agir', 'Suivre un plan écrit à l’avance', 'Accepter un risque défini']) })
-              })
-            }),
-            practice: Object.freeze({
-              id: 'exercise',
-              label: 'Exercice',
-              heading: 'Qui échange quoi ?',
-              prompt: 'Quelle affirmation décrit le mieux ce qui vient de se passer ?',
-              successText: 'Correct. Tu reconnais le mécanisme fondamental de l’échange.',
-              choices: Object.freeze([
-                Object.freeze({ text: 'Le prix monte toujours après un achat.', correct: false, feedback: 'Un achat ne garantit rien sur la suite : le prix dépend de l’équilibre entre toutes les intentions d’achat et de vente, pas d’une seule transaction.' }),
-                Object.freeze({ text: 'Le marché met en relation des intentions d’achat et de vente.', correct: true }),
-                Object.freeze({ text: 'Le vendeur connaît forcément l’avenir.', correct: false, feedback: 'Personne ne connaît l’avenir avec certitude. Le vendeur accepte simplement de céder l’actif à ce prix, maintenant.' })
-              ])
-            }),
-            evaluation: Object.freeze({
-              id: 'quiz',
-              label: 'Quiz de validation',
-              heading: 'Avant toute décision, que faut-il privilégier ?',
-              successText: 'Correct. La discipline du processus passe avant la précipitation.',
-              choices: Object.freeze([
-                Object.freeze({ text: 'Entrer rapidement pour ne rien manquer.', correct: false, feedback: 'La précipitation est justement ce que ce module déconseille : observer avant d’agir protège ton capital.' }),
-                Object.freeze({ text: 'Chercher un gain immédiat.', correct: false, feedback: 'Un gain isolé ne prouve rien sur la qualité d’une décision — c’est le principe essentiel vu plus haut.' }),
-                Object.freeze({ text: 'Observer, comprendre et suivre un plan.', correct: true })
-              ])
-            }),
-            result: Object.freeze({
-              heading: 'Première compétence confirmée.',
-              body: 'Tu as compris que le processus de décision passe avant le résultat.'
-            })
-          }
-        ])
-      },
+      { id: 'M0', title: 'Fondations des marchés', lessons: Object.freeze([buildM01Lesson()]) },
       { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze([]) },
       { id: 'M2', title: 'Risque et discipline', summary: 'Protéger son capital avant de rechercher la performance.', lessons: Object.freeze([]) },
       { id: 'M3', title: 'Module M3', lessons: Object.freeze([]) },

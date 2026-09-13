@@ -14,7 +14,7 @@ body{
   transition:transform .22s var(--ease),border-color .22s var(--ease),box-shadow .22s var(--ease);
 }
 @media(hover:hover){
-  .panel:hover,.resource-feature:hover,.plan-card:hover{
+  .panel:hover,.resource-feature:hover,.plan-card:hover,.broker-card:hover{
     border-color:rgba(13,166,217,.5);box-shadow:0 16px 38px rgba(0,0,0,.28);
   }
 }
