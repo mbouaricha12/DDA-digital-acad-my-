@@ -24,20 +24,25 @@
      Supported block types today (each has a real renderer in
      lesson-renderer.js): text_short, image_explainer, video, diagram,
      mini_simulation, scenario, case_study, graphical_exercise,
-     decision_choice, quiz, summary, journal_link, competency_check.
-     "feedback_explanatory" is not a standalone block: it is expressed
-     per-choice inside a quiz block (`choice.feedback`), because that is
-     genuinely how explanatory feedback occurs in this product today —
-     inventing a separate block for it would misrepresent the mechanic.
+     decision_choice, quiz, summary, journal_link, competency_check,
+     chart_observe, zone_identify. "feedback_explanatory" is not a
+     standalone block: it is expressed per-choice inside a quiz,
+     decision_choice or zone_identify block (`choice.feedback` /
+     `zone.feedback`), because that is genuinely how explanatory feedback
+     occurs in this product today — inventing a separate block for it
+     would misrepresent the mechanic.
      M0.1 below only uses the block types it has real, authored content
      for (text_short, diagram, case_study, scenario, quiz ×2, summary,
      competency_check, journal_link). image_explainer, video,
-     mini_simulation, graphical_exercise and decision_choice are real,
-     tested renderers with no invented content behind them yet — see
-     test_dda_v18.js, which exercises each directly with explicitly
-     labelled structural fixtures, never through the live product. M0.1
-     is one valid composition of this engine, not the template every
-     future lesson must copy. --------------------------------------------- */
+     mini_simulation and graphical_exercise are real, tested renderers
+     with no invented content behind them yet — see test_dda_v18.js,
+     which exercises each directly with explicitly labelled structural
+     fixtures, never through the live product. M0.1 is one valid
+     composition of this engine, not the template every future lesson
+     must copy — Golden Lesson #2 (M0.2, below) proves that by composing
+     chart_observe, zone_identify and a graded decision_choice into a
+     visibly different, observe-then-practice experience with the same
+     engine and zero changes to how M0.1 renders or behaves. ---------- */
   function buildM01Lesson() {
     const competency = Object.freeze({ id: 'market_understanding', label: 'Compréhension des marchés' });
     const xp = Object.freeze({ lessonViewed: 30, exerciseComplete: 60, quizComplete: 120 });
@@ -113,7 +118,11 @@
       Object.freeze({ type: 'quiz', id: 'exercise', outline: practice.heading, step: 'exercise', locked: false, data: practice }),
       Object.freeze({ type: 'quiz', id: 'quiz', outline: evaluation.heading, step: 'quiz', locked: true, data: evaluation }),
       Object.freeze({ type: 'journal_link', id: 'journal-prompt', step: 'review', prompt: 'Envie de documenter ce que tu retiens de cette leçon avant de continuer ?', cta: 'Ouvrir Journal & Plan' }),
-      Object.freeze({ type: 'summary', id: 'result', step: 'review', data: result })
+      // Scope decision (Golden Lesson #2 tranche): Parcours' "current chapter" card
+      // stays bound to M0.1 only (its routing was explicitly not generalized this
+      // tranche — see app.js's isRenderableModule). This CTA is M0.2's real, sole
+      // entry point: reachable once M0.1's quiz is actually complete, never before.
+      Object.freeze({ type: 'summary', id: 'result', step: 'review', data: result, continueTo: Object.freeze({ view: 'lesson-m02', label: 'Continuer vers Support & Résistance' }) })
     ]);
     return Object.freeze({
       id: 'M0.1',
@@ -131,12 +140,181 @@
     });
   }
 
+  /* ---------------------------------------------------------------------
+     Golden Lesson #2 — Support & Résistance. Same block/step engine as
+     M0.1, deliberately different composition: M0.1 explains a concept
+     through reading; this lesson makes the learner OBSERVE a synthetic
+     pedagogical chart, TOUCH a zone, get explanatory feedback, then apply
+     the same reasoning to a second, less-guided case, spot a flawed
+     analysis, and finally prove the competency on a fresh chart. No real
+     market data, no live feed, no signal, no entry/position guidance —
+     every chart below is hand-authored synthetic geometry, never a real
+     quote. Two new block types exist to support this (chart_observe,
+     zone_identify) and `decision_choice` gained optional graded options
+     (correct/feedback) — both additive, backward-compatible extensions of
+     the same engine used by M0.1's blocks. --------------------------- */
+  function buildM02Lesson() {
+    const competency = Object.freeze({ id: 'zone_reading', label: 'Lecture des zones de support et résistance' });
+    const xp = Object.freeze({ lessonViewed: 30, exerciseComplete: 70, quizComplete: 130 });
+
+    // Synthetic pedagogical chart geometry (viewBox 0 0 300 160). Never real market data.
+    const chartSupport = Object.freeze({
+      points: Object.freeze([{ x: 10, y: 40 }, { x: 55, y: 112 }, { x: 95, y: 48 }, { x: 135, y: 110 }, { x: 175, y: 46 }, { x: 215, y: 108 }, { x: 255, y: 52 }, { x: 290, y: 80 }]),
+      reactions: Object.freeze([{ x: 55, y: 112 }, { x: 135, y: 110 }, { x: 215, y: 108 }]),
+      zone: Object.freeze({ y: 100, height: 20 }),
+      ariaLabel: 'Graphique pédagogique synthétique : le prix redescend puis remonte à trois reprises dans la même zone basse.'
+    });
+    const chartResistance = Object.freeze({
+      points: Object.freeze([{ x: 10, y: 120 }, { x: 50, y: 55 }, { x: 90, y: 118 }, { x: 130, y: 52 }, { x: 170, y: 116 }, { x: 210, y: 58 }, { x: 250, y: 112 }, { x: 290, y: 70 }]),
+      reactions: Object.freeze([{ x: 50, y: 55 }, { x: 130, y: 52 }, { x: 210, y: 58 }]),
+      zone: Object.freeze({ y: 42, height: 20 }),
+      ariaLabel: 'Graphique pédagogique synthétique : nouveau cas, le prix redescend à trois reprises depuis la même zone haute.'
+    });
+    const chartFlawed = Object.freeze({
+      points: Object.freeze([{ x: 10, y: 70 }, { x: 40, y: 95 }, { x: 75, y: 60 }, { x: 110, y: 100 }, { x: 150, y: 58 }, { x: 190, y: 98 }, { x: 230, y: 56 }, { x: 270, y: 90 }, { x: 290, y: 64 }]),
+      reactions: Object.freeze([{ x: 75, y: 60 }, { x: 150, y: 58 }, { x: 230, y: 56 }]),
+      flawReaction: Object.freeze({ x: 270, y: 90 }),
+      ariaLabel: 'Graphique pédagogique annoté : une analyse trace une zone autour d’une seule réaction isolée, alors que trois réactions plus nettes apparaissent ailleurs sur le même graphique.'
+    });
+    const chartChallenge = Object.freeze({
+      points: Object.freeze([{ x: 10, y: 50 }, { x: 45, y: 105 }, { x: 85, y: 44 }, { x: 120, y: 108 }, { x: 160, y: 42 }, { x: 200, y: 106 }, { x: 240, y: 48 }, { x: 280, y: 96 }]),
+      reactions: Object.freeze([{ x: 45, y: 105 }, { x: 120, y: 108 }, { x: 200, y: 106 }]),
+      zone: Object.freeze({ y: 98, height: 20 }),
+      ariaLabel: 'Graphique pédagogique synthétique : dernier cas à analyser sans aide.'
+    });
+
+    const content = Object.freeze({
+      lead: 'Cette leçon ne t’explique pas seulement une notion : elle te fait la pratiquer, comme sur un vrai graphique.'
+    });
+
+    const finalCheck = Object.freeze({
+      id: 'm2-quiz',
+      label: 'Quiz de validation',
+      heading: 'Une dernière question avant de valider la compétence.',
+      prompt: 'Que représente une zone de support ou de résistance ?',
+      successText: 'Correct. Tu distingues une zone de réaction observée plusieurs fois d’un simple prix ponctuel.',
+      choices: Object.freeze([
+        Object.freeze({ text: 'Un prix exact que le marché ne peut jamais dépasser.', correct: false, feedback: 'C’est le mythe de la ligne parfaite : aucun prix n’est infranchissable, et une zone reste une zone, pas une barrière absolue.' }),
+        Object.freeze({ text: 'Une zone où le prix a réagi plusieurs fois de façon visible.', correct: true }),
+        Object.freeze({ text: 'Un signal indiquant qu’il faut acheter ou vendre immédiatement.', correct: false, feedback: 'Une zone de réaction n’est ni un signal ni une recommandation de position — elle t’aide seulement à lire le marché.' })
+      ])
+    });
+
+    const steps = Object.freeze([
+      Object.freeze({ id: 'lesson', label: 'Observer' }),
+      Object.freeze({ id: 'exercise', label: 'Défi final' }),
+      Object.freeze({ id: 'quiz', label: 'Quiz' }),
+      Object.freeze({ id: 'review', label: 'Résultat' })
+    ]);
+
+    const blocks = Object.freeze([
+      Object.freeze({ type: 'competency_check', id: 'm2-competency-intro', step: 'lesson', mode: 'targets', competency }),
+      Object.freeze({
+        type: 'chart_observe', id: 'm2-observe-1', step: 'lesson', outline: 'Observer', eyebrow: 'Observer',
+        heading: 'Regarde simplement le prix.', prompt: 'Qu’est-ce qui semble se produire plusieurs fois dans cette zone ?', chart: chartSupport
+      }),
+      Object.freeze({
+        type: 'zone_identify', id: 'm2-identify-1', step: 'lesson', outline: 'Toucher la zone',
+        eyebrow: 'Identifier', heading: 'Touche la zone où le prix a réagi plusieurs fois.',
+        prompt: 'Aucune précision au pixel près n’est nécessaire : choisis la bande qui te semble correspondre.',
+        chart: chartSupport,
+        successText: 'Exactement. Le prix a réagi trois fois au même endroit — c’est ce qui rend cette zone intéressante à observer.',
+        reveal: 'Cette zone basse a fait réagir le prix à trois reprises : c’est une zone de réaction. Elle n’est pas un point exact, mais une bande.',
+        zones: Object.freeze([
+          Object.freeze({ label: 'Zone haute', top: 18, height: 20, correct: false, feedback: 'Regarde plutôt où le prix a répété la même réaction, pas où il a simplement été présent une fois.' }),
+          Object.freeze({ label: 'Zone médiane', top: 38, height: 19, correct: false, feedback: 'Le prix traverse cette zone sans jamais y réagir plusieurs fois : ce n’est pas un point de repère.' }),
+          Object.freeze({ label: 'Zone basse — plusieurs réactions', top: 58, height: 24, correct: true })
+        ])
+      }),
+      Object.freeze({
+        type: 'text_short', id: 'm2-naming', step: 'lesson', outline: 'Nommer',
+        eyebrow: 'Nommer', heading: 'Cette zone a un nom : support.',
+        body: 'Quand le prix réagit plusieurs fois à la baisse dans la même zone, on parle de zone de support. Si la réaction se produit plutôt vers le haut, on parle de zone de résistance. Le principe est le même : un endroit où le prix a montré, plusieurs fois, qu’il changeait de comportement.',
+        principle: Object.freeze({ label: 'Vocabulaire professionnel', text: 'Support et résistance ne sont jamais un prix unique : ce sont des zones de réaction observées plusieurs fois.' })
+      }),
+      Object.freeze({
+        type: 'decision_choice', id: 'm2-myth-line', step: 'lesson', outline: 'Ligne ou zone ?',
+        eyebrow: 'Casser un mythe', heading: 'Une ligne parfaite… ou une zone ?',
+        prompt: 'Laquelle de ces deux représentations décrit le mieux ce que tu viens d’observer ?',
+        options: Object.freeze([
+          Object.freeze({ text: 'Une ligne exacte, au prix près, que le marché respecterait à chaque fois.', correct: false, feedback: 'Sur le graphique précédent, les trois réactions ne se sont pas produites exactement au même prix — chercher une ligne parfaite fait perdre l’essentiel.' }),
+          Object.freeze({ text: 'Une zone qui regroupe plusieurs réactions proches, sans exiger un prix exact.', correct: true, feedback: 'C’est exactement ce que tu as observé : plusieurs réactions proches, pas un prix unique.' })
+        ]),
+        note: 'DDA enseigne à raisonner en zones de réaction, jamais à chercher systématiquement un prix exact — cette simplification pédagogique reste une nuance, pas une règle absolue de marché.'
+      }),
+      Object.freeze({
+        type: 'chart_observe', id: 'm2-observe-2', step: 'lesson', outline: 'Deuxième cas', eyebrow: 'Nouveau cas',
+        heading: 'Un graphique différent.', prompt: 'Où le prix réagit-il plusieurs fois, cette fois ?', chart: chartResistance
+      }),
+      Object.freeze({
+        type: 'zone_identify', id: 'm2-identify-2', step: 'lesson', outline: 'À toi de jouer',
+        eyebrow: 'Identifier sans aide', heading: 'Identifie la zone pertinente.',
+        prompt: 'Cette fois, aucune indication supplémentaire : observe et choisis.',
+        chart: chartResistance,
+        successText: 'C’est la bonne zone : le prix y a réagi trois fois à la baisse, ce qui en fait une résistance.',
+        reveal: 'Cette zone haute est une zone de résistance : le prix y a buté trois fois avant de redescendre. La logique est la même que pour le premier cas — seule la direction change.',
+        zones: Object.freeze([
+          Object.freeze({ label: 'Zone haute — plusieurs réactions', top: 18, height: 20, correct: true }),
+          Object.freeze({ label: 'Zone médiane', top: 38, height: 19, correct: false, feedback: 'Le prix traverse cette zone sans y réagir plusieurs fois.' }),
+          Object.freeze({ label: 'Zone basse', top: 58, height: 24, correct: false, feedback: 'Le prix ne réagit pas plusieurs fois ici sur ce graphique — regarde plutôt en haut.' })
+        ])
+      }),
+      Object.freeze({
+        type: 'chart_observe', id: 'm2-observe-3', step: 'lesson', outline: 'Repérer une erreur', eyebrow: 'Analyse à corriger',
+        heading: 'Une analyse déjà tracée — mais fragile.', prompt: 'Une zone a été entourée sur ce graphique. Regarde bien avant de continuer.',
+        chart: chartFlawed, flaw: true
+      }),
+      Object.freeze({
+        type: 'decision_choice', id: 'm2-spot-error', step: 'lesson', outline: 'Qu’est-ce qui est fragile ?',
+        eyebrow: 'Esprit critique', heading: 'Qu’est-ce qui te paraît fragile dans cette analyse ?',
+        prompt: 'Choisis le raisonnement le plus juste.',
+        options: Object.freeze([
+          Object.freeze({ text: 'Rien : une seule réaction suffit toujours à définir une zone fiable.', correct: false, feedback: 'Une réaction isolée ne prouve rien : c’est justement l’erreur à éviter. Une vraie zone se confirme par plusieurs réactions.' }),
+          Object.freeze({ text: 'La zone entourée ne repose que sur une réaction isolée, alors que trois réactions plus nettes existent ailleurs sur le même graphique.', correct: true, feedback: 'Exactement. Une zone de réaction se confirme par répétition — pas par une seule coïncidence.' }),
+          Object.freeze({ text: 'Le graphique est trop compliqué pour être analysé.', correct: false, feedback: 'Le graphique se lit très bien une fois qu’on cherche la répétition, pas la complexité apparente.' })
+        ])
+      }),
+      Object.freeze({
+        type: 'chart_observe', id: 'm2-observe-4', step: 'exercise', outline: 'Défi final', eyebrow: 'Défi final',
+        heading: 'Un dernier graphique, sans aide.', prompt: 'Identifie la zone la plus pertinente, puis réponds à la question qui suit.', chart: chartChallenge
+      }),
+      Object.freeze({
+        type: 'zone_identify', id: 'm2-challenge-zone', step: 'exercise', outline: 'Identifier la zone',
+        eyebrow: 'Défi final', heading: 'Quelle est la zone la plus pertinente ici ?',
+        chart: chartChallenge,
+        successText: 'Bonne lecture : trois réactions confirment cette zone comme une zone de support pertinente.',
+        reveal: 'Comme dans le premier cas, trois réactions au même endroit confirment la zone — la même lecture s’applique, sur un graphique différent.',
+        zones: Object.freeze([
+          Object.freeze({ label: 'Zone haute', top: 18, height: 19, correct: false, feedback: 'Le prix passe par ici sans y réagir plusieurs fois.' }),
+          Object.freeze({ label: 'Zone médiane', top: 38, height: 19, correct: false, feedback: 'Aucune répétition claire ici : regarde plus bas.' }),
+          Object.freeze({ label: 'Zone basse — plusieurs réactions', top: 58, height: 24, correct: true })
+        ])
+      }),
+      Object.freeze({ type: 'quiz', id: 'm2-quiz', outline: finalCheck.heading, step: 'quiz', locked: true, data: finalCheck }),
+      Object.freeze({ type: 'journal_link', id: 'm2-journal-prompt', step: 'review', prompt: 'Envie de noter ce que tu retiens de cet exercice dans ton Journal ?', cta: 'Ouvrir Journal & Plan' }),
+      Object.freeze({ type: 'summary', id: 'm2-result', step: 'review', idSuffix: 'm2', data: Object.freeze({ heading: 'Compétence de lecture confirmée.', body: 'Tu as observé, identifié une zone, corrigé une analyse fragile et validé ta lecture sur un nouveau cas.' }) })
+    ]);
+
+    return Object.freeze({
+      id: 'M0.2',
+      title: 'Support & Résistance',
+      summary: 'Observer, toucher et valider une zone de réaction — sans signal, sans position.',
+      estimatedMinutes: 14,
+      markUnderstoodLabel: 'Passer au défi final',
+      competency,
+      xp,
+      content,
+      steps,
+      blocks
+    });
+  }
+
   // M1-M9 are structural placeholders (empty lessons[]) — no content invented.
   const curriculum = Object.freeze({
     id: 'darius-free',
     title: 'Darius Free',
     modules: Object.freeze([
-      { id: 'M0', title: 'Fondations des marchés', lessons: Object.freeze([buildM01Lesson()]) },
+      { id: 'M0', title: 'Fondations des marchés', lessons: Object.freeze([buildM01Lesson(), buildM02Lesson()]) },
       { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze([]) },
       { id: 'M2', title: 'Risque et discipline', summary: 'Protéger son capital avant de rechercher la performance.', lessons: Object.freeze([]) },
       { id: 'M3', title: 'Module M3', lessons: Object.freeze([]) },
