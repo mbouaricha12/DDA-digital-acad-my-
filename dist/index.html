@@ -274,7 +274,10 @@
 
         <section class="journal-panel" id="journal-entries-panel">
           <div class="journal-toolbar">
-            <p class="journal-count" id="journal-count">0 entrée</p>
+            <div>
+              <p class="journal-count" id="journal-count">0 entrée</p>
+              <p class="journal-last-entry" id="journal-last-entry" hidden></p>
+            </div>
             <button class="primary-action" id="journal-new-entry" type="button"><svg class="icon"><use href="#icon-plus"/></svg> Nouvelle entrée</button>
           </div>
           <div class="journal-empty" id="journal-empty">
@@ -325,13 +328,22 @@
         <section class="journal-panel" id="journal-plan-panel" hidden>
           <p class="journal-plan-intro">Documente ton processus personnel — pas tes objectifs de gain. Ces réponses orientent la manière dont DDA t’accompagne, jamais ce que tu dois trader.</p>
           <form id="journal-plan-form">
-            <label>Marchés étudiés<textarea id="plan-markets" maxlength="600" rows="2" placeholder="Quels marchés ou instruments souhaites-tu comprendre ?"></textarea></label>
-            <label>Créneaux d’étude<textarea id="plan-slots" maxlength="600" rows="2" placeholder="Quand comptes-tu pratiquer, réalistement ?"></textarea></label>
-            <label>Checklist avant analyse<textarea id="plan-checklist" maxlength="600" rows="3" placeholder="Que vérifies-tu systématiquement avant de commencer ?"></textarea></label>
-            <label>Règles personnelles de discipline<textarea id="plan-discipline" maxlength="600" rows="3"></textarea></label>
-            <label>Objectifs d’apprentissage<textarea id="plan-goals" maxlength="600" rows="2"></textarea></label>
-            <label>Erreurs à éviter<textarea id="plan-mistakes" maxlength="600" rows="3"></textarea></label>
-            <label>Points à vérifier avant une décision<textarea id="plan-checkpoints" maxlength="600" rows="3"></textarea></label>
+            <fieldset class="plan-group">
+              <legend>Ton terrain</legend>
+              <label>Marchés étudiés<textarea id="plan-markets" maxlength="600" rows="2" placeholder="Quels marchés ou instruments souhaites-tu comprendre ?"></textarea></label>
+              <label>Créneaux d’étude<textarea id="plan-slots" maxlength="600" rows="2" placeholder="Quand comptes-tu pratiquer, réalistement ?"></textarea></label>
+            </fieldset>
+            <fieldset class="plan-group">
+              <legend>Ta discipline</legend>
+              <label>Checklist avant analyse<textarea id="plan-checklist" maxlength="600" rows="3" placeholder="Que vérifies-tu systématiquement avant de commencer ?"></textarea></label>
+              <label>Règles personnelles de discipline<textarea id="plan-discipline" maxlength="600" rows="3"></textarea></label>
+              <label>Points à vérifier avant une décision<textarea id="plan-checkpoints" maxlength="600" rows="3"></textarea></label>
+            </fieldset>
+            <fieldset class="plan-group">
+              <legend>Tes objectifs</legend>
+              <label>Objectifs d’apprentissage<textarea id="plan-goals" maxlength="600" rows="2"></textarea></label>
+              <label>Erreurs à éviter<textarea id="plan-mistakes" maxlength="600" rows="3"></textarea></label>
+            </fieldset>
             <p class="form-note" id="journal-plan-note">Pas encore enregistré</p>
             <button class="primary-action" type="submit">Enregistrer mon plan</button>
           </form>
@@ -340,11 +352,41 @@
 
       <section class="view" id="resources" aria-labelledby="resources-title">
         <div class="section-intro"><p class="eyebrow gold">Bibliothèque DDA</p><h1 id="resources-title">Les bons outils, au bon moment.</h1><p>Des ressources courtes pour comprendre, pratiquer et décider avec méthode.</p></div>
-        <div class="resource-grid">
-          <article class="resource-card"><span class="resource-type">Guide · DDA Free</span><div class="resource-icon"><svg class="icon"><use href="#icon-check-circle"/></svg></div><h2>Checklist avant une décision</h2><p>Six vérifications simples pour éviter la précipitation et protéger ton processus.</p><button class="secondary-action resource-open" data-resource="checklist">Consulter le guide</button></article>
-          <article class="resource-card"><span class="resource-type">Glossaire · DDA Free</span><div class="resource-icon"><svg class="icon"><use href="#icon-book"/></svg></div><h2>Les mots essentiels du marché</h2><p>Acheteur, vendeur, actif, liquidité et risque expliqués sans jargon.</p><button class="secondary-action resource-open" data-resource="glossary">Ouvrir le glossaire</button></article>
-          <article class="resource-card premium-resource"><span class="resource-type">Atelier · Premium</span><div class="resource-icon"><svg class="icon"><use href="#icon-shield"/></svg></div><h2>Laboratoire de gestion du risque</h2><p>Des scénarios guidés pour travailler sizing, invalidation et discipline.</p><button class="secondary-action premium-gate" data-permission="resources_premium">Voir l’aperçu Premium</button></article>
+
+        <div class="library-shelf">
+          <p class="eyebrow library-shelf-label">Rayon Free — à lire dès maintenant</p>
+          <ul class="library-list">
+            <li class="library-entry">
+              <div class="resource-icon"><svg class="icon"><use href="#icon-check-circle"/></svg></div>
+              <div class="library-entry-body">
+                <span class="resource-type">Guide · DDA Free</span>
+                <h2>Checklist avant une décision</h2>
+                <p>Six vérifications simples pour éviter la précipitation et protéger ton processus.</p>
+                <button class="secondary-action resource-open" data-resource="checklist">Consulter le guide</button>
+              </div>
+            </li>
+            <li class="library-entry">
+              <div class="resource-icon"><svg class="icon"><use href="#icon-book"/></svg></div>
+              <div class="library-entry-body">
+                <span class="resource-type">Glossaire · DDA Free</span>
+                <h2>Les mots essentiels du marché</h2>
+                <p>Acheteur, vendeur, actif, liquidité et risque expliqués sans jargon.</p>
+                <button class="secondary-action resource-open" data-resource="glossary">Ouvrir le glossaire</button>
+              </div>
+            </li>
+          </ul>
         </div>
+
+        <article class="resource-feature premium-resource">
+          <div class="resource-feature-head">
+            <div class="resource-icon"><svg class="icon"><use href="#icon-shield"/></svg></div>
+            <span class="resource-type">Atelier · Premium</span>
+          </div>
+          <h2>Laboratoire de gestion du risque</h2>
+          <p>Des scénarios guidés pour travailler sizing, invalidation et discipline.</p>
+          <button class="secondary-action premium-gate" data-permission="resources_premium">Voir l’aperçu Premium</button>
+        </article>
+
         <div class="resource-reader" id="resource-reader" hidden><button class="reader-close" id="reader-close" aria-label="Fermer">×</button><p class="eyebrow gold" id="reader-label">Ressource DDA</p><h2 id="reader-title"></h2><div id="reader-content"></div></div>
       </section>
 
