@@ -902,7 +902,7 @@ function filterBrokers() {
   marketSelect.classList.toggle('is-filtered', market !== 'all');
   useSelect.classList.toggle('is-filtered', use !== 'all');
   let visible = 0;
-  document.querySelectorAll('.broker-card').forEach(card => {
+  document.querySelectorAll('.broker-row').forEach(card => {
     const matchMarket = market === 'all' || card.dataset.market.split(' ').includes(market);
     const matchUse = use === 'all' || card.dataset.use.split(' ').includes(use);
     card.hidden = !(matchMarket && matchUse);

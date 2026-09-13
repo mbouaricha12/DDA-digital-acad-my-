@@ -503,35 +503,44 @@
       </section>
 
       <section class="view" id="brokers" aria-labelledby="brokers-title">
-        <div class="section-intro"><p class="eyebrow gold">DDA Broker Hub</p><h1 id="brokers-title">Comparer sans pression commerciale.</h1><p>Filtre les profils de démonstration. Les licences, coûts et disponibilités devront être vérifiés avant publication.</p></div>
-        <div class="broker-read-guide">
-          <div><svg class="icon"><use href="#icon-pin"/></svg><div><strong>Disponibilité</strong><p>Selon ton pays, à confirmer avant toute mise en avant réelle.</p></div></div>
-          <div><svg class="icon"><use href="#icon-shield"/></svg><div><strong>Transparence</strong><p>Toute relation partenaire sera déclarée clairement, jamais dissimulée.</p></div></div>
-          <div><svg class="icon"><use href="#icon-clock"/></svg><div><strong>Vérification</strong><p>Aucune fiche n’est publiée tant qu’elle n’a pas été validée.</p></div></div>
-        </div>
-        <p class="broker-orient-cue">Réponds à ces deux critères pour affiner l’orientation — l’ordre d’affichage n’est jamais influencé par une commission.</p>
-        <div class="broker-controls"><label><span class="broker-control-label"><svg class="icon"><use href="#icon-pin"/></svg> Marché</span><select id="broker-market"><option value="all">Tous</option><option value="forex">Forex & CFD</option><option value="synthetic">Indices synthétiques</option></select></label><label><span class="broker-control-label"><svg class="icon"><use href="#icon-target"/></svg> Usage</span><select id="broker-use"><option value="all">Tous les usages</option><option value="learning">Débuter / apprendre</option><option value="advanced">Outils avancés</option></select></label></div>
-        <div class="broker-grid" id="broker-grid">
-          <article class="broker-card" data-market="forex synthetic" data-use="learning advanced">
-            <div class="broker-card-head">
-              <span class="broker-monogram">D</span>
-              <div class="broker-card-heading"><h2>Deriv</h2><p>Profil de démonstration pour marchés dérivés et indices synthétiques.</p></div>
-            </div>
-            <div class="photo-frame dark ratio-wide broker-photo"><svg class="icon"><use href="#icon-photo"/></svg><span>Aperçu de plateforme — à intégrer après vérification</span></div>
-            <dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div><div><dt>Régulation</dt><dd>À vérifier avant publication</dd></div><div><dt>Dépôt minimum</dt><dd>À vérifier avant publication</dd></div></dl>
-            <div class="broker-card-foot"><span class="verification"><svg class="icon"><use href="#icon-clock"/></svg> À vérifier avant publication</span><button class="secondary-action broker-detail">Voir les critères</button></div>
-          </article>
-          <article class="broker-card" data-market="forex" data-use="learning advanced">
-            <div class="broker-card-head">
-              <span class="broker-monogram">H</span>
-              <div class="broker-card-heading"><h2>HFM</h2><p>Profil de démonstration pour Forex et CFD, sous réserve d’éligibilité locale.</p></div>
-            </div>
-            <div class="photo-frame dark ratio-wide broker-photo"><svg class="icon"><use href="#icon-photo"/></svg><span>Aperçu de plateforme — à intégrer après vérification</span></div>
-            <dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div><div><dt>Régulation</dt><dd>À vérifier avant publication</dd></div><div><dt>Dépôt minimum</dt><dd>À vérifier avant publication</dd></div></dl>
-            <div class="broker-card-foot"><span class="verification"><svg class="icon"><use href="#icon-clock"/></svg> À vérifier avant publication</span><button class="secondary-action broker-detail">Voir les critères</button></div>
-          </article>
-        </div>
-        <div class="broker-empty" id="broker-empty" hidden><h2>Aucun profil correspondant.</h2><p>Modifie les filtres pour afficher un autre usage.</p></div>
+        <div class="section-intro"><p class="eyebrow gold">DDA Broker Hub</p><h1 id="brokers-title">Comparer sans pression commerciale.</h1><p>Un outil d’orientation, pas une vitrine : DDA ne recommande aucun broker, elle t’aide à comparer selon ton propre besoin. Filtre les profils de démonstration ci-dessous — licences, coûts et disponibilités devront être vérifiés avant publication.</p></div>
+
+        <section class="panel broker-criteria-panel">
+          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-help"/></svg> Comment lire une fiche</p><h3>Les critères qui comptent, avant tout classement</h3></div></div>
+          <div class="broker-read-guide">
+            <div><svg class="icon"><use href="#icon-pin"/></svg><div><strong>Disponibilité</strong><p>Selon ton pays, à confirmer avant toute mise en avant réelle.</p></div></div>
+            <div><svg class="icon"><use href="#icon-shield"/></svg><div><strong>Transparence</strong><p>Toute relation partenaire sera déclarée clairement, jamais dissimulée.</p></div></div>
+            <div><svg class="icon"><use href="#icon-clock"/></svg><div><strong>Vérification</strong><p>Aucune fiche n’est publiée tant qu’elle n’a pas été validée.</p></div></div>
+          </div>
+          <p class="broker-orient-cue">Réponds aux deux critères ci-dessous pour affiner l’orientation selon ton propre besoin — l’ordre d’affichage n’est jamais influencé par une commission ni par un classement commercial.</p>
+          <div class="broker-controls"><label><span class="broker-control-label"><svg class="icon"><use href="#icon-pin"/></svg> Marché</span><select id="broker-market"><option value="all">Tous</option><option value="forex">Forex & CFD</option><option value="synthetic">Indices synthétiques</option></select></label><label><span class="broker-control-label"><svg class="icon"><use href="#icon-target"/></svg> Usage</span><select id="broker-use"><option value="all">Tous les usages</option><option value="learning">Débuter / apprendre</option><option value="advanced">Outils avancés</option></select></label></div>
+        </section>
+
+        <section class="panel broker-list-panel">
+          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-search"/></svg> Profils</p><h3>Ce qui est réellement connu, ce qui reste à confirmer</h3></div></div>
+          <div class="broker-list" id="broker-grid">
+            <article class="broker-row" data-market="forex synthetic" data-use="learning advanced">
+              <div class="broker-row-head">
+                <span class="broker-monogram">D</span>
+                <div class="broker-row-heading"><h2>Deriv</h2><p>Profil de démonstration pour marchés dérivés et indices synthétiques.</p></div>
+              </div>
+              <div class="photo-frame light ratio-wide broker-photo"><svg class="icon"><use href="#icon-photo"/></svg><span>Aperçu de plateforme — à intégrer après vérification</span></div>
+              <dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div><div><dt>Régulation</dt><dd>À vérifier avant publication</dd></div><div><dt>Dépôt minimum</dt><dd>À vérifier avant publication</dd></div></dl>
+              <div class="broker-row-foot"><span class="verification"><svg class="icon"><use href="#icon-clock"/></svg> À vérifier avant publication</span><button class="secondary-action dark-action broker-detail">Voir les critères</button></div>
+            </article>
+            <article class="broker-row" data-market="forex" data-use="learning advanced">
+              <div class="broker-row-head">
+                <span class="broker-monogram">H</span>
+                <div class="broker-row-heading"><h2>HFM</h2><p>Profil de démonstration pour Forex et CFD, sous réserve d’éligibilité locale.</p></div>
+              </div>
+              <div class="photo-frame light ratio-wide broker-photo"><svg class="icon"><use href="#icon-photo"/></svg><span>Aperçu de plateforme — à intégrer après vérification</span></div>
+              <dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div><div><dt>Régulation</dt><dd>À vérifier avant publication</dd></div><div><dt>Dépôt minimum</dt><dd>À vérifier avant publication</dd></div></dl>
+              <div class="broker-row-foot"><span class="verification"><svg class="icon"><use href="#icon-clock"/></svg> À vérifier avant publication</span><button class="secondary-action dark-action broker-detail">Voir les critères</button></div>
+            </article>
+          </div>
+          <div class="broker-empty" id="broker-empty" hidden><h2>Aucun profil correspondant.</h2><p>Modifie les filtres pour afficher un autre usage.</p></div>
+        </section>
+
         <p class="disclosure"><svg class="icon"><use href="#icon-shield"/></svg> DDA ne recommande jamais de déposer davantage, de sur-trader ou de prendre un risque inadapté. Le classement n’est jamais basé sur une commission perçue par DDA. Une éventuelle rémunération d’affiliation devra être signalée clairement avant toute activation réelle.</p>
       </section>
 
