@@ -425,30 +425,39 @@
       </section>
 
       <section class="view" id="markets" aria-labelledby="markets-title">
-        <div class="section-intro"><p class="eyebrow gold">Market Intelligence</p><h1 id="markets-title">Comprendre avant d’agir.</h1><p>Un aperçu éditorial du futur cockpit DDA. Aucune donnée ci-dessous n’est connectée à une source réelle — chaque carte le précise explicitement.</p></div>
+        <div class="section-intro"><p class="eyebrow gold">Market Intelligence</p><h1 id="markets-title">Comprendre avant d’agir.</h1><p>Un aperçu éditorial du futur cockpit DDA. Aucune donnée ci-dessous n’est connectée à une source réelle — chaque zone le précise explicitement. Cet espace couvre les étapes « Suivre les marchés » et « Revenir » de la boucle d’apprentissage DDA.</p></div>
 
-        <div class="index-grid" id="market-indices" aria-label="Indices suivis (démonstration)"></div>
+        <div class="market-visit-cue"><svg class="icon"><use href="#icon-compass"/></svg><p>Tu as suivi cet espace <strong id="market-visit-days">1</strong> <span id="market-visit-days-suffix">jour</span> sur cet appareil.</p></div>
 
-        <div class="market-layout">
-          <div class="market-main">
-            <article class="market-brief"><p class="eyebrow gold">Le brief DDA</p><h2>Du marché réel vers le curriculum.</h2><div class="brief-step"><span><svg class="icon"><use href="#icon-search"/></svg></span><div><strong>Que s’est-il passé ?</strong><p>Identifier le fait, sans exagération ni prédiction.</p></div></div><div class="brief-step"><span><svg class="icon"><use href="#icon-target"/></svg></span><div><strong>Pourquoi est-ce important ?</strong><p>Relier l’événement à la volatilité, au risque et au comportement.</p></div></div><div class="brief-step"><span><svg class="icon"><use href="#icon-book"/></svg></span><div><strong>Que faut-il apprendre ?</strong><p>Ouvrir la leçon utile au lieu de fournir un signal.</p></div></div><button class="primary-action" data-view="lesson">Revoir les fondations <span>→</span></button></article>
+        <section class="market-zone">
+          <p class="eyebrow gold zone-label">Vue marché</p>
+          <div class="index-grid" id="market-indices" aria-label="Indices suivis (démonstration)"></div>
+        </section>
 
-            <article class="market-calendar">
-              <p class="eyebrow gold"><svg class="icon"><use href="#icon-calendar"/></svg> Exemple pédagogique</p>
-              <h2>Calendrier des publications</h2>
-              <p>Aperçu de la mise en page qu’aura le vrai calendrier BRVM une fois une source officielle connectée. Aucune société, date ou montant réel n’est affiché.</p>
-              <ul id="market-calendar-list"></ul>
-            </article>
+        <section class="market-zone market-zone-brief">
+          <p class="eyebrow gold zone-label">Contexte pédagogique DDA</p>
+          <article class="market-brief"><h2>Du marché réel vers le curriculum.</h2><div class="brief-step"><span><svg class="icon"><use href="#icon-search"/></svg></span><div><strong>Que s’est-il passé ?</strong><p>Identifier le fait, sans exagération ni prédiction.</p></div></div><div class="brief-step"><span><svg class="icon"><use href="#icon-target"/></svg></span><div><strong>Pourquoi est-ce important ?</strong><p>Relier l’événement à la volatilité, au risque et au comportement.</p></div></div><div class="brief-step"><span><svg class="icon"><use href="#icon-book"/></svg></span><div><strong>Que faut-il apprendre ?</strong><p>Ouvrir la leçon utile au lieu de fournir un signal.</p></div></div><button class="primary-action" data-view="lesson">Revoir les fondations <span>→</span></button></article>
+          <div class="journal-link-block"><svg class="icon"><use href="#icon-journal"/></svg><p>Un mouvement de marché t’interpelle ? Documente ton observation avant d’agir.</p><button class="secondary-action" data-view="journal">Ouvrir Journal &amp; Plan <span>→</span></button></div>
+        </section>
+
+        <section class="market-zone market-zone-brvm">
+          <p class="eyebrow gold zone-label">BRVM — Afrique de l’Ouest</p>
+          <div class="brvm-intro">
+            <div class="photo-frame dark ratio-wide brvm-photo"><svg class="icon"><use href="#icon-photo"/></svg><span>Photographie régionale — à intégrer</span></div>
+            <div class="brvm-panel">
+              <h2>BRVM</h2>
+              <p>La BRVM est la bourse régionale commune aux 8 pays de l’UEMOA. DDA préparera une lecture accessible des sociétés cotées, indices, publications et notions d’investissement régional.</p>
+              <ul><li><svg class="icon"><use href="#icon-book"/></svg> Fiches pédagogiques</li><li><svg class="icon"><use href="#icon-help"/></svg> Glossaire régional</li><li><svg class="icon"><use href="#icon-calendar"/></svg> Calendrier des publications</li><li><svg class="icon"><use href="#icon-shield"/></svg> Sources officielles uniquement</li></ul>
+            </div>
           </div>
-
-          <aside class="brvm-panel">
-            <p class="eyebrow"><svg class="icon"><use href="#icon-pin"/></svg> Focus Afrique de l’Ouest</p>
-            <h2>BRVM</h2>
-            <p>La BRVM est la bourse régionale commune aux 8 pays de l’UEMOA. DDA préparera une lecture accessible des sociétés cotées, indices, publications et notions d’investissement régional.</p>
-            <ul><li><svg class="icon"><use href="#icon-book"/></svg> Fiches pédagogiques</li><li><svg class="icon"><use href="#icon-help"/></svg> Glossaire régional</li><li><svg class="icon"><use href="#icon-calendar"/></svg> Calendrier des publications</li><li><svg class="icon"><use href="#icon-shield"/></svg> Sources officielles uniquement</li></ul>
-            <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Données réelles différées jusqu’à connexion validée</span>
-          </aside>
-        </div>
+          <article class="market-calendar">
+            <p class="eyebrow"><svg class="icon"><use href="#icon-calendar"/></svg> Exemple pédagogique</p>
+            <h2>Calendrier des publications</h2>
+            <p>Aperçu de la mise en page qu’aura le vrai calendrier BRVM une fois une source officielle connectée. Aucune société, date ou montant réel n’est affiché.</p>
+            <ul id="market-calendar-list"></ul>
+          </article>
+          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Données réelles différées jusqu’à connexion validée</span>
+        </section>
       </section>
 
       <section class="view" id="brokers" aria-labelledby="brokers-title">
