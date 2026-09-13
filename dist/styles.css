@@ -763,41 +763,57 @@ body.lesson-focus .journey-button,body.lesson-focus .icon-button{display:none!im
 #markets .future-label{color:#8a6f2e;border-top-color:#DCD0AF}
 .market-zone-reflect .journal-link-block{margin:0}
 
-/* ---------- Broker Hub ---------- */
-.broker-read-guide{display:grid;grid-template-columns:1fr;gap:0;margin-bottom:22px;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--navy-800)}
-.broker-read-guide>div{display:flex;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);border-radius:0;background:transparent}
+/* ---------- Broker Hub — Design System Propagation #6 ----------
+   Same ivory editorial canvas as the rest of the propagated screens. Navy is
+   withheld entirely — an orientation tool has no reason to feel urgent or
+   "live". The two demo profiles move from a generic marketplace card grid
+   (the exact anti-pattern the mandate calls out) into one continuous
+   editorial list, matching Progression's mastery-list / Journal's temporal
+   spine — comparison by reading, never a ranked showcase. ---------- */
+#brokers{background:linear-gradient(165deg,var(--ivory),var(--ivory-2) 92%);color:var(--ink)}
+#brokers .eyebrow.gold{color:var(--blue)}
+#brokers .eyebrow{color:var(--muted-2)}
+#brokers .panel{background:var(--paper,#FBF9F3);border-color:#DCD0AF;color:var(--ink)}
+#brokers .panel-heading .icon{color:#8a6f2e}
+#brokers .panel-heading h3{color:var(--ink)}
+
+.broker-criteria-panel,.broker-list-panel{margin-top:16px}
+.broker-read-guide{display:grid;grid-template-columns:1fr;gap:0;margin:18px 0;border:1px solid #DCD0AF;border-radius:var(--r-md);overflow:hidden;background:var(--paper,#FBF9F3)}
+.broker-read-guide>div{display:flex;gap:12px;padding:16px 18px;border-bottom:1px solid #DCD0AF;border-radius:0;background:transparent}
 .broker-read-guide>div:last-child{border-bottom:0}
-.broker-read-guide .icon{color:var(--gold-soft);flex:none;margin-top:2px}
-.broker-read-guide strong{display:block;margin-bottom:4px;font-size:14px}
-.broker-read-guide p{color:var(--muted);font-size:13px;margin:0}
-.broker-orient-cue{color:var(--muted);font-size:13px;margin:0 0 14px}
-.broker-controls{display:grid;gap:12px;margin-bottom:20px}
-.broker-controls label{display:grid;gap:6px;color:var(--muted);font-size:13px}
+.broker-read-guide .icon{color:#8a6f2e;flex:none;margin-top:2px}
+.broker-read-guide strong{display:block;margin-bottom:4px;font-size:14px;color:var(--ink)}
+.broker-read-guide p{color:var(--muted-2);font-size:13px;margin:0}
+.broker-orient-cue{color:var(--muted-2);font-size:13px;margin:0 0 14px}
+.broker-controls{display:grid;gap:12px}
+.broker-controls label{display:grid;gap:6px;color:var(--muted-2);font-size:13px}
 .broker-control-label{display:flex;align-items:center;gap:7px;font-weight:700}
-.broker-control-label .icon{color:var(--gold-soft);width:15px;height:15px}
-.broker-controls select{width:100%;min-height:48px;background:var(--navy-800);color:var(--white);border:1px solid var(--line);padding:12px;border-radius:11px;font:inherit;transition:border-color .15s}
-.broker-controls select.is-filtered{border-color:rgba(217,164,65,.55)}
-.broker-grid{display:grid;grid-template-columns:1fr;gap:14px}
-.broker-card{padding:22px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800);transition:opacity .2s}
-.broker-card-head{display:flex;align-items:center;gap:14px}
-.broker-monogram{display:grid;place-items:center;width:50px;height:50px;border-radius:16px;background:var(--ivory);color:var(--navy-950);font-family:Georgia,serif;font-weight:900;font-size:21px;flex:none}
-.broker-card-heading h2{font-size:22px;margin-bottom:4px}
-.broker-card-heading p{color:var(--muted);font-size:13.5px;margin:0}
+.broker-control-label .icon{color:#8a6f2e;width:15px;height:15px}
+.broker-controls select{width:100%;min-height:48px;background:var(--paper,#FBF9F3);color:var(--ink);border:1px solid #DCD0AF;padding:12px;border-radius:11px;font:inherit;transition:border-color .15s}
+.broker-controls select.is-filtered{border-color:var(--gold)}
+
+.broker-list{display:grid;gap:0;margin-top:18px}
+.broker-row{padding:22px 0;border-top:1px solid #DCD0AF;transition:opacity .2s}
+.broker-row:first-child{border-top:0;padding-top:0}
+.broker-row-head{display:flex;align-items:center;gap:14px}
+.broker-monogram{display:grid;place-items:center;width:50px;height:50px;border-radius:16px;background:var(--navy-950);color:var(--ivory);font-family:Georgia,serif;font-weight:900;font-size:21px;flex:none}
+.broker-row-heading h2{font-size:22px;margin-bottom:4px;color:var(--ink);font-weight:400}
+.broker-row-heading p{color:var(--muted-2);font-size:13.5px;margin:0}
 .broker-photo{margin:18px 0;height:130px}
-.broker-card dl{display:grid;gap:1px;background:var(--line);margin:18px 0;border-radius:10px;overflow:hidden}
-.broker-card dl div{background:var(--navy-700);padding:12px;display:flex;justify-content:space-between;gap:15px;font-size:13px}
-.broker-card dl div:nth-child(-n+2){background:var(--navy-800)}
-.broker-card dl div:nth-child(-n+2) dt{color:var(--gold-soft);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;font-weight:800}
-.broker-card dl div:nth-child(-n+2) dd{color:var(--white);font-weight:700}
-.broker-card dt{color:var(--muted)}
-.broker-card dd{margin:0;text-align:right}
-.broker-card-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.verification{color:var(--gold-soft);font-size:10px;text-transform:uppercase;font-weight:900;display:flex;align-items:center;gap:5px}
+.broker-row dl{display:grid;gap:1px;background:#DCD0AF;margin:18px 0;border-radius:10px;overflow:hidden}
+.broker-row dl div{background:var(--paper,#FBF9F3);padding:12px;display:flex;justify-content:space-between;gap:15px;font-size:13px}
+.broker-row dl div:nth-child(-n+2) dt{color:#8a6f2e;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;font-weight:800}
+.broker-row dl div:nth-child(-n+2) dd{color:var(--ink);font-weight:700}
+.broker-row dt{color:var(--muted-2)}
+.broker-row dd{margin:0;text-align:right;color:var(--ink)}
+.broker-row-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.verification{color:#8a6f2e;font-size:10px;text-transform:uppercase;font-weight:900;display:flex;align-items:center;gap:5px}
 .verification .icon{width:13px;height:13px}
-.broker-card-foot .broker-detail{width:auto;margin:0}
-.disclosure{margin-top:18px;padding:16px 18px;border-left:2px solid var(--gold);border-radius:0 var(--r-sm) var(--r-sm) 0;background:var(--navy-800);color:var(--muted);font-size:13px;display:flex;align-items:flex-start;gap:10px}
-.disclosure .icon{color:var(--gold-soft);flex:none;margin-top:2px}
-.broker-empty{padding:34px 20px;text-align:center;border:1px dashed var(--line);border-radius:var(--r-md)}
+.broker-row-foot .broker-detail{width:auto;margin:0}
+.disclosure{margin-top:18px;padding:16px 18px;border-left:2px solid var(--gold);border-radius:0 var(--r-sm) var(--r-sm) 0;background:var(--paper,#FBF9F3);border-top:1px solid #DCD0AF;border-right:1px solid #DCD0AF;border-bottom:1px solid #DCD0AF;color:var(--muted-2);font-size:13px;display:flex;align-items:flex-start;gap:10px}
+.disclosure .icon{color:#8a6f2e;flex:none;margin-top:2px}
+.broker-empty{padding:34px 20px;text-align:center;border:1px dashed #cfc19a;border-radius:var(--r-md);margin-top:18px;color:var(--muted-2)}
+.broker-empty h2{color:var(--ink);font-size:19px;margin-bottom:8px}
 
 /* ---------- Support ---------- */
 .support-grid{display:grid;grid-template-columns:1fr;gap:14px}
@@ -905,10 +921,10 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .terminal-family{grid-template-columns:.9fr 1.1fr;align-items:center}
   .terminal-tools{grid-template-columns:repeat(3,1fr)}
   .plan-grid{grid-template-columns:repeat(2,1fr)}
-  .broker-grid,.support-grid{grid-template-columns:repeat(2,1fr)}
+  .support-grid{grid-template-columns:repeat(2,1fr)}
   .broker-controls{grid-template-columns:1fr 1fr}
   .broker-read-guide{grid-template-columns:repeat(3,1fr)}
-  .broker-read-guide>div{border-bottom:0;border-right:1px solid var(--line)}
+  .broker-read-guide>div{border-bottom:0;border-right:1px solid #DCD0AF}
   .broker-read-guide>div:last-child{border-right:0}
   .comparison-grid{grid-template-columns:1fr 1fr}
   .profile-fields{grid-template-columns:1fr 1fr}
