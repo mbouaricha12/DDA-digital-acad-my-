@@ -680,6 +680,24 @@ function renderTerminalSkillmap(continueTarget) {
     </div>`).join('');
 }
 
+// The one real next action available on this surface right now — reuses the
+// same nextActionable() call Terminal/Progression already use when the learner
+// is still on Free, so it never invents a second notion of "what's next".
+// Once Premium is simulated, points at the one real gated feature (the
+// Ressources Premium atelier / certificate preview) rather than a vague promise.
+function renderMembershipNextStep(premium) {
+  const el = document.getElementById('membership-next-step');
+  if (!el) return;
+  if (premium) {
+    el.textContent = 'Ton accès Premium est simulé sur cet appareil — ouvre l’atelier Ressources Premium ou l’aperçu de certification pour voir ce qu’il débloque réellement dès aujourd’hui.';
+    return;
+  }
+  const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
+  el.textContent = next
+    ? `Continuer ${next.lesson.title} (${next.lesson.id}) sur DDA Free — Premium reste disponible en démonstration quand tu voudras l’explorer.`
+    : 'Tu as validé les leçons disponibles sur DDA Free — simule l’accès Premium ci-dessus pour voir ce qu’il débloque dès aujourd’hui.';
+}
+
 function renderState() {
   const name = prototypeState.user?.name || 'Richard';
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'RD';
@@ -789,6 +807,7 @@ function renderState() {
   document.querySelectorAll('.premium-gate').forEach(button => {
     button.textContent = premium ? 'Ouvrir l’atelier' : 'Voir l’aperçu Premium';
   });
+  renderMembershipNextStep(premium);
 
   renderPathJourney();
   renderModulesRecap();

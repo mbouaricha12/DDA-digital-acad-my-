@@ -413,16 +413,16 @@
       </section>
 
       <section class="view" id="membership" aria-labelledby="membership-title">
-        <div class="membership-hero">
-          <div><p class="eyebrow gold">Accès DDA</p><h1 id="membership-title">Grandir à ton rythme.</h1><p>DDA Free pose les fondations. Premium approfondira la pratique, l’évaluation et la preuve de progression. Aucun paiement n’est activé dans ce prototype.</p></div>
-          <div class="membership-status"><span>Formule actuelle</span><strong id="membership-status">DDA Free</strong><small>Mode démonstration local</small></div>
-        </div>
+        <div class="section-intro"><p class="eyebrow gold">Accès DDA</p><h1 id="membership-title">Grandir à ton rythme.</h1><p>DDA Free pose les fondations. Premium approfondira la pratique, l’évaluation et la preuve de progression. Aucun paiement n’est activé dans ce prototype.</p></div>
+        <div class="membership-status-line"><span>Formule actuelle</span><strong id="membership-status">DDA Free</strong><small>Mode démonstration local — aucun achat</small></div>
+
         <div class="plan-grid">
-          <article class="plan-card current-plan"><p class="eyebrow">Fondations</p><h2>DDA Free</h2><p class="plan-tagline">Pour démarrer sérieusement, sans rien débourser.</p><ul><li>Parcours M0</li><li>Exercices et quiz</li><li>Progression locale</li><li>Guides essentiels</li></ul><span class="plan-state" id="free-plan-state">Formule active</span></article>
-          <article class="plan-card premium-plan"><p class="eyebrow gold">Approfondissement</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><ul><li>Parcours avancés</li><li>Ateliers pratiques</li><li>Ressources Premium</li><li>Aperçu de certification</li></ul><button class="primary-action" id="preview-premium">Simuler l’accès Premium <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Démonstration uniquement — aucun achat</small></article>
+          <article class="plan-card current-plan"><p class="eyebrow">Ce que tu as aujourd’hui</p><h2>DDA Free</h2><p class="plan-tagline">Pour démarrer sérieusement, sans rien débourser.</p><ul><li>Parcours M0 et ses leçons</li><li>Exercices, quiz et Fil de maîtrise réel</li><li>Journal &amp; Plan</li><li>Market Intelligence (démonstration)</li></ul><span class="plan-state" id="free-plan-state">Formule active</span></article>
+          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">Ce que Premium approfondira</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><ul><li>Atelier Ressources Premium — laboratoire de gestion du risque</li><li>Aperçu de certification une fois M0.1 validé</li><li>Chaque brique ci-dessous, construite étape par étape</li></ul><button class="primary-action" id="preview-premium">Simuler l’accès Premium <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Démonstration locale uniquement — aucun achat, aucun abonnement actif</small></article>
         </div>
+
         <section class="panel membership-roadmap">
-          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-path"/></svg> Vision DDA</p><h3>Ce que Premium deviendra progressivement</h3></div></div>
+          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-path"/></svg> Pourquoi Premium continue d’apporter de la valeur</p><h3>Une pile construite étape par étape, jamais livrée en une fois</h3></div></div>
           <p>Journal &amp; Plan est la première brique réellement construite de cette pile ; DDA l’étoffera puis construira le reste étape par étape — jamais toutes en même temps. Statuts réels ci-dessous, pas une promesse uniforme.</p>
           <ol class="roadmap-track">
             <li class="status-partial">Journal &amp; Plan <small>Partiel</small></li>
@@ -435,6 +435,22 @@
           </ol>
           <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Journal &amp; Plan (fondation locale) et Market Intelligence (démonstration) existent déjà ; la couche Premium connectée et personnalisée de cette pile n’est pas encore activée</span>
         </section>
+
+        <section class="panel family-panel" aria-labelledby="family-title">
+          <div class="photo-frame light ratio-wide family-photo"><svg class="icon"><use href="#icon-photo"/></svg><span>Photographie DDA Family — à intégrer</span></div>
+          <div class="family-copy">
+            <p class="eyebrow gold">DDA Family</p>
+            <h2 id="family-title">Apprendre, progresser, appartenir.</h2>
+            <p>DDA Family n’est pas un groupe de messagerie — c’est l’appartenance à l’écosystème DDA : une institution qu’on rejoint pour apprendre, partager ses observations et comparer son raisonnement avec d’autres apprenants sérieux.</p>
+            <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Aperçu — DDA Family, bientôt disponible</span>
+          </div>
+        </section>
+
+        <section class="panel next-step-panel">
+          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-compass"/></svg> Prochaine étape réelle</p></div></div>
+          <p id="membership-next-step">—</p>
+        </section>
+
         <section class="panel membership-guardrails">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-shield"/></svg> Garde-fous</p><h3>Ce que DDA n’activera jamais sans le dire clairement</h3></div></div>
           <ul class="guardrail-list">
