@@ -570,7 +570,13 @@
         <div class="section-intro profile-intro"><p class="eyebrow gold">Espace personnel</p><h1 id="profile-title">Ton profil d’apprentissage.</h1><p>Modifie uniquement ce qui aide DDA à te proposer la prochaine étape utile.</p></div>
         <div class="profile-layout">
           <form class="profile-panel" id="profile-form">
-            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">RD</span><div><p class="eyebrow">Compte pilote</p><h2 id="profile-heading-name">Richard</h2><p id="profile-heading-email">Aucune donnée serveur</p></div></div>
+            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">RD</span><div><p class="eyebrow">Compte pilote</p><h2 id="profile-heading-name">Richard</h2><p id="profile-heading-email">Aucune donnée serveur</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
+            <div class="profile-progress-strip">
+              <div><span>XP total</span><strong id="profile-total-xp">0</strong></div>
+              <div><span>Modules amorcés</span><strong id="profile-modules-started">0/10</strong></div>
+              <div><span>Jours d’activité</span><strong id="profile-active-days">0</strong></div>
+            </div>
+            <button class="text-action profile-progress-link" type="button" data-view="progress">Voir la Progression complète <span>→</span></button>
             <div class="profile-fields">
               <label>Prénom<input id="profile-first-name" maxlength="60" required></label>
               <label>Niveau<select id="profile-level"><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select></label>
@@ -578,17 +584,17 @@
               <label class="field-wide">Rythme<select id="profile-time"><option>10 minutes par jour</option><option>20 minutes par jour</option><option>45 minutes, 3 fois par semaine</option></select></label>
             </div>
             <p class="form-error" id="profile-error" role="alert"></p>
-            <div class="profile-actions"><button class="primary-action" type="submit">Enregistrer</button><button class="secondary-action" id="profile-reset" type="button">Réinitialiser le pilote</button></div>
+            <div class="profile-actions"><button class="primary-action" type="submit">Enregistrer</button><button class="secondary-action dark-action" id="profile-reset" type="button">Réinitialiser le pilote</button></div>
           </form>
           <aside class="preference-panel">
             <p class="eyebrow gold">Préférences</p><h3>Une expérience adaptée à ton appareil.</h3>
             <label class="preference-row"><span><b>Économie de données</b><small>Réduit mouvements et médias non essentiels.</small></span><input id="profile-low-data" type="checkbox"></label>
             <label class="preference-row"><span><b>Rappels pédagogiques</b><small>Préférence enregistrée seulement ; aucun message n’est envoyé.</small></span><input id="profile-reminders" type="checkbox"></label>
-            <div class="privacy-note"><svg class="icon"><use href="#icon-shield"/></svg><div><strong>Confidentialité du prototype</strong><p>Les informations restent sur cet appareil. Aucun courtier, paiement ou service publicitaire n’y a accès.</p></div></div>
-            <div class="activity-summary"><span>Activité locale</span><strong id="event-count">0 événement</strong><small>Mesure pédagogique anonyme sur cet appareil.</small></div>
+            <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité du prototype.</strong> Les informations restent sur cet appareil. Aucun courtier, paiement ou service publicitaire n’y a accès.</span></p>
+            <div class="activity-summary"><span>Activité locale</span><strong id="event-count">0 événement</strong><small>Mesure pédagogique anonyme sur cet appareil — ta relation avec l’écosystème DDA, jamais partagée.</small></div>
           </aside>
         </div>
-        <div class="empty-profile" id="empty-profile" hidden><span>◎</span><h2>Aucun profil pilote sur cet appareil.</h2><p>Commence l’onboarding pour créer ton premier parcours.</p><button class="primary-action" data-view="access">Commencer</button></div>
+        <div class="empty-profile" id="empty-profile" hidden><span><svg class="icon"><use href="#icon-user"/></svg></span><h2>Aucun profil pilote sur cet appareil.</h2><p>Commence l’onboarding pour créer ton premier parcours.</p><button class="primary-action" data-view="access">Commencer</button></div>
       </section>
     </main>
 

@@ -316,9 +316,17 @@ function renderProgressHero() {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
     return status === DDALearning.MODULE_STATUS.IN_PROGRESS || status === DDALearning.MODULE_STATUS.COMPLETED;
   }).length;
-  startedEl.textContent = `${started}/${DDA.curriculum.modules.length}`;
-  document.getElementById('progress-total-xp').textContent = String(DDALearning.totalXp(DDA.curriculum, prototypeState));
-  document.getElementById('progress-active-days').textContent = String(countActiveDays(prototypeState.events));
+  const startedLabel = `${started}/${DDA.curriculum.modules.length}`;
+  const totalXp = DDALearning.totalXp(DDA.curriculum, prototypeState);
+  const activeDays = countActiveDays(prototypeState.events);
+  startedEl.textContent = startedLabel;
+  document.getElementById('progress-total-xp').textContent = String(totalXp);
+  document.getElementById('progress-active-days').textContent = String(activeDays);
+  // Profil mirrors the exact same real values as Progression — never a second,
+  // diverging computation of "how far has this learner gotten".
+  document.getElementById('profile-modules-started').textContent = startedLabel;
+  document.getElementById('profile-total-xp').textContent = String(totalXp);
+  document.getElementById('profile-active-days').textContent = String(activeDays);
 }
 
 // Real data only: learner's own name, the real completed lesson, and the real
@@ -778,6 +786,7 @@ function renderState() {
   dataButton.textContent = prototypeState.preferences.lowData ? 'Data réduite' : 'Data normale';
   dataButton.setAttribute('aria-pressed', String(Boolean(prototypeState.preferences.lowData)));
 
+  const premium = prototypeState.membership?.plan === 'premium';
   const hasProfile = Boolean(prototypeState.user);
   document.getElementById('profile-form').hidden = !hasProfile;
   document.querySelector('.preference-panel').hidden = !hasProfile;
@@ -786,6 +795,7 @@ function renderState() {
     document.getElementById('profile-large-avatar').textContent = initials;
     document.getElementById('profile-heading-name').textContent = name;
     document.getElementById('profile-heading-email').textContent = prototypeState.user.email || 'Compte local';
+    document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · Démo' : 'DDA Free';
     document.getElementById('profile-first-name').value = name;
     document.getElementById('profile-level').value = prototypeState.onboarding?.level || 'Débutant';
     document.getElementById('profile-goal').value = prototypeState.onboarding?.goal || 'Comprendre les marchés';
@@ -796,7 +806,6 @@ function renderState() {
   const count = prototypeState.events?.length || 0;
   document.getElementById('event-count').textContent = `${count} événement${count > 1 ? 's' : ''}`;
 
-  const premium = prototypeState.membership?.plan === 'premium';
   document.getElementById('sidebar-plan').textContent = premium ? 'DDA Premium · Démo' : 'DDA Free';
   document.getElementById('membership-status').textContent = premium ? 'DDA Premium' : 'DDA Free';
   document.getElementById('free-plan-state').textContent = premium ? 'Inclus avec Premium' : 'Formule active';
