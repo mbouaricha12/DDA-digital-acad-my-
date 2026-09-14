@@ -384,7 +384,7 @@
                 <span class="resource-type">Guide · DDA Free</span>
                 <h2>Checklist avant une décision</h2>
                 <p>Six vérifications simples pour éviter la précipitation et protéger ton processus.</p>
-                <button class="secondary-action resource-open" data-resource="checklist">Consulter le guide</button>
+                <button class="secondary-action dark-action resource-open" data-resource="checklist">Consulter le guide</button>
               </div>
             </li>
             <li class="library-entry">
@@ -393,7 +393,7 @@
                 <span class="resource-type">Glossaire · DDA Free</span>
                 <h2>Les mots essentiels du marché</h2>
                 <p>Acheteur, vendeur, actif, liquidité et risque expliqués sans jargon.</p>
-                <button class="secondary-action resource-open" data-resource="glossary">Ouvrir le glossaire</button>
+                <button class="secondary-action dark-action resource-open" data-resource="glossary">Ouvrir le glossaire</button>
               </div>
             </li>
           </ul>
@@ -546,7 +546,24 @@
 
       <section class="view" id="support" aria-labelledby="support-title">
         <div class="section-intro"><p class="eyebrow gold">Centre d’aide</p><h1 id="support-title">Une réponse claire, sans te perdre.</h1><p>Ce prototype prépare le support avant d’activer les canaux et notifications réels.</p></div>
-        <div class="support-grid"><article class="support-card"><span><svg class="icon"><use href="#icon-help"/></svg></span><h2>Questions fréquentes</h2><details><summary>Ma progression est-elle enregistrée ?</summary><p>Dans ce prototype, elle reste uniquement sur cet appareil.</p></details><details><summary>Puis-je déjà payer Premium ?</summary><p>Non. Aucun paiement réel n’est activé.</p></details><details><summary>DDA donne-t-elle des signaux ?</summary><p>Non. DDA enseigne le processus, le risque et la compréhension des marchés.</p></details><details><summary>Ma progression suit-elle mon compte sur un autre appareil ?</summary><p>Pas encore. Sans compte serveur, chaque appareil garde sa propre progression locale.</p></details></article><article class="support-card"><span><svg class="icon"><use href="#icon-mail"/></svg></span><h2>Demander de l’aide</h2><form id="support-form"><label>Sujet<select id="support-subject"><option>Problème de progression</option><option>Question sur un cours</option><option>Accès au compte</option></select></label><label>Message<textarea id="support-message" maxlength="500" required placeholder="Décris simplement ce qui bloque…"></textarea></label><button class="primary-action" type="submit">Préparer ma demande <span>→</span></button><p class="support-note" id="support-note">Aucun message n’est envoyé dans le prototype.</p></form></article></div>
+        <section class="panel support-faq-panel">
+          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-help"/></svg> Questions fréquentes</p></div></div>
+          <details><summary>Ma progression est-elle enregistrée ?</summary><p>Dans ce prototype, elle reste uniquement sur cet appareil.</p></details>
+          <details><summary>Puis-je déjà payer Premium ?</summary><p>Non. Aucun paiement réel n’est activé.</p></details>
+          <details><summary>DDA donne-t-elle des signaux ?</summary><p>Non. DDA enseigne le processus, le risque et la compréhension des marchés.</p></details>
+          <details><summary>Ma progression suit-elle mon compte sur un autre appareil ?</summary><p>Pas encore. Sans compte serveur, chaque appareil garde sa propre progression locale.</p></details>
+        </section>
+
+        <section class="support-contact" aria-labelledby="support-contact-title">
+          <p class="eyebrow gold"><svg class="icon"><use href="#icon-mail"/></svg> Demander de l’aide</p>
+          <h2 id="support-contact-title">Écris-nous simplement.</h2>
+          <form id="support-form">
+            <label>Sujet<select id="support-subject"><option>Problème de progression</option><option>Question sur un cours</option><option>Accès au compte</option></select></label>
+            <label>Message<textarea id="support-message" maxlength="500" required placeholder="Décris simplement ce qui bloque…"></textarea></label>
+            <button class="primary-action" type="submit">Préparer ma demande <span>→</span></button>
+          </form>
+          <p class="disclosure support-note"><svg class="icon"><use href="#icon-shield"/></svg> <span id="support-note">Aucun message n’est envoyé dans le prototype — ta demande reste sur cet appareil.</span></p>
+        </section>
       </section>
 
       <section class="view" id="profile" aria-labelledby="profile-title">
