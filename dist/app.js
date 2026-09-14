@@ -46,6 +46,18 @@ const MARKET_DEMO = {
 };
 const NEXT_STEP_PHRASE = { lesson: 'voir la leçon', exercise: 'réussir l’exercice', quiz: 'valider le quiz' };
 
+// Daily Value Loop V1 — "Pourquoi cette action ?". Keyed by the exact same
+// `step` DDALearning.lessonNextStep() already returns (see NEXT_STEP_PHRASE
+// above) — never a second, parallel notion of lesson state. One honest
+// sentence per real state, nothing computed here that the engine doesn't
+// already know.
+const WHY_PHRASE = {
+  lesson: 'Proposé parce que tu n’as pas encore ouvert cette leçon — c’est la première étape non commencée de ton parcours.',
+  exercise: 'Proposé parce que tu as compris la leçon mais n’as pas encore validé l’exercice qui la confirme.',
+  quiz: 'Proposé parce que l’exercice est validé — il ne reste que le quiz pour confirmer cette compétence.',
+  review: 'Tu as validé toutes les leçons disponibles aujourd’hui — reviens dès qu’un nouveau module sera publié.'
+};
+
 // The four levels DDA will ever claim for a competency, and the only real signal
 // each one is allowed to rest on. Levels 2-4 come from durably stored lesson
 // progress (state.lessons), so once earned they can never be lost. Level 1
@@ -633,6 +645,27 @@ function renderTerminalMeta(continueTarget) {
   const xpKey = step === 'lesson' ? 'lessonViewed' : step === 'exercise' ? 'exerciseComplete' : step === 'quiz' ? 'quizComplete' : null;
   const nextXp = xpKey && continueTarget.lesson.xp ? continueTarget.lesson.xp[xpKey] : null;
   document.getElementById('terminal-meta-xp').textContent = nextXp ? `+${nextXp} XP` : '—';
+
+  // Daily Value Loop V1 — same `step` value above drives both the rationale
+  // line and the one conditional secondary action. A secondary action only
+  // ever appears in the real "nothing left to do today" state (step ===
+  // 'review', meaning nextActionable found no incomplete authored lesson) —
+  // every other state gets exactly one primary action, per mandate.
+  const whyText = document.getElementById('terminal-lead-why-text');
+  if (whyText) whyText.textContent = WHY_PHRASE[step] || '';
+  const secondary = document.getElementById('terminal-lead-secondary');
+  if (secondary) {
+    if (step === 'review') {
+      const journalEmpty = (prototypeState.journal?.entries || []).length === 0;
+      secondary.hidden = false;
+      secondary.dataset.view = journalEmpty ? 'journal' : 'markets';
+      secondary.innerHTML = journalEmpty
+        ? 'Ouvrir ton Journal <span>→</span>'
+        : 'Explorer Market Intelligence <span>→</span>';
+    } else {
+      secondary.hidden = true;
+    }
+  }
 }
 
 // Reuses the same honest, structurally-labelled demo data as the full Markets screen —
