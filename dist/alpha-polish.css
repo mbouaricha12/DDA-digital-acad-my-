@@ -10,7 +10,7 @@ body{
 }
 
 /* elevation on hover for interactive cards */
-.panel,.path-card,.skill-card,.library-entry,.resource-feature,.plan-card,.support-card,.market-brief,.brvm-panel,.profile-panel,.preference-panel,.broker-card{
+.panel,.path-card,.skill-card,.library-entry,.resource-feature,.plan-card,.support-contact,.market-brief,.brvm-panel,.profile-panel,.preference-panel,.broker-card{
   transition:transform .22s var(--ease),border-color .22s var(--ease),box-shadow .22s var(--ease);
 }
 @media(hover:hover){
@@ -62,5 +62,5 @@ button:active{transform:translateY(1px)}
 @media(max-width:699px){
   .section-intro h1{max-width:340px}
   .broker-controls select{min-height:48px}
-  .support-card textarea{min-height:120px}
+  .support-contact textarea{min-height:120px}
 }
