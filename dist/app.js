@@ -51,11 +51,14 @@ const NEXT_STEP_PHRASE = { lesson: 'voir la leçon', exercise: 'réussir l’exe
 // above) — never a second, parallel notion of lesson state. One honest
 // sentence per real state, nothing computed here that the engine doesn't
 // already know.
+// No 'review' key: nextActionable() (learning-engine.js) never returns a
+// lesson whose lessonNextStep() is 'review' (that only fires once quizComplete
+// is true, i.e. once the lesson IS completed) — the real "everything validated"
+// rationale lives in renderTerminalLeadComplete(), not here.
 const WHY_PHRASE = {
   lesson: 'Proposé parce que tu n’as pas encore ouvert cette leçon — c’est la première étape non commencée de ton parcours.',
   exercise: 'Proposé parce que tu as compris la leçon mais n’as pas encore validé l’exercice qui la confirme.',
-  quiz: 'Proposé parce que l’exercice est validé — il ne reste que le quiz pour confirmer cette compétence.',
-  review: 'Tu as validé toutes les leçons disponibles aujourd’hui — reviens dès qu’un nouveau module sera publié.'
+  quiz: 'Proposé parce que l’exercice est validé — il ne reste que le quiz pour confirmer cette compétence.'
 };
 
 // The four levels DDA will ever claim for a competency, and the only real signal
@@ -572,11 +575,28 @@ function renderLessonProgressUI(lessonId, lessonDef, ids) {
   return { lessonProgress, step, complete };
 }
 
+// CEO correction (Daily Value Loop V1.1): this used to fall back to the fixed
+// activeLessonId (M0.1) once nextActionable() found nothing left, so the
+// Terminal kept presenting an already-completed lesson as if it were still
+// today's destination. nextActionable() (learning-engine.js, unchanged) is
+// already the single correct source for "is there a real next step" — it
+// returns null exactly when every authored lesson is validated, and every
+// other consumer in this file (renderResultStats, renderProgressNextStep,
+// renderMembershipNextStep) already treats that null honestly. This function
+// now does too: it is a thin, honest wrapper, nothing more.
 function resolveContinueTarget() {
-  const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
-  if (next) return next;
-  const found = DDALearning.findLesson(DDA.curriculum, activeLessonId);
-  return found ? { module: found.module, lesson: found.lesson } : null;
+  return DDALearning.nextActionable(DDA.curriculum, prototypeState);
+}
+
+// The last real, authored lesson — used only once resolveContinueTarget()
+// returns null (curriculum complete) to offer an explicitly-labelled review
+// link and to show a mastered competency on the thread/skillmap. Reuses
+// authoredLessons() (already the single source for "every real lesson, in
+// order") — never a fixed M0.1/M0.2 id, so this adapts automatically once
+// M1+ gain real content.
+function lastAuthoredLesson() {
+  const flat = authoredLessons();
+  return flat.length ? flat[flat.length - 1] : null;
 }
 
 // The real, greeting-time-of-day text — never a fixed "Bonsoir" regardless of the hour.
@@ -621,15 +641,27 @@ function lessonAfter(curriculum, lessonId) {
 
 function renderTerminalThread(continueTarget) {
   const labelEl = document.getElementById('terminal-thread-label');
-  if (!labelEl || !continueTarget) return;
+  if (!labelEl) return;
+  const nextEl = document.getElementById('terminal-thread-next');
+  const beadsEl = document.getElementById('terminal-thread-beads');
+  if (!continueTarget) {
+    // Curriculum complete: show the last real competency at its true, fully
+    // mastered level (4/4) — never blank/stale, and never a "next"
+    // competency, since nothing authored actually follows it yet.
+    const last = lastAuthoredLesson();
+    if (!last) return;
+    labelEl.textContent = last.lesson.competency.label;
+    beadsEl.innerHTML = renderBeads(4);
+    beadsEl.setAttribute('aria-label', beadsAriaLabel(4));
+    nextEl.hidden = true;
+    return;
+  }
   const lessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
   const level = competencyLevel(continueTarget.lesson.id, lessonProgress);
   labelEl.textContent = continueTarget.lesson.competency.label;
-  const beadsEl = document.getElementById('terminal-thread-beads');
   beadsEl.innerHTML = renderBeads(level);
   beadsEl.setAttribute('aria-label', beadsAriaLabel(level));
   const after = lessonAfter(DDA.curriculum, continueTarget.lesson.id);
-  const nextEl = document.getElementById('terminal-thread-next');
   const showNext = Boolean(after && after.lesson.competency.label !== continueTarget.lesson.competency.label);
   nextEl.hidden = !showNext;
   if (showNext) nextEl.innerHTML = `Prochaine compétence : <b>${after.lesson.competency.label}</b>`;
@@ -638,6 +670,11 @@ function renderTerminalThread(continueTarget) {
 function renderTerminalMeta(continueTarget) {
   const stepEl = document.getElementById('terminal-meta-step');
   if (!stepEl || !continueTarget) return;
+  // Real next step still pending: show the step/module/xp meta strip and
+  // un-hide it (it is explicitly hidden by renderTerminalLeadComplete() once
+  // the curriculum is complete, so coming back to a real step must restore it).
+  const metaEl = document.getElementById('terminal-lead-meta');
+  if (metaEl) metaEl.hidden = false;
   const lessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
   const step = DDALearning.lessonNextStep(lessonProgress);
   stepEl.textContent = step === 'review' ? 'leçon terminée' : (NEXT_STEP_PHRASE[step] || '—');
@@ -646,26 +683,65 @@ function renderTerminalMeta(continueTarget) {
   const nextXp = xpKey && continueTarget.lesson.xp ? continueTarget.lesson.xp[xpKey] : null;
   document.getElementById('terminal-meta-xp').textContent = nextXp ? `+${nextXp} XP` : '—';
 
-  // Daily Value Loop V1 — same `step` value above drives both the rationale
-  // line and the one conditional secondary action. A secondary action only
-  // ever appears in the real "nothing left to do today" state (step ===
-  // 'review', meaning nextActionable found no incomplete authored lesson) —
-  // every other state gets exactly one primary action, per mandate.
+  // Daily Value Loop V1 — same `step` value drives the rationale line. Note:
+  // nextActionable() (learning-engine.js) only ever returns a lesson whose
+  // status isn't COMPLETED, and lessonNextStep() only returns 'review' once
+  // quizComplete is true (i.e. status IS COMPLETED) — so step is never
+  // 'review' here. The real "nothing left to do today" state is continueTarget
+  // === null, handled by renderTerminalLeadComplete(), including its one
+  // primary action (Journal/Market Intelligence) and review-only secondary link.
   const whyText = document.getElementById('terminal-lead-why-text');
   if (whyText) whyText.textContent = WHY_PHRASE[step] || '';
   const secondary = document.getElementById('terminal-lead-secondary');
+  if (secondary) secondary.hidden = true;
+}
+
+// CEO correction (Daily Value Loop V1.1): once resolveContinueTarget() honestly
+// returns null (every authored lesson validated), there is no lesson-based
+// "next step" left to head the Terminal with — but the mandate still requires
+// exactly one primary action and an honest rationale. This reuses the exact
+// Journal-empty/Market-Intelligence branching already validated in V1 (it was
+// previously the conditional secondary action for step === 'review'; here it
+// is promoted to the one primary action, since there is nothing real to pair
+// it with). The completed lesson itself is demoted to a labelled review-only
+// link — never presented as the next pedagogical step.
+function renderTerminalLeadComplete() {
+  const last = lastAuthoredLesson();
+  const pillEl = document.getElementById('lesson-state-pill');
+  if (pillEl) pillEl.textContent = 'Complété';
+  const indexEl = document.getElementById('lesson-index-label');
+  if (indexEl) indexEl.textContent = 'CURRICULUM M0 COMPLÉTÉ';
+  const moduleEl = document.getElementById('terminal-lead-module');
+  if (moduleEl) moduleEl.textContent = last ? last.module.title : 'DDA';
+  const titleEl = document.getElementById('terminal-lead-title');
+  if (titleEl) titleEl.textContent = 'Toutes les leçons disponibles sont validées.';
+  const summaryEl = document.getElementById('terminal-lead-summary');
+  if (summaryEl) summaryEl.textContent = 'Ton prochain module sera bientôt disponible — en attendant, continue avec ce qui est réellement à ta disposition aujourd’hui.';
+
+  const journalEmpty = (prototypeState.journal?.entries || []).length === 0;
+  const whyText = document.getElementById('terminal-lead-why-text');
+  if (whyText) {
+    whyText.textContent = journalEmpty
+      ? 'Proposé parce que tu as validé tout le curriculum disponible — ton Journal & Plan est encore vide, c’est la prochaine chose réelle à faire.'
+      : 'Proposé parce que tu as validé tout le curriculum disponible — Market Intelligence est une destination réelle pour continuer à observer les marchés.';
+  }
+  const primary = document.getElementById('lesson-primary-action');
+  if (primary) {
+    primary.dataset.view = journalEmpty ? 'journal' : 'markets';
+    primary.innerHTML = journalEmpty ? 'Ouvrir ton Journal <span>→</span>' : 'Explorer Market Intelligence <span>→</span>';
+  }
+  const secondary = document.getElementById('terminal-lead-secondary');
   if (secondary) {
-    if (step === 'review') {
-      const journalEmpty = (prototypeState.journal?.entries || []).length === 0;
+    if (last) {
       secondary.hidden = false;
-      secondary.dataset.view = journalEmpty ? 'journal' : 'markets';
-      secondary.innerHTML = journalEmpty
-        ? 'Ouvrir ton Journal <span>→</span>'
-        : 'Explorer Market Intelligence <span>→</span>';
+      secondary.dataset.view = LESSON_VIEW_ID[last.lesson.id] || 'lesson';
+      secondary.innerHTML = `Revoir ${last.lesson.id} <span>→</span>`;
     } else {
       secondary.hidden = true;
     }
   }
+  const metaEl = document.getElementById('terminal-lead-meta');
+  if (metaEl) metaEl.hidden = true;
 }
 
 // Reuses the same honest, structurally-labelled demo data as the full Markets screen —
@@ -704,11 +780,22 @@ function renderTerminalJournalNote() {
 // same underlying competencyLevel(), never a contradictory second logic.
 function renderTerminalSkillmap(continueTarget) {
   const el = document.getElementById('terminal-skillmap');
-  if (!el || !continueTarget) return;
-  const lessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
-  const level = competencyLevel(continueTarget.lesson.id, lessonProgress);
+  if (!el) return;
+  let label, level;
+  if (continueTarget) {
+    const lessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
+    label = continueTarget.lesson.competency.label;
+    level = competencyLevel(continueTarget.lesson.id, lessonProgress);
+  } else {
+    // Curriculum complete: the one real row shows the last authored
+    // competency, fully mastered — never blank, never a fabricated "next".
+    const last = lastAuthoredLesson();
+    if (!last) return;
+    label = last.lesson.competency.label;
+    level = 4;
+  }
   const rows = [
-    { label: continueTarget.lesson.competency.label, real: true },
+    { label, real: true },
     { label: 'Gestion du risque', real: false },
     { label: 'Discipline', real: false }
   ];
@@ -744,15 +831,20 @@ function renderState() {
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'RD';
   const activeLessonProgress = DDALearning.getLessonProgress(prototypeState, activeLessonId);
   const xp = DDALearning.totalXp(DDA.curriculum, prototypeState) || 20;
+  // Deliberately out of scope for the Daily Value Loop correction: `complete`
+  // only tracks M0.1's own quizComplete and drives the Parcours journey-button
+  // text below, which is architecturally pinned to M0.1 (isRenderableModule()) —
+  // untouched here.
   const complete = Boolean(activeLessonProgress.quizComplete);
   const continueTarget = resolveContinueTarget();
-  // The ring tracks whatever lesson the Terminal is actually pointing the learner to,
-  // not the fixed primary lesson — otherwise it would freeze at 100% forever once M0.1
-  // is done while M0.2 is genuinely in progress.
-  const continueLessonProgress = continueTarget
-    ? DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id)
-    : activeLessonProgress;
-  const progress = DDALearning.lessonProgressPercent(continueLessonProgress);
+  // CEO correction (Daily Value Loop V1.1): continueTarget is now honestly null
+  // once every authored lesson is validated — there is no "current" lesson left
+  // to track progress against, so the ring reports the true 100%, not a stale
+  // reading of whatever activeLessonId happens to be.
+  const curriculumComplete = !continueTarget;
+  const progress = curriculumComplete
+    ? 100
+    : DDALearning.lessonProgressPercent(DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id));
 
   document.getElementById('dashboard-name').textContent = name;
   document.getElementById('profile-name').textContent = name;
@@ -769,22 +861,28 @@ function renderState() {
     marketVisitEl.textContent = String(marketVisitDays);
     document.getElementById('market-visit-days-suffix').textContent = marketVisitDays > 1 ? 'jours' : 'jour';
   }
-  document.getElementById('personalized-next').textContent = complete
-    ? `${activeLessonId} est validée. Ton prochain module sera bientôt disponible.`
+  // Reuses the exact honest phrasing renderProgressNextStep() already shows for
+  // this same curriculumComplete state — never a second, contradictory message.
+  document.getElementById('personalized-next').textContent = curriculumComplete
+    ? 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.'
     : prototypeState.onboarding?.goal
       ? `Objectif : ${prototypeState.onboarding.goal}. Prochaine étape : terminer ${activeLessonId}.`
       : 'Une étape claire pour continuer à progresser.';
 
   if (continueTarget) {
-    const continueComplete = continueLessonProgress.quizComplete;
-    document.getElementById('lesson-state-pill').textContent = continueComplete ? 'Validée' : 'En cours';
+    // nextActionable() only ever returns a lesson whose status isn't COMPLETED,
+    // so this is always the "still in progress" case — the completed case is
+    // handled entirely by renderTerminalLeadComplete() below.
+    document.getElementById('lesson-state-pill').textContent = 'En cours';
     const lessonIndex = continueTarget.module.lessons.findIndex(l => l.id === continueTarget.lesson.id) + 1;
-    document.getElementById('lesson-index-label').textContent = continueComplete ? 'COMPÉTENCE VALIDÉE' : `LEÇON ${lessonIndex} SUR ${continueTarget.module.lessons.length}`;
-    document.getElementById('lesson-primary-action').innerHTML = continueComplete ? 'Revoir la leçon <span>→</span>' : 'Reprendre la leçon <span>→</span>';
+    document.getElementById('lesson-index-label').textContent = `LEÇON ${lessonIndex} SUR ${continueTarget.module.lessons.length}`;
+    document.getElementById('lesson-primary-action').innerHTML = 'Reprendre la leçon <span>→</span>';
     document.getElementById('lesson-primary-action').dataset.view = LESSON_VIEW_ID[continueTarget.lesson.id] || 'lesson';
     document.getElementById('terminal-lead-module').textContent = continueTarget.module.title;
     document.getElementById('terminal-lead-title').textContent = continueTarget.lesson.title;
     document.getElementById('terminal-lead-summary').textContent = continueTarget.lesson.summary;
+  } else {
+    renderTerminalLeadComplete();
   }
   renderTerminalThread(continueTarget);
   renderTerminalMeta(continueTarget);
