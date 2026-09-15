@@ -32,7 +32,7 @@ const views = document.querySelectorAll('.view');
 const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
-const titles = { dashboard: 'Aujourd’hui', access: 'Accès pilote', path: 'Mon parcours', lesson: 'Leçon en cours', 'lesson-m02': 'Support & Résistance', 'lesson-m03': 'Lire une tendance', progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
+const titles = { dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours', lesson: 'Leçon en cours', 'lesson-m02': 'Support & Résistance', 'lesson-m03': 'Lire une tendance', progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
 const viewPermissions = { path: 'path', lesson: 'lesson_m01', 'lesson-m02': 'lesson_m01', 'lesson-m03': 'lesson_m01', progress: 'progress', journal: 'journal', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile' };
 // M0.2 and M0.3 reuse the same `lesson_m01` free-tier entitlement — no separate
 // premium tier is being introduced for M0 in this tranche, so no new key is invented.
@@ -883,13 +883,13 @@ function renderMembershipNextStep(premium) {
   const el = document.getElementById('membership-next-step');
   if (!el) return;
   if (premium) {
-    el.textContent = 'Ton accès Premium est simulé sur cet appareil — ouvre l’atelier Ressources Premium ou l’aperçu de certification pour voir ce qu’il débloque réellement dès aujourd’hui.';
+    el.textContent = 'Ton accès Premium est en aperçu sur cet appareil — ouvre l’atelier Ressources Premium ou l’aperçu de certification pour voir ce qu’il débloque réellement dès aujourd’hui.';
     return;
   }
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   el.textContent = next
-    ? `Continuer ${next.lesson.title} (${next.lesson.id}) sur DDA Free — Premium reste disponible en démonstration quand tu voudras l’explorer.`
-    : 'Tu as validé les leçons disponibles sur DDA Free — simule l’accès Premium ci-dessus pour voir ce qu’il débloque dès aujourd’hui.';
+    ? `Continuer ${next.lesson.title} (${next.lesson.id}) sur DDA Free — Premium reste disponible en aperçu quand tu voudras l’explorer.`
+    : 'Tu as validé les leçons disponibles sur DDA Free — ouvre l’aperçu Premium ci-dessus pour voir ce qu’il débloque dès aujourd’hui.';
 }
 
 function renderState() {
@@ -1069,7 +1069,7 @@ function closeGate() {
   if (gateTrigger) { gateTrigger.focus(); gateTrigger = null; }
 }
 document.querySelectorAll('.premium-gate').forEach(button => button.addEventListener('click', () => {
-  if (DDA.can(prototypeState, button.dataset.permission)) { showToast('Atelier Premium débloqué dans cette démonstration.'); return; }
+  if (DDA.can(prototypeState, button.dataset.permission)) { showToast('Atelier Premium débloqué en aperçu.'); return; }
   gateTrigger = button;
   document.getElementById('gate-layer').hidden = false;
   document.getElementById('gate-close').focus();
@@ -1190,7 +1190,7 @@ document.getElementById('support-form').addEventListener('submit', event => {
 document.getElementById('play-demo').addEventListener('click', event => {
   const caption = document.getElementById('video-caption');
   event.currentTarget.textContent = event.currentTarget.textContent === '▶' ? 'Ⅱ' : '▶';
-  caption.textContent = event.currentTarget.textContent === 'Ⅱ' ? 'Démonstration visuelle — prototype sans vidéo finale' : 'Une décision commence par l’observation.';
+  caption.textContent = event.currentTarget.textContent === 'Ⅱ' ? 'Illustration — vidéo à venir' : 'Une décision commence par l’observation.';
 });
 
 function bindMarkUnderstood(lessonId, ids) {
@@ -1370,7 +1370,7 @@ function resetPilot() {
   document.getElementById('result-card-m3').hidden = true;
   renderState();
   showView('access', false);
-  showToast('Données de démonstration effacées.');
+  showToast('Tes données ont été effacées.');
 }
 
 document.getElementById('reset-session').addEventListener('click', resetPilot);
