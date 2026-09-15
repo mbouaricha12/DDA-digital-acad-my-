@@ -487,6 +487,7 @@ body.lesson-focus .icon-button{display:none!important}
 .mastery-row .terminal-thread-beads i.on{background:#8a6f2e}
 .mastery-row .terminal-thread-beads i.now{background:var(--paper,#FBF9F3);border-color:#8a6f2e}
 .mastery-row .proof-timeline{margin-top:16px}
+.mastery-row-lesson-link{margin-top:14px;color:#8a6f2e;text-decoration:none;border-bottom:1.5px solid #8a6f2e;display:inline-flex;align-items:center;gap:6px;min-height:44px;font-weight:800}
 .mastery-row.unmeasured{opacity:.75}
 .mastery-row.unmeasured .mastery-level span{color:var(--muted-2)}
 .mastery-unmeasured-note{margin:10px 0 0;font-size:13px;color:var(--muted-2)}
