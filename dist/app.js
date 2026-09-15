@@ -15,6 +15,16 @@ const lessonM02Meta = DDALearning.findLesson(DDA.curriculum, lessonM02Id);
 const lessonM02Def = lessonM02Meta.lesson;
 document.getElementById('lesson-m02-main').insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(lessonM02Meta.module, lessonM02Def, 'm2'));
 document.getElementById('lesson-m02-outline').innerHTML = DDALessonRenderer.renderLessonOutline(lessonM02Def, 'm2');
+
+// M0 Build Tranche — Lire une tendance. Mounted exactly the way M0.1/M0.2 are,
+// with an 'm3' idSuffix — the third proof that this mounting pattern (and the
+// block renderer beneath it) needs zero change to support another
+// independently-gated lesson.
+const lessonM03Id = 'M0.3';
+const lessonM03Meta = DDALearning.findLesson(DDA.curriculum, lessonM03Id);
+const lessonM03Def = lessonM03Meta.lesson;
+document.getElementById('lesson-m03-main').insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(lessonM03Meta.module, lessonM03Def, 'm3'));
+document.getElementById('lesson-m03-outline').innerHTML = DDALessonRenderer.renderLessonOutline(lessonM03Def, 'm3');
 function findLessonBlock(lessonDef, id) { return lessonDef.blocks.find(b => b.id === id); }
 
 const buttons = document.querySelectorAll('[data-view]');
@@ -22,15 +32,15 @@ const views = document.querySelectorAll('.view');
 const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
-const titles = { dashboard: 'Aujourd’hui', access: 'Accès pilote', path: 'Mon parcours', lesson: 'Leçon en cours', 'lesson-m02': 'Support & Résistance', progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
-const viewPermissions = { path: 'path', lesson: 'lesson_m01', 'lesson-m02': 'lesson_m01', progress: 'progress', journal: 'journal', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile' };
-// M0.2 reuses the same `lesson_m01` free-tier entitlement — no separate premium
-// tier is being introduced for it in this tranche, so no new key is invented.
+const titles = { dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours', lesson: 'Leçon en cours', 'lesson-m02': 'Support & Résistance', 'lesson-m03': 'Lire une tendance', progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
+const viewPermissions = { path: 'path', lesson: 'lesson_m01', 'lesson-m02': 'lesson_m01', 'lesson-m03': 'lesson_m01', progress: 'progress', journal: 'journal', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile' };
+// M0.2 and M0.3 reuse the same `lesson_m01` free-tier entitlement — no separate
+// premium tier is being introduced for M0 in this tranche, so no new key is invented.
 // Maps a lesson id to the view that actually renders it — the Terminal cockpit's
 // "continue" button follows DDALearning.nextActionable, which will point at
-// M0.2 the moment M0.1's quiz is complete; without this map it would still say
-// "Reprendre la leçon" but navigate to the now-completed M0.1 view instead.
-const LESSON_VIEW_ID = { 'M0.1': 'lesson', 'M0.2': 'lesson-m02' };
+// M0.2/M0.3 the moment the previous lesson's quiz is complete; without this map
+// it would still say "Reprendre la leçon" but navigate to the wrong view instead.
+const LESSON_VIEW_ID = { 'M0.1': 'lesson', 'M0.2': 'lesson-m02', 'M0.3': 'lesson-m03' };
 const MODULE_STATUS_LABEL = { completed: 'Terminé', in_progress: 'En cours', available: 'Disponible', locked: 'Verrouillé', coming_soon: 'Prochainement' };
 // Structural demo only — no real index value, date or amount. Swap for a real feed's response later without touching the markup.
 const MARKET_DEMO = {
@@ -201,9 +211,24 @@ function renderPathJourney() {
   const currentIndex = modules.findIndex(isRenderableModule);
   const currentModule = modules[currentIndex];
   const currentStatus = DDALearning.moduleStatus(DDA.curriculum, currentModule.id, prototypeState);
-  const currentLesson = currentModule.lessons.find(lesson => lesson.id === activeLessonId);
+  // The hero chapter must track the real current lesson, not a fixed M0.1 —
+  // once M0.1 is validated, resolveContinueTarget() honestly moves on to
+  // M0.2/M0.3, and this card (title, summary, duration, link) follows it.
+  // Only once nothing authored remains does it fall back to the last real
+  // lesson as an explicit review, same pattern as the Terminal.
+  const continueTarget = resolveContinueTarget();
+  const currentLessonTarget = continueTarget || lastAuthoredLesson();
+  const currentLesson = currentLessonTarget ? currentLessonTarget.lesson : currentModule.lessons.find(lesson => lesson.id === activeLessonId);
+  const currentView = currentLessonTarget ? (LESSON_VIEW_ID[currentLesson.id] || 'lesson') : 'lesson';
   const currentNumber = String(currentIndex + 1).padStart(2, '0');
   const lessonCount = currentModule.lessons.length;
+  const actionLabel = continueTarget ? moduleActionLabel(currentStatus, true) : 'Revoir';
+  // Parcours reconstruction (Phase A): the hero now states *why* this is the
+  // current chapter — same WHY_PHRASE/lessonNextStep() truth the Terminal
+  // already shows, reused verbatim so the two screens never disagree.
+  const why = continueTarget
+    ? (WHY_PHRASE[DDALearning.lessonNextStep(DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id))] || '')
+    : 'Compétence validée — reviens ici quand un nouveau module sera disponible.';
 
   const rail = modules.map((module, index) => ({ module, index })).filter(({ index }) => index !== currentIndex).map(({ module, index }) => {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
@@ -212,15 +237,16 @@ function renderPathJourney() {
   }).join('');
 
   container.innerHTML = `
-    <button class="journey-current" data-view="lesson">
+    <button class="journey-current" data-view="${currentView}">
       <div class="journey-current-eyebrow"><span class="path-number">${currentNumber}</span><div><small>${moduleStatusLabel(currentStatus, true)}</small><span class="journey-current-tag">${currentModule.title}</span></div></div>
       <h2>${currentLesson.title}</h2>
       <p>${currentLesson.summary}</p>
+      <p class="journey-current-why"><svg class="icon"><use href="#icon-compass"/></svg><span>${why}</span></p>
       <div class="journey-meta"><span><svg class="icon"><use href="#icon-clock"/></svg>${currentLesson.estimatedMinutes} min</span><span><svg class="icon"><use href="#icon-book"/></svg>${lessonCount} leçon${lessonCount > 1 ? 's' : ''}</span></div>
-      <span class="primary-action">${moduleActionLabel(currentStatus, true)} <span>→</span></span>
+      <span class="primary-action">${actionLabel} <span>→</span></span>
     </button>
     <ol class="journey-rail" aria-label="Prochains modules du parcours">${rail}</ol>`;
-  container.querySelector('.journey-current').addEventListener('click', () => showView('lesson'));
+  container.querySelector('.journey-current').addEventListener('click', () => showView(currentView));
 }
 
 function renderModulesRecap() {
@@ -599,6 +625,28 @@ function lastAuthoredLesson() {
   return flat.length ? flat[flat.length - 1] : null;
 }
 
+// The sidebar's "Leçon en cours" shortcut, corrected: it used to be pinned to
+// the fixed view id "lesson" (always M0.1), so once a learner moved on to
+// M0.2/M0.3 it silently sent them back to a lesson they had already
+// completed. It now targets whatever resolveContinueTarget() honestly
+// reports as current, via the same LESSON_VIEW_ID map the Terminal's own
+// primary action uses — one source of truth, no second nav engine. Once the
+// curriculum is complete it relabels itself as a review link to the last
+// real lesson rather than pointing at a dead "current lesson" concept.
+function renderNavCurrentLesson(continueTarget) {
+  const item = document.getElementById('nav-current-lesson');
+  if (!item) return;
+  const label = item.querySelector('svg') ? item.lastChild : null;
+  if (continueTarget) {
+    item.dataset.view = LESSON_VIEW_ID[continueTarget.lesson.id] || 'lesson';
+    if (label) label.textContent = ' Leçon en cours';
+  } else {
+    const last = lastAuthoredLesson();
+    item.dataset.view = last ? (LESSON_VIEW_ID[last.lesson.id] || 'lesson') : 'lesson';
+    if (label) label.textContent = ' Revoir la dernière leçon';
+  }
+}
+
 // The real, greeting-time-of-day text — never a fixed "Bonsoir" regardless of the hour.
 function greetingPrefix() {
   const hour = new Date().getHours();
@@ -705,12 +753,30 @@ function renderTerminalMeta(continueTarget) {
 // is promoted to the one primary action, since there is nothing real to pair
 // it with). The completed lesson itself is demoted to a labelled review-only
 // link — never presented as the next pedagogical step.
+// M0 Build Tranche debt fix (mandate §11): this used to read the fixed string
+// "CURRICULUM M0 COMPLÉTÉ" — accurate only while M0 was the sole authored
+// module, and false the moment a second module (M1+) also gets authored and
+// completed. It now reads which modules are ACTUALLY complete from
+// DDALearning.moduleStatus() (the same engine call moduleSnapshot/Parcours
+// already use — no second notion of "complete"), so the label stays correct
+// on its own once M1+ exist, with no future edit required here.
+function completedModuleIds() {
+  return DDA.curriculum.modules
+    .filter(module => DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState) === DDALearning.MODULE_STATUS.COMPLETED)
+    .map(module => module.id);
+}
+
 function renderTerminalLeadComplete() {
   const last = lastAuthoredLesson();
   const pillEl = document.getElementById('lesson-state-pill');
   if (pillEl) pillEl.textContent = 'Complété';
   const indexEl = document.getElementById('lesson-index-label');
-  if (indexEl) indexEl.textContent = 'CURRICULUM M0 COMPLÉTÉ';
+  if (indexEl) {
+    const completedIds = completedModuleIds();
+    indexEl.textContent = completedIds.length
+      ? `CURRICULUM ${completedIds.join(' + ')} COMPLÉTÉ${completedIds.length > 1 ? 'S' : ''}`
+      : 'CURRICULUM DISPONIBLE COMPLÉTÉ';
+  }
   const moduleEl = document.getElementById('terminal-lead-module');
   if (moduleEl) moduleEl.textContent = last ? last.module.title : 'DDA';
   const titleEl = document.getElementById('terminal-lead-title');
@@ -817,13 +883,13 @@ function renderMembershipNextStep(premium) {
   const el = document.getElementById('membership-next-step');
   if (!el) return;
   if (premium) {
-    el.textContent = 'Ton accès Premium est simulé sur cet appareil — ouvre l’atelier Ressources Premium ou l’aperçu de certification pour voir ce qu’il débloque réellement dès aujourd’hui.';
+    el.textContent = 'Ton accès Premium est en aperçu sur cet appareil — ouvre l’atelier Ressources Premium ou l’aperçu de certification pour voir ce qu’il débloque réellement dès aujourd’hui.';
     return;
   }
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   el.textContent = next
-    ? `Continuer ${next.lesson.title} (${next.lesson.id}) sur DDA Free — Premium reste disponible en démonstration quand tu voudras l’explorer.`
-    : 'Tu as validé les leçons disponibles sur DDA Free — simule l’accès Premium ci-dessus pour voir ce qu’il débloque dès aujourd’hui.';
+    ? `Continuer ${next.lesson.title} (${next.lesson.id}) sur DDA Free — Premium reste disponible en aperçu quand tu voudras l’explorer.`
+    : 'Tu as validé les leçons disponibles sur DDA Free — ouvre l’aperçu Premium ci-dessus pour voir ce qu’il débloque dès aujourd’hui.';
 }
 
 function renderState() {
@@ -897,9 +963,7 @@ function renderState() {
   renderJournalList();
   renderJournalPlan();
 
-  const journey = document.querySelector('.journey-button');
-  journey.textContent = complete ? `Revoir ${activeLessonId}` : prototypeState.onboarding?.complete ? `Reprendre ${activeLessonId}` : 'Tester le parcours';
-  journey.dataset.view = prototypeState.onboarding?.complete ? 'lesson' : 'access';
+  renderNavCurrentLesson(continueTarget);
 
   renderLessonProgressUI(activeLessonId, activeLessonDef, {
     loopId: 'lesson-loop', outlineListId: 'lesson-outline-list', gateId: 'quiz-block', evalName: 'quiz',
@@ -909,13 +973,13 @@ function renderState() {
     loopId: 'lesson-loop-m2', outlineListId: 'lesson-outline-list-m2', gateId: 'm2-quiz-block', evalName: 'm2-quiz',
     resultId: 'result-card-m2', markUnderstoodId: 'mark-understood-m2', savedStateId: 'saved-state-m2', resultStatsId: 'result-stats-m2'
   });
+  renderLessonProgressUI(lessonM03Id, lessonM03Def, {
+    loopId: 'lesson-loop-m3', outlineListId: 'lesson-outline-list-m3', gateId: 'm3-quiz-block', evalName: 'm3-quiz',
+    resultId: 'result-card-m3', markUnderstoodId: 'mark-understood-m3', savedStateId: 'saved-state-m3', resultStatsId: 'result-stats-m3'
+  });
 
   document.getElementById('resume-device').hidden = !prototypeState.user;
-  document.getElementById('low-data-toggle').checked = Boolean(prototypeState.preferences.lowData);
   document.body.classList.toggle('low-data', Boolean(prototypeState.preferences.lowData));
-  const dataButton = document.getElementById('low-data-button');
-  dataButton.textContent = prototypeState.preferences.lowData ? 'Data réduite' : 'Data normale';
-  dataButton.setAttribute('aria-pressed', String(Boolean(prototypeState.preferences.lowData)));
 
   const premium = prototypeState.membership?.plan === 'premium';
   const hasProfile = Boolean(prototypeState.user);
@@ -959,12 +1023,12 @@ function showView(id, recordEvent = true) {
   const permission = viewPermissions[id];
   if (permission && !DDA.can(prototypeState, permission)) {
     prototypeState = DDA.track(prototypeState, 'access_denied', { view: id, permission });
-    showToast('Crée d’abord ton espace pilote pour accéder à cette section.');
+    showToast('Termine ton inscription pour accéder à cette section.');
     id = 'access';
   }
   views.forEach(view => view.classList.toggle('active', view.id === id));
   [...desktopItems, ...mobileItems].forEach(item => item.classList.toggle('active', item.dataset.view === id));
-  document.body.classList.toggle('lesson-focus', id === 'lesson' || id === 'lesson-m02');
+  document.body.classList.toggle('lesson-focus', id === 'lesson' || id === 'lesson-m02' || id === 'lesson-m03');
   contextTitle.textContent = titles[id] || 'DDA';
   history.replaceState(null, '', `#${id}`);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1005,7 +1069,7 @@ function closeGate() {
   if (gateTrigger) { gateTrigger.focus(); gateTrigger = null; }
 }
 document.querySelectorAll('.premium-gate').forEach(button => button.addEventListener('click', () => {
-  if (DDA.can(prototypeState, button.dataset.permission)) { showToast('Atelier Premium débloqué dans cette démonstration.'); return; }
+  if (DDA.can(prototypeState, button.dataset.permission)) { showToast('Atelier Premium débloqué en aperçu.'); return; }
   gateTrigger = button;
   document.getElementById('gate-layer').hidden = false;
   document.getElementById('gate-close').focus();
@@ -1126,7 +1190,7 @@ document.getElementById('support-form').addEventListener('submit', event => {
 document.getElementById('play-demo').addEventListener('click', event => {
   const caption = document.getElementById('video-caption');
   event.currentTarget.textContent = event.currentTarget.textContent === '▶' ? 'Ⅱ' : '▶';
-  caption.textContent = event.currentTarget.textContent === 'Ⅱ' ? 'Démonstration visuelle — prototype sans vidéo finale' : 'Une décision commence par l’observation.';
+  caption.textContent = event.currentTarget.textContent === 'Ⅱ' ? 'Illustration — vidéo à venir' : 'Une décision commence par l’observation.';
 });
 
 function bindMarkUnderstood(lessonId, ids) {
@@ -1148,6 +1212,7 @@ function bindMarkUnderstood(lessonId, ids) {
 
 bindMarkUnderstood(activeLessonId, { buttonId: 'mark-understood', savedStateId: 'saved-state', scrollToId: 'exercise-block' });
 bindMarkUnderstood(lessonM02Id, { buttonId: 'mark-understood-m2', savedStateId: 'saved-state-m2', scrollToId: 'm2-observe-4-block' });
+bindMarkUnderstood(lessonM03Id, { buttonId: 'mark-understood-m3', savedStateId: 'saved-state-m3', scrollToId: 'm3-observe-4-block' });
 
 document.getElementById('signup-form').addEventListener('submit', event => {
   event.preventDefault();
@@ -1267,22 +1332,29 @@ bindQuestion(lessonM02Id, { role: 'practice', name: m2SpotError.id, successText:
 bindQuestion(lessonM02Id, { role: 'exercise', name: m2Challenge.id, successText: m2Challenge.successText }, { gateId: 'm2-quiz-block', revealId: `${m2Challenge.id}-reveal` });
 bindQuestion(lessonM02Id, { role: 'quiz', name: m2QuizBlock.data.id, successText: m2QuizBlock.data.successText }, { resultId: 'result-card-m2', savedStateId: 'saved-state-m2' });
 
+// M0 Build Tranche — Lire une tendance. Three ungated classify pairs (practice
+// role: reasoning checks only, no gating) then a défi final (exercise role,
+// unlocks the quiz gate) then the quiz itself — the same two-gate shape as
+// M0.1/M0.2, mirrored on purpose (a real DDA product convention now, not a
+// content copy: the chart geometry, questions and feedback are all new).
+const m3Classify1 = findLessonBlock(lessonM03Def, 'm3-classify-1');
+const m3Classify2 = findLessonBlock(lessonM03Def, 'm3-classify-2');
+const m3Classify3 = findLessonBlock(lessonM03Def, 'm3-classify-3');
+const m3Challenge = findLessonBlock(lessonM03Def, 'm3-challenge');
+const m3QuizBlock = findLessonBlock(lessonM03Def, 'm3-quiz');
+
+bindQuestion(lessonM03Id, { role: 'practice', name: m3Classify1.id, successText: 'Bonne lecture.' });
+bindQuestion(lessonM03Id, { role: 'practice', name: m3Classify2.id, successText: 'Bonne lecture.' });
+bindQuestion(lessonM03Id, { role: 'practice', name: m3Classify3.id, successText: 'Bonne lecture.' });
+bindQuestion(lessonM03Id, { role: 'exercise', name: m3Challenge.id, successText: 'Bonne lecture — direction confirmée sans aide.' }, { gateId: 'm3-quiz-block' });
+bindQuestion(lessonM03Id, { role: 'quiz', name: m3QuizBlock.data.id, successText: m3QuizBlock.data.successText }, { resultId: 'result-card-m3', savedStateId: 'saved-state-m3' });
+
 function updateNetworkState() {
   const online = navigator.onLine;
   const status = document.getElementById('network-state');
   status.classList.toggle('offline', !online);
   status.querySelector('span').textContent = online ? 'En ligne' : 'Mode hors connexion';
 }
-
-document.getElementById('low-data-toggle').addEventListener('change', event => {
-  saveState({ preferences: { ...prototypeState.preferences, lowData: event.currentTarget.checked } });
-  trackEvent('preference_updated', { preference: 'lowData', enabled: String(event.currentTarget.checked) });
-});
-
-document.getElementById('low-data-button').addEventListener('click', () => {
-  saveState({ preferences: { ...prototypeState.preferences, lowData: !prototypeState.preferences.lowData } });
-  trackEvent('preference_updated', { preference: 'lowData', enabled: String(prototypeState.preferences.lowData) });
-});
 
 document.getElementById('resume-session').addEventListener('click', () => {
   showView(prototypeState.onboarding?.complete ? 'lesson' : 'access');
@@ -1295,9 +1367,10 @@ function resetPilot() {
   document.getElementById('onboarding-form').hidden = true;
   document.getElementById('result-card').hidden = true;
   document.getElementById('result-card-m2').hidden = true;
+  document.getElementById('result-card-m3').hidden = true;
   renderState();
   showView('access', false);
-  showToast('Données de démonstration effacées.');
+  showToast('Tes données ont été effacées.');
 }
 
 document.getElementById('reset-session').addEventListener('click', resetPilot);

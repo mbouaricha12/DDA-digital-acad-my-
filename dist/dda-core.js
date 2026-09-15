@@ -292,7 +292,10 @@
       }),
       Object.freeze({ type: 'quiz', id: 'm2-quiz', outline: finalCheck.heading, step: 'quiz', locked: true, data: finalCheck }),
       Object.freeze({ type: 'journal_link', id: 'm2-journal-prompt', step: 'review', prompt: 'Envie de noter ce que tu retiens de cet exercice dans ton Journal ?', cta: 'Ouvrir Journal & Plan' }),
-      Object.freeze({ type: 'summary', id: 'm2-result', step: 'review', idSuffix: 'm2', data: Object.freeze({ heading: 'Compétence de lecture confirmée.', body: 'Tu as observé, identifié une zone, corrigé une analyse fragile et validé ta lecture sur un nouveau cas.' }) })
+      // M0.3 tranche: gives M0.2's result screen the same real "continue" CTA
+      // M0.1's already has — M0.3 is now the next real lesson, so this is no
+      // longer the dead end it honestly had to be before it existed.
+      Object.freeze({ type: 'summary', id: 'm2-result', step: 'review', idSuffix: 'm2', continueTo: Object.freeze({ view: 'lesson-m03', label: 'Continuer vers Lire une tendance' }), data: Object.freeze({ heading: 'Compétence de lecture confirmée.', body: 'Tu as observé, identifié une zone, corrigé une analyse fragile et validé ta lecture sur un nouveau cas.' }) })
     ]);
 
     return Object.freeze({
@@ -309,12 +312,163 @@
     });
   }
 
+  /* ---------------------------------------------------------------------
+     M0.3 — Lire une tendance. Gap identified after inspecting M0.1 (the
+     market as an exchange) and M0.2 (spotting a horizontal reaction zone
+     on ONE chart, explored in depth): nothing yet teaches the more basic,
+     genuinely different chart-reading skill of reading a trend's overall
+     DIRECTION (up / down / range) across several independent charts. This
+     is a real prerequisite for M1 ("Comprendre les marchés financiers" —
+     why prices move) without duplicating M1's own planned content (this
+     lesson only ever describes a direction already observed, never why it
+     happened). Deliberately a different rhythm from both predecessors:
+     M0.1 has zero charts; M0.2 explores ONE chart in depth across many
+     blocks with a spatial "touch a zone" interaction (zone_identify).
+     M0.3 instead shows three short, independent charts in a compare/
+     classify rhythm, each resolved by a categorical multiple-choice
+     judgement (decision_choice) — genuinely different because "which of
+     three directions is this" is a classification act, not a spatial one,
+     so reusing decision_choice here is competency-driven, not component
+     reuse for its own sake. Zero changes to lesson-renderer.js or
+     learning-engine.js were needed: every block type below (competency_check,
+     text_short, case_study, chart_observe, decision_choice, quiz,
+     journal_link, summary) already existed with a real renderer, and each
+     one's own id already scopes it safely — proving the engine already
+     supported a third independently-mounted lesson with no new surface. --- */
+  function buildM03Lesson() {
+    const competency = Object.freeze({ id: 'trend_reading', label: 'Lecture de tendance' });
+    const xp = Object.freeze({ lessonViewed: 30, exerciseComplete: 70, quizComplete: 130 });
+
+    // Synthetic pedagogical chart geometry (viewBox 0 0 300 160), same convention
+    // as M0.2 — never real market data. No `reactions`/`zone` needed here: this
+    // lesson reads the overall slope of the line, not a horizontal band.
+    const chartUp = Object.freeze({
+      points: Object.freeze([{ x: 10, y: 128 }, { x: 50, y: 118 }, { x: 90, y: 125 }, { x: 130, y: 100 }, { x: 170, y: 108 }, { x: 210, y: 78 }, { x: 250, y: 88 }, { x: 290, y: 52 }]),
+      ariaLabel: 'Graphique pédagogique synthétique : le prix progresse globalement vers le haut malgré quelques reculs temporaires.'
+    });
+    const chartDown = Object.freeze({
+      points: Object.freeze([{ x: 10, y: 40 }, { x: 50, y: 52 }, { x: 90, y: 46 }, { x: 130, y: 72 }, { x: 170, y: 64 }, { x: 210, y: 96 }, { x: 250, y: 88 }, { x: 290, y: 124 }]),
+      ariaLabel: 'Graphique pédagogique synthétique : le prix recule globalement malgré quelques rebonds temporaires.'
+    });
+    const chartRange = Object.freeze({
+      points: Object.freeze([{ x: 10, y: 82 }, { x: 50, y: 60 }, { x: 90, y: 98 }, { x: 130, y: 64 }, { x: 170, y: 96 }, { x: 210, y: 62 }, { x: 250, y: 92 }, { x: 290, y: 80 }]),
+      ariaLabel: 'Graphique pédagogique synthétique : le prix oscille dans une bande sans direction générale nette.'
+    });
+    const chartChallenge = Object.freeze({
+      points: Object.freeze([{ x: 10, y: 120 }, { x: 45, y: 132 }, { x: 85, y: 100 }, { x: 120, y: 110 }, { x: 160, y: 78 }, { x: 200, y: 90 }, { x: 240, y: 55 }, { x: 280, y: 66 }]),
+      ariaLabel: 'Graphique pédagogique synthétique : dernier cas à analyser sans aide.'
+    });
+
+    const content = Object.freeze({
+      lead: 'Cette leçon ne t’apprend pas à prédire le marché : elle t’apprend à décrire calmement ce qu’il vient de faire.'
+    });
+
+    function trendOptions(correctLabel) {
+      const base = [
+        Object.freeze({ key: 'up', text: 'Tendance haussière : le prix progresse globalement vers le haut.', wrong: 'Regarde l’ensemble du graphique, pas un instant isolé : compare surtout le point de départ et le point d’arrivée.' }),
+        Object.freeze({ key: 'down', text: 'Tendance baissière : le prix recule globalement.', wrong: 'Regarde l’ensemble du graphique, pas un instant isolé : compare surtout le point de départ et le point d’arrivée.' }),
+        Object.freeze({ key: 'range', text: 'Tendance latérale : le prix oscille sans direction générale claire.', wrong: 'Ici, la direction générale entre le début et la fin du graphique est en réalité assez nette.' })
+      ];
+      return Object.freeze(base.map(opt => Object.freeze({
+        text: opt.text,
+        correct: opt.key === correctLabel,
+        feedback: opt.key === correctLabel ? undefined : opt.wrong
+      })));
+    }
+
+    const finalCheck = Object.freeze({
+      id: 'm3-quiz',
+      label: 'Quiz de validation',
+      heading: 'Une dernière question avant de valider la compétence.',
+      prompt: 'Que signifie une tendance haussière ?',
+      successText: 'Correct. Tu distingues une direction générale déjà observée d’une prédiction sur l’avenir.',
+      choices: Object.freeze([
+        Object.freeze({ text: 'Une garantie que le prix va continuer à monter.', correct: false, feedback: 'Une tendance décrit un mouvement déjà observé, jamais une garantie sur l’avenir — c’est une lecture, pas une prédiction.' }),
+        Object.freeze({ text: 'Une direction générale où le prix a globalement progressé sur la période observée.', correct: true }),
+        Object.freeze({ text: 'Un signal indiquant qu’il faut acheter immédiatement.', correct: false, feedback: 'Une tendance n’est ni un signal ni une recommandation de position — elle t’aide seulement à lire le contexte du marché.' })
+      ])
+    });
+
+    const steps = Object.freeze([
+      Object.freeze({ id: 'lesson', label: 'Observer' }),
+      Object.freeze({ id: 'exercise', label: 'Défi final' }),
+      Object.freeze({ id: 'quiz', label: 'Quiz' }),
+      Object.freeze({ id: 'review', label: 'Résultat' })
+    ]);
+
+    const blocks = Object.freeze([
+      Object.freeze({ type: 'competency_check', id: 'm3-competency-intro', step: 'lesson', mode: 'targets', competency }),
+      Object.freeze({
+        type: 'text_short', id: 'm3-concept', step: 'lesson', outline: 'Une tendance, c’est une direction déjà observée',
+        eyebrow: 'Le concept', heading: 'Une tendance, c’est une direction déjà observée.',
+        body: 'Quand le prix progresse globalement dans un sens sur une période, on parle de tendance. Trois états suffisent à la décrire : elle monte, elle descend, ou elle n’a pas de direction claire.',
+        principle: Object.freeze({ label: 'Principe essentiel', text: 'Lire une tendance, c’est constater un mouvement passé, jamais prédire un mouvement futur.' })
+      }),
+      Object.freeze({
+        type: 'case_study', id: 'm3-example', step: 'lesson', outline: 'Exemple concret', label: 'Exemple concret',
+        text: 'Que tu observes le cours d’une action à la BRVM, le prix international d’une matière première ou une paire de devises, la même lecture s’applique : regarder la direction générale, pas un instant isolé.'
+      }),
+      Object.freeze({
+        type: 'chart_observe', id: 'm3-observe-1', step: 'lesson', outline: 'Premier graphique', eyebrow: 'Observer',
+        heading: 'Premier graphique.', prompt: 'Que remarques-tu sur la direction générale du prix ?', chart: chartUp
+      }),
+      Object.freeze({
+        type: 'decision_choice', id: 'm3-classify-1', step: 'lesson', outline: 'Classer', eyebrow: 'Classer',
+        heading: 'Comment qualifierais-tu ce graphique ?', prompt: 'Choisis la description la plus juste.',
+        options: trendOptions('up')
+      }),
+      Object.freeze({
+        type: 'chart_observe', id: 'm3-observe-2', step: 'lesson', outline: 'Deuxième graphique', eyebrow: 'Nouveau cas',
+        heading: 'Deuxième graphique.', prompt: 'Un nouveau cas — regarde bien avant de répondre.', chart: chartDown
+      }),
+      Object.freeze({
+        type: 'decision_choice', id: 'm3-classify-2', step: 'lesson', outline: 'Classer', eyebrow: 'Classer',
+        heading: 'Comment qualifierais-tu ce graphique ?', prompt: 'Choisis la description la plus juste.',
+        options: trendOptions('down')
+      }),
+      Object.freeze({
+        type: 'chart_observe', id: 'm3-observe-3', step: 'lesson', outline: 'Troisième graphique', eyebrow: 'Nouveau cas',
+        heading: 'Troisième graphique.', prompt: 'Ce cas est différent des deux précédents.', chart: chartRange
+      }),
+      Object.freeze({
+        type: 'decision_choice', id: 'm3-classify-3', step: 'lesson', outline: 'Classer', eyebrow: 'Classer',
+        heading: 'Comment qualifierais-tu ce graphique ?', prompt: 'Choisis la description la plus juste.',
+        options: trendOptions('range')
+      }),
+      Object.freeze({
+        type: 'chart_observe', id: 'm3-observe-4', step: 'exercise', outline: 'Défi final', eyebrow: 'Défi final',
+        heading: 'Un dernier graphique, sans aide.', prompt: 'Identifie la tendance, puis réponds à la question qui suit.', chart: chartChallenge
+      }),
+      Object.freeze({
+        type: 'decision_choice', id: 'm3-challenge', step: 'exercise', outline: 'Défi final', eyebrow: 'Défi final',
+        heading: 'Quelle est la tendance ici ?', prompt: 'Choisis la description la plus juste.',
+        options: trendOptions('up')
+      }),
+      Object.freeze({ type: 'quiz', id: 'm3-quiz', outline: finalCheck.heading, step: 'quiz', locked: true, data: finalCheck }),
+      Object.freeze({ type: 'journal_link', id: 'm3-journal-prompt', step: 'review', prompt: 'Envie de noter ce que tu retiens de cette lecture de tendance dans ton Journal ?', cta: 'Ouvrir Journal & Plan' }),
+      Object.freeze({ type: 'summary', id: 'm3-result', step: 'review', idSuffix: 'm3', data: Object.freeze({ heading: 'Compétence de lecture de tendance confirmée.', body: 'Tu as observé plusieurs graphiques, classé leur direction générale et confirmé ta lecture sur un cas sans aide.' }) })
+    ]);
+
+    return Object.freeze({
+      id: 'M0.3',
+      title: 'Lire une tendance',
+      summary: 'Reconnaître une direction générale sur un graphique — sans jamais prédire la suite.',
+      estimatedMinutes: 12,
+      markUnderstoodLabel: 'Passer au défi final',
+      competency,
+      xp,
+      content,
+      steps,
+      blocks
+    });
+  }
+
   // M1-M9 are structural placeholders (empty lessons[]) — no content invented.
   const curriculum = Object.freeze({
     id: 'darius-free',
     title: 'Darius Free',
     modules: Object.freeze([
-      { id: 'M0', title: 'Fondations des marchés', lessons: Object.freeze([buildM01Lesson(), buildM02Lesson()]) },
+      { id: 'M0', title: 'Fondations des marchés', lessons: Object.freeze([buildM01Lesson(), buildM02Lesson(), buildM03Lesson()]) },
       { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze([]) },
       { id: 'M2', title: 'Risque et discipline', summary: 'Protéger son capital avant de rechercher la performance.', lessons: Object.freeze([]) },
       { id: 'M3', title: 'Module M3', lessons: Object.freeze([]) },
