@@ -1421,5 +1421,10 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 renderState();
 renderMarketIntelligence();
 
+// A first-time visitor (no local profile yet, no deep-link hash) must land on
+// the real entry point — Access/onboarding — never on the Terminal's static
+// default-active markup, which would otherwise show a placeholder "Richard"
+// dashboard as if already signed in before anyone has actually onboarded.
 const initialView = location.hash.replace('#', '');
 if (titles[initialView]) showView(initialView);
+else if (!prototypeState.user) showView('access');
