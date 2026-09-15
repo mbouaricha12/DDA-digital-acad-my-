@@ -307,6 +307,7 @@ function renderMasteryList() {
       const icon = done ? '<svg class="icon"><use href="#icon-check-circle"/></svg>' : '';
       return `<li class="${done ? 'done' : 'pending'}"><span class="proof-dot">${icon}</span><div><strong>${milestone.label}</strong><small>${when}</small></div></li>`;
     }).join('');
+    const lessonView = LESSON_VIEW_ID[lesson.id] || 'lesson';
     return `
       <article class="mastery-row">
         <div class="mastery-row-head">
@@ -317,6 +318,7 @@ function renderMasteryList() {
           </div>
         </div>
         <ol class="proof-timeline">${milestones}</ol>
+        <button class="text-action mastery-row-lesson-link" type="button" data-view="${lessonView}">${level >= 4 ? 'Revoir cette leçon' : 'Ouvrir cette leçon'} <span>→</span></button>
       </article>`;
   }).join('');
 
@@ -331,6 +333,15 @@ function renderMasteryList() {
 
   container.innerHTML = rows + unmeasured;
 }
+
+// Product state connection (Navigation Integrity V1, mandat §4/§9): Progression
+// → compétence → leçon pertinente. Delegated once on the stable container since
+// renderMasteryList() regenerates its children on every renderState() call —
+// the static buttons.forEach binding at load time never sees these.
+document.getElementById('mastery-list')?.addEventListener('click', event => {
+  const button = event.target.closest('.mastery-row-lesson-link');
+  if (button) showView(button.dataset.view);
+});
 
 // The same nextActionable() call Terminal's "continue" button already uses — never
 // a second, diverging notion of "what's next". Journal's count is shown only as
@@ -1019,7 +1030,23 @@ function renderState() {
   document.getElementById('storage-warning').hidden = DDA.storageAvailable();
 }
 
+// Navigation Integrity V1 — real "previous screen" tracking, so a lesson's
+// or Journal's "← Retour" returns to wherever the learner actually came from
+// (Parcours, Terminal, Progression, Market Intelligence…) instead of a
+// hardcoded destination. Updated on every real showView() call, including
+// direct window.showView() calls from tests/deep-link boot — one source of
+// truth, not a second routing system.
+let currentView = 'dashboard';
+let previousView = null;
+const LESSON_VIEW_IDS = new Set(Object.values(LESSON_VIEW_ID));
+
+function smartBackTarget() {
+  if (previousView && titles[previousView] && !LESSON_VIEW_IDS.has(previousView) && previousView !== 'access') return previousView;
+  return 'dashboard';
+}
+
 function showView(id, recordEvent = true) {
+  if (id === 'back') id = smartBackTarget();
   const permission = viewPermissions[id];
   if (permission && !DDA.can(prototypeState, permission)) {
     prototypeState = DDA.track(prototypeState, 'access_denied', { view: id, permission });
@@ -1032,6 +1059,7 @@ function showView(id, recordEvent = true) {
   contextTitle.textContent = titles[id] || 'DDA';
   history.replaceState(null, '', `#${id}`);
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (id !== currentView) { previousView = currentView; currentView = id; }
   if (recordEvent) trackEvent('view_opened', { view: id });
 }
 
