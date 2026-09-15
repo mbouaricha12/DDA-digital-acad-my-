@@ -50,10 +50,13 @@ button,input,select,textarea{font:inherit;color:inherit}
 .icon-fill{fill:currentColor;stroke:none}
 
 /* ---------- Top banner ---------- */
+/* Honest disclosure (no real market data, device-only persistence), reframed
+   from an internal QA-style "PROTOTYPE" alert into a calm, permanent product
+   fact — same truth, no longer looking like a test-build watermark. */
 .prototype-banner{
-  position:sticky;top:0;z-index:40;background:var(--gold);color:var(--navy-950);
-  font-size:11px;font-weight:800;letter-spacing:.09em;text-align:center;
-  text-transform:uppercase;padding:7px 10px;
+  position:sticky;top:0;z-index:40;background:var(--paper,#F2ECDA);color:#6b5d34;
+  font-size:11px;font-weight:700;letter-spacing:.04em;text-align:center;
+  padding:7px 10px;border-bottom:1px solid #DCD0AF;
 }
 
 /* ---------- App shell / layout ---------- */
@@ -75,16 +78,12 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .network-state i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(79,190,133,.14)}
 .network-state.offline i{background:var(--gold);box-shadow:0 0 0 4px rgba(217,164,65,.14)}
 .network-state span{display:none}
-.data-mode-button{border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--muted);padding:8px;font-size:0;cursor:pointer;min-width:40px;min-height:40px}
-.data-mode-button:after{content:"DATA";font-size:9px;letter-spacing:.05em}
-.data-mode-button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
-.journey-button{display:none}
 .icon-button{position:relative;border:1px solid var(--line);width:40px;height:40px;min-width:40px;border-radius:50%;display:grid;place-items:center;background:transparent;cursor:pointer}
 /* Learning Focus Mode — toggled by showView() (app.js) purely via this body class, no
-   new routing. Calms the topbar's two "leave/distract" affordances while inside a
+   new routing. Calms the topbar's one "leave/distract" affordance while inside a
    lesson (real exit stays available: sidebar nav + the lesson's own back-link);
    DDA's own identity — logo, context title — stays fully visible. */
-body.lesson-focus .journey-button,body.lesson-focus .icon-button{display:none!important}
+body.lesson-focus .icon-button{display:none!important}
 .notification-dot{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--gold);right:8px;top:8px;box-shadow:0 0 0 2px var(--navy-950)}
 
 /* ---------- Views ---------- */
@@ -117,12 +116,6 @@ body.lesson-focus .journey-button,body.lesson-focus .icon-button{display:none!im
 .profile-chip b{font-weight:800}
 .avatar{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--ivory);color:var(--ink);font-weight:800}
 .profile-chip small{color:var(--muted)}
-.data-toggle{display:flex;align-items:flex-start;gap:10px;margin:0 8px 16px;color:var(--muted);cursor:pointer}
-.data-toggle input{margin-top:4px;accent-color:var(--gold);width:18px;height:18px}
-.data-toggle span{display:grid;line-height:1.3}
-.data-toggle b{font-size:12px;color:var(--white)}
-.data-toggle small{font-size:11px}
-
 /* ---------- Mobile bottom nav ---------- */
 .mobile-nav{
   position:fixed;left:0;right:0;bottom:0;z-index:35;display:grid;grid-template-columns:repeat(5,1fr);
@@ -204,6 +197,15 @@ body.lesson-focus .journey-button,body.lesson-focus .icon-button{display:none!im
 .terminal-lead-photo .progress-ring{position:absolute;top:14px;right:14px;width:58px}
 .terminal-lead-photo span{font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:800;line-height:1.4}
 
+/* The Home/Terminal seam: "Aujourd'hui" (thread + greeting + one lead action,
+   above) answers today's question fast; everything below this line is the
+   deeper Terminal console (market intelligence, journal, skillmap, family,
+   Premium) — same route, same page, but the reconstruction gives it its own
+   quiet identity instead of stacking every zone with equal weight. */
+.terminal-divider{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;padding-top:8px;margin-bottom:24px;border-top:1px solid #DCD0AF}
+.terminal-divider-label{font-family:Georgia,serif;font-size:13px;color:#8a6f2e;padding-top:14px;flex:none}
+.terminal-divider p{margin:0;padding-top:14px;color:var(--muted-2);font-size:12.5px}
+
 /* Market Intelligence — deeper than a link, still no new data source */
 .terminal-mi{padding-bottom:28px;border-bottom:1px solid #DCD0AF;margin-bottom:28px}
 .terminal-mi-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px;flex-wrap:wrap}
@@ -263,6 +265,8 @@ body.lesson-focus .journey-button,body.lesson-focus .icon-button{display:none!im
 .journey-current-eyebrow .journey-current-tag{color:var(--muted);font-size:12px;font-weight:700}
 .journey-current h2{font-size:22px;margin:0}
 .journey-current p{color:var(--muted);font-size:14px;margin:0}
+.journey-current-why{display:flex;align-items:flex-start;gap:8px;color:var(--gold-soft)!important;font-size:12.5px!important;max-width:440px;margin-top:6px!important}
+.journey-current-why .icon{flex:none;width:15px;height:15px;margin-top:1px}
 .journey-meta{display:flex;gap:16px;color:var(--muted);font-size:12px;font-weight:700}
 .journey-meta span{display:flex;align-items:center;gap:6px}
 .journey-meta .icon{width:1.1em;height:1.1em}
@@ -990,11 +994,7 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .mobile-brand{display:none}
   .context{display:grid}
   .context strong{font-size:17px}
-  .journey-button{display:inline-flex;margin-left:auto;border:1px solid var(--gold);background:transparent;color:var(--gold-soft);border-radius:999px;padding:9px 16px;font:inherit;font-weight:800;cursor:pointer}
-  .icon-button{margin-left:0}
   .network-state span{display:inline}
-  .data-mode-button{font-size:12px;padding:8px 12px;min-width:0}
-  .data-mode-button:after{content:""}
   .mobile-nav{display:none}
   .view{padding:44px clamp(24px,4vw,56px) 90px}
   h1{margin-bottom:15px}

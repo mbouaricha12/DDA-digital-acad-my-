@@ -211,9 +211,24 @@ function renderPathJourney() {
   const currentIndex = modules.findIndex(isRenderableModule);
   const currentModule = modules[currentIndex];
   const currentStatus = DDALearning.moduleStatus(DDA.curriculum, currentModule.id, prototypeState);
-  const currentLesson = currentModule.lessons.find(lesson => lesson.id === activeLessonId);
+  // The hero chapter must track the real current lesson, not a fixed M0.1 —
+  // once M0.1 is validated, resolveContinueTarget() honestly moves on to
+  // M0.2/M0.3, and this card (title, summary, duration, link) follows it.
+  // Only once nothing authored remains does it fall back to the last real
+  // lesson as an explicit review, same pattern as the Terminal.
+  const continueTarget = resolveContinueTarget();
+  const currentLessonTarget = continueTarget || lastAuthoredLesson();
+  const currentLesson = currentLessonTarget ? currentLessonTarget.lesson : currentModule.lessons.find(lesson => lesson.id === activeLessonId);
+  const currentView = currentLessonTarget ? (LESSON_VIEW_ID[currentLesson.id] || 'lesson') : 'lesson';
   const currentNumber = String(currentIndex + 1).padStart(2, '0');
   const lessonCount = currentModule.lessons.length;
+  const actionLabel = continueTarget ? moduleActionLabel(currentStatus, true) : 'Revoir';
+  // Parcours reconstruction (Phase A): the hero now states *why* this is the
+  // current chapter — same WHY_PHRASE/lessonNextStep() truth the Terminal
+  // already shows, reused verbatim so the two screens never disagree.
+  const why = continueTarget
+    ? (WHY_PHRASE[DDALearning.lessonNextStep(DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id))] || '')
+    : 'Compétence validée — reviens ici quand un nouveau module sera disponible.';
 
   const rail = modules.map((module, index) => ({ module, index })).filter(({ index }) => index !== currentIndex).map(({ module, index }) => {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
@@ -222,15 +237,16 @@ function renderPathJourney() {
   }).join('');
 
   container.innerHTML = `
-    <button class="journey-current" data-view="lesson">
+    <button class="journey-current" data-view="${currentView}">
       <div class="journey-current-eyebrow"><span class="path-number">${currentNumber}</span><div><small>${moduleStatusLabel(currentStatus, true)}</small><span class="journey-current-tag">${currentModule.title}</span></div></div>
       <h2>${currentLesson.title}</h2>
       <p>${currentLesson.summary}</p>
+      <p class="journey-current-why"><svg class="icon"><use href="#icon-compass"/></svg><span>${why}</span></p>
       <div class="journey-meta"><span><svg class="icon"><use href="#icon-clock"/></svg>${currentLesson.estimatedMinutes} min</span><span><svg class="icon"><use href="#icon-book"/></svg>${lessonCount} leçon${lessonCount > 1 ? 's' : ''}</span></div>
-      <span class="primary-action">${moduleActionLabel(currentStatus, true)} <span>→</span></span>
+      <span class="primary-action">${actionLabel} <span>→</span></span>
     </button>
     <ol class="journey-rail" aria-label="Prochains modules du parcours">${rail}</ol>`;
-  container.querySelector('.journey-current').addEventListener('click', () => showView('lesson'));
+  container.querySelector('.journey-current').addEventListener('click', () => showView(currentView));
 }
 
 function renderModulesRecap() {
@@ -609,6 +625,28 @@ function lastAuthoredLesson() {
   return flat.length ? flat[flat.length - 1] : null;
 }
 
+// The sidebar's "Leçon en cours" shortcut, corrected: it used to be pinned to
+// the fixed view id "lesson" (always M0.1), so once a learner moved on to
+// M0.2/M0.3 it silently sent them back to a lesson they had already
+// completed. It now targets whatever resolveContinueTarget() honestly
+// reports as current, via the same LESSON_VIEW_ID map the Terminal's own
+// primary action uses — one source of truth, no second nav engine. Once the
+// curriculum is complete it relabels itself as a review link to the last
+// real lesson rather than pointing at a dead "current lesson" concept.
+function renderNavCurrentLesson(continueTarget) {
+  const item = document.getElementById('nav-current-lesson');
+  if (!item) return;
+  const label = item.querySelector('svg') ? item.lastChild : null;
+  if (continueTarget) {
+    item.dataset.view = LESSON_VIEW_ID[continueTarget.lesson.id] || 'lesson';
+    if (label) label.textContent = ' Leçon en cours';
+  } else {
+    const last = lastAuthoredLesson();
+    item.dataset.view = last ? (LESSON_VIEW_ID[last.lesson.id] || 'lesson') : 'lesson';
+    if (label) label.textContent = ' Revoir la dernière leçon';
+  }
+}
+
 // The real, greeting-time-of-day text — never a fixed "Bonsoir" regardless of the hour.
 function greetingPrefix() {
   const hour = new Date().getHours();
@@ -925,9 +963,7 @@ function renderState() {
   renderJournalList();
   renderJournalPlan();
 
-  const journey = document.querySelector('.journey-button');
-  journey.textContent = complete ? `Revoir ${activeLessonId}` : prototypeState.onboarding?.complete ? `Reprendre ${activeLessonId}` : 'Tester le parcours';
-  journey.dataset.view = prototypeState.onboarding?.complete ? 'lesson' : 'access';
+  renderNavCurrentLesson(continueTarget);
 
   renderLessonProgressUI(activeLessonId, activeLessonDef, {
     loopId: 'lesson-loop', outlineListId: 'lesson-outline-list', gateId: 'quiz-block', evalName: 'quiz',
@@ -943,11 +979,7 @@ function renderState() {
   });
 
   document.getElementById('resume-device').hidden = !prototypeState.user;
-  document.getElementById('low-data-toggle').checked = Boolean(prototypeState.preferences.lowData);
   document.body.classList.toggle('low-data', Boolean(prototypeState.preferences.lowData));
-  const dataButton = document.getElementById('low-data-button');
-  dataButton.textContent = prototypeState.preferences.lowData ? 'Data réduite' : 'Data normale';
-  dataButton.setAttribute('aria-pressed', String(Boolean(prototypeState.preferences.lowData)));
 
   const premium = prototypeState.membership?.plan === 'premium';
   const hasProfile = Boolean(prototypeState.user);
@@ -991,7 +1023,7 @@ function showView(id, recordEvent = true) {
   const permission = viewPermissions[id];
   if (permission && !DDA.can(prototypeState, permission)) {
     prototypeState = DDA.track(prototypeState, 'access_denied', { view: id, permission });
-    showToast('Crée d’abord ton espace pilote pour accéder à cette section.');
+    showToast('Termine ton inscription pour accéder à cette section.');
     id = 'access';
   }
   views.forEach(view => view.classList.toggle('active', view.id === id));
@@ -1323,16 +1355,6 @@ function updateNetworkState() {
   status.classList.toggle('offline', !online);
   status.querySelector('span').textContent = online ? 'En ligne' : 'Mode hors connexion';
 }
-
-document.getElementById('low-data-toggle').addEventListener('change', event => {
-  saveState({ preferences: { ...prototypeState.preferences, lowData: event.currentTarget.checked } });
-  trackEvent('preference_updated', { preference: 'lowData', enabled: String(event.currentTarget.checked) });
-});
-
-document.getElementById('low-data-button').addEventListener('click', () => {
-  saveState({ preferences: { ...prototypeState.preferences, lowData: !prototypeState.preferences.lowData } });
-  trackEvent('preference_updated', { preference: 'lowData', enabled: String(prototypeState.preferences.lowData) });
-});
 
 document.getElementById('resume-session').addEventListener('click', () => {
   showView(prototypeState.onboarding?.complete ? 'lesson' : 'access');

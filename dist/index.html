@@ -48,7 +48,7 @@
       <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     </defs>
   </svg>
-  <div class="prototype-banner">Prototype privé — aucune donnée réelle</div>
+  <div class="prototype-banner">Version d’apprentissage DDA — aucune donnée de marché réelle</div>
   <div class="app-shell">
     <aside class="sidebar" aria-label="Navigation principale">
       <a class="brand" href="#dashboard" aria-label="DDA — Accueil">
@@ -58,7 +58,7 @@
       <nav>
         <button class="nav-item active" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Aujourd’hui</button>
         <button class="nav-item" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mon parcours</button>
-        <button class="nav-item" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Leçon en cours</button>
+        <button class="nav-item" id="nav-current-lesson" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Leçon en cours</button>
         <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
         <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal &amp; Plan</button>
         <button class="nav-item" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
@@ -70,18 +70,15 @@
       </nav>
       <div class="sidebar-foot">
         <span class="plan-label" id="sidebar-plan">DDA Free</span>
-        <label class="data-toggle"><input type="checkbox" id="low-data-toggle"><span><b>Mode économie de données</b><small>Réduit les animations et médias</small></span></label>
-        <button class="profile-chip"><span class="avatar" id="profile-avatar">RD</span><span><b id="profile-name">Richard</b><br><small>Profil pilote</small></span></button>
+        <button class="profile-chip" data-view="profile"><span class="avatar" id="profile-avatar">RD</span><span><b id="profile-name">Richard</b><br><small>Profil pilote</small></span></button>
       </div>
     </aside>
 
     <main>
       <header class="topbar">
         <button class="mobile-brand" data-view="dashboard" aria-label="Accueil DDA"><b>DDA</b><small>DIGITAL ACADÉMIE</small></button>
-        <div class="context"><span class="eyebrow">Darius Terminal</span><strong id="context-title">Aujourd’hui</strong></div>
+        <div class="context"><strong id="context-title">Aujourd’hui</strong></div>
         <div class="network-state" id="network-state" role="status"><i></i><span>Vérification réseau</span></div>
-        <button class="data-mode-button" id="low-data-button" type="button" aria-pressed="false">Data normale</button>
-        <button class="journey-button" data-view="access">Tester le parcours</button>
         <button class="icon-button" aria-label="Notifications"><svg class="icon"><use href="#icon-bell"/></svg><span class="notification-dot"></span></button>
       </header>
 
@@ -168,6 +165,8 @@
             <span>Photographie DDA<br>apprentissage, réflexion</span>
           </div>
         </article>
+
+        <div class="terminal-divider"><span class="terminal-divider-label">Terminal</span><p>Ta vision complète : marchés, journal, compétences — au-delà de la prochaine étape.</p></div>
 
         <section class="terminal-mi" aria-labelledby="terminal-mi-title">
           <div class="terminal-mi-head"><div><p class="eyebrow">Intelligence marché</p><h3 id="terminal-mi-title">Ce qui bouge aujourd’hui</h3></div><button class="text-action" data-view="markets">Marchés &amp; BRVM <span>→</span></button></div>
@@ -614,7 +613,7 @@
     <nav class="mobile-nav" aria-label="Navigation mobile">
       <button class="active" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg>Accueil</button>
       <button data-view="path"><svg class="icon"><use href="#icon-path"/></svg>Parcours</button>
-      <button data-view="resources"><svg class="icon"><use href="#icon-book"/></svg>Ressources</button>
+      <button data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg>Journal</button>
       <button data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg>Progression</button>
       <button data-view="profile"><svg class="icon"><use href="#icon-user"/></svg>Profil</button>
     </nav>
