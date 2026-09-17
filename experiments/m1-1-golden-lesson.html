@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DDA — M1.1 Pourquoi les prix évoluent ?</title>
+  <style>
+    :root{--navy:#0c1b2a;--paper:#f6f1e8;--ink:#10202d;--muted:#66717a;--gold:#b8892f;--line:#d8d0c3;--ok:#285f46;--bad:#8f3a32;--white:#fff}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--paper);color:var(--ink)}
+    .shell{max-width:980px;margin:auto;min-height:100vh}.top{background:var(--navy);color:white;padding:22px 20px;border-bottom:3px solid var(--gold)}
+    .brand{font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;opacity:.78}.top h1{font-family:Georgia,serif;font-size:clamp(1.9rem,5vw,3.2rem);margin:.45rem 0 .5rem}.top p{max-width:720px;line-height:1.55;color:#d9e0e5;margin:0}
+    main{padding:22px 18px 56px}.rail{display:flex;gap:10px;overflow:auto;padding:2px 0 18px}.step{white-space:nowrap;border:1px solid var(--line);border-radius:99px;padding:9px 13px;font-size:.84rem;background:#fff}.step.current{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .card{background:rgba(255,255,255,.74);border:1px solid var(--line);border-radius:18px;padding:20px;margin:0 0 18px;box-shadow:0 7px 22px rgba(14,28,40,.05)}
+    .eyebrow{font-size:.76rem;text-transform:uppercase;letter-spacing:.14em;color:var(--gold);font-weight:800}.card h2{font-family:Georgia,serif;font-size:1.55rem;margin:.4rem 0 .65rem}.card p{line-height:1.62}.principle{border-left:3px solid var(--gold);padding:11px 14px;background:#fff8e8;border-radius:8px}
+    .flow{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin:16px 0}.side{border:1px solid var(--line);background:white;border-radius:14px;padding:15px}.side strong{display:block;margin-bottom:5px}.arrow{font-size:1.5rem;color:var(--gold)}
+    .meter{display:flex;gap:8px;align-items:flex-end;height:132px;padding:18px 10px;background:var(--navy);border-radius:14px}.bar{flex:1;border-radius:8px 8px 3px 3px;background:#fff;opacity:.88;min-height:18px}.bar.buy{background:#d5b15d}.bar.sell{background:#a8bac5}.meter-labels{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted);margin-top:6px}
+    .choices{display:grid;gap:10px;margin-top:14px}.choice{border:1px solid #b9c2c8;border-radius:12px;background:white;color:var(--ink);padding:14px 15px;text-align:left;font:inherit;min-height:48px;cursor:pointer}.choice:hover,.choice:focus-visible{outline:2px solid var(--gold);outline-offset:2px}.choice.correct{border-color:var(--ok);background:#eef7f2}.choice.wrong{border-color:var(--bad);background:#fff0ee}.feedback{margin-top:12px;padding:12px 14px;border-radius:10px;display:none;line-height:1.5}.feedback.show{display:block}.feedback.ok{background:#eaf5ef;color:#173f2c}.feedback.bad{background:#fff0ed;color:#6d2823}
+    .gate{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:16px}.btn{border:0;border-radius:12px;padding:12px 16px;min-height:46px;font-weight:800;cursor:pointer}.btn.primary{background:var(--navy);color:white}.btn.secondary{background:white;border:1px solid var(--line);color:var(--ink)}.btn:disabled{opacity:.42;cursor:not-allowed}
+    .proof{display:grid;gap:10px}.proof-row{display:flex;gap:12px;align-items:flex-start}.dot{width:14px;height:14px;border-radius:50%;border:2px solid #8c969d;margin-top:4px;flex:none}.dot.done{background:var(--gold);border-color:var(--gold)}
+    .result{background:var(--navy);color:white}.result p{color:#d8e0e5}.result strong{color:#f2ce77}
+    @media(max-width:560px){main{padding:16px 12px 48px}.top{padding:18px 14px}.card{padding:17px}.flow{grid-template-columns:1fr}.arrow{transform:rotate(90deg);text-align:center}.gate{align-items:stretch;flex-direction:column}.btn{width:100%}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <div class="brand">Darius Digital Académie · Module M1</div>
+    <h1>M1.1 — Pourquoi les prix évoluent ?</h1>
+    <p>Comprendre comment acheteurs, vendeurs, liquidité et déséquilibres peuvent déplacer un prix — sans signal, sans prédiction et sans promesse de gain.</p>
+  </header>
+  <main>
+    <div class="rail" aria-label="Étapes de la leçon">
+      <span class="step current">1 · Comprendre</span><span class="step">2 · Décider</span><span class="step">3 · Appliquer</span><span class="step">4 · Valider</span>
+    </div>
+
+    <section class="card">
+      <div class="eyebrow">Compétence visée</div>
+      <h2>Compréhension de la formation du prix</h2>
+      <p>À la fin de cette leçon, tu dois pouvoir expliquer pourquoi un prix peut monter, baisser ou rester relativement stable à partir de l’équilibre entre intentions d’achat, intentions de vente et liquidité disponible.</p>
+      <div class="principle"><strong>Principe DDA :</strong> un mouvement de prix décrit un équilibre qui change. Ce n’est jamais une garantie sur ce qui arrivera ensuite.</div>
+    </section>
+
+    <section class="card">
+      <div class="eyebrow">Observer</div>
+      <h2>Un prix bouge lorsqu’il faut trouver une nouvelle contrepartie</h2>
+      <div class="flow">
+        <div class="side"><strong>Acheteurs agressifs</strong>Ils acceptent les prix disponibles pour exécuter rapidement.</div>
+        <div class="arrow">→</div>
+        <div class="side"><strong>Liquidité vendeuse limitée</strong>Les offres disponibles proches du prix courant peuvent être absorbées.</div>
+      </div>
+      <p>Si les achats agressifs consomment les offres de vente disponibles, les transactions suivantes peuvent devoir s’exécuter plus haut. L’inverse peut se produire avec une pression vendeuse agressive.</p>
+    </section>
+
+    <section class="card scenario" data-scenario="buy">
+      <div class="eyebrow">Cas 1 · Décider</div><h2>Pression acheteuse</h2>
+      <div class="meter" aria-label="Schéma pédagogique : pression acheteuse plus forte que pression vendeuse"><div class="bar buy" style="height:92%"></div><div class="bar buy" style="height:78%"></div><div class="bar sell" style="height:38%"></div><div class="bar sell" style="height:28%"></div></div>
+      <div class="meter-labels"><span>Achats agressifs élevés</span><span>Ventes disponibles faibles</span></div>
+      <p><strong>Question :</strong> quelle lecture est la plus juste ?</p>
+      <div class="choices">
+        <button class="choice" data-correct="false" data-feedback="Un achat isolé ne suffit pas. Ici, l’élément important est la pression acheteuse répétée face à une liquidité vendeuse limitée.">Le prix doit forcément monter longtemps.</button>
+        <button class="choice" data-correct="true" data-feedback="Oui. Si les offres proches sont absorbées, les exécutions suivantes peuvent se faire à des prix plus élevés. Cela décrit un mécanisme possible, pas une certitude future.">Le prix peut devoir chercher des vendeurs plus haut si les offres proches sont absorbées.</button>
+        <button class="choice" data-correct="false" data-feedback="Le vendeur n’a pas besoin de connaître l’avenir. Il fournit simplement une contrepartie au prix accepté.">Les vendeurs savent que le marché va monter.</button>
+      </div><div class="feedback" aria-live="polite"></div>
+    </section>
+
+    <section class="card scenario" data-scenario="sell">
+      <div class="eyebrow">Cas 2 · Nouveau contexte</div><h2>Pression vendeuse</h2>
+      <div class="meter" aria-label="Schéma pédagogique : pression vendeuse plus forte que pression acheteuse"><div class="bar buy" style="height:30%"></div><div class="bar buy" style="height:35%"></div><div class="bar sell" style="height:84%"></div><div class="bar sell" style="height:96%"></div></div>
+      <p><strong>Question :</strong> si les vendeurs agressifs absorbent les achats disponibles proches, que peut-il se passer ?</p>
+      <div class="choices">
+        <button class="choice" data-correct="true" data-feedback="Exact. Pour trouver de nouvelles contreparties acheteuses, les transactions peuvent se déplacer vers des prix plus bas.">Les transactions suivantes peuvent se faire plus bas.</button>
+        <button class="choice" data-correct="false" data-feedback="Le nombre brut de participants ne suffit pas : ce sont les ordres réellement exécutés, leur agressivité et la liquidité disponible qui comptent.">Le prix monte parce qu’il y a toujours autant d’acheteurs que de vendeurs.</button>
+        <button class="choice" data-correct="false" data-feedback="Une pression vendeuse peut déplacer le prix, mais rien ne garantit la durée du mouvement.">La baisse devient garantie pour le reste de la journée.</button>
+      </div><div class="feedback" aria-live="polite"></div>
+    </section>
+
+    <section class="card scenario" data-scenario="balance">
+      <div class="eyebrow">Cas 3 · Équilibre relatif</div><h2>Pourquoi un prix peut rester en range</h2>
+      <div class="meter" aria-label="Schéma pédagogique : forces acheteuses et vendeuses relativement équilibrées"><div class="bar buy" style="height:62%"></div><div class="bar buy" style="height:58%"></div><div class="bar sell" style="height:60%"></div><div class="bar sell" style="height:57%"></div></div>
+      <p><strong>Question :</strong> quelle conséquence est la plus cohérente avec cet équilibre relatif ?</p>
+      <div class="choices">
+        <button class="choice" data-correct="false" data-feedback="Un équilibre relatif ne crée pas automatiquement une forte tendance. Il peut au contraire limiter le déplacement net du prix.">Une forte tendance devient inévitable.</button>
+        <button class="choice" data-correct="true" data-feedback="Oui. Quand aucune pression ne domine durablement, le prix peut osciller dans une zone jusqu’à ce que l’équilibre change.">Le prix peut osciller dans une zone tant qu’aucune pression ne domine durablement.</button>
+      </div><div class="feedback" aria-live="polite"></div>
+    </section>
+
+    <section class="card scenario" data-scenario="exercise">
+      <div class="eyebrow">Appliquer · Exercice</div><h2>Lis une situation nouvelle</h2>
+      <p>Sur plusieurs transactions successives, les offres de vente proches sont rapidement consommées. Les nouveaux échanges se font progressivement à des prix plus élevés.</p>
+      <p><strong>Quelle explication est la plus solide ?</strong></p>
+      <div class="choices">
+        <button class="choice" data-correct="false" data-feedback="Le nombre de personnes n’est pas observable ici. Ce que le scénario décrit, c’est l’absorption de liquidité vendeuse et le déplacement des exécutions.">Il y a forcément plus de personnes qui achètent que de personnes qui vendent.</button>
+        <button class="choice" data-correct="true" data-feedback="Correct. Les ordres acheteurs agressifs consomment la liquidité vendeuse proche ; les exécutions suivantes trouvent leur contrepartie plus haut.">La pression acheteuse absorbe la liquidité vendeuse disponible et le prix se déplace pour trouver de nouvelles contreparties.</button>
+        <button class="choice" data-correct="false" data-feedback="Le mouvement observé n’est pas une preuve de ce qui arrivera ensuite. La leçon explique un mécanisme, pas un signal.">Le marché donne un signal d’achat pour la suite.</button>
+      </div><div class="feedback" aria-live="polite"></div>
+    </section>
+
+    <section class="card scenario" data-scenario="quiz">
+      <div class="eyebrow">Valider · Quiz final</div><h2>Quelle phrase résume le mieux la formation du prix ?</h2>
+      <div class="choices">
+        <button class="choice" data-correct="false" data-feedback="Une seule transaction ne suffit pas à expliquer durablement un mouvement. Il faut regarder l’interaction entre ordres et liquidité.">Chaque achat fait monter le prix et chaque vente le fait baisser.</button>
+        <button class="choice" data-correct="true" data-feedback="Exact. Le prix est le résultat dynamique des ordres exécutés et de la liquidité disponible ; il peut monter, baisser ou rester relativement stable selon l’équilibre du moment.">Le prix résulte de l’interaction entre ordres exécutés et liquidité disponible ; l’équilibre peut se déplacer dans un sens ou rester relativement stable.</button>
+        <button class="choice" data-correct="false" data-feedback="Cette leçon ne transforme pas la lecture du marché en prédiction. Comprendre le mécanisme ne permet jamais de garantir la prochaine direction.">Comprendre la liquidité permet de connaître à l’avance la prochaine direction.</button>
+      </div><div class="feedback" aria-live="polite"></div>
+    </section>
+
+    <section class="card result" id="result">
+      <div class="eyebrow">Preuve de compétence</div><h2>Compréhension de la formation du prix</h2>
+      <div class="proof">
+        <div class="proof-row"><span class="dot done"></span><div><strong>Découvrir</strong><br>Comprendre acheteurs, vendeurs et contrepartie.</div></div>
+        <div class="proof-row"><span class="dot" id="proof-understand"></span><div><strong>Comprendre</strong><br>Expliquer pression, liquidité et déplacement du prix.</div></div>
+        <div class="proof-row"><span class="dot" id="proof-apply"></span><div><strong>Appliquer</strong><br>Lire correctement une situation nouvelle.</div></div>
+        <div class="proof-row"><span class="dot" id="proof-master"></span><div><strong>Maîtriser</strong><br>Non revendiqué automatiquement : DDA demandera plusieurs preuves futures avant d’utiliser ce niveau.</div></div>
+      </div>
+      <p id="status"><strong>Statut :</strong> complète les trois cas, l’exercice et le quiz pour confirmer l’application.</p>
+    </section>
+  </main>
+</div>
+<script>
+  const scenarios=[...document.querySelectorAll('.scenario')];
+  const passed=new Set();
+  scenarios.forEach(section=>{
+    const fb=section.querySelector('.feedback');
+    section.querySelectorAll('.choice').forEach(btn=>btn.addEventListener('click',()=>{
+      const correct=btn.dataset.correct==='true';
+      section.querySelectorAll('.choice').forEach(x=>x.classList.remove('correct','wrong'));
+      btn.classList.add(correct?'correct':'wrong');
+      fb.textContent=btn.dataset.feedback||'';
+      fb.className='feedback show '+(correct?'ok':'bad');
+      if(correct) passed.add(section.dataset.scenario);
+      updateProof();
+    }));
+  });
+  function updateProof(){
+    const understanding=['buy','sell','balance'].every(x=>passed.has(x));
+    const applying=passed.has('exercise');
+    const quiz=passed.has('quiz');
+    document.getElementById('proof-understand').classList.toggle('done',understanding);
+    document.getElementById('proof-apply').classList.toggle('done',understanding&&applying&&quiz);
+    const status=document.getElementById('status');
+    if(understanding&&applying&&quiz){status.innerHTML='<strong>Statut :</strong> compétence appliquée et confirmée sur cette leçon. Le niveau “Maîtriser” reste volontairement non attribué sur une seule validation.'}
+  }
+</script>
+</body>
+</html>
