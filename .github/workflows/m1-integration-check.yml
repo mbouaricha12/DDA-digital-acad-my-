@@ -1,0 +1,22 @@
+name: M1.1 Integration Check
+on:
+  pull_request:
+    paths:
+      - 'dist/m1-1-lesson.js'
+      - 'dist/dda-analytics.js'
+      - 'tests/test_m1_integration_contract.js'
+      - '.github/workflows/m1-integration-check.yml'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node --check dist/m1-1-lesson.js
+      - run: node --check dist/dda-analytics.js
+      - run: node tests/test_m1_golden_lesson.js
+      - run: node tests/test_m1_integration_contract.js
