@@ -272,6 +272,224 @@ async function completeSignupFlow(page, opts) {
     await context.close();
   });
 
+  console.log('\n-- F. Acquisition V1 — capture --');
+
+  await test('UTM params are captured once into state.acquisition with a pseudonymous visitorId', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/?utm_source=newsletter&utm_medium=email&utm_campaign=launch#landing`);
+    const acquisition = await page.evaluate(() => window.DDA.load().acquisition);
+    assert.equal(acquisition.source, 'newsletter');
+    assert.equal(acquisition.medium, 'email');
+    assert.equal(acquisition.campaign, 'launch');
+    assert.equal(typeof acquisition.visitorId, 'string');
+    assert.ok(acquisition.visitorId.length > 0);
+    await context.close();
+  });
+
+  await test('first-touch attribution is preserved across a later visit with different UTM params', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/?utm_source=newsletter&utm_medium=email&utm_campaign=launch#landing`);
+    const first = await page.evaluate(() => window.DDA.load().acquisition);
+    await page.goto(`${BASE}/?utm_source=facebook&utm_medium=cpc&utm_campaign=retarget#landing`);
+    const second = await page.evaluate(() => window.DDA.load().acquisition);
+    assert.equal(second.visitorId, first.visitorId);
+    assert.equal(second.source, 'newsletter');
+    assert.equal(second.campaign, 'launch');
+    await context.close();
+  });
+
+  await test('no email, name or PII is ever present in state.acquisition', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await completeSignupFlow(page, { firstName: 'Ada', email: 'ada@example.com' });
+    const acquisition = await page.evaluate(() => window.DDA.load().acquisition);
+    const serialized = JSON.stringify(acquisition);
+    assert.equal(serialized.includes('ada@example.com'), false);
+    assert.equal(serialized.includes('Ada'), false);
+    await context.close();
+  });
+
+  console.log('\n-- G. Analytics adapter — funnel + data minimization --');
+
+  await test('landing_visit reaches the analytics adapter with only safe acquisition props', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/?utm_source=newsletter&utm_medium=email&utm_campaign=launch#landing`);
+    const queue = await page.evaluate(() => window.DDAAnalytics.getDebugQueue());
+    const entry = queue.find(e => e.localName === 'landing_visit');
+    assert.ok(entry, 'landing_visit should reach the adapter');
+    assert.equal(entry.externalName, 'landing_visit');
+    assert.equal(entry.props.source, 'newsletter');
+    assert.equal(entry.props.campaign, 'launch');
+    assert.equal('level' in entry.props, false);
+    assert.equal('goal' in entry.props, false);
+    await context.close();
+  });
+
+  await test('signup forwards to the adapter as dda_signup without level/goal/name/email', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await completeSignupFlow(page, { firstName: 'Ada', email: 'ada@example.com' });
+    const queue = await page.evaluate(() => window.DDAAnalytics.getDebugQueue());
+    const entry = queue.find(e => e.localName === 'onboarding_complete');
+    assert.ok(entry, 'onboarding_complete should reach the adapter');
+    assert.equal(entry.externalName, 'dda_signup');
+    assert.equal('level' in entry.props, false);
+    assert.equal('goal' in entry.props, false);
+    assert.equal(JSON.stringify(entry).includes('ada@example.com'), false);
+    assert.equal(JSON.stringify(entry).includes('Ada'), false);
+    await context.close();
+  });
+
+  await test('purely local product-analytics events (e.g. exercise_attempt) never reach the external event map', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await completeSignupFlow(page);
+    await page.locator('#lesson [data-question] button[data-correct="true"]').first().click();
+    const queue = await page.evaluate(() => window.DDAAnalytics.getDebugQueue());
+    const entry = queue.find(e => e.localName === 'exercise_attempt');
+    assert.ok(entry, 'exercise_attempt should have reached the adapter boundary');
+    assert.equal(entry.externalName, null, 'exercise_attempt must never be forwarded externally');
+    assert.equal(entry.sent, false);
+    await context.close();
+  });
+
+  await test('activation_v1 fires exactly once, the first time M0.1 quiz completes', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await completeSignupFlow(page);
+    await page.locator('#lesson [data-question] button[data-correct="true"]').first().click();
+    const quizButton = page.locator('#quiz-block [data-question] button[data-correct="true"]').first();
+    await quizButton.scrollIntoViewIfNeeded();
+    await quizButton.click();
+    const state = await page.evaluate(() => window.DDA.load());
+    const localActivations = state.events.filter(e => e.name === 'activation_v1');
+    const queue = await page.evaluate(() => window.DDAAnalytics.getDebugQueue());
+    const forwarded = queue.filter(e => e.localName === 'activation_v1');
+    assert.equal(localActivations.length, 1);
+    assert.equal(forwarded.length, 1);
+    assert.equal(forwarded[0].externalName, 'activation_v1');
+    await context.close();
+  });
+
+  console.log('\n-- H. Broker Hub --');
+
+  await test('Deriv, HFM, XM and Weltrade are all present with strictly identical structure', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await completeSignupFlow(page);
+    // The app only re-routes via showView() calls (nav clicks), not via hash
+    // changes without a full reload (documented navigation debt, DDA_ROUTE_MAP.md)
+    // — so reaching #brokers here means clicking the real nav item, like a user.
+    await page.click('.nav-item[data-view="brokers"]');
+    assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'brokers');
+    const rows = await page.evaluate(() => Array.from(document.querySelectorAll('.broker-row')).map(row => ({
+      broker: row.dataset.broker,
+      hasVerificationBadge: Boolean(row.querySelector('.verification')),
+      hasDetailButton: Boolean(row.querySelector('.broker-detail')),
+      featured: row.classList.contains('featured') || row.classList.contains('recommended')
+    })));
+    const brokers = rows.map(r => r.broker).sort();
+    assert.deepEqual(brokers, ['Deriv', 'HFM', 'Weltrade', 'XM']);
+    assert.ok(rows.every(r => r.hasVerificationBadge && r.hasDetailButton && !r.featured), 'every broker row must carry the same honest, non-featured treatment');
+    await context.close();
+  });
+
+  await test('clicking a broker card fires broker_selected with the right broker, never affiliate_link_click', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await completeSignupFlow(page);
+    await page.click('.nav-item[data-view="brokers"]');
+    await page.locator('.broker-row[data-broker="XM"] .broker-detail').click();
+    const state = await page.evaluate(() => window.DDA.load());
+    const selected = state.events.find(e => e.name === 'broker_selected');
+    assert.ok(selected);
+    assert.equal(selected.metadata.broker, 'XM');
+    assert.equal(state.events.some(e => e.name === 'affiliate_link_click'), false);
+    await context.close();
+  });
+
+  console.log('\n-- I. Landing — public surface --');
+
+  await test('#landing hides sidebar, topbar, mobile nav and the prototype banner', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+    const visibility = await page.evaluate(() => ({
+      sidebar: getComputedStyle(document.querySelector('.sidebar')).display,
+      topbar: getComputedStyle(document.querySelector('.topbar')).display,
+      mobileNav: getComputedStyle(document.querySelector('.mobile-nav')).display,
+      banner: getComputedStyle(document.querySelector('.prototype-banner')).display
+    }));
+    assert.equal(visibility.sidebar, 'none');
+    assert.equal(visibility.topbar, 'none');
+    assert.equal(visibility.mobileNav, 'none');
+    assert.equal(visibility.banner, 'none');
+    await context.close();
+  });
+
+  await test('#access still shows its chrome as before (landing does not leak into other views)', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#access`);
+    const topbarDisplay = await page.evaluate(() => getComputedStyle(document.querySelector('.topbar')).display);
+    assert.notEqual(topbarDisplay, 'none');
+    await context.close();
+  });
+
+  await test('a first-time anonymous visitor with no hash lands on #landing, and its CTA reaches #access', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/`);
+    assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'landing');
+    await page.click('#landing [data-view="access"]');
+    assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'access');
+    await context.close();
+  });
+
+  console.log('\n-- J. Full funnel proof: landing → access → onboarding → M0.1 → activation --');
+
+  await test('a single visitorId is traceable end-to-end through the full acquisition funnel', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+
+    await page.goto(`${BASE}/?utm_source=youtube&utm_medium=video&utm_campaign=m0-launch#landing`);
+    await page.click('#landing [data-view="access"]');
+    await fillSignup(page, { firstName: 'Fatou', email: 'fatou@example.com' });
+    await fillOnboarding(page);
+    await page.waitForSelector('.view.active#lesson');
+    await page.click('.nav-item[data-view="brokers"]');
+    await page.locator('.broker-row[data-broker="Deriv"] .broker-detail').click();
+    await page.click('.nav-item[data-view="lesson"]');
+    await page.locator('#lesson [data-question] button[data-correct="true"]').first().click();
+    const quizButton = page.locator('#quiz-block [data-question] button[data-correct="true"]').first();
+    await quizButton.scrollIntoViewIfNeeded();
+    await quizButton.click();
+
+    const { visitorId, queue } = await page.evaluate(() => ({
+      visitorId: window.DDA.load().acquisition.visitorId,
+      queue: window.DDAAnalytics.getDebugQueue()
+    }));
+
+    const forwardedNames = queue.filter(e => e.externalName).map(e => e.externalName);
+    assert.ok(forwardedNames.includes('landing_visit'));
+    assert.ok(forwardedNames.includes('dda_signup'));
+    assert.ok(forwardedNames.includes('broker_selected'));
+    assert.ok(forwardedNames.includes('activation_v1'));
+    assert.equal(forwardedNames.includes('affiliate_link_click'), false);
+
+    const funnelEvents = queue.filter(e => e.externalName);
+    assert.ok(funnelEvents.every(e => e.distinctId === visitorId), 'every funnel event must carry the same visitorId');
+    assert.ok(funnelEvents.every(e => !JSON.stringify(e).includes('fatou@example.com') && !JSON.stringify(e).includes('Fatou')), 'no PII may ever reach the adapter');
+
+    const order = forwardedNames.filter(n => ['landing_visit', 'dda_signup', 'broker_selected', 'activation_v1'].includes(n));
+    assert.deepEqual(order, ['landing_visit', 'dda_signup', 'broker_selected', 'activation_v1'], 'funnel steps must be recorded in the real order they happened');
+
+    await context.close();
+  });
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 
