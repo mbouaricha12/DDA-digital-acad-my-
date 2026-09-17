@@ -947,10 +947,15 @@ function renderState() {
   }
   // Reuses the exact honest phrasing renderProgressNextStep() already shows for
   // this same curriculumComplete state — never a second, contradictory message.
+  // Daily Value Loop V1.1 fix: this used to hardcode activeLessonId (always
+  // M0.1), so Home kept telling a learner who had validated M0.1 to "terminer
+  // M0.1" forever, while Terminal/Parcours/Progression had already moved on to
+  // M0.2/M0.3 via continueTarget — a direct cross-surface contradiction. Now
+  // follows the same continueTarget every other surface already uses.
   document.getElementById('personalized-next').textContent = curriculumComplete
     ? 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.'
     : prototypeState.onboarding?.goal
-      ? `Objectif : ${prototypeState.onboarding.goal}. Prochaine étape : terminer ${activeLessonId}.`
+      ? `Objectif : ${prototypeState.onboarding.goal}. Prochaine étape : terminer ${continueTarget.lesson.id}.`
       : 'Une étape claire pour continuer à progresser.';
 
   if (continueTarget) {
