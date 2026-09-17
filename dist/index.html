@@ -82,6 +82,28 @@
         <button class="icon-button" aria-label="Notifications"><svg class="icon"><use href="#icon-bell"/></svg><span class="notification-dot"></span></button>
       </header>
 
+      <section class="view" id="landing" aria-labelledby="landing-title">
+        <div class="access-shell">
+          <div class="access-copy">
+            <div class="photo-frame light ratio-wide access-photo" role="img" aria-label="Photographie DDA à venir — apprenant en session d’étude"><svg class="icon"><use href="#icon-photo"/></svg><span>Photographie DDA</span></div>
+            <p class="eyebrow gold">Darius Digital Académie</p>
+            <h1 id="landing-title">Apprends les marchés financiers, étape par étape.</h1>
+            <p>DDA t’aide à comprendre les marchés, t’entraîner sur des cas concrets et prouver ta progression réelle — à ton rythme, sur ton appareil.</p>
+            <ul class="trust-list">
+              <li><svg class="icon"><use href="#icon-target"/></svg> Une seule prochaine action à la fois</li>
+              <li><svg class="icon"><use href="#icon-check-circle"/></svg> Validation par exercice et quiz, jamais une simple vidéo</li>
+              <li><svg class="icon"><use href="#icon-shield"/></svg> Aucune promesse de gain, aucun signal, aucun faux témoignage</li>
+            </ul>
+          </div>
+          <div class="access-card landing-cta-card">
+            <p class="eyebrow">Commencer</p>
+            <h2>Créer mon compte DDA Free</h2>
+            <p>Gratuit, sans carte bancaire. Ta progression reste sur cet appareil.</p>
+            <button class="primary-action" type="button" data-view="access">Commencer maintenant <span>→</span></button>
+          </div>
+        </div>
+      </section>
+
       <section class="view" id="access" aria-labelledby="access-title">
         <div class="access-shell">
           <div class="access-copy">
@@ -98,7 +120,7 @@
             </svg>
             <p class="eyebrow gold">Fondations des marchés</p>
             <h1 id="access-title">Commence par une expérience claire.</h1>
-            <p>Ton inscription personnalise ton parcours et reste sur cet appareil — aucune donnée n’est envoyée à un serveur.</p>
+            <p>Ton inscription personnalise ton parcours et reste sur cet appareil : ton nom, ton e-mail et tes réponses ne sont jamais transmis. Une mesure d’audience anonyme (jamais ton identité) peut être utilisée pour comprendre comment les visiteurs découvrent DDA.</p>
             <ul class="trust-list">
               <li><svg class="icon"><use href="#icon-target"/></svg> Une seule prochaine action</li>
               <li><svg class="icon"><use href="#icon-check-circle"/></svg> Validation par exercice et quiz</li>
@@ -532,7 +554,7 @@
         <section class="panel broker-list-panel">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-search"/></svg> Profils</p><h3>Ce qui est réellement connu, ce qui reste à confirmer</h3></div></div>
           <div class="broker-list" id="broker-grid">
-            <article class="broker-row" data-market="forex synthetic" data-use="learning advanced">
+            <article class="broker-row" data-broker="Deriv" data-market="forex synthetic" data-use="learning advanced">
               <div class="broker-row-head">
                 <span class="broker-monogram">D</span>
                 <div class="broker-row-heading"><h2>Deriv</h2><p>Profil pour marchés dérivés et indices synthétiques.</p></div>
@@ -541,10 +563,28 @@
               <dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div><div><dt>Régulation</dt><dd>À vérifier avant publication</dd></div><div><dt>Dépôt minimum</dt><dd>À vérifier avant publication</dd></div></dl>
               <div class="broker-row-foot"><span class="verification"><svg class="icon"><use href="#icon-clock"/></svg> À vérifier avant publication</span><button class="secondary-action dark-action broker-detail">Voir les critères</button></div>
             </article>
-            <article class="broker-row" data-market="forex" data-use="learning advanced">
+            <article class="broker-row" data-broker="HFM" data-market="forex" data-use="learning advanced">
               <div class="broker-row-head">
                 <span class="broker-monogram">H</span>
                 <div class="broker-row-heading"><h2>HFM</h2><p>Profil pour Forex et CFD, sous réserve d’éligibilité locale.</p></div>
+              </div>
+              <div class="photo-frame light ratio-wide broker-photo"><svg class="icon"><use href="#icon-photo"/></svg><span>Aperçu de plateforme — à intégrer après vérification</span></div>
+              <dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div><div><dt>Régulation</dt><dd>À vérifier avant publication</dd></div><div><dt>Dépôt minimum</dt><dd>À vérifier avant publication</dd></div></dl>
+              <div class="broker-row-foot"><span class="verification"><svg class="icon"><use href="#icon-clock"/></svg> À vérifier avant publication</span><button class="secondary-action dark-action broker-detail">Voir les critères</button></div>
+            </article>
+            <article class="broker-row" data-broker="XM" data-market="forex" data-use="learning advanced">
+              <div class="broker-row-head">
+                <span class="broker-monogram">X</span>
+                <div class="broker-row-heading"><h2>XM</h2><p>Profil pour Forex et CFD, sous réserve d’éligibilité locale.</p></div>
+              </div>
+              <div class="photo-frame light ratio-wide broker-photo"><svg class="icon"><use href="#icon-photo"/></svg><span>Aperçu de plateforme — à intégrer après vérification</span></div>
+              <dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div><div><dt>Régulation</dt><dd>À vérifier avant publication</dd></div><div><dt>Dépôt minimum</dt><dd>À vérifier avant publication</dd></div></dl>
+              <div class="broker-row-foot"><span class="verification"><svg class="icon"><use href="#icon-clock"/></svg> À vérifier avant publication</span><button class="secondary-action dark-action broker-detail">Voir les critères</button></div>
+            </article>
+            <article class="broker-row" data-broker="Weltrade" data-market="forex synthetic" data-use="learning advanced">
+              <div class="broker-row-head">
+                <span class="broker-monogram">W</span>
+                <div class="broker-row-heading"><h2>Weltrade</h2><p>Profil pour Forex et instruments dérivés, sous réserve d’éligibilité locale.</p></div>
               </div>
               <div class="photo-frame light ratio-wide broker-photo"><svg class="icon"><use href="#icon-photo"/></svg><span>Aperçu de plateforme — à intégrer après vérification</span></div>
               <dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div><div><dt>Régulation</dt><dd>À vérifier avant publication</dd></div><div><dt>Dépôt minimum</dt><dd>À vérifier avant publication</dd></div></dl>
@@ -603,7 +643,7 @@
             <p class="eyebrow gold">Préférences</p><h3>Une expérience adaptée à ton appareil.</h3>
             <label class="preference-row"><span><b>Économie de données</b><small>Réduit mouvements et médias non essentiels.</small></span><input id="profile-low-data" type="checkbox"></label>
             <label class="preference-row"><span><b>Rappels pédagogiques</b><small>Préférence enregistrée seulement ; aucun message n’est envoyé.</small></span><input id="profile-reminders" type="checkbox"></label>
-            <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité.</strong> Les informations restent sur cet appareil. Aucun courtier, paiement ou service publicitaire n’y a accès.</span></p>
+            <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité.</strong> Ton profil, tes préférences et tes réponses restent sur cet appareil. Aucun courtier, paiement ou service publicitaire n’y a accès. Une mesure d’audience anonyme et pseudonyme peut être utilisée pour comprendre comment les visiteurs découvrent DDA — jamais ton nom, ton e-mail ni tes réponses.</span></p>
             <div class="activity-summary"><span>Activité locale</span><strong id="event-count">0 événement</strong><small>Mesure pédagogique anonyme sur cet appareil — ta relation avec l’écosystème DDA, jamais partagée.</small></div>
           </aside>
         </div>
@@ -628,6 +668,7 @@
   <script src="dda-core.js"></script>
   <script src="learning-engine.js"></script>
   <script src="lesson-renderer.js"></script>
+  <script src="dda-analytics.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
