@@ -33,7 +33,14 @@ const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
 const titles = { dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours', lesson: 'Leçon en cours', 'lesson-m02': 'Support & Résistance', 'lesson-m03': 'Lire une tendance', progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
-const viewPermissions = { path: 'path', lesson: 'lesson_m01', 'lesson-m02': 'lesson_m01', 'lesson-m03': 'lesson_m01', progress: 'progress', journal: 'journal', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile' };
+// V1.1 correction: 'dashboard' was never gated here even though DDA.curriculum's
+// own entitlements model (dda-core.js ENTITLEMENTS) already lists 'dashboard' as a
+// free/premium-only permission, not a visitor one — the deep-link/reload matrix this
+// tranche requires (mandate item 3) surfaced that an anonymous visitor navigating
+// straight to #dashboard bypassed Access entirely and saw the Terminal's real
+// authenticated shell. Wiring it here uses the exact same, already-tested
+// permission-gate showView() applies to every other protected view — no new logic.
+const viewPermissions = { dashboard: 'dashboard', path: 'path', lesson: 'lesson_m01', 'lesson-m02': 'lesson_m01', 'lesson-m03': 'lesson_m01', progress: 'progress', journal: 'journal', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile' };
 // M0.2 and M0.3 reuse the same `lesson_m01` free-tier entitlement — no separate
 // premium tier is being introduced for M0 in this tranche, so no new key is invented.
 // Maps a lesson id to the view that actually renders it — the Terminal cockpit's
@@ -1001,7 +1008,7 @@ function renderState() {
     document.getElementById('profile-large-avatar').textContent = initials;
     document.getElementById('profile-heading-name').textContent = name;
     document.getElementById('profile-heading-email').textContent = prototypeState.user.email || 'Compte local';
-    document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · Démo' : 'DDA Free';
+    document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
     document.getElementById('profile-first-name').value = name;
     document.getElementById('profile-level').value = prototypeState.onboarding?.level || 'Débutant';
     document.getElementById('profile-goal').value = prototypeState.onboarding?.goal || 'Comprendre les marchés';
@@ -1012,7 +1019,7 @@ function renderState() {
   const count = prototypeState.events?.length || 0;
   document.getElementById('event-count').textContent = `${count} événement${count > 1 ? 's' : ''}`;
 
-  document.getElementById('sidebar-plan').textContent = premium ? 'DDA Premium · Démo' : 'DDA Free';
+  document.getElementById('sidebar-plan').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
   document.getElementById('membership-status').textContent = premium ? 'DDA Premium' : 'DDA Free';
   document.getElementById('free-plan-state').textContent = premium ? 'Inclus avec Premium' : 'Formule active';
   document.getElementById('preview-premium').hidden = premium;
@@ -1036,8 +1043,32 @@ function renderState() {
 // hardcoded destination. Updated on every real showView() call, including
 // direct window.showView() calls from tests/deep-link boot — one source of
 // truth, not a second routing system.
+//
+// V1.1 correction (real bug, found by reproducing an actual reload — not
+// showView() called in isolation): previousView lived ONLY in memory. A
+// learner opening a lesson from Progression/Parcours and then reloading the
+// page (or the tab was restored, or the link opened in a context that
+// re-executes this script) lost that memory entirely — the next boot always
+// re-seeded previousView from the hardcoded 'dashboard' default, so "←
+// Retour" silently fell back to Aujourd'hui instead of the real origin.
+// Persisted to sessionStorage (this tab's session only, never localStorage —
+// this is navigation-in-progress memory, not durable learner state) and
+// restored at boot, with currentView pre-seeded to the deep-linked view so
+// the boot's own showView() call doesn't immediately clobber the restored
+// value with its normal (correct, for a real transition) "record previous"
+// logic below.
+const PREV_VIEW_STORAGE_KEY = 'dda-nav-previous-view';
+function readStoredPreviousView() {
+  try { return sessionStorage.getItem(PREV_VIEW_STORAGE_KEY); } catch (error) { return null; }
+}
+function storePreviousView(view) {
+  try {
+    if (view) sessionStorage.setItem(PREV_VIEW_STORAGE_KEY, view);
+    else sessionStorage.removeItem(PREV_VIEW_STORAGE_KEY);
+  } catch (error) { /* private/blocked storage — back-link still falls back to dashboard */ }
+}
 let currentView = 'dashboard';
-let previousView = null;
+let previousView = readStoredPreviousView();
 const LESSON_VIEW_IDS = new Set(Object.values(LESSON_VIEW_ID));
 
 function smartBackTarget() {
@@ -1059,7 +1090,11 @@ function showView(id, recordEvent = true) {
   contextTitle.textContent = titles[id] || 'DDA';
   history.replaceState(null, '', `#${id}`);
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (id !== currentView) { previousView = currentView; currentView = id; }
+  if (id !== currentView) {
+    previousView = currentView;
+    storePreviousView(previousView);
+    currentView = id;
+  }
   if (recordEvent) trackEvent('view_opened', { view: id });
 }
 
@@ -1454,5 +1489,11 @@ renderMarketIntelligence();
 // default-active markup, which would otherwise show a placeholder "Richard"
 // dashboard as if already signed in before anyone has actually onboarded.
 const initialView = location.hash.replace('#', '');
-if (titles[initialView]) showView(initialView);
-else if (!prototypeState.user) showView('access');
+if (titles[initialView]) {
+  // Pre-seed currentView to the view we're actually booting into so showView()'s
+  // own "record previous" logic below doesn't treat this restore as a real
+  // transition and clobber the previousView just restored from sessionStorage
+  // above (see V1.1 correction) with the hardcoded 'dashboard' default.
+  currentView = initialView;
+  showView(initialView);
+} else if (!prototypeState.user) showView('access');

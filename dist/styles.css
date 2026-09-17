@@ -516,7 +516,7 @@ body.lesson-focus .icon-button{display:none!important}
 
 .modules-track{margin-top:16px}
 .modules-track ol{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:8px}
-.modules-track li{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #DCD0AF;border-radius:12px}
+.modules-track li{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #DCD0AF;border-radius:12px;min-width:0}
 .modules-track .module-id{font-family:Georgia,serif;color:#8a6f2e;font-size:13px;width:30px;flex:none}
 
 /* ---------- Certification preview (Progression) ---------- */
