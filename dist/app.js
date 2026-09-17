@@ -307,7 +307,8 @@ function renderMasteryList() {
   const rows = authoredLessons().map(({ lesson }) => {
     const lessonProgress = DDALearning.getLessonProgress(prototypeState, lesson.id);
     const level = competencyLevel(lesson.id, lessonProgress);
-    const milestones = lessonProofMilestones(lesson.id).map(milestone => {
+    const proofMilestones = lessonProofMilestones(lesson.id);
+    const milestones = proofMilestones.map(milestone => {
       const done = milestone.done(lessonProgress);
       const event = [...events].reverse().find(milestone.matches);
       const when = done ? (event ? relativeTime(event.at) : 'Complété') : 'À venir';
@@ -315,6 +316,22 @@ function renderMasteryList() {
       return `<li class="${done ? 'done' : 'pending'}"><span class="proof-dot">${icon}</span><div><strong>${milestone.label}</strong><small>${when}</small></div></li>`;
     }).join('');
     const lessonView = LESSON_VIEW_ID[lesson.id] || 'lesson';
+    // Learning Experience & Progression Depth V1 (mandat §7) : rendre explicite
+    // l'étape manquante — jamais implicite dans la seule timeline — et rappeler
+    // sur quoi repose "Maîtrisé" pour ne jamais laisser croire à une évaluation
+    // externe : un quiz réussi après une vraie leçon comprise et un exercice
+    // réussi sur cet appareil, jamais davantage.
+    // Driven by `level` (the exact same value the badge above shows), never by
+    // re-probing the milestones' own done() flags independently: M0.2/M0.3's
+    // "mark understood" click is optional (their practice blocks are reachable
+    // without it), so lessonViewed can legitimately stay false even once
+    // quizComplete is true — probing milestones directly would then contradict
+    // the level badge by claiming a level-4 "Maîtrisé" row is still missing its
+    // "Leçon comprise" proof.
+    const missingMilestone = proofMilestones.find(milestone => milestone.level > level);
+    const nextStepNote = missingMilestone
+      ? `Étape manquante : ${missingMilestone.label}.`
+      : 'Aucune étape manquante — leçon comprise, exercice réussi et quiz validé sur cet appareil.';
     return `
       <article class="mastery-row">
         <div class="mastery-row-head">
@@ -325,6 +342,7 @@ function renderMasteryList() {
           </div>
         </div>
         <ol class="proof-timeline">${milestones}</ol>
+        <p class="mastery-next-step">${nextStepNote}</p>
         <button class="text-action mastery-row-lesson-link" type="button" data-view="${lessonView}">${level >= 4 ? 'Revoir cette leçon' : 'Ouvrir cette leçon'} <span>→</span></button>
       </article>`;
   }).join('');
@@ -1381,6 +1399,11 @@ function bindQuestion(lessonId, question, options) {
 
 bindQuestion(activeLessonId, { role: 'exercise', name: activeLessonDef.practice.id, successText: activeLessonDef.practice.successText });
 bindQuestion(activeLessonId, { role: 'quiz', name: activeLessonDef.evaluation.id, successText: activeLessonDef.evaluation.successText });
+// Learning Experience & Progression Depth V1: practice role, never gates
+// exerciseComplete/quizComplete — a real decision moment with retry, same
+// pattern as M0.2/M0.3's ungated practice checks.
+const m01ComparisonChoice = findLessonBlock(activeLessonDef, 'comparison-choice');
+if (m01ComparisonChoice) bindQuestion(activeLessonId, { role: 'practice', name: m01ComparisonChoice.id, successText: 'Bonne lecture.' });
 
 // Golden Lesson #2 — Support & Résistance. Phases B/D/E/F are practice reasoning
 // checks (no gating role: they only ever show explanatory feedback). Phase G's

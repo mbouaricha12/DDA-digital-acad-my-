@@ -491,6 +491,7 @@ body.lesson-focus .icon-button{display:none!important}
 .mastery-row.unmeasured{opacity:.75}
 .mastery-row.unmeasured .mastery-level span{color:var(--muted-2)}
 .mastery-unmeasured-note{margin:10px 0 0;font-size:13px;color:var(--muted-2)}
+.mastery-next-step{margin:14px 0 0;font-size:13px;color:var(--muted-2)}
 
 .proof-timeline{list-style:none;padding:0;margin:20px 0 0;display:grid;gap:0}
 .proof-timeline li{display:flex;gap:14px;padding:0 0 18px;position:relative}
