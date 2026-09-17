@@ -282,7 +282,7 @@
       ${lesson.blocks.map(renderBlock).join('\n')}
 
       <div class="lesson-actions">
-        <button class="secondary-action" data-view="dashboard">Quitter</button>
+        <button class="secondary-action" data-view="back">Quitter</button>
         <button class="primary-action" id="mark-understood${suffix}">${lesson.markUnderstoodLabel || 'Passer à l’exercice'} <span>→</span></button>
       </div>`;
   }
@@ -293,7 +293,7 @@
     return `
       <p class="eyebrow">Dans cette leçon</p>
       <ol id="lesson-outline-list${suffix}">${beats.map(beat => `<li data-outline-step="${beat.step}">${beat.outline}</li>`).join('')}</ol>
-      <div class="saved-state" id="saved-state${suffix}">Progression non enregistrée — prototype</div>`;
+      <div class="saved-state" id="saved-state${suffix}">Progression enregistrée sur cet appareil — jamais envoyée à un serveur</div>`;
   }
 
   window.DDALessonRenderer = Object.freeze({ renderLessonMain, renderLessonOutline, renderBlock, BLOCK_RENDERERS });
