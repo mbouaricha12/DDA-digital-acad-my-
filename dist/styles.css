@@ -84,6 +84,16 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
    lesson (real exit stays available: sidebar nav + the lesson's own back-link);
    DDA's own identity — logo, context title — stays fully visible. */
 body.lesson-focus .icon-button{display:none!important}
+
+/* Acquisition V1 — #landing is a public marketing surface, not an app screen:
+   hide every piece of authenticated chrome (sidebar/profile/plan, topbar,
+   mobile nav, prototype banner) while it's active. Scoped via this body
+   class only — no new routing concept, same pattern as lesson-focus above. */
+body.public-shell .prototype-banner,
+body.public-shell .topbar,
+body.public-shell .sidebar,
+body.public-shell .mobile-nav{display:none!important}
+body.public-shell main{padding-bottom:0}
 .notification-dot{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--gold);right:8px;top:8px;box-shadow:0 0 0 2px var(--navy-950)}
 
 /* ---------- Views ---------- */

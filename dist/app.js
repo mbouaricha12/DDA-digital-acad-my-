@@ -32,7 +32,7 @@ const views = document.querySelectorAll('.view');
 const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
-const titles = { dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours', lesson: 'Leçon en cours', 'lesson-m02': 'Support & Résistance', 'lesson-m03': 'Lire une tendance', progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
+const titles = { landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours', lesson: 'Leçon en cours', 'lesson-m02': 'Support & Résistance', 'lesson-m03': 'Lire une tendance', progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
 // V1.1 correction: 'dashboard' was never gated here even though DDA.curriculum's
 // own entitlements model (dda-core.js ENTITLEMENTS) already lists 'dashboard' as a
 // free/premium-only permission, not a visitor one — the deep-link/reload matrix this
@@ -140,6 +140,18 @@ function countActiveDaysForView(events, viewId) {
 
 let prototypeState = DDA.load();
 
+// Acquisition V1 — first-touch capture, a no-op after the first call on this
+// device (see DDA.captureAcquisition). Runs on every boot, before any view is
+// shown, so a shared link's UTM parameters are captured however deep into the
+// app it points (not only through #landing).
+prototypeState = DDA.captureAcquisition(prototypeState, {
+  source: new URLSearchParams(location.search).get('utm_source'),
+  medium: new URLSearchParams(location.search).get('utm_medium'),
+  campaign: new URLSearchParams(location.search).get('utm_campaign'),
+  referrer: document.referrer,
+  landingPath: location.pathname + location.hash
+});
+
 function saveState(update) {
   prototypeState = DDA.save({ ...prototypeState, ...update });
   renderState();
@@ -152,6 +164,13 @@ function updateLessonState(lessonId, patch) {
 
 function trackEvent(name, metadata) {
   prototypeState = DDA.track(prototypeState, name, metadata);
+  // Single choke point forwarding to the acquisition analytics adapter (see
+  // dda-analytics.js). Guarded and wrapped so a missing/failed adapter never
+  // breaks the product — PostHog is never a dependency of the core app.
+  if (window.DDAAnalytics) {
+    try { window.DDAAnalytics.send(name, { ...metadata, visitorId: prototypeState.acquisition?.visitorId }); }
+    catch { /* analytics must never break the product */ }
+  }
   renderState();
 }
 
@@ -1092,6 +1111,11 @@ function showView(id, recordEvent = true) {
   views.forEach(view => view.classList.toggle('active', view.id === id));
   [...desktopItems, ...mobileItems].forEach(item => item.classList.toggle('active', item.dataset.view === id));
   document.body.classList.toggle('lesson-focus', id === 'lesson' || id === 'lesson-m02' || id === 'lesson-m03');
+  // Acquisition V1 — #landing is a public marketing surface, not an app screen:
+  // it must never show the authenticated chrome (sidebar/plan/profile, topbar,
+  // mobile nav, prototype banner). Scoped purely via this body class, same
+  // pattern as lesson-focus above — no new routing concept.
+  document.body.classList.toggle('public-shell', id === 'landing');
   contextTitle.textContent = titles[id] || 'DDA';
   history.replaceState(null, '', `#${id}`);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1101,6 +1125,13 @@ function showView(id, recordEvent = true) {
     currentView = id;
   }
   if (recordEvent) trackEvent('view_opened', { view: id });
+  if (id === 'landing') {
+    trackEvent('landing_visit', {
+      source: prototypeState.acquisition?.source,
+      medium: prototypeState.acquisition?.medium,
+      campaign: prototypeState.acquisition?.campaign
+    });
+  }
 }
 
 buttons.forEach(button => button.addEventListener('click', () => showView(button.dataset.view)));
@@ -1184,7 +1215,14 @@ function filterBrokers() {
 }
 document.getElementById('broker-market').addEventListener('change', filterBrokers);
 document.getElementById('broker-use').addEventListener('change', filterBrokers);
-document.querySelectorAll('.broker-detail').forEach(button => button.addEventListener('click', () => showToast('Fiche complète différée jusqu’à vérification réglementaire.')));
+document.querySelectorAll('.broker-detail').forEach(button => button.addEventListener('click', () => {
+  const broker = button.closest('.broker-row')?.dataset.broker;
+  // Measures interest in a broker profile only. No real link exists yet and
+  // affiliate_link_click is never fired here — a separate CEO validation is
+  // required before any real broker link/click is wired (see EVENT_NAMES).
+  if (broker) trackEvent('broker_selected', { broker });
+  showToast('Fiche complète différée jusqu’à vérification réglementaire.');
+}));
 
 document.getElementById('journal-tab-entries').addEventListener('click', () => switchJournalTab('entries'));
 document.getElementById('journal-tab-plan').addEventListener('click', () => switchJournalTab('plan'));
@@ -1364,8 +1402,13 @@ function bindQuestion(lessonId, question, options) {
       }
     }
     if (correct && role === 'quiz') {
+      const wasActivated = DDA.isActivated_v1(prototypeState);
       updateLessonState(lessonId, { quizComplete: true });
       trackEvent('quiz_complete', { lesson: lessonId });
+      // activation_v1 = M0.1 completed successfully (CEO-fixed definition).
+      // Fires exactly once per device, the moment that becomes true — M0.2/
+      // M0.3 quiz completions reuse this same code path but never retrigger it.
+      if (!wasActivated && DDA.isActivated_v1(prototypeState)) trackEvent('activation_v1', { lesson: lessonId });
       const resultCard = document.getElementById(opts.resultId || 'result-card');
       if (resultCard) {
         resultCard.hidden = false;
@@ -1501,4 +1544,4 @@ if (titles[initialView]) {
   // above (see V1.1 correction) with the hardcoded 'dashboard' default.
   currentView = initialView;
   showView(initialView);
-} else if (!prototypeState.user) showView('access');
+} else if (!prototypeState.user) showView('landing');

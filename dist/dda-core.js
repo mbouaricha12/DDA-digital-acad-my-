@@ -4,8 +4,14 @@
   const STORAGE_KEY = 'dda-prototype-state-v4';
   const LEGACY_KEYS = ['dda-prototype-state-v3', 'dda-prototype-state-v2', 'dda-prototype-state'];
   const SCHEMA_VERSION = 4;
-  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved']);
-  const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan']);
+  // Acquisition V1 (CEO-validated) adds four event names to the existing local
+  // allowlist: landing_visit, broker_selected, affiliate_link_click (defined but
+  // never triggered until real broker links get separate CEO validation), and
+  // activation_v1 — deliberately versioned so a future activation_v2 definition
+  // can be added alongside it without reinterpreting what activation_v1 events
+  // already meant when they were recorded.
+  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved', 'landing_visit', 'broker_selected', 'affiliate_link_click', 'activation_v1']);
+  const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan', 'source', 'medium', 'campaign', 'broker']);
   const ENTITLEMENTS = Object.freeze({
     visitor: ['dashboard_preview', 'access'],
     free: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal'],
@@ -516,8 +522,16 @@
       journal: { entries: [], plan: emptyJournalPlan() },
       preferences: { lowData: false, reminders: false },
       events: [],
+      // Acquisition V1 — first-touch attribution only, captured once per device
+      // by DDA.captureAcquisition(). No PII: a locally generated pseudonymous
+      // visitorId plus the UTM/referrer context of the first real visit.
+      acquisition: emptyAcquisition(),
       updatedAt: null
     };
+  }
+
+  function emptyAcquisition() {
+    return { visitorId: null, source: null, medium: null, campaign: null, referrer: null, landingPath: null, firstSeenAt: null };
   }
 
   function sanitizeText(value, maxLength) {
@@ -570,6 +584,24 @@
     return { entries, plan: sanitizeJournalPlan(raw?.plan) };
   }
 
+  function sanitizeAcquisition(raw) {
+    const acquisition = emptyAcquisition();
+    if (!raw || typeof raw !== 'object') return acquisition;
+    acquisition.visitorId = raw.visitorId ? sanitizeText(raw.visitorId, 60) : null;
+    acquisition.source = raw.source ? sanitizeText(raw.source, 120) : null;
+    acquisition.medium = raw.medium ? sanitizeText(raw.medium, 120) : null;
+    acquisition.campaign = raw.campaign ? sanitizeText(raw.campaign, 120) : null;
+    acquisition.referrer = raw.referrer ? sanitizeText(raw.referrer, 300) : null;
+    acquisition.landingPath = raw.landingPath ? sanitizeText(raw.landingPath, 300) : null;
+    acquisition.firstSeenAt = raw.firstSeenAt ? sanitizeText(raw.firstSeenAt, 40) : null;
+    return acquisition;
+  }
+
+  function generateVisitorId() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+    return `visitor-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
+  }
+
   // v3 and earlier stored one flat `progress` object implicitly meaning M0.1.
   function migrateFlatProgress(progress) {
     if (!progress || typeof progress !== 'object') return {};
@@ -594,7 +626,8 @@
         preferences: { ...next.preferences, ...raw.preferences },
         lessons: sanitizeLessons(raw.lessons),
         journal: sanitizeJournal(raw.journal),
-        events: Array.isArray(raw.events) ? raw.events.slice(-50) : []
+        events: Array.isArray(raw.events) ? raw.events.slice(-50) : [],
+        acquisition: sanitizeAcquisition(raw.acquisition)
       });
     }
 
@@ -607,6 +640,7 @@
       if (Object.keys(next.lessons).length === 0) next.lessons = migrateFlatProgress(raw.progress);
       next.preferences = { ...next.preferences, ...(raw.preferences || {}) };
       next.events = Array.isArray(raw.events) ? raw.events.slice(-50) : [];
+      next.acquisition = sanitizeAcquisition(raw.acquisition);
       return next;
     }
 
@@ -699,6 +733,32 @@
       const journal = state.journal || { entries: [], plan: emptyJournalPlan() };
       const plan = sanitizeJournalPlan({ ...fields, updatedAt: new Date().toISOString() });
       return save({ ...state, journal: { ...journal, plan } });
+    },
+    // Acquisition V1 — first-touch attribution, captured once per device. A
+    // pseudonymous visitorId is generated the first time this is called; the
+    // source/medium/campaign/referrer of that first real visit are then kept
+    // for the lifetime of the device's local state and never overwritten by a
+    // later visit, so a returning visitor's original attribution isn't lost.
+    // No email, name or other identity ever passes through this path.
+    captureAcquisition(state, params) {
+      if (state.acquisition && state.acquisition.visitorId) return state;
+      const acquisition = sanitizeAcquisition({
+        visitorId: generateVisitorId(),
+        source: params?.source,
+        medium: params?.medium,
+        campaign: params?.campaign,
+        referrer: params?.referrer,
+        landingPath: params?.landingPath,
+        firstSeenAt: new Date().toISOString()
+      });
+      return save({ ...state, acquisition });
+    },
+    // Versioned deliberately (see EVENT_NAMES comment above): a future
+    // activation_v2 definition must be added as a new function, never by
+    // redefining this one, so past activation_v1 events keep the meaning they
+    // had when they were recorded.
+    isActivated_v1(state) {
+      return Boolean(state?.lessons?.['M0.1']?.quizComplete);
     },
     track(state, name, metadata) {
       if (!EVENT_NAMES.has(name)) return state;
