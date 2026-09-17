@@ -121,6 +121,22 @@
       Object.freeze({ type: 'diagram', id: 'exchange-diagram', step: 'lesson', diagram: content.diagram, caption: 'Une décision commence par l’observation.' }),
       Object.freeze({ type: 'case_study', id: 'example', outline: content.example.label, step: 'lesson', label: content.example.label, text: content.example.text }),
       Object.freeze({ type: 'scenario', id: 'comparison', outline: content.comparison.heading, step: 'lesson', heading: content.comparison.heading, bad: content.comparison.bad, good: content.comparison.good }),
+      // Learning Experience & Progression Depth V1: the comparison above was
+      // purely a static read — the learner never had to actually apply the
+      // impulsive-vs-méthodique distinction to a situation. This graded
+      // decision_choice (same engine M0.2 already uses, additive, no gating
+      // role) makes them choose, get it wrong or right, and see why — a real
+      // AGIR→SE TROMPER→COMPRENDRE moment before the exercise, without turning
+      // M0.1 into a chart lesson.
+      Object.freeze({
+        type: 'decision_choice', id: 'comparison-choice', step: 'lesson', outline: 'À toi de choisir', eyebrow: 'Mettre en pratique',
+        heading: 'Le prix vient de faire un mouvement brutal. Que fais-tu ?',
+        prompt: 'Applique ce que tu viens de voir.',
+        options: Object.freeze([
+          Object.freeze({ text: 'J’ouvre immédiatement une position pour ne pas rater le mouvement.', correct: false, feedback: 'C’est une réaction impulsive : elle ignore justement le principe vu plus haut — observer avant d’agir.' }),
+          Object.freeze({ text: 'J’observe la situation et je vérifie si elle correspond à mon plan avant de décider.', correct: true, feedback: 'C’est une décision méthodique : tu appliques le principe que tu viens de voir.' })
+        ])
+      }),
       Object.freeze({ type: 'quiz', id: 'exercise', outline: practice.heading, step: 'exercise', locked: false, data: practice }),
       Object.freeze({ type: 'quiz', id: 'quiz', outline: evaluation.heading, step: 'quiz', locked: true, data: evaluation }),
       Object.freeze({ type: 'journal_link', id: 'journal-prompt', step: 'review', prompt: 'Envie de documenter ce que tu retiens de cette leçon avant de continuer ?', cta: 'Ouvrir Journal & Plan' }),
@@ -470,6 +486,10 @@
   }
 
   // M1-M9 are structural placeholders (empty lessons[]) — no content invented.
+  // M1/M2 titles come from the validated roadmap (DDA_HANDOVER_BRIEF-1.md); no
+  // real title exists yet for M3-M9 there, so their title is the honest "À
+  // venir" fallback (Learning Experience & Progression Depth V1, mandat §9) —
+  // never a generic "Module M3" placeholder that reads as a broken feature.
   const curriculum = Object.freeze({
     id: 'darius-free',
     title: 'Darius Free',
@@ -477,13 +497,13 @@
       { id: 'M0', title: 'Fondations des marchés', lessons: Object.freeze([buildM01Lesson(), buildM02Lesson(), buildM03Lesson()]) },
       { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze([]) },
       { id: 'M2', title: 'Risque et discipline', summary: 'Protéger son capital avant de rechercher la performance.', lessons: Object.freeze([]) },
-      { id: 'M3', title: 'Module M3', lessons: Object.freeze([]) },
-      { id: 'M4', title: 'Module M4', lessons: Object.freeze([]) },
-      { id: 'M5', title: 'Module M5', lessons: Object.freeze([]) },
-      { id: 'M6', title: 'Module M6', lessons: Object.freeze([]) },
-      { id: 'M7', title: 'Module M7', lessons: Object.freeze([]) },
-      { id: 'M8', title: 'Module M8', lessons: Object.freeze([]) },
-      { id: 'M9', title: 'Module M9', lessons: Object.freeze([]) }
+      { id: 'M3', title: 'À venir', lessons: Object.freeze([]) },
+      { id: 'M4', title: 'À venir', lessons: Object.freeze([]) },
+      { id: 'M5', title: 'À venir', lessons: Object.freeze([]) },
+      { id: 'M6', title: 'À venir', lessons: Object.freeze([]) },
+      { id: 'M7', title: 'À venir', lessons: Object.freeze([]) },
+      { id: 'M8', title: 'À venir', lessons: Object.freeze([]) },
+      { id: 'M9', title: 'À venir', lessons: Object.freeze([]) }
     ])
   });
 
