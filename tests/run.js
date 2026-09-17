@@ -250,7 +250,7 @@ async function completeSignupFlow(page, opts) {
     const context = await freshContext(browser);
     const page = await context.newPage();
     await completeSignupFlow(page);
-    const correctExercise = page.locator('#lesson [data-question] button[data-correct="true"]').first();
+    const correctExercise = page.locator('[data-question="exercise"] button[data-correct="true"]').first();
     await correctExercise.scrollIntoViewIfNeeded();
     await correctExercise.click();
     const state = await page.evaluate(() => window.DDA.load());
@@ -262,7 +262,7 @@ async function completeSignupFlow(page, opts) {
     const context = await freshContext(browser);
     const page = await context.newPage();
     await completeSignupFlow(page);
-    await page.locator('#lesson [data-question] button[data-correct="true"]').first().click();
+    await page.locator('[data-question="exercise"] button[data-correct="true"]').first().click();
     const quizButton = page.locator('#quiz-block [data-question] button[data-correct="true"]').first();
     await quizButton.scrollIntoViewIfNeeded();
     await quizButton.click();
@@ -347,7 +347,7 @@ async function completeSignupFlow(page, opts) {
     const context = await freshContext(browser);
     const page = await context.newPage();
     await completeSignupFlow(page);
-    await page.locator('#lesson [data-question] button[data-correct="true"]').first().click();
+    await page.locator('[data-question="exercise"] button[data-correct="true"]').first().click();
     const queue = await page.evaluate(() => window.DDAAnalytics.getDebugQueue());
     const entry = queue.find(e => e.localName === 'exercise_attempt');
     assert.ok(entry, 'exercise_attempt should have reached the adapter boundary');
@@ -360,7 +360,7 @@ async function completeSignupFlow(page, opts) {
     const context = await freshContext(browser);
     const page = await context.newPage();
     await completeSignupFlow(page);
-    await page.locator('#lesson [data-question] button[data-correct="true"]').first().click();
+    await page.locator('[data-question="exercise"] button[data-correct="true"]').first().click();
     const quizButton = page.locator('#quiz-block [data-question] button[data-correct="true"]').first();
     await quizButton.scrollIntoViewIfNeeded();
     await quizButton.click();
@@ -463,7 +463,7 @@ async function completeSignupFlow(page, opts) {
     await page.click('.nav-item[data-view="brokers"]');
     await page.locator('.broker-row[data-broker="Deriv"] .broker-detail').click();
     await page.click('.nav-item[data-view="lesson"]');
-    await page.locator('#lesson [data-question] button[data-correct="true"]').first().click();
+    await page.locator('[data-question="exercise"] button[data-correct="true"]').first().click();
     const quizButton = page.locator('#quiz-block [data-question] button[data-correct="true"]').first();
     await quizButton.scrollIntoViewIfNeeded();
     await quizButton.click();
