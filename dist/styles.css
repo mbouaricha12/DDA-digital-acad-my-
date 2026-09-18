@@ -1731,3 +1731,253 @@ body.public-shell{background:var(--dda-ivory);color:#15243a}
 @media(prefers-reduced-motion:reduce){
   .landing-signal span{animation:none}
 }
+
+
+/* ======================================================================
+   Lesson Experience V2 — DDA learning should feel like a guided studio,
+   not a document with buttons. One authored beat at a time, one visual
+   grammar across M0 and M1.1.
+   ====================================================================== */
+.lesson-layout{
+  align-items:start;
+}
+.lesson-main{
+  counter-reset:dda-beat;
+  position:relative;
+}
+.lesson-main > .eyebrow:first-of-type{
+  margin-top:4px;
+  letter-spacing:.16em;
+}
+.lesson-main > h1{
+  max-width:14ch;
+  font-family:Newsreader,Georgia,serif;
+  font-size:clamp(2.1rem,7vw,4.5rem);
+  line-height:.98;
+  letter-spacing:-.045em;
+}
+.lesson-lead{
+  max-width:66ch;
+  font-size:clamp(1rem,2vw,1.15rem);
+  line-height:1.65;
+  color:rgba(246,243,236,.74);
+  margin-bottom:18px;
+}
+.lesson-loop{
+  padding:14px 0 22px;
+  margin-bottom:12px;
+  border-bottom:1px solid rgba(232,198,133,.16);
+}
+.lesson-beat{
+  counter-increment:dda-beat;
+  position:relative;
+  margin:0;
+  padding:clamp(26px,5vw,48px) 0;
+  border-bottom:1px solid rgba(147,166,186,.13);
+}
+.lesson-beat:not(.lesson-beat-quiet)::before{
+  content:counter(dda-beat, decimal-leading-zero);
+  position:absolute;
+  top:30px;
+  right:0;
+  font:600 11px/1 "DM Sans",Inter,sans-serif;
+  letter-spacing:.16em;
+  color:rgba(232,198,133,.54);
+}
+.lesson-beat h2{
+  max-width:18ch;
+  font-family:Newsreader,Georgia,serif;
+  font-size:clamp(1.7rem,4.8vw,2.7rem);
+  line-height:1.04;
+  letter-spacing:-.035em;
+}
+.lesson-beat p{
+  max-width:64ch;
+}
+.lesson-beat-case_study .example-callout{
+  margin:0;
+  padding:22px 0 22px 20px;
+  border:0;
+  border-left:3px solid var(--gold);
+  border-radius:0;
+  background:transparent;
+}
+.lesson-beat-case_study .example-callout > .icon{
+  color:var(--gold-soft);
+}
+.lesson-beat-decision_choice,
+.lesson-beat-quiz{
+  margin-inline:clamp(-18px,-3vw,-44px);
+  padding-inline:clamp(18px,3vw,44px);
+  background:
+    radial-gradient(circle at 88% 12%,rgba(217,164,65,.10),transparent 30%),
+    linear-gradient(145deg,rgba(11,27,48,.96),rgba(5,11,20,.98));
+  border-bottom:0;
+  border-radius:22px;
+  box-shadow:0 22px 60px rgba(0,0,0,.18);
+}
+.lesson-beat-decision_choice + .lesson-beat-case_study{
+  margin-top:16px;
+}
+.decision-choice-options,
+.answer-grid{
+  display:grid;
+  gap:10px;
+  margin-top:20px;
+}
+.decision-option,
+.answer-grid button{
+  min-height:56px;
+  padding:15px 16px;
+  text-align:left;
+  border:1px solid rgba(147,166,186,.22);
+  border-radius:14px;
+  background:rgba(255,255,255,.035);
+  transition:transform .18s var(--ease),border-color .18s var(--ease),background .18s var(--ease);
+}
+.decision-option:hover,
+.answer-grid button:hover{
+  transform:translateY(-2px);
+  border-color:rgba(232,198,133,.56);
+  background:rgba(232,198,133,.06);
+}
+.decision-option:active,
+.answer-grid button:active{
+  transform:translateY(0) scale(.99);
+}
+.feedback:not(:empty){
+  margin-top:14px;
+  padding:13px 15px;
+  border-left:3px solid var(--gold);
+  background:rgba(217,164,65,.07);
+  border-radius:0 10px 10px 0;
+}
+.lesson-beat-chart_observe,
+.lesson-beat-zone_identify,
+.lesson-beat-graphical_exercise{
+  padding-top:36px;
+}
+.chart-frame,
+.graphical-exercise-canvas{
+  border-radius:18px;
+  overflow:hidden;
+  border:1px solid rgba(232,198,133,.18);
+  background:
+    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),
+    rgba(8,20,38,.78);
+  background-size:24px 24px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.01);
+}
+.price-chart{
+  min-height:220px;
+}
+.lesson-beat-text_short .lesson-copy{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+}
+.principle{
+  margin-top:22px;
+  max-width:720px;
+  border:0;
+  border-top:1px solid rgba(232,198,133,.30);
+  border-bottom:1px solid rgba(232,198,133,.30);
+  border-radius:0;
+  background:transparent;
+  padding:18px 0;
+}
+.lesson-beat-competency_check{
+  padding:12px 0 18px;
+  border-bottom:0;
+}
+.competency-check-block{
+  background:transparent;
+  border:1px solid rgba(232,198,133,.22);
+}
+.lesson-beat-journal_link .journal-link-block{
+  background:linear-gradient(135deg,rgba(232,198,133,.08),rgba(11,27,48,.10));
+  border:1px solid rgba(232,198,133,.18);
+}
+.lesson-actions{
+  position:sticky;
+  bottom:calc(70px + var(--safe-b));
+  z-index:12;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:10px;
+  padding:12px;
+  margin:28px -12px 0;
+  border:1px solid rgba(147,166,186,.18);
+  border-radius:16px;
+  background:rgba(5,11,20,.90);
+  backdrop-filter:blur(18px);
+  box-shadow:0 12px 38px rgba(0,0,0,.25);
+}
+.lesson-actions .secondary-action{
+  width:auto;
+}
+.lesson-outline{
+  position:sticky;
+  top:112px;
+  max-height:calc(100vh - 140px);
+  overflow:auto;
+}
+.lesson-outline li{
+  transition:color .18s ease,transform .18s ease,border-color .18s ease;
+}
+.lesson-outline li.active{
+  transform:translateX(4px);
+}
+.lesson-layout-m1 .lesson-main > h1{
+  max-width:12ch;
+}
+.lesson-layout-m1 .lesson-beat-decision_choice{
+  background:
+    radial-gradient(circle at 82% 14%,rgba(13,166,217,.08),transparent 28%),
+    radial-gradient(circle at 15% 85%,rgba(217,164,65,.07),transparent 30%),
+    linear-gradient(145deg,rgba(8,20,38,.98),rgba(5,11,20,.99));
+}
+
+@media (min-width:900px){
+  .lesson-layout{
+    grid-template-columns:minmax(0,760px) minmax(220px,280px);
+    gap:clamp(42px,6vw,88px);
+  }
+  .lesson-beat-text_short .lesson-copy{
+    grid-template-columns:minmax(0,1fr) minmax(180px,.42fr);
+    column-gap:36px;
+    align-items:start;
+  }
+  .lesson-beat-text_short .lesson-copy .eyebrow,
+  .lesson-beat-text_short .lesson-copy h2,
+  .lesson-beat-text_short .lesson-copy > p{
+    grid-column:1;
+  }
+  .lesson-beat-text_short .principle{
+    grid-column:2;
+    grid-row:1 / span 3;
+    margin-top:22px;
+  }
+}
+@media (max-width:720px){
+  .lesson-main > h1{max-width:none}
+  .lesson-beat:not(.lesson-beat-quiet)::before{top:20px}
+  .lesson-beat{padding:28px 0}
+  .lesson-beat-decision_choice,
+  .lesson-beat-quiz{
+    margin-inline:-18px;
+    padding-inline:18px;
+    border-radius:0;
+  }
+  .price-chart{min-height:180px}
+  .lesson-actions{
+    grid-template-columns:1fr;
+  }
+  .lesson-actions .secondary-action{width:100%}
+}
+body.low-data .lesson-beat,
+@media (prefers-reduced-motion:reduce){
+  .decision-option,
+  .answer-grid button,
+  .lesson-outline li{transition:none!important}
+}
