@@ -264,7 +264,13 @@
   function renderBlock(block) {
     const renderer = BLOCK_RENDERERS[block.type];
     if (!renderer) return '';
-    return renderer(block);
+    const markup = renderer(block);
+    // Lesson Experience V2: every authored beat gets one visual rhythm hook.
+    // Content/state remain owned by the existing block renderer; this wrapper
+    // only gives CSS a stable semantic surface so lessons stop looking like a
+    // long stack of unrelated cards.
+    const quiet = block.type === 'competency_check' || block.type === 'summary';
+    return `<div class="lesson-beat lesson-beat-${block.type}${quiet ? ' lesson-beat-quiet' : ''}" data-lesson-step="${block.step || 'lesson'}" data-block-type="${block.type}">${markup}</div>`;
   }
 
   // idSuffix (optional) lets a second lesson mount alongside M0.1 without id

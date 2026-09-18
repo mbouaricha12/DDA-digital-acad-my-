@@ -485,6 +485,14 @@
     });
   }
 
+  // M1.1 is authored in its own file so the lesson remains independently testable.
+  // When that file is loaded before dda-core.js, promote the authored lesson into
+  // the real curriculum. If it is absent, fail safely back to an empty M1 instead
+  // of inventing or partially rendering content.
+  const M11_LESSON = (typeof globalThis !== 'undefined' && globalThis.DDAM1GoldenLesson)
+    ? globalThis.DDAM1GoldenLesson
+    : null;
+
   // M1-M9 are structural placeholders (empty lessons[]) — no content invented.
   // M1/M2 titles come from the validated roadmap (DDA_HANDOVER_BRIEF-1.md); no
   // real title exists yet for M3-M9 there, so their title is the honest "À
@@ -495,7 +503,7 @@
     title: 'Darius Free',
     modules: Object.freeze([
       { id: 'M0', title: 'Fondations des marchés', lessons: Object.freeze([buildM01Lesson(), buildM02Lesson(), buildM03Lesson()]) },
-      { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze([]) },
+      { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze(M11_LESSON ? [M11_LESSON] : []) },
       { id: 'M2', title: 'Risque et discipline', summary: 'Protéger son capital avant de rechercher la performance.', lessons: Object.freeze([]) },
       { id: 'M3', title: 'À venir', lessons: Object.freeze([]) },
       { id: 'M4', title: 'À venir', lessons: Object.freeze([]) },
