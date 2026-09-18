@@ -12,6 +12,9 @@
   <meta name="apple-mobile-web-app-title" content="DDA">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="alpha-polish.css">
 </head>
@@ -83,31 +86,70 @@
       </header>
 
       <section class="view" id="landing" aria-labelledby="landing-title">
-        <div class="access-shell">
-          <div class="access-copy">
-            <div class="dda-aperture access-photo" role="img" aria-label="Signature visuelle DDA — apprendre, pratiquer, prouver sa progression">
-              <div class="aperture-grid" aria-hidden="true"></div>
-              <span class="aperture-kicker">LEARN MARKETS</span>
-              <strong>Build Skills.</strong>
-              <em>Prove Progress.</em>
-              <div class="aperture-thread" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="landing-editorial-shell">
+          <div class="landing-main-copy">
+            <p class="landing-masthead">DARIUS DIGITAL ACADÉMIE <span>ABIDJAN · AFRIQUE FRANCOPHONE · MONDE</span></p>
+            <p class="eyebrow gold">Trading & Financial Markets Learning OS</p>
+            <h1 id="landing-title">Comprendre les marchés.<br><em>Construire des compétences.</em></h1>
+            <p class="landing-deck">DDA transforme l’apprentissage des marchés en un parcours où chaque notion doit être observée, pratiquée et prouvée — pas simplement regardée.</p>
+            <div class="landing-actions">
+              <button class="primary-action" type="button" data-view="access">Entrer dans DDA <span>→</span></button>
+              <button class="text-action landing-secondary" type="button" data-view="path">Voir la méthode <span>↓</span></button>
             </div>
-            <p class="eyebrow gold">Darius Digital Académie</p>
-            <h1 id="landing-title">Apprends les marchés financiers, étape par étape.</h1>
-            <p>DDA t’aide à comprendre les marchés, t’entraîner sur des cas concrets et prouver ta progression réelle — à ton rythme, sur ton appareil.</p>
-            <ul class="trust-list">
-              <li><svg class="icon"><use href="#icon-target"/></svg> Une seule prochaine action à la fois</li>
-              <li><svg class="icon"><use href="#icon-check-circle"/></svg> Validation par exercice et quiz, jamais une simple vidéo</li>
-              <li><svg class="icon"><use href="#icon-shield"/></svg> Aucune promesse de gain, aucun signal, aucun faux témoignage</li>
+            <ul class="trust-list landing-trust">
+              <li><svg class="icon"><use href="#icon-target"/></svg> Une prochaine action claire</li>
+              <li><svg class="icon"><use href="#icon-check-circle"/></svg> Exercice + preuve de progression</li>
+              <li><svg class="icon"><use href="#icon-shield"/></svg> Zéro signal, zéro promesse de gain</li>
             </ul>
           </div>
-          <div class="access-card landing-cta-card">
-            <p class="eyebrow">Commencer</p>
-            <h2>Créer mon compte DDA Free</h2>
-            <p>Gratuit, sans carte bancaire. Ta progression reste sur cet appareil.</p>
-            <button class="primary-action" type="button" data-view="access">Commencer maintenant <span>→</span></button>
+
+          <div class="dda-aperture landing-aperture" role="img" aria-label="Signature éditoriale DDA : apprendre, pratiquer, prouver sa progression">
+            <div class="aperture-grid" aria-hidden="true"></div>
+            <div class="landing-aperture-top">
+              <span class="aperture-kicker">THE DDA METHOD</span>
+              <span class="landing-edition">PRIVATE ALPHA · 2026</span>
+            </div>
+            <div class="landing-aperture-copy">
+              <strong>Learn Markets.</strong>
+              <em>Build Skills.<br>Prove Progress.</em>
+            </div>
+            <div class="landing-signal" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="aperture-thread" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
           </div>
         </div>
+
+        <section class="landing-method" aria-label="Méthode DDA">
+          <article>
+            <span class="method-index">01</span>
+            <p class="eyebrow">Learn</p>
+            <h2>Voir avant de croire.</h2>
+            <p>Les notions commencent par une observation, une comparaison ou un cas concret. Le jargon vient après la compréhension.</p>
+          </article>
+          <article>
+            <span class="method-index">02</span>
+            <p class="eyebrow">Practice</p>
+            <h2>Agir sans risquer.</h2>
+            <p>Décisions guidées, erreurs possibles, feedback et retry : DDA transforme une idée en compétence avant toute mise en situation réelle.</p>
+          </article>
+          <article>
+            <span class="method-index">03</span>
+            <p class="eyebrow">Prove</p>
+            <h2>Prouver la progression.</h2>
+            <p>Une leçon ouverte n’est pas une compétence. DDA conserve des preuves concrètes de ce qui a été compris, appliqué et validé.</p>
+          </article>
+        </section>
+
+        <section class="landing-institution" aria-label="Positionnement DDA">
+          <div>
+            <p class="eyebrow gold">Born in Africa. Built for serious learners.</p>
+            <h2>Une académie qui ressemble davantage à un terminal d’apprentissage qu’à une bibliothèque de vidéos.</h2>
+          </div>
+          <div class="institution-proof">
+            <span>DISCOVER</span><i></i><span>LEARN</span><i></i><span>PRACTICE</span><i></i><span>MEASURE</span><i></i><span>IMPROVE</span>
+          </div>
+        </section>
       </section>
 
       <section class="view" id="access" aria-labelledby="access-title">

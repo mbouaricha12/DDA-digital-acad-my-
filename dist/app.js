@@ -1579,3 +1579,59 @@ if (titles[initialView]) {
   currentView = initialView;
   showView(initialView);
 } else if (!prototypeState.user) showView('landing');
+
+
+/* DDA Visual Identity V2 — progressive reveals for premium editorial rhythm.
+   Purely presentational: no learning state, navigation, or analytics semantics. */
+(function initDDAVisualRhythm() {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+  const selector = [
+    '.landing-main-copy',
+    '.landing-aperture',
+    '.landing-method article',
+    '.landing-institution > div',
+    '.terminal-entry',
+    '.terminal-lead',
+    '.terminal-mi',
+    '.terminal-two > section',
+    '.terminal-family',
+    '.terminal-aperture',
+    '.terminal-tools',
+    '.section-intro',
+    '.journey-current',
+    '.journey-node',
+    '.panel',
+    '.lesson-main > *'
+  ].join(',');
+
+  function prepare(root = document) {
+    const nodes = root.querySelectorAll(selector);
+    nodes.forEach((node, index) => {
+      if (node.dataset.revealReady === 'true') return;
+      node.dataset.revealReady = 'true';
+      node.setAttribute('data-reveal', '');
+      node.setAttribute('data-reveal-delay', String(index % 4));
+      observer?.observe(node);
+    });
+  }
+
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const observer = !reduced && 'IntersectionObserver' in window
+    ? new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        });
+      }, { threshold: 0.08, rootMargin: '0px 0px -7% 0px' })
+    : null;
+
+  if (!observer) {
+    document.documentElement.classList.add('no-reveal-motion');
+    document.querySelectorAll(selector).forEach(node => node.classList.add('revealed'));
+  } else {
+    prepare();
+    const mutationObserver = new MutationObserver(() => prepare());
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+  }
+})();
