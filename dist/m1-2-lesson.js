@@ -90,10 +90,10 @@
       prompt: 'Choisis la formulation la plus rigoureuse.', options: immediateOptions
     }),
     Object.freeze({
-      type: 'scenario', id: 'm12-market-vs-limit', step: 'lesson', outline: 'Marché vs limite',
-      heading: 'Deux instructions, deux compromis différents.',
-      bad: Object.freeze({ label: 'Ordre au marché', items: Object.freeze(['Priorité : exécution rapide', 'Le prix exact n’est pas garanti', 'Peut consommer plusieurs niveaux de liquidité']) }),
-      good: Object.freeze({ label: 'Ordre limite', items: Object.freeze(['Priorité : contrainte de prix', 'L’exécution n’est pas garantie', 'Peut rester en attente si le prix choisi n’est pas disponible']) })
+      type: 'mini_simulation', id: 'm12-market-vs-limit', step: 'lesson', outline: 'Marché vs limite',
+      eyebrow: 'Comparer', heading: 'Deux instructions, deux compromis différents.',
+      prompt: 'Aucune n’est “meilleure” par nature : elles répondent à des contraintes différentes.',
+      state: '<div class="dda-order-compare"><article><span>ORDRE AU MARCHÉ</span><strong>Priorité : exécution</strong><p>Le prix exact n’est pas garanti et plusieurs niveaux de liquidité peuvent être consommés.</p></article><article><span>ORDRE LIMITE</span><strong>Priorité : contrainte de prix</strong><p>L’exécution n’est pas garantie et l’ordre peut rester en attente si le prix choisi n’est pas disponible.</p></article></div>'
     }),
     Object.freeze({
       type: 'decision_choice', id: 'm12-limit-order', step: 'lesson', outline: 'Comprendre la limite',
