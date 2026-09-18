@@ -9,6 +9,7 @@ on:
       - 'dist/index.html'
       - 'dist/styles.css'
       - 'tests/test_m1_2_order_execution.js'
+      - 'tests/test_path_current_module.js'
       - '.github/workflows/m1-2-check.yml'
   workflow_dispatch:
 
@@ -25,3 +26,4 @@ jobs:
       - run: node --check dist/dda-core.js
       - run: node --check dist/app.js
       - run: node tests/test_m1_2_order_execution.js
+      - run: node tests/test_path_current_module.js
