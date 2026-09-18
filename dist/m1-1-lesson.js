@@ -56,7 +56,7 @@
     Object.freeze({ type: 'decision_choice', id: 'm1-exercise', step: 'exercise', outline: 'Identifier le déséquilibre', eyebrow: 'Appliquer', heading: practice.heading, prompt: practice.prompt, options: finalExerciseOptions }),
     Object.freeze({ type: 'quiz', id: 'm1-quiz', step: 'quiz', outline: evaluation.heading, locked: true, data: evaluation }),
     Object.freeze({ type: 'journal_link', id: 'm1-journal', step: 'review', prompt: 'Écris avec tes propres mots pourquoi un prix peut monter, baisser ou rester en range.', cta: 'Ouvrir Journal & Plan' }),
-    Object.freeze({ type: 'summary', id: 'm1-result', step: 'review', data: Object.freeze({ heading: 'Compréhension de la formation du prix confirmée.', body: 'Tu as relié hausse, baisse et équilibre relatif aux ordres, à la liquidité et aux déséquilibres — sans transformer cette lecture en prédiction ou en signal.' }) })
+    Object.freeze({ type: 'summary', id: 'm1-result', step: 'review', idSuffix: 'm11', data: Object.freeze({ heading: 'Compréhension de la formation du prix confirmée.', body: 'Tu as relié hausse, baisse et équilibre relatif aux ordres, à la liquidité et aux déséquilibres — sans transformer cette lecture en prédiction ou en signal.' }) })
   ]);
   return Object.freeze({ id: 'M1.1', title: 'Pourquoi les prix évoluent ?', summary: 'Comprendre comment ordres, liquidité et déséquilibres peuvent déplacer le prix — sans signal ni prédiction.', estimatedMinutes: 15, markUnderstoodLabel: 'Passer à l’exercice', competency, xp, content, practice, evaluation, steps, blocks });
 });
