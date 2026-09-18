@@ -1077,6 +1077,12 @@ function renderState() {
       resultId: 'result-card-m11', markUnderstoodId: 'mark-understood-m11', savedStateId: 'saved-state-m11', resultStatsId: 'result-stats-m11'
     });
   }
+  if (lessonM12Def) {
+    renderLessonProgressUI(lessonM12Id, lessonM12Def, {
+      loopId: 'lesson-loop-m12', outlineListId: 'lesson-outline-list-m12', gateId: 'm12-quiz-block', evalName: 'm12-quiz',
+      resultId: 'result-card-m12', markUnderstoodId: 'mark-understood-m12', savedStateId: 'saved-state-m12', resultStatsId: 'result-stats-m12'
+    });
+  }
 
   document.getElementById('resume-device').hidden = !prototypeState.user;
   document.body.classList.toggle('low-data', Boolean(prototypeState.preferences.lowData));
