@@ -1,4 +1,4 @@
-const CACHE = 'dda-shell-v10';
+const CACHE = 'dda-shell-v11';
 const CORE = ['./', './index.html', './styles.css', './dda-core.js', './app.js', './manifest.webmanifest'];
 
 self.addEventListener('install', event => {
