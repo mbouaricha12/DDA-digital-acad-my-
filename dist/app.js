@@ -256,11 +256,20 @@ function renderPathJourney() {
     ? (WHY_PHRASE[DDALearning.lessonNextStep(DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id))] || '')
     : 'Compétence validée — reviens ici quand un nouveau module sera disponible.';
 
-  const rail = modules.map((module, index) => ({ module, index })).filter(({ index }) => index !== currentIndex).map(({ module, index }) => {
+  // UX Focus V1: only the nearest future modules belong in the default journey.
+  // Hiding distant placeholders keeps Parcours focused on the learner's real horizon.
+  const futureModules = modules.map((module, index) => ({ module, index }))
+    .filter(({ index }) => index > currentIndex)
+    .slice(0, 3);
+  const rail = futureModules.map(({ module, index }) => {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
     const number = String(index + 1).padStart(2, '0');
     return `<li class="journey-node ${status}"><span class="journey-dot"></span><span class="path-number">${number}</span><div><small>${moduleStatusLabel(status, false)}</small><strong>${module.title}</strong>${module.summary ? `<p>${module.summary}</p>` : ''}</div></li>`;
   }).join('');
+  const hiddenFutureCount = Math.max(0, modules.length - currentIndex - 1 - futureModules.length);
+  const futureNote = hiddenFutureCount > 0
+    ? `<p class="journey-future-note">+${hiddenFutureCount} module${hiddenFutureCount > 1 ? 's' : ''} prévu${hiddenFutureCount > 1 ? 's' : ''} plus loin dans le parcours — affiché${hiddenFutureCount > 1 ? 's' : ''} quand ils deviennent pertinents.</p>`
+    : '';
 
   container.innerHTML = `
     <button class="journey-current" data-view="${currentView}">
@@ -271,17 +280,25 @@ function renderPathJourney() {
       <div class="journey-meta"><span><svg class="icon"><use href="#icon-clock"/></svg>${currentLesson.estimatedMinutes} min</span><span><svg class="icon"><use href="#icon-book"/></svg>${lessonCount} leçon${lessonCount > 1 ? 's' : ''}</span></div>
       <span class="primary-action">${actionLabel} <span>→</span></span>
     </button>
-    <ol class="journey-rail" aria-label="Prochains modules du parcours">${rail}</ol>`;
+    <ol class="journey-rail" aria-label="Prochains modules du parcours">${rail}</ol>
+    ${futureNote}`;
   container.querySelector('.journey-current').addEventListener('click', () => showView(currentView));
 }
 
 function renderModulesRecap() {
   const container = document.getElementById('modules-recap-list');
   if (!container) return;
-  container.innerHTML = DDA.curriculum.modules.map(module => {
+  const modules = DDA.curriculum.modules;
+  const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
+  const activeModuleId = next?.module?.id || modules.find(module => module.lessons.some(lesson => DDALearning.getLessonProgress(prototypeState, lesson.id).quizComplete))?.id || 'M0';
+  const activeIndex = Math.max(0, modules.findIndex(module => module.id === activeModuleId));
+  const visibleModules = modules.slice(0, Math.min(modules.length, Math.max(3, activeIndex + 2)));
+  container.innerHTML = visibleModules.map(module => {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
     return `<li><span class="module-id">${module.id}</span><strong>${module.title}</strong><span class="module-pill ${status}">${MODULE_STATUS_LABEL[status] || status}</span></li>`;
   }).join('');
+  const hidden = modules.length - visibleModules.length;
+  if (hidden > 0) container.insertAdjacentHTML('beforeend', `<li class="modules-recap-more"><span class="module-id">…</span><strong>${hidden} modules plus loin</strong><span class="module-pill coming_soon">Progressif</span></li>`);
 }
 
 function renderMarketIntelligence() {
@@ -289,7 +306,7 @@ function renderMarketIntelligence() {
   if (indices) {
     indices.innerHTML = MARKET_DEMO.indices.map(item => `
       <article class="index-card">
-        <div class="index-card-head"><strong>${item.label}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Non connecté</span></div>
+        <div class="index-card-head"><strong>${item.label}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Mode pédagogique</span></div>
         <svg class="index-sparkline" viewBox="0 0 120 30" aria-hidden="true"><path d="M2 18 L22 18 L42 12 L62 20 L82 10 L102 16 L118 14"/></svg>
         <p>${item.description}</p>
       </article>
@@ -298,7 +315,7 @@ function renderMarketIntelligence() {
   const calendar = document.getElementById('market-calendar-list');
   if (calendar) {
     calendar.innerHTML = MARKET_DEMO.calendar.map(row => `
-      <li><div><strong>${row.company}</strong><small>${row.event}</small></div><span class="data-badge"><svg class="icon"><use href="#icon-clock"/></svg>À confirmer</span></li>
+      <li><div><strong>${row.company}</strong><small>${row.event}</small></div><span class="data-badge"><svg class="icon"><use href="#icon-clock"/></svg>Exemple</span></li>
     `).join('');
   }
 }
@@ -323,7 +340,18 @@ function renderMasteryList() {
   const container = document.getElementById('mastery-list');
   if (!container) return;
   const events = prototypeState.events || [];
-  const rows = authoredLessons().map(({ lesson }) => {
+  const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
+  const all = authoredLessons();
+
+  // UX Focus V1: Progression opens on useful evidence, not a wall of untouched rows.
+  // Keep completed competencies plus the single current lesson; future untouched lessons stay contextual.
+  const visible = all.filter(({ lesson }) => {
+    const lp = DDALearning.getLessonProgress(prototypeState, lesson.id);
+    return lp.quizComplete || lesson.id === next?.lesson?.id;
+  });
+  const rowsToRender = visible.length ? visible : all.slice(0, 1);
+
+  const rows = rowsToRender.map(({ lesson }) => {
     const lessonProgress = DDALearning.getLessonProgress(prototypeState, lesson.id);
     const level = competencyLevel(lesson.id, lessonProgress);
     const proofMilestones = lessonProofMilestones(lesson.id);
@@ -335,24 +363,12 @@ function renderMasteryList() {
       return `<li class="${done ? 'done' : 'pending'}"><span class="proof-dot">${icon}</span><div><strong>${milestone.label}</strong><small>${when}</small></div></li>`;
     }).join('');
     const lessonView = LESSON_VIEW_ID[lesson.id] || 'lesson';
-    // Learning Experience & Progression Depth V1 (mandat §7) : rendre explicite
-    // l'étape manquante — jamais implicite dans la seule timeline — et rappeler
-    // sur quoi repose "Maîtrisé" pour ne jamais laisser croire à une évaluation
-    // externe : un quiz réussi après une vraie leçon comprise et un exercice
-    // réussi sur cet appareil, jamais davantage.
-    // Driven by `level` (the exact same value the badge above shows), never by
-    // re-probing the milestones' own done() flags independently: M0.2/M0.3's
-    // "mark understood" click is optional (their practice blocks are reachable
-    // without it), so lessonViewed can legitimately stay false even once
-    // quizComplete is true — probing milestones directly would then contradict
-    // the level badge by claiming a level-4 "Maîtrisé" row is still missing its
-    // "Leçon comprise" proof.
     const missingMilestone = proofMilestones.find(milestone => milestone.level > level);
     const nextStepNote = missingMilestone
-      ? `Étape manquante : ${missingMilestone.label}.`
-      : 'Aucune étape manquante — leçon comprise, exercice réussi et quiz validé sur cet appareil.';
+      ? `Prochaine preuve : ${missingMilestone.label}.`
+      : 'Compétence confirmée sur cet appareil.';
     return `
-      <article class="mastery-row">
+      <article class="mastery-row mastery-row-focused">
         <div class="mastery-row-head">
           <div><p class="mastery-lesson">${lesson.id} — ${lesson.title}</p><strong>${lesson.competency.label}</strong></div>
           <div class="mastery-level">
@@ -362,20 +378,15 @@ function renderMasteryList() {
         </div>
         <ol class="proof-timeline">${milestones}</ol>
         <p class="mastery-next-step">${nextStepNote}</p>
-        <button class="text-action mastery-row-lesson-link" type="button" data-view="${lessonView}">${level >= 4 ? 'Revoir cette leçon' : 'Ouvrir cette leçon'} <span>→</span></button>
+        <button class="text-action mastery-row-lesson-link" type="button" data-view="${lessonView}">${level >= 4 ? 'Revoir cette leçon' : 'Continuer cette leçon'} <span>→</span></button>
       </article>`;
   }).join('');
 
-  const unmeasured = ['Gestion du risque', 'Discipline'].map(label => `
-      <article class="mastery-row unmeasured">
-        <div class="mastery-row-head">
-          <div><strong>${label}</strong></div>
-          <div class="mastery-level"><span>Pas encore évalué</span></div>
-        </div>
-        <p class="mastery-unmeasured-note">DDA ne propose pas encore de leçon mesurant cette compétence.</p>
-      </article>`).join('');
-
-  container.innerHTML = rows + unmeasured;
+  const hiddenCount = Math.max(0, all.length - rowsToRender.length);
+  const context = hiddenCount > 0
+    ? `<div class="mastery-context-note"><strong>${hiddenCount} compétence${hiddenCount > 1 ? 's' : ''} plus loin dans ton parcours.</strong><span>Elles apparaîtront ici quand elles deviennent utiles.</span></div>`
+    : '';
+  container.innerHTML = rows + context;
 }
 
 // Product state connection (Navigation Integrity V1, mandat §4/§9): Progression
@@ -872,7 +883,7 @@ function renderTerminalMarketIntelligence() {
   if (!row) return;
   row.innerHTML = MARKET_DEMO.indices.map(item => `
     <div class="terminal-mi-idx">
-      <div class="top"><b>${item.label}</b><span class="badge"><svg class="icon"><use href="#icon-blocked"/></svg>Non connecté</span></div>
+      <div class="top"><b>${item.label}</b><span class="badge"><svg class="icon"><use href="#icon-blocked"/></svg>Mode pédagogique</span></div>
       <svg class="index-sparkline" viewBox="0 0 120 30" aria-hidden="true"><path d="M2 18 L22 18 L42 12 L62 20 L82 10 L102 16 L118 14"/></svg>
     </div>`).join('');
 }
