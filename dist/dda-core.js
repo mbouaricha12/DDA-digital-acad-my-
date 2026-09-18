@@ -485,6 +485,142 @@
     });
   }
 
+  /* ---------------------------------------------------------------------
+     M1.1 — Pourquoi les prix évoluent ?
+     First authored lesson of M1. It teaches price formation through buyers,
+     sellers, counterparties, liquidity and pressure — never signals, entries
+     or live-market claims. All visual cases are synthetic pedagogical geometry.
+     M1 itself is gated by learning-engine.js behind completion of the authored
+     M0 module, so this lesson only becomes actionable after M0.1–M0.3 are
+     genuinely completed. -------------------------------------------------- */
+  function buildM11Lesson() {
+    const competency = Object.freeze({ id: 'price_formation', label: 'Compréhension de la formation du prix' });
+    const xp = Object.freeze({ lessonViewed: 40, exerciseComplete: 80, quizComplete: 150 });
+
+    const chartUp = Object.freeze({
+      points: Object.freeze([{ x: 10, y: 118 }, { x: 55, y: 112 }, { x: 95, y: 100 }, { x: 135, y: 88 }, { x: 175, y: 72 }, { x: 215, y: 62 }, { x: 255, y: 48 }, { x: 290, y: 38 }]),
+      ariaLabel: 'Cas pédagogique synthétique : la pression acheteuse devient plus forte que l’offre immédiatement disponible et le prix progresse.'
+    });
+    const chartDown = Object.freeze({
+      points: Object.freeze([{ x: 10, y: 42 }, { x: 55, y: 50 }, { x: 95, y: 62 }, { x: 135, y: 76 }, { x: 175, y: 88 }, { x: 215, y: 102 }, { x: 255, y: 116 }, { x: 290, y: 124 }]),
+      ariaLabel: 'Cas pédagogique synthétique : la pression vendeuse devient plus forte que la demande immédiatement disponible et le prix recule.'
+    });
+    const chartBalance = Object.freeze({
+      points: Object.freeze([{ x: 10, y: 82 }, { x: 50, y: 66 }, { x: 90, y: 92 }, { x: 130, y: 70 }, { x: 170, y: 90 }, { x: 210, y: 68 }, { x: 250, y: 88 }, { x: 290, y: 80 }]),
+      ariaLabel: 'Cas pédagogique synthétique : acheteurs et vendeurs trouvent suffisamment de contreparties et le prix oscille sans pression directionnelle nette.'
+    });
+    const chartApply = Object.freeze({
+      points: Object.freeze([{ x: 10, y: 116 }, { x: 50, y: 110 }, { x: 90, y: 96 }, { x: 130, y: 86 }, { x: 170, y: 70 }, { x: 210, y: 58 }, { x: 250, y: 46 }, { x: 290, y: 34 }]),
+      ariaLabel: 'Nouveau cas pédagogique synthétique à interpréter : progression graduelle du prix.'
+    });
+
+    const content = Object.freeze({
+      lead: 'Un prix ne bouge pas parce qu’une courbe “décide” de monter ou descendre. Il bouge quand les intentions d’achat et de vente ne trouvent plus le même équilibre au prix actuel.'
+    });
+
+    const finalCheck = Object.freeze({
+      id: 'm11-quiz',
+      label: 'Quiz de validation',
+      heading: 'Prouve que tu comprends le mécanisme.',
+      prompt: 'Pourquoi un prix peut-il rester dans une zone sans direction claire ?',
+      successText: 'Correct. Tu relies maintenant mouvement et équilibre des intentions, sans transformer cela en signal.',
+      choices: Object.freeze([
+        Object.freeze({ text: 'Parce que le marché est arrêté.', correct: false, feedback: 'Un marché peut continuer à échanger tout en restant équilibré : des contreparties existent des deux côtés et aucune pression ne domine durablement.' }),
+        Object.freeze({ text: 'Parce que les intentions d’achat et de vente trouvent suffisamment de contreparties et qu’aucune pression ne domine clairement.', correct: true }),
+        Object.freeze({ text: 'Parce qu’un indicateur interdit au prix de sortir de la zone.', correct: false, feedback: 'Aucun indicateur ne contrôle le prix. Ici on explique seulement un état d’équilibre entre participants.' })
+      ])
+    });
+
+    const steps = Object.freeze([
+      Object.freeze({ id: 'lesson', label: 'Observer & comprendre' }),
+      Object.freeze({ id: 'exercise', label: 'Appliquer' }),
+      Object.freeze({ id: 'quiz', label: 'Prouver' }),
+      Object.freeze({ id: 'review', label: 'Résultat' })
+    ]);
+
+    const blocks = Object.freeze([
+      Object.freeze({ type: 'competency_check', id: 'm11-competency-intro', step: 'lesson', mode: 'targets', competency }),
+      Object.freeze({
+        type: 'text_short', id: 'm11-concept', step: 'lesson', outline: 'Ce qui fait bouger un prix',
+        eyebrow: 'Comprendre', heading: 'Un prix se forme quand un acheteur rencontre un vendeur.',
+        body: 'Chaque transaction a une contrepartie : pour acheter, quelqu’un doit accepter de vendre. La liquidité décrit la capacité du marché à trouver ces contreparties. Quand beaucoup d’ordres agressifs arrivent d’un côté et que les contreparties proches deviennent insuffisantes, le prix doit chercher plus loin.',
+        principle: Object.freeze({ label: 'Idée clé', text: 'Hausse, baisse ou équilibre décrivent la relation entre pression d’achat, pression de vente et liquidité disponible — pas une certitude sur le prochain mouvement.' })
+      }),
+      Object.freeze({
+        type: 'chart_observe', id: 'm11-up-observe', step: 'lesson', outline: 'Cas 1 · Pression acheteuse',
+        eyebrow: 'Observer', heading: 'Cas 1 — acheteurs agressifs, peu de vendeurs disponibles.', prompt: 'Observe le déplacement synthétique du prix.', chart: chartUp
+      }),
+      Object.freeze({
+        type: 'decision_choice', id: 'm11-up-decision', step: 'lesson', outline: 'Décider · Cas 1',
+        eyebrow: 'Réfléchir', heading: 'Quelle explication est la plus cohérente ?', prompt: 'Choisis, puis lis le feedback.',
+        options: Object.freeze([
+          Object.freeze({ text: 'La pression acheteuse pousse le prix à chercher des vendeurs plus haut.', correct: true, feedback: 'Exact. Quand les acheteurs consomment les vendeurs disponibles au prix actuel, la transaction suivante peut devoir se faire plus haut.' }),
+          Object.freeze({ text: 'Un achat suffit toujours à faire monter le marché.', correct: false, feedback: 'Non. Une transaction a toujours une contrepartie. C’est le déséquilibre persistant entre pression et liquidité disponible qui compte, pas un achat isolé.' }),
+          Object.freeze({ text: 'Le graphique prouve que le prix continuera de monter.', correct: false, feedback: 'Le cas explique ce qui vient de se produire. Il ne prédit pas la suite et ne constitue aucun signal.' })
+        ])
+      }),
+      Object.freeze({
+        type: 'chart_observe', id: 'm11-down-observe', step: 'lesson', outline: 'Cas 2 · Pression vendeuse',
+        eyebrow: 'Observer', heading: 'Cas 2 — vendeurs agressifs, peu d’acheteurs disponibles.', prompt: 'Même logique, direction inverse.', chart: chartDown
+      }),
+      Object.freeze({
+        type: 'decision_choice', id: 'm11-down-decision', step: 'lesson', outline: 'Décider · Cas 2',
+        eyebrow: 'Réfléchir', heading: 'Pourquoi le prix recule-t-il dans ce cas ?', prompt: 'Choisis la meilleure explication.',
+        options: Object.freeze([
+          Object.freeze({ text: 'Les vendeurs doivent accepter des prix plus bas pour trouver suffisamment d’acheteurs.', correct: true, feedback: 'Exact. La pression vendeuse consomme la demande disponible et le prix cherche de nouvelles contreparties plus bas.' }),
+          Object.freeze({ text: 'Parce qu’il n’existe plus aucun acheteur.', correct: false, feedback: 'Il existe toujours une contrepartie à chaque transaction exécutée. Le problème est la quantité disponible au prix actuel, pas l’absence totale d’acheteurs.' }),
+          Object.freeze({ text: 'Parce que toute baisse signifie qu’il faut vendre.', correct: false, feedback: 'Une explication de mouvement n’est pas une recommandation de position.' })
+        ])
+      }),
+      Object.freeze({
+        type: 'chart_observe', id: 'm11-balance-observe', step: 'lesson', outline: 'Cas 3 · Équilibre',
+        eyebrow: 'Observer', heading: 'Cas 3 — suffisamment de contreparties des deux côtés.', prompt: 'Ici, aucune pression ne domine durablement.', chart: chartBalance
+      }),
+      Object.freeze({
+        type: 'decision_choice', id: 'm11-balance-decision', step: 'lesson', outline: 'Décider · Cas 3',
+        eyebrow: 'Réfléchir', heading: 'Quelle lecture décrit le mieux cette situation ?', prompt: 'Cherche l’explication, pas un signal.',
+        options: Object.freeze([
+          Object.freeze({ text: 'Les acheteurs et vendeurs trouvent des contreparties sans déséquilibre durable : le prix oscille.', correct: true, feedback: 'Exact. C’est un état de balance : le marché échange, mais aucune pression ne déplace durablement le prix dans une seule direction.' }),
+          Object.freeze({ text: 'Personne ne négocie sur le marché.', correct: false, feedback: 'Un prix peut osciller tout en enregistrant beaucoup d’échanges. L’absence de direction ne signifie pas absence d’activité.' }),
+          Object.freeze({ text: 'Le prix est obligé de rester dans cette zone.', correct: false, feedback: 'Aucune zone n’est une prison. Si l’équilibre change, le prix peut se déplacer.' })
+        ])
+      }),
+      Object.freeze({
+        type: 'case_study', id: 'm11-liquidity', step: 'lesson', outline: 'Liquidité & contreparties',
+        label: 'Relier les notions', text: 'Imagine un marché où 100 acheteurs veulent exécuter immédiatement, mais où très peu de vendeurs acceptent le prix actuel. Pour continuer à échanger, des acheteurs peuvent accepter de payer plus cher. L’inverse vaut quand les vendeurs dominent. La liquidité indique simplement à quel point des contreparties sont disponibles autour du prix.'
+      }),
+      Object.freeze({
+        type: 'chart_observe', id: 'm11-apply-observe', step: 'exercise', outline: 'Application',
+        eyebrow: 'Appliquer', heading: 'Nouveau cas — sans explication préalable.', prompt: 'Observe, puis explique le mécanisme avec les notions de pression et de contrepartie.', chart: chartApply
+      }),
+      Object.freeze({
+        type: 'decision_choice', id: 'm11-apply', step: 'exercise', outline: 'Application',
+        eyebrow: 'À toi', heading: 'Quelle explication tient le mieux ?', prompt: 'Une seule réponse décrit le mécanisme sans faire de prédiction.',
+        options: Object.freeze([
+          Object.freeze({ text: 'La pression acheteuse semble avoir consommé une partie des vendeurs disponibles, poussant les échanges vers des prix plus hauts.', correct: true, feedback: 'Bonne application : tu expliques le mouvement par pression et liquidité, sans promettre la suite.' }),
+          Object.freeze({ text: 'La hausse garantit que la prochaine décision doit être un achat.', correct: false, feedback: 'Ce serait transformer une observation en signal. La leçon n’enseigne pas cela.' }),
+          Object.freeze({ text: 'Il n’y avait aucun vendeur pendant la hausse.', correct: false, feedback: 'Chaque transaction exécutée implique acheteur et vendeur. Ce qui change est leur disponibilité relative aux différents prix.' })
+        ])
+      }),
+      Object.freeze({ type: 'quiz', id: 'm11-quiz', outline: finalCheck.heading, step: 'quiz', locked: true, data: finalCheck }),
+      Object.freeze({ type: 'journal_link', id: 'm11-journal-prompt', step: 'review', prompt: 'Écris avec tes propres mots pourquoi un prix peut monter, baisser ou rester en équilibre.', cta: 'Ouvrir Journal & Plan' }),
+      Object.freeze({ type: 'summary', id: 'm11-result', step: 'review', idSuffix: 'm11', data: Object.freeze({ heading: 'Compétence de formation du prix confirmée.', body: 'Tu as expliqué une hausse, une baisse et un équilibre à partir des contreparties, de la liquidité et de la pression — sans confondre compréhension et signal.' }) })
+    ]);
+
+    return Object.freeze({
+      id: 'M1.1',
+      title: 'Pourquoi les prix évoluent ?',
+      summary: 'Acheteurs, vendeurs, contreparties, liquidité et déséquilibre.',
+      estimatedMinutes: 16,
+      markUnderstoodLabel: 'Passer à l’application',
+      competency,
+      xp,
+      content,
+      steps,
+      blocks
+    });
+  }
+
   // M1-M9 are structural placeholders (empty lessons[]) — no content invented.
   // M1/M2 titles come from the validated roadmap (DDA_HANDOVER_BRIEF-1.md); no
   // real title exists yet for M3-M9 there, so their title is the honest "À
@@ -495,7 +631,7 @@
     title: 'Darius Free',
     modules: Object.freeze([
       { id: 'M0', title: 'Fondations des marchés', lessons: Object.freeze([buildM01Lesson(), buildM02Lesson(), buildM03Lesson()]) },
-      { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze([]) },
+      { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze([buildM11Lesson()]) },
       { id: 'M2', title: 'Risque et discipline', summary: 'Protéger son capital avant de rechercher la performance.', lessons: Object.freeze([]) },
       { id: 'M3', title: 'À venir', lessons: Object.freeze([]) },
       { id: 'M4', title: 'À venir', lessons: Object.freeze([]) },
