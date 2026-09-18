@@ -468,7 +468,7 @@
       }),
       Object.freeze({ type: 'quiz', id: 'm3-quiz', outline: finalCheck.heading, step: 'quiz', locked: true, data: finalCheck }),
       Object.freeze({ type: 'journal_link', id: 'm3-journal-prompt', step: 'review', prompt: 'Envie de noter ce que tu retiens de cette lecture de tendance dans ton Journal ?', cta: 'Ouvrir Journal & Plan' }),
-      Object.freeze({ type: 'summary', id: 'm3-result', step: 'review', idSuffix: 'm3', data: Object.freeze({ heading: 'Compétence de lecture de tendance confirmée.', body: 'Tu as observé plusieurs graphiques, classé leur direction générale et confirmé ta lecture sur un cas sans aide.' }) })
+      Object.freeze({ type: 'summary', id: 'm3-result', step: 'review', idSuffix: 'm3', continueTo: Object.freeze({ view: 'lesson-m11', label: 'Continuer vers Pourquoi les prix évoluent ?' }), data: Object.freeze({ heading: 'Compétence de lecture de tendance confirmée.', body: 'Tu as observé plusieurs graphiques, classé leur direction générale et confirmé ta lecture sur un cas sans aide.' }) })
     ]);
 
     return Object.freeze({
