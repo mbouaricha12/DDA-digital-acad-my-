@@ -240,16 +240,14 @@ function renderPathJourney() {
   const container = document.getElementById('path-list');
   if (!container) return;
   const modules = DDA.curriculum.modules;
-  const currentIndex = modules.findIndex(isRenderableModule);
-  const currentModule = modules[currentIndex];
-  const currentStatus = DDALearning.moduleStatus(DDA.curriculum, currentModule.id, prototypeState);
-  // The hero chapter must track the real current lesson, not a fixed M0.1 —
-  // once M0.1 is validated, resolveContinueTarget() honestly moves on to
-  // M0.2/M0.3, and this card (title, summary, duration, link) follows it.
-  // Only once nothing authored remains does it fall back to the last real
-  // lesson as an explicit review, same pattern as the Terminal.
+  // The hero follows the real actionable lesson's module. Once M0 is fully
+  // validated, M1 becomes the current chapter instead of leaving the hero
+  // visually pinned to M0 while its button opens M1.
   const continueTarget = resolveContinueTarget();
   const currentLessonTarget = continueTarget || lastAuthoredLesson();
+  const currentIndex = currentLessonTarget ? modules.findIndex(module => module.id === currentLessonTarget.module.id) : 0;
+  const currentModule = modules[Math.max(0, currentIndex)];
+  const currentStatus = DDALearning.moduleStatus(DDA.curriculum, currentModule.id, prototypeState);
   const currentLesson = currentLessonTarget ? currentLessonTarget.lesson : currentModule.lessons.find(lesson => lesson.id === activeLessonId);
   const currentView = currentLessonTarget ? (LESSON_VIEW_ID[currentLesson.id] || 'lesson') : 'lesson';
   const currentNumber = String(currentIndex + 1).padStart(2, '0');
