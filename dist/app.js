@@ -269,15 +269,20 @@ function renderPathJourney() {
 
   // UX Focus V1: only the nearest future modules belong in the default journey.
   // Hiding distant placeholders keeps Parcours focused on the learner's real horizon.
-  const futureModules = modules.map((module, index) => ({ module, index }))
-    .filter(({ index }) => index > currentIndex)
+  const futureCandidates = modules.map((module, index) => ({ module, index }))
+    .filter(({ index }) => index > currentIndex);
+  // Mobile/product clarity: the journey rail only surfaces future modules that
+  // already have meaningful authored framing. Bare placeholder modules such as
+  // "À venir" belong in the compact future count, not beside the real next module.
+  const futureModules = futureCandidates
+    .filter(({ module }) => module.title !== 'À venir' && Boolean(module.summary))
     .slice(0, 3);
   const rail = futureModules.map(({ module, index }) => {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
     const number = String(index + 1).padStart(2, '0');
     return `<li class="journey-node ${status}"><span class="journey-dot"></span><span class="path-number">${number}</span><div><small>${moduleStatusLabel(status, false)}</small><strong>${module.title}</strong>${module.summary ? `<p>${module.summary}</p>` : ''}</div></li>`;
   }).join('');
-  const hiddenFutureCount = Math.max(0, modules.length - currentIndex - 1 - futureModules.length);
+  const hiddenFutureCount = Math.max(0, futureCandidates.length - futureModules.length);
   const futureNote = hiddenFutureCount > 0
     ? `<p class="journey-future-note">+${hiddenFutureCount} module${hiddenFutureCount > 1 ? 's' : ''} prévu${hiddenFutureCount > 1 ? 's' : ''} plus loin dans le parcours — affiché${hiddenFutureCount > 1 ? 's' : ''} quand ils deviennent pertinents.</p>`
     : '';

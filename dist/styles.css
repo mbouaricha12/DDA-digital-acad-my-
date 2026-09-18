@@ -1984,3 +1984,41 @@ body.low-data .lesson-outline li{transition:none!important}
   .answer-grid button,
   .lesson-outline li{transition:none!important}
 }
+
+
+/* Lesson Experience V2 — mobile QA fixes
+   1) prevent the outline rail from competing with lesson content in the
+      860–899px transition range;
+   2) make local-saved/privacy proof wrap instead of producing horizontal
+      scrolling or clipped text;
+   3) keep every lesson child shrinkable inside narrow grids. */
+.lesson-main,
+.lesson-outline,
+.saved-state{min-width:0}
+.saved-state{
+  width:100%;
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  overflow-x:hidden;
+  line-height:1.45;
+}
+@media (min-width:860px) and (max-width:899px){
+  .lesson-layout{
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:0!important;
+  }
+  .lesson-outline{
+    display:none!important;
+    position:static!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+}
+@media (max-width:720px){
+  .saved-state{
+    padding:12px 13px;
+    font-size:11.5px;
+  }
+}
