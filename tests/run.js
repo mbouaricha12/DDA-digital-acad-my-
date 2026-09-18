@@ -490,6 +490,93 @@ async function completeSignupFlow(page, opts) {
     await context.close();
   });
 
+  console.log('\n-- K. M1.1 — price formation golden lesson --');
+
+  await test('M1.1 is locked until all authored M0 lessons are completed, then unlocks', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await completeSignupFlow(page);
+
+    await page.goto(`${BASE}/#lesson-m11`);
+    assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'path', 'M1.1 must redirect to Parcours while M0 is incomplete');
+
+    await page.evaluate(() => {
+      let state = window.DDA.load();
+      for (const id of ['M0.1', 'M0.2', 'M0.3']) {
+        state = window.DDA.updateLesson(state, id, { lessonViewed: true, exerciseComplete: true, quizComplete: true });
+      }
+    });
+    await page.goto(`${BASE}/#lesson-m11`);
+    assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'lesson-m11');
+    await context.close();
+  });
+
+  await test('M1.1 supports wrong answer → explanatory feedback → retry → application → quiz → durable proof', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await completeSignupFlow(page);
+    await page.evaluate(() => {
+      let state = window.DDA.load();
+      for (const id of ['M0.1', 'M0.2', 'M0.3']) {
+        state = window.DDA.updateLesson(state, id, { lessonViewed: true, exerciseComplete: true, quizComplete: true });
+      }
+    });
+    await page.goto(`${BASE}/#lesson-m11`);
+
+    const wrong = page.locator('[data-question="m11-up-decision"] button[data-correct="false"]').first();
+    await wrong.click();
+    const feedback = await page.locator('#m11-up-decision-feedback').textContent();
+    assert.ok(feedback && feedback.length > 20, 'wrong answer must explain why it is wrong');
+
+    await page.locator('[data-question="m11-up-decision"] button[data-correct="true"]').click();
+    await page.click('#mark-understood-m11');
+    await page.locator('[data-question="m11-apply"] button[data-correct="true"]').click();
+    assert.equal(await page.locator('#m11-quiz-block').getAttribute('aria-disabled'), 'false');
+
+    await page.locator('#m11-quiz-block [data-question="m11-quiz"] button[data-correct="true"]').click();
+    const state = await page.evaluate(() => window.DDA.load());
+    assert.equal(state.lessons['M1.1'].lessonViewed, true);
+    assert.equal(state.lessons['M1.1'].exerciseComplete, true);
+    assert.equal(state.lessons['M1.1'].quizComplete, true);
+    assert.equal(await page.locator('#result-card-m11').isVisible(), true);
+
+    await page.reload();
+    assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'lesson-m11');
+    assert.equal(await page.locator('#result-card-m11').isVisible(), true, 'M1.1 completion proof must survive reload');
+    await context.close();
+  });
+
+  await test('M1.1 stays usable without horizontal overflow at 320/375/390/428px', async () => {
+    for (const width of [320, 375, 390, 428]) {
+      const context = await freshContext(browser, { width, height: 844 });
+      await context.addInitScript(() => {
+        const state = {
+          schemaVersion: 4,
+          user: { id: 'mobile-test', name: 'Ada', email: 'ada@example.com', mode: 'device-demo' },
+          membership: { plan: 'free', status: 'demo' },
+          onboarding: { level: 'Débutant', goal: 'Comprendre les marchés', time: '10 minutes par jour', complete: true },
+          lessons: {
+            'M0.1': { lessonViewed: true, exerciseComplete: true, quizComplete: true },
+            'M0.2': { lessonViewed: true, exerciseComplete: true, quizComplete: true },
+            'M0.3': { lessonViewed: true, exerciseComplete: true, quizComplete: true }
+          },
+          journal: { entries: [], plan: {} },
+          preferences: { lowData: false, reminders: false },
+          events: [],
+          acquisition: {},
+          updatedAt: null
+        };
+        localStorage.setItem('dda-prototype-state-v4', JSON.stringify(state));
+      });
+      const page = await context.newPage();
+      await page.goto(`${BASE}/#lesson-m11`);
+      assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'lesson-m11');
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+      assert.equal(overflow, false, `M1.1 must not overflow horizontally at ${width}px`);
+      await context.close();
+    }
+  });
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 
