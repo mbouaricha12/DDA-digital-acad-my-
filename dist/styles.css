@@ -2094,3 +2094,39 @@ body.low-data .lesson-outline li{transition:none!important}
   .dda-order-ladder .ladder-side{padding:12px}
   .dda-order-ladder .ladder-side strong{font-size:12.5px}
 }
+
+
+.dda-order-compare{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  text-align:left;
+}
+.dda-order-compare article{
+  padding:16px;
+  border:1px solid rgba(147,166,186,.18);
+  background:rgba(255,255,255,.025);
+  border-radius:14px;
+}
+.dda-order-compare span{
+  display:block;
+  margin-bottom:8px;
+  color:var(--gold-soft);
+  font-size:10.5px;
+  font-weight:900;
+  letter-spacing:.11em;
+}
+.dda-order-compare strong{
+  display:block;
+  margin-bottom:8px;
+  color:var(--white);
+}
+.dda-order-compare p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.55;
+}
+@media(max-width:620px){
+  .dda-order-compare{grid-template-columns:1fr}
+}
