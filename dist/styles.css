@@ -1478,3 +1478,256 @@ button {
     animation: none;
   }
 }
+
+
+/* ======================================================================
+   DDA VISUAL IDENTITY V2 — editorial institution, not generic SaaS.
+   Public surfaces: ivory/editorial. Learner app: deep navy/precision.
+   ====================================================================== */
+:root{
+  --dda-serif:"Newsreader", Georgia, "Times New Roman", serif;
+  --dda-sans:"DM Sans", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --dda-ivory:#f5f0e6;
+  --dda-paper:#fbf8f1;
+  --dda-navy:#07111f;
+  --dda-navy-2:#0d1e34;
+  --dda-gold:#c99a45;
+  --dda-gold-soft:#e3c27f;
+}
+body{font-family:var(--dda-sans)}
+h1,h2{font-family:var(--dda-serif)}
+body.public-shell{background:var(--dda-ivory);color:#15243a}
+#landing{
+  max-width:none;
+  min-height:100vh;
+  padding:0;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(201,154,69,.09), transparent 28%),
+    linear-gradient(180deg,#f7f3eb 0%,#f2ecdf 100%);
+  color:#15243a;
+}
+.landing-editorial-shell{
+  max-width:1440px;
+  margin:0 auto;
+  padding:clamp(28px,5vw,74px) clamp(20px,5vw,72px) 44px;
+  display:grid;
+  gap:34px;
+  align-items:end;
+}
+.landing-main-copy{max-width:760px}
+.landing-masthead{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  padding-bottom:14px;
+  margin-bottom:clamp(36px,8vw,86px);
+  border-bottom:1px solid rgba(21,36,58,.18);
+  color:#213653;
+  font-size:.72rem;
+  font-weight:700;
+  letter-spacing:.11em;
+}
+.landing-masthead span{color:#8d7a58;font-weight:600}
+#landing .eyebrow.gold{color:#8a682d}
+#landing h1{
+  max-width:12ch;
+  margin-bottom:20px;
+  color:#102239;
+  font-size:clamp(3rem,8vw,7rem);
+  line-height:.88;
+  font-weight:600;
+  letter-spacing:-.045em;
+}
+#landing h1 em{
+  display:block;
+  margin-top:.08em;
+  color:#6e5b38;
+  font-style:italic;
+  font-weight:500;
+}
+.landing-deck{
+  max-width:700px;
+  color:#516174;
+  font-size:clamp(1rem,2vw,1.22rem);
+  line-height:1.65;
+}
+.landing-actions{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:30px 0 24px}
+.landing-actions .primary-action{width:auto;min-width:190px;padding-inline:24px}
+.landing-secondary{color:#233a58!important;text-decoration:none!important;font-weight:700}
+.landing-trust{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px 22px;
+  margin:24px 0 0;
+}
+.landing-trust li{font-size:.82rem;color:#5f6d7d}
+.landing-trust .icon{color:#9d7a3a}
+
+.landing-aperture{
+  min-height:520px;
+  justify-content:space-between;
+  padding:30px;
+  border-radius:2px;
+  background:
+    radial-gradient(circle at 75% 13%, rgba(64,156,217,.30), transparent 20%),
+    radial-gradient(circle at 15% 88%, rgba(201,154,69,.18), transparent 25%),
+    linear-gradient(145deg,#06101c 0%,#112a49 63%,#0b6fae 145%);
+  box-shadow:0 30px 80px rgba(6,16,28,.22);
+}
+.landing-aperture-top{position:relative;z-index:2;display:flex;justify-content:space-between;gap:18px;align-items:center}
+.landing-edition{font-size:.66rem;letter-spacing:.13em;color:rgba(255,255,255,.48)}
+.landing-aperture-copy{position:relative;z-index:2;margin-top:auto}
+.landing-aperture-copy strong{display:block;font-size:clamp(3rem,6vw,5.6rem);line-height:.88}
+.landing-aperture-copy em{display:block;margin-top:16px;font-family:var(--dda-serif);font-size:clamp(1.35rem,3vw,2.4rem);line-height:1.04;color:rgba(248,243,232,.67)}
+.landing-signal{
+  position:absolute;
+  left:0;right:0;bottom:110px;
+  height:120px;
+  display:flex;
+  align-items:flex-end;
+  gap:1px;
+  padding:0 30px;
+  opacity:.44;
+}
+.landing-signal span{flex:1;background:linear-gradient(180deg,rgba(227,194,127,.1),rgba(227,194,127,.85));transform-origin:bottom;animation:dda-signal 2.8s ease-in-out infinite alternate}
+.landing-signal span:nth-child(1){height:34%}.landing-signal span:nth-child(2){height:66%;animation-delay:.2s}.landing-signal span:nth-child(3){height:42%;animation-delay:.35s}.landing-signal span:nth-child(4){height:84%;animation-delay:.5s}.landing-signal span:nth-child(5){height:58%;animation-delay:.65s}
+@keyframes dda-signal{from{transform:scaleY(.78);opacity:.45}to{transform:scaleY(1);opacity:1}}
+
+.landing-method{
+  max-width:1440px;
+  margin:0 auto;
+  padding:18px clamp(20px,5vw,72px) 70px;
+  display:grid;
+  gap:0;
+  border-top:1px solid rgba(21,36,58,.12);
+}
+.landing-method article{
+  position:relative;
+  padding:30px 0 34px;
+  border-bottom:1px solid rgba(21,36,58,.12);
+}
+.method-index{
+  display:block;
+  margin-bottom:28px;
+  color:#b89555;
+  font-family:var(--dda-serif);
+  font-size:2rem;
+}
+.landing-method h2{
+  max-width:11ch;
+  margin-bottom:12px;
+  color:#142842;
+  font-size:clamp(1.8rem,4vw,3rem);
+  line-height:.98;
+}
+.landing-method p:last-child{max-width:460px;color:#627083;font-size:.92rem}
+
+.landing-institution{
+  margin:0;
+  padding:clamp(34px,6vw,72px) clamp(20px,5vw,72px);
+  background:var(--dda-navy);
+  color:#f4ecdd;
+  display:grid;
+  gap:34px;
+}
+.landing-institution>div:first-child{max-width:1000px}
+.landing-institution h2{max-width:17ch;font-size:clamp(2rem,5vw,4.7rem);line-height:.96;font-weight:500}
+.institution-proof{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:#9fb0c2;font-size:.67rem;font-weight:700;letter-spacing:.11em}
+.institution-proof i{width:22px;height:1px;background:#b88f4f}
+
+#dashboard .terminal-entry h1,
+#dashboard .terminal-lead h2,
+#path .journey-current h2,
+#progress .section-intro h1,
+.lesson-main h1,
+.lesson-main h2{font-family:var(--dda-serif)}
+
+.terminal-lead{
+  position:relative;
+  overflow:hidden;
+}
+.terminal-lead::after{
+  content:"";
+  position:absolute;
+  inset:auto 0 0 auto;
+  width:30%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold));
+}
+.terminal-lead-photo{
+  min-height:230px;
+  border-radius:2px!important;
+}
+.terminal-lead-photo::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size:28px 28px;
+  mask-image:linear-gradient(135deg,rgba(0,0,0,.9),transparent 72%);
+  pointer-events:none;
+}
+.terminal-lead-go{transition:gap .2s ease,color .2s ease}
+.terminal-lead-go:hover{gap:12px;color:#8f6f34}
+
+.lesson-layout{align-items:start}
+.lesson-main{
+  max-width:900px;
+}
+.lesson-main>p,
+.lesson-copy p,
+.example-callout p{max-width:68ch}
+.lesson-outline{
+  position:sticky;
+  top:110px;
+  max-height:calc(100vh - 140px);
+  overflow:auto;
+}
+.lesson-main .learning-check,
+.lesson-main .principle,
+.lesson-main .example-callout,
+.lesson-main .comparison-block,
+.lesson-main .chart-observe,
+.lesson-main .zone-identify{
+  scroll-margin-top:110px;
+}
+.learning-check{
+  border-radius:2px;
+  box-shadow:none;
+}
+.answer-grid button{
+  border-radius:8px;
+  transition:transform .15s ease,border-color .15s ease,background .15s ease;
+}
+.answer-grid button:hover{transform:translateX(3px)}
+.answer-grid button.correct{box-shadow:inset 3px 0 var(--green)}
+.answer-grid button.incorrect{box-shadow:inset 3px 0 var(--red)}
+
+[data-reveal]{
+  opacity:0;
+  transform:translateY(18px);
+  transition:opacity .55s var(--ease),transform .55s var(--ease);
+}
+[data-reveal].revealed{opacity:1;transform:none}
+[data-reveal-delay="1"]{transition-delay:.08s}
+[data-reveal-delay="2"]{transition-delay:.16s}
+[data-reveal-delay="3"]{transition-delay:.24s}
+
+@media(min-width:900px){
+  .landing-editorial-shell{grid-template-columns:minmax(0,1.08fr) minmax(430px,.72fr);min-height:760px}
+  .landing-method{grid-template-columns:repeat(3,1fr)}
+  .landing-method article{padding:44px 38px 52px;border-bottom:0;border-right:1px solid rgba(21,36,58,.12)}
+  .landing-method article:first-child{padding-left:0}
+  .landing-method article:last-child{border-right:0}
+  .landing-institution{grid-template-columns:1.4fr .6fr;align-items:end}
+}
+@media(max-width:899px){
+  .landing-masthead{margin-bottom:38px;flex-direction:column;gap:4px}
+  .landing-aperture{min-height:410px}
+  #landing h1{font-size:clamp(3rem,14vw,5rem)}
+}
+@media(prefers-reduced-motion:reduce){
+  .landing-signal span{animation:none}
+}
