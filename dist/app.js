@@ -25,6 +25,12 @@ const lessonM03Meta = DDALearning.findLesson(DDA.curriculum, lessonM03Id);
 const lessonM03Def = lessonM03Meta.lesson;
 document.getElementById('lesson-m03-main').insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(lessonM03Meta.module, lessonM03Def, 'm3'));
 document.getElementById('lesson-m03-outline').innerHTML = DDALessonRenderer.renderLessonOutline(lessonM03Def, 'm3');
+
+const lessonM11Id = 'M1.1';
+const lessonM11Meta = DDALearning.findLesson(DDA.curriculum, lessonM11Id);
+const lessonM11Def = lessonM11Meta.lesson;
+document.getElementById('lesson-m11-main').insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(lessonM11Meta.module, lessonM11Def, 'm11'));
+document.getElementById('lesson-m11-outline').innerHTML = DDALessonRenderer.renderLessonOutline(lessonM11Def, 'm11');
 function findLessonBlock(lessonDef, id) { return lessonDef.blocks.find(b => b.id === id); }
 
 const buttons = document.querySelectorAll('[data-view]');
@@ -32,7 +38,7 @@ const views = document.querySelectorAll('.view');
 const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
-const titles = { landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours', lesson: 'Leçon en cours', 'lesson-m02': 'Support & Résistance', 'lesson-m03': 'Lire une tendance', progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
+const titles = { landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours', lesson: 'Leçon en cours', 'lesson-m02': 'Support & Résistance', 'lesson-m03': 'Lire une tendance', 'lesson-m11': 'Pourquoi les prix évoluent ?', progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
 // V1.1 correction: 'dashboard' was never gated here even though DDA.curriculum's
 // own entitlements model (dda-core.js ENTITLEMENTS) already lists 'dashboard' as a
 // free/premium-only permission, not a visitor one — the deep-link/reload matrix this
@@ -40,14 +46,14 @@ const titles = { landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 
 // straight to #dashboard bypassed Access entirely and saw the Terminal's real
 // authenticated shell. Wiring it here uses the exact same, already-tested
 // permission-gate showView() applies to every other protected view — no new logic.
-const viewPermissions = { dashboard: 'dashboard', path: 'path', lesson: 'lesson_m01', 'lesson-m02': 'lesson_m01', 'lesson-m03': 'lesson_m01', progress: 'progress', journal: 'journal', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile' };
+const viewPermissions = { dashboard: 'dashboard', path: 'path', lesson: 'lesson_m01', 'lesson-m02': 'lesson_m01', 'lesson-m03': 'lesson_m01', 'lesson-m11': 'lesson_m01', progress: 'progress', journal: 'journal', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile' };
 // M0.2 and M0.3 reuse the same `lesson_m01` free-tier entitlement — no separate
 // premium tier is being introduced for M0 in this tranche, so no new key is invented.
 // Maps a lesson id to the view that actually renders it — the Terminal cockpit's
 // "continue" button follows DDALearning.nextActionable, which will point at
 // M0.2/M0.3 the moment the previous lesson's quiz is complete; without this map
 // it would still say "Reprendre la leçon" but navigate to the wrong view instead.
-const LESSON_VIEW_ID = { 'M0.1': 'lesson', 'M0.2': 'lesson-m02', 'M0.3': 'lesson-m03' };
+const LESSON_VIEW_ID = { 'M0.1': 'lesson', 'M0.2': 'lesson-m02', 'M0.3': 'lesson-m03', 'M1.1': 'lesson-m11' };
 const MODULE_STATUS_LABEL = { completed: 'Terminé', in_progress: 'En cours', available: 'Disponible', locked: 'Verrouillé', coming_soon: 'Prochainement' };
 // Structural demo only — no real index value, date or amount. Swap for a real feed's response later without touching the markup.
 const MARKET_DEMO = {
@@ -1037,6 +1043,10 @@ function renderState() {
     loopId: 'lesson-loop-m3', outlineListId: 'lesson-outline-list-m3', gateId: 'm3-quiz-block', evalName: 'm3-quiz',
     resultId: 'result-card-m3', markUnderstoodId: 'mark-understood-m3', savedStateId: 'saved-state-m3', resultStatsId: 'result-stats-m3'
   });
+  renderLessonProgressUI(lessonM11Id, lessonM11Def, {
+    loopId: 'lesson-loop-m11', outlineListId: 'lesson-outline-list-m11', gateId: 'm11-quiz-block', evalName: 'm11-quiz',
+    resultId: 'result-card-m11', markUnderstoodId: 'mark-understood-m11', savedStateId: 'saved-state-m11', resultStatsId: 'result-stats-m11'
+  });
 
   document.getElementById('resume-device').hidden = !prototypeState.user;
   document.body.classList.toggle('low-data', Boolean(prototypeState.preferences.lowData));
@@ -1126,9 +1136,13 @@ function showView(id, recordEvent = true) {
     showToast('Termine ton inscription pour accéder à cette section.');
     id = 'access';
   }
+  if (id === 'lesson-m11' && DDALearning.moduleStatus(DDA.curriculum, 'M1', prototypeState) === DDALearning.MODULE_STATUS.LOCKED) {
+    showToast('Valide d’abord les trois leçons de M0 pour ouvrir M1.');
+    id = 'path';
+  }
   views.forEach(view => view.classList.toggle('active', view.id === id));
   [...desktopItems, ...mobileItems].forEach(item => item.classList.toggle('active', item.dataset.view === id));
-  document.body.classList.toggle('lesson-focus', id === 'lesson' || id === 'lesson-m02' || id === 'lesson-m03');
+  document.body.classList.toggle('lesson-focus', id === 'lesson' || id === 'lesson-m02' || id === 'lesson-m03' || id === 'lesson-m11');
   // Acquisition V1 — #landing is a public marketing surface, not an app screen:
   // it must never show the authenticated chrome (sidebar/plan/profile, topbar,
   // mobile nav, prototype banner). Scoped purely via this body class, same
@@ -1337,6 +1351,7 @@ function bindMarkUnderstood(lessonId, ids) {
 bindMarkUnderstood(activeLessonId, { buttonId: 'mark-understood', savedStateId: 'saved-state', scrollToId: 'exercise-block' });
 bindMarkUnderstood(lessonM02Id, { buttonId: 'mark-understood-m2', savedStateId: 'saved-state-m2', scrollToId: 'm2-observe-4-block' });
 bindMarkUnderstood(lessonM03Id, { buttonId: 'mark-understood-m3', savedStateId: 'saved-state-m3', scrollToId: 'm3-observe-4-block' });
+bindMarkUnderstood(lessonM11Id, { buttonId: 'mark-understood-m11', savedStateId: 'saved-state-m11', scrollToId: 'm11-apply-observe-block' });
 
 document.getElementById('signup-form').addEventListener('submit', event => {
   event.preventDefault();
@@ -1483,6 +1498,17 @@ bindQuestion(lessonM03Id, { role: 'practice', name: m3Classify3.id, successText:
 bindQuestion(lessonM03Id, { role: 'exercise', name: m3Challenge.id, successText: 'Bonne lecture — direction confirmée sans aide.' }, { gateId: 'm3-quiz-block' });
 bindQuestion(lessonM03Id, { role: 'quiz', name: m3QuizBlock.data.id, successText: m3QuizBlock.data.successText }, { resultId: 'result-card-m3', savedStateId: 'saved-state-m3' });
 
+const m11Up = findLessonBlock(lessonM11Def, 'm11-up-decision');
+const m11Down = findLessonBlock(lessonM11Def, 'm11-down-decision');
+const m11Balance = findLessonBlock(lessonM11Def, 'm11-balance-decision');
+const m11Apply = findLessonBlock(lessonM11Def, 'm11-apply');
+const m11QuizBlock = findLessonBlock(lessonM11Def, 'm11-quiz');
+bindQuestion(lessonM11Id, { role: 'practice', name: m11Up.id, successText: 'Bonne lecture.' });
+bindQuestion(lessonM11Id, { role: 'practice', name: m11Down.id, successText: 'Bonne lecture.' });
+bindQuestion(lessonM11Id, { role: 'practice', name: m11Balance.id, successText: 'Bonne lecture.' });
+bindQuestion(lessonM11Id, { role: 'exercise', name: m11Apply.id, successText: 'Bonne application.' }, { gateId: 'm11-quiz-block' });
+bindQuestion(lessonM11Id, { role: 'quiz', name: m11QuizBlock.data.id, successText: m11QuizBlock.data.successText }, { resultId: 'result-card-m11', savedStateId: 'saved-state-m11' });
+
 function updateNetworkState() {
   const online = navigator.onLine;
   const status = document.getElementById('network-state');
@@ -1502,6 +1528,7 @@ function resetPilot() {
   document.getElementById('result-card').hidden = true;
   document.getElementById('result-card-m2').hidden = true;
   document.getElementById('result-card-m3').hidden = true;
+  document.getElementById('result-card-m11').hidden = true;
   renderState();
   showView('access', false);
   showToast('Tes données ont été effacées.');
