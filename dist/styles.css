@@ -1975,7 +1975,10 @@ body.public-shell{background:var(--dda-ivory);color:#15243a}
   }
   .lesson-actions .secondary-action{width:100%}
 }
-body.low-data .lesson-beat,
+body.low-data .decision-option,
+body.low-data .answer-grid button,
+body.low-data .lesson-outline li{transition:none!important}
+
 @media (prefers-reduced-motion:reduce){
   .decision-option,
   .answer-grid button,
