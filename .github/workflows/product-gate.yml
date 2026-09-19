@@ -1,0 +1,49 @@
+name: DDA Product Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'dist/**'
+      - 'tests/**'
+      - '.github/workflows/product-gate.yml'
+  workflow_dispatch:
+
+jobs:
+  product-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Syntax checks
+        run: |
+          node --check dist/dda-core.js
+          node --check dist/learning-engine.js
+          node --check dist/lesson-renderer.js
+          node --check dist/dda-analytics.js
+          node --check dist/m1-1-lesson.js
+          node --check dist/m1-2-lesson.js
+          node --check dist/app.js
+
+      - name: Run committed contract checks
+        run: |
+          node tests/test_m1_golden_lesson.js
+          node tests/test_m1_integration_contract.js
+          node tests/test_m1_2_order_execution.js
+          node tests/test_path_current_module.js
+          node tests/test_m1_runtime_contract.js
+
+      - name: Install Playwright Chromium
+        run: |
+          npm install --global playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Run real browser regression harness
+        run: node tests/run.js
