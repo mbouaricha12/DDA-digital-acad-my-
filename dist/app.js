@@ -1677,7 +1677,9 @@ if (titles[initialView]) {
   ].join(',');
 
   function prepare(root = document) {
-    const nodes = root.querySelectorAll(selector);
+    // querySelectorAll only matches descendants — when called with a single
+    // newly-added element as root, it must be considered too, not just its children.
+    const nodes = root !== document && root.matches?.(selector) ? [root, ...root.querySelectorAll(selector)] : root.querySelectorAll(selector);
     nodes.forEach((node, index) => {
       if (node.dataset.revealReady === 'true') return;
       node.dataset.revealReady = 'true';
@@ -1703,7 +1705,19 @@ if (titles[initialView]) {
     document.querySelectorAll(selector).forEach(node => node.classList.add('revealed'));
   } else {
     prepare();
-    const mutationObserver = new MutationObserver(() => prepare());
+    // Scoped to each mutation's own added nodes, never the whole document:
+    // renderState() replaces dozens of subtrees via innerHTML per learner
+    // action (each one itself a childList mutation), so a full-document
+    // re-scan on every mutation re-queries and re-observes the same targets
+    // over and over across a session, growing unboundedly instead of doing
+    // fixed, bounded work per render.
+    const mutationObserver = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === 1) prepare(node);
+        });
+      });
+    });
     mutationObserver.observe(document.body, { childList: true, subtree: true });
   }
 })();
