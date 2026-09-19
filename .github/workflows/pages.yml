@@ -1,10 +1,16 @@
-name: Deploy static site to GitHub Pages
+name: Verify and deploy static site to GitHub Pages
 
 on:
+  pull_request:
+    paths:
+      - 'dist/**'
+      - 'tests/**'
+      - '.github/workflows/pages.yml'
   push:
     branches: [main]
     paths:
       - 'dist/**'
+      - 'tests/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -14,11 +20,39 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax check runtime
+        run: |
+          node --check dist/dda-core.js
+          node --check dist/learning-engine.js
+          node --check dist/lesson-renderer.js
+          node --check dist/dda-analytics.js
+          node --check dist/m1-1-lesson.js
+          node --check dist/m1-2-lesson.js
+          node --check dist/app.js
+      - name: Run authored-learning contracts
+        run: |
+          node tests/test_m1_golden_lesson.js
+          node tests/test_m1_integration_contract.js
+          node tests/test_m1_2_order_execution.js
+          node tests/test_m1_runtime_contract.js
+          node tests/test_path_current_module.js
+
   deploy:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs: verify
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
