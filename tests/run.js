@@ -490,6 +490,74 @@ async function completeSignupFlow(page, opts) {
     await context.close();
   });
 
+
+  console.log('\n-- K. Fin du curriculum authored — cohérence M1 complète --');
+
+  await test('M1.2 completed leaves no phantom lesson and keeps M2 honestly coming soon', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => {
+      const done = { lessonViewed: true, exerciseComplete: true, quizComplete: true };
+      localStorage.setItem('dda-prototype-state-v4', JSON.stringify({
+        schemaVersion: 4,
+        user: { id: 'complete-path', name: 'Ada', email: 'ada@example.com', mode: 'device-demo' },
+        membership: { plan: 'free', status: 'demo' },
+        onboarding: { level: 'Débutant', goal: 'Comprendre les marchés', time: '10 minutes par jour', complete: true },
+        lessons: {
+          'M0.1': done,
+          'M0.2': done,
+          'M0.3': done,
+          'M1.1': done,
+          'M1.2': done
+        },
+        journal: { entries: [], plan: {} },
+        preferences: { lowData: false, reminders: false },
+        events: [],
+        acquisition: {},
+        updatedAt: null
+      }));
+    });
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#dashboard`);
+
+    const productState = await page.evaluate(() => ({
+      active: document.querySelector('.view.active')?.id,
+      next: window.DDALearning.nextActionable(window.DDA.curriculum, window.DDA.load()),
+      m0: window.DDALearning.moduleStatus(window.DDA.curriculum, 'M0', window.DDA.load()),
+      m1: window.DDALearning.moduleStatus(window.DDA.curriculum, 'M1', window.DDA.load()),
+      m2: window.DDALearning.moduleStatus(window.DDA.curriculum, 'M2', window.DDA.load()),
+      terminalTitle: document.getElementById('terminal-lead-title')?.textContent?.trim(),
+      terminalIndex: document.getElementById('lesson-index-label')?.textContent?.trim(),
+      primaryView: document.getElementById('lesson-primary-action')?.dataset?.view,
+      progressNext: document.getElementById('progress-next-step')?.textContent?.trim()
+    }));
+
+    assert.equal(productState.active, 'dashboard');
+    assert.equal(productState.next, null, 'there must be no fabricated next lesson after M1.2');
+    assert.equal(productState.m0, 'completed');
+    assert.equal(productState.m1, 'completed');
+    assert.equal(productState.m2, 'coming_soon');
+    assert.equal(productState.terminalTitle, 'Toutes les leçons disponibles sont validées.');
+    assert.ok(productState.terminalIndex.includes('M0') && productState.terminalIndex.includes('M1'), 'Terminal completion label must reflect both completed authored modules');
+    assert.equal(productState.primaryView, 'journal', 'with an empty journal, the honest daily action is Journal — not a phantom lesson');
+    assert.equal(productState.progressNext, 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.');
+
+    await page.click('.nav-item[data-view="path"]');
+    const pathState = await page.evaluate(() => ({
+      active: document.querySelector('.view.active')?.id,
+      module: document.querySelector('.journey-current-tag')?.textContent?.trim(),
+      why: document.querySelector('.journey-current-why')?.textContent?.trim(),
+      target: document.querySelector('.journey-current')?.dataset?.view
+    }));
+    assert.equal(pathState.active, 'path');
+    assert.equal(pathState.module, 'Comprendre les marchés financiers');
+    assert.ok(pathState.why.includes('Compétence validée'));
+    assert.equal(pathState.target, 'lesson-m12', 'Parcours review target must be the last real authored lesson');
+
+    await page.reload();
+    assert.equal(await page.evaluate(() => window.DDALearning.nextActionable(window.DDA.curriculum, window.DDA.load())), null, 'completion state must survive reload');
+    await context.close();
+  });
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 

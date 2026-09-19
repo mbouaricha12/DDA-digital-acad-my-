@@ -49,6 +49,12 @@ jobs:
           node tests/test_m1_2_order_execution.js
           node tests/test_m1_runtime_contract.js
           node tests/test_path_current_module.js
+      - name: Install Playwright Chromium for real browser regression
+        run: |
+          npm install -g playwright@1.55.0
+          playwright install --with-deps chromium
+      - name: Run real browser regression harness
+        run: node tests/run.js
 
   deploy:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
