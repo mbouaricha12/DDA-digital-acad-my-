@@ -92,7 +92,7 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
   height:64px;padding:0 16px;background:rgba(5,11,20,.9);backdrop-filter:blur(16px);
   border-bottom:1px solid var(--line-soft);
 }
-.mobile-brand{display:flex;text-align:left;line-height:1;gap:2px;flex-direction:column}
+.mobile-brand{display:flex;text-align:left;line-height:1;gap:2px;flex-direction:column;border:0;background:none;padding:0;cursor:pointer;appearance:none}
 .mobile-brand b{font-family:Georgia,serif;font-size:21px;letter-spacing:-.05em;background:linear-gradient(135deg,var(--cta-blue-2),var(--cta-blue) 55%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
 .mobile-brand small{font-size:7px;letter-spacing:.22em;color:var(--muted)}
 .context{display:none}
