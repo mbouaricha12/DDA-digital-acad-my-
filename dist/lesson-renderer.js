@@ -79,9 +79,12 @@
     },
 
     image_explainer(block) {
+      const visual = block.src
+        ? `<div class="photo-frame ${block.tone || 'dark'} ratio-wide"><img src="${block.src}" alt="${block.alt || ''}" loading="lazy"></div>`
+        : `<div class="photo-frame ${block.tone || 'dark'} ratio-wide"><svg class="icon"><use href="#icon-photo"/></svg><span>${block.placeholderLabel || 'Illustration à intégrer'}</span></div>`;
       return `
       <figure class="image-explainer-block" id="${block.id}-block">
-        <div class="photo-frame ${block.tone || 'dark'} ratio-wide"><svg class="icon"><use href="#icon-photo"/></svg><span>${block.placeholderLabel || 'Illustration à intégrer'}</span></div>
+        ${visual}
         ${block.caption ? `<figcaption>${block.caption}</figcaption>` : ''}
       </figure>`;
     },

@@ -255,6 +255,12 @@
         principle: Object.freeze({ label: 'Vocabulaire professionnel', text: 'Support et résistance ne sont jamais un prix unique : ce sont des zones de réaction observées plusieurs fois.' })
       }),
       Object.freeze({
+        type: 'image_explainer', id: 'm2-diagram', step: 'lesson', outline: 'Le schéma classique', eyebrow: 'Schéma de référence',
+        src: 'images/lessons/support-resistance-diagram.jpg',
+        alt: 'Schéma illustrant des zones de support et de résistance qui se répètent à mesure que le prix progresse, une ancienne résistance pouvant devenir une nouvelle zone de support.',
+        caption: 'Le schéma classique : une même zone peut changer de rôle selon le sens du marché. Ni promesse, ni signal — la même logique de zones répétées que tu viens d’observer.'
+      }),
+      Object.freeze({
         type: 'decision_choice', id: 'm2-myth-line', step: 'lesson', outline: 'Ligne ou zone ?',
         eyebrow: 'Casser un mythe', heading: 'Une ligne parfaite… ou une zone ?',
         prompt: 'Laquelle de ces deux représentations décrit le mieux ce que tu viens d’observer ?',
