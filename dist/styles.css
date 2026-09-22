@@ -290,14 +290,14 @@ body.public-shell main{padding-bottom:0}
 .terminal-tools button{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 16px;text-align:left;font:inherit;cursor:pointer;min-height:44px;color:#fff}
 .terminal-tools strong{display:block;font-size:13px;font-weight:700}
 .terminal-tools small{color:rgba(244,247,252,.55);font-size:11.5px}
-#dashboard .chevron-row-icon{background:rgba(47,116,214,.2);color:var(--cta-blue-2)}
+#dashboard .chevron-row-icon{background:rgba(47,116,214,.08);border-color:rgba(47,116,214,.45);color:var(--cta-blue-2)}
 #dashboard .chevron-row-arrow{color:rgba(244,247,252,.5)}
 
 /* Chevron row — icon badge + title/description + chevron, reused wherever a
    row leads somewhere else (quick access, FAQ, library entries). */
 .chevron-row{display:flex;align-items:center;gap:14px;transition:border-color .15s,transform .15s}
 .chevron-row:hover{border-color:var(--cta-blue-2);transform:translateX(2px)}
-.chevron-row-icon{flex:none;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:rgba(13,79,176,.1);color:var(--cta-blue)}
+.chevron-row-icon{flex:none;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:rgba(13,79,176,.06);border:1.5px solid rgba(13,79,176,.35);color:var(--cta-blue)}
 .chevron-row-icon .icon{width:19px;height:19px}
 .chevron-row-body{flex:1;min-width:0;display:grid;gap:2px}
 .chevron-row-arrow{flex:none;width:16px;height:16px;color:#8a7f6a}
@@ -329,7 +329,7 @@ body.public-shell main{padding-bottom:0}
 .community-spaces-list{display:grid;gap:10px;margin-top:14px}
 .community-spaces-list .chevron-row{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px 16px;color:#fff;width:100%;text-align:left;font:inherit;cursor:pointer;min-height:44px}
 .community-spaces-list .chevron-row-body small{color:rgba(244,247,252,.55)}
-.community-spaces-list .chevron-row-icon{background:rgba(13,79,176,.18)}
+.community-spaces-list .chevron-row-icon{background:rgba(13,79,176,.08);border-color:rgba(47,116,214,.45)}
 .community-spaces-list .chevron-row:hover{border-color:var(--cta-blue-2)}
 
 .community-cta{margin-top:30px;text-align:center;padding-bottom:8px}
