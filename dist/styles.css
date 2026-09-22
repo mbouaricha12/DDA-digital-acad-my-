@@ -189,7 +189,7 @@ body.public-shell main{padding-bottom:0}
    Scoped to #dashboard only (mandat "Terminal Master Implementation"): the shared app
    chrome (.sidebar/.topbar) stays exactly as it is everywhere else — the same
    light-canvas-inside-dark-chrome pattern already used for #access, not a new one. */
-#dashboard{background:linear-gradient(180deg,var(--navy-950),#04070f 60%);color:#f4f7fc}
+#dashboard{background:linear-gradient(180deg,var(--navy-900),var(--navy-950) 70%);color:#f4f7fc}
 #dashboard .eyebrow.gold{color:var(--gold-soft)}
 
 /* Signature 1 — the mastery thread: a bead chain, never a generic progress bar.
@@ -304,7 +304,7 @@ body.public-shell main{padding-bottom:0}
 @media (prefers-reduced-motion: reduce){.chevron-row{transition:none}.chevron-row:hover{transform:none}}
 
 /* ---------- Communauté (aperçu honnête, aucun backend réel) ---------- */
-.community-view{background:linear-gradient(180deg,var(--navy-950),#04070f 60%);color:#f4f7fc}
+.community-view{background:linear-gradient(180deg,var(--navy-900),var(--navy-950) 70%);color:#f4f7fc}
 .community-view .eyebrow{color:rgba(244,247,252,.5)}
 .community-hero{position:relative;overflow:hidden;border-radius:20px;min-height:220px;display:flex;align-items:flex-end;padding:22px}
 .community-hero-copy{position:relative;z-index:1}
@@ -382,11 +382,11 @@ body.public-shell main{padding-bottom:0}
    Systemic Terminal elements imported (typography hierarchy, navy/ivory ratios, editorial
    rhythm, rail separators, CTA/focus discipline, Fil de maîtrise) — never the Terminal's
    own disposition or dashboard-specific blocks. #lesson/#lesson-m02 only. */
-#lesson,#lesson-m02{background:linear-gradient(165deg,var(--ivory),var(--ivory-2) 92%);color:var(--ink)}
-#lesson .eyebrow.gold,#lesson-m02 .eyebrow.gold{color:var(--blue)}
+#lesson,#lesson-m02{background:linear-gradient(180deg,var(--navy-900),var(--navy-950) 70%);color:#f4f7fc}
+#lesson .eyebrow.gold,#lesson-m02 .eyebrow.gold{color:var(--gold-soft)}
 .lesson-layout{display:grid;grid-template-columns:1fr;gap:0}
-.back-link{color:var(--muted-2);margin-bottom:22px;padding:8px 0;background:none;border:0;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:44px}
-.lesson-lead{font-size:16px;color:var(--muted-2)}
+.back-link{color:rgba(244,247,252,.6);margin-bottom:22px;padding:8px 0;background:none;border:0;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.lesson-lead{font-size:16px;color:rgba(244,247,252,.68)}
 .video-stage{
   aspect-ratio:16/11;border:1px solid var(--line);border-radius:var(--r-lg);
   background:radial-gradient(circle at 50% 15%,#1c2f57,#070c17 68%);
@@ -403,7 +403,7 @@ body.public-shell main{padding-bottom:0}
 .play-button:hover{transform:scale(1.06)}
 #video-caption{position:absolute;bottom:14px;margin:0;color:var(--muted);font-size:12px;text-align:center;padding:0 14px}
 .lesson-copy{margin-top:30px}
-.lesson-copy p{color:var(--muted-2);font-size:16px}
+.lesson-copy p{color:rgba(244,247,252,.68);font-size:16px}
 .principle{margin:24px 0;padding:20px;border-left:3px solid var(--gold);background:#F2ECDA;border-radius:0 var(--r-sm) var(--r-sm) 0;display:flex;gap:14px;align-items:flex-start}
 .principle .icon{color:var(--gold);flex:none;margin-top:2px}
 .principle span{color:#8a6f2e;font-size:11px;text-transform:uppercase;font-weight:900;letter-spacing:.1em;display:block;margin-bottom:4px}
@@ -420,10 +420,10 @@ body.public-shell main{padding-bottom:0}
 
 .comparison-block{margin:26px 0}
 .comparison-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}
-.comparison-col{padding:16px;border-radius:var(--r-md);border:1px solid #DCD0AF}
+.comparison-col{padding:16px;border-radius:var(--r-md);border:1px solid rgba(255,255,255,.14)}
 .comparison-col span{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;margin-bottom:10px}
 .comparison-col ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
-.comparison-col li{font-size:13px;color:var(--muted-2);padding-left:14px;position:relative}
+.comparison-col li{font-size:13px;color:rgba(244,247,252,.68);padding-left:14px;position:relative}
 .comparison-col li:before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:currentColor}
 .comparison-col.bad{background:rgba(217,115,115,.08)}
 .comparison-col.bad span{color:#b64a4a}
@@ -466,7 +466,7 @@ body.public-shell main{padding-bottom:0}
 .result-feedback{color:var(--muted-2);font-size:13px;min-height:44px;display:inline-flex;align-items:center}
 .lesson-actions{position:sticky;bottom:calc(68px + var(--safe-b));display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:14px 0;margin-top:34px;background:var(--navy-950)}
 .lesson-outline{display:none}
-.saved-state{font-size:12px;padding:13px;border:1px dashed #cfc19a;border-radius:12px;color:var(--muted-2);margin-top:20px}
+.saved-state{font-size:12px;padding:13px;border:1px dashed rgba(255,255,255,.2);border-radius:12px;color:rgba(244,247,252,.6);margin-top:20px}
 
 /* ---------- Learning & Engagement System V1 — block types ---------- */
 .competency-check-block{display:flex;align-items:center;gap:12px;margin:24px 0;padding:14px 18px;border-radius:var(--r-sm);font-size:13.5px}
@@ -485,12 +485,12 @@ body.public-shell main{padding-bottom:0}
 
 .image-explainer-block{margin:26px 0}
 .image-explainer-block .photo-frame{height:220px}
-.image-explainer-block figcaption{color:var(--muted-2);font-size:12.5px;margin-top:8px;text-align:center}
+.image-explainer-block figcaption{color:rgba(244,247,252,.6);font-size:12.5px;margin-top:8px;text-align:center}
 
 .video-explainer-block{margin:26px 0}
 .video-explainer-block video{width:100%;border-radius:var(--r-lg);display:block}
 .video-explainer-block .photo-frame{height:220px}
-.video-explainer-caption{color:var(--muted-2);font-size:12.5px;margin-top:8px;text-align:center}
+.video-explainer-caption{color:rgba(244,247,252,.6);font-size:12.5px;margin-top:8px;text-align:center}
 
 .mini-simulation-block,.graphical-exercise-block,.decision-choice-block{margin:26px 0;padding:22px;border:1px solid var(--line);border-left:3px solid var(--blue-2);border-radius:0 var(--r-md) var(--r-md) 0;background:var(--navy-800);box-shadow:0 10px 30px -18px rgba(5,11,20,.5)}
 .mini-simulation-block .eyebrow.gold,.graphical-exercise-block .eyebrow.gold,.decision-choice-block .eyebrow.gold{color:var(--gold-soft)!important}
@@ -550,7 +550,7 @@ body.public-shell main{padding-bottom:0}
    — never a second, disagreeing meter. No card grid: one continuous editorial
    list, one row per real competency, proof shown inline as the reason for its
    own state. ---------- */
-#progress{background:linear-gradient(180deg,var(--navy-950),#04070f 60%);color:#f4f7fc}
+#progress{background:linear-gradient(180deg,var(--navy-900),var(--navy-950) 70%);color:#f4f7fc}
 #progress .eyebrow.gold{color:var(--gold-soft)}
 #progress .eyebrow{color:rgba(244,247,252,.65)}
 #progress .panel{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.14);color:#f4f7fc}
@@ -638,7 +638,7 @@ body.public-shell main{padding-bottom:0}
    DDA-Journal-specific signature is temporal continuity: a discreet chronological
    spine connecting entries — never the Fil de maîtrise, which has no real
    progression meaning here. ---------- */
-#journal{background:linear-gradient(180deg,var(--navy-950),#04070f 60%);color:#f4f7fc}
+#journal{background:linear-gradient(180deg,var(--navy-900),var(--navy-950) 70%);color:#f4f7fc}
 #journal .eyebrow.gold{color:var(--gold-soft)}
 
 .journal-tabs{display:inline-flex;gap:4px;padding:4px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(255,255,255,.04);margin-bottom:22px}
@@ -711,7 +711,7 @@ body.public-shell main{padding-bottom:0}
    deliberate "Ouverture DDA" dark anchor — the same depth signature Terminal/
    Progression/Premium already use for a genuine Premium moment, never a new
    surface invented for this tranche. ---------- */
-#resources{background:linear-gradient(180deg,var(--navy-950),#04070f 60%);color:#f4f7fc}
+#resources{background:linear-gradient(180deg,var(--navy-900),var(--navy-950) 70%);color:#f4f7fc}
 #resources .eyebrow.gold{color:var(--gold-soft)}
 #resources .eyebrow{color:rgba(244,247,252,.65)}
 
@@ -754,7 +754,7 @@ body.public-shell main{padding-bottom:0}
    sitting inside a dark screen — Free stays the plain paper card ("what you
    have"). DDA Family gets its own warm, human, non-dark block (photo + text),
    never the dark register — it is belonging, not a cockpit surface. ---------- */
-#membership{background:linear-gradient(180deg,var(--navy-950),#04070f 60%);color:#f4f7fc}
+#membership{background:linear-gradient(180deg,var(--navy-900),var(--navy-950) 70%);color:#f4f7fc}
 #membership .eyebrow.gold{color:var(--gold-soft)}
 #membership .eyebrow{color:rgba(244,247,252,.65)}
 #membership .panel{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.14);color:#f4f7fc}
@@ -820,7 +820,7 @@ body.public-shell main{padding-bottom:0}
    Same ivory-on-dark-chrome pattern as #access/#dashboard/#lesson; the single dark
    surface here is the featured index card — one real "Ouverture DDA" anchor for
    "what actually moves today", not a leftover dark panel. ---------- */
-#markets{background:linear-gradient(180deg,var(--navy-950),#04070f 60%);color:#f4f7fc}
+#markets{background:linear-gradient(180deg,var(--navy-900),var(--navy-950) 70%);color:#f4f7fc}
 #markets .eyebrow.gold{color:var(--gold-soft)}
 
 .market-visit-cue{display:flex;align-items:center;gap:10px;margin:16px 0 0;padding:12px 16px;border:1px solid rgba(255,255,255,.14);border-radius:999px;color:rgba(244,247,252,.65);font-size:12.5px;width:fit-content;background:rgba(255,255,255,.04)}
@@ -887,7 +887,7 @@ body.public-shell main{padding-bottom:0}
    (the exact anti-pattern the mandate calls out) into one continuous
    editorial list, matching Progression's mastery-list / Journal's temporal
    spine — comparison by reading, never a ranked showcase. ---------- */
-#brokers{background:linear-gradient(180deg,var(--navy-950),#04070f 60%);color:#f4f7fc}
+#brokers{background:linear-gradient(180deg,var(--navy-900),var(--navy-950) 70%);color:#f4f7fc}
 #brokers .eyebrow.gold{color:var(--gold-soft)}
 #brokers .eyebrow{color:rgba(244,247,252,.65)}
 #brokers .panel{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.14);color:#f4f7fc}
@@ -939,7 +939,7 @@ body.public-shell main{padding-bottom:0}
    contact form sits directly on the open canvas with no card border of its
    own — asymmetric on purpose so the two zones (and the two screens) never
    read as the same repeated box. ---------- */
-#support{background:linear-gradient(180deg,var(--navy-950),#04070f 60%);color:#f4f7fc}
+#support{background:linear-gradient(180deg,var(--navy-900),var(--navy-950) 70%);color:#f4f7fc}
 #support .eyebrow.gold{color:var(--gold-soft)}
 #support .eyebrow{color:rgba(244,247,252,.65)}
 #support .panel{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.14);color:#f4f7fc}
@@ -963,7 +963,7 @@ body.public-shell main{padding-bottom:0}
 .support-note{margin-top:18px;max-width:480px;font-size:13px}
 
 /* ---------- Profile — Design System Propagation #8 ---------- */
-#profile{background:linear-gradient(180deg,var(--navy-950),#04070f 60%);color:#f4f7fc}
+#profile{background:linear-gradient(180deg,var(--navy-900),var(--navy-950) 70%);color:#f4f7fc}
 #profile .eyebrow.gold{color:var(--gold-soft)}
 #profile .eyebrow{color:rgba(244,247,252,.65)}
 
