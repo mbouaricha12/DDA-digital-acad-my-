@@ -14,8 +14,8 @@
   const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan', 'source', 'medium', 'campaign', 'broker']);
   const ENTITLEMENTS = Object.freeze({
     visitor: ['dashboard_preview', 'access'],
-    free: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'community'],
-    premium: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'resources_premium', 'certificate_preview', 'advanced_modules', 'community']
+    free: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'community', 'practice', 'intelligence'],
+    premium: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'resources_premium', 'certificate_preview', 'advanced_modules', 'community', 'practice', 'intelligence']
   });
 
   /* ---------------------------------------------------------------------

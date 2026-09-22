@@ -1081,7 +1081,7 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
      track instead of spanning the row, collapsing the whole page width. */
   body.public-shell .app-shell{grid-template-columns:1fr}
   .sidebar{
-    display:flex;flex-direction:column;position:sticky;top:0;height:calc(100vh - 29px);
+    display:flex;flex-direction:column;position:sticky;top:0;height:calc(100vh - 29px);overflow-y:auto;
     padding:32px 20px 22px;border-right:1px solid var(--line-soft);background:var(--navy-900);
   }
   .brand{display:flex;align-items:center;gap:12px;text-decoration:none;margin:0 8px 38px;color:inherit}
