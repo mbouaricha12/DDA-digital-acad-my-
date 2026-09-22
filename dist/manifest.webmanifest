@@ -1,10 +1,14 @@
 {
-  "name": "Darius Digital Académie",
+  "name": "Darius Digital Academy",
   "short_name": "DDA",
-  "description": "Prototype privé de l’expérience d’apprentissage DDA.",
+  "description": "L’expérience d’apprentissage DDA — comprendre les marchés, pratiquer avec méthode, prouver sa progression.",
   "lang": "fr",
   "start_url": "./#dashboard",
   "display": "standalone",
-  "background_color": "#0b1020",
-  "theme_color": "#0b1020"
+  "background_color": "#04070f",
+  "theme_color": "#04070f",
+  "icons": [
+    { "src": "images/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "images/dda-mark-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
 }
