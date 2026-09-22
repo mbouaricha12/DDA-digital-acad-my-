@@ -295,10 +295,11 @@ body.public-shell main{padding-bottom:0}
 
 /* Chevron row — icon badge + title/description + chevron, reused wherever a
    row leads somewhere else (quick access, FAQ, library entries). */
-.view-photo-band{position:relative;overflow:hidden;border-radius:18px;min-height:150px;margin-bottom:22px;display:flex;align-items:flex-end;padding:16px}
-.view-photo-band .photo-scrim{background:linear-gradient(180deg,rgba(5,11,20,.55),rgba(5,11,20,.92))}
+.view-photo-band{position:relative;overflow:hidden;border-radius:18px;min-height:120px;max-height:150px;margin-bottom:22px;display:flex;align-items:flex-end;padding:16px}
+.view-photo-band .photo-scrim{background:linear-gradient(180deg,rgba(5,11,20,.72),rgba(5,11,20,.95))}
 .view-photo-band-copy{position:relative;z-index:1;margin:0;color:#fff;font-family:var(--dda-serif);font-size:clamp(15px,3.4vw,19px);font-weight:600;max-width:34ch;line-height:1.3}
-@media(min-width:700px){.view-photo-band{min-height:220px;padding:26px}}
+@media(min-width:700px){.view-photo-band{min-height:160px;max-height:190px;padding:26px}}
+#brokers .view-photo-band .photo-fill{object-position:50% 14%}
 
 .chevron-row{display:flex;align-items:center;gap:14px;transition:border-color .15s,transform .15s}
 .chevron-row:hover{border-color:var(--cta-blue-2);transform:translateX(2px)}
