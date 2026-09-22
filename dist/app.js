@@ -82,6 +82,29 @@ const MARKET_DEMO = {
 };
 const NEXT_STEP_PHRASE = { lesson: 'voir la leçon', exercise: 'réussir l’exercice', quiz: 'valider le quiz' };
 
+// Illustrative candlestick shape (never real price data — same "Mode pédagogique"
+// honesty as the badge next to it) replacing a generic line sparkline with DDA's
+// own visual signature: blue/ivory candles, never green/red (§ zéro signal).
+const CANDLE_PATTERNS = [
+  [6, 14, 4, 16, 9, 15, 5, 17],
+  [10, 15, 12, 6, 16, 8, 13, 7]
+];
+function candlestickSpark(patternIndex) {
+  const pattern = CANDLE_PATTERNS[patternIndex % CANDLE_PATTERNS.length];
+  const bars = pattern.map((open, i) => {
+    const close = pattern[(i + 1) % pattern.length];
+    const x = 6 + i * 15.5;
+    const top = 30 - Math.max(open, close) * 1.5;
+    const bottom = 30 - Math.min(open, close) * 1.5;
+    const wickTop = top - 3;
+    const wickBottom = bottom + 3;
+    const up = close >= open;
+    const fill = up ? 'var(--cta-blue-2)' : 'rgba(244,247,252,.4)';
+    return `<line x1="${x + 3.5}" y1="${wickTop}" x2="${x + 3.5}" y2="${wickBottom}" stroke="${fill}" stroke-width="1"/><rect x="${x}" y="${top}" width="7" height="${Math.max(bottom - top, 1.5)}" fill="${fill}" rx="1"/>`;
+  }).join('');
+  return `<svg class="index-sparkline candlestick" viewBox="0 0 120 34" aria-hidden="true">${bars}</svg>`;
+}
+
 // Daily Value Loop V1 — "Pourquoi cette action ?". Keyed by the exact same
 // `step` DDALearning.lessonNextStep() already returns (see NEXT_STEP_PHRASE
 // above) — never a second, parallel notion of lesson state. One honest
@@ -327,10 +350,10 @@ function renderModulesRecap() {
 function renderMarketIntelligence() {
   const indices = document.getElementById('market-indices');
   if (indices) {
-    indices.innerHTML = MARKET_DEMO.indices.map(item => `
+    indices.innerHTML = MARKET_DEMO.indices.map((item, i) => `
       <article class="index-card">
         <div class="index-card-head"><strong>${item.label}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Mode pédagogique</span></div>
-        <svg class="index-sparkline" viewBox="0 0 120 30" aria-hidden="true"><path d="M2 18 L22 18 L42 12 L62 20 L82 10 L102 16 L118 14"/></svg>
+        ${candlestickSpark(i)}
         <p>${item.description}</p>
       </article>
     `).join('');
@@ -904,10 +927,10 @@ function renderTerminalLeadComplete() {
 function renderTerminalMarketIntelligence() {
   const row = document.getElementById('terminal-mi-row');
   if (!row) return;
-  row.innerHTML = MARKET_DEMO.indices.map(item => `
+  row.innerHTML = MARKET_DEMO.indices.map((item, i) => `
     <div class="terminal-mi-idx">
       <div class="top"><b>${item.label}</b><span class="badge"><svg class="icon"><use href="#icon-blocked"/></svg>Mode pédagogique</span></div>
-      <svg class="index-sparkline" viewBox="0 0 120 30" aria-hidden="true"><path d="M2 18 L22 18 L42 12 L62 20 L82 10 L102 16 L118 14"/></svg>
+      ${candlestickSpark(i)}
     </div>`).join('');
 }
 
