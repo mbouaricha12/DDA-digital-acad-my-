@@ -1701,7 +1701,12 @@ if (titles[initialView]) {
     '.journey-current',
     '.journey-node',
     '.panel',
-    '.lesson-main > *'
+    '.lesson-main > *',
+    '.library-entry',
+    '.resource-feature',
+    '.plan-card',
+    '.broker-row',
+    '.journal-entry-card'
   ].join(',');
 
   function prepare(root = document) {
