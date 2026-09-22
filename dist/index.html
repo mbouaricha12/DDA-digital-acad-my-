@@ -64,6 +64,9 @@
       <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></symbol>
       <symbol id="icon-journal" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M4 7h2M4 17h2M8 8h8M8 12h8M8 16h5"/></symbol>
       <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="icon-chevron-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+      <symbol id="icon-chat" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8A2.5 2.5 0 0 1 17.5 16H10l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 13.5Z"/></symbol>
+      <symbol id="icon-users" viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3"/><circle cx="16" cy="9" r="2.5"/><path d="M3 20a5.5 5.5 0 0 1 11 0"/><path d="M14 20a4.5 4.5 0 0 1 7-3.7"/></symbol>
     </defs>
   </svg>
   <div class="prototype-banner">Version d’apprentissage DDA — aucune donnée de marché réelle</div>
@@ -79,6 +82,7 @@
         <button class="nav-item" id="nav-current-lesson" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Leçon en cours</button>
         <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
         <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal &amp; Plan</button>
+        <button class="nav-item" data-view="community"><svg class="icon"><use href="#icon-users"/></svg> Communauté</button>
         <button class="nav-item" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
         <button class="nav-item" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg> Marchés & BRVM</button>
         <button class="nav-item" data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg> Broker Hub</button>
@@ -379,7 +383,7 @@
             <p class="eyebrow gold">DDA Family</p>
             <h2 id="terminal-family-title">Les marchés se travaillent aussi ensemble.</h2>
             <p>Partage tes observations, compare ton raisonnement, apprends des décisions des autres apprenants DDA.</p>
-            <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Aperçu — DDA Family, bientôt disponible</span>
+            <button class="future-label future-label-link" type="button" data-view="community"><svg class="icon"><use href="#icon-compass"/></svg> Aperçu — DDA Family, bientôt disponible <svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
           </div>
         </section>
 
@@ -393,9 +397,9 @@
         </section>
 
         <div class="terminal-tools" aria-label="Accès rapides du Terminal">
-          <button data-view="brokers"><strong>Broker Hub</strong><small>Comparer avec transparence</small></button>
-          <button data-view="resources"><strong>Ressources</strong><small>Guides et outils</small></button>
-          <button data-view="support"><strong>Centre d’aide</strong><small>Trouver une réponse</small></button>
+          <button data-view="brokers" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-compass"/></svg></span><span class="chevron-row-body"><strong>Broker Hub</strong><small>Comparer avec transparence</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
+          <button data-view="resources" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-book"/></svg></span><span class="chevron-row-body"><strong>Ressources</strong><small>Guides et outils</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
+          <button data-view="support" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-help"/></svg></span><span class="chevron-row-body"><strong>Centre d’aide</strong><small>Trouver une réponse</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
         </div>
       </section>
 
@@ -665,7 +669,7 @@
             <p class="eyebrow gold">DDA Family</p>
             <h2 id="family-title">Apprendre, progresser, appartenir.</h2>
             <p>DDA Family n’est pas un groupe de messagerie — c’est l’appartenance à l’écosystème DDA : une institution qu’on rejoint pour apprendre, partager ses observations et comparer son raisonnement avec d’autres apprenants sérieux.</p>
-            <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Aperçu — DDA Family, bientôt disponible</span>
+            <button class="future-label future-label-link" type="button" data-view="community"><svg class="icon"><use href="#icon-compass"/></svg> Aperçu — DDA Family, bientôt disponible <svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
           </div>
         </section>
 
@@ -811,6 +815,51 @@
           </form>
           <p class="disclosure support-note"><svg class="icon"><use href="#icon-shield"/></svg> <span id="support-note">Aucun message n’est envoyé pour l’instant — ta demande reste sur cet appareil.</span></p>
         </section>
+      </section>
+
+      <section class="view community-view" id="community" aria-labelledby="community-title">
+        <div class="community-hero" role="img" aria-label="La communauté DDA — aperçu">
+          <img class="photo-fill" src="images/photos/community-hero-handshake.jpg" alt="" loading="lazy">
+          <div class="photo-scrim"></div>
+          <div class="community-hero-copy">
+            <p class="eyebrow gold">Aperçu — bientôt disponible</p>
+            <h1 id="community-title">La communauté DDA</h1>
+            <p>Apprendre, échanger et progresser avec d’autres apprenants DDA — une fois cette brique activée.</p>
+          </div>
+        </div>
+
+        <div class="community-tiles">
+          <div class="community-tile"><svg class="icon"><use href="#icon-chat"/></svg><span>Discussions</span></div>
+          <div class="community-tile"><svg class="icon"><use href="#icon-play"/></svg><span>Sessions en direct</span></div>
+          <div class="community-tile"><svg class="icon"><use href="#icon-users"/></svg><span>Groupes d’étude</span></div>
+        </div>
+        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Ces espaces ne sont pas encore actifs — DDA ne simule jamais une conversation qui n’existe pas.</p>
+
+        <section class="community-featured" aria-labelledby="community-featured-title">
+          <p class="eyebrow">Ce qui existe déjà</p>
+          <article class="community-featured-card">
+            <div class="community-featured-copy">
+              <h2 id="community-featured-title">Atelier : Gestion du risque</h2>
+              <p>Le laboratoire pratique déjà proposé dans Ressources Premium — sizing, invalidation, discipline.</p>
+              <button class="primary-action" data-view="resources">Voir l’atelier <span>→</span></button>
+            </div>
+            <div class="community-featured-icon"><svg class="icon"><use href="#icon-shield"/></svg></div>
+          </article>
+        </section>
+
+        <section class="community-spaces" aria-label="Tes espaces réels aujourd’hui">
+          <p class="eyebrow">Tes espaces réels aujourd’hui</p>
+          <div class="community-spaces-list">
+            <button data-view="path" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-path"/></svg></span><span class="chevron-row-body"><strong>Débutants</strong><small>Poser les fondations, un module à la fois</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
+            <button data-view="markets" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-chart"/></svg></span><span class="chevron-row-body"><strong>Marchés &amp; BRVM</strong><small>Comprendre ce qui bouge, sans jargon</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
+            <button data-view="journal" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-journal"/></svg></span><span class="chevron-row-body"><strong>Discipline &amp; psychologie</strong><small>Documenter tes décisions dans ton Journal</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
+          </div>
+        </section>
+
+        <div class="community-cta">
+          <button class="primary-action" id="community-notify" type="button">Être informé au lancement <span>→</span></button>
+          <p class="disclosure" id="community-notify-note">Aucune inscription réelle — juste une préférence locale sur cet appareil.</p>
+        </div>
       </section>
 
       <section class="view" id="profile" aria-labelledby="profile-title">

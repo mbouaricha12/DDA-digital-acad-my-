@@ -51,7 +51,7 @@ const views = document.querySelectorAll('.view');
 const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
-const titles = { landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours', lesson: 'Leçon en cours', 'lesson-m02': 'Support & Résistance', 'lesson-m03': 'Lire une tendance', 'lesson-m11': 'Pourquoi les prix évoluent ?', 'lesson-m12': 'Comment les ordres s’exécutent ?', progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
+const titles = { landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours', lesson: 'Leçon en cours', 'lesson-m02': 'Support & Résistance', 'lesson-m03': 'Lire une tendance', 'lesson-m11': 'Pourquoi les prix évoluent ?', 'lesson-m12': 'Comment les ordres s’exécutent ?', progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil', community: 'Communauté' };
 // V1.1 correction: 'dashboard' was never gated here even though DDA.curriculum's
 // own entitlements model (dda-core.js ENTITLEMENTS) already lists 'dashboard' as a
 // free/premium-only permission, not a visitor one — the deep-link/reload matrix this
@@ -59,7 +59,7 @@ const titles = { landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 
 // straight to #dashboard bypassed Access entirely and saw the Terminal's real
 // authenticated shell. Wiring it here uses the exact same, already-tested
 // permission-gate showView() applies to every other protected view — no new logic.
-const viewPermissions = { dashboard: 'dashboard', path: 'path', lesson: 'lesson_m01', 'lesson-m02': 'lesson_m01', 'lesson-m03': 'lesson_m01', 'lesson-m11': 'lesson_m01', 'lesson-m12': 'lesson_m01', progress: 'progress', journal: 'journal', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile' };
+const viewPermissions = { dashboard: 'dashboard', path: 'path', lesson: 'lesson_m01', 'lesson-m02': 'lesson_m01', 'lesson-m03': 'lesson_m01', 'lesson-m11': 'lesson_m01', 'lesson-m12': 'lesson_m01', progress: 'progress', journal: 'journal', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile', community: 'community' };
 // M0.2 and M0.3 reuse the same `lesson_m01` free-tier entitlement — no separate
 // premium tier is being introduced for M0 in this tranche, so no new key is invented.
 // Maps a lesson id to the view that actually renders it — the Terminal cockpit's
@@ -1380,6 +1380,14 @@ document.getElementById('support-form').addEventListener('submit', event => {
   if (!message) return;
   document.getElementById('support-note').textContent = 'Demande préparée localement. Le canal support sera connecté avant le lancement.';
   showToast('Brouillon de demande préparé — aucun envoi réel.');
+});
+
+document.getElementById('community-notify')?.addEventListener('click', () => {
+  saveState({ preferences: { ...prototypeState.preferences, communityNotify: true } });
+  trackEvent('preference_updated', { preference: 'communityNotify', enabled: 'true' });
+  const note = document.getElementById('community-notify-note');
+  if (note) note.textContent = 'Préférence enregistrée sur cet appareil — aucune inscription réelle envoyée.';
+  showToast('Tu seras averti localement quand la Communauté sera activée.');
 });
 
 document.getElementById('play-demo').addEventListener('click', event => {
