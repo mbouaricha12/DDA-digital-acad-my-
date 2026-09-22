@@ -93,7 +93,7 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
   border-bottom:1px solid var(--line-soft);
 }
 .mobile-brand{display:flex;text-align:left;line-height:1;gap:2px;flex-direction:column}
-.mobile-brand b{font-family:Georgia,serif;font-size:21px;letter-spacing:-.05em;background:linear-gradient(135deg,var(--blue-2),var(--blue) 60%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.mobile-brand b{font-family:Georgia,serif;font-size:21px;letter-spacing:-.05em;background:linear-gradient(135deg,var(--cta-blue-2),var(--cta-blue) 55%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
 .mobile-brand small{font-size:7px;letter-spacing:.22em;color:var(--muted)}
 .context{display:none}
 .network-state{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;margin-left:auto}
@@ -1032,7 +1032,7 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
     padding:32px 20px 22px;border-right:1px solid var(--line-soft);background:var(--navy-900);
   }
   .brand{display:flex;align-items:center;gap:12px;text-decoration:none;margin:0 8px 38px;color:inherit}
-  .brand-mark{font-family:Georgia,serif;font-weight:800;letter-spacing:-.06em;font-size:26px;color:var(--gold-soft)}
+  .brand-mark{font-family:Georgia,serif;font-weight:800;letter-spacing:-.06em;font-size:26px;background:linear-gradient(135deg,var(--cta-blue-2),var(--cta-blue) 55%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
   .brand-name{font-size:10px;line-height:1.25;max-width:88px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
   .sidebar nav{display:grid;gap:6px}
   .sidebar-foot{margin-top:auto;border-top:1px solid var(--line-soft);padding-top:18px}
