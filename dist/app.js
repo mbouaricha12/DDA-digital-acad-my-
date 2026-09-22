@@ -1207,9 +1207,23 @@ function showView(id, recordEvent = true) {
       campaign: prototypeState.acquisition?.campaign
     });
   }
+  // Funnel measurability (mandate §18): #access is the real start of both the
+  // signup step (name/email) and the qualification step (level/goal/time) —
+  // no real distinction exists yet between the two screens, so both fire here.
+  if (id === 'access' && !prototypeState.user) {
+    trackEvent('signup_started', {});
+    trackEvent('qualification_started', {});
+  }
 }
 
-buttons.forEach(button => button.addEventListener('click', () => showView(button.dataset.view)));
+buttons.forEach(button => button.addEventListener('click', () => {
+  // Acquisition V1 landing funnel: any button explicitly opting in via
+  // data-analytics is recorded under its own real event name before the
+  // normal navigation happens — never a substitute for view_opened, which
+  // still fires for every navigation regardless of this attribute.
+  if (button.dataset.analytics) trackEvent(button.dataset.analytics, { view: button.dataset.view });
+  showView(button.dataset.view);
+}));
 
 const resources = {
   checklist: { title: 'Checklist avant une décision', label: 'Guide · DDA Free', body: '<ol><li>Ai-je compris le contexte du marché ?</li><li>Mon scénario est-il écrit clairement ?</li><li>Où mon idée devient-elle invalide ?</li><li>Quel risque suis-je prêt à accepter ?</li><li>Est-ce une décision prévue ou impulsive ?</li><li>Puis-je justifier mon choix sans parler de gain ?</li></ol>' },
@@ -1411,6 +1425,7 @@ document.getElementById('signup-form').addEventListener('submit', event => {
   if (invalidFields.length) { error.textContent = 'Complète les champs et confirme le stockage local.'; invalidFields[0].focus(); return; }
   error.textContent = '';
   saveState({ user: DDA.createUser(name, email) });
+  trackEvent('signup_completed', {});
   event.currentTarget.hidden = true;
   document.getElementById('onboarding-form').hidden = false;
   document.getElementById('step-dot-2').classList.add('active');
@@ -1431,6 +1446,7 @@ document.getElementById('onboarding-form').addEventListener('submit', async even
   saveState({ onboarding: { level, goal, time, complete: true } });
   updateLessonState(activeLessonId, { lessonViewed: true });
   trackEvent('onboarding_complete', { level, goal });
+  trackEvent('qualification_completed', { level, goal });
   setLoading(true);
   if (!prototypeState.preferences.lowData) await new Promise(resolve => setTimeout(resolve, 450));
   setLoading(false);
@@ -1668,6 +1684,12 @@ if (titles[initialView]) {
     '.landing-aperture',
     '.landing-method article',
     '.landing-institution > div',
+    '.landing-demo-grid article',
+    '.landing-problem-list li',
+    '.landing-steps-list li',
+    '.landing-plan-card',
+    '.landing-guardrails > *',
+    '.landing-final-cta > *',
     '.terminal-entry',
     '.terminal-lead',
     '.terminal-mi',

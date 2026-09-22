@@ -558,6 +558,74 @@ async function completeSignupFlow(page, opts) {
     await context.close();
   });
 
+  console.log('\n-- L. Landing — Private Alpha acquisition readiness --');
+
+  await test('#landing demonstrates the real product (demo/steps/plans/guardrails) with no fabricated numbers', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+
+    const counts = await page.evaluate(() => ({
+      demo: document.querySelectorAll('.landing-demo-grid article').length,
+      problem: document.querySelectorAll('.landing-problem-list li').length,
+      steps: document.querySelectorAll('.landing-steps-list li').length,
+      plans: document.querySelectorAll('.landing-plan-card').length,
+      guardrails: document.querySelectorAll('.landing-guardrail-list li').length,
+      finalCtaView: document.querySelector('.landing-final-cta [data-view]')?.dataset?.view
+    }));
+    assert.ok(counts.demo >= 3, 'product demonstration must list several real screens');
+    assert.ok(counts.problem >= 3, 'problem section must name concrete pain points');
+    assert.ok(counts.steps >= 3 && counts.steps <= 5, 'how-it-works must stay to 3-5 steps per the mandate');
+    assert.equal(counts.plans, 2, 'exactly Free and Premium, no invented third tier');
+    assert.ok(counts.guardrails >= 3, 'trust section must state concrete guardrails');
+    assert.equal(counts.finalCtaView, 'access', 'closing CTA must lead to the real signup entry point');
+
+    const bodyText = await page.evaluate(() => document.getElementById('landing').textContent);
+    assert.doesNotMatch(bodyText, /\d+[\s ]*(000|k)?\s*(utilisateurs|membres|apprenants|élèves)/i, 'no fabricated user-count claim');
+    assert.doesNotMatch(bodyText, /gagnez|devenez rentable|rendement garanti|par jour\b.*FCFA/i, 'no financial-promise language');
+    assert.doesNotMatch(bodyText, /témoignage|"[^"]{20,}"\s*[-—]\s*[A-Z]/i, 'no testimonial-shaped content');
+    await context.close();
+  });
+
+  await test('#landing renders with no horizontal overflow at 360px, 390px and 1440px', async () => {
+    for (const width of [360, 390, 1440]) {
+      const context = await freshContext(browser, { width, height: 900 });
+      const page = await context.newPage();
+      await page.goto(`${BASE}/#landing`);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      assert.ok(overflow <= 1, `#landing must not overflow horizontally at ${width}px (got ${overflow}px)`);
+      await context.close();
+    }
+  });
+
+  await test('the hero CTA fires hero_cta_click, and #access records signup_started + qualification_started exactly once', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+
+    await page.click('#landing .landing-actions [data-view="access"][data-analytics="hero_cta_click"]');
+    const afterHero = await page.evaluate(() => window.DDA.load().events.map(e => e.name));
+    assert.ok(afterHero.includes('hero_cta_click'), 'hero CTA click must be recorded');
+    assert.ok(afterHero.includes('signup_started'), '#access entry must record signup_started');
+    assert.ok(afterHero.includes('qualification_started'), '#access entry must record qualification_started');
+
+    await page.goto(`${BASE}/#access`);
+    await page.goto(`${BASE}/#access`);
+    const afterRevisit = await page.evaluate(() => window.DDA.load().events.filter(e => e.name === 'signup_started').length);
+    assert.equal(afterRevisit, 1, 'signup_started must not be recorded again once the visitor already reached #access');
+    await context.close();
+  });
+
+  await test('completing signup fires signup_completed, and completing onboarding fires qualification_completed', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await completeSignupFlow(page);
+    const names = await page.evaluate(() => window.DDA.load().events.map(e => e.name));
+    assert.ok(names.includes('signup_completed'), 'signup_completed must fire once the account is created');
+    assert.ok(names.includes('qualification_completed'), 'qualification_completed must fire once onboarding is submitted');
+    await context.close();
+  });
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 
