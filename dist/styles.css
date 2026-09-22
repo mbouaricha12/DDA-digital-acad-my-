@@ -490,7 +490,8 @@ body.public-shell main{padding-bottom:0}
 .journal-link-block .secondary-action{width:auto}
 
 .image-explainer-block{margin:26px 0}
-.image-explainer-block .photo-frame{height:220px}
+.image-explainer-block .photo-frame{height:auto}
+.image-explainer-block .photo-frame:not(:has(img)){height:220px}
 .image-explainer-block figcaption{color:rgba(244,247,252,.6);font-size:12.5px;margin-top:8px;text-align:center}
 
 .video-explainer-block{margin:26px 0}
