@@ -64,7 +64,16 @@ jobs:
       - name: M0 to M1 runtime bridge
         run: node tests/test_m1_runtime_integration.js
       - name: M0 to M1 browser flow
-        run: npm run test:m1:e2e
+        shell: bash
+        run: |
+          set +e
+          npm run test:m1:e2e
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            report=$(tr '\n' ' ' < test-results/m1-browser-e2e.log | cut -c1-6000)
+            echo "::error title=M1 browser flow::$report"
+            exit "$status"
+          fi
       - name: Upload browser-flow report
         if: always()
         uses: actions/upload-artifact@v4
