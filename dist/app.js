@@ -17,6 +17,7 @@
 const LESSON_REGISTRY = Object.freeze([
   {
     id: 'M0.1', viewId: 'lesson', suffix: '', title: 'Leçon en cours',
+    permission: 'lesson_m01',
     quizBlock: 'quiz', understoodScrollTo: 'exercise-block',
     questions: [
       { role: 'exercise', block: 'exercise', success: '@practice', gate: true },
@@ -26,6 +27,7 @@ const LESSON_REGISTRY = Object.freeze([
   },
   {
     id: 'M0.2', viewId: 'lesson-m02', suffix: 'm2', title: 'Support & Résistance', prerequisite: 'M0.1',
+    permission: 'lesson_m01',
     quizBlock: 'm2-quiz', understoodScrollTo: 'm2-observe-4-block',
     questions: [
       { role: 'practice', block: 'm2-identify-1', success: '@block', reveal: true },
@@ -38,6 +40,7 @@ const LESSON_REGISTRY = Object.freeze([
   },
   {
     id: 'M0.3', viewId: 'lesson-m03', suffix: 'm3', title: 'Lire une tendance', prerequisite: 'M0.2',
+    permission: 'lesson_m01',
     quizBlock: 'm3-quiz', understoodScrollTo: 'm3-observe-4-block',
     questions: [
       { role: 'practice', block: 'm3-classify-1', success: 'Bonne lecture.' },
@@ -51,7 +54,10 @@ const LESSON_REGISTRY = Object.freeze([
     // M1.1 est authored dans son propre fichier (m1-1-lesson.js) et promue dans
     // le curriculum par dda-core.js quand ce fichier est chargé ; si le fichier
     // est absent, l'entrée reste inerte au lieu d'un rendu partiel.
+    // Matrice des droits CDCP-OS §4.2 (arbitrage D1 Option B) : M1+ réservé à
+    // l'offre Standard/Pro (advanced_modules).
     id: 'M1.1', viewId: 'lesson-m11', suffix: 'm11', title: 'Pourquoi les prix évoluent ?', prerequisite: 'M0.3',
+    permission: 'advanced_modules',
     quizBlock: 'm1-quiz', understoodScrollTo: 'm1-exercise-case-block',
     questions: [
       { role: 'practice', block: 'm1-buy-pressure', success: 'Bonne lecture du déséquilibre.' },
@@ -63,6 +69,7 @@ const LESSON_REGISTRY = Object.freeze([
   },
   {
     id: 'M1.2', viewId: 'lesson-m12', suffix: 'm12', title: 'Comment les ordres s’exécutent ?', prerequisite: 'M1.1',
+    permission: 'advanced_modules',
     quizBlock: 'm12-quiz', understoodScrollTo: 'm12-slippage-case-block',
     questions: [
       { role: 'practice', block: 'm12-market-order', success: 'Bonne compréhension de l’ordre au marché.' },
@@ -77,6 +84,7 @@ const LESSON_REGISTRY = Object.freeze([
     // le curriculum par dda-core.js quand ce fichier est chargé ; si le fichier
     // est absent, l'entrée reste inerte au lieu d'un rendu partiel.
     id: 'M1.3', viewId: 'lesson-m13', suffix: 'm13', title: 'Comment les marchés s’organisent ?', prerequisite: 'M1.2',
+    permission: 'advanced_modules',
     quizBlock: 'm13-quiz', understoodScrollTo: 'm13-exercise-case-block',
     questions: [
       { role: 'practice', block: 'm13-actor', success: 'Bonne lecture des rôles sur un marché organisé.' },
@@ -135,9 +143,10 @@ const viewPermissions = {
   dashboard: 'dashboard', path: 'path', progress: 'progress', journal: 'journal', resources: 'resources_free',
   markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile',
   community: 'community', practice: 'practice', intelligence: 'intelligence',
-  // Every lesson view reuses the same `lesson_m01` free-tier entitlement — no
-  // separate premium tier exists for lessons — derived here, never re-typed.
-  ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, 'lesson_m01']))
+  // Matrice des droits CDCP-OS §4.2 (arbitrage D1 validé, Option B) : M0 en
+  // Free (lesson_m01), M1+ réservé à l'offre Standard/Pro (advanced_modules) —
+  // dérivé du registre, jamais une liste parallèle écrite à la main.
+  ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.permission || 'lesson_m01']))
 };
 // Maps a lesson id to the view that actually renders it — the Terminal cockpit's
 // "continue" button follows DDALearning.nextActionable, which will point at the
@@ -1257,6 +1266,42 @@ function smartBackTarget() {
   return 'dashboard';
 }
 
+let gateTrigger = null;
+let pendingGatedView = null;
+
+function openGate(options = {}) {
+  const gate = document.getElementById('gate-layer');
+  if (!gate) return;
+  const eyebrowEl = document.getElementById('gate-eyebrow');
+  const titleEl = document.getElementById('gate-title');
+  const descEl = document.getElementById('gate-description');
+  const unlockBtn = document.getElementById('gate-unlock');
+  const previewBtn = document.getElementById('gate-preview');
+
+  if (eyebrowEl) eyebrowEl.textContent = options.eyebrow || 'DDA Premium';
+  if (titleEl) titleEl.textContent = options.title || 'Cette expérience sera disponible avec Premium.';
+  if (descEl) descEl.textContent = options.description || 'Aucun achat ni paiement réel n’est proposé ici.';
+  if (unlockBtn) {
+    unlockBtn.hidden = !options.canUnlock;
+    if (options.unlockText) unlockBtn.innerHTML = `${options.unlockText} <span>→</span>`;
+  }
+  if (previewBtn) {
+    previewBtn.textContent = options.previewText || (options.canUnlock ? 'Voir la formule Premium' : 'Voir la formule Premium →');
+    previewBtn.className = options.canUnlock ? 'secondary-action' : 'primary-action';
+  }
+  pendingGatedView = options.targetView || null;
+  gate.hidden = false;
+  document.getElementById('gate-close')?.focus();
+}
+
+function closeGate() {
+  const gate = document.getElementById('gate-layer');
+  if (!gate || gate.hidden) return;
+  gate.hidden = true;
+  pendingGatedView = null;
+  if (gateTrigger) { gateTrigger.focus(); gateTrigger = null; }
+}
+
 function showView(id, recordEvent = true) {
   if (id === 'back') id = smartBackTarget();
   const prerequisiteLessonId = LESSON_PREREQUISITE[id];
@@ -1266,9 +1311,24 @@ function showView(id, recordEvent = true) {
   }
   const permission = viewPermissions[id];
   if (permission && !DDA.can(prototypeState, permission)) {
-    prototypeState = DDA.track(prototypeState, 'access_denied', { view: id, permission });
-    showToast('Termine ton inscription pour accéder à cette section.');
-    id = 'access';
+    prototypeState = DDA.track(prototypeState, 'access_denied', { view: id, permission, plan: prototypeState.membership?.plan || 'visitor' });
+    if (!prototypeState.user) {
+      showToast('Termine ton inscription pour accéder à cette section.');
+      id = 'access';
+    } else {
+      const fallbackView = currentView && currentView !== id && titles[currentView] ? currentView : 'path';
+      showView(fallbackView, false);
+      openGate({
+        eyebrow: 'Offre Standard · M1+',
+        title: 'Ce module est réservé à l’offre Standard.',
+        description: 'DDA Free (Découverte) donne accès au module M0 Fondations. Les modules M1 et suivants sont réservés aux offres Standard et Pro (CDCP-OS §4.2). Aucun paiement réel — active l’aperçu pour explorer ce module.',
+        canUnlock: true,
+        unlockText: 'Activer l’aperçu Standard (simulation)',
+        previewText: 'Voir la formule Premium',
+        targetView: id
+      });
+      return;
+    }
   }
   views.forEach(view => view.classList.toggle('active', view.id === id));
   [...desktopItems, ...mobileItems].forEach(item => item.classList.toggle('active', item.dataset.view === id));
@@ -1336,23 +1396,31 @@ function closeReader() {
 }
 document.getElementById('reader-close').addEventListener('click', closeReader);
 
-let gateTrigger = null;
-function closeGate() {
-  const gate = document.getElementById('gate-layer');
-  if (gate.hidden) return;
-  gate.hidden = true;
-  if (gateTrigger) { gateTrigger.focus(); gateTrigger = null; }
-}
 document.querySelectorAll('.premium-gate').forEach(button => button.addEventListener('click', () => {
   if (DDA.can(prototypeState, button.dataset.permission)) { showToast('Atelier Premium débloqué en aperçu.'); return; }
   gateTrigger = button;
-  document.getElementById('gate-layer').hidden = false;
-  document.getElementById('gate-close').focus();
   prototypeState = DDA.track(prototypeState, 'access_denied', { permission: button.dataset.permission, plan: 'free' });
+  openGate({
+    eyebrow: 'DDA Premium',
+    title: 'Cette expérience sera disponible avec Premium.',
+    description: 'Aucun achat ni paiement réel n’est proposé ici.',
+    canUnlock: true,
+    unlockText: 'Simuler l’accès Premium sur cet appareil',
+    previewText: 'Voir la formule Premium'
+  });
 }));
-document.getElementById('gate-close').addEventListener('click', closeGate);
-document.getElementById('gate-layer').addEventListener('click', event => { if (event.target.id === 'gate-layer') closeGate(); });
-document.getElementById('gate-preview').addEventListener('click', () => { closeGate(); showView('membership'); });
+document.getElementById('gate-unlock')?.addEventListener('click', () => {
+  const target = pendingGatedView;
+  prototypeState = DDA.setPlan(prototypeState, 'premium');
+  prototypeState = DDA.track(prototypeState, 'plan_preview', { plan: 'premium' });
+  renderState();
+  closeGate();
+  showToast('Accès Standard débloqué en aperçu.');
+  if (target) showView(target);
+});
+document.getElementById('gate-close')?.addEventListener('click', closeGate);
+document.getElementById('gate-layer')?.addEventListener('click', event => { if (event.target.id === 'gate-layer') closeGate(); });
+document.getElementById('gate-preview')?.addEventListener('click', () => { closeGate(); showView('membership'); });
 
 document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;

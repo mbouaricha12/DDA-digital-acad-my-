@@ -11,9 +11,9 @@
 | `lesson` (M0.1) | Home, Parcours, Progression, raccourci sidebar "Leçon en cours" | Bouton "Quitter"/back-link → origine réelle (nouveau) ; lien Journal optionnel | back-link contextuel (nouveau) | `lesson_m01` | ✅ fiable | Redirige vers `access` | ✅ — **aucun verrou séquentiel appliqué à la navigation directe (dette, voir §10)** |
 | `lesson-m02` (Support & Résistance) | idem + bouton "Continuer" du résultat M0.1 | idem | idem | `lesson_m01` | ✅ fiable | idem | idem |
 | `lesson-m03` (Lire une tendance) | idem + bouton "Continuer" du résultat M0.2 | idem | idem | `lesson_m01` | ✅ fiable | idem | idem |
-| `lesson-m11` (Pourquoi les prix évoluent ?) | idem + bouton "Continuer" du résultat M0.3 | idem | idem | `lesson_m01` (+ verrou séquentiel : quiz M0.3) | ✅ fiable | idem | idem |
-| `lesson-m12` (Comment les ordres s'exécutent ?) | idem + bouton "Continuer" du résultat M1.1 | idem | idem | `lesson_m01` (+ verrou séquentiel : quiz M1.1) | ✅ fiable | idem | idem |
-| `lesson-m13` (Comment les marchés s'organisent ?) | idem + bouton "Continuer" du résultat M1.2 | idem | idem | `lesson_m01` (+ verrou séquentiel : quiz M1.2) | ✅ fiable | idem | idem |
+| `lesson-m11` (Pourquoi les prix évoluent ?) | idem + bouton "Continuer" du résultat M0.3 | idem | idem | `advanced_modules` (Standard/Pro, CDCP-OS §4.2, Option B) + verrou séquentiel : quiz M0.3 | ✅ fiable | idem | Ouvre modale Standard avec déblocage simulation |
+| `lesson-m12` (Comment les ordres s'exécutent ?) | idem + bouton "Continuer" du résultat M1.1 | idem | idem | `advanced_modules` (Standard/Pro, CDCP-OS §4.2, Option B) + verrou séquentiel : quiz M1.1 | ✅ fiable | idem | idem |
+| `lesson-m13` (Comment les marchés s'organisent ?) | idem + bouton "Continuer" du résultat M1.2 | idem | idem | `advanced_modules` (Standard/Pro, CDCP-OS §4.2, Option B) + verrou séquentiel : quiz M1.2 | ✅ fiable | idem | idem |
 | `progress` (Progression) | Nav, lien "Voir ma Progression" (Profil, résultat de leçon) | Nouveau : bouton par compétence → leçon réelle (§Corrections) | Nav uniquement (vue racine) | `progress` | ✅ fiable | Redirige vers `access` | ✅ |
 | `journal` (Journal & Plan) | Nav mobile/desktop, lien "Ouvrir ton Journal" (Terminal, Market, résultat de leçon) | Composer interne (3 étapes) | back-link contextuel (nouveau) → origine réelle | `journal` | ✅ fiable | Redirige vers `access` | ✅ |
 | `resources` (Ressources) | Nav, tuile "Ressources" (Terminal) | Lecteur intégré (pas de nouvelle vue) | Nav uniquement | `resources_free` | ✅ fiable | Redirige vers `access` | ✅ |
