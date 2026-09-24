@@ -50,7 +50,8 @@ test('M0.2 teaches zones, not exact-price certainty or trading signals', () => {
   assert.ok(text.includes('zone'));
   assert.ok(text.includes('plusieurs fois'));
   assert.ok(text.includes('sans signal'));
-  assert.ok(!text.includes('signal indiquant qu’il faut acheter'));
+  const affirmativeChoices = m02.blocks.flatMap(b => (b.choices || b.options || b.data?.choices || []).filter(c => c.correct === true).map(c => String(c.text || '').toLowerCase()));
+  assert.ok(affirmativeChoices.every(choice => !/signal|acheter|vendre|position/.test(choice)), 'Aucune réponse correcte ne doit transformer la leçon en signal de trading.');;
 });
 
 test('M0.3 changes the competency from horizontal zones to trend direction', () => {
