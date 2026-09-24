@@ -93,6 +93,21 @@ const LESSON_REGISTRY = Object.freeze([
       { role: 'exercise', block: 'm13-exercise', success: '@practice', gate: true },
       { role: 'quiz', block: 'm13-quiz', success: '@data', result: true }
     ]
+  },
+  {
+    // M2.1 est authored dans son propre fichier (m2-1-lesson.js) et promue
+    // dans le module M2 par dda-core.js. La suite démarre après M1.3 : aucun
+    // accès direct ne contourne la continuité pédagogique.
+    id: 'M2.1', viewId: 'lesson-m21', suffix: 'm21', title: 'Protéger son capital', prerequisite: 'M1.3',
+    permission: 'advanced_modules',
+    quizBlock: 'm21-quiz', understoodScrollTo: 'm21-invalidation-case-block',
+    questions: [
+      { role: 'practice', block: 'm21-asymmetry-check', success: 'Bonne lecture de la base de calcul.' },
+      { role: 'practice', block: 'm21-invalidation-check', success: 'Bonne distinction entre plan préparé et réaction émotionnelle.' },
+      { role: 'practice', block: 'm21-sizing-discipline', success: 'Bonne lecture du contexte : aucun sizing universel.' },
+      { role: 'exercise', block: 'm21-exercise', success: '@practice', gate: true },
+      { role: 'quiz', block: 'm21-quiz', success: '@data', result: true }
+    ]
   }
 ]);
 

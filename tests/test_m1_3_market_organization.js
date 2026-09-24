@@ -52,12 +52,13 @@ test('the integrated exercise spans both markets — émission primaire, puis re
   });
 });
 
-test('the result summary closes honestly: map of actors learned, no recommendation invented', () => {
+test('the result summary hands off honestly to M2.1 without inventing a signal', () => {
   const summary = lesson.blocks.find(b => b.type === 'summary');
   assert.ok(summary.data.heading.includes('Compréhension de l’organisation des marchés confirmée'));
   const body = summary.data.body.toLowerCase();
   assert.ok(body.includes('recommandation') && body.includes('signal'), 'the body restates what DDA never does');
-  assert.ok(!summary.continueTo, 'M1.3 closes the authored M1 path — no M2 CTA invented');
+  assert.strictEqual(summary.continueTo.view, 'lesson-m21');
+  assert.ok(summary.continueTo.label.includes('Protéger son capital'));
 });
 
 console.log(`RESULT: ${pass} M1.3 checks passed`);
