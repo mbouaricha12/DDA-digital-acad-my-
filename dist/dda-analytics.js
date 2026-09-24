@@ -102,16 +102,12 @@
   const bootState = base.load();
   const primaryLessonId = m0Complete(bootState) ? 'M1.1' : base.primaryLessonId;
 
-  function updateLesson(state, lessonId, patch) {
-    const next = base.updateLesson(state, lessonId, patch);
-    if (lessonId === 'M0.3' && patch?.quizComplete === true && m0Complete(next)) {
-      try { sessionStorage.setItem('dda-m1-transition', 'ready'); } catch {}
-      setTimeout(() => location.reload(), 180);
-    }
-    return next;
-  }
-
-  window.DDA = Object.freeze({ ...base, curriculum, primaryLessonId, updateLesson });
+  // Progression is already rendered from the same persisted state by app.js.
+  // Do not reload when M0.3 is completed: a forced reload can interrupt the
+  // result feedback and send the learner back to an unrelated reader. The next
+  // Terminal action, Path state and dedicated M1.1 reader all derive directly
+  // from `curriculum` plus the updated lesson state in this running session.
+  window.DDA = Object.freeze({ ...base, curriculum, primaryLessonId });
 
   document.addEventListener('DOMContentLoaded', () => {
     if (primaryLessonId !== 'M1.1') return;
