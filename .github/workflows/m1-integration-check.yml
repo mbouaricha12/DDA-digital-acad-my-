@@ -12,6 +12,7 @@ on:
       - 'tests/test_m1_golden_lesson.js'
       - 'tests/test_m1_integration_contract.js'
       - 'tests/test_m1_runtime_integration.js'
+      - 'experiments/M1_1_INTEGRATION_STATUS.md'
       - '.github/workflows/m1-integration-check.yml'
   push:
     branches:
@@ -26,6 +27,7 @@ on:
       - 'tests/test_m1_golden_lesson.js'
       - 'tests/test_m1_integration_contract.js'
       - 'tests/test_m1_runtime_integration.js'
+      - 'experiments/M1_1_INTEGRATION_STATUS.md'
       - '.github/workflows/m1-integration-check.yml'
   workflow_dispatch:
 
