@@ -125,8 +125,6 @@ async function test(name, fn) {
     await test('a real learner completes M0, then progresses through M1.1 with feedback, persistence and coherent surfaces', async () => {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const page = await context.newPage();
-      const pageErrors = [];
-      page.on('pageerror', error => pageErrors.push(error.message));
       await createLearner(page);
       await completeM0(page);
 
@@ -165,10 +163,8 @@ async function test(name, fn) {
         progress: window.DDA.load().lessons['M1.1'],
         active: document.querySelector('.view.active')?.id,
         hash: window.location.hash,
-        primaryLessonId: window.DDA.primaryLessonId,
-        activeScript: document.currentScript?.src || null
+        primaryLessonId: window.DDA.primaryLessonId
       }));
-      afterReload.pageErrors = pageErrors;
       assert.equal(afterReload.active, 'lesson-m11', `M1 reload route did not persist: ${JSON.stringify(afterReload)}`);
       assert.equal(afterReload.progress.lessonViewed, true);
       assert.equal(afterReload.exerciseComplete, false);

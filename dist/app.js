@@ -1367,7 +1367,10 @@ document.getElementById('support-form').addEventListener('submit', event => {
   showToast('Brouillon de demande préparé — aucun envoi réel.');
 });
 
-document.getElementById('play-demo').addEventListener('click', event => {
+// The active reader can be M1.1 after a persisted M0 completion. Its authored
+// lesson shell intentionally has no M0 video-demo control, so bind this
+// optional affordance only when the current reader renders it.
+document.getElementById('play-demo')?.addEventListener('click', event => {
   const caption = document.getElementById('video-caption');
   event.currentTarget.textContent = event.currentTarget.textContent === '▶' ? 'Ⅱ' : '▶';
   caption.textContent = event.currentTarget.textContent === 'Ⅱ' ? 'Illustration — vidéo à venir' : 'Une décision commence par l’observation.';
