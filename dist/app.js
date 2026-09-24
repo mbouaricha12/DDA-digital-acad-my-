@@ -1031,6 +1031,38 @@ function renderTerminalMarketIntelligence() {
     </div>`).join('');
 }
 
+// Darius Analysis Terminal P0.4 — local, deterministic teaching data only.
+// The series is deliberately normalized and labelled as pedagogical: it is not
+// a quote feed, not an investment signal, and not a substitute for market data.
+const TERMINAL_SERIES = Object.freeze({
+  'BRVM Composite': [48, 50, 49, 52, 55, 54, 57, 56, 58, 61, 60, 63, 62, 65, 64, 67, 66, 64, 68, 70, 69, 72, 71, 74, 73, 76, 75, 77, 76, 79, 78, 80],
+  'BRVM 30': [54, 53, 55, 54, 57, 59, 58, 56, 57, 60, 62, 61, 63, 62, 65, 64, 66, 68, 67, 69, 68, 71, 70, 72, 71, 73, 72, 74, 73, 76, 75, 77],
+  'EUR/USD pédagogique': [72, 71, 70, 72, 73, 72, 74, 75, 74, 73, 75, 77, 76, 78, 77, 76, 78, 79, 78, 80, 79, 81, 80, 79, 81, 82, 81, 83, 82, 84, 83, 85]
+});
+const terminalInteraction = { tool: 'crosshair', draft: null, crosshair: null, ready: false };
+function getTerminalState() { return { instrument: prototypeState.terminal?.instrument || 'BRVM Composite', timeframe: prototypeState.terminal?.timeframe || '1D', zoom: Number(prototypeState.terminal?.zoom) || 1, pan: Number(prototypeState.terminal?.pan) || 0, drawings: Array.isArray(prototypeState.terminal?.drawings) ? prototypeState.terminal.drawings : [], observation: prototypeState.terminal?.observation || '' }; }
+function terminalClamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+function terminalDataset(instrument) { const source = TERMINAL_SERIES[instrument] || TERMINAL_SERIES['BRVM Composite']; return source.map((close, index) => { const open = index ? source[index - 1] : close - 1; return { open, close, high: Math.max(open, close) + 1 + (index % 3) * .35, low: Math.min(open, close) - 1 - (index % 2) * .3, index }; }); }
+function terminalSvgPoint(event) { const svg = document.getElementById('terminal-chart'); const rect = svg.getBoundingClientRect(); return { x: terminalClamp((event.clientX - rect.left) / rect.width * 900, 0, 900), y: terminalClamp((event.clientY - rect.top) / rect.height * 420, 0, 420) }; }
+function renderTerminalCrosshair() { const group = document.getElementById('terminal-crosshair'); if (!group) return; const point = terminalInteraction.crosshair; group.hidden = !point; if (!point) return; group.querySelector('.crosshair-v').setAttribute('x1', point.x); group.querySelector('.crosshair-v').setAttribute('x2', point.x); group.querySelector('.crosshair-h').setAttribute('y1', point.y); group.querySelector('.crosshair-h').setAttribute('y2', point.y); group.querySelector('.crosshair-x-label').setAttribute('x', terminalClamp(point.x - 22, 4, 852)); group.querySelector('.crosshair-x-label').textContent = `x ${Math.round(point.x)}`; }
+function renderDariusAnalysisTerminal() {
+  const svg = document.getElementById('terminal-chart'); if (!svg) return;
+  const state = getTerminalState(); const data = terminalDataset(state.instrument); const visibleCount = Math.max(12, Math.round(data.length / state.zoom)); const maxPan = Math.max(0, data.length - visibleCount); const start = terminalClamp(state.pan, 0, maxPan); const visible = data.slice(start, start + visibleCount); const min = Math.min(...visible.map(c => c.low)) - 1; const max = Math.max(...visible.map(c => c.high)) + 1; const x = i => 34 + i * (832 / Math.max(1, visible.length - 1)); const y = value => 24 + (max - value) / (max - min) * 332; const candleWidth = Math.max(5, 680 / visible.length);
+  const grid = [0, 1, 2, 3, 4].map(i => `<line class="grid" x1="24" x2="876" y1="${24 + i * 83}" y2="${24 + i * 83}"/>`).join('');
+  const candles = visible.map((candle, i) => { const cx = x(i); const top = y(Math.max(candle.open, candle.close)); const bottom = y(Math.min(candle.open, candle.close)); return `<line class="wick" x1="${cx}" x2="${cx}" y1="${y(candle.high)}" y2="${y(candle.low)}"/><rect class="${candle.close >= candle.open ? 'candle-up' : 'candle-down'}" x="${cx - candleWidth / 2}" y="${top}" width="${candleWidth}" height="${Math.max(3, bottom - top)}" rx="1"/>`; }).join('');
+  const labels = visible.filter((_, i) => i % Math.max(1, Math.floor(visible.length / 5)) === 0).map((candle, i) => `<text x="${x(i * Math.max(1, Math.floor(visible.length / 5)))}" y="388">${candle.index + 1}</text>`).join('');
+  const drawings = state.drawings.map(drawing => { if (drawing.type === 'zone') return `<rect class="sr-zone" x="${Math.min(drawing.x1, drawing.x2)}" y="${Math.min(drawing.y1, drawing.y2)}" width="${Math.abs(drawing.x2 - drawing.x1)}" height="${Math.abs(drawing.y2 - drawing.y1)}"/>`; if (drawing.type === 'fib') return [0, .382, .5, .618, 1].map(level => { const yy = drawing.y1 + (drawing.y2 - drawing.y1) * level; return `<line class="fib-line" x1="${Math.min(drawing.x1, drawing.x2)}" x2="${Math.max(drawing.x1, drawing.x2)}" y1="${yy}" y2="${yy}"/><text class="fib-label" x="${Math.max(drawing.x1, drawing.x2) - 34}" y="${yy - 3}">${Math.round(level * 100)}%</text>`; }).join(''); return `<line class="draw-line" x1="${drawing.x1}" y1="${drawing.y1}" x2="${drawing.x2}" y2="${drawing.y2}"/>`; }).join('');
+  svg.innerHTML = `${grid}${drawings}${candles}${labels}<g id="terminal-crosshair" hidden><line class="crosshair crosshair-v" x1="0" x2="0" y1="18" y2="368"/><line class="crosshair crosshair-h" x1="24" x2="876" y1="0" y2="0"/><rect class="crosshair-label" x="4" y="372" width="44" height="18" rx="3"/><text class="crosshair-x-label" x="10" y="385">x 0</text></g>`;
+  document.getElementById('terminal-instrument').value = state.instrument; document.getElementById('terminal-timeframe').value = state.timeframe; document.getElementById('terminal-zoom').value = String(state.zoom); const observation = document.getElementById('terminal-observation'); if (document.activeElement !== observation) observation.value = state.observation; document.getElementById('terminal-observation-state').textContent = state.observation ? 'Observation conservée localement' : 'Non enregistré'; document.getElementById('terminal-chart-caption').textContent = `${state.instrument} · ${state.timeframe} · série historique locale contrôlée · valeurs normalisées · aucune cotation en temps réel.`; renderTerminalCrosshair();
+}
+function initDariusAnalysisTerminal() {
+  const svg = document.getElementById('terminal-chart'); if (!svg || terminalInteraction.ready) return; terminalInteraction.ready = true; const update = patch => saveState({ terminal: { ...getTerminalState(), ...patch } });
+  document.getElementById('terminal-instrument').addEventListener('change', event => update({ instrument: event.target.value, pan: 0 })); document.getElementById('terminal-timeframe').addEventListener('change', event => update({ timeframe: event.target.value })); document.getElementById('terminal-zoom').addEventListener('input', event => update({ zoom: Number(event.target.value), pan: 0 })); document.getElementById('terminal-pan-left').addEventListener('click', () => update({ pan: Math.max(0, getTerminalState().pan - 3) })); document.getElementById('terminal-pan-right').addEventListener('click', () => { const state = getTerminalState(); const data = terminalDataset(state.instrument); update({ pan: Math.min(data.length - Math.max(12, Math.round(data.length / state.zoom)), state.pan + 3) }); });
+  document.querySelectorAll('[data-terminal-tool]').forEach(button => button.addEventListener('click', () => { terminalInteraction.tool = button.dataset.terminalTool; document.querySelectorAll('[data-terminal-tool]').forEach(item => item.classList.toggle('active', item === button)); document.getElementById('terminal-tool-hint').textContent = terminalInteraction.tool === 'crosshair' ? 'Déplace le pointeur sur le graphique.' : 'Clique deux fois sur le graphique pour placer cette annotation.'; terminalInteraction.draft = null; }));
+  svg.addEventListener('pointermove', event => { terminalInteraction.crosshair = terminalSvgPoint(event); renderTerminalCrosshair(); }); svg.addEventListener('pointerleave', () => { terminalInteraction.crosshair = null; renderTerminalCrosshair(); }); svg.addEventListener('pointerdown', event => { if (terminalInteraction.tool === 'crosshair') return; const point = terminalSvgPoint(event); if (!terminalInteraction.draft) { terminalInteraction.draft = point; document.getElementById('terminal-tool-hint').textContent = 'Encore un clic pour terminer l’annotation.'; return; } const drawing = { type: terminalInteraction.tool, x1: terminalInteraction.draft.x, y1: terminalInteraction.draft.y, x2: point.x, y2: point.y }; update({ drawings: [...getTerminalState().drawings, drawing] }); terminalInteraction.draft = null; document.getElementById('terminal-tool-hint').textContent = 'Annotation conservée localement. Tu peux en ajouter une autre.'; });
+  document.getElementById('terminal-save-observation').addEventListener('click', () => { const observation = document.getElementById('terminal-observation').value.trim(); if (!observation) { document.getElementById('terminal-observation-state').textContent = 'Écris une observation avant de l’enregistrer.'; return; } update({ observation }); showToast('Observation conservée sur cet appareil.'); });
+}
+
 // The learner's own most recent Journal entry, or an honest empty state — never an
 // invented example quote.
 function renderTerminalJournalNote() {
@@ -1166,6 +1198,7 @@ function renderState() {
   }
   renderTerminalThread(continueTarget);
   renderTerminalMeta(continueTarget);
+  renderDariusAnalysisTerminal();
   renderTerminalMarketIntelligence();
   renderTerminalJournalNote();
   renderTerminalSkillmap(continueTarget);
@@ -1777,6 +1810,7 @@ document.getElementById('profile-reminders').addEventListener('change', event =>
 window.addEventListener('online', updateNetworkState);
 window.addEventListener('offline', updateNetworkState);
 updateNetworkState();
+initDariusAnalysisTerminal();
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});

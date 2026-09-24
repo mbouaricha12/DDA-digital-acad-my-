@@ -354,6 +354,68 @@
 
         <div class="terminal-divider"><span class="terminal-divider-label">Terminal</span><p>Ta vision complète : marchés, journal, compétences — au-delà de la prochaine étape.</p></div>
 
+        <section class="analysis-terminal" aria-labelledby="analysis-terminal-title">
+          <div class="analysis-terminal-head">
+            <div>
+              <p class="eyebrow gold">Darius Analysis Terminal · P0.4</p>
+              <h2 id="analysis-terminal-title">Observer avant de décider.</h2>
+              <p>Un espace de démonstration local pour manipuler une série historique contrôlée, annoter ton observation et la conserver sur cet appareil.</p>
+            </div>
+            <span class="demo-data-badge"><span class="status-dot"></span>Données pédagogiques locales</span>
+          </div>
+
+          <div class="analysis-terminal-toolbar" aria-label="Contrôles du graphique">
+            <label>Instrument
+              <select id="terminal-instrument">
+                <option value="BRVM Composite">BRVM Composite</option>
+                <option value="BRVM 30">BRVM 30</option>
+                <option value="EUR/USD pédagogique">EUR/USD pédagogique</option>
+              </select>
+            </label>
+            <label>Timeframe
+              <select id="terminal-timeframe">
+                <option value="1D">1D</option>
+                <option value="1W">1W</option>
+                <option value="1M">1M</option>
+              </select>
+            </label>
+            <label class="terminal-zoom-control">Zoom
+              <input id="terminal-zoom" type="range" min="1" max="3" step="1" value="1" aria-label="Zoom du graphique">
+            </label>
+            <div class="terminal-pan-controls" aria-label="Déplacement du graphique">
+              <button type="button" class="terminal-icon-button" id="terminal-pan-left" aria-label="Déplacer vers la gauche">←</button>
+              <button type="button" class="terminal-icon-button" id="terminal-pan-right" aria-label="Déplacer vers la droite">→</button>
+            </div>
+          </div>
+
+          <div class="analysis-terminal-tools" role="toolbar" aria-label="Outils d’annotation">
+            <button type="button" class="terminal-tool active" data-terminal-tool="crosshair">✣ Crosshair</button>
+            <button type="button" class="terminal-tool" data-terminal-tool="zone">▧ Zone S/R</button>
+            <button type="button" class="terminal-tool" data-terminal-tool="line">╱ Ligne</button>
+            <button type="button" class="terminal-tool" data-terminal-tool="fib">⌁ Fibonacci</button>
+            <span class="terminal-tool-hint" id="terminal-tool-hint">Déplace le pointeur sur le graphique.</span>
+          </div>
+
+          <div class="analysis-chart-shell">
+            <div class="analysis-chart-y-labels" aria-hidden="true"><span>haut</span><span>milieu</span><span>bas</span></div>
+            <svg id="terminal-chart" class="analysis-chart" viewBox="0 0 900 420" role="img" aria-label="Graphique pédagogique interactif"></svg>
+          </div>
+          <p class="analysis-chart-caption" id="terminal-chart-caption">Série historique locale contrôlée · valeurs normalisées · aucune cotation en temps réel.</p>
+
+          <div class="analysis-terminal-bottom">
+            <div class="analysis-observation">
+              <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-edit"/></svg> Ton observation</p><h3>Qu’est-ce que tu vois ?</h3></div></div>
+              <textarea id="terminal-observation" maxlength="1000" rows="5" placeholder="Décris la structure, une zone ou une question — sans formuler de signal. "></textarea>
+              <div class="analysis-observation-actions"><button type="button" class="primary-action" id="terminal-save-observation">Conserver localement <span>→</span></button><span id="terminal-observation-state" role="status">Non enregistré</span></div>
+            </div>
+            <div class="analysis-terminal-legend">
+              <p class="eyebrow">Méthode DDA</p>
+              <ol><li><b>Observer</b><span>Repère les bougies et la structure.</span></li><li><b>Manipuler</b><span>Zoome, déplace et annote.</span></li><li><b>Justifier</b><span>Conserve ton raisonnement dans le Journal.</span></li></ol>
+              <button type="button" class="text-action" data-view="journal">Continuer dans Journal &amp; Plan <span>→</span></button>
+            </div>
+          </div>
+        </section>
+
         <section class="terminal-mi" aria-labelledby="terminal-mi-title">
           <div class="terminal-mi-head"><div><p class="eyebrow">Intelligence marché</p><h3 id="terminal-mi-title">Ce qui bouge aujourd’hui</h3></div><button class="text-action" data-view="markets">Marchés &amp; BRVM <span>→</span></button></div>
           <div class="terminal-mi-row" id="terminal-mi-row"></div>
