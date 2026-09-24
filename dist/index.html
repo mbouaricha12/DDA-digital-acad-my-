@@ -411,7 +411,7 @@
             <div class="analysis-terminal-legend">
               <p class="eyebrow">Méthode DDA</p>
               <ol><li><b>Observer</b><span>Repère les bougies et la structure.</span></li><li><b>Manipuler</b><span>Zoome, déplace et annote.</span></li><li><b>Justifier</b><span>Conserve ton raisonnement dans le Journal.</span></li></ol>
-              <button type="button" class="text-action" data-view="journal">Continuer dans Journal &amp; Plan <span>→</span></button>
+              <button type="button" class="text-action" data-view="journal" data-terminal-handoff="true" id="terminal-journal-handoff">Continuer dans Journal &amp; Plan <span>→</span></button>
             </div>
           </div>
         </section>
@@ -617,6 +617,7 @@
         <section class="journal-composer" id="journal-composer" hidden>
           <button class="back-link" id="journal-composer-back" type="button">← Retour au journal</button>
           <p class="eyebrow gold" id="journal-composer-eyebrow">Nouvelle entrée</p>
+          <p class="journal-source-context" id="journal-source-context" hidden>Préremplie depuis le Darius Analysis Terminal — relis chaque champ avant d’enregistrer.</p>
           <div class="step-indicator journal-step-indicator" aria-label="Étapes de l’entrée">
             <span class="active" id="journal-step-dot-1">1</span><i></i>
             <span id="journal-step-dot-2">2</span><i></i>

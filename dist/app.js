@@ -697,10 +697,10 @@ function goToJournalStep(step) {
   document.getElementById('journal-step-save').hidden = step !== 3;
 }
 
-function openJournalComposer(entry, trigger) {
+function openJournalComposer(entry, trigger, draft = null) {
   journalEditingId = entry ? entry.id : null;
   journalComposerTrigger = trigger || null;
-  const fields = entry || DDA.emptyJournalEntry();
+  const fields = entry || draft || DDA.emptyJournalEntry();
   document.getElementById('journal-market').value = fields.market || '';
   document.getElementById('journal-context').value = fields.context || '';
   document.getElementById('journal-scenario').value = fields.scenario || '';
@@ -711,6 +711,7 @@ function openJournalComposer(entry, trigger) {
   document.getElementById('journal-toimprove').value = fields.toImprove || '';
   document.getElementById('journal-note').value = fields.note || '';
   document.getElementById('journal-composer-eyebrow').textContent = entry ? 'Modifier l’entrée' : 'Nouvelle entrée';
+  document.getElementById('journal-source-context').hidden = !fields.terminalSource;
   document.getElementById('journal-composer-delete').hidden = !entry;
   document.getElementById('journal-entry-error').textContent = '';
   goToJournalStep(1);
@@ -1054,6 +1055,18 @@ function renderDariusAnalysisTerminal() {
   const drawings = state.drawings.map(drawing => { if (drawing.type === 'zone') return `<rect class="sr-zone" x="${Math.min(drawing.x1, drawing.x2)}" y="${Math.min(drawing.y1, drawing.y2)}" width="${Math.abs(drawing.x2 - drawing.x1)}" height="${Math.abs(drawing.y2 - drawing.y1)}"/>`; if (drawing.type === 'fib') return [0, .382, .5, .618, 1].map(level => { const yy = drawing.y1 + (drawing.y2 - drawing.y1) * level; return `<line class="fib-line" x1="${Math.min(drawing.x1, drawing.x2)}" x2="${Math.max(drawing.x1, drawing.x2)}" y1="${yy}" y2="${yy}"/><text class="fib-label" x="${Math.max(drawing.x1, drawing.x2) - 34}" y="${yy - 3}">${Math.round(level * 100)}%</text>`; }).join(''); return `<line class="draw-line" x1="${drawing.x1}" y1="${drawing.y1}" x2="${drawing.x2}" y2="${drawing.y2}"/>`; }).join('');
   svg.innerHTML = `${grid}${drawings}${candles}${labels}<g id="terminal-crosshair" hidden><line class="crosshair crosshair-v" x1="0" x2="0" y1="18" y2="368"/><line class="crosshair crosshair-h" x1="24" x2="876" y1="0" y2="0"/><rect class="crosshair-label" x="4" y="372" width="44" height="18" rx="3"/><text class="crosshair-x-label" x="10" y="385">x 0</text></g>`;
   document.getElementById('terminal-instrument').value = state.instrument; document.getElementById('terminal-timeframe').value = state.timeframe; document.getElementById('terminal-zoom').value = String(state.zoom); const observation = document.getElementById('terminal-observation'); if (document.activeElement !== observation) observation.value = state.observation; document.getElementById('terminal-observation-state').textContent = state.observation ? 'Observation conservée localement' : 'Non enregistré'; document.getElementById('terminal-chart-caption').textContent = `${state.instrument} · ${state.timeframe} · série historique locale contrôlée · valeurs normalisées · aucune cotation en temps réel.`; renderTerminalCrosshair();
+}
+function terminalJournalDraft() {
+  const state = getTerminalState();
+  const drawingLabels = state.drawings.map(drawing => ({ zone: 'zone Support/Résistance', line: 'ligne', fib: 'Fibonacci' }[drawing.type] || 'annotation')).join(', ');
+  return {
+    market: state.instrument,
+    context: `Observation du Darius Analysis Terminal — timeframe ${state.timeframe}. Série pédagogique locale contrôlée, sans cotation en temps réel.`,
+    scenario: state.observation,
+    process: `Graphique manipulé en ${state.timeframe}, zoom ${state.zoom}/3${drawingLabels ? `; annotations : ${drawingLabels}` : ''}.`,
+    note: drawingLabels ? `Annotations conservées dans le Terminal : ${drawingLabels}.` : 'Brouillon transféré depuis le Terminal — complète ton raisonnement avant d’enregistrer.',
+    terminalSource: true
+  };
 }
 function initDariusAnalysisTerminal() {
   const svg = document.getElementById('terminal-chart'); if (!svg || terminalInteraction.ready) return; terminalInteraction.ready = true; const update = patch => saveState({ terminal: { ...getTerminalState(), ...patch } });
@@ -1403,6 +1416,7 @@ buttons.forEach(button => button.addEventListener('click', () => {
   // still fires for every navigation regardless of this attribute.
   if (button.dataset.analytics) trackEvent(button.dataset.analytics, { view: button.dataset.view });
   showView(button.dataset.view);
+  if (button.dataset.terminalHandoff === 'true') openJournalComposer(null, button, terminalJournalDraft());
 }));
 
 const resources = {
