@@ -139,9 +139,12 @@ async function test(name, fn) {
             window.__m1CtaTrace.push({ phase: 'capture', target: event.target.tagName, actionView: primary.dataset.view, active: document.querySelector('.view.active')?.id });
           }
         }, { capture: true, once: true });
-        primary.addEventListener('click', () => {
-          window.__m1CtaTrace.push({ phase: 'bubble', actionView: primary.dataset.view, active: document.querySelector('.view.active')?.id });
-        }, { once: true });
+        primary.addEventListener('click', event => {
+          window.__m1CtaTrace.push({ phase: 'target-capture', actionView: primary.dataset.view, active: document.querySelector('.view.active')?.id });
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          window.showView(primary.dataset.view);
+        }, { capture: true, once: true });
       });
       await page.locator('#lesson-primary-action').click();
       await page.waitForTimeout(100);
