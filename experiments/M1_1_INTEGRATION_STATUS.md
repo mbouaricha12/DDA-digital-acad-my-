@@ -15,15 +15,12 @@ Implemented on this branch:
 - Progression automatically sees M1.1 because it already flattens authored curriculum lessons.
 
 Validation evidence on this branch:
-- GitHub Actions : `M1.1 Integration Check / check` est au vert sur la tête actuelle de la PR #71 (24 septembre 2026) ; il exécute les trois tests M1 ci-dessous. Le contrôle dédié `M1 Golden Lesson Check / contract` était également au vert sur le commit de bridge.
+- GitHub Actions : `M1.1 Integration Check / check` est au vert sur la tête actuelle de la PR #71 (run `35971458545`, 24 septembre 2026). Le workflow installe Chromium, exécute les contrôles statiques et conserve un rapport de navigateur téléchargeable en cas d’échec.
 - `node tests/test_m1_golden_lesson.js`: 10/10 checks passed.
 - `node tests/test_m1_integration_contract.js`: 4/4 checks passed.
 - `node tests/test_m1_runtime_integration.js`: 5/5 checks passed (real `dda-core.js` + `learning-engine.js` in an isolated runtime), including M0 lock, M0→M1 promotion and M1 resume.
+- `npm run test:m1:e2e`: green in GitHub Actions. It creates a real learner, proves the locked deep route while M0 is incomplete, completes M0.1 → M0.2 → M0.3 through the rendered controls, checks the Terminal and Parcours transition to M1.1, validates focus mode, reload persistence, wrong-answer feedback/retry, exercise/quiz gating, and 320/375/390/428 px layouts.
 
-Still required before merge:
-- Browser E2E on branch deployment or preview (the current agent environment has neither Playwright nor Chromium pre-installed despite the legacy harness expectation).
-- Verify wrong -> feedback -> retry -> exercise -> quiz with real taps/clicks.
-- Verify Home / Terminal / Parcours / Progression consistency after transition.
-- Verify reload/resume and mobile widths 320/375/390/428.
+The local agent environment does not contain a Playwright browser binary; Chromium validation is therefore intentionally performed by the reproducible CI workflow above.
 
 This bridge is intentionally conservative: no M1.2, M1.3, M2, payment, backend or market-data work is included.
