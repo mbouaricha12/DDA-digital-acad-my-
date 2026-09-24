@@ -158,9 +158,15 @@ async function test(name, fn) {
       // M1 progress is durable before any graded gate is passed.
       await page.locator('#mark-understood-m11').click();
       await page.reload({ waitUntil: 'domcontentloaded' });
-      await page.waitForSelector('.view.active#lesson-m11');
-      const afterReload = await page.evaluate(() => window.DDA.load().lessons['M1.1']);
-      assert.equal(afterReload.lessonViewed, true);
+      await page.waitForTimeout(100);
+      const afterReload = await page.evaluate(() => ({
+        progress: window.DDA.load().lessons['M1.1'],
+        active: document.querySelector('.view.active')?.id,
+        hash: window.location.hash,
+        primaryLessonId: window.DDA.primaryLessonId
+      }));
+      assert.equal(afterReload.active, 'lesson-m11', `M1 reload route did not persist: ${JSON.stringify(afterReload)}`);
+      assert.equal(afterReload.progress.lessonViewed, true);
       assert.equal(afterReload.exerciseComplete, false);
 
       // Wrong -> feedback -> retry is a real interaction, not an authored string only.
