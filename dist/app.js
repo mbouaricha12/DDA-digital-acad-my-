@@ -1208,7 +1208,19 @@ function showView(id, recordEvent = true) {
   }
 }
 
-buttons.forEach(button => button.addEventListener('click', () => showView(button.dataset.view)));
+// The Terminal's CTA is re-targeted by renderState() as the learner advances
+// (M0.1 → M0.2 → M0.3 → M1.1). Bind it independently instead of relying on
+// the initial all-navigation snapshot: its destination is deliberately dynamic
+// whereas the rest of this static collection keeps a fixed destination.
+const terminalPrimaryAction = document.getElementById('lesson-primary-action');
+buttons.forEach(button => {
+  if (button === terminalPrimaryAction) return;
+  button.addEventListener('click', () => showView(button.dataset.view));
+});
+terminalPrimaryAction?.addEventListener('click', event => {
+  event.preventDefault();
+  showView(event.currentTarget.dataset.view);
+});
 
 const resources = {
   checklist: { title: 'Checklist avant une décision', label: 'Guide · DDA Free', body: '<ol><li>Ai-je compris le contexte du marché ?</li><li>Mon scénario est-il écrit clairement ?</li><li>Où mon idée devient-elle invalide ?</li><li>Quel risque suis-je prêt à accepter ?</li><li>Est-ce une décision prévue ou impulsive ?</li><li>Puis-je justifier mon choix sans parler de gain ?</li></ol>' },
