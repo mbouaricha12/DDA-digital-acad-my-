@@ -219,9 +219,12 @@ function setLoading(active, message = 'Préparation de ton parcours…') {
   layer.hidden = !active;
 }
 
-// A module card can only be opened today if it holds the one lesson we have a reader view for.
+// A module can become the active chapter only when every authored lesson it
+// contains has a real reader view. This is intentionally driven by the same
+// LESSON_VIEW_ID registry as Terminal, Progression and the sidebar: adding an
+// authored lesson never creates a second definition of what is renderable.
 function isRenderableModule(module) {
-  return module.lessons.some(lesson => lesson.id === activeLessonId);
+  return module.lessons.length > 0 && module.lessons.every(lesson => Boolean(LESSON_VIEW_ID[lesson.id]));
 }
 
 function moduleStatusLabel(status, renderable) {
@@ -245,21 +248,25 @@ function renderPathJourney() {
   const container = document.getElementById('path-list');
   if (!container) return;
   const modules = DDA.curriculum.modules;
-  const currentIndex = modules.findIndex(isRenderableModule);
-  const currentModule = modules[currentIndex];
-  const currentStatus = DDALearning.moduleStatus(DDA.curriculum, currentModule.id, prototypeState);
-  // The hero chapter must track the real current lesson, not a fixed M0.1 —
-  // once M0.1 is validated, resolveContinueTarget() honestly moves on to
-  // M0.2/M0.3, and this card (title, summary, duration, link) follows it.
-  // Only once nothing authored remains does it fall back to the last real
-  // lesson as an explicit review, same pattern as the Terminal.
+  // The journey hero follows the one real next lesson. Once a learner has
+  // completed M0, M1.1 must become the chapter itself — not merely borrow the
+  // M0 card's title, count and action. When every authored lesson is complete,
+  // retain the last authored module only as an explicit review destination.
   const continueTarget = resolveContinueTarget();
   const currentLessonTarget = continueTarget || lastAuthoredLesson();
-  const currentLesson = currentLessonTarget ? currentLessonTarget.lesson : currentModule.lessons.find(lesson => lesson.id === activeLessonId);
-  const currentView = currentLessonTarget ? (LESSON_VIEW_ID[currentLesson.id] || 'lesson') : 'lesson';
+  const currentModuleId = currentLessonTarget?.module?.id;
+  const currentIndex = Math.max(0, currentModuleId
+    ? modules.findIndex(module => module.id === currentModuleId)
+    : modules.findIndex(isRenderableModule));
+  const currentModule = modules[currentIndex];
+  const currentStatus = DDALearning.moduleStatus(DDA.curriculum, currentModule.id, prototypeState);
+  const currentLesson = currentLessonTarget
+    ? currentLessonTarget.lesson
+    : currentModule.lessons.find(lesson => LESSON_VIEW_ID[lesson.id]) || currentModule.lessons[0];
+  const currentView = LESSON_VIEW_ID[currentLesson.id] || 'lesson';
   const currentNumber = String(currentIndex + 1).padStart(2, '0');
   const lessonCount = currentModule.lessons.length;
-  const actionLabel = continueTarget ? moduleActionLabel(currentStatus, true) : 'Revoir';
+  const actionLabel = continueTarget ? moduleActionLabel(currentStatus, isRenderableModule(currentModule)) : 'Revoir';
   // Parcours reconstruction (Phase A): the hero now states *why* this is the
   // current chapter — same WHY_PHRASE/lessonNextStep() truth the Terminal
   // already shows, reused verbatim so the two screens never disagree.
@@ -332,7 +339,7 @@ function renderMarketIntelligence() {
 }
 
 // The real, curriculum-flattened list of lessons with actual authored content —
-// M1-M9 have none yet (empty lessons[]), so they never appear here. Drives the
+// M0 and M1.1 appear here; M2-M9 still have no authored lessons. Drives the
 // deep "Fil de maîtrise" view on Progression; Terminal shows only the current
 // lesson via resolveContinueTarget() — same competencyLevel() underneath, so the
 // two screens can never disagree about the same competency's real state.
@@ -755,8 +762,8 @@ function beadsAriaLabel(level, count = 4) {
 }
 
 // The next lesson actually authored right after this one in the curriculum — never a
-// guessed or invented competency. Returns null once nothing real follows (M1–M9 are
-// still empty), which is the honest state the thread must show as "no next" then.
+// guessed or invented competency. Returns null once no authored lesson follows,
+// which is the honest state the thread must show as "no next" then.
 function lessonAfter(curriculum, lessonId) {
   const flat = [];
   curriculum.modules.forEach(m => m.lessons.forEach(l => flat.push({ module: m, lesson: l })));
@@ -974,11 +981,6 @@ function renderState() {
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'RD';
   const activeLessonProgress = DDALearning.getLessonProgress(prototypeState, activeLessonId);
   const xp = DDALearning.totalXp(DDA.curriculum, prototypeState) || 20;
-  // Deliberately out of scope for the Daily Value Loop correction: `complete`
-  // only tracks M0.1's own quizComplete and drives the Parcours journey-button
-  // text below, which is architecturally pinned to M0.1 (isRenderableModule()) —
-  // untouched here.
-  const complete = Boolean(activeLessonProgress.quizComplete);
   const continueTarget = resolveContinueTarget();
   // CEO correction (Daily Value Loop V1.1): continueTarget is now honestly null
   // once every authored lesson is validated — there is no "current" lesson left
@@ -1140,6 +1142,21 @@ function storePreviousView(view) {
 let currentView = 'dashboard';
 let previousView = readStoredPreviousView();
 const LESSON_VIEW_IDS = new Set(Object.values(LESSON_VIEW_ID));
+const LESSON_ID_BY_VIEW_ID = Object.freeze(Object.fromEntries(
+  Object.entries(LESSON_VIEW_ID).map(([lessonId, viewId]) => [viewId, lessonId])
+));
+
+// Preserve the documented M0 in-module deep-link behaviour for isolated
+// lesson testing, while enforcing the actual cross-module prerequisite the
+// curriculum engine already knows: an authored M1+ lesson cannot be opened
+// until the preceding authored module is complete. This closes the specific
+// M0 → M1 bridge without inventing a second progression model.
+function isLockedModuleLessonView(viewId) {
+  const lessonId = LESSON_ID_BY_VIEW_ID[viewId];
+  if (!lessonId) return false;
+  const found = DDALearning.findLesson(DDA.curriculum, lessonId);
+  return Boolean(found && DDALearning.moduleStatus(DDA.curriculum, found.module.id, prototypeState) === DDALearning.MODULE_STATUS.LOCKED);
+}
 
 function smartBackTarget() {
   if (previousView && titles[previousView] && !LESSON_VIEW_IDS.has(previousView) && previousView !== 'access') return previousView;
@@ -1154,9 +1171,20 @@ function showView(id, recordEvent = true) {
     showToast('Termine ton inscription pour accéder à cette section.');
     id = 'access';
   }
+  if (isLockedModuleLessonView(id)) {
+    // This is a curriculum prerequisite, not a paid entitlement: keep the
+    // learner in the real Parcours and explain the next action rather than
+    // opening a later lesson through a direct hash or stale button.
+    prototypeState = DDA.track(prototypeState, 'access_denied', { view: id, permission: 'module_prerequisite' });
+    showToast('Valide d’abord le module précédent pour ouvrir cette leçon.');
+    id = 'path';
+  }
   views.forEach(view => view.classList.toggle('active', view.id === id));
   [...desktopItems, ...mobileItems].forEach(item => item.classList.toggle('active', item.dataset.view === id));
-  document.body.classList.toggle('lesson-focus', id === 'lesson' || id === 'lesson-m02' || id === 'lesson-m03');
+  // Every authored lesson shares Focus Mode. Keep this derived from the
+  // lesson-view registry so a newly mounted lesson never accidentally keeps
+  // distracting topbar affordances visible while M0 lessons hide them.
+  document.body.classList.toggle('lesson-focus', LESSON_VIEW_IDS.has(id));
   // Acquisition V1 — #landing is a public marketing surface, not an app screen:
   // it must never show the authenticated chrome (sidebar/plan/profile, topbar,
   // mobile nav, prototype banner). Scoped purely via this body class, same
