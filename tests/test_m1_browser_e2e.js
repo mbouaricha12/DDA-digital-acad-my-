@@ -112,6 +112,16 @@ async function test(name, fn) {
     await test('M0 completion promotes M1.1 through Terminal, Parcours, Focus Mode and M1 feedback gates', async () => {
       const { context, page } = await newSeededPage(browser, { completeM0: true }, '#dashboard');
       await page.waitForSelector('.view.active#dashboard');
+      const seeded = await page.evaluate(() => ({
+        m01: window.DDA.load().lessons['M0.1'],
+        m02: window.DDA.load().lessons['M0.2'],
+        m03: window.DDA.load().lessons['M0.3'],
+        next: window.DDALearning.nextActionable(window.DDA.curriculum, window.DDA.load())?.lessonId
+      }));
+      assert.equal(seeded.m01?.quizComplete, true, `M0.1 seed lost: ${JSON.stringify(seeded)}`);
+      assert.equal(seeded.m02?.quizComplete, true, `M0.2 seed lost: ${JSON.stringify(seeded)}`);
+      assert.equal(seeded.m03?.quizComplete, true, `M0.3 seed lost: ${JSON.stringify(seeded)}`);
+      assert.equal(seeded.next, 'M1.1', `unexpected next lesson: ${JSON.stringify(seeded)}`);
 
       assert.match(await page.locator('#terminal-lead-title').textContent(), /Pourquoi les prix évoluent/);
       await page.locator('#lesson-primary-action').click();
