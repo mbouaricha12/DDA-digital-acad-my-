@@ -75,7 +75,7 @@ async function newSeededPage(browser, options, target, viewport = { width: 390, 
     page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
     page.evaluate(({ state, hash }) => {
       localStorage.setItem('dda-prototype-state-v4', JSON.stringify(state));
-      window.location.hash = hash;
+      window.history.replaceState(null, '', hash);
       window.location.reload();
     }, { state: seededState(options), hash: target })
   ]);
