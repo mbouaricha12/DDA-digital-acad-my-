@@ -131,12 +131,25 @@ async function test(name, fn) {
       await page.locator('.mobile-nav button[data-view="dashboard"]').click();
       await page.waitForSelector('.view.active#dashboard');
       assert.match(await page.locator('#terminal-lead-title').textContent(), /Pourquoi les prix évoluent/);
+      await page.evaluate(() => {
+        const primary = document.getElementById('lesson-primary-action');
+        window.__m1CtaTrace = [];
+        document.addEventListener('click', event => {
+          if (event.target === primary || primary.contains(event.target)) {
+            window.__m1CtaTrace.push({ phase: 'capture', target: event.target.tagName, actionView: primary.dataset.view, active: document.querySelector('.view.active')?.id });
+          }
+        }, { capture: true, once: true });
+        primary.addEventListener('click', () => {
+          window.__m1CtaTrace.push({ phase: 'bubble', actionView: primary.dataset.view, active: document.querySelector('.view.active')?.id });
+        }, { once: true });
+      });
       await page.locator('#lesson-primary-action').click();
       await page.waitForTimeout(100);
       const m1Route = await page.evaluate(() => ({
         active: document.querySelector('.view.active')?.id,
         hash: window.location.hash,
-        actionView: document.getElementById('lesson-primary-action')?.dataset.view
+        actionView: document.getElementById('lesson-primary-action')?.dataset.view,
+        trace: window.__m1CtaTrace
       }));
       assert.equal(m1Route.active, 'lesson-m11', `M1 route did not open: ${JSON.stringify(m1Route)}`);
       assert.equal(await page.locator('body').evaluate(body => body.classList.contains('lesson-focus')), true);
