@@ -1218,7 +1218,11 @@ buttons.forEach(button => {
   button.addEventListener('click', () => showView(button.dataset.view));
 });
 terminalPrimaryAction?.addEventListener('click', event => {
+  // Do not allow an ancestor navigation delegate (or a future generic binding)
+  // to replay the CTA with its initial M0.1 destination after this dynamic
+  // destination has been resolved.
   event.preventDefault();
+  event.stopImmediatePropagation();
   showView(event.currentTarget.dataset.view);
 });
 
