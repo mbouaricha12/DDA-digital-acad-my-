@@ -2167,6 +2167,25 @@ body.low-data .lesson-outline li{transition:none!important}
 }
 
 
+/* Lesson Experience V2 — mobile step rail
+   Keep the four real lesson stages on one readable rail on narrow screens.
+   Wrapping turns the progression indicator into two unrelated rows and weakens
+   the learner's sense of where they are. Horizontal scrolling preserves the
+   complete sequence without shrinking labels or changing the underlying state. */
+@media (max-width:720px){
+  .lesson-loop{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+    padding-inline:2px;
+  }
+  .lesson-loop::-webkit-scrollbar{display:none}
+  .lesson-loop li{flex:none}
+}
+
+
 /* Lesson Experience V2 — mobile QA fixes
    1) prevent the outline rail from competing with lesson content in the
       860–899px transition range;
