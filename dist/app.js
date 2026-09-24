@@ -1,7 +1,8 @@
-// The lesson reader is data-driven: render the active lesson's markup into its
-// mount points before anything below captures [data-view] buttons, so buttons
-// generated inside the lesson (Quitter, Voir ma Progression, …) get bound too.
-const activeLessonId = DDA.primaryLessonId;
+// The M0.1 reader shell is persistent. Later authored lessons own dedicated
+// view mounts below; choosing a later next action must not render it a second
+// time into this M0 shell on reload (which would duplicate lesson controls and
+// leave one hidden copy bound to the wrong view).
+const activeLessonId = 'M0.1';
 const activeLessonMeta = DDALearning.findLesson(DDA.curriculum, activeLessonId);
 const activeLessonDef = activeLessonMeta.lesson;
 document.getElementById('lesson-main').insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(activeLessonMeta.module, activeLessonDef));
