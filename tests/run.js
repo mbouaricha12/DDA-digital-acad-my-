@@ -491,9 +491,9 @@ async function completeSignupFlow(page, opts) {
   });
 
 
-  console.log('\n-- K. Fin du curriculum authored — cohérence M1 complète --');
+  console.log('\n-- K. Fin du curriculum authored — cohérence M2.1 complète --');
 
-  await test('M1.3 completed leaves no phantom lesson and keeps M2 honestly coming soon', async () => {
+  await test('M2.1 completed leaves no phantom lesson and reports the next module honestly', async () => {
     const context = await freshContext(browser);
     await context.addInitScript(() => {
       const done = { lessonViewed: true, exerciseComplete: true, quizComplete: true };
@@ -508,7 +508,8 @@ async function completeSignupFlow(page, opts) {
           'M0.3': done,
           'M1.1': done,
           'M1.2': done,
-          'M1.3': done
+          'M1.3': done,
+          'M2.1': done
         },
         journal: { entries: [], plan: {} },
         preferences: { lowData: false, reminders: false },
@@ -533,12 +534,12 @@ async function completeSignupFlow(page, opts) {
     }));
 
     assert.equal(productState.active, 'dashboard');
-    assert.equal(productState.next, null, 'there must be no fabricated next lesson after M1.3');
+    assert.equal(productState.next, null, 'there must be no fabricated next lesson after M2.1');
     assert.equal(productState.m0, 'completed');
     assert.equal(productState.m1, 'completed');
-    assert.equal(productState.m2, 'coming_soon');
+    assert.equal(productState.m2, 'completed');
     assert.equal(productState.terminalTitle, 'Toutes les leçons disponibles sont validées.');
-    assert.ok(productState.terminalIndex.includes('M0') && productState.terminalIndex.includes('M1'), 'Terminal completion label must reflect both completed authored modules');
+    assert.ok(productState.terminalIndex.includes('M0') && productState.terminalIndex.includes('M1') && productState.terminalIndex.includes('M2'), 'Terminal completion label must reflect all completed authored modules');
     assert.equal(productState.primaryView, 'journal', 'with an empty journal, the honest daily action is Journal — not a phantom lesson');
     assert.equal(productState.progressNext, 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.');
 
@@ -550,9 +551,9 @@ async function completeSignupFlow(page, opts) {
       target: document.querySelector('.journey-current')?.dataset?.view
     }));
     assert.equal(pathState.active, 'path');
-    assert.equal(pathState.module, 'Comprendre les marchés financiers');
+    assert.equal(pathState.module, 'Risque et discipline');
     assert.ok(pathState.why.includes('Compétence validée'));
-    assert.equal(pathState.target, 'lesson-m13', 'Parcours review target must be the last real authored lesson');
+    assert.equal(pathState.target, 'lesson-m21', 'Parcours review target must be the last real authored lesson');
 
     await page.reload();
     assert.equal(await page.evaluate(() => window.DDALearning.nextActionable(window.DDA.curriculum, window.DDA.load())), null, 'completion state must survive reload');

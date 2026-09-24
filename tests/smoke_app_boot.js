@@ -12,8 +12,8 @@
  *   vérifié FERMÉ (M1.1 refusé tant que M0.3 n'est pas validée) → M0.2 →
  *   M0.3 → verrou séquentiel vérifié OUVERT → M1.1 → verrou séquentiel
  *   vérifié FERMÉ (M1.3 refusée tant que M1.2 n'est pas validée) → M1.2 →
- *   M1.3 → Terminal en état « curriculum complété » → état persisté dans
- *   localStorage.
+ *   M1.3 → M2.1 « Protéger son capital » → Terminal en état
+ *   « curriculum complété » → état persisté dans localStorage.
  *
  * This is the committed, dependency-light counterpart of tests/run.js
  * (Playwright/Chromium): it cannot measure layout or touch targets, but it
@@ -40,7 +40,7 @@ const path = require('path');
 
 const root = path.join(__dirname, '..');
 const dist = (...segments) => path.join(root, 'dist', ...segments);
-const SCRIPTS = ['m1-1-lesson.js', 'm1-2-lesson.js', 'm1-3-lesson.js', 'dda-core.js', 'learning-engine.js', 'lesson-renderer.js', 'dda-analytics.js', 'app.js'];
+const SCRIPTS = ['m1-1-lesson.js', 'm1-2-lesson.js', 'm1-3-lesson.js', 'm2-1-lesson.js', 'dda-core.js', 'learning-engine.js', 'lesson-renderer.js', 'dda-analytics.js', 'app.js'];
 
 const dom = new JSDOM(fs.readFileSync(dist('index.html'), 'utf8'), {
   url: 'http://localhost/',
@@ -163,7 +163,11 @@ async function completeLesson({ viewId, markId, exerciseName, quizName, resultId
   });
   await completeLesson({
     viewId: 'lesson-m13', markId: 'mark-understood-m13',
-    exerciseName: 'm13-exercise', quizName: 'm13-quiz', resultId: 'result-card-m13'
+    exerciseName: 'm13-exercise', quizName: 'm13-quiz', resultId: 'result-card-m13', nextViewId: 'lesson-m21'
+  });
+  await completeLesson({
+    viewId: 'lesson-m21', markId: 'mark-understood-m21',
+    exerciseName: 'm21-exercise', quizName: 'm21-quiz', resultId: 'result-card-m21'
   });
 
   await test('Terminal shows the honest curriculum-complete state with a real next action', () => {
@@ -176,7 +180,7 @@ async function completeLesson({ viewId, markId, exerciseName, quizName, resultId
 
   await test('full journey persisted: every lesson quizComplete is durably stored', () => {
     const state = JSON.parse(window.localStorage.getItem('dda-prototype-state-v4'));
-    ['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3'].forEach(id => {
+    ['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3', 'M2.1'].forEach(id => {
       assert.equal(state.lessons[id]?.quizComplete, true, `${id} quizComplete persisted`);
     });
     assert.ok(state.acquisition?.visitorId, 'acquisition visitor id persisted');

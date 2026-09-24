@@ -115,7 +115,7 @@
     }),
     Object.freeze({ type: 'quiz', id: 'm13-quiz', step: 'quiz', outline: evaluation.heading, locked: true, data: evaluation }),
     Object.freeze({ type: 'journal_link', id: 'm13-journal', step: 'review', prompt: 'Explique dans ton Journal, avec tes propres mots, la différence entre marché primaire et marché secondaire — et qui intervient à chaque étape.', cta: 'Ouvrir Journal & Plan' }),
-    Object.freeze({ type: 'summary', id: 'm13-result', step: 'review', idSuffix: 'm13', data: Object.freeze({ heading: 'Compréhension de l’organisation des marchés confirmée.', body: 'Tu as situé émetteurs, investisseurs, intermédiaires et lieu de cotation, et distingué marché primaire et marché secondaire — sans transformer cette lecture en recommandation, en signal ni en promesse.' }) })
+    Object.freeze({ type: 'summary', id: 'm13-result', step: 'review', idSuffix: 'm13', continueTo: Object.freeze({ view: 'lesson-m21', label: 'Continuer vers Protéger son capital' }), data: Object.freeze({ heading: 'Compréhension de l’organisation des marchés confirmée.', body: 'Tu as situé émetteurs, investisseurs, intermédiaires et lieu de cotation, et distingué marché primaire et marché secondaire — sans transformer cette lecture en recommandation, en signal ni en promesse.' }) })
   ]);
 
   return Object.freeze({

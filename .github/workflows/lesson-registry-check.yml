@@ -10,7 +10,9 @@ on:
       - 'dist/m1-1-lesson.js'
       - 'dist/m1-2-lesson.js'
       - 'dist/m1-3-lesson.js'
+      - 'dist/m2-1-lesson.js'
       - 'tests/test_lesson_registry.js'
+      - 'tests/test_m2_1_risk_discipline.js'
       - 'tests/smoke_app_boot.js'
       - '.github/workflows/lesson-registry-check.yml'
   workflow_dispatch:
@@ -28,10 +30,12 @@ jobs:
       - run: node --check dist/lesson-renderer.js
       - run: node --check dist/learning-engine.js
       - run: node --check dist/m1-3-lesson.js
+      - run: node --check dist/m2-1-lesson.js
       # Structural contract: registry ↔ curriculum ↔ renderer ↔ mount points.
       - run: node tests/test_lesson_registry.js
       # Golden-lesson contracts (authored content, no signals/fabrication).
       - run: node tests/test_m1_3_market_organization.js
+      - run: node tests/test_m2_1_risk_discipline.js
       # Cross-contracts pinning the derived maps' registry form.
       - run: node tests/test_path_current_module.js
       - run: node tests/test_m1_runtime_contract.js
