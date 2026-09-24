@@ -493,7 +493,7 @@ async function completeSignupFlow(page, opts) {
 
   console.log('\n-- K. Fin du curriculum authored — cohérence M1 complète --');
 
-  await test('M1.2 completed leaves no phantom lesson and keeps M2 honestly coming soon', async () => {
+  await test('M1.3 completed leaves no phantom lesson and keeps M2 honestly coming soon', async () => {
     const context = await freshContext(browser);
     await context.addInitScript(() => {
       const done = { lessonViewed: true, exerciseComplete: true, quizComplete: true };
@@ -507,7 +507,8 @@ async function completeSignupFlow(page, opts) {
           'M0.2': done,
           'M0.3': done,
           'M1.1': done,
-          'M1.2': done
+          'M1.2': done,
+          'M1.3': done
         },
         journal: { entries: [], plan: {} },
         preferences: { lowData: false, reminders: false },
@@ -532,7 +533,7 @@ async function completeSignupFlow(page, opts) {
     }));
 
     assert.equal(productState.active, 'dashboard');
-    assert.equal(productState.next, null, 'there must be no fabricated next lesson after M1.2');
+    assert.equal(productState.next, null, 'there must be no fabricated next lesson after M1.3');
     assert.equal(productState.m0, 'completed');
     assert.equal(productState.m1, 'completed');
     assert.equal(productState.m2, 'coming_soon');
@@ -551,7 +552,7 @@ async function completeSignupFlow(page, opts) {
     assert.equal(pathState.active, 'path');
     assert.equal(pathState.module, 'Comprendre les marchés financiers');
     assert.ok(pathState.why.includes('Compétence validée'));
-    assert.equal(pathState.target, 'lesson-m12', 'Parcours review target must be the last real authored lesson');
+    assert.equal(pathState.target, 'lesson-m13', 'Parcours review target must be the last real authored lesson');
 
     await page.reload();
     assert.equal(await page.evaluate(() => window.DDALearning.nextActionable(window.DDA.curriculum, window.DDA.load())), null, 'completion state must survive reload');

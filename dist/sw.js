@@ -1,5 +1,5 @@
-const CACHE = 'dda-shell-v11';
-const CORE = ['./', './index.html', './styles.css', './m1-1-lesson.js', './m1-2-lesson.js', './dda-core.js', './learning-engine.js', './lesson-renderer.js', './dda-analytics.js', './app.js', './manifest.webmanifest'];
+const CACHE = 'dda-shell-v13';
+const CORE = ['./', './index.html', './styles.css', './m1-1-lesson.js', './m1-2-lesson.js', './m1-3-lesson.js', './dda-core.js', './learning-engine.js', './lesson-renderer.js', './dda-analytics.js', './app.js', './manifest.webmanifest'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));

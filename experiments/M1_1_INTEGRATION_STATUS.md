@@ -1,5 +1,15 @@
 # M1.1 Integration Gate
 
+> **Status update (24 September 2026): MERGED, then restructured.** M1.1 — and
+> since then M1.2 — live on `main` as *dedicated lesson views* (`lesson-m11`/
+> `lesson-m12`) wired through **`LESSON_REGISTRY`** in `dist/app.js`. The
+> "bridge reloads the app" mechanism described below existed only on the
+> integration branch and is no longer present in the shipped code (no
+> `location.reload` anywhere in `dist/`). Requirements listed below are now
+> covered by committed tests: `tests/test_m1_runtime_contract.js`,
+> `tests/test_lesson_registry.js`, `tests/smoke_app_boot.js` (gate closed →
+> open, full journey, reload-free resume). Kept for history.
+
 Status: branch implementation, not yet merged to main.
 
 Implemented on this branch:
