@@ -34,7 +34,7 @@ function test(name, fn) {
 }
 
 test('M0 contains exactly the three authored foundation lessons in sequence', () => {
-  assert.deepStrictEqual(m0.lessons.map(l => l.id), ['M0.1', 'M0.2', 'M0.3']);
+  assert.deepEqual(Array.from(m0.lessons, l => l.id), ['M0.1', 'M0.2', 'M0.3']);
 });
 
 test('M0.2 is a distinct interactive Support & Resistance lesson', () => {
@@ -71,7 +71,7 @@ test('the authored M0 chain points forward without skipping a proof gate', () =>
 
 test('all M0 lessons use the four proof stages', () => {
   [m01, m02, m03].forEach(lesson => {
-    assert.deepStrictEqual(lesson.steps.map(s => s.id), ['lesson', 'exercise', 'quiz', 'review']);
+    assert.deepEqual(Array.from(lesson.steps, s => s.id), ['lesson', 'exercise', 'quiz', 'review']);
   });
 });
 
