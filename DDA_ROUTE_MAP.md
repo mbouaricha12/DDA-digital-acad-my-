@@ -40,9 +40,12 @@ Aucune page ne recalcule "la prochaine leçon" par elle-même.
 
 ## Dettes réelles restantes (documentées, non corrigées cette tranche)
 
-1. **Verrou séquentiel non appliqué à la navigation directe** : `lessonStatusInModule()` (moteur) sait qu'une leçon est verrouillée tant que la précédente du même module n'est pas complétée, mais `showView()` ne consulte jamais cette fonction — un lien direct vers `#lesson-m03` fonctionne même sans avoir terminé M0.1/M0.2. Correction non tenue cette tranche : ~20 sites de test dépendent explicitement de ce comportement pour tester M0.2/M0.3 en isolation ; l'implémenter aurait exigé une réécriture disproportionnée de tests existants pour un chemin que le CEO n'a pas explicitement signalé comme cassé. À traiter dans une tranche dédiée.
-2. **`history.pushState` jamais utilisé** : le bouton natif "précédent" du navigateur ne suit pas les transitions internes (toujours `replaceState`). Le back-link applicatif compense pour les leçons/Journal ; les autres vues n'ont pas besoin de "retour" puisqu'elles sont des racines de la nav principale.
-3. **Modules M3–M9** : aucun titre réel n'existe dans la documentation produit au-delà de M0/M1/M2 ; Parcours affiche donc honnêtement "Module M3"…"Module M9", jamais un contenu inventé (conforme au mandat §8).
+1. **`history.pushState` jamais utilisé** : le bouton natif "précédent" du navigateur ne suit pas les transitions internes (toujours `replaceState`). Le back-link applicatif compense pour les leçons/Journal ; les autres vues n'ont pas besoin de "retour" puisqu'elles sont des racines de la nav principale.
+2. **Modules M3–M9** : aucun titre réel n'existe dans la documentation produit au-delà de M0/M1/M2 ; Parcours affiche donc honnêtement "À venir" pour M3–M9, jamais un contenu inventé (conforme au mandat §8).
+
+### Vérification ajoutée
+
+Le verrou séquentiel est désormais bien appliqué par `showView()` via `LESSON_PREREQUISITE` : M0.2 exige la validation de M0.1, M0.3 exige M0.2, M1.1 exige M0.3 et M1.2 exige M1.1. Cette règle est couverte par le runtime existant et ne constitue plus une dette produit.
 
 ## Addendum — Acquisition Engine V1 (CEO decision)
 
