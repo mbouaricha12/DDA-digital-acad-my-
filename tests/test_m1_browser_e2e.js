@@ -167,7 +167,7 @@ async function test(name, fn) {
       }));
       assert.equal(afterReload.active, 'lesson-m11', `M1 reload route did not persist: ${JSON.stringify(afterReload)}`);
       assert.equal(afterReload.progress.lessonViewed, true);
-      assert.equal(afterReload.exerciseComplete, false);
+      assert.equal(Boolean(afterReload.progress.exerciseComplete), false);
 
       // Wrong -> feedback -> retry is a real interaction, not an authored string only.
       const exercise = page.locator('[data-question="m1-exercise"]');
