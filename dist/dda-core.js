@@ -504,9 +504,6 @@
   const M13_LESSON = (typeof globalThis !== 'undefined' && globalThis.DDAM13GoldenLesson)
     ? globalThis.DDAM13GoldenLesson
     : null;
-  const M21_LESSON = (typeof globalThis !== 'undefined' && globalThis.DDAM21GoldenLesson)
-    ? globalThis.DDAM21GoldenLesson
-    : null;
 
   // M1-M9 are structural placeholders (empty lessons[]) — no content invented.
   // M1/M2 titles come from the validated roadmap (DDA_HANDOVER_BRIEF-1.md); no
@@ -519,7 +516,7 @@
     modules: Object.freeze([
       { id: 'M0', title: 'Fondations des marchés', lessons: Object.freeze([buildM01Lesson(), buildM02Lesson(), buildM03Lesson()]) },
       { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze([M11_LESSON, M12_LESSON, M13_LESSON].filter(Boolean)) },
-      { id: 'M2', title: 'Risque et discipline', summary: 'Protéger son capital avant de rechercher la performance.', lessons: Object.freeze([M21_LESSON].filter(Boolean)) },
+      { id: 'M2', title: 'Risque et discipline', summary: 'Protéger son capital avant de rechercher la performance.', lessons: Object.freeze([]) },
       { id: 'M3', title: 'À venir', lessons: Object.freeze([]) },
       { id: 'M4', title: 'À venir', lessons: Object.freeze([]) },
       { id: 'M5', title: 'À venir', lessons: Object.freeze([]) },

@@ -46,13 +46,12 @@ const coreCtx = {
   console,
   localStorage: { getItem: () => null, setItem: () => {}, removeItem: () => {} },
   crypto: { randomUUID: () => 'test-visitor' },
-  // M1.1/M1.2/M1.3 and M2.1 are authored in their own files and promoted into
-  // the curriculum by dda-core.js via these globals — same mechanism as the
+  // M1.1/M1.2/M1.3 are authored in their own files and promoted into the
+  // curriculum by dda-core.js via these globals — same mechanism as the
   // browser scripts.
   DDAM1GoldenLesson: require('../dist/m1-1-lesson.js'),
   DDAM12GoldenLesson: require('../dist/m1-2-lesson.js'),
-  DDAM13GoldenLesson: require('../dist/m1-3-lesson.js'),
-  DDAM21GoldenLesson: require('../dist/m2-1-lesson.js')
+  DDAM13GoldenLesson: require('../dist/m1-3-lesson.js')
 };
 vm.runInNewContext(fs.readFileSync(path.join(root, 'dist', 'dda-core.js'), 'utf8'), coreCtx);
 const DDA = coreCtx.window.DDA;

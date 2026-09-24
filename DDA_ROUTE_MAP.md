@@ -14,7 +14,6 @@
 | `lesson-m11` (Pourquoi les prix évoluent ?) | idem + bouton "Continuer" du résultat M0.3 | idem | idem | `advanced_modules` (Standard/Pro, CDCP-OS §4.2, Option B) + verrou séquentiel : quiz M0.3 | ✅ fiable | idem | Ouvre modale Standard avec déblocage simulation |
 | `lesson-m12` (Comment les ordres s'exécutent ?) | idem + bouton "Continuer" du résultat M1.1 | idem | idem | `advanced_modules` (Standard/Pro, CDCP-OS §4.2, Option B) + verrou séquentiel : quiz M1.1 | ✅ fiable | idem | idem |
 | `lesson-m13` (Comment les marchés s'organisent ?) | idem + bouton "Continuer" du résultat M1.2 | idem | idem | `advanced_modules` (Standard/Pro, CDCP-OS §4.2, Option B) + verrou séquentiel : quiz M1.2 | ✅ fiable | idem | idem |
-| `lesson-m21` (Protéger son capital) | bouton "Continuer" du résultat M1.3 | idem | idem | `advanced_modules` (Standard/Pro, CDCP-OS §4.2, Option B) + verrou séquentiel : quiz M1.3 | ✅ fiable | idem | idem |
 | `progress` (Progression) | Nav, lien "Voir ma Progression" (Profil, résultat de leçon) | Nouveau : bouton par compétence → leçon réelle (§Corrections) | Nav uniquement (vue racine) | `progress` | ✅ fiable | Redirige vers `access` | ✅ |
 | `journal` (Journal & Plan) | Nav mobile/desktop, lien "Ouvrir ton Journal" (Terminal, Market, résultat de leçon) | Composer interne (3 étapes) | back-link contextuel (nouveau) → origine réelle | `journal` | ✅ fiable | Redirige vers `access` | ✅ |
 | `resources` (Ressources) | Nav, tuile "Ressources" (Terminal) | Lecteur intégré (pas de nouvelle vue) | Nav uniquement | `resources_free` | ✅ fiable | Redirige vers `access` | ✅ |
@@ -49,7 +48,7 @@ Aucune page ne recalcule "la prochaine leçon" par elle-même.
 
 ### Vérification ajoutée
 
-Le verrou séquentiel est désormais bien appliqué par `showView()` via `LESSON_PREREQUISITE` : M0.2 exige la validation de M0.1, M0.3 exige M0.2, M1.1 exige M0.3, M1.2 exige M1.1, M1.3 exige M1.2 et M2.1 exige M1.3. Cette règle est couverte par le runtime existant et ne constitue plus une dette produit.
+Le verrou séquentiel est désormais bien appliqué par `showView()` via `LESSON_PREREQUISITE` : M0.2 exige la validation de M0.1, M0.3 exige M0.2, M1.1 exige M0.3, M1.2 exige M1.1 et M1.3 exige M1.2. Cette règle est couverte par le runtime existant et ne constitue plus une dette produit.
 
 **Lesson Registry (septembre 2026)** : `LESSON_PREREQUISITE`, `LESSON_VIEW_ID`, les titres d'écran des leçons et leurs permissions ne sont plus des littéraux maintenus à la main — ils sont **dérivés de `LESSON_REGISTRY`** (haut de `dist/app.js`), une table unique déclarant chaque leçon une seule fois (id, vue, titre, suffixe d'ids, prérequis, bloc quiz, ancres et interactions notées). Cette carte des routes reflète ce que le registre produit ; `tests/test_lesson_registry.js` garantit en CI que les deux restent cohérents.
 
