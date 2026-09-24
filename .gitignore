@@ -1,3 +1,6 @@
 .sites-runtime/
 *.zip
 DDA_Rapport_*.md
+node_modules/
+playwright-report/
+test-results/

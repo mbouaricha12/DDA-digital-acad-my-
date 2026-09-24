@@ -9,9 +9,12 @@ on:
       - 'dist/lesson-renderer.js'
       - 'dist/app.js'
       - 'dist/index.html'
+      - 'package.json'
+      - 'package-lock.json'
       - 'tests/test_m1_golden_lesson.js'
       - 'tests/test_m1_integration_contract.js'
       - 'tests/test_m1_runtime_integration.js'
+      - 'tests/test_m1_browser_e2e.js'
       - 'experiments/M1_1_INTEGRATION_STATUS.md'
       - '.github/workflows/m1-integration-check.yml'
   push:
@@ -24,9 +27,12 @@ on:
       - 'dist/lesson-renderer.js'
       - 'dist/app.js'
       - 'dist/index.html'
+      - 'package.json'
+      - 'package-lock.json'
       - 'tests/test_m1_golden_lesson.js'
       - 'tests/test_m1_integration_contract.js'
       - 'tests/test_m1_runtime_integration.js'
+      - 'tests/test_m1_browser_e2e.js'
       - 'experiments/M1_1_INTEGRATION_STATUS.md'
       - '.github/workflows/m1-integration-check.yml'
   workflow_dispatch:
@@ -39,6 +45,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Install test dependency
+        run: npm ci
+      - name: Install Chromium for browser checks
+        run: npx playwright install --with-deps chromium
       - name: Syntax checks
         run: |
           node --check dist/m1-1-lesson.js
@@ -46,9 +56,12 @@ jobs:
           node --check dist/learning-engine.js
           node --check dist/lesson-renderer.js
           node --check dist/app.js
+          node --check tests/test_m1_browser_e2e.js
       - name: M1.1 authored lesson contract
         run: node tests/test_m1_golden_lesson.js
       - name: M1.1 renderer contract
         run: node tests/test_m1_integration_contract.js
       - name: M0 to M1 runtime bridge
         run: node tests/test_m1_runtime_integration.js
+      - name: M0 to M1 browser flow
+        run: npm run test:m1:e2e
