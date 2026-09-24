@@ -10,12 +10,12 @@
   // activation_v1 — deliberately versioned so a future activation_v2 definition
   // can be added alongside it without reinterpreting what activation_v1 events
   // already meant when they were recorded.
-  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved', 'landing_visit', 'broker_selected', 'affiliate_link_click', 'activation_v1']);
+  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved', 'landing_visit', 'broker_selected', 'affiliate_link_click', 'activation_v1', 'hero_cta_click', 'signup_started', 'signup_completed', 'qualification_started', 'qualification_completed']);
   const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan', 'source', 'medium', 'campaign', 'broker']);
   const ENTITLEMENTS = Object.freeze({
     visitor: ['dashboard_preview', 'access'],
-    free: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal'],
-    premium: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'resources_premium', 'certificate_preview', 'advanced_modules']
+    free: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'community', 'practice', 'intelligence'],
+    premium: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'resources_premium', 'certificate_preview', 'advanced_modules', 'community', 'practice', 'intelligence']
   });
 
   /* ---------------------------------------------------------------------
@@ -255,6 +255,12 @@
         principle: Object.freeze({ label: 'Vocabulaire professionnel', text: 'Support et résistance ne sont jamais un prix unique : ce sont des zones de réaction observées plusieurs fois.' })
       }),
       Object.freeze({
+        type: 'image_explainer', id: 'm2-diagram', step: 'lesson', outline: 'Le schéma classique', eyebrow: 'Schéma de référence',
+        src: 'images/lessons/support-resistance-diagram.jpg',
+        alt: 'Schéma illustrant des zones de support et de résistance qui se répètent à mesure que le prix progresse, une ancienne résistance pouvant devenir une nouvelle zone de support.',
+        caption: 'Le schéma classique : une même zone peut changer de rôle selon le sens du marché. Ni promesse, ni signal — la même logique de zones répétées que tu viens d’observer.'
+      }),
+      Object.freeze({
         type: 'decision_choice', id: 'm2-myth-line', step: 'lesson', outline: 'Ligne ou zone ?',
         eyebrow: 'Casser un mythe', heading: 'Une ligne parfaite… ou une zone ?',
         prompt: 'Laquelle de ces deux représentations décrit le mieux ce que tu viens d’observer ?',
@@ -468,7 +474,7 @@
       }),
       Object.freeze({ type: 'quiz', id: 'm3-quiz', outline: finalCheck.heading, step: 'quiz', locked: true, data: finalCheck }),
       Object.freeze({ type: 'journal_link', id: 'm3-journal-prompt', step: 'review', prompt: 'Envie de noter ce que tu retiens de cette lecture de tendance dans ton Journal ?', cta: 'Ouvrir Journal & Plan' }),
-      Object.freeze({ type: 'summary', id: 'm3-result', step: 'review', idSuffix: 'm3', data: Object.freeze({ heading: 'Compétence de lecture de tendance confirmée.', body: 'Tu as observé plusieurs graphiques, classé leur direction générale et confirmé ta lecture sur un cas sans aide.' }) })
+      Object.freeze({ type: 'summary', id: 'm3-result', step: 'review', idSuffix: 'm3', continueTo: Object.freeze({ view: 'lesson-m11', label: 'Continuer vers Pourquoi les prix évoluent ?' }), data: Object.freeze({ heading: 'Compétence de lecture de tendance confirmée.', body: 'Tu as observé plusieurs graphiques, classé leur direction générale et confirmé ta lecture sur un cas sans aide.' }) })
     ]);
 
     return Object.freeze({
@@ -492,6 +498,12 @@
   const M11_LESSON = (typeof globalThis !== 'undefined' && globalThis.DDAM1GoldenLesson)
     ? globalThis.DDAM1GoldenLesson
     : null;
+  const M12_LESSON = (typeof globalThis !== 'undefined' && globalThis.DDAM12GoldenLesson)
+    ? globalThis.DDAM12GoldenLesson
+    : null;
+  const M13_LESSON = (typeof globalThis !== 'undefined' && globalThis.DDAM13GoldenLesson)
+    ? globalThis.DDAM13GoldenLesson
+    : null;
 
   // M1-M9 are structural placeholders (empty lessons[]) — no content invented.
   // M1/M2 titles come from the validated roadmap (DDA_HANDOVER_BRIEF-1.md); no
@@ -503,7 +515,7 @@
     title: 'Darius Free',
     modules: Object.freeze([
       { id: 'M0', title: 'Fondations des marchés', lessons: Object.freeze([buildM01Lesson(), buildM02Lesson(), buildM03Lesson()]) },
-      { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze(M11_LESSON ? [M11_LESSON] : []) },
+      { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze([M11_LESSON, M12_LESSON, M13_LESSON].filter(Boolean)) },
       { id: 'M2', title: 'Risque et discipline', summary: 'Protéger son capital avant de rechercher la performance.', lessons: Object.freeze([]) },
       { id: 'M3', title: 'À venir', lessons: Object.freeze([]) },
       { id: 'M4', title: 'À venir', lessons: Object.freeze([]) },

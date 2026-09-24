@@ -11,7 +11,9 @@
 | `lesson` (M0.1) | Home, Parcours, Progression, raccourci sidebar "Leçon en cours" | Bouton "Quitter"/back-link → origine réelle (nouveau) ; lien Journal optionnel | back-link contextuel (nouveau) | `lesson_m01` | ✅ fiable | Redirige vers `access` | ✅ — **aucun verrou séquentiel appliqué à la navigation directe (dette, voir §10)** |
 | `lesson-m02` (Support & Résistance) | idem + bouton "Continuer" du résultat M0.1 | idem | idem | `lesson_m01` | ✅ fiable | idem | idem |
 | `lesson-m03` (Lire une tendance) | idem + bouton "Continuer" du résultat M0.2 | idem | idem | `lesson_m01` | ✅ fiable | idem | idem |
-| `lesson-m11` (Pourquoi les prix évoluent ?) | Terminal/Parcours/Progression après validation complète de M0 ; lien direct si M0 déjà validé | Bouton "Quitter"/back-link → origine réelle ; lien Journal optionnel | back-link contextuel | `lesson_m01` + prérequis module M0 | ✅ fiable — redirige vers `path` tant que M0 est incomplet | Redirige vers `access` | ✅ après M0 ; sinon Parcours + explication du verrou |
+| `lesson-m11` (Pourquoi les prix évoluent ?) | idem + bouton "Continuer" du résultat M0.3 | idem | idem | `lesson_m01` (+ verrou séquentiel : quiz M0.3) | ✅ fiable | idem | idem |
+| `lesson-m12` (Comment les ordres s'exécutent ?) | idem + bouton "Continuer" du résultat M1.1 | idem | idem | `lesson_m01` (+ verrou séquentiel : quiz M1.1) | ✅ fiable | idem | idem |
+| `lesson-m13` (Comment les marchés s'organisent ?) | idem + bouton "Continuer" du résultat M1.2 | idem | idem | `lesson_m01` (+ verrou séquentiel : quiz M1.2) | ✅ fiable | idem | idem |
 | `progress` (Progression) | Nav, lien "Voir ma Progression" (Profil, résultat de leçon) | Nouveau : bouton par compétence → leçon réelle (§Corrections) | Nav uniquement (vue racine) | `progress` | ✅ fiable | Redirige vers `access` | ✅ |
 | `journal` (Journal & Plan) | Nav mobile/desktop, lien "Ouvrir ton Journal" (Terminal, Market, résultat de leçon) | Composer interne (3 étapes) | back-link contextuel (nouveau) → origine réelle | `journal` | ✅ fiable | Redirige vers `access` | ✅ |
 | `resources` (Ressources) | Nav, tuile "Ressources" (Terminal) | Lecteur intégré (pas de nouvelle vue) | Nav uniquement | `resources_free` | ✅ fiable | Redirige vers `access` | ✅ |
@@ -38,13 +40,17 @@ Aucune page ne recalcule "la prochaine leçon" par elle-même.
 2. **Parcours → leçon → retour** : la carte "chapitre en cours" pointait en dur vers M0.1 (dette héritée, documentée dans deux tranches précédentes). Elle suit désormais `resolveContinueTarget()`.
 3. **Progression → compétence → leçon pertinente** : chaque ligne du Fil de maîtrise expose maintenant un lien réel vers sa leçon (`mastery-row-lesson-link`, délégation d'événement car la liste est régénérée dynamiquement).
 4. **Deep link / reload fiable** : `history.replaceState` conserve le hash ; au chargement, `showView(initialView)` restaure la vue si elle existe, sinon un visiteur anonyme atterrit sur `access` (corrigé lors de la tranche précédente), jamais sur un tableau de bord factice.
-5. **Pont M0 → M1.1** : le registre `LESSON_VIEW_ID` connaît `M1.1 → lesson-m11` et alimente donc le même Focus Mode que M0. Parcours ne conserve plus la carte M0 quand `nextActionable()` promeut M1.1 : module, numéro, compteur, action et vue correspondent tous à M1. Le routeur bloque le seul franchissement inter-module actuellement authored (`M1.1`) quand le module M0 n'est pas validé et ramène honnêtement vers Parcours ; il ne modifie pas le comportement historique de deep-link entre les leçons internes de M0.
 
 ## Dettes réelles restantes (documentées, non corrigées cette tranche)
 
-1. **Verrou séquentiel intra-module non appliqué à la navigation directe** : `lessonStatusInModule()` (moteur) sait qu'une leçon est verrouillée tant que la précédente du même module n'est pas complétée, mais `showView()` ne consulte toujours pas cette fonction entre les leçons M0 — un lien direct vers `#lesson-m03` fonctionne donc sans avoir terminé M0.1/M0.2. Le franchissement **entre modules authored** est désormais traité séparément : `#lesson-m11` est redirigé vers Parcours tant que M0 reste verrouillant. Le verrou séquentiel interne M0 reste une dette assumée car les tests isolés existants en dépendent ; à traiter dans une tranche dédiée.
-2. **`history.pushState` jamais utilisé** : le bouton natif "précédent" du navigateur ne suit pas les transitions internes (toujours `replaceState`). Le back-link applicatif compense pour les leçons/Journal ; les autres vues n'ont pas besoin de "retour" puisqu'elles sont des racines de la nav principale.
-3. **Modules M2–M9 hors M1.1** : M2 garde son vrai titre de roadmap et M3–M9 l'étiquette honnête « À venir » ; aucune de ces leçons n'est authored ou ouvrable. M1 ne contient pour l'instant que M1.1 — M1.2+ restent à écrire, jamais simulées.
+1. **`history.pushState` jamais utilisé** : le bouton natif "précédent" du navigateur ne suit pas les transitions internes (toujours `replaceState`). Le back-link applicatif compense pour les leçons/Journal ; les autres vues n'ont pas besoin de "retour" puisqu'elles sont des racines de la nav principale.
+2. **Modules M3–M9** : aucun titre réel n'existe dans la documentation produit au-delà de M0/M1/M2 ; Parcours affiche donc honnêtement "À venir" pour M3–M9, jamais un contenu inventé (conforme au mandat §8).
+
+### Vérification ajoutée
+
+Le verrou séquentiel est désormais bien appliqué par `showView()` via `LESSON_PREREQUISITE` : M0.2 exige la validation de M0.1, M0.3 exige M0.2, M1.1 exige M0.3, M1.2 exige M1.1 et M1.3 exige M1.2. Cette règle est couverte par le runtime existant et ne constitue plus une dette produit.
+
+**Lesson Registry (septembre 2026)** : `LESSON_PREREQUISITE`, `LESSON_VIEW_ID`, les titres d'écran des leçons et leurs permissions ne sont plus des littéraux maintenus à la main — ils sont **dérivés de `LESSON_REGISTRY`** (haut de `dist/app.js`), une table unique déclarant chaque leçon une seule fois (id, vue, titre, suffixe d'ids, prérequis, bloc quiz, ancres et interactions notées). Cette carte des routes reflète ce que le registre produit ; `tests/test_lesson_registry.js` garantit en CI que les deux restent cohérents.
 
 ## Addendum — Acquisition Engine V1 (CEO decision)
 

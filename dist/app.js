@@ -1,42 +1,113 @@
-// The M0.1 reader shell is persistent. Later authored lessons own dedicated
-// view mounts below; choosing a later next action must not render it a second
-// time into this M0 shell on reload (which would duplicate lesson controls and
-// leave one hidden copy bound to the wrong view).
-const activeLessonId = 'M0.1';
+/* ==========================================================================
+   DDA LESSON REGISTRY — chaque leçon déclarée UNE SEULE FOIS.
+   Audit de la restructuration : chaque leçon ajoutée au fil des tranches
+   (M0.1 → M0.2 → M0.3 → M1.1 → M1.2) copiait-collait un bloc de montage, un
+   appel renderLessonProgressUI, un bindMarkUnderstood, une section
+   bindQuestion et des resets — plus des littéraux parallèles (titres
+   d'écran, permissions, carte id→vue, carte vue→prérequis) qu'il fallait
+   tenir synchronisés à la main, avec des incohérences réelles (table d'ids
+   `m1-quiz-block` recopiée alors que le suffixe de M1.1 est `m11`). Ce
+   registre unique remplace tout ça : montage, ids d'UI (lessonUiIds),
+   routes, titres, permissions, verrou séquentiel, ancres de scroll et
+   liaisons de questions en sont DÉRIVÉS. Ajouter une leçon = une entrée
+   ici + ses mount points dans index.html — rien d'autre.
+   Ce littéral reste volontairement des données pures (aucune référence
+   externe) : le test le réévalue tel quel avec vm.
+   ========================================================================== */
+const LESSON_REGISTRY = Object.freeze([
+  {
+    id: 'M0.1', viewId: 'lesson', suffix: '', title: 'Leçon en cours',
+    quizBlock: 'quiz', understoodScrollTo: 'exercise-block',
+    questions: [
+      { role: 'exercise', block: 'exercise', success: '@practice', gate: true },
+      { role: 'quiz', block: 'quiz', success: '@data', result: true },
+      { role: 'practice', block: 'comparison-choice', success: 'Bonne lecture.' }
+    ]
+  },
+  {
+    id: 'M0.2', viewId: 'lesson-m02', suffix: 'm2', title: 'Support & Résistance', prerequisite: 'M0.1',
+    quizBlock: 'm2-quiz', understoodScrollTo: 'm2-observe-4-block',
+    questions: [
+      { role: 'practice', block: 'm2-identify-1', success: '@block', reveal: true },
+      { role: 'practice', block: 'm2-identify-2', success: '@block', reveal: true },
+      { role: 'practice', block: 'm2-myth-line', success: 'Bonne lecture.' },
+      { role: 'practice', block: 'm2-spot-error', success: 'Bon réflexe critique.' },
+      { role: 'exercise', block: 'm2-challenge-zone', success: '@block', gate: true, reveal: true },
+      { role: 'quiz', block: 'm2-quiz', success: '@data', result: true }
+    ]
+  },
+  {
+    id: 'M0.3', viewId: 'lesson-m03', suffix: 'm3', title: 'Lire une tendance', prerequisite: 'M0.2',
+    quizBlock: 'm3-quiz', understoodScrollTo: 'm3-observe-4-block',
+    questions: [
+      { role: 'practice', block: 'm3-classify-1', success: 'Bonne lecture.' },
+      { role: 'practice', block: 'm3-classify-2', success: 'Bonne lecture.' },
+      { role: 'practice', block: 'm3-classify-3', success: 'Bonne lecture.' },
+      { role: 'exercise', block: 'm3-challenge', success: 'Bonne lecture — direction confirmée sans aide.', gate: true },
+      { role: 'quiz', block: 'm3-quiz', success: '@data', result: true }
+    ]
+  },
+  {
+    // M1.1 est authored dans son propre fichier (m1-1-lesson.js) et promue dans
+    // le curriculum par dda-core.js quand ce fichier est chargé ; si le fichier
+    // est absent, l'entrée reste inerte au lieu d'un rendu partiel.
+    id: 'M1.1', viewId: 'lesson-m11', suffix: 'm11', title: 'Pourquoi les prix évoluent ?', prerequisite: 'M0.3',
+    quizBlock: 'm1-quiz', understoodScrollTo: 'm1-exercise-case-block',
+    questions: [
+      { role: 'practice', block: 'm1-buy-pressure', success: 'Bonne lecture du déséquilibre.' },
+      { role: 'practice', block: 'm1-sell-pressure', success: 'Bonne lecture du déséquilibre.' },
+      { role: 'practice', block: 'm1-balance', success: 'Bonne lecture de l’équilibre relatif.' },
+      { role: 'exercise', block: 'm1-exercise', success: '@practice', gate: true },
+      { role: 'quiz', block: 'm1-quiz', success: '@data', result: true }
+    ]
+  },
+  {
+    id: 'M1.2', viewId: 'lesson-m12', suffix: 'm12', title: 'Comment les ordres s’exécutent ?', prerequisite: 'M1.1',
+    quizBlock: 'm12-quiz', understoodScrollTo: 'm12-slippage-case-block',
+    questions: [
+      { role: 'practice', block: 'm12-market-order', success: 'Bonne compréhension de l’ordre au marché.' },
+      { role: 'practice', block: 'm12-limit-order', success: 'Bonne compréhension de l’ordre limite.' },
+      { role: 'practice', block: 'm12-spread', success: 'Bonne lecture du spread.' },
+      { role: 'exercise', block: 'm12-exercise', success: '@practice', gate: true },
+      { role: 'quiz', block: 'm12-quiz', success: '@data', result: true }
+    ]
+  },
+  {
+    // M1.3 est authored dans son propre fichier (m1-3-lesson.js) et promue dans
+    // le curriculum par dda-core.js quand ce fichier est chargé ; si le fichier
+    // est absent, l'entrée reste inerte au lieu d'un rendu partiel.
+    id: 'M1.3', viewId: 'lesson-m13', suffix: 'm13', title: 'Comment les marchés s’organisent ?', prerequisite: 'M1.2',
+    quizBlock: 'm13-quiz', understoodScrollTo: 'm13-exercise-case-block',
+    questions: [
+      { role: 'practice', block: 'm13-actor', success: 'Bonne lecture des rôles sur un marché organisé.' },
+      { role: 'practice', block: 'm13-market-type', success: 'Bonne distinction entre émission et échanges.' },
+      { role: 'practice', block: 'm13-organized', success: 'Bonne lecture de l’organisation d’un marché.' },
+      { role: 'exercise', block: 'm13-exercise', success: '@practice', gate: true },
+      { role: 'quiz', block: 'm13-quiz', success: '@data', result: true }
+    ]
+  }
+]);
+
+// Résolution runtime du registre contre le curriculum réel : une leçon
+// déclarée mais absente du curriculum (fichier authored non chargé) n'est pas
+// montée — les boucles ci-dessous ne consomment que mountedLessons.
+const mountedLessons = LESSON_REGISTRY
+  .map(entry => ({ ...entry, meta: DDALearning.findLesson(DDA.curriculum, entry.id) }))
+  .filter(entry => entry.meta);
+
+const activeLessonId = DDA.primaryLessonId;
 const activeLessonMeta = DDALearning.findLesson(DDA.curriculum, activeLessonId);
 const activeLessonDef = activeLessonMeta.lesson;
-document.getElementById('lesson-main').insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(activeLessonMeta.module, activeLessonDef));
-document.getElementById('lesson-outline').innerHTML = DDALessonRenderer.renderLessonOutline(activeLessonDef);
 
-// Golden Lesson #2 — Support & Résistance. Mounted exactly the way M0.1 is,
-// with an 'm2' idSuffix so its ids never collide with M0.1's, proving the
-// same renderer supports a second, independently-gated lesson unmodified.
-const lessonM02Id = 'M0.2';
-const lessonM02Meta = DDALearning.findLesson(DDA.curriculum, lessonM02Id);
-const lessonM02Def = lessonM02Meta.lesson;
-document.getElementById('lesson-m02-main').insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(lessonM02Meta.module, lessonM02Def, 'm2'));
-document.getElementById('lesson-m02-outline').innerHTML = DDALessonRenderer.renderLessonOutline(lessonM02Def, 'm2');
-
-// M0 Build Tranche — Lire une tendance. Mounted exactly the way M0.1/M0.2 are,
-// with an 'm3' idSuffix — the third proof that this mounting pattern (and the
-// block renderer beneath it) needs zero change to support another
-// independently-gated lesson.
-const lessonM03Id = 'M0.3';
-const lessonM03Meta = DDALearning.findLesson(DDA.curriculum, lessonM03Id);
-const lessonM03Def = lessonM03Meta.lesson;
-document.getElementById('lesson-m03-main').insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(lessonM03Meta.module, lessonM03Def, 'm3'));
-document.getElementById('lesson-m03-outline').innerHTML = DDALessonRenderer.renderLessonOutline(lessonM03Def, 'm3');
-
-// M1.1 — Pourquoi les prix évoluent ? Authored separately, promoted into the
-// curriculum by dda-core.js when m1-1-lesson.js is loaded. It uses the exact
-// same renderer/progression engine as M0, but keeps its own ids/state.
-const lessonM11Id = 'M1.1';
-const lessonM11Meta = DDALearning.findLesson(DDA.curriculum, lessonM11Id);
-const lessonM11Def = lessonM11Meta?.lesson || null;
-if (lessonM11Def) {
-  document.getElementById('lesson-m11-main').insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(lessonM11Meta.module, lessonM11Def, 'm11'));
-  document.getElementById('lesson-m11-outline').innerHTML = DDALessonRenderer.renderLessonOutline(lessonM11Def, 'm11');
-}
+// The lesson reader is data-driven: render each mounted lesson's markup into
+// its mount points BEFORE anything below captures [data-view] buttons, so
+// buttons generated inside lessons (Quitter, Voir ma Progression, …) get
+// bound too. Une seule boucle pour toutes les leçons — plus de bloc copié.
+mountedLessons.forEach(entry => {
+  const suffix = entry.suffix || undefined;
+  document.getElementById(`${entry.viewId}-main`).insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(entry.meta.module, entry.meta.lesson, suffix));
+  document.getElementById(`${entry.viewId}-outline`).innerHTML = DDALessonRenderer.renderLessonOutline(entry.meta.lesson, suffix);
+});
 function findLessonBlock(lessonDef, id) { return lessonDef.blocks.find(b => b.id === id); }
 
 const buttons = document.querySelectorAll('[data-view]');
@@ -44,7 +115,15 @@ const views = document.querySelectorAll('.view');
 const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
-const titles = { landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours', lesson: 'Leçon en cours', 'lesson-m02': 'Support & Résistance', 'lesson-m03': 'Lire une tendance', 'lesson-m11': 'Pourquoi les prix évoluent ?', progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub', membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil' };
+const titles = {
+  landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours',
+  progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub',
+  membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil', community: 'Communauté',
+  practice: 'Pratique avancée', intelligence: 'Intelligence DDA',
+  // Lesson screen titles are declared once, in LESSON_REGISTRY — never a
+  // second hand-maintained list to keep in sync.
+  ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.title]))
+};
 // V1.1 correction: 'dashboard' was never gated here even though DDA.curriculum's
 // own entitlements model (dda-core.js ENTITLEMENTS) already lists 'dashboard' as a
 // free/premium-only permission, not a visitor one — the deep-link/reload matrix this
@@ -52,14 +131,35 @@ const titles = { landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 
 // straight to #dashboard bypassed Access entirely and saw the Terminal's real
 // authenticated shell. Wiring it here uses the exact same, already-tested
 // permission-gate showView() applies to every other protected view — no new logic.
-const viewPermissions = { dashboard: 'dashboard', path: 'path', lesson: 'lesson_m01', 'lesson-m02': 'lesson_m01', 'lesson-m03': 'lesson_m01', 'lesson-m11': 'lesson_m01', progress: 'progress', journal: 'journal', resources: 'resources_free', markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile' };
-// M0.2 and M0.3 reuse the same `lesson_m01` free-tier entitlement — no separate
-// premium tier is being introduced for M0 in this tranche, so no new key is invented.
+const viewPermissions = {
+  dashboard: 'dashboard', path: 'path', progress: 'progress', journal: 'journal', resources: 'resources_free',
+  markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile',
+  community: 'community', practice: 'practice', intelligence: 'intelligence',
+  // Every lesson view reuses the same `lesson_m01` free-tier entitlement — no
+  // separate premium tier exists for lessons — derived here, never re-typed.
+  ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, 'lesson_m01']))
+};
 // Maps a lesson id to the view that actually renders it — the Terminal cockpit's
-// "continue" button follows DDALearning.nextActionable, which will point at
-// M0.2/M0.3 the moment the previous lesson's quiz is complete; without this map
-// it would still say "Reprendre la leçon" but navigate to the wrong view instead.
-const LESSON_VIEW_ID = { 'M0.1': 'lesson', 'M0.2': 'lesson-m02', 'M0.3': 'lesson-m03', 'M1.1': 'lesson-m11' };
+// "continue" button follows DDALearning.nextActionable, which will point at the
+// next authored lesson the moment the previous lesson's quiz is complete;
+// without this map it would still say "Reprendre la leçon" but navigate to the
+// wrong view instead. Derived from the registry — one declaration per lesson.
+const LESSON_VIEW_ID = Object.freeze(Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.id, entry.viewId])));
+// Les identifiants d'UI d'une leçon découlent de son suffixe de registre —
+// plus aucune table d'ids recopiée à la main (source passée d'incohérences).
+function lessonUiIds(entry) {
+  const suffix = entry.suffix ? `-${entry.suffix}` : '';
+  return {
+    loopId: `lesson-loop${suffix}`,
+    outlineListId: `lesson-outline-list${suffix}`,
+    gateId: `${entry.quizBlock}-block`,
+    evalName: entry.quizBlock,
+    resultId: `result-card${suffix}`,
+    markUnderstoodId: `mark-understood${suffix}`,
+    savedStateId: `saved-state${suffix}`,
+    resultStatsId: `result-stats${suffix}`
+  };
+}
 const MODULE_STATUS_LABEL = { completed: 'Terminé', in_progress: 'En cours', available: 'Disponible', locked: 'Verrouillé', coming_soon: 'Prochainement' };
 // Structural demo only — no real index value, date or amount. Swap for a real feed's response later without touching the markup.
 const MARKET_DEMO = {
@@ -74,6 +174,29 @@ const MARKET_DEMO = {
   ]
 };
 const NEXT_STEP_PHRASE = { lesson: 'voir la leçon', exercise: 'réussir l’exercice', quiz: 'valider le quiz' };
+
+// Illustrative candlestick shape (never real price data — same "Mode pédagogique"
+// honesty as the badge next to it) replacing a generic line sparkline with DDA's
+// own visual signature: blue/ivory candles, never green/red (§ zéro signal).
+const CANDLE_PATTERNS = [
+  [6, 14, 4, 16, 9, 15, 5, 17],
+  [10, 15, 12, 6, 16, 8, 13, 7]
+];
+function candlestickSpark(patternIndex) {
+  const pattern = CANDLE_PATTERNS[patternIndex % CANDLE_PATTERNS.length];
+  const bars = pattern.map((open, i) => {
+    const close = pattern[(i + 1) % pattern.length];
+    const x = 6 + i * 15.5;
+    const top = 30 - Math.max(open, close) * 1.5;
+    const bottom = 30 - Math.min(open, close) * 1.5;
+    const wickTop = top - 3;
+    const wickBottom = bottom + 3;
+    const up = close >= open;
+    const fill = up ? 'var(--cta-blue-2)' : 'rgba(244,247,252,.4)';
+    return `<line x1="${x + 3.5}" y1="${wickTop}" x2="${x + 3.5}" y2="${wickBottom}" stroke="${fill}" stroke-width="1"/><rect x="${x}" y="${top}" width="7" height="${Math.max(bottom - top, 1.5)}" fill="${fill}" rx="1"/>`;
+  }).join('');
+  return `<svg class="index-sparkline candlestick" viewBox="0 0 120 34" aria-hidden="true">${bars}</svg>`;
+}
 
 // Daily Value Loop V1 — "Pourquoi cette action ?". Keyed by the exact same
 // `step` DDALearning.lessonNextStep() already returns (see NEXT_STEP_PHRASE
@@ -220,14 +343,6 @@ function setLoading(active, message = 'Préparation de ton parcours…') {
   layer.hidden = !active;
 }
 
-// A module can become the active chapter only when every authored lesson it
-// contains has a real reader view. This is intentionally driven by the same
-// LESSON_VIEW_ID registry as Terminal, Progression and the sidebar: adding an
-// authored lesson never creates a second definition of what is renderable.
-function isRenderableModule(module) {
-  return module.lessons.length > 0 && module.lessons.every(lesson => Boolean(LESSON_VIEW_ID[lesson.id]));
-}
-
 function moduleStatusLabel(status, renderable) {
   if (status === DDALearning.MODULE_STATUS.COMPLETED) return 'VALIDÉE';
   if (status === DDALearning.MODULE_STATUS.LOCKED) return 'VERROUILLÉE';
@@ -249,25 +364,20 @@ function renderPathJourney() {
   const container = document.getElementById('path-list');
   if (!container) return;
   const modules = DDA.curriculum.modules;
-  // The journey hero follows the one real next lesson. Once a learner has
-  // completed M0, M1.1 must become the chapter itself — not merely borrow the
-  // M0 card's title, count and action. When every authored lesson is complete,
-  // retain the last authored module only as an explicit review destination.
+  // Parcours must follow the same next-action truth as Terminal/Progression.
+  // The previous implementation always picked the module containing M0.1,
+  // which kept the hero visually pinned to M0 even after the learner advanced
+  // into M1. Resolve the real current target first, then derive its module.
   const continueTarget = resolveContinueTarget();
   const currentLessonTarget = continueTarget || lastAuthoredLesson();
-  const currentModuleId = currentLessonTarget?.module?.id;
-  const currentIndex = Math.max(0, currentModuleId
-    ? modules.findIndex(module => module.id === currentModuleId)
-    : modules.findIndex(isRenderableModule));
-  const currentModule = modules[currentIndex];
+  const currentModule = currentLessonTarget?.module || modules[0];
+  const currentIndex = Math.max(0, modules.findIndex(module => module.id === currentModule.id));
   const currentStatus = DDALearning.moduleStatus(DDA.curriculum, currentModule.id, prototypeState);
-  const currentLesson = currentLessonTarget
-    ? currentLessonTarget.lesson
-    : currentModule.lessons.find(lesson => LESSON_VIEW_ID[lesson.id]) || currentModule.lessons[0];
-  const currentView = LESSON_VIEW_ID[currentLesson.id] || 'lesson';
+  const currentLesson = currentLessonTarget ? currentLessonTarget.lesson : currentModule.lessons[0];
+  const currentView = currentLessonTarget ? (LESSON_VIEW_ID[currentLesson.id] || 'lesson') : 'lesson';
   const currentNumber = String(currentIndex + 1).padStart(2, '0');
   const lessonCount = currentModule.lessons.length;
-  const actionLabel = continueTarget ? moduleActionLabel(currentStatus, isRenderableModule(currentModule)) : 'Revoir';
+  const actionLabel = continueTarget ? moduleActionLabel(currentStatus, true) : 'Revoir';
   // Parcours reconstruction (Phase A): the hero now states *why* this is the
   // current chapter — same WHY_PHRASE/lessonNextStep() truth the Terminal
   // already shows, reused verbatim so the two screens never disagree.
@@ -277,15 +387,20 @@ function renderPathJourney() {
 
   // UX Focus V1: only the nearest future modules belong in the default journey.
   // Hiding distant placeholders keeps Parcours focused on the learner's real horizon.
-  const futureModules = modules.map((module, index) => ({ module, index }))
-    .filter(({ index }) => index > currentIndex)
+  const futureCandidates = modules.map((module, index) => ({ module, index }))
+    .filter(({ index }) => index > currentIndex);
+  // Mobile/product clarity: the journey rail only surfaces future modules that
+  // already have meaningful authored framing. Bare placeholder modules such as
+  // "À venir" belong in the compact future count, not beside the real next module.
+  const futureModules = futureCandidates
+    .filter(({ module }) => module.title !== 'À venir' && Boolean(module.summary))
     .slice(0, 3);
   const rail = futureModules.map(({ module, index }) => {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
     const number = String(index + 1).padStart(2, '0');
     return `<li class="journey-node ${status}"><span class="journey-dot"></span><span class="path-number">${number}</span><div><small>${moduleStatusLabel(status, false)}</small><strong>${module.title}</strong>${module.summary ? `<p>${module.summary}</p>` : ''}</div></li>`;
   }).join('');
-  const hiddenFutureCount = Math.max(0, modules.length - currentIndex - 1 - futureModules.length);
+  const hiddenFutureCount = Math.max(0, futureCandidates.length - futureModules.length);
   const futureNote = hiddenFutureCount > 0
     ? `<p class="journey-future-note">+${hiddenFutureCount} module${hiddenFutureCount > 1 ? 's' : ''} prévu${hiddenFutureCount > 1 ? 's' : ''} plus loin dans le parcours — affiché${hiddenFutureCount > 1 ? 's' : ''} quand ils deviennent pertinents.</p>`
     : '';
@@ -323,10 +438,10 @@ function renderModulesRecap() {
 function renderMarketIntelligence() {
   const indices = document.getElementById('market-indices');
   if (indices) {
-    indices.innerHTML = MARKET_DEMO.indices.map(item => `
+    indices.innerHTML = MARKET_DEMO.indices.map((item, i) => `
       <article class="index-card">
         <div class="index-card-head"><strong>${item.label}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Mode pédagogique</span></div>
-        <svg class="index-sparkline" viewBox="0 0 120 30" aria-hidden="true"><path d="M2 18 L22 18 L42 12 L62 20 L82 10 L102 16 L118 14"/></svg>
+        ${candlestickSpark(i)}
         <p>${item.description}</p>
       </article>
     `).join('');
@@ -340,7 +455,7 @@ function renderMarketIntelligence() {
 }
 
 // The real, curriculum-flattened list of lessons with actual authored content —
-// M0 and M1.1 appear here; M2-M9 still have no authored lessons. Drives the
+// M1-M9 have none yet (empty lessons[]), so they never appear here. Drives the
 // deep "Fil de maîtrise" view on Progression; Terminal shows only the current
 // lesson via resolveContinueTarget() — same competencyLevel() underneath, so the
 // two screens can never disagree about the same competency's real state.
@@ -763,8 +878,8 @@ function beadsAriaLabel(level, count = 4) {
 }
 
 // The next lesson actually authored right after this one in the curriculum — never a
-// guessed or invented competency. Returns null once no authored lesson follows,
-// which is the honest state the thread must show as "no next" then.
+// guessed or invented competency. Returns null once nothing real follows (M1–M9 are
+// still empty), which is the honest state the thread must show as "no next" then.
 function lessonAfter(curriculum, lessonId) {
   const flat = [];
   curriculum.modules.forEach(m => m.lessons.forEach(l => flat.push({ module: m, lesson: l })));
@@ -900,10 +1015,10 @@ function renderTerminalLeadComplete() {
 function renderTerminalMarketIntelligence() {
   const row = document.getElementById('terminal-mi-row');
   if (!row) return;
-  row.innerHTML = MARKET_DEMO.indices.map(item => `
+  row.innerHTML = MARKET_DEMO.indices.map((item, i) => `
     <div class="terminal-mi-idx">
       <div class="top"><b>${item.label}</b><span class="badge"><svg class="icon"><use href="#icon-blocked"/></svg>Mode pédagogique</span></div>
-      <svg class="index-sparkline" viewBox="0 0 120 30" aria-hidden="true"><path d="M2 18 L22 18 L42 12 L62 20 L82 10 L102 16 L118 14"/></svg>
+      ${candlestickSpark(i)}
     </div>`).join('');
 }
 
@@ -982,6 +1097,11 @@ function renderState() {
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'RD';
   const activeLessonProgress = DDALearning.getLessonProgress(prototypeState, activeLessonId);
   const xp = DDALearning.totalXp(DDA.curriculum, prototypeState) || 20;
+  // Deliberately out of scope for the Daily Value Loop correction: `complete`
+  // only tracks M0.1's own quizComplete and drives the certificate preview
+  // below — Parcours itself follows resolveContinueTarget(), never a pinned
+  // module (the old isRenderableModule() helper is gone: it hardcoded M0.1).
+  const complete = Boolean(activeLessonProgress.quizComplete);
   const continueTarget = resolveContinueTarget();
   // CEO correction (Daily Value Loop V1.1): continueTarget is now honestly null
   // once every authored lesson is validated — there is no "current" lesson left
@@ -1050,24 +1170,9 @@ function renderState() {
 
   renderNavCurrentLesson(continueTarget);
 
-  renderLessonProgressUI(activeLessonId, activeLessonDef, {
-    loopId: 'lesson-loop', outlineListId: 'lesson-outline-list', gateId: 'quiz-block', evalName: 'quiz',
-    resultId: 'result-card', markUnderstoodId: 'mark-understood', savedStateId: 'saved-state', resultStatsId: 'result-stats'
-  });
-  renderLessonProgressUI(lessonM02Id, lessonM02Def, {
-    loopId: 'lesson-loop-m2', outlineListId: 'lesson-outline-list-m2', gateId: 'm2-quiz-block', evalName: 'm2-quiz',
-    resultId: 'result-card-m2', markUnderstoodId: 'mark-understood-m2', savedStateId: 'saved-state-m2', resultStatsId: 'result-stats-m2'
-  });
-  renderLessonProgressUI(lessonM03Id, lessonM03Def, {
-    loopId: 'lesson-loop-m3', outlineListId: 'lesson-outline-list-m3', gateId: 'm3-quiz-block', evalName: 'm3-quiz',
-    resultId: 'result-card-m3', markUnderstoodId: 'mark-understood-m3', savedStateId: 'saved-state-m3', resultStatsId: 'result-stats-m3'
-  });
-  if (lessonM11Def) {
-    renderLessonProgressUI(lessonM11Id, lessonM11Def, {
-      loopId: 'lesson-loop-m11', outlineListId: 'lesson-outline-list-m11', gateId: 'm1-quiz-block', evalName: 'm1-quiz',
-      resultId: 'result-card-m11', markUnderstoodId: 'mark-understood-m11', savedStateId: 'saved-state-m11', resultStatsId: 'result-stats-m11'
-    });
-  }
+  // Restore every mounted lesson's progress UI from stored state — one
+  // registry-driven loop covers all of them, ids derived by lessonUiIds.
+  mountedLessons.forEach(entry => renderLessonProgressUI(entry.id, entry.meta.lesson, lessonUiIds(entry)));
 
   document.getElementById('resume-device').hidden = !prototypeState.user;
   document.body.classList.toggle('low-data', Boolean(prototypeState.preferences.lowData));
@@ -1143,21 +1248,9 @@ function storePreviousView(view) {
 let currentView = 'dashboard';
 let previousView = readStoredPreviousView();
 const LESSON_VIEW_IDS = new Set(Object.values(LESSON_VIEW_ID));
-const LESSON_ID_BY_VIEW_ID = Object.freeze(Object.fromEntries(
-  Object.entries(LESSON_VIEW_ID).map(([lessonId, viewId]) => [viewId, lessonId])
-));
-
-// Preserve the documented M0 in-module deep-link behaviour for isolated
-// lesson testing, while enforcing the actual cross-module prerequisite the
-// curriculum engine already knows: an authored M1+ lesson cannot be opened
-// until the preceding authored module is complete. This closes the specific
-// M0 → M1 bridge without inventing a second progression model.
-function isLockedModuleLessonView(viewId) {
-  const lessonId = LESSON_ID_BY_VIEW_ID[viewId];
-  if (!lessonId) return false;
-  const found = DDALearning.findLesson(DDA.curriculum, lessonId);
-  return Boolean(found && DDALearning.moduleStatus(DDA.curriculum, found.module.id, prototypeState) === DDALearning.MODULE_STATUS.LOCKED);
-}
+// Le verrou séquentiel est la chaîne déclarée par le registre (`prerequisite`
+// de chaque leçon), jamais une carte parallèle écrite à la main.
+const LESSON_PREREQUISITE = Object.freeze(Object.fromEntries(LESSON_REGISTRY.filter(entry => entry.prerequisite).map(entry => [entry.viewId, entry.prerequisite])));
 
 function smartBackTarget() {
   if (previousView && titles[previousView] && !LESSON_VIEW_IDS.has(previousView) && previousView !== 'access') return previousView;
@@ -1166,25 +1259,19 @@ function smartBackTarget() {
 
 function showView(id, recordEvent = true) {
   if (id === 'back') id = smartBackTarget();
+  const prerequisiteLessonId = LESSON_PREREQUISITE[id];
+  if (prerequisiteLessonId && !DDALearning.getLessonProgress(prototypeState, prerequisiteLessonId).quizComplete) {
+    showToast('Cette leçon se débloque après la validation de l’étape précédente.');
+    id = 'path';
+  }
   const permission = viewPermissions[id];
   if (permission && !DDA.can(prototypeState, permission)) {
     prototypeState = DDA.track(prototypeState, 'access_denied', { view: id, permission });
     showToast('Termine ton inscription pour accéder à cette section.');
     id = 'access';
   }
-  if (isLockedModuleLessonView(id)) {
-    // This is a curriculum prerequisite, not a paid entitlement: keep the
-    // learner in the real Parcours and explain the next action rather than
-    // opening a later lesson through a direct hash or stale button.
-    prototypeState = DDA.track(prototypeState, 'access_denied', { view: id, permission: 'module_prerequisite' });
-    showToast('Valide d’abord le module précédent pour ouvrir cette leçon.');
-    id = 'path';
-  }
   views.forEach(view => view.classList.toggle('active', view.id === id));
   [...desktopItems, ...mobileItems].forEach(item => item.classList.toggle('active', item.dataset.view === id));
-  // Every authored lesson shares Focus Mode. Keep this derived from the
-  // lesson-view registry so a newly mounted lesson never accidentally keeps
-  // distracting topbar affordances visible while M0 lessons hide them.
   document.body.classList.toggle('lesson-focus', LESSON_VIEW_IDS.has(id));
   // Acquisition V1 — #landing is a public marketing surface, not an app screen:
   // it must never show the authenticated chrome (sidebar/plan/profile, topbar,
@@ -1207,9 +1294,23 @@ function showView(id, recordEvent = true) {
       campaign: prototypeState.acquisition?.campaign
     });
   }
+  // Funnel measurability (mandate §18): #access is the real start of both the
+  // signup step (name/email) and the qualification step (level/goal/time) —
+  // no real distinction exists yet between the two screens, so both fire here.
+  if (id === 'access' && !prototypeState.user) {
+    trackEvent('signup_started', {});
+    trackEvent('qualification_started', {});
+  }
 }
 
-buttons.forEach(button => button.addEventListener('click', () => showView(button.dataset.view)));
+buttons.forEach(button => button.addEventListener('click', () => {
+  // Acquisition V1 landing funnel: any button explicitly opting in via
+  // data-analytics is recorded under its own real event name before the
+  // normal navigation happens — never a substitute for view_opened, which
+  // still fires for every navigation regardless of this attribute.
+  if (button.dataset.analytics) trackEvent(button.dataset.analytics, { view: button.dataset.view });
+  showView(button.dataset.view);
+}));
 
 const resources = {
   checklist: { title: 'Checklist avant une décision', label: 'Guide · DDA Free', body: '<ol><li>Ai-je compris le contexte du marché ?</li><li>Mon scénario est-il écrit clairement ?</li><li>Où mon idée devient-elle invalide ?</li><li>Quel risque suis-je prêt à accepter ?</li><li>Est-ce une décision prévue ou impulsive ?</li><li>Puis-je justifier mon choix sans parler de gain ?</li></ol>' },
@@ -1368,10 +1469,20 @@ document.getElementById('support-form').addEventListener('submit', event => {
   showToast('Brouillon de demande préparé — aucun envoi réel.');
 });
 
-// The active reader can be M1.1 after a persisted M0 completion. Its authored
-// lesson shell intentionally has no M0 video-demo control, so bind this
-// optional affordance only when the current reader renders it.
-document.getElementById('play-demo')?.addEventListener('click', event => {
+function bindNotifyButton(viewId, buttonId, prefKey, label) {
+  document.getElementById(buttonId)?.addEventListener('click', () => {
+    saveState({ preferences: { ...prototypeState.preferences, [prefKey]: true } });
+    trackEvent('preference_updated', { preference: prefKey, enabled: 'true' });
+    const note = document.getElementById(`${viewId}-notify-note`);
+    if (note) note.textContent = 'Préférence enregistrée sur cet appareil — aucune inscription réelle envoyée.';
+    showToast(`Tu seras averti localement quand ${label} sera activé.`);
+  });
+}
+bindNotifyButton('community', 'community-notify', 'communityNotify', 'la Communauté');
+bindNotifyButton('practice', 'practice-notify', 'practiceNotify', 'la Pratique avancée');
+bindNotifyButton('intelligence', 'intelligence-notify', 'intelligenceNotify', 'l’Intelligence DDA');
+
+document.getElementById('play-demo').addEventListener('click', event => {
   const caption = document.getElementById('video-caption');
   event.currentTarget.textContent = event.currentTarget.textContent === '▶' ? 'Ⅱ' : '▶';
   caption.textContent = event.currentTarget.textContent === 'Ⅱ' ? 'Illustration — vidéo à venir' : 'Une décision commence par l’observation.';
@@ -1394,10 +1505,12 @@ function bindMarkUnderstood(lessonId, ids) {
   });
 }
 
-bindMarkUnderstood(activeLessonId, { buttonId: 'mark-understood', savedStateId: 'saved-state', scrollToId: 'exercise-block' });
-bindMarkUnderstood(lessonM02Id, { buttonId: 'mark-understood-m2', savedStateId: 'saved-state-m2', scrollToId: 'm2-observe-4-block' });
-bindMarkUnderstood(lessonM03Id, { buttonId: 'mark-understood-m3', savedStateId: 'saved-state-m3', scrollToId: 'm3-observe-4-block' });
-if (lessonM11Def) bindMarkUnderstood(lessonM11Id, { buttonId: 'mark-understood-m11', savedStateId: 'saved-state-m11', scrollToId: 'm1-exercise-case-block' });
+// « J'ai compris » de chaque leçon montée — ids et ancre de scroll dérivés
+// du registre (lessonUiIds + understoodScrollTo), plus de bloc par leçon.
+mountedLessons.forEach(entry => {
+  const ui = lessonUiIds(entry);
+  bindMarkUnderstood(entry.id, { buttonId: ui.markUnderstoodId, savedStateId: ui.savedStateId, scrollToId: entry.understoodScrollTo });
+});
 
 document.getElementById('signup-form').addEventListener('submit', event => {
   event.preventDefault();
@@ -1413,6 +1526,7 @@ document.getElementById('signup-form').addEventListener('submit', event => {
   if (invalidFields.length) { error.textContent = 'Complète les champs et confirme le stockage local.'; invalidFields[0].focus(); return; }
   error.textContent = '';
   saveState({ user: DDA.createUser(name, email) });
+  trackEvent('signup_completed', {});
   event.currentTarget.hidden = true;
   document.getElementById('onboarding-form').hidden = false;
   document.getElementById('step-dot-2').classList.add('active');
@@ -1433,6 +1547,7 @@ document.getElementById('onboarding-form').addEventListener('submit', async even
   saveState({ onboarding: { level, goal, time, complete: true } });
   updateLessonState(activeLessonId, { lessonViewed: true });
   trackEvent('onboarding_complete', { level, goal });
+  trackEvent('qualification_completed', { level, goal });
   setLoading(true);
   if (!prototypeState.preferences.lowData) await new Promise(resolve => setTimeout(resolve, 450));
   setLoading(false);
@@ -1501,61 +1616,33 @@ function bindQuestion(lessonId, question, options) {
   }));
 }
 
-bindQuestion(activeLessonId, { role: 'exercise', name: activeLessonDef.practice.id, successText: activeLessonDef.practice.successText });
-bindQuestion(activeLessonId, { role: 'quiz', name: activeLessonDef.evaluation.id, successText: activeLessonDef.evaluation.successText });
-// Learning Experience & Progression Depth V1: practice role, never gates
-// exerciseComplete/quizComplete — a real decision moment with retry, same
-// pattern as M0.2/M0.3's ungated practice checks.
-const m01ComparisonChoice = findLessonBlock(activeLessonDef, 'comparison-choice');
-if (m01ComparisonChoice) bindQuestion(activeLessonId, { role: 'practice', name: m01ComparisonChoice.id, successText: 'Bonne lecture.' });
-
-// Golden Lesson #2 — Support & Résistance. Phases B/D/E/F are practice reasoning
-// checks (no gating role: they only ever show explanatory feedback). Phase G's
-// zone identification is the exercise gate; its short comprehension question is
-// the quiz gate — the same two-gate shape as M0.1, mirrored on purpose.
-const m2Identify1 = findLessonBlock(lessonM02Def, 'm2-identify-1');
-const m2Identify2 = findLessonBlock(lessonM02Def, 'm2-identify-2');
-const m2MythLine = findLessonBlock(lessonM02Def, 'm2-myth-line');
-const m2SpotError = findLessonBlock(lessonM02Def, 'm2-spot-error');
-const m2Challenge = findLessonBlock(lessonM02Def, 'm2-challenge-zone');
-const m2QuizBlock = findLessonBlock(lessonM02Def, 'm2-quiz');
-
-bindQuestion(lessonM02Id, { role: 'practice', name: m2Identify1.id, successText: m2Identify1.successText }, { revealId: `${m2Identify1.id}-reveal` });
-bindQuestion(lessonM02Id, { role: 'practice', name: m2Identify2.id, successText: m2Identify2.successText }, { revealId: `${m2Identify2.id}-reveal` });
-bindQuestion(lessonM02Id, { role: 'practice', name: m2MythLine.id, successText: 'Bonne lecture.' });
-bindQuestion(lessonM02Id, { role: 'practice', name: m2SpotError.id, successText: 'Bon réflexe critique.' });
-bindQuestion(lessonM02Id, { role: 'exercise', name: m2Challenge.id, successText: m2Challenge.successText }, { gateId: 'm2-quiz-block', revealId: `${m2Challenge.id}-reveal` });
-bindQuestion(lessonM02Id, { role: 'quiz', name: m2QuizBlock.data.id, successText: m2QuizBlock.data.successText }, { resultId: 'result-card-m2', savedStateId: 'saved-state-m2' });
-
-// M0 Build Tranche — Lire une tendance. Three ungated classify pairs (practice
-// role: reasoning checks only, no gating) then a défi final (exercise role,
-// unlocks the quiz gate) then the quiz itself — the same two-gate shape as
-// M0.1/M0.2, mirrored on purpose (a real DDA product convention now, not a
-// content copy: the chart geometry, questions and feedback are all new).
-const m3Classify1 = findLessonBlock(lessonM03Def, 'm3-classify-1');
-const m3Classify2 = findLessonBlock(lessonM03Def, 'm3-classify-2');
-const m3Classify3 = findLessonBlock(lessonM03Def, 'm3-classify-3');
-const m3Challenge = findLessonBlock(lessonM03Def, 'm3-challenge');
-const m3QuizBlock = findLessonBlock(lessonM03Def, 'm3-quiz');
-
-bindQuestion(lessonM03Id, { role: 'practice', name: m3Classify1.id, successText: 'Bonne lecture.' });
-bindQuestion(lessonM03Id, { role: 'practice', name: m3Classify2.id, successText: 'Bonne lecture.' });
-bindQuestion(lessonM03Id, { role: 'practice', name: m3Classify3.id, successText: 'Bonne lecture.' });
-bindQuestion(lessonM03Id, { role: 'exercise', name: m3Challenge.id, successText: 'Bonne lecture — direction confirmée sans aide.' }, { gateId: 'm3-quiz-block' });
-bindQuestion(lessonM03Id, { role: 'quiz', name: m3QuizBlock.data.id, successText: m3QuizBlock.data.successText }, { resultId: 'result-card-m3', savedStateId: 'saved-state-m3' });
-
-if (lessonM11Def) {
-  const m11Buy = findLessonBlock(lessonM11Def, 'm1-buy-pressure');
-  const m11Sell = findLessonBlock(lessonM11Def, 'm1-sell-pressure');
-  const m11Balance = findLessonBlock(lessonM11Def, 'm1-balance');
-  const m11Exercise = findLessonBlock(lessonM11Def, 'm1-exercise');
-  const m11Quiz = findLessonBlock(lessonM11Def, 'm1-quiz');
-  bindQuestion(lessonM11Id, { role: 'practice', name: m11Buy.id, successText: 'Bonne lecture du déséquilibre.' });
-  bindQuestion(lessonM11Id, { role: 'practice', name: m11Sell.id, successText: 'Bonne lecture du déséquilibre.' });
-  bindQuestion(lessonM11Id, { role: 'practice', name: m11Balance.id, successText: 'Bonne lecture de l’équilibre relatif.' });
-  bindQuestion(lessonM11Id, { role: 'exercise', name: m11Exercise.id, successText: lessonM11Def.practice.successText }, { gateId: 'm1-quiz-block' });
-  bindQuestion(lessonM11Id, { role: 'quiz', name: m11Quiz.data.id, successText: m11Quiz.data.successText }, { resultId: 'result-card-m11', savedStateId: 'saved-state-m11' });
+// Les liaisons [data-question] de chaque leçon montée découlent de son entrée
+// de registre : le rôle ('practice'|'exercise'|'quiz') pilote les effets de
+// complétion de bindQuestion — un `practice` ne fait jamais semblant d'être
+// un verrou, l'`exercise` est le seul à déverrouiller le quiz (`gate`), le
+// `quiz` le seul à ouvrir la carte résultat (`result`). Les textes de succès
+// pointent la source honnête : '@block' → successText du bloc authored,
+// '@practice' → lesson.practice.successText, '@data' → quiz data.successText,
+// sinon le texte littéral choisi pour cette question.
+function bindRegistryQuestions(entry) {
+  const lesson = entry.meta.lesson;
+  const ui = lessonUiIds(entry);
+  entry.questions.forEach(descriptor => {
+    const block = findLessonBlock(lesson, descriptor.block);
+    if (!block) return;
+    let successText = descriptor.success;
+    if (successText === '@block') successText = block.successText;
+    else if (successText === '@practice') successText = lesson.practice?.successText;
+    else if (successText === '@data') successText = block.data?.successText;
+    const options = {};
+    if (descriptor.gate) options.gateId = ui.gateId;
+    if (descriptor.result) { options.resultId = ui.resultId; options.savedStateId = ui.savedStateId; }
+    if (descriptor.reveal) options.revealId = `${descriptor.block}-reveal`;
+    const name = descriptor.role === 'quiz' ? (block.data?.id || block.id) : block.id;
+    bindQuestion(entry.id, { role: descriptor.role, name, successText }, options);
+  });
 }
+mountedLessons.forEach(bindRegistryQuestions);
 
 function updateNetworkState() {
   const online = navigator.onLine;
@@ -1573,11 +1660,10 @@ function resetPilot() {
   document.getElementById('signup-form').reset();
   document.getElementById('signup-form').hidden = false;
   document.getElementById('onboarding-form').hidden = true;
-  document.getElementById('result-card').hidden = true;
-  document.getElementById('result-card-m2').hidden = true;
-  document.getElementById('result-card-m3').hidden = true;
-  const m11Result = document.getElementById('result-card-m11');
-  if (m11Result) m11Result.hidden = true;
+  mountedLessons.forEach(entry => {
+    const card = document.getElementById(lessonUiIds(entry).resultId);
+    if (card) card.hidden = true;
+  });
   renderState();
   showView('access', false);
   showToast('Tes données ont été effacées.');
@@ -1655,6 +1741,12 @@ if (titles[initialView]) {
     '.landing-aperture',
     '.landing-method article',
     '.landing-institution > div',
+    '.landing-demo-grid article',
+    '.landing-problem-list li',
+    '.landing-steps-list li',
+    '.landing-plan-card',
+    '.landing-guardrails > *',
+    '.landing-final-cta > *',
     '.terminal-entry',
     '.terminal-lead',
     '.terminal-mi',
@@ -1666,11 +1758,18 @@ if (titles[initialView]) {
     '.journey-current',
     '.journey-node',
     '.panel',
-    '.lesson-main > *'
+    '.lesson-main > *',
+    '.library-entry',
+    '.resource-feature',
+    '.plan-card',
+    '.broker-row',
+    '.journal-entry-card'
   ].join(',');
 
   function prepare(root = document) {
-    const nodes = root.querySelectorAll(selector);
+    // querySelectorAll only matches descendants — when called with a single
+    // newly-added element as root, it must be considered too, not just its children.
+    const nodes = root !== document && root.matches?.(selector) ? [root, ...root.querySelectorAll(selector)] : root.querySelectorAll(selector);
     nodes.forEach((node, index) => {
       if (node.dataset.revealReady === 'true') return;
       node.dataset.revealReady = 'true';
@@ -1696,7 +1795,19 @@ if (titles[initialView]) {
     document.querySelectorAll(selector).forEach(node => node.classList.add('revealed'));
   } else {
     prepare();
-    const mutationObserver = new MutationObserver(() => prepare());
+    // Scoped to each mutation's own added nodes, never the whole document:
+    // renderState() replaces dozens of subtrees via innerHTML per learner
+    // action (each one itself a childList mutation), so a full-document
+    // re-scan on every mutation re-queries and re-observes the same targets
+    // over and over across a session, growing unboundedly instead of doing
+    // fixed, bounded work per render.
+    const mutationObserver = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === 1) prepare(node);
+        });
+      });
+    });
     mutationObserver.observe(document.body, { childList: true, subtree: true });
   }
 })();

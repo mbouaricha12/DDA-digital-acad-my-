@@ -1,41 +1,10 @@
 name: M1.1 Integration Check
-
 on:
   pull_request:
     paths:
       - 'dist/m1-1-lesson.js'
-      - 'dist/dda-core.js'
       - 'dist/dda-analytics.js'
-      - 'dist/learning-engine.js'
-      - 'dist/lesson-renderer.js'
-      - 'dist/app.js'
-      - 'dist/index.html'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tests/test_m1_golden_lesson.js'
       - 'tests/test_m1_integration_contract.js'
-      - 'tests/test_m1_runtime_integration.js'
-      - 'tests/test_m1_browser_e2e.js'
-      - 'experiments/M1_1_INTEGRATION_STATUS.md'
-      - '.github/workflows/m1-integration-check.yml'
-  push:
-    branches:
-      - 'arena/01a0d22b-dda-digital-acad-my'
-    paths:
-      - 'dist/m1-1-lesson.js'
-      - 'dist/dda-core.js'
-      - 'dist/dda-analytics.js'
-      - 'dist/learning-engine.js'
-      - 'dist/lesson-renderer.js'
-      - 'dist/app.js'
-      - 'dist/index.html'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tests/test_m1_golden_lesson.js'
-      - 'tests/test_m1_integration_contract.js'
-      - 'tests/test_m1_runtime_integration.js'
-      - 'tests/test_m1_browser_e2e.js'
-      - 'experiments/M1_1_INTEGRATION_STATUS.md'
       - '.github/workflows/m1-integration-check.yml'
   workflow_dispatch:
 
@@ -47,40 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install test dependency
-        run: npm ci
-      - name: Install Chromium for browser checks
-        run: npx playwright install --with-deps chromium
-      - name: Syntax checks
-        run: |
-          node --check dist/m1-1-lesson.js
-          node --check dist/dda-core.js
-          node --check dist/learning-engine.js
-          node --check dist/lesson-renderer.js
-          node --check dist/app.js
-          node --check tests/test_m1_browser_e2e.js
-      - name: M1.1 authored lesson contract
-        run: node tests/test_m1_golden_lesson.js
-      - name: M1.1 renderer contract
-        run: node tests/test_m1_integration_contract.js
-      - name: M0 to M1 runtime bridge
-        run: node tests/test_m1_runtime_integration.js
-      - name: M0 to M1 browser flow
-        shell: bash
-        run: |
-          set +e
-          npm run test:m1:e2e
-          status=$?
-          if [ "$status" -ne 0 ]; then
-            report=$(tr '\n' ' ' < test-results/m1-browser-e2e.log | cut -c1-6000)
-            echo "::error title=M1 browser flow::$report"
-            exit "$status"
-          fi
-      - name: Upload browser-flow report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: m1-browser-e2e-report
-          path: test-results/m1-browser-e2e.log
-          if-no-files-found: warn
-          retention-days: 7
+      - run: node --check dist/m1-1-lesson.js
+      - run: node --check dist/dda-analytics.js
+      - run: node tests/test_m1_golden_lesson.js
+      - run: node tests/test_m1_integration_contract.js

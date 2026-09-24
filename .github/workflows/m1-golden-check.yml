@@ -9,7 +9,7 @@ on:
       - '.github/workflows/m1-golden-check.yml'
   push:
     branches:
-      - 'arena/01a0d22b-dda-digital-acad-my'
+      - 'chatgpt/m1-1-golden-lesson'
     paths:
       - 'dist/m1-1-lesson.js'
       - 'tests/test_m1_golden_lesson.js'
