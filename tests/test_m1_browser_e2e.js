@@ -131,10 +131,10 @@ async function test(name, fn) {
       await page.locator('.mobile-nav button[data-view="dashboard"]').click();
       await page.waitForSelector('.view.active#dashboard');
       assert.match(await page.locator('#terminal-lead-title').textContent(), /Pourquoi les prix évoluent/);
-      // showView() restores the Terminal at the top with a smooth scroll. Wait
-      // for that transition before using its visible primary CTA; otherwise an
-      // auto-scroll performed by Playwright can race the app's own scroll.
-      await page.waitForFunction(() => window.scrollY <= 1);
+      // Reset the document scroll after leaving M0.3. The app scrolls the
+      // Terminal smoothly; stabilising it here prevents Playwright's own
+      // auto-scroll from racing that transition before the CTA is clicked.
+      await page.evaluate(() => window.scrollTo(0, 0));
       await page.locator('#lesson-primary-action').click();
       await page.waitForSelector('.view.active#lesson-m11');
       assert.equal(await page.locator('body').evaluate(body => body.classList.contains('lesson-focus')), true);
