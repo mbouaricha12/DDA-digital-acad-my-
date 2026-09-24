@@ -659,8 +659,8 @@
         <div class="membership-status-line"><span>Formule actuelle</span><strong id="membership-status">DDA Free</strong><small>Aucun achat actif</small></div>
 
         <div class="plan-grid">
-          <article class="plan-card current-plan"><p class="eyebrow">Ce que tu as aujourd’hui</p><h2>DDA Free</h2><p class="plan-tagline">Pour démarrer sérieusement, sans rien débourser.</p><ul><li>Parcours M0 et ses leçons</li><li>Exercices, quiz et Fil de maîtrise réel</li><li>Journal &amp; Plan</li><li>Market Intelligence (aperçu)</li></ul><span class="plan-state" id="free-plan-state">Formule active</span></article>
-          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">Ce que Premium approfondira</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><ul><li>Atelier Ressources Premium — laboratoire de gestion du risque</li><li>Aperçu de certification une fois M0.1 validé</li><li>Chaque brique ci-dessous, construite étape par étape</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aperçu local — aucun achat, aucun abonnement actif</small></article>
+          <article class="plan-card current-plan"><p class="eyebrow">Ce que tu as aujourd’hui</p><h2>DDA Free</h2><p class="plan-tagline">Pour démarrer sérieusement, sans rien débourser.</p><ul><li>Parcours M0 Fondations et ses leçons</li><li>Exercices, quiz et Fil de maîtrise réel</li><li>Journal &amp; Plan</li><li>Market Intelligence (aperçu)</li></ul><span class="plan-state" id="free-plan-state">Formule active</span></article>
+          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">Ce que Premium approfondira</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><ul><li>Modules M1+ (marchés financiers, ordres, organisation)</li><li>Atelier Ressources Premium — laboratoire de gestion du risque</li><li>Aperçu de certification une fois M0.1 validé</li><li>Chaque brique ci-dessous, construite étape par étape</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aperçu local — aucun achat, aucun abonnement actif</small></article>
         </div>
 
         <section class="panel membership-roadmap">
@@ -1015,7 +1015,15 @@
   <div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
   <div class="storage-warning" id="storage-warning" hidden role="status" aria-live="polite"><svg class="icon"><use href="#icon-blocked"/></svg><span>Stockage indisponible sur cet appareil — ta progression ne sera pas conservée après la fermeture de cette page.</span></div>
   <div class="gate-layer" id="gate-layer" hidden role="dialog" aria-modal="true" aria-labelledby="gate-title">
-    <div class="gate-card"><button class="reader-close" id="gate-close" aria-label="Fermer">×</button><span class="gate-symbol"><svg class="icon"><use href="#icon-spark"/></svg></span><p class="eyebrow gold">DDA Premium</p><h2 id="gate-title">Cette expérience sera disponible avec Premium.</h2><p>Aucun achat ni paiement réel n’est proposé ici.</p><button class="primary-action" id="gate-preview">Voir la formule Premium <span>→</span></button></div>
+    <div class="gate-card">
+      <button class="reader-close" id="gate-close" aria-label="Fermer">×</button>
+      <span class="gate-symbol"><svg class="icon"><use href="#icon-spark"/></svg></span>
+      <p class="eyebrow gold" id="gate-eyebrow">DDA Premium</p>
+      <h2 id="gate-title">Cette expérience sera disponible avec Premium.</h2>
+      <p id="gate-description">Aucun achat ni paiement réel n’est proposé ici.</p>
+      <button class="primary-action" id="gate-unlock" hidden>Activer l’aperçu Standard (simulation) <span>→</span></button>
+      <button class="primary-action" id="gate-preview">Voir la formule Premium <span>→</span></button>
+    </div>
   </div>
   <script src="m1-1-lesson.js"></script>
   <script src="m1-2-lesson.js"></script>

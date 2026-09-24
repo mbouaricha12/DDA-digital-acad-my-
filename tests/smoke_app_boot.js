@@ -135,8 +135,18 @@ async function completeLesson({ viewId, markId, exerciseName, quizName, resultId
   });
   await completeLesson({
     viewId: 'lesson-m03', markId: 'mark-understood-m3',
-    exerciseName: 'm3-challenge', quizName: 'm3-quiz', resultId: 'result-card-m3', nextViewId: 'lesson-m11'
+    exerciseName: 'm3-challenge', quizName: 'm3-quiz', resultId: 'result-card-m3'
   });
+
+  await test('Standard entitlement gate (CDCP-OS §4.2, Option B): Free user attempting M1.1 opens the Standard preview gate', () => {
+    click(document.querySelector('#result-card-m3 [data-view="lesson-m11"]'));
+    assert.equal(document.getElementById('gate-layer').hidden, false, 'gate modal opens for unentitled M1 lesson');
+    assert.ok(document.getElementById('gate-title').textContent.includes('Standard'), 'gate mentions Standard tier');
+    click(document.getElementById('gate-unlock'));
+    assert.equal(document.getElementById('gate-layer').hidden, true, 'gate closes on unlock');
+    assert.equal(activeViewId(), 'lesson-m11', 'learner smoothly lands on M1.1 after unlock');
+  });
+
   await completeLesson({
     viewId: 'lesson-m11', markId: 'mark-understood-m11',
     exerciseName: 'm1-exercise', quizName: 'm1-quiz', resultId: 'result-card-m11', nextViewId: 'lesson-m12'

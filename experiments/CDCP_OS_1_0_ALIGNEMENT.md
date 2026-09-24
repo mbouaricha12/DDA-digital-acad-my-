@@ -32,12 +32,17 @@ _Objet : classement du livrable « DDA_Cahier_des_Charges_Produit_OS_V1.md » te
 
 ### D1 — §4.2 : matrice des droits vs accès M1 dans le prototype
 
-V2.1 autorise **M0 seul en Découverte** (M0–M6 Standard, M0–M9 Pro). Le prototype ouvre actuellement M0 **et M1** à tout inscrit « Free » (permission `lesson_m01` dérivée du registre sur toutes les vues de leçons), tandis que la carte Membership affiche déjà « DDA Free : Parcours M0 et ses leçons » — incohérence visible entre le libellé commercial et le comportement du prototype.
+V2.1 autorise **M0 seul en Découverte** (M0–M6 Standard, M0–M9 Pro). Le prototype ouvrait initialement M0 et M1 à tout inscrit « Free » (permission `lesson_m01` partagée), tandis que la carte Membership affichait « DDA Free : Parcours M0 et ses leçons » — incohérence entre le libellé commercial et le comportement du prototype.
 
-- **Option A** — conserver M1 ouvert dans le prototype, documenté explicitement comme choix de démonstration locale non commerciale (rien n'est publié ni vendu) : la démo CEO montre la vraie chaîne M0→M1 déjà construite.
-- **Option B** — simuler dès maintenant le verrou Standard sur M1+ (honest lock « réservé à Standard — aperçu ») : alignement strict avec la matrice, au prix d'une démo moins riche des leçons M1 authored.
+- **Option A** — conserver M1 ouvert dans le prototype, documenté explicitement comme choix de démonstration locale non commerciale.
+- **Option B** — simuler dès maintenant le verrou Standard sur M1+ (honest lock « réservé à Standard — aperçu » avec déblocage simulation 1-clic) : alignement strict avec la matrice.
 
-**Statut : EN ATTENTE DE DÉCISION DIRECTION.** En attendant : statu quo (Option A de fait), aucune modification silencieuse.
+**Statut : ARBITRÉ PAR LA DIRECTION (24 septembre 2026) — OPTION B RETENUE.**
+- Mise en œuvre : `LESSON_REGISTRY` attribue `lesson_m01` aux leçons M0 (Free/Découverte) et `advanced_modules` aux leçons M1+ (Standard/Pro) ;
+- `viewPermissions` en dérive les droits sans liste manuelle parallèle ;
+- Navigation vers M1.1/M1.2/M1.3 par un compte Free ouvre la modale dédiée « Offre Standard & Pro · M1+ — Ce module est réservé à l’offre Standard » ;
+- Déblocage simulation 1-clic (« Activer l'aperçu Standard (simulation) ») permettant d'expérimenter M1 immédiatement sans friction ;
+- Test de contrat structurel (`test_lesson_registry.js`), d'intégration runtime (`test_m1_runtime_contract.js`) et smoke boot E2E (`smoke_app_boot.js`) mis à jour et validés verts.
 
 ### D2 — Portées tronquées du document
 

@@ -55,7 +55,7 @@ test('every M1 lesson restores its progress UI from stored state on every render
 test('M1.3 remains inside the same curriculum/navigation source of truth', () => {
   assert.ok(app.includes("id: 'M1.2', viewId: 'lesson-m12'"), 'M1.2 route declared once, in the registry');
   assert.ok(app.includes("id: 'M1.3', viewId: 'lesson-m13'"), 'M1.3 route declared once, in the same registry');
-  assert.ok(app.includes("...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, 'lesson_m01']))"), 'lesson views share the free-tier entitlement by construction');
+  assert.ok(app.includes("...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.permission || 'lesson_m01']))"), 'lesson views derive their entitlement from the registry');
 });
 
 test('low-data shell cache includes all authored M1 lesson dependencies', () => {

@@ -189,10 +189,20 @@ test('app.js actually derives its maps from the registry (no parallel hand-writt
     'const LESSON_VIEW_ID = Object.freeze(Object.fromEntries(LESSON_REGISTRY.map(',
     'const LESSON_PREREQUISITE = Object.freeze(Object.fromEntries(LESSON_REGISTRY.filter(',
     '...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.title]))',
-    "...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, 'lesson_m01']))",
+    "...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.permission || 'lesson_m01']))",
     'renderLessonProgressUI(entry.id, entry.meta.lesson, lessonUiIds(entry))',
     'mountedLessons.forEach(bindRegistryQuestions)'
   ].forEach(token => assert.ok(app.includes(token), `app.js derives: ${token.slice(0, 60)}…`));
+});
+
+test('registry declares the honest entitlement tier for each lesson (CDCP-OS §4.2 / D1 Option B)', () => {
+  REGISTRY.forEach(entry => {
+    if (entry.id.startsWith('M0.')) {
+      assert.strictEqual(entry.permission || 'lesson_m01', 'lesson_m01', `${entry.id} belongs to Free/Découverte tier (lesson_m01)`);
+    } else {
+      assert.strictEqual(entry.permission, 'advanced_modules', `${entry.id} requires Standard/Pro tier (advanced_modules)`);
+    }
+  });
 });
 
 console.log(`\nRESULT: ${pass} Lesson Registry structural checks passed`);
