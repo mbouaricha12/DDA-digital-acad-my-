@@ -132,7 +132,13 @@ async function test(name, fn) {
       await page.waitForSelector('.view.active#dashboard');
       assert.match(await page.locator('#terminal-lead-title').textContent(), /Pourquoi les prix évoluent/);
       await page.locator('#lesson-primary-action').click();
-      await page.waitForSelector('.view.active#lesson-m11');
+      await page.waitForTimeout(100);
+      const m1Route = await page.evaluate(() => ({
+        active: document.querySelector('.view.active')?.id,
+        hash: window.location.hash,
+        actionView: document.getElementById('lesson-primary-action')?.dataset.view
+      }));
+      assert.equal(m1Route.active, 'lesson-m11', `M1 route did not open: ${JSON.stringify(m1Route)}`);
       assert.equal(await page.locator('body').evaluate(body => body.classList.contains('lesson-focus')), true);
       assert.equal(await page.locator('#m1-quiz-block').getAttribute('aria-disabled'), 'true');
 
