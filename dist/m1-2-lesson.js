@@ -116,7 +116,7 @@
     }),
     Object.freeze({ type: 'quiz', id: 'm12-quiz', step: 'quiz', outline: evaluation.heading, locked: true, data: evaluation }),
     Object.freeze({ type: 'journal_link', id: 'm12-journal', step: 'review', prompt: 'Résume avec tes mots la différence entre ordre au marché, ordre limite, bid, ask et spread.', cta: 'Ouvrir Journal & Plan' }),
-    Object.freeze({ type: 'summary', id: 'm12-result', step: 'review', idSuffix: 'm12', data: Object.freeze({ heading: 'Compréhension des ordres et de l’exécution confirmée.', body: 'Tu sais distinguer bid, ask, spread, ordre au marché et ordre limite, et expliquer pourquoi le prix d’exécution peut différer du premier prix affiché.' }) })
+    Object.freeze({ type: 'summary', id: 'm12-result', step: 'review', idSuffix: 'm12', continueTo: Object.freeze({ view: 'lesson-m13', label: 'Continuer vers Comment les marchés s’organisent ?' }), data: Object.freeze({ heading: 'Compréhension des ordres et de l’exécution confirmée.', body: 'Tu sais distinguer bid, ask, spread, ordre au marché et ordre limite, et expliquer pourquoi le prix d’exécution peut différer du premier prix affiché.' }) })
   ]);
 
   return Object.freeze({

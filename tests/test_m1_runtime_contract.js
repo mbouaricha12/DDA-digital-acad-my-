@@ -10,42 +10,58 @@ const html = fs.readFileSync(path.join(root, 'dist', 'index.html'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'dist', 'sw.js'), 'utf8');
 const m11 = require('../dist/m1-1-lesson.js');
 const m12 = require('../dist/m1-2-lesson.js');
+const m13 = require('../dist/m1-3-lesson.js');
 
 let pass = 0;
 function test(name, fn) { fn(); pass++; console.log('PASS -', name); }
 
-test('M1.1 and M1.2 both have dedicated rendered lesson views', () => {
-  ['lesson-m11', 'lesson-m11-main', 'lesson-m11-outline', 'lesson-m12', 'lesson-m12-main', 'lesson-m12-outline']
+test('M1.1, M1.2 and M1.3 all have dedicated rendered lesson views', () => {
+  ['lesson-m11', 'lesson-m11-main', 'lesson-m11-outline',
+   'lesson-m12', 'lesson-m12-main', 'lesson-m12-outline',
+   'lesson-m13', 'lesson-m13-main', 'lesson-m13-outline']
     .forEach(id => assert.ok(html.includes(`id="${id}"`), id));
 });
 
-test('lesson prerequisites enforce M0.3 → M1.1 → M1.2 sequence', () => {
-  assert.ok(app.includes("'lesson-m11': 'M0.3'"));
-  assert.ok(app.includes("'lesson-m12': 'M1.1'"));
+// Lesson Registry tranche: the prerequisite chain is declared once per lesson
+// inside LESSON_REGISTRY and derived into LESSON_PREREQUISITE — asserted here
+// in registry form instead of the old hand-typed literal map.
+test('lesson prerequisites enforce M0.3 → M1.1 → M1.2 → M1.3 sequence', () => {
+  assert.ok(/id: 'M1\.1', viewId: 'lesson-m11', suffix: 'm11', title: '[^']+', prerequisite: 'M0\.3'/.test(app), 'M1.1 declares M0.3 as its prerequisite');
+  assert.ok(/id: 'M1\.2', viewId: 'lesson-m12', suffix: 'm12', title: '[^']+', prerequisite: 'M1\.1'/.test(app), 'M1.2 declares M1.1 as its prerequisite');
+  assert.ok(/id: 'M1\.3', viewId: 'lesson-m13', suffix: 'm13', title: '[^']+', prerequisite: 'M1\.2'/.test(app), 'M1.3 declares M1.2 as its prerequisite');
+  assert.ok(app.includes('const LESSON_PREREQUISITE = Object.freeze(Object.fromEntries(LESSON_REGISTRY.filter'), 'the sequential gate is derived from the registry, not a parallel hand-written chain');
 });
 
-test('M1.1 completion leads to M1.2 without inventing a later lesson', () => {
-  const summary = m11.blocks.find(block => block.type === 'summary');
-  assert.strictEqual(summary.continueTo.view, 'lesson-m12');
+test('each M1 lesson hands off to the next and M1.3 closes the currently authored M1 path', () => {
+  const m11Summary = m11.blocks.find(block => block.type === 'summary');
+  assert.strictEqual(m11Summary.continueTo.view, 'lesson-m12');
   const m12Summary = m12.blocks.find(block => block.type === 'summary');
-  assert.ok(!m12Summary.continueTo, 'M1.2 must remain the end of the currently authored M1 path');
+  assert.strictEqual(m12Summary.continueTo.view, 'lesson-m13');
+  const m13Summary = m13.blocks.find(block => block.type === 'summary');
+  assert.ok(!m13Summary.continueTo, 'M1.3 must remain the end of the currently authored M1 path — no M2 CTA invented');
 });
 
-test('both M1 lessons restore their progress UI from stored state on every render', () => {
-  assert.ok(app.includes('renderLessonProgressUI(lessonM11Id, lessonM11Def'));
-  assert.ok(app.includes('renderLessonProgressUI(lessonM12Id, lessonM12Def'));
-  ['lesson-loop-m12','lesson-outline-list-m12','m12-quiz-block','result-card-m12','mark-understood-m12','saved-state-m12','result-stats-m12']
-    .forEach(token => assert.ok(app.includes(token), token));
+test('every M1 lesson restores its progress UI from stored state on every render', () => {
+  assert.ok(app.includes('renderLessonProgressUI(entry.id, entry.meta.lesson, lessonUiIds(entry))'), 'one registry-driven restore loop covers every mounted lesson');
+  assert.ok(app.includes("id: 'M1.1', viewId: 'lesson-m11', suffix: 'm11'"), 'M1.1 declared in the registry');
+  assert.ok(app.includes("id: 'M1.2', viewId: 'lesson-m12', suffix: 'm12'"), 'M1.2 declared in the registry');
+  assert.ok(app.includes("id: 'M1.3', viewId: 'lesson-m13', suffix: 'm13'"), 'M1.3 declared in the registry');
+  assert.ok(app.includes("quizBlock: 'm1-quiz'") && app.includes("quizBlock: 'm12-quiz'") && app.includes("quizBlock: 'm13-quiz'"), 'all M1 quiz gates derive from their authored quiz blocks');
+  // Full id-by-id proof that lessonUiIds() produces ids the real renderer
+  // actually emits (lesson-loop-m13, result-card-m13, …) lives in
+  // tests/test_lesson_registry.js, which renders each registered lesson.
 });
 
-test('M1.2 remains inside the same curriculum/navigation source of truth', () => {
-  assert.ok(app.includes("'M1.2': 'lesson-m12'"));
-  assert.ok(app.includes("'lesson-m12': 'lesson_m01'"));
+test('M1.3 remains inside the same curriculum/navigation source of truth', () => {
+  assert.ok(app.includes("id: 'M1.2', viewId: 'lesson-m12'"), 'M1.2 route declared once, in the registry');
+  assert.ok(app.includes("id: 'M1.3', viewId: 'lesson-m13'"), 'M1.3 route declared once, in the same registry');
+  assert.ok(app.includes("...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, 'lesson_m01']))"), 'lesson views share the free-tier entitlement by construction');
 });
 
-test('low-data shell cache includes both authored M1 lesson dependencies', () => {
+test('low-data shell cache includes all authored M1 lesson dependencies', () => {
   assert.ok(sw.includes('./m1-1-lesson.js'));
   assert.ok(sw.includes('./m1-2-lesson.js'));
+  assert.ok(sw.includes('./m1-3-lesson.js'));
 });
 
 console.log(`RESULT: ${pass} M1 runtime integration checks passed`);

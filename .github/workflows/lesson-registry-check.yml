@@ -1,0 +1,39 @@
+name: Lesson Registry Check
+
+on:
+  pull_request:
+    paths:
+      - 'dist/app.js'
+      - 'dist/index.html'
+      - 'dist/dda-core.js'
+      - 'dist/lesson-renderer.js'
+      - 'dist/m1-1-lesson.js'
+      - 'dist/m1-2-lesson.js'
+      - 'dist/m1-3-lesson.js'
+      - 'tests/test_lesson_registry.js'
+      - 'tests/smoke_app_boot.js'
+      - '.github/workflows/lesson-registry-check.yml'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node --check dist/app.js
+      - run: node --check dist/dda-core.js
+      - run: node --check dist/lesson-renderer.js
+      - run: node --check dist/learning-engine.js
+      - run: node --check dist/m1-3-lesson.js
+      # Structural contract: registry ↔ curriculum ↔ renderer ↔ mount points.
+      - run: node tests/test_lesson_registry.js
+      # Golden-lesson contracts (authored content, no signals/fabrication).
+      - run: node tests/test_m1_3_market_organization.js
+      # Cross-contracts pinning the derived maps' registry form.
+      - run: node tests/test_path_current_module.js
+      - run: node tests/test_m1_runtime_contract.js
+      # Full-app smoke boot (skips gracefully when jsdom is not installed).
+      - run: node tests/smoke_app_boot.js

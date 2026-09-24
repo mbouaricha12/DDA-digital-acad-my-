@@ -105,8 +105,11 @@
     },
 
     case_study(block) {
+      // Comme tous les autres blocs interactifs, le bloc porte un id stable
+      // `${id}-block` : les ancres de scroll « j'ai compris » (M1.1, M1.2,
+      // M1.3) et `understoodScrollTo` du Lesson Registry en dépendent.
       return `
-      <div class="example-callout">
+      <div class="example-callout" id="${block.id}-block">
         <svg class="icon"><use href="#icon-target"/></svg>
         <div><span>${block.label}</span><p>${block.text}</p></div>
       </div>`;
