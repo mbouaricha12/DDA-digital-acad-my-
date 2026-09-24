@@ -45,45 +45,45 @@ function startServer() {
   return new Promise(resolve => server.listen(PORT, '127.0.0.1', () => resolve(server)));
 }
 
-function seededState({ completeM0 = false } = {}) {
-  const complete = { lessonViewed: true, exerciseComplete: true, quizComplete: true };
-  return {
-    schemaVersion: 4,
-    user: { id: 'local-ada', name: 'Ada', email: 'ada@example.com', mode: 'device-demo' },
-    membership: { plan: 'free', status: 'demo' },
-    onboarding: { level: 'Débutant', goal: 'Comprendre les marchés', time: '10 minutes par jour', complete: true },
-    lessons: completeM0 ? { 'M0.1': complete, 'M0.2': complete, 'M0.3': complete } : {},
-    journal: { entries: [], plan: {} },
-    preferences: { lowData: false, reminders: false },
-    events: [],
-    acquisition: { visitorId: 'm1-e2e-local', source: null, medium: null, campaign: null, referrer: null, landingPath: null, firstSeenAt: null },
-    updatedAt: null
-  };
-}
-
-// Seed after the origin exists, then make a real navigation. This avoids relying
-// on addInitScript execution against about:blank, where localStorage is opaque
-// in some Chromium builds.
-async function newSeededPage(browser, options, target, viewport = { width: 390, height: 844 }) {
-  const context = await browser.newContext({ viewport });
-  const page = await context.newPage();
-  await page.goto(`${BASE}/#access`, { waitUntil: 'domcontentloaded' });
-  // Changing only a hash is a same-document navigation and this SPA intentionally
-  // has no hashchange listener. Set the target hash then explicitly reload, so
-  // boot-time routing reads the seeded state and requested route together.
-  await Promise.all([
-    page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
-    page.evaluate(({ state, hash }) => {
-      localStorage.setItem('dda-prototype-state-v4', JSON.stringify(state));
-      window.history.replaceState(null, '', hash);
-      window.location.reload();
-    }, { state: seededState(options), hash: target })
-  ]);
-  return { context, page };
-}
-
 async function activeView(page) {
   return page.locator('.view.active').evaluate(element => element.id);
+}
+
+async function createLearner(page) {
+  await page.goto(`${BASE}/#access`, { waitUntil: 'domcontentloaded' });
+  await page.fill('#first-name', 'Ada');
+  await page.fill('#email', 'ada@example.com');
+  await page.check('#consent');
+  await page.click('#signup-form button[type="submit"]');
+  await page.selectOption('#level', 'Débutant');
+  await page.selectOption('#goal', 'Comprendre les marchés');
+  await page.selectOption('#time', '10 minutes par jour');
+  await page.click('#onboarding-form button[type="submit"]');
+  await page.waitForSelector('.view.active#lesson');
+}
+
+async function chooseCorrect(page, questionName) {
+  const button = page.locator(`[data-question="${questionName}"] button[data-correct="true"]`).first();
+  await button.scrollIntoViewIfNeeded();
+  await button.click();
+}
+
+async function completeM0(page) {
+  await chooseCorrect(page, 'exercise');
+  await chooseCorrect(page, 'quiz');
+  await page.waitForSelector('#result-card:not([hidden])');
+  await page.locator('#result-card [data-view="lesson-m02"]').click();
+  await page.waitForSelector('.view.active#lesson-m02');
+
+  await chooseCorrect(page, 'm2-challenge-zone');
+  await chooseCorrect(page, 'm2-quiz');
+  await page.waitForSelector('#result-card-m2:not([hidden])');
+  await page.locator('#result-card-m2 [data-view="lesson-m03"]').click();
+  await page.waitForSelector('.view.active#lesson-m03');
+
+  await chooseCorrect(page, 'm3-challenge');
+  await chooseCorrect(page, 'm3-quiz');
+  await page.waitForSelector('#result-card-m3:not([hidden])');
 }
 
 let passed = 0;
@@ -107,33 +107,49 @@ async function test(name, fn) {
     browser = await chromium.launch();
 
     await test('M1.1 direct route stays locked until M0 is complete', async () => {
-      const { context, page } = await newSeededPage(browser, { completeM0: false }, '#lesson-m11');
-      await page.waitForSelector('.view.active#path');
-      assert.equal(await activeView(page), 'path');
-      assert.match(await page.locator('#toast').textContent(), /Valide d’abord le module précédent/);
-      assert.equal(await page.locator('body').evaluate(body => body.classList.contains('lesson-focus')), false);
+      const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const page = await context.newPage();
+      await createLearner(page);
+
+      // A fresh document models a real bookmarked/deep-linked route. It shares
+      // the learner's local state but must not expose M1.1 prematurely.
+      const directPage = await context.newPage();
+      await directPage.goto(`${BASE}/?m1-lock-check=1#lesson-m11`, { waitUntil: 'domcontentloaded' });
+      await directPage.waitForSelector('.view.active#path');
+      assert.equal(await activeView(directPage), 'path');
+      assert.match(await directPage.locator('#toast').textContent(), /Valide d’abord le module précédent/);
+      assert.equal(await directPage.locator('body').evaluate(body => body.classList.contains('lesson-focus')), false);
       await context.close();
     });
 
-    await test('M0 completion promotes M1.1 through Terminal, Parcours, Focus Mode and M1 feedback gates', async () => {
-      const { context, page } = await newSeededPage(browser, { completeM0: true }, '#dashboard');
-      await page.waitForSelector('.view.active#dashboard');
-      const seeded = await page.evaluate(() => ({
-        m01: window.DDA.load().lessons['M0.1'],
-        m02: window.DDA.load().lessons['M0.2'],
-        m03: window.DDA.load().lessons['M0.3'],
-        next: window.DDALearning.nextActionable(window.DDA.curriculum, window.DDA.load())?.lessonId
-      }));
-      assert.equal(seeded.m01?.quizComplete, true, `M0.1 seed lost: ${JSON.stringify(seeded)}`);
-      assert.equal(seeded.m02?.quizComplete, true, `M0.2 seed lost: ${JSON.stringify(seeded)}`);
-      assert.equal(seeded.m03?.quizComplete, true, `M0.3 seed lost: ${JSON.stringify(seeded)}`);
-      assert.equal(seeded.next, 'M1.1', `unexpected next lesson: ${JSON.stringify(seeded)}`);
+    await test('a real learner completes M0, then progresses through M1.1 with feedback, persistence and coherent surfaces', async () => {
+      const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const page = await context.newPage();
+      await createLearner(page);
+      await completeM0(page);
 
+      await page.locator('#result-card-m3 [data-view="dashboard"]').click();
+      await page.waitForSelector('.view.active#dashboard');
       assert.match(await page.locator('#terminal-lead-title').textContent(), /Pourquoi les prix évoluent/);
       await page.locator('#lesson-primary-action').click();
       await page.waitForSelector('.view.active#lesson-m11');
       assert.equal(await page.locator('body').evaluate(body => body.classList.contains('lesson-focus')), true);
       assert.equal(await page.locator('#m1-quiz-block').getAttribute('aria-disabled'), 'true');
+
+      // The M1 reader remains usable at every target mobile width.
+      for (const width of [320, 375, 390, 428]) {
+        await page.setViewportSize({ width, height: 844 });
+        const metrics = await page.evaluate(() => {
+          const button = document.getElementById('mark-understood-m11').getBoundingClientRect();
+          return {
+            overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+            width: button.width,
+            height: button.height
+          };
+        });
+        assert.ok(metrics.overflow <= 1, `${width}px has ${metrics.overflow}px horizontal overflow`);
+        assert.ok(metrics.width >= 44 && metrics.height >= 44, `${width}px primary control is smaller than 44px`);
+      }
 
       // M1 progress is durable before any graded gate is passed.
       await page.locator('#mark-understood-m11').click();
@@ -170,24 +186,6 @@ async function test(name, fn) {
       assert.match(await page.locator('.journey-current-tag').textContent(), /Comprendre les marchés financiers/);
       assert.equal((await page.locator('.journey-current .path-number').textContent()).trim(), '02');
       await context.close();
-    });
-
-    await test('M1.1 stays within the viewport and keeps a 44px primary control on mobile widths', async () => {
-      for (const width of [320, 375, 390, 428]) {
-        const { context, page } = await newSeededPage(browser, { completeM0: true }, '#lesson-m11', { width, height: 844 });
-        await page.waitForSelector('.view.active#lesson-m11');
-        const metrics = await page.evaluate(() => {
-          const button = document.getElementById('mark-understood-m11').getBoundingClientRect();
-          return {
-            overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-            width: button.width,
-            height: button.height
-          };
-        });
-        assert.ok(metrics.overflow <= 1, `${width}px has ${metrics.overflow}px horizontal overflow`);
-        assert.ok(metrics.width >= 44 && metrics.height >= 44, `${width}px primary control is smaller than 44px`);
-        await context.close();
-      }
     });
   } catch (error) {
     failures.push({ name: 'browser bootstrap', error });
