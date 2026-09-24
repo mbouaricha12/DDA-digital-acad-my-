@@ -131,30 +131,12 @@ async function test(name, fn) {
       await page.locator('.mobile-nav button[data-view="dashboard"]').click();
       await page.waitForSelector('.view.active#dashboard');
       assert.match(await page.locator('#terminal-lead-title').textContent(), /Pourquoi les prix évoluent/);
-      await page.evaluate(() => {
-        const primary = document.getElementById('lesson-primary-action');
-        window.__m1CtaTrace = [];
-        document.addEventListener('click', event => {
-          if (event.target === primary || primary.contains(event.target)) {
-            window.__m1CtaTrace.push({ phase: 'capture', target: event.target.tagName, actionView: primary.dataset.view, active: document.querySelector('.view.active')?.id });
-          }
-        }, { capture: true, once: true });
-        primary.addEventListener('click', event => {
-          window.__m1CtaTrace.push({ phase: 'target-capture', actionView: primary.dataset.view, active: document.querySelector('.view.active')?.id });
-          event.preventDefault();
-          event.stopImmediatePropagation();
-          window.showView(primary.dataset.view);
-        }, { capture: true, once: true });
-      });
+      // showView() restores the Terminal at the top with a smooth scroll. Wait
+      // for that transition before using its visible primary CTA; otherwise an
+      // auto-scroll performed by Playwright can race the app's own scroll.
+      await page.waitForFunction(() => window.scrollY <= 1);
       await page.locator('#lesson-primary-action').click();
-      await page.waitForTimeout(100);
-      const m1Route = await page.evaluate(() => ({
-        active: document.querySelector('.view.active')?.id,
-        hash: window.location.hash,
-        actionView: document.getElementById('lesson-primary-action')?.dataset.view,
-        trace: window.__m1CtaTrace
-      }));
-      assert.equal(m1Route.active, 'lesson-m11', `M1 route did not open: ${JSON.stringify(m1Route)}`);
+      await page.waitForSelector('.view.active#lesson-m11');
       assert.equal(await page.locator('body').evaluate(body => body.classList.contains('lesson-focus')), true);
       assert.equal(await page.locator('#m1-quiz-block').getAttribute('aria-disabled'), 'true');
 
