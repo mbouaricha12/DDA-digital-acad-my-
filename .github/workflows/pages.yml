@@ -44,6 +44,7 @@ jobs:
           node --check dist/app.js
       - name: Run authored-learning contracts
         run: |
+          node tests/test_m0_golden_lessons.js
           node tests/test_m1_golden_lesson.js
           node tests/test_m1_integration_contract.js
           node tests/test_m1_2_order_execution.js
