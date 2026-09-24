@@ -128,7 +128,7 @@ async function test(name, fn) {
       await createLearner(page);
       await completeM0(page);
 
-      await page.locator('.nav-item[data-view="dashboard"]').click();
+      await page.locator('.mobile-nav button[data-view="dashboard"]').click();
       await page.waitForSelector('.view.active#dashboard');
       assert.match(await page.locator('#terminal-lead-title').textContent(), /Pourquoi les prix évoluent/);
       await page.locator('#lesson-primary-action').click();
@@ -178,10 +178,10 @@ async function test(name, fn) {
       assert.match(await page.locator('#result-card-m11').textContent(), /formation du prix/i);
 
       // After validation, every connected surface agrees that M1 is the latest authored chapter.
-      await page.locator('.nav-item[data-view="dashboard"]').click();
+      await page.locator('.mobile-nav button[data-view="dashboard"]').click();
       await page.waitForSelector('.view.active#dashboard');
       assert.match(await page.locator('#terminal-lead-title').textContent(), /Toutes les leçons disponibles sont validées/);
-      await page.locator('.nav-item[data-view="path"]').click();
+      await page.locator('.mobile-nav button[data-view="path"]').click();
       await page.waitForSelector('.view.active#path');
       assert.match(await page.locator('.journey-current-tag').textContent(), /Comprendre les marchés financiers/);
       assert.equal((await page.locator('.journey-current .path-number').textContent()).trim(), '02');
