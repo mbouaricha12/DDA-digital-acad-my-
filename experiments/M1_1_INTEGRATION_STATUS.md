@@ -15,7 +15,7 @@ Implemented on this branch:
 - Progression automatically sees M1.1 because it already flattens authored curriculum lessons.
 
 Validation evidence on this branch:
-- GitHub Actions : `M1 Golden Lesson Check / contract` et `M1.1 Integration Check / check` sont au vert sur la PR #71 (24 septembre 2026).
+- GitHub Actions : `M1.1 Integration Check / check` est au vert sur la tête actuelle de la PR #71 (24 septembre 2026) ; il exécute les trois tests M1 ci-dessous. Le contrôle dédié `M1 Golden Lesson Check / contract` était également au vert sur le commit de bridge.
 - `node tests/test_m1_golden_lesson.js`: 10/10 checks passed.
 - `node tests/test_m1_integration_contract.js`: 4/4 checks passed.
 - `node tests/test_m1_runtime_integration.js`: 5/5 checks passed (real `dda-core.js` + `learning-engine.js` in an isolated runtime), including M0 lock, M0→M1 promotion and M1 resume.
