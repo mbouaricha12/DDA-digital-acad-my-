@@ -61,12 +61,16 @@ function seededState({ completeM0 = false } = {}) {
   };
 }
 
-async function newSeededContext(browser, options, viewport = { width: 390, height: 844 }) {
+// Seed after the origin exists, then make a real navigation. This avoids relying
+// on addInitScript execution against about:blank, where localStorage is opaque
+// in some Chromium builds.
+async function newSeededPage(browser, options, target, viewport = { width: 390, height: 844 }) {
   const context = await browser.newContext({ viewport });
-  await context.addInitScript(state => {
-    if (!localStorage.getItem('dda-prototype-state-v4')) localStorage.setItem('dda-prototype-state-v4', JSON.stringify(state));
-  }, seededState(options));
-  return context;
+  const page = await context.newPage();
+  await page.goto(`${BASE}/#access`, { waitUntil: 'domcontentloaded' });
+  await page.evaluate(state => localStorage.setItem('dda-prototype-state-v4', JSON.stringify(state)), seededState(options));
+  await page.goto(`${BASE}/${target}`, { waitUntil: 'domcontentloaded' });
+  return { context, page };
 }
 
 async function activeView(page) {
@@ -94,9 +98,7 @@ async function test(name, fn) {
     browser = await chromium.launch();
 
     await test('M1.1 direct route stays locked until M0 is complete', async () => {
-      const context = await newSeededContext(browser, { completeM0: false });
-      const page = await context.newPage();
-      await page.goto(`${BASE}/#lesson-m11`, { waitUntil: 'domcontentloaded' });
+      const { context, page } = await newSeededPage(browser, { completeM0: false }, '#lesson-m11');
       await page.waitForSelector('.view.active#path');
       assert.equal(await activeView(page), 'path');
       assert.match(await page.locator('#toast').textContent(), /Valide d’abord le module précédent/);
@@ -105,9 +107,7 @@ async function test(name, fn) {
     });
 
     await test('M0 completion promotes M1.1 through Terminal, Parcours, Focus Mode and M1 feedback gates', async () => {
-      const context = await newSeededContext(browser, { completeM0: true });
-      const page = await context.newPage();
-      await page.goto(`${BASE}/#dashboard`, { waitUntil: 'domcontentloaded' });
+      const { context, page } = await newSeededPage(browser, { completeM0: true }, '#dashboard');
       await page.waitForSelector('.view.active#dashboard');
 
       assert.match(await page.locator('#terminal-lead-title').textContent(), /Pourquoi les prix évoluent/);
@@ -155,9 +155,7 @@ async function test(name, fn) {
 
     await test('M1.1 stays within the viewport and keeps a 44px primary control on mobile widths', async () => {
       for (const width of [320, 375, 390, 428]) {
-        const context = await newSeededContext(browser, { completeM0: true }, { width, height: 844 });
-        const page = await context.newPage();
-        await page.goto(`${BASE}/#lesson-m11`, { waitUntil: 'domcontentloaded' });
+        const { context, page } = await newSeededPage(browser, { completeM0: true }, '#lesson-m11', { width, height: 844 });
         await page.waitForSelector('.view.active#lesson-m11');
         const metrics = await page.evaluate(() => {
           const button = document.getElementById('mark-understood-m11').getBoundingClientRect();
