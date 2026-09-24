@@ -172,14 +172,18 @@ async function test(name, fn) {
         await context.close();
       }
     });
+  } catch (error) {
+    failures.push({ name: 'browser bootstrap', error });
+    console.log(`FAIL - browser bootstrap -> ${error.message}`);
   } finally {
     if (browser) await browser.close();
     if (server) await new Promise(resolve => server.close(resolve));
   }
 
-  console.log(`\nRESULT: ${passed} passed, ${failures.length} failed`);
-  if (failures.length) {
-    failures.forEach(({ name, error }) => console.log(`- ${name}: ${error.stack || error.message}`));
-    process.exit(1);
-  }
+  const failureDetails = failures.map(({ name, error }) => `- ${name}: ${error.stack || error.message}`);
+  const report = [`RESULT: ${passed} passed, ${failures.length} failed`, ...failureDetails].join('\n');
+  fs.mkdirSync(path.join(__dirname, '..', 'test-results'), { recursive: true });
+  fs.writeFileSync(path.join(__dirname, '..', 'test-results', 'm1-browser-e2e.log'), `${report}\n`);
+  console.log(`\n${report}`);
+  if (failures.length) process.exit(1);
 })();

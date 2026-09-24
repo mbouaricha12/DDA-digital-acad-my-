@@ -65,3 +65,11 @@ jobs:
         run: node tests/test_m1_runtime_integration.js
       - name: M0 to M1 browser flow
         run: npm run test:m1:e2e
+      - name: Upload browser-flow report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m1-browser-e2e-report
+          path: test-results/m1-browser-e2e.log
+          if-no-files-found: warn
+          retention-days: 7
