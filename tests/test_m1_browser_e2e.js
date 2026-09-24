@@ -69,7 +69,10 @@ async function newSeededPage(browser, options, target, viewport = { width: 390, 
   const page = await context.newPage();
   await page.goto(`${BASE}/#access`, { waitUntil: 'domcontentloaded' });
   await page.evaluate(state => localStorage.setItem('dda-prototype-state-v4', JSON.stringify(state)), seededState(options));
-  await page.goto(`${BASE}/${target}`, { waitUntil: 'domcontentloaded' });
+  // Changing only a hash is a same-document navigation and this SPA intentionally
+  // has no hashchange listener. A harmless query makes this a real reload, so
+  // boot-time routing reads the seeded state and the requested hash together.
+  await page.goto(`${BASE}/?m1-e2e=1${target}`, { waitUntil: 'domcontentloaded' });
   return { context, page };
 }
 
