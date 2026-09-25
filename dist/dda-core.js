@@ -596,11 +596,14 @@
   }
 
   const JOURNAL_TEXT_FIELDS = ['market', 'context', 'scenario', 'process', 'decision', 'outcome', 'whatWorked', 'toImprove', 'note'];
+  const JOURNAL_PROOF_FIELDS = ['sourceLesson', 'proofId', 'proofType'];
 
   function sanitizeJournalEntry(raw) {
     if (!raw || typeof raw !== 'object') return null;
     const entry = { id: sanitizeText(raw.id, 40) || `entry-${Date.now()}-${Math.round(Math.random() * 1000)}` };
     JOURNAL_TEXT_FIELDS.forEach(field => { entry[field] = sanitizeText(raw[field], 800); });
+    JOURNAL_PROOF_FIELDS.forEach(field => { entry[field] = sanitizeText(raw[field], 80); });
+    entry.terminalSource = Boolean(raw.terminalSource);
     entry.createdAt = sanitizeText(raw.createdAt, 40) || new Date().toISOString();
     entry.updatedAt = sanitizeText(raw.updatedAt, 40) || entry.createdAt;
     // An entry with every field blank carries nothing real to keep.

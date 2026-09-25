@@ -634,6 +634,7 @@ const JOURNAL_FIELD_LABELS = {
 let journalEditingId = null;
 let journalComposerTrigger = null;
 let journalStep = 1;
+let journalComposerMetadata = null;
 
 function formatJournalDate(iso) {
   if (!iso) return '';
@@ -654,6 +655,7 @@ function renderJournalList() {
       .filter(([field]) => entry[field])
       .map(([field, label]) => `<div><dt>${label}</dt><dd>${entry[field]}</dd></div>`)
       .join('');
+    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve ${entry.proofId || 'locale'}</strong><span>${entry.sourceLesson || 'M0.2'} · ${entry.proofType || 'zone_identification'}</span></div>` : '';
     const snippet = entry.decision || entry.scenario || entry.context || 'Aucun détail renseigné.';
     const entryNumber = String(entries.length - idx).padStart(2, '0');
     return `
@@ -666,6 +668,7 @@ function renderJournalList() {
             <span class="journal-entry-snippet">${snippet.slice(0, 90)}</span>
           </summary>
           <div class="journal-entry-detail">
+            ${proofMeta}
             <dl>${detailRows || '<div><dd>Aucun détail renseigné.</dd></div>'}</dl>
             <div class="journal-entry-actions">
               <button class="secondary-action dark-action journal-entry-edit" data-id="${entry.id}" type="button">Modifier</button>
@@ -701,7 +704,8 @@ function collectJournalFields() {
     outcome: document.getElementById('journal-outcome').value,
     whatWorked: document.getElementById('journal-whatworked').value,
     toImprove: document.getElementById('journal-toimprove').value,
-    note: document.getElementById('journal-note').value
+    note: document.getElementById('journal-note').value,
+    ...(journalComposerMetadata || {})
   };
 }
 
@@ -718,6 +722,7 @@ function openJournalComposer(entry, trigger, draft = null) {
   journalEditingId = entry ? entry.id : null;
   journalComposerTrigger = trigger || null;
   const fields = entry || draft || DDA.emptyJournalEntry();
+  journalComposerMetadata = fields.terminalSource ? { terminalSource: true, sourceLesson: fields.sourceLesson, proofId: fields.proofId, proofType: fields.proofType } : null;
   document.getElementById('journal-market').value = fields.market || '';
   document.getElementById('journal-context').value = fields.context || '';
   document.getElementById('journal-scenario').value = fields.scenario || '';
@@ -741,6 +746,7 @@ function closeJournalComposer() {
   document.getElementById('journal-composer').hidden = true;
   document.getElementById('journal-entries-panel').hidden = false;
   journalEditingId = null;
+  journalComposerMetadata = null;
   const trigger = journalComposerTrigger;
   journalComposerTrigger = null;
   // The trigger can be a now-detached node if the list was just re-rendered
@@ -1076,6 +1082,7 @@ function renderDariusAnalysisTerminal() {
 }
 function terminalJournalDraft() {
   const state = getTerminalState();
+  const proof = state.practice?.proof || {};
   const drawingLabels = state.drawings.map(drawing => ({ zone: 'zone Support/Résistance', line: 'ligne', fib: 'Fibonacci' }[drawing.type] || 'annotation')).join(', ');
   return {
     market: state.instrument,
@@ -1083,7 +1090,10 @@ function terminalJournalDraft() {
     scenario: state.observation,
     process: `Graphique manipulé en ${state.timeframe}, zoom ${state.zoom}/3${drawingLabels ? `; annotations : ${drawingLabels}` : ''}.`,
     note: drawingLabels ? `Annotations conservées dans le Terminal : ${drawingLabels}.` : 'Brouillon transféré depuis le Terminal — complète ton raisonnement avant d’enregistrer.',
-    terminalSource: true
+    terminalSource: true,
+    sourceLesson: proof.lessonId || state.practice?.sourceLesson || 'M0.2',
+    proofId: proof.id || 'm02-zone-identification',
+    proofType: proof.type || 'zone_identification'
   };
 }
 function initDariusAnalysisTerminal() {
