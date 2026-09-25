@@ -532,6 +532,18 @@ function renderMasteryList() {
   container.innerHTML = rows + context;
 }
 
+function renderPracticeProof() {
+  const container = document.getElementById('progress-practice-proof');
+  if (!container) return;
+  const practice = prototypeState.terminal?.practice;
+  if (!practice?.attempts) {
+    container.innerHTML = '<p class="practice-proof-empty">Aucune mission validée pour le moment. Le Terminal te proposera une première lecture guidée.</p>';
+    return;
+  }
+  const validated = practice.status === 'validated';
+  container.innerHTML = `<div class="practice-proof-row ${validated ? 'is-validated' : 'is-retry'}"><span class="practice-proof-icon">${validated ? '✓' : '↻'}</span><div><strong>Zone Support/Résistance — Practice Terminal</strong><p>${practice.feedback || 'Mission tentée localement.'}</p><small>${validated ? 'Preuve de pratique conservée sur cet appareil.' : 'Mission à reprendre — elle ne compte pas comme compétence acquise.'}</small></div></div>`;
+}
+
 // Product state connection (Navigation Integrity V1, mandat §4/§9): Progression
 // → compétence → leçon pertinente. Delegated once on the stable container since
 // renderMasteryList() regenerates its children on every renderState() call —
@@ -1041,7 +1053,7 @@ const TERMINAL_SERIES = Object.freeze({
   'EUR/USD pédagogique': [72, 71, 70, 72, 73, 72, 74, 75, 74, 73, 75, 77, 76, 78, 77, 76, 78, 79, 78, 80, 79, 81, 80, 79, 81, 82, 81, 83, 82, 84, 83, 85]
 });
 const terminalInteraction = { tool: 'crosshair', draft: null, crosshair: null, ready: false };
-function getTerminalState() { return { instrument: prototypeState.terminal?.instrument || 'BRVM Composite', timeframe: prototypeState.terminal?.timeframe || '1D', zoom: Number(prototypeState.terminal?.zoom) || 1, pan: Number(prototypeState.terminal?.pan) || 0, drawings: Array.isArray(prototypeState.terminal?.drawings) ? prototypeState.terminal.drawings : [], observation: prototypeState.terminal?.observation || '' }; }
+function getTerminalState() { return { instrument: prototypeState.terminal?.instrument || 'BRVM Composite', timeframe: prototypeState.terminal?.timeframe || '1D', zoom: Number(prototypeState.terminal?.zoom) || 1, pan: Number(prototypeState.terminal?.pan) || 0, drawings: Array.isArray(prototypeState.terminal?.drawings) ? prototypeState.terminal.drawings : [], observation: prototypeState.terminal?.observation || '', practice: prototypeState.terminal?.practice || null }; }
 function terminalClamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
 function terminalDataset(instrument) { const source = TERMINAL_SERIES[instrument] || TERMINAL_SERIES['BRVM Composite']; return source.map((close, index) => { const open = index ? source[index - 1] : close - 1; return { open, close, high: Math.max(open, close) + 1 + (index % 3) * .35, low: Math.min(open, close) - 1 - (index % 2) * .3, index }; }); }
 function terminalSvgPoint(event) { const svg = document.getElementById('terminal-chart'); const rect = svg.getBoundingClientRect(); return { x: terminalClamp((event.clientX - rect.left) / rect.width * 900, 0, 900), y: terminalClamp((event.clientY - rect.top) / rect.height * 420, 0, 420) }; }
@@ -1219,6 +1231,7 @@ function renderState() {
   renderTerminalSkillmap(continueTarget);
 
   renderMasteryList();
+  renderPracticeProof();
   renderProgressNextStep();
   renderProgressHero();
   renderCertificatePreview(activeLessonProgress);
