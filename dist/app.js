@@ -115,10 +115,12 @@ mountedLessons.forEach(entry => {
   const suffix = entry.suffix || undefined;
   document.getElementById(`${entry.viewId}-main`).insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(entry.meta.module, entry.meta.lesson, suffix));
   document.getElementById(`${entry.viewId}-outline`).innerHTML = DDALessonRenderer.renderLessonOutline(entry.meta.lesson, suffix);
+  if (entry.id === 'M0.2') document.getElementById(`${entry.viewId}-main`).insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff"><p class="eyebrow gold">Après la leçon</p><h3>Mettre la lecture en pratique</h3><p>Ouvre une mission guidée dans le Terminal pour repérer une zone sans chercher un prix exact.</p><button type="button" class="secondary-action" data-practice-launch="M0.2">Lancer la mission Practice <span>→</span></button></section>');
 });
 function findLessonBlock(lessonDef, id) { return lessonDef.blocks.find(b => b.id === id); }
 
 const buttons = document.querySelectorAll('[data-view]');
+document.querySelectorAll('[data-practice-launch]').forEach(button => button.addEventListener('click', () => { const lesson = button.dataset.practiceLaunch; saveState({ terminal: { ...getTerminalState(), practice: { ...(getTerminalState().practice || {}), sourceLesson: lesson, sourceLessonTitle: 'Support & Résistance' } } }); showView('dashboard'); setTimeout(() => document.getElementById('analysis-terminal')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0); }));
 const views = document.querySelectorAll('.view');
 const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
@@ -541,7 +543,8 @@ function renderPracticeProof() {
     return;
   }
   const validated = practice.status === 'validated';
-  container.innerHTML = `<div class="practice-proof-row ${validated ? 'is-validated' : 'is-retry'}"><span class="practice-proof-icon">${validated ? '✓' : '↻'}</span><div><strong>Zone Support/Résistance — Practice Terminal</strong><p>${practice.feedback || 'Mission tentée localement.'}</p><small>${validated ? 'Preuve de pratique conservée sur cet appareil.' : 'Mission à reprendre — elle ne compte pas comme compétence acquise.'}</small></div></div>`;
+  const source = practice.sourceLessonTitle ? `Après la leçon ${practice.sourceLesson} · ${practice.sourceLessonTitle}` : 'Practice Terminal autonome';
+  container.innerHTML = `<div class="practice-proof-row ${validated ? 'is-validated' : 'is-retry'}"><span class="practice-proof-icon">${validated ? '✓' : '↻'}</span><div><strong>Zone Support/Résistance — Practice Terminal</strong><p>${source}</p><p>${practice.feedback || 'Mission tentée localement.'}</p><small>${validated ? 'Preuve de pratique conservée sur cet appareil.' : 'Mission à reprendre — elle ne compte pas comme compétence acquise.'}</small></div></div>`;
 }
 
 // Product state connection (Navigation Integrity V1, mandat §4/§9): Progression
