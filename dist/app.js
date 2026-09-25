@@ -655,7 +655,8 @@ function renderJournalList() {
       .filter(([field]) => entry[field])
       .map(([field, label]) => `<div><dt>${label}</dt><dd>${entry[field]}</dd></div>`)
       .join('');
-    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve ${entry.proofId || 'locale'}</strong><span>${entry.sourceLesson || 'M0.2'} · ${entry.proofType || 'zone_identification'}</span></div>` : '';
+    const sourceView = entry.sourceLesson === 'M0.2' ? 'lesson-m02' : '';
+    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve ${entry.proofId || 'locale'}</strong><span>${entry.sourceLesson || 'M0.2'} · ${entry.proofType || 'zone_identification'}</span>${sourceView ? `<button type="button" class="text-action journal-proof-source" data-view="${sourceView}">Revoir la leçon <span>→</span></button>` : ''}</div>` : '';
     const snippet = entry.decision || entry.scenario || entry.context || 'Aucun détail renseigné.';
     const entryNumber = String(entries.length - idx).padStart(2, '0');
     return `
@@ -1582,7 +1583,10 @@ document.getElementById('journal-entry-form').addEventListener('submit', event =
 document.getElementById('journal-list').addEventListener('click', event => {
   const editButton = event.target.closest('.journal-entry-edit');
   const deleteButton = event.target.closest('.journal-entry-delete');
-  if (editButton) {
+  const sourceButton = event.target.closest('.journal-proof-source');
+  if (sourceButton) {
+    showView(sourceButton.dataset.view);
+  } else if (editButton) {
     const entry = (prototypeState.journal?.entries || []).find(item => item.id === editButton.dataset.id);
     if (entry) openJournalComposer(entry, editButton);
   } else if (deleteButton) {
