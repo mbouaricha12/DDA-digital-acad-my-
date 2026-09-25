@@ -9,8 +9,8 @@ assert.ok(html.includes('terminal-practice-mission'), 'guided mission exists ins
 assert.ok(html.includes('terminal-practice-validate'), 'mission exposes a validation action');
 assert.ok(html.includes('Repère une zone, sans chercher à prédire.'), 'mission stays educational and non-predictive');
 assert.ok(app.includes("const zones = state.drawings.filter(drawing => drawing.type === 'zone')"), 'validation reads the learner zone annotation');
-assert.ok(app.includes("status: 'validated'"), 'successful practice creates a local proof status');
-assert.ok(app.includes("status: 'retry'"), 'incorrect practice remains retryable');
+assert.ok(app.includes("const status = valid ? 'validated' : 'retry'"), 'practice creates an explicit local status');
+assert.ok(app.includes("proof: { id: 'm02-zone-identification'"), 'incorrect and successful practice share the typed proof contract');
 assert.ok(app.includes('Preuve conservée localement'), 'feedback never claims market performance');
 assert.ok(app.includes('completedAt: new Date().toISOString()'), 'successful proof has a local timestamp');
 assert.ok(css.includes('.terminal-practice-mission'), 'mission has dedicated responsive styling');
