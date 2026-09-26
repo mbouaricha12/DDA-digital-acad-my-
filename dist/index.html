@@ -106,209 +106,150 @@
         <button class="icon-button" aria-label="Notifications"><svg class="icon"><use href="#icon-bell"/></svg><span class="notification-dot"></span></button>
       </header>
 
-      <section class="view public-shell" id="landing" aria-labelledby="landing-title">
-        <header class="dda-header">
-          <div class="dda-header-container">
-            <a href="#landing" class="dda-brand">
-              <span class="dda-logo-mark">DDA</span>
-              <span class="dda-brand-text">Digital Academy</span>
-            </a>
-            
-            <nav class="dda-nav-desktop">
-              <a href="#landing" class="nav-link active">Accueil</a>
-              <a href="#dda-free" class="nav-link">DDA Free</a>
-              <a href="#dda-premium" class="nav-link">Offre Premium</a>
-              <a href="#dda-vision" class="nav-link">Vision & IA</a>
-              <a href="#access" class="nav-link">Formations</a>
-            </nav>
-
-            <div class="dda-header-actions">
-              <button class="btn btn-outline" type="button" data-view="access">Se connecter</button>
-              <button class="btn btn-primary primary-action" type="button" data-view="access" data-analytics="hero_cta_click">Accéder au Terminal →</button>
+      <section class="view" id="landing" aria-labelledby="landing-title">
+        <div class="landing-editorial-shell">
+          <div class="landing-main-copy">
+            <p class="landing-masthead">DARIUS DIGITAL ACADEMY <span>ABIDJAN · AFRIQUE FRANCOPHONE · MONDE</span></p>
+            <p class="eyebrow gold">Trading & Financial Markets Learning OS</p>
+            <h1 id="landing-title">Comprendre les marchés.<br><em>Construire des compétences.</em></h1>
+            <p class="landing-deck">DDA transforme l’apprentissage des marchés en un parcours où chaque notion doit être observée, pratiquée et prouvée — pas simplement regardée.</p>
+            <div class="landing-actions">
+              <button class="primary-action" type="button" data-view="access" data-analytics="hero_cta_click">Entrer dans DDA <span>→</span></button>
+              <button class="text-action landing-secondary" type="button" data-view="path">Voir la méthode <span>↓</span></button>
             </div>
-
-            <button class="dda-hamburger" aria-label="Menu Mobile" onclick="document.querySelector('.dda-nav-mobile').classList.toggle('open')">
-              <span></span><span></span><span></span>
-            </button>
+            <ul class="trust-list landing-trust">
+              <li><svg class="icon"><use href="#icon-target"/></svg> Une prochaine action claire</li>
+              <li><svg class="icon"><use href="#icon-check-circle"/></svg> Exercice + preuve de progression</li>
+              <li><svg class="icon"><use href="#icon-shield"/></svg> Zéro signal, zéro promesse de gain</li>
+            </ul>
           </div>
 
-          <div class="dda-nav-mobile">
-            <a href="#landing">Accueil</a>
-            <a href="#dda-free">DDA Free</a>
-            <a href="#dda-premium">Offre Premium</a>
-            <a href="#dda-vision">Vision & IA</a>
-            <a href="#access">Formations</a>
-            <button class="btn btn-primary" type="button" data-view="access" style="margin-top: 1rem; width: 100%;">Accéder au Terminal</button>
-          </div>
-        </header>
-
-        <div class="dda-hero">
-          <div class="dda-container">
-            <div class="hero-badge">Plateforme Éducative & Terminal Pédagogique</div>
-            <h1 class="hero-title" id="landing-title">Maîtrisez les Marchés Financiers par la Pratique Réelle</h1>
-            <p class="hero-subtitle">
-              DDA réinvente l'apprentissage de la finance et de la Bourse (BRVM & Internationale). 
-              Progression étape par étape, cas pratiques guidés et suivi dans le Darius Terminal.
-            </p>
-
-            <div class="hero-actions">
-              <button class="btn btn-primary btn-lg primary-action" type="button" data-view="access" data-analytics="hero_cta_click">Commencer Gratuitement (DDA Free)</button>
-              <button class="btn btn-secondary btn-lg landing-secondary" type="button" data-view="path">Explorer le Terminal Pédagogique</button>
+          <div class="dda-aperture landing-aperture" role="img" aria-label="Signature éditoriale DDA : apprendre, pratiquer, prouver sa progression">
+            <img class="photo-fill" src="images/photos/hero-market-woman.jpg" alt="" loading="lazy">
+            <div class="photo-scrim"></div>
+            <div class="aperture-grid" aria-hidden="true"></div>
+            <div class="landing-aperture-top">
+              <span class="aperture-kicker">THE DDA METHOD</span>
+              <span class="landing-edition">PRIVATE ALPHA · 2026</span>
             </div>
-
-            <div class="hero-stats">
-              <div class="stat-card">
-                <span class="stat-number">M0–M9</span>
-                <span class="stat-label">Modules de formation structurés</span>
-              </div>
-              <div class="stat-card">
-                <span class="stat-number">100%</span>
-                <span class="stat-label">Pratique guidée sans simulation trompeuse</span>
-              </div>
-              <div class="stat-card">
-                <span class="stat-number">V1.0</span>
-                <span class="stat-label">Terminal Foundation Opérationnel</span>
-              </div>
+            <div class="landing-aperture-copy">
+              <strong>Learn Markets.</strong>
+              <em>Build Skills.<br>Prove Progress.</em>
             </div>
+            <div class="landing-signal" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="aperture-thread" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
           </div>
         </div>
 
-        <div id="dda-free" class="dda-section dda-bg-alt">
-          <div class="dda-container">
-            <div class="section-header">
-              <span class="badge badge-free">DDA Free</span>
-              <h2>Un Accès Gratuit & Immédiat pour Débuter</h2>
-              <p>Développez vos compétences financières de base sans engagement financier.</p>
-            </div>
+        <section class="landing-method" aria-label="Méthode DDA">
+          <article>
+            <span class="method-index">01</span>
+            <p class="eyebrow">Learn</p>
+            <h2>Voir avant de croire.</h2>
+            <p>Les notions commencent par une observation, une comparaison ou un cas concret. Le jargon vient après la compréhension.</p>
+          </article>
+          <article>
+            <span class="method-index">02</span>
+            <p class="eyebrow">Practice</p>
+            <h2>Agir sans risquer.</h2>
+            <p>Décisions guidées, erreurs possibles, feedback et retry : DDA transforme une idée en compétence avant toute mise en situation réelle.</p>
+          </article>
+          <article>
+            <span class="method-index">03</span>
+            <p class="eyebrow">Prove</p>
+            <h2>Prouver la progression.</h2>
+            <p>Une leçon ouverte n’est pas une compétence. DDA conserve des preuves concrètes de ce qui a été compris, appliqué et validé.</p>
+          </article>
+        </section>
 
-            <div class="dda-grid-3">
-              <div class="dda-card">
-                <div class="card-icon">📚</div>
-                <h3>Curriculum d'Initiation</h3>
-                <p>Accès complet aux modules d'apprentissage fondamentaux (M0) pour comprendre le fonctionnement des marchés.</p>
-              </div>
-              <div class="dda-card">
-                <div class="card-icon">🖥️</div>
-                <h3>Darius Terminal Pédagogique</h3>
-                <p>Un cockpit d'apprentissage interactif pour suivre votre progression et réaliser vos premiers exercices.</p>
-              </div>
-              <div class="dda-card">
-                <div class="card-icon">📓</div>
-                <h3>Journal d'Apprentissage</h3>
-                <p>Consignez vos analyses, vos réflexions et vos prises de notes pédagogiques au fil de votre parcours.</p>
-              </div>
-            </div>
-
-            <div class="section-cta" style="margin-top: 2rem; text-align: center;">
-              <button class="btn btn-primary" type="button" data-view="access">Créer mon compte DDA Free →</button>
-            </div>
+        <section class="landing-institution" aria-label="Positionnement DDA">
+          <div>
+            <p class="eyebrow gold">Born in Africa. Built for serious learners.</p>
+            <h2>Une académie qui ressemble davantage à un terminal d’apprentissage qu’à une bibliothèque de vidéos.</h2>
           </div>
-        </div>
-
-        <div id="dda-premium" class="dda-section">
-          <div class="dda-container">
-            <div class="section-header">
-              <span class="badge badge-premium">DDA Premium</span>
-              <h2>Passez à la Vitesse Supérieure</h2>
-              <p>Un catalogue approfondi et des outils avancés pour accélérer votre maîtrise des marchés.</p>
-            </div>
-
-            <div class="dda-grid-2">
-              <div class="dda-card card-premium">
-                <h3>Niveau Standard</h3>
-                <p class="price-tag" style="font-weight: 700; color: var(--dda-primary); margin: 0.5rem 0 1rem;">Accès Avancé</p>
-                <ul class="feature-list" style="list-style: none; padding: 0; margin-bottom: 1.5rem; line-height: 1.8;">
-                  <li>✔ Déblocage des modules avancés (M1–M6)</li>
-                  <li>✔ Exercices d'exécution et de lecture de tendance</li>
-                  <li>✔ Bibliothèque de ressources stratégiques</li>
-                  <li>✔ Support pédagogique DDA</li>
-                </ul>
-                <button class="btn btn-outline btn-block" type="button" data-view="membership" style="width: 100%;">Consulter l'aperçu Standard</button>
-              </div>
-
-              <div class="dda-card card-premium highlight" style="border: 1px solid var(--dda-accent);">
-                <span class="popular-tag" style="background: var(--dda-accent); color: #000; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px; float: right;">Incontournable</span>
-                <h3>Niveau Pro</h3>
-                <p class="price-tag" style="font-weight: 700; color: var(--dda-primary); margin: 0.5rem 0 1rem;">Maîtrise Complète</p>
-                <ul class="feature-list" style="list-style: none; padding: 0; margin-bottom: 1.5rem; line-height: 1.8;">
-                  <li>✔ Accès à l'ensemble du curriculum (M0 à M9)</li>
-                  <li>✔ Outils d'analyse de marché & Broker Hub</li>
-                  <li>✔ Contenus exclusifs Market Intelligence</li>
-                  <li>✔ Attestation de compétences DDA</li>
-                </ul>
-                <button class="btn btn-primary btn-block" type="button" data-view="membership" style="width: 100%;">Consulter l'aperçu Pro</button>
-              </div>
-            </div>
+          <div class="landing-institution-photo" role="img" aria-label="Vision institutionnelle DDA">
+            <img class="photo-fill" src="images/photos/institution-gold-bull.jpg" alt="" loading="lazy">
+            <div class="photo-scrim"></div>
           </div>
-        </div>
-
-        <div id="dda-vision" class="dda-section dda-bg-dark">
-          <div class="dda-container">
-            <div class="section-header text-white">
-              <span class="badge badge-future">Feuille de route V2 / En Développement</span>
-              <h2>L'Avenir de DDA : IA Coach & Écosystème Expert</h2>
-              <p>Nous préparons la prochaine génération de fonctionnalités d'apprentissage guidé.</p>
-            </div>
-
-            <div class="dda-grid-2">
-              <div class="dda-card card-dark">
-                <div class="card-icon">🤖</div>
-                <h3>IA Coach Pédagogique</h3>
-                <p>Un assistant virtuel personnalisé pour vous guider dans vos révisions, analyser vos erreurs d'exercice et répondre à vos questions 24/7.</p>
-                <span class="status-tag" style="display: inline-block; margin-top: 1rem; font-size: 0.8rem; color: #8b949e; border: 1px dashed var(--dda-border); padding: 0.2rem 0.5rem; border-radius: 4px;">À venir en V2</span>
-              </div>
-
-              <div class="dda-card card-dark">
-                <div class="card-icon">🎓</div>
-                <h3>Écosystème & Marketplace Experts</h3>
-                <p>Un réseau d'experts certifiés pour partager des cas pratiques réels, organiser des sessions thématiques et accompagner les apprenants.</p>
-                <span class="status-tag" style="display: inline-block; margin-top: 1rem; font-size: 0.8rem; color: #8b949e; border: 1px dashed var(--dda-border); padding: 0.2rem 0.5rem; border-radius: 4px;">À venir en V2</span>
-              </div>
-            </div>
+          <div class="institution-proof">
+            <span>DISCOVER</span><i></i><span>LEARN</span><i></i><span>PRACTICE</span><i></i><span>ANALYZE</span><i></i><span>IMPROVE</span>
           </div>
-        </div>
+        </section>
 
-        <footer class="dda-footer">
-          <div class="dda-container">
-            <div class="footer-grid">
-              <div class="footer-brand">
-                <div class="dda-brand">
-                  <span class="dda-logo-mark">DDA</span>
-                  <span class="dda-brand-text">Digital Academy</span>
-                </div>
-                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Plateforme d'éducation financière et d'apprentissage pratique des marchés.</p>
-              </div>
-
-              <div class="footer-col">
-                <h4>Navigation</h4>
-                <a href="#landing">Accueil</a>
-                <a href="#dda-free">DDA Free</a>
-                <a href="#dda-premium">Offre Premium</a>
-                <a href="#dda-vision">Vision & IA</a>
-              </div>
-
-              <div class="footer-col">
-                <h4>Plateforme</h4>
-                <button type="button" data-view="dashboard" style="background:none;border:none;color:var(--dda-text);padding:0;font:inherit;cursor:pointer;text-align:left;">Terminal Apprenant</button>
-                <button type="button" data-view="path" style="background:none;border:none;color:var(--dda-text);padding:0;font:inherit;cursor:pointer;text-align:left;">Parcours M0-M9</button>
-                <button type="button" data-view="resources" style="background:none;border:none;color:var(--dda-text);padding:0;font:inherit;cursor:pointer;text-align:left;">Ressources</button>
-                <button type="button" data-view="markets" style="background:none;border:none;color:var(--dda-text);padding:0;font:inherit;cursor:pointer;text-align:left;">Market Intelligence</button>
-              </div>
-
-              <div class="footer-col">
-                <h4>Statut système</h4>
-                <p class="system-status"><span class="status-dot green"></span> Terminal V1.0 : Opérationnel</p>
-              </div>
-            </div>
-
-            <div class="footer-bottom">
-              <p class="disclaimer">
-                <strong>Avertissement pédagogique :</strong> DDA est une plateforme d'apprentissage à but éducatif. Aucune analyse ou donnée présentée ne constitue un conseil en investissement financier.
-              </p>
-              <p class="copyright" style="margin-top: 0.5rem;">&copy; 2026 DDA Digital Academy. Tous droits réservés.</p>
-            </div>
+        <section class="landing-demo" aria-label="Ce que tu retrouves dans DDA">
+          <div class="landing-section-head">
+            <p class="eyebrow gold">L’expérience DDA</p>
+            <h2>Un vrai espace d’apprentissage, pas une liste de vidéos.</h2>
           </div>
-        </footer>
+          <div class="landing-demo-grid">
+            <article><svg class="icon"><use href="#icon-home"/></svg><h3>Aujourd’hui</h3><p>Une seule prochaine action claire, calculée à partir de ta vraie progression — jamais une liste figée.</p></article>
+            <article><svg class="icon"><use href="#icon-path"/></svg><h3>Mon parcours</h3><p>Chaque module affiche son vrai statut : verrouillé, en cours ou validé — jamais un pourcentage inventé.</p></article>
+            <article><svg class="icon"><use href="#icon-journal"/></svg><h3>Journal &amp; Plan</h3><p>Un carnet personnel pour documenter tes observations et tes décisions, pas un flux social.</p></article>
+            <article><svg class="icon"><use href="#icon-progress"/></svg><h3>Progression</h3><p>Des preuves concrètes — exercices et quiz réellement validés — jamais une barre qui avance seule.</p></article>
+          </div>
+        </section>
+
+        <section class="landing-problem" aria-label="Le problème que DDA résout">
+          <div class="landing-section-head">
+            <p class="eyebrow gold">Le vrai problème</p>
+            <h2>Regarder des heures de contenu n’a jamais construit une compétence.</h2>
+          </div>
+          <ul class="landing-problem-list">
+            <li><svg class="icon"><use href="#icon-blocked"/></svg><div><strong>Trop d’informations, aucun ordre</strong><p>Vidéos, threads, groupes — sans savoir par où commencer ni quoi apprendre ensuite.</p></div></li>
+            <li><svg class="icon"><use href="#icon-blocked"/></svg><div><strong>Consommer sans pratiquer</strong><p>Comprendre une notion en la regardant n’est pas la même chose que savoir l’appliquer.</p></div></li>
+            <li><svg class="icon"><use href="#icon-blocked"/></svg><div><strong>Aucune preuve de progression</strong><p>Sans mesure réelle, impossible de savoir ce qui est réellement acquis.</p></div></li>
+            <li><svg class="icon"><use href="#icon-blocked"/></svg><div><strong>Zéro pratique structurée</strong><p>Les décisions impulsives se corrigent par l’entraînement guidé, pas par davantage de contenu.</p></div></li>
+          </ul>
+        </section>
+
+        <section class="landing-steps" aria-label="Comment fonctionne DDA">
+          <div class="landing-section-head">
+            <p class="eyebrow gold">Comment ça marche</p>
+            <h2>Un système continu, pas un cours qu’on abandonne.</h2>
+          </div>
+          <ol class="landing-steps-list">
+            <li><span class="method-index">01</span><div><h3>Discover</h3><p>Comprendre où commencer, selon ton niveau réel.</p></div></li>
+            <li><span class="method-index">02</span><div><h3>Learn</h3><p>Acquérir les fondamentaux, une notion observée à la fois.</p></div></li>
+            <li><span class="method-index">03</span><div><h3>Practice</h3><p>Mettre chaque notion en application, avec feedback et retry.</p></div></li>
+            <li><span class="method-index">04</span><div><h3>Analyze</h3><p>Comprendre tes erreurs et ta progression réelle.</p></div></li>
+            <li><span class="method-index">05</span><div><h3>Improve</h3><p>Continuer à construire — DDA ne s’arrête jamais à une leçon terminée.</p></div></li>
+          </ol>
+        </section>
+
+        <section class="landing-plans" aria-label="DDA Free et Premium">
+          <div class="landing-section-head">
+            <p class="eyebrow gold">Accès DDA</p>
+            <h2>Une vraie porte d’entrée, pas une version bridée.</h2>
+          </div>
+          <div class="landing-plans-grid">
+            <article class="landing-plan-card">
+              <p class="eyebrow">Aujourd’hui</p><h3>DDA Free</h3>
+              <p class="plan-tagline">Pour démarrer sérieusement, sans rien débourser.</p>
+              <ul><li>Parcours M0 et ses leçons</li><li>Exercices, quiz et Fil de maîtrise réel</li><li>Journal &amp; Plan</li><li>Market Intelligence (aperçu)</li></ul>
+            </article>
+            <article class="landing-plan-card landing-plan-card-gold">
+              <p class="eyebrow gold">À venir</p><h3>DDA Premium</h3>
+              <p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p>
+              <ul><li>Atelier Ressources Premium</li><li>Aperçu de certification</li><li>Chaque brique construite étape par étape, jamais livrée en une fois</li></ul>
+            </article>
+          </div>
+          <p class="landing-plans-note">Aucun paiement n’est activé pour le moment — DDA Premium s’active en aperçu local une fois ton compte créé.</p>
+        </section>
+
+        <section class="landing-guardrails" aria-label="Ce que DDA ne fera jamais">
+          <div class="landing-section-head">
+            <p class="eyebrow gold">Confiance</p>
+            <h2>Ce que DDA n’activera jamais sans le dire clairement.</h2>
+          </div>
+          <ul class="guardrail-list landing-guardrail-list">
+            <li><svg class="icon"><use href="#icon-blocked"/></svg> Paiement réel ou renouvellement automatique</li>
+            <li><svg class="icon"><use href="#icon-blocked"/></svg> Lien affilié ou broker réel</li>
+            <li><svg class="icon"><use href="#icon-blocked"/></svg> Données de marché en temps réel</li>
+            <li><svg class="icon"><use href="#icon-blocked"/></svg> Signaux de trading ou promesses de gain</li>
+          </ul>
+        </section>
       </section>
     </main>
   </div>
