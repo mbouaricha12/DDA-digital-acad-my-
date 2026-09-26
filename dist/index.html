@@ -33,6 +33,22 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="alpha-polish.css">
 </head>
+  <script>
+    // Module 1 Runtime & Navigation Contract
+    window.addEventListener('DOMContentLoaded', () => {
+      const navButtons = document.querySelectorAll('.nav-item');
+      navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.target || btn.getAttribute('href');
+          if (target) {
+            document.querySelectorAll('section, div[id]').forEach(sec => sec.style.display = 'none');
+            const el = document.querySelector(target);
+            if (el) el.style.display = 'block';
+          }
+        });
+      });
+    });
+  </script>
 <body>
   <svg hidden aria-hidden="true" focusable="false">
     <defs>
