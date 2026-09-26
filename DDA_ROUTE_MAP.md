@@ -8,7 +8,7 @@
 | `access` | Défaut si aucun compte local et aucun hash ; lien "Commencer" (profil vide) ; toute vue protégée sans droit | Formulaire → `lesson` (ou vue en cours si déjà inscrit) | — (point d'entrée) | Aucune | ✅ fiable | Vue réelle | Redirige vers `dashboard` si déjà inscrit et hash absent |
 | `dashboard` (Aujourd'hui/Terminal) | Nav (sidebar/mobile), marque DDA, tout back-link "← Retour" sans origine, fin d'onboarding implicite (Home) | Action principale → leçon réelle, Journal ou Market Intelligence selon `nextActionable()` | — (racine) | Aucune | ✅ fiable | Redirigé vers `access` | ✅ |
 | `path` (Parcours) | Nav | Carte "chapitre en cours" → leçon réelle en cours | back-link des leçons ouvertes depuis Parcours → `path` (nouveau, voir §Corrections) | `path` (requiert compte) | ✅ fiable | Redirige vers `access` | ✅ |
-| `lesson` (M0.1) | Home, Parcours, Progression, raccourci sidebar "Leçon en cours" | Bouton "Quitter"/back-link → origine réelle (nouveau) ; lien Journal optionnel | back-link contextuel (nouveau) | `lesson_m01` | ✅ fiable | Redirige vers `access` | ✅ — **aucun verrou séquentiel appliqué à la navigation directe (dette, voir §10)** |
+| `lesson` (M0.1) | Home, Parcours, Progression, raccourci sidebar "Leçon en cours" | Bouton "Quitter"/back-link → origine réelle (nouveau) ; lien Journal optionnel | back-link contextuel (nouveau) | `lesson_m01` | ✅ fiable | Redirige vers `access` | ✅ — première leçon authored ; les leçons suivantes sont soumises au verrou séquentiel `LESSON_PREREQUISITE` |
 | `lesson-m02` (Support & Résistance) | idem + bouton "Continuer" du résultat M0.1 | idem | idem | `lesson_m01` | ✅ fiable | idem | idem |
 | `lesson-m03` (Lire une tendance) | idem + bouton "Continuer" du résultat M0.2 | idem | idem | `lesson_m01` | ✅ fiable | idem | idem |
 | `lesson-m11` (Pourquoi les prix évoluent ?) | idem + bouton "Continuer" du résultat M0.3 | idem | idem | `advanced_modules` (Standard/Pro, CDCP-OS §4.2, Option B) + verrou séquentiel : quiz M0.3 | ✅ fiable | idem | Ouvre modale Standard avec déblocage simulation |
@@ -55,3 +55,19 @@ Le verrou séquentiel est désormais bien appliqué par `showView()` via `LESSON
 ## Addendum — Acquisition Engine V1 (CEO decision)
 
 `landing` devient le point d'entrée anonyme par défaut (`!prototypeState.user` sans hash valide), `access` reste atteignable directement par lien/deep-link et reste la cible de tout refus de permission (`showView()` continue de rediriger vers `access`, jamais vers `landing`, quand un visiteur anonyme tente une vue protégée — `landing` est un point d'entrée marketing, pas une destination de gate). Aucune autre règle de `smartBackTarget()`/`previousView` n'est modifiée par cette tranche.
+
+## Addendum — Architecture d’information cible réajustée (26 septembre 2026)
+
+La nouvelle structure DDA est désormais la **couche d’organisation cible** du
+produit : `PUBLIC`, `AUTHENTIFICATION`, `APP APPRENANT`, `PREMIUM` et `FUTUR
+ÉCOSYSTÈME EXPERT`. Elle ne modifie pas les routes SPA ni les permissions de
+cette carte. La correspondance détaillée, avec les statuts CONSTRUIT/PARTIEL/
+SIMULÉ/FUTUR et les limites de chaque zone, est documentée dans
+`DDA_INFORMATION_ARCHITECTURE_TARGET.md`.
+
+Règle de lecture : une branche de l’arborescence peut être une cible de
+navigation ou de roadmap sans être une capacité active. Les zones Experts,
+Communauté native, IA réelle et Écosystème Expert restent futures ; les
+surfaces Market Intelligence, Premium et Broker restent explicitement
+démonstratives ou locales tant qu’aucune validation et aucune connexion
+externe ne sont autorisées.
