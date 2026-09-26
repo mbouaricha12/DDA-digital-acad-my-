@@ -106,1006 +106,212 @@
         <button class="icon-button" aria-label="Notifications"><svg class="icon"><use href="#icon-bell"/></svg><span class="notification-dot"></span></button>
       </header>
 
-      <section class="view" id="landing" aria-labelledby="landing-title">
-        <div class="landing-editorial-shell">
-          <div class="landing-main-copy">
-            <p class="landing-masthead">DARIUS DIGITAL ACADEMY <span>ABIDJAN · AFRIQUE FRANCOPHONE · MONDE</span></p>
-            <p class="eyebrow gold">Trading & Financial Markets Learning OS</p>
-            <h1 id="landing-title">Comprendre les marchés.<br><em>Construire des compétences.</em></h1>
-            <p class="landing-deck">DDA transforme l’apprentissage des marchés en un parcours où chaque notion doit être observée, pratiquée et prouvée — pas simplement regardée.</p>
-            <div class="landing-actions">
-              <button class="primary-action" type="button" data-view="access" data-analytics="hero_cta_click">Entrer dans DDA <span>→</span></button>
-              <button class="text-action landing-secondary" type="button" data-view="path">Voir la méthode <span>↓</span></button>
+      <!-- LANDING PAGE REFAITE SUR-MESURE -->
+      <section class="view public-shell" id="landing" aria-labelledby="landing-title">
+        <header class="dda-header">
+          <div class="dda-header-container">
+            <a href="#landing" class="dda-brand">
+              <span class="dda-logo-mark">DDA</span>
+              <span class="dda-brand-text">Digital Academy</span>
+            </a>
+            
+            <nav class="dda-nav-desktop">
+              <a href="#landing" class="nav-link active">Accueil</a>
+              <a href="#dda-free" class="nav-link">DDA Free</a>
+              <a href="#dda-premium" class="nav-link">Offre Premium</a>
+              <a href="#dda-vision" class="nav-link">Vision & IA</a>
+              <a href="#access" class="nav-link">Formations</a>
+            </nav>
+
+            <div class="dda-header-actions">
+              <a href="#access" class="btn btn-outline">Se connecter</a>
+              <a href="#dashboard" class="btn btn-primary">Accéder au Terminal →</a>
             </div>
-            <ul class="trust-list landing-trust">
-              <li><svg class="icon"><use href="#icon-target"/></svg> Une prochaine action claire</li>
-              <li><svg class="icon"><use href="#icon-check-circle"/></svg> Exercice + preuve de progression</li>
-              <li><svg class="icon"><use href="#icon-shield"/></svg> Zéro signal, zéro promesse de gain</li>
-            </ul>
+
+            <button class="dda-hamburger" aria-label="Menu Mobile" onclick="document.querySelector('.dda-nav-mobile').classList.toggle('open')">
+              <span></span><span></span><span></span>
+            </button>
           </div>
 
-          <div class="dda-aperture landing-aperture" role="img" aria-label="Signature éditoriale DDA : apprendre, pratiquer, prouver sa progression">
-            <img class="photo-fill" src="images/photos/hero-market-woman.jpg" alt="" loading="lazy">
-            <div class="photo-scrim"></div>
-            <div class="aperture-grid" aria-hidden="true"></div>
-            <div class="landing-aperture-top">
-              <span class="aperture-kicker">THE DDA METHOD</span>
-              <span class="landing-edition">PRIVATE ALPHA · 2026</span>
+          <div class="dda-nav-mobile">
+            <a href="#landing">Accueil</a>
+            <a href="#dda-free">DDA Free</a>
+            <a href="#dda-premium">Offre Premium</a>
+            <a href="#dda-vision">Vision & IA</a>
+            <a href="#access">Formations</a>
+            <a href="#dashboard" class="btn btn-primary" style="margin-top: 1rem; text-align: center;">Accéder au Terminal</a>
+          </div>
+        </header>
+
+        <div class="dda-hero">
+          <div class="dda-container">
+            <div class="hero-badge">Plateforme Éducative & Terminal Pédagogique</div>
+            <h1 class="hero-title" id="landing-title">Maîtrisez les Marchés Financiers par la Pratique Réelle</h1>
+            <p class="hero-subtitle">
+              DDA réinvente l'apprentissage de la finance et de la Bourse (BRVM & Internationale). 
+              Progression étape par étape, cas pratiques guidés et suivi dans le Darius Terminal.
+            </p>
+
+            <div class="hero-actions">
+              <a href="#access" class="btn btn-primary btn-lg">Commencer Gratuitement (DDA Free)</a>
+              <a href="#dashboard" class="btn btn-secondary btn-lg">Explorer le Terminal Pédagogique</a>
             </div>
-            <div class="landing-aperture-copy">
-              <strong>Learn Markets.</strong>
-              <em>Build Skills.<br>Prove Progress.</em>
-            </div>
-            <div class="landing-signal" aria-hidden="true">
-              <span></span><span></span><span></span><span></span><span></span>
-            </div>
-            <div class="aperture-thread" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-          </div>
-        </div>
 
-        <section class="landing-method" aria-label="Méthode DDA">
-          <article>
-            <span class="method-index">01</span>
-            <p class="eyebrow">Learn</p>
-            <h2>Voir avant de croire.</h2>
-            <p>Les notions commencent par une observation, une comparaison ou un cas concret. Le jargon vient après la compréhension.</p>
-          </article>
-          <article>
-            <span class="method-index">02</span>
-            <p class="eyebrow">Practice</p>
-            <h2>Agir sans risquer.</h2>
-            <p>Décisions guidées, erreurs possibles, feedback et retry : DDA transforme une idée en compétence avant toute mise en situation réelle.</p>
-          </article>
-          <article>
-            <span class="method-index">03</span>
-            <p class="eyebrow">Prove</p>
-            <h2>Prouver la progression.</h2>
-            <p>Une leçon ouverte n’est pas une compétence. DDA conserve des preuves concrètes de ce qui a été compris, appliqué et validé.</p>
-          </article>
-        </section>
-
-        <section class="landing-institution" aria-label="Positionnement DDA">
-          <div>
-            <p class="eyebrow gold">Born in Africa. Built for serious learners.</p>
-            <h2>Une académie qui ressemble davantage à un terminal d’apprentissage qu’à une bibliothèque de vidéos.</h2>
-          </div>
-          <div class="landing-institution-photo" role="img" aria-label="Vision institutionnelle DDA">
-            <img class="photo-fill" src="images/photos/institution-gold-bull.jpg" alt="" loading="lazy">
-            <div class="photo-scrim"></div>
-          </div>
-          <div class="institution-proof">
-            <span>DISCOVER</span><i></i><span>LEARN</span><i></i><span>PRACTICE</span><i></i><span>ANALYZE</span><i></i><span>IMPROVE</span>
-          </div>
-        </section>
-
-        <section class="landing-demo" aria-label="Ce que tu retrouves dans DDA">
-          <div class="landing-section-head">
-            <p class="eyebrow gold">L’expérience DDA</p>
-            <h2>Un vrai espace d’apprentissage, pas une liste de vidéos.</h2>
-          </div>
-          <div class="landing-demo-grid">
-            <article><svg class="icon"><use href="#icon-home"/></svg><h3>Aujourd’hui</h3><p>Une seule prochaine action claire, calculée à partir de ta vraie progression — jamais une liste figée.</p></article>
-            <article><svg class="icon"><use href="#icon-path"/></svg><h3>Mon parcours</h3><p>Chaque module affiche son vrai statut : verrouillé, en cours ou validé — jamais un pourcentage inventé.</p></article>
-            <article><svg class="icon"><use href="#icon-journal"/></svg><h3>Journal &amp; Plan</h3><p>Un carnet personnel pour documenter tes observations et tes décisions, pas un flux social.</p></article>
-            <article><svg class="icon"><use href="#icon-progress"/></svg><h3>Progression</h3><p>Des preuves concrètes — exercices et quiz réellement validés — jamais une barre qui avance seule.</p></article>
-          </div>
-        </section>
-
-        <section class="landing-problem" aria-label="Le problème que DDA résout">
-          <div class="landing-section-head">
-            <p class="eyebrow gold">Le vrai problème</p>
-            <h2>Regarder des heures de contenu n’a jamais construit une compétence.</h2>
-          </div>
-          <ul class="landing-problem-list">
-            <li><svg class="icon"><use href="#icon-blocked"/></svg><div><strong>Trop d’informations, aucun ordre</strong><p>Vidéos, threads, groupes — sans savoir par où commencer ni quoi apprendre ensuite.</p></div></li>
-            <li><svg class="icon"><use href="#icon-blocked"/></svg><div><strong>Consommer sans pratiquer</strong><p>Comprendre une notion en la regardant n’est pas la même chose que savoir l’appliquer.</p></div></li>
-            <li><svg class="icon"><use href="#icon-blocked"/></svg><div><strong>Aucune preuve de progression</strong><p>Sans mesure réelle, impossible de savoir ce qui est réellement acquis.</p></div></li>
-            <li><svg class="icon"><use href="#icon-blocked"/></svg><div><strong>Zéro pratique structurée</strong><p>Les décisions impulsives se corrigent par l’entraînement guidé, pas par davantage de contenu.</p></div></li>
-          </ul>
-        </section>
-
-        <section class="landing-steps" aria-label="Comment fonctionne DDA">
-          <div class="landing-section-head">
-            <p class="eyebrow gold">Comment ça marche</p>
-            <h2>Un système continu, pas un cours qu’on abandonne.</h2>
-          </div>
-          <ol class="landing-steps-list">
-            <li><span class="method-index">01</span><div><h3>Discover</h3><p>Comprendre où commencer, selon ton niveau réel.</p></div></li>
-            <li><span class="method-index">02</span><div><h3>Learn</h3><p>Acquérir les fondamentaux, une notion observée à la fois.</p></div></li>
-            <li><span class="method-index">03</span><div><h3>Practice</h3><p>Mettre chaque notion en application, avec feedback et retry.</p></div></li>
-            <li><span class="method-index">04</span><div><h3>Analyze</h3><p>Comprendre tes erreurs et ta progression réelle.</p></div></li>
-            <li><span class="method-index">05</span><div><h3>Improve</h3><p>Continuer à construire — DDA ne s’arrête jamais à une leçon terminée.</p></div></li>
-          </ol>
-        </section>
-
-        <section class="landing-plans" aria-label="DDA Free et Premium">
-          <div class="landing-section-head">
-            <p class="eyebrow gold">Accès DDA</p>
-            <h2>Une vraie porte d’entrée, pas une version bridée.</h2>
-          </div>
-          <div class="landing-plans-grid">
-            <article class="landing-plan-card">
-              <p class="eyebrow">Aujourd’hui</p><h3>DDA Free</h3>
-              <p class="plan-tagline">Pour démarrer sérieusement, sans rien débourser.</p>
-              <ul><li>Parcours M0 et ses leçons</li><li>Exercices, quiz et Fil de maîtrise réel</li><li>Journal &amp; Plan</li><li>Market Intelligence (aperçu)</li></ul>
-            </article>
-            <article class="landing-plan-card landing-plan-card-gold">
-              <p class="eyebrow gold">À venir</p><h3>DDA Premium</h3>
-              <p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p>
-              <ul><li>Atelier Ressources Premium</li><li>Aperçu de certification</li><li>Chaque brique construite étape par étape, jamais livrée en une fois</li></ul>
-            </article>
-          </div>
-          <p class="landing-plans-note">Aucun paiement n’est activé pour le moment — DDA Premium s’active en aperçu local une fois ton compte créé.</p>
-        </section>
-
-        <section class="landing-guardrails" aria-label="Ce que DDA ne fera jamais">
-          <div class="landing-section-head">
-            <p class="eyebrow gold">Confiance</p>
-            <h2>Ce que DDA n’activera jamais sans le dire clairement.</h2>
-          </div>
-          <ul class="guardrail-list landing-guardrail-list">
-            <li><svg class="icon"><use href="#icon-blocked"/></svg> Paiement réel ou renouvellement automatique</li>
-            <li><svg class="icon"><use href="#icon-blocked"/></svg> Lien affilié ou broker réel</li>
-            <li><svg class="icon"><use href="#icon-blocked"/></svg> Données de marché en temps réel</li>
-            <li><svg class="icon"><use href="#icon-blocked"/></svg> Signal ou recommandation de position</li>
-          </ul>
-        </section>
-
-        <section class="landing-final-cta" aria-label="Rejoindre DDA">
-          <h2>Prêt à construire de vraies compétences ?</h2>
-          <p>Commence gratuitement. Ta progression reste sur cet appareil, ton rythme reste le tien.</p>
-          <button class="primary-action" type="button" data-view="access" data-analytics="hero_cta_click">Commencer gratuitement <span>→</span></button>
-        </section>
-      </section>
-
-      <section class="view" id="access" aria-labelledby="access-title">
-        <div class="access-shell">
-          <div class="access-copy">
-            <div class="dda-aperture access-photo" role="img" aria-label="Signature visuelle DDA — apprendre, pratiquer, prouver sa progression">
-              <img class="photo-fill" src="images/photos/access-two-women-market.jpg" alt="" loading="lazy">
-              <div class="photo-scrim"></div>
-              <div class="aperture-grid" aria-hidden="true"></div>
-              <span class="aperture-kicker">LEARN MARKETS</span>
-              <strong>Build Skills.</strong>
-              <em>Prove Progress.</em>
-              <div class="aperture-thread" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-            </div>
-            <svg class="access-illustration" viewBox="0 0 300 160" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-              <path class="lane-a" d="M10 130 C 70 40, 150 150, 290 30" stroke="#c9beaa" stroke-dasharray="3 6"/>
-              <circle cx="10" cy="130" r="5" fill="#0B6FAE" stroke="none"/>
-              <circle cx="150" cy="90" r="5" fill="#D9A441" stroke="none"/>
-              <circle cx="290" cy="30" r="6" fill="#189B92" stroke="none"/>
-              <path d="M40 150h60M110 150h40M170 150h40" stroke="#c9beaa"/>
-              <text x="6" y="150" font-size="9" fill="#8a7f6a" stroke="none" font-family="Inter, sans-serif">Learn</text>
-              <text x="130" y="112" font-size="9" fill="#8a7f6a" stroke="none" font-family="Inter, sans-serif">Practice</text>
-              <text x="258" y="52" font-size="9" fill="#8a7f6a" stroke="none" font-family="Inter, sans-serif">Prove</text>
-            </svg>
-            <p class="eyebrow gold">Fondations des marchés</p>
-            <h1 id="access-title">Commence par une expérience claire.</h1>
-            <p>Ton inscription personnalise ton parcours et reste sur cet appareil : ton nom, ton e-mail et tes réponses ne sont jamais transmis. Une mesure d’audience anonyme (jamais ton identité) peut être utilisée pour comprendre comment les visiteurs découvrent DDA.</p>
-            <ul class="trust-list">
-              <li><svg class="icon"><use href="#icon-target"/></svg> Une seule prochaine action</li>
-              <li><svg class="icon"><use href="#icon-check-circle"/></svg> Validation par exercice et quiz</li>
-              <li><svg class="icon"><use href="#icon-shield"/></svg> Progression enregistrée sur cet appareil</li>
-            </ul>
-          </div>
-          <div class="access-card">
-            <div class="step-indicator"><span class="active" id="step-dot-1">1</span><i></i><span id="step-dot-2">2</span></div>
-            <form id="signup-form">
-              <p class="eyebrow">Étape 1 sur 2</p><h2>Créer mon compte</h2>
-              <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ex. Richard"></label>
-              <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"></label>
-              <label class="consent"><input id="consent" type="checkbox" required><span>J’accepte que ces informations restent uniquement sur mon appareil.</span></label>
-              <p class="form-error" id="signup-error" role="alert"></p>
-              <button class="primary-action" type="submit">Continuer <span>→</span></button>
-            </form>
-            <form id="onboarding-form" hidden>
-              <p class="eyebrow">Étape 2 sur 2</p><h2>Quel parcours te correspond ?</h2>
-              <label>Niveau<select id="level" required><option value="">Choisir</option><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select></label>
-              <label>Objectif pédagogique<select id="goal" required><option value="">Choisir</option><option>Comprendre les marchés</option><option>Améliorer ma gestion du risque</option><option>Structurer mes décisions</option></select></label>
-              <label>Temps disponible<select id="time" required><option value="">Choisir</option><option>10 minutes par jour</option><option>20 minutes par jour</option><option>45 minutes, 3 fois par semaine</option></select></label>
-              <p class="form-error" id="onboarding-error" role="alert"></p>
-              <button class="primary-action" type="submit">Construire mon parcours <span>→</span></button>
-            </form>
-            <div class="resume-device" id="resume-device" hidden><p>Une progression existe déjà sur cet appareil.</p><button class="secondary-action dark-action" id="resume-session" type="button">Reprendre ma session</button><button class="text-action" id="reset-session" type="button">Effacer mes données</button></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="view active" id="dashboard" aria-labelledby="dashboard-title">
-        <div class="terminal-thread" id="terminal-thread">
-          <span class="terminal-thread-label" id="terminal-thread-label">Compréhension des marchés</span>
-          <div class="terminal-thread-beads" id="terminal-thread-beads" role="img" aria-label="Compétence en cours de construction"><i></i><i></i><i></i><i></i></div>
-          <span class="terminal-thread-next" id="terminal-thread-next" hidden></span>
-        </div>
-
-        <div class="terminal-entry">
-          <div>
-            <p class="eyebrow gold">Aujourd’hui dans DDA</p>
-            <h1 id="dashboard-title"><span id="greeting-prefix">Bonjour</span> <span id="dashboard-name">Richard</span>.</h1>
-            <p id="personalized-next">Une étape claire pour continuer à progresser.</p>
-          </div>
-          <p class="terminal-entry-state"><span>Cette semaine <strong id="week-xp">+20 XP</strong></span><span>Activité <strong id="active-days">0 jour</strong></span></p>
-        </div>
-
-        <article class="terminal-lead">
-          <div>
-            <p class="terminal-lead-kicker"><span class="pill" id="lesson-state-pill">En cours</span><span id="terminal-lead-module">Fondations des marchés</span><span class="lesson-index" id="lesson-index-label">LEÇON</span></p>
-            <h2 id="terminal-lead-title">Le trading comme commerce</h2>
-            <p id="terminal-lead-summary">Comprendre l’échange entre acheteurs et vendeurs avant de chercher une opportunité.</p>
-            <p class="terminal-lead-why" id="terminal-lead-why"><svg class="icon"><use href="#icon-compass"/></svg><span id="terminal-lead-why-text"></span></p>
-            <div class="terminal-lead-actions">
-              <button class="terminal-lead-go" id="lesson-primary-action" data-view="lesson">Reprendre la leçon <span>→</span></button>
-              <button class="secondary-action dark-action" id="terminal-lead-secondary" type="button" data-view="journal" hidden>Ouvrir ton Journal <span>→</span></button>
-            </div>
-            <div class="terminal-lead-meta" id="terminal-lead-meta">
-              <div><strong id="terminal-meta-step">—</strong><span>étape actuelle</span></div>
-              <div><strong id="terminal-meta-module">—</strong><span>module actif</span></div>
-              <div><strong id="terminal-meta-xp">—</strong><span>à la clé</span></div>
-            </div>
-          </div>
-          <div class="terminal-lead-photo">
-            <img class="photo-fill" src="images/photos/terminal-desk-trading.jpg" alt="" loading="lazy">
-            <div class="photo-scrim"></div>
-            <div class="progress-ring" id="module-ring" style="--progress: 18"><strong id="module-percent">18%</strong><span>du module</span></div>
-            <div class="terminal-visual-copy"><small>LEARN → PRACTICE → PROVE</small><strong>Ta progression devient visible.</strong></div>
-          </div>
-        </article>
-
-        <div class="terminal-divider"><span class="terminal-divider-label">Terminal</span><p>Ta vision complète : marchés, journal, compétences — au-delà de la prochaine étape.</p></div>
-
-        <section class="analysis-terminal" aria-labelledby="analysis-terminal-title">
-          <div class="analysis-terminal-head">
-            <div>
-              <p class="eyebrow gold">Darius Analysis Terminal · P0.4</p>
-              <h2 id="analysis-terminal-title">Observer avant de décider.</h2>
-              <p>Un espace de démonstration local pour manipuler une série historique contrôlée, annoter ton observation et la conserver sur cet appareil.</p>
-            </div>
-            <span class="demo-data-badge"><span class="status-dot"></span>Données pédagogiques locales</span>
-          </div>
-
-          <div class="analysis-terminal-toolbar" aria-label="Contrôles du graphique">
-            <label>Instrument
-              <select id="terminal-instrument">
-                <option value="BRVM Composite">BRVM Composite</option>
-                <option value="BRVM 30">BRVM 30</option>
-                <option value="EUR/USD pédagogique">EUR/USD pédagogique</option>
-              </select>
-            </label>
-            <label>Timeframe
-              <select id="terminal-timeframe">
-                <option value="1D">1D</option>
-                <option value="1W">1W</option>
-                <option value="1M">1M</option>
-              </select>
-            </label>
-            <label class="terminal-zoom-control">Zoom
-              <input id="terminal-zoom" type="range" min="1" max="3" step="1" value="1" aria-label="Zoom du graphique">
-            </label>
-            <div class="terminal-pan-controls" aria-label="Déplacement du graphique">
-              <button type="button" class="terminal-icon-button" id="terminal-pan-left" aria-label="Déplacer vers la gauche">←</button>
-              <button type="button" class="terminal-icon-button" id="terminal-pan-right" aria-label="Déplacer vers la droite">→</button>
-            </div>
-          </div>
-
-          <div class="analysis-terminal-tools" role="toolbar" aria-label="Outils d’annotation">
-            <button type="button" class="terminal-tool active" data-terminal-tool="crosshair">✣ Crosshair</button>
-            <button type="button" class="terminal-tool" data-terminal-tool="zone">▧ Zone S/R</button>
-            <button type="button" class="terminal-tool" data-terminal-tool="line">╱ Ligne</button>
-            <button type="button" class="terminal-tool" data-terminal-tool="fib">⌁ Fibonacci</button>
-            <span class="terminal-tool-hint" id="terminal-tool-hint">Déplace le pointeur sur le graphique.</span>
-          </div>
-
-          <div class="analysis-chart-shell">
-            <div class="analysis-chart-y-labels" aria-hidden="true"><span>haut</span><span>milieu</span><span>bas</span></div>
-            <svg id="terminal-chart" class="analysis-chart" viewBox="0 0 900 420" role="img" aria-label="Graphique pédagogique interactif"></svg>
-          </div>
-          <p class="analysis-chart-caption" id="terminal-chart-caption">Série historique locale contrôlée · valeurs normalisées · aucune cotation en temps réel.</p>
-
-          <section class="terminal-practice-mission" aria-labelledby="terminal-practice-title">
-            <div class="panel-heading"><div><p class="eyebrow gold">Practice Terminal · mission guidée</p><h3 id="terminal-practice-title">Repère une zone, sans chercher à prédire.</h3></div><span class="practice-proof-badge" id="terminal-practice-proof">À commencer</span></div>
-            <p id="terminal-practice-instruction">Sélectionne l’outil <b>Zone S/R</b>, puis place une zone horizontale autour de la partie centrale du graphique. Une zone est une aire d’observation, pas un prix exact.</p>
-            <div class="terminal-practice-actions"><button type="button" class="secondary-action" id="terminal-practice-validate">Vérifier ma lecture</button><span id="terminal-practice-feedback" role="status">Aucune vérification effectuée.</span></div>
-          </section>
-
-          <div class="analysis-terminal-bottom">
-            <div class="analysis-observation">
-              <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-edit"/></svg> Ton observation</p><h3>Qu’est-ce que tu vois ?</h3></div></div>
-              <textarea id="terminal-observation" maxlength="1000" rows="5" placeholder="Décris la structure, une zone ou une question — sans formuler de signal. "></textarea>
-              <div class="analysis-observation-actions"><button type="button" class="primary-action" id="terminal-save-observation">Conserver localement <span>→</span></button><span id="terminal-observation-state" role="status">Non enregistré</span></div>
-            </div>
-            <div class="analysis-terminal-legend">
-              <p class="eyebrow">Méthode DDA</p>
-              <ol><li><b>Observer</b><span>Repère les bougies et la structure.</span></li><li><b>Manipuler</b><span>Zoome, déplace et annote.</span></li><li><b>Justifier</b><span>Conserve ton raisonnement dans le Journal.</span></li></ol>
-              <button type="button" class="text-action" data-view="journal" data-terminal-handoff="true" id="terminal-journal-handoff">Continuer dans Journal &amp; Plan <span>→</span></button>
-            </div>
-          </div>
-        </section>
-
-        <section class="terminal-mi" aria-labelledby="terminal-mi-title">
-          <div class="terminal-mi-head"><div><p class="eyebrow">Intelligence marché</p><h3 id="terminal-mi-title">Ce qui bouge aujourd’hui</h3></div><button class="text-action" data-view="markets">Marchés &amp; BRVM <span>→</span></button></div>
-          <div class="terminal-mi-row" id="terminal-mi-row"></div>
-        </section>
-
-        <div class="terminal-two">
-          <section aria-labelledby="terminal-journal-title">
-            <p class="eyebrow">Journal &amp; Plan</p>
-            <h4 id="terminal-journal-title">Ton outil de travail</h4>
-            <div class="terminal-journal-note" id="terminal-journal-note"></div>
-            <button class="text-action" data-view="journal">Ouvrir ton Journal <span>→</span></button>
-          </section>
-          <section aria-labelledby="terminal-skills-title">
-            <p class="eyebrow">Profil de compétences</p>
-            <h4 id="terminal-skills-title">Ce que tu construis</h4>
-            <div class="terminal-skillmap" id="terminal-skillmap"></div>
-          </section>
-        </div>
-
-        <section class="terminal-family" aria-labelledby="terminal-family-title">
-          <div class="dda-community-visual terminal-family-photo" role="img" aria-label="Deux parcours d’apprentissage reliés dans DDA Family">
-            <img class="photo-fill" src="images/photos/family-three-colleagues.jpg" alt="" loading="lazy">
-            <div class="photo-scrim"></div>
-            <span class="community-node node-a">A</span><span class="community-node node-b">B</span>
-            <span class="community-line line-a"></span><span class="community-line line-b"></span>
-            <strong>Observer ensemble.<br>Raisonner chacun.</strong>
-          </div>
-          <div class="terminal-family-copy">
-            <p class="eyebrow gold">DDA Family</p>
-            <h2 id="terminal-family-title">Les marchés se travaillent aussi ensemble.</h2>
-            <p>Partage tes observations, compare ton raisonnement, apprends des décisions des autres apprenants DDA.</p>
-            <button class="future-label future-label-link" type="button" data-view="community"><svg class="icon"><use href="#icon-compass"/></svg> Aperçu — DDA Family, bientôt disponible <svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
-          </div>
-        </section>
-
-        <section class="terminal-aperture" aria-labelledby="terminal-premium-title">
-          <div>
-            <p class="eyebrow gold">DDA Premium</p>
-            <h3 id="terminal-premium-title">Free t’a donné une vraie compétence. Premium en ouvre la profondeur.</h3>
-            <p>Ateliers pratiques, personnalisation du parcours, continuité au-delà de M0 — la suite logique, pas une offre pressée.</p>
-          </div>
-          <button class="text-action terminal-aperture-go" data-view="membership">Voir l’aperçu Premium <span>→</span></button>
-        </section>
-
-        <div class="terminal-tools" aria-label="Accès rapides du Terminal">
-          <button data-view="brokers" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-compass"/></svg></span><span class="chevron-row-body"><strong>Broker Hub</strong><small>Comparer avec transparence</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
-          <button data-view="resources" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-book"/></svg></span><span class="chevron-row-body"><strong>Ressources</strong><small>Guides et outils</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
-          <button data-view="support" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-help"/></svg></span><span class="chevron-row-body"><strong>Centre d’aide</strong><small>Trouver une réponse</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
-        </div>
-      </section>
-
-      <section class="view" id="path" aria-labelledby="path-title">
-        <div class="view-photo-band" role="img" aria-label="Ton parcours DDA">
-          <img class="photo-fill" src="images/photos/path-crystal-forecast.jpg" alt="" loading="lazy">
-          <div class="photo-scrim"></div>
-          <p class="view-photo-band-copy">Pas de boule de cristal. Une méthode, étape par étape.</p>
-        </div>
-        <div class="section-intro"><p class="eyebrow gold">Darius Free</p><h1 id="path-title">Ton parcours commence par les fondations.</h1><p>Chaque étape se débloque après une vraie validation, jamais après une simple ouverture.</p></div>
-        <div class="journey" id="path-list"></div>
-      </section>
-
-      <section class="view" id="lesson" aria-labelledby="lesson-title">
-        <div class="lesson-layout">
-          <article class="lesson-main" id="lesson-main">
-            <button class="back-link" data-view="back">← Retour</button>
-          </article>
-          <aside class="lesson-outline" id="lesson-outline"></aside>
-        </div>
-      </section>
-
-      <section class="view" id="lesson-m02" aria-labelledby="lesson-title-m2">
-        <div class="lesson-layout">
-          <article class="lesson-main" id="lesson-m02-main">
-            <button class="back-link" data-view="back">← Retour</button>
-          </article>
-          <aside class="lesson-outline" id="lesson-m02-outline"></aside>
-        </div>
-      </section>
-
-      <section class="view" id="lesson-m03" aria-labelledby="lesson-title-m3">
-        <div class="lesson-layout">
-          <article class="lesson-main" id="lesson-m03-main">
-            <button class="back-link" data-view="back">← Retour</button>
-          </article>
-          <aside class="lesson-outline" id="lesson-m03-outline"></aside>
-        </div>
-      </section>
-
-      <section class="view" id="lesson-m11" aria-labelledby="lesson-title-m11">
-        <div class="lesson-layout lesson-layout-m1">
-          <article class="lesson-main" id="lesson-m11-main">
-            <button class="back-link" data-view="back">← Retour</button>
-          </article>
-          <aside class="lesson-outline" id="lesson-m11-outline"></aside>
-        </div>
-      </section>
-
-      <section class="view" id="lesson-m12" aria-labelledby="lesson-title-m12">
-        <div class="lesson-layout lesson-layout-m1 lesson-layout-m12">
-          <article class="lesson-main" id="lesson-m12-main">
-            <button class="back-link" data-view="back">← Retour</button>
-          </article>
-          <aside class="lesson-outline" id="lesson-m12-outline"></aside>
-        </div>
-      </section>
-
-      <section class="view" id="lesson-m13" aria-labelledby="lesson-title-m13">
-        <div class="lesson-layout lesson-layout-m1 lesson-layout-m13">
-          <article class="lesson-main" id="lesson-m13-main">
-            <button class="back-link" data-view="back">← Retour</button>
-          </article>
-          <aside class="lesson-outline" id="lesson-m13-outline"></aside>
-        </div>
-      </section>
-
-      <section class="view" id="progress" aria-labelledby="progress-title">
-        <div class="view-photo-band" role="img" aria-label="Ta progression DDA">
-          <img class="photo-fill" src="images/photos/progress-trader-poster.jpg" alt="" loading="lazy">
-          <div class="photo-scrim"></div>
-          <p class="view-photo-band-copy">Pas un raccourci. La vraie compétence se construit, preuve après preuve.</p>
-        </div>
-        <div class="section-intro"><p class="eyebrow gold">Progression</p><h1 id="progress-title">Ce que DDA peut réellement prouver que tu as appris.</h1><p>Chaque niveau ci-dessous repose sur une preuve réelle — une leçon ouverte n’est jamais comptée comme une compétence acquise.</p></div>
-
-        <div class="progress-hero">
-          <div class="progress-stat featured"><span>XP total</span><strong id="progress-total-xp">0</strong></div>
-          <div class="progress-stat"><span>Modules amorcés</span><strong id="progress-modules-started">0/10</strong></div>
-          <div class="progress-stat"><span>Jours d’activité</span><strong id="progress-active-days">0</strong></div>
-        </div>
-
-        <section class="panel mastery-panel">
-          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-progress"/></svg> Fil de maîtrise</p><h3>Ce que tu as réellement démontré, compétence par compétence</h3></div></div>
-          <div class="mastery-list" id="mastery-list"></div>
-        </section>
-
-        <section class="panel practice-proof-panel" aria-labelledby="practice-proof-title">
-          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-check-circle"/></svg> Preuves de pratique</p><h3 id="practice-proof-title">Ce que tu as essayé dans le Terminal</h3></div></div>
-          <div id="progress-practice-proof"></div>
-        </section>
-
-        <section class="panel next-step-panel">
-          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-compass"/></svg> Prochaine étape réelle</p></div></div>
-          <p id="progress-next-step">—</p>
-          <p class="progress-journal-note" id="progress-journal-note" hidden></p>
-        </section>
-
-        <section class="panel modules-track">
-          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-path"/></svg> Parcours M0–M9</p><h3>Où tu en es sur l’ensemble du curriculum</h3></div></div>
-          <ol id="modules-recap-list"></ol>
-        </section>
-
-        <section class="panel certificate-panel">
-          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> Certification</p><h3>Un aperçu de ce que DDA délivrera</h3></div></div>
-          <div class="certificate-locked" id="certificate-locked"><svg class="icon"><use href="#icon-lock"/></svg><p>Termine ta première leçon (M0.1) pour débloquer un aperçu de certification.</p></div>
-          <div class="certificate-gate" id="certificate-gate" hidden><p>L’aperçu de certification est réservé à DDA Premium.</p><button class="secondary-action premium-gate" data-permission="certificate_preview">Voir l’aperçu Premium</button></div>
-          <div class="certificate-preview" id="certificate-preview-block" hidden>
-            <div class="certificate-mock" id="certificate-mock">
-              <span class="certificate-watermark">Aperçu</span>
-              <svg class="icon certificate-seal"><use href="#icon-award"/></svg>
-              <p class="certificate-eyebrow">Darius Digital Academy</p>
-              <h4 id="certificate-name">—</h4>
-              <p class="certificate-line">a complété <strong id="certificate-module">—</strong></p>
-              <p class="certificate-date" id="certificate-date">—</p>
-            </div>
-            <p class="certificate-disclaimer"><svg class="icon"><use href="#icon-shield"/></svg> Maquette pédagogique — aucune certification officielle n’est délivrée pour le moment. Une émission réelle nécessitera une validation complète du parcours et une infrastructure dédiée, non encore activée.</p>
-          </div>
-        </section>
-
-        <section class="panel badges-panel">
-          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> Badges</p><h3>Les prochaines preuves à débloquer</h3></div></div>
-          <div class="badge-row">
-            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Fondations validées</span></div>
-            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Risque maîtrisé</span></div>
-            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Discipline confirmée</span></div>
-          </div>
-          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Aucun badge actif aujourd’hui — débloqués uniquement après une validation réelle</span>
-        </section>
-      </section>
-
-      <section class="view" id="journal" aria-labelledby="journal-title">
-        <button class="back-link" data-view="back">← Retour</button>
-        <div class="section-intro"><p class="eyebrow gold">Journal &amp; Plan</p><h1 id="journal-title">Qu’avais-tu prévu ? Qu’as-tu fait ? Qu’en retiens-tu ?</h1><p>Un espace pour documenter ton processus de décision — jamais un signal, jamais un conseil d’achat ou de vente, jamais un chiffre de gain inventé. Conservé uniquement sur cet appareil.</p></div>
-
-        <div class="journal-tabs" role="tablist" aria-label="Sections du Journal">
-          <button class="journal-tab active" id="journal-tab-entries" type="button" role="tab" aria-selected="true" data-journal-tab="entries">Journal</button>
-          <button class="journal-tab" id="journal-tab-plan" type="button" role="tab" aria-selected="false" data-journal-tab="plan">Mon plan</button>
-        </div>
-
-        <section class="journal-panel" id="journal-entries-panel">
-          <div class="journal-toolbar">
-            <div>
-              <p class="journal-count" id="journal-count">0 entrée</p>
-              <p class="journal-last-entry" id="journal-last-entry" hidden></p>
-            </div>
-            <button class="primary-action" id="journal-new-entry" type="button"><svg class="icon"><use href="#icon-plus"/></svg> Nouvelle entrée</button>
-          </div>
-          <div class="journal-empty" id="journal-empty">
-            <svg class="icon"><use href="#icon-journal"/></svg>
-            <h2>Aucune entrée pour l’instant.</h2>
-            <p>Documente ta première analyse — ce que tu as prévu, ce que tu as fait, ce que tu en retiens.</p>
-          </div>
-          <ol class="journal-list" id="journal-list"></ol>
-        </section>
-
-        <section class="journal-composer" id="journal-composer" hidden>
-          <button class="back-link" id="journal-composer-back" type="button">← Retour au journal</button>
-          <p class="eyebrow gold" id="journal-composer-eyebrow">Nouvelle entrée</p>
-          <p class="journal-source-context" id="journal-source-context" hidden>Préremplie depuis le Darius Analysis Terminal — relis chaque champ avant d’enregistrer.</p>
-          <div class="step-indicator journal-step-indicator" aria-label="Étapes de l’entrée">
-            <span class="active" id="journal-step-dot-1">1</span><i></i>
-            <span id="journal-step-dot-2">2</span><i></i>
-            <span id="journal-step-dot-3">3</span>
-          </div>
-          <form id="journal-entry-form">
-            <div class="journal-step active" data-step="1">
-              <p class="journal-step-label">Avant</p>
-              <label>Marché ou instrument<input id="journal-market" maxlength="80" placeholder="Ex. EUR/USD, Or, BRVM Composite…"></label>
-              <label>Contexte<textarea id="journal-context" maxlength="800" rows="3" placeholder="Qu’observais-tu avant de commencer ton analyse ?"></textarea></label>
-              <label>Scénario envisagé<textarea id="journal-scenario" maxlength="800" rows="3" placeholder="Quelle hypothèse avais-tu en tête ?"></textarea></label>
-            </div>
-            <div class="journal-step" data-step="2">
-              <p class="journal-step-label">Pendant</p>
-              <label>Processus suivi<textarea id="journal-process" maxlength="800" rows="3" placeholder="Quelle checklist ou méthode as-tu appliquée ?"></textarea></label>
-              <label>Décision prise<textarea id="journal-decision" maxlength="800" rows="3" placeholder="Qu’as-tu réellement décidé de faire ?"></textarea></label>
-            </div>
-            <div class="journal-step" data-step="3">
-              <p class="journal-step-label">Après</p>
-              <label>Résultat ou issue<textarea id="journal-outcome" maxlength="800" rows="3" placeholder="Que s’est-il passé, sans chiffrer un gain ou une perte ?"></textarea></label>
-              <label>Ce qui a été bien fait<textarea id="journal-whatworked" maxlength="800" rows="2"></textarea></label>
-              <label>Ce qui doit être amélioré<textarea id="journal-toimprove" maxlength="800" rows="2"></textarea></label>
-              <label>Note personnelle<textarea id="journal-note" maxlength="800" rows="2"></textarea></label>
-            </div>
-            <p class="form-error" id="journal-entry-error" role="alert"></p>
-            <div class="journal-composer-actions">
-              <button class="secondary-action dark-action" id="journal-step-prev" type="button" hidden>← Précédent</button>
-              <button class="primary-action" id="journal-step-next" type="button">Suivant <span>→</span></button>
-              <button class="primary-action" id="journal-step-save" type="submit" hidden>Enregistrer l’entrée</button>
-              <button class="text-action" id="journal-composer-delete" type="button" hidden>Supprimer cette entrée</button>
-            </div>
-          </form>
-        </section>
-
-        <section class="journal-panel" id="journal-plan-panel" hidden>
-          <p class="journal-plan-intro">Documente ton processus personnel — pas tes objectifs de gain. Ces réponses orientent la manière dont DDA t’accompagne, jamais ce que tu dois trader.</p>
-          <form id="journal-plan-form">
-            <fieldset class="plan-group">
-              <legend>Ton terrain</legend>
-              <label>Marchés étudiés<textarea id="plan-markets" maxlength="600" rows="2" placeholder="Quels marchés ou instruments souhaites-tu comprendre ?"></textarea></label>
-              <label>Créneaux d’étude<textarea id="plan-slots" maxlength="600" rows="2" placeholder="Quand comptes-tu pratiquer, réalistement ?"></textarea></label>
-            </fieldset>
-            <fieldset class="plan-group">
-              <legend>Ta discipline</legend>
-              <label>Checklist avant analyse<textarea id="plan-checklist" maxlength="600" rows="3" placeholder="Que vérifies-tu systématiquement avant de commencer ?"></textarea></label>
-              <label>Règles personnelles de discipline<textarea id="plan-discipline" maxlength="600" rows="3"></textarea></label>
-              <label>Points à vérifier avant une décision<textarea id="plan-checkpoints" maxlength="600" rows="3"></textarea></label>
-            </fieldset>
-            <fieldset class="plan-group">
-              <legend>Tes objectifs</legend>
-              <label>Objectifs d’apprentissage<textarea id="plan-goals" maxlength="600" rows="2"></textarea></label>
-              <label>Erreurs à éviter<textarea id="plan-mistakes" maxlength="600" rows="3"></textarea></label>
-            </fieldset>
-            <p class="form-note" id="journal-plan-note">Pas encore enregistré</p>
-            <button class="primary-action" type="submit">Enregistrer mon plan</button>
-          </form>
-        </section>
-      </section>
-
-      <section class="view" id="resources" aria-labelledby="resources-title">
-        <div class="section-intro"><p class="eyebrow gold">Bibliothèque DDA</p><h1 id="resources-title">Les bons outils, au bon moment.</h1><p>Des ressources courtes pour comprendre, pratiquer et décider avec méthode.</p></div>
-
-        <div class="library-shelf">
-          <p class="eyebrow library-shelf-label">Rayon Free — à lire dès maintenant</p>
-          <ul class="library-list">
-            <li class="library-entry">
-              <div class="resource-icon"><svg class="icon"><use href="#icon-check-circle"/></svg></div>
-              <div class="library-entry-body">
-                <span class="resource-type">Guide · DDA Free</span>
-                <h2>Checklist avant une décision</h2>
-                <p>Six vérifications simples pour éviter la précipitation et protéger ton processus.</p>
-                <button class="secondary-action dark-action resource-open" data-resource="checklist">Consulter le guide</button>
+            <div class="hero-stats">
+              <div class="stat-card">
+                <span class="stat-number">M0–M9</span>
+                <span class="stat-label">Modules de formation structurés</span>
               </div>
-            </li>
-            <li class="library-entry">
-              <div class="resource-icon"><svg class="icon"><use href="#icon-book"/></svg></div>
-              <div class="library-entry-body">
-                <span class="resource-type">Glossaire · DDA Free</span>
-                <h2>Les mots essentiels du marché</h2>
-                <p>Acheteur, vendeur, actif, liquidité et risque expliqués sans jargon.</p>
-                <button class="secondary-action dark-action resource-open" data-resource="glossary">Ouvrir le glossaire</button>
+              <div class="stat-card">
+                <span class="stat-number">100%</span>
+                <span class="stat-label">Pratique guidée sans simulation trompeuse</span>
               </div>
-            </li>
-          </ul>
-        </div>
-
-        <article class="resource-feature premium-resource">
-          <div class="resource-feature-head">
-            <div class="resource-icon"><svg class="icon"><use href="#icon-shield"/></svg></div>
-            <span class="resource-type">Atelier · Premium</span>
-          </div>
-          <h2>Laboratoire de gestion du risque</h2>
-          <p>Des scénarios guidés pour travailler sizing, invalidation et discipline.</p>
-          <button class="secondary-action premium-gate" data-permission="resources_premium">Voir l’aperçu Premium</button>
-        </article>
-
-        <div class="resource-reader" id="resource-reader" hidden><button class="reader-close" id="reader-close" aria-label="Fermer">×</button><p class="eyebrow gold" id="reader-label">Ressource DDA</p><h2 id="reader-title"></h2><div id="reader-content"></div></div>
-      </section>
-
-      <section class="view" id="membership" aria-labelledby="membership-title">
-        <div class="section-intro"><p class="eyebrow gold">Accès DDA</p><h1 id="membership-title">Grandir à ton rythme.</h1><p>DDA Free pose les fondations. Premium approfondira la pratique, l’évaluation et la preuve de progression. Aucun paiement n’est activé pour le moment.</p></div>
-        <div class="membership-status-line"><span>Formule actuelle</span><strong id="membership-status">DDA Free</strong><small>Aucun achat actif</small></div>
-
-        <div class="plan-grid">
-          <article class="plan-card current-plan"><p class="eyebrow">Ce que tu as aujourd’hui</p><h2>DDA Free</h2><p class="plan-tagline">Pour démarrer sérieusement, sans rien débourser.</p><ul><li>Parcours M0 Fondations et ses leçons</li><li>Exercices, quiz et Fil de maîtrise réel</li><li>Journal &amp; Plan</li><li>Market Intelligence (aperçu)</li></ul><span class="plan-state" id="free-plan-state">Formule active</span></article>
-          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">Ce que Premium approfondira</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><ul><li>Modules M1+ (marchés financiers, ordres, organisation)</li><li>Atelier Ressources Premium — laboratoire de gestion du risque</li><li>Aperçu de certification une fois M0.1 validé</li><li>Chaque brique ci-dessous, construite étape par étape</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aperçu local — aucun achat, aucun abonnement actif</small></article>
-        </div>
-
-        <section class="panel membership-roadmap">
-          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-path"/></svg> Pourquoi Premium continue d’apporter de la valeur</p><h3>Une pile construite étape par étape, jamais livrée en une fois</h3></div></div>
-          <p>Journal &amp; Plan est la première brique réellement construite de cette pile ; DDA l’étoffera puis construira le reste étape par étape — jamais toutes en même temps. Statuts réels ci-dessous, pas une promesse uniforme.</p>
-          <ol class="roadmap-track">
-            <li class="status-partial">Journal &amp; Plan <small>Partiel</small></li>
-            <li class="status-demo">Market Intelligence <small>Aperçu</small></li>
-            <li class="status-future">Weekly Review <small>Futur</small></li>
-            <li class="status-future">Decision Replay <small>Futur</small></li>
-            <li class="status-future">Darius AI <small>Futur</small></li>
-            <li class="status-future">Trading Lab <small>Futur</small></li>
-            <li class="status-future">Trader DNA <small>Futur</small></li>
-          </ol>
-          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Journal &amp; Plan (fondation locale) et Market Intelligence (aperçu) existent déjà ; la couche Premium connectée et personnalisée de cette pile n’est pas encore activée</span>
-        </section>
-
-        <section class="panel family-panel" aria-labelledby="family-title">
-          <div class="dda-community-visual light family-photo" role="img" aria-label="Réseau d’apprentissage DDA Family">
-            <img class="photo-fill" src="images/photos/membership-handshake-africa.jpg" alt="" loading="lazy">
-            <div class="photo-scrim light"></div>
-            <span class="community-node node-a">D</span><span class="community-node node-b">F</span>
-            <span class="community-line line-a"></span><span class="community-line line-b"></span>
-            <strong>DDA Family<br><small>Apprendre · Progresser · Partager</small></strong>
-          </div>
-          <div class="family-copy">
-            <p class="eyebrow gold">DDA Family</p>
-            <h2 id="family-title">Apprendre, progresser, appartenir.</h2>
-            <p>DDA Family n’est pas un groupe de messagerie — c’est l’appartenance à l’écosystème DDA : une institution qu’on rejoint pour apprendre, partager ses observations et comparer son raisonnement avec d’autres apprenants sérieux.</p>
-            <button class="future-label future-label-link" type="button" data-view="community"><svg class="icon"><use href="#icon-compass"/></svg> Aperçu — DDA Family, bientôt disponible <svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
-          </div>
-        </section>
-
-        <section class="panel next-step-panel">
-          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-compass"/></svg> Prochaine étape réelle</p></div></div>
-          <p id="membership-next-step">—</p>
-        </section>
-
-        <section class="panel membership-guardrails">
-          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-shield"/></svg> Garde-fous</p><h3>Ce que DDA n’activera jamais sans le dire clairement</h3></div></div>
-          <ul class="guardrail-list">
-            <li><svg class="icon"><use href="#icon-blocked"/></svg> Paiement réel ou renouvellement automatique</li>
-            <li><svg class="icon"><use href="#icon-blocked"/></svg> Lien affilié ou broker réel</li>
-            <li><svg class="icon"><use href="#icon-blocked"/></svg> Données de marché en temps réel</li>
-            <li><svg class="icon"><use href="#icon-blocked"/></svg> Signal ou recommandation de position</li>
-          </ul>
-        </section>
-      </section>
-
-      <section class="view" id="markets" aria-labelledby="markets-title">
-        <div class="section-intro"><p class="eyebrow gold">Market Intelligence</p><h1 id="markets-title">Comprendre avant d’agir.</h1><p>Un aperçu éditorial du futur cockpit DDA. Aucune donnée ci-dessous n’est connectée à une source réelle — chaque zone le précise explicitement. Cet espace couvre les étapes « Suivre les marchés » et « Revenir » de la boucle d’apprentissage DDA.</p></div>
-
-        <div class="market-visit-cue"><svg class="icon"><use href="#icon-compass"/></svg><p>Tu as suivi cet espace <strong id="market-visit-days">1</strong> <span id="market-visit-days-suffix">jour</span> sur cet appareil.</p></div>
-
-        <section class="market-zone">
-          <p class="eyebrow gold zone-label">Vue marché</p>
-          <div class="index-grid" id="market-indices" aria-label="Indices suivis (aperçu)"></div>
-        </section>
-
-        <section class="market-zone market-zone-brief">
-          <p class="eyebrow gold zone-label">Pourquoi cela compte</p>
-          <article class="market-brief"><h2>Du marché réel vers le curriculum.</h2><div class="brief-step"><span><svg class="icon"><use href="#icon-search"/></svg></span><div><strong>Que s’est-il passé ?</strong><p>Identifier le fait, sans exagération ni prédiction.</p></div></div><div class="brief-step"><span><svg class="icon"><use href="#icon-target"/></svg></span><div><strong>Pourquoi est-ce important ?</strong><p>Relier l’événement à la volatilité, au risque et au comportement.</p></div></div><div class="brief-step"><span><svg class="icon"><use href="#icon-book"/></svg></span><div><strong>Que faut-il apprendre ?</strong><p>Ouvrir la leçon utile au lieu de fournir un signal.</p></div></div><button class="primary-action" data-view="lesson">Revoir les fondations <span>→</span></button></article>
-        </section>
-
-        <section class="market-zone market-zone-brvm">
-          <p class="eyebrow gold zone-label">BRVM — Afrique de l’Ouest</p>
-          <div class="brvm-intro">
-            <div class="brvm-editorial-visual brvm-photo" role="img" aria-label="BRVM — marché régional d’Afrique de l’Ouest">
-            <img class="photo-fill" src="images/photos/brvm-market-fruits.jpg" alt="" loading="lazy">
-            <div class="photo-scrim"></div>
-            <span class="brvm-map-word">BRVM</span>
-            <strong>Afrique de l’Ouest</strong>
-            <small>Marchés · sociétés · publications · apprentissage régional</small>
-          </div>
-            <div class="brvm-panel">
-              <h2>BRVM</h2>
-              <p>La BRVM est la bourse régionale commune aux 8 pays de l’UEMOA. DDA préparera une lecture accessible des sociétés cotées, indices, publications et notions d’investissement régional.</p>
-              <ul><li><svg class="icon"><use href="#icon-book"/></svg> Fiches pédagogiques</li><li><svg class="icon"><use href="#icon-help"/></svg> Glossaire régional</li><li><svg class="icon"><use href="#icon-calendar"/></svg> Calendrier des publications</li><li><svg class="icon"><use href="#icon-shield"/></svg> Sources officielles uniquement</li></ul>
-            </div>
-          </div>
-          <article class="market-calendar">
-            <p class="eyebrow"><svg class="icon"><use href="#icon-calendar"/></svg> Exemple pédagogique</p>
-            <h2>Calendrier des publications</h2>
-            <p>Aperçu de la mise en page qu’aura le vrai calendrier BRVM une fois une source officielle connectée. Aucune société, date ou montant réel n’est affiché.</p>
-            <ul id="market-calendar-list"></ul>
-          </article>
-          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Données réelles différées jusqu’à connexion validée</span>
-        </section>
-
-        <section class="market-zone market-zone-reflect">
-          <p class="eyebrow gold zone-label">Réfléchir / documenter</p>
-          <div class="journal-link-block"><svg class="icon"><use href="#icon-journal"/></svg><p>Un mouvement de marché t’interpelle ? Documente ton observation avant d’agir.</p><button class="secondary-action" data-view="journal">Ouvrir Journal &amp; Plan <span>→</span></button></div>
-        </section>
-      </section>
-
-      <section class="view" id="brokers" aria-labelledby="brokers-title">
-        <div class="view-photo-band" role="img" aria-label="Comparer les brokers avec DDA">
-          <img class="photo-fill" src="images/photos/brokers-trading-floor.jpg" alt="" loading="lazy">
-          <div class="photo-scrim"></div>
-          <p class="view-photo-band-copy">Les marchés sont mondiaux. Ton choix de broker doit rester le tien.</p>
-        </div>
-        <div class="section-intro"><p class="eyebrow gold">DDA Broker Hub</p><h1 id="brokers-title">Comparer sans pression commerciale.</h1><p>Un outil d’orientation, pas une vitrine : DDA ne recommande aucun broker, elle t’aide à comparer selon ton propre besoin. Filtre les profils ci-dessous — licences, coûts et disponibilités devront être vérifiés avant publication.</p></div>
-
-        <section class="panel broker-criteria-panel">
-          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-help"/></svg> Comment lire une fiche</p><h3>Les critères qui comptent, avant tout classement</h3></div></div>
-          <div class="broker-read-guide">
-            <div><svg class="icon"><use href="#icon-pin"/></svg><div><strong>Disponibilité</strong><p>Selon ton pays, à confirmer avant toute mise en avant réelle.</p></div></div>
-            <div><svg class="icon"><use href="#icon-shield"/></svg><div><strong>Transparence</strong><p>Toute relation partenaire sera déclarée clairement, jamais dissimulée.</p></div></div>
-            <div><svg class="icon"><use href="#icon-clock"/></svg><div><strong>Vérification</strong><p>Aucune fiche n’est publiée tant qu’elle n’a pas été validée.</p></div></div>
-          </div>
-          <p class="broker-orient-cue">Réponds aux deux critères ci-dessous pour affiner l’orientation selon ton propre besoin — l’ordre d’affichage n’est jamais influencé par une commission ni par un classement commercial.</p>
-          <div class="broker-controls"><label><span class="broker-control-label"><svg class="icon"><use href="#icon-pin"/></svg> Marché</span><select id="broker-market"><option value="all">Tous</option><option value="forex">Forex & CFD</option><option value="synthetic">Indices synthétiques</option></select></label><label><span class="broker-control-label"><svg class="icon"><use href="#icon-target"/></svg> Usage</span><select id="broker-use"><option value="all">Tous les usages</option><option value="learning">Débuter / apprendre</option><option value="advanced">Outils avancés</option></select></label></div>
-        </section>
-
-        <section class="panel broker-list-panel">
-          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-search"/></svg> Profils</p><h3>Ce qui est réellement connu, ce qui reste à confirmer</h3></div></div>
-          <div class="broker-list" id="broker-grid">
-            <article class="broker-row" data-broker="Deriv" data-market="forex synthetic" data-use="learning advanced">
-              <div class="broker-row-head">
-                <span class="broker-monogram">D</span>
-                <div class="broker-row-heading"><h2>Deriv</h2><p>Profil pour marchés dérivés et indices synthétiques.</p></div>
+              <div class="stat-card">
+                <span class="stat-number">V1.0</span>
+                <span class="stat-label">Terminal Foundation Opérationnel</span>
               </div>
-              
-              <dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div><div><dt>Régulation</dt><dd>À vérifier avant publication</dd></div><div><dt>Dépôt minimum</dt><dd>À vérifier avant publication</dd></div></dl>
-              <div class="broker-row-foot"><span class="verification"><svg class="icon"><use href="#icon-clock"/></svg> À vérifier avant publication</span><button class="secondary-action dark-action broker-detail">Voir les critères</button></div>
-            </article>
-            <article class="broker-row" data-broker="HFM" data-market="forex" data-use="learning advanced">
-              <div class="broker-row-head">
-                <span class="broker-monogram">H</span>
-                <div class="broker-row-heading"><h2>HFM</h2><p>Profil pour Forex et CFD, sous réserve d’éligibilité locale.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="dda-free" class="dda-section dda-bg-alt">
+          <div class="dda-container">
+            <div class="section-header">
+              <span class="badge badge-free">DDA Free</span>
+              <h2>Un Accès Gratuit & Immédiat pour Débuter</h2>
+              <p>Développez vos compétences financières de base sans engagement financier.</p>
+            </div>
+
+            <div class="dda-grid-3">
+              <div class="dda-card">
+                <div class="card-icon">📚</div>
+                <h3>Curriculum d'Initiation</h3>
+                <p>Accès complet aux modules d'apprentissage fondamentaux (M0) pour comprendre le fonctionnement des marchés.</p>
               </div>
-              
-              <dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div><div><dt>Régulation</dt><dd>À vérifier avant publication</dd></div><div><dt>Dépôt minimum</dt><dd>À vérifier avant publication</dd></div></dl>
-              <div class="broker-row-foot"><span class="verification"><svg class="icon"><use href="#icon-clock"/></svg> À vérifier avant publication</span><button class="secondary-action dark-action broker-detail">Voir les critères</button></div>
-            </article>
-            <article class="broker-row" data-broker="XM" data-market="forex" data-use="learning advanced">
-              <div class="broker-row-head">
-                <span class="broker-monogram">X</span>
-                <div class="broker-row-heading"><h2>XM</h2><p>Profil pour Forex et CFD, sous réserve d’éligibilité locale.</p></div>
+              <div class="dda-card">
+                <div class="card-icon">🖥️</div>
+                <h3>Darius Terminal Pédagogique</h3>
+                <p>Un cockpit d'apprentissage interactif pour suivre votre progression et réaliser vos premiers exercices.</p>
               </div>
-              
-              <dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div><div><dt>Régulation</dt><dd>À vérifier avant publication</dd></div><div><dt>Dépôt minimum</dt><dd>À vérifier avant publication</dd></div></dl>
-              <div class="broker-row-foot"><span class="verification"><svg class="icon"><use href="#icon-clock"/></svg> À vérifier avant publication</span><button class="secondary-action dark-action broker-detail">Voir les critères</button></div>
-            </article>
-            <article class="broker-row" data-broker="Weltrade" data-market="forex synthetic" data-use="learning advanced">
-              <div class="broker-row-head">
-                <span class="broker-monogram">W</span>
-                <div class="broker-row-heading"><h2>Weltrade</h2><p>Profil pour Forex et instruments dérivés, sous réserve d’éligibilité locale.</p></div>
+              <div class="dda-card">
+                <div class="card-icon">📓</div>
+                <h3>Journal d'Apprentissage</h3>
+                <p>Consignez vos analyses, vos réflexions et vos prises de notes pédagogiques au fil de votre parcours.</p>
               </div>
-              
-              <dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div><div><dt>Régulation</dt><dd>À vérifier avant publication</dd></div><div><dt>Dépôt minimum</dt><dd>À vérifier avant publication</dd></div></dl>
-              <div class="broker-row-foot"><span class="verification"><svg class="icon"><use href="#icon-clock"/></svg> À vérifier avant publication</span><button class="secondary-action dark-action broker-detail">Voir les critères</button></div>
-            </article>
-          </div>
-          <div class="broker-empty" id="broker-empty" hidden><h2>Aucun profil correspondant.</h2><p>Modifie les filtres pour afficher un autre usage.</p></div>
-        </section>
-
-        <p class="disclosure"><svg class="icon"><use href="#icon-shield"/></svg> DDA ne recommande jamais de déposer davantage, de sur-trader ou de prendre un risque inadapté. Le classement n’est jamais basé sur une commission perçue par DDA. Une éventuelle rémunération d’affiliation devra être signalée clairement avant toute activation réelle.</p>
-      </section>
-
-      <section class="view" id="support" aria-labelledby="support-title">
-        <div class="section-intro"><p class="eyebrow gold">Centre d’aide</p><h1 id="support-title">Une réponse claire, sans te perdre.</h1><p>Ce centre d’aide prépare le support avant d’activer les canaux et notifications réels.</p></div>
-        <section class="panel support-faq-panel">
-          <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-help"/></svg> Questions fréquentes</p></div></div>
-          <details><summary>Ma progression est-elle enregistrée ?</summary><p>Pour l’instant, elle reste uniquement sur cet appareil.</p></details>
-          <details><summary>Puis-je déjà payer Premium ?</summary><p>Non. Aucun paiement réel n’est activé.</p></details>
-          <details><summary>DDA donne-t-elle des signaux ?</summary><p>Non. DDA enseigne le processus, le risque et la compréhension des marchés.</p></details>
-          <details><summary>Ma progression suit-elle mon compte sur un autre appareil ?</summary><p>Pas encore. Sans compte serveur, chaque appareil garde sa propre progression locale.</p></details>
-        </section>
-
-        <section class="support-contact" aria-labelledby="support-contact-title">
-          <p class="eyebrow gold"><svg class="icon"><use href="#icon-mail"/></svg> Demander de l’aide</p>
-          <h2 id="support-contact-title">Écris-nous simplement.</h2>
-          <form id="support-form">
-            <label>Sujet<select id="support-subject"><option>Problème de progression</option><option>Question sur un cours</option><option>Accès au compte</option></select></label>
-            <label>Message<textarea id="support-message" maxlength="500" required placeholder="Décris simplement ce qui bloque…"></textarea></label>
-            <button class="primary-action" type="submit">Préparer ma demande <span>→</span></button>
-          </form>
-          <p class="disclosure support-note"><svg class="icon"><use href="#icon-shield"/></svg> <span id="support-note">Aucun message n’est envoyé pour l’instant — ta demande reste sur cet appareil.</span></p>
-        </section>
-      </section>
-
-      <section class="view community-view" id="community" aria-labelledby="community-title">
-        <div class="community-hero" role="img" aria-label="La communauté DDA — aperçu">
-          <img class="photo-fill" src="images/photos/community-hero-handshake.jpg" alt="" loading="lazy">
-          <div class="photo-scrim"></div>
-          <div class="community-hero-copy">
-            <p class="eyebrow gold">Aperçu — bientôt disponible</p>
-            <h1 id="community-title">La communauté DDA</h1>
-            <p>Apprendre, échanger et progresser avec d’autres apprenants DDA — une fois cette brique activée.</p>
-          </div>
-        </div>
-
-        <div class="community-tiles">
-          <div class="community-tile"><svg class="icon"><use href="#icon-chat"/></svg><span>Discussions</span></div>
-          <div class="community-tile"><svg class="icon"><use href="#icon-play"/></svg><span>Sessions en direct</span></div>
-          <div class="community-tile"><svg class="icon"><use href="#icon-users"/></svg><span>Groupes d’étude</span></div>
-        </div>
-        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Ces espaces ne sont pas encore actifs — DDA ne simule jamais une conversation qui n’existe pas.</p>
-
-        <section class="community-featured" aria-labelledby="community-featured-title">
-          <p class="eyebrow">Ce qui existe déjà</p>
-          <article class="community-featured-card">
-            <div class="community-featured-copy">
-              <h2 id="community-featured-title">Atelier : Gestion du risque</h2>
-              <p>Le laboratoire pratique déjà proposé dans Ressources Premium — sizing, invalidation, discipline.</p>
-              <button class="primary-action" data-view="resources">Voir l’atelier <span>→</span></button>
             </div>
-            <div class="community-featured-icon"><svg class="icon"><use href="#icon-shield"/></svg></div>
-          </article>
-        </section>
 
-        <section class="community-spaces" aria-label="Tes espaces réels aujourd’hui">
-          <p class="eyebrow">Tes espaces réels aujourd’hui</p>
-          <div class="community-spaces-list">
-            <button data-view="path" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-path"/></svg></span><span class="chevron-row-body"><strong>Débutants</strong><small>Poser les fondations, un module à la fois</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
-            <button data-view="markets" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-chart"/></svg></span><span class="chevron-row-body"><strong>Marchés &amp; BRVM</strong><small>Comprendre ce qui bouge, sans jargon</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
-            <button data-view="journal" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-journal"/></svg></span><span class="chevron-row-body"><strong>Discipline &amp; psychologie</strong><small>Documenter tes décisions dans ton Journal</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
-          </div>
-        </section>
-
-        <div class="community-cta">
-          <button class="primary-action" id="community-notify" type="button">Être informé au lancement <span>→</span></button>
-          <p class="disclosure" id="community-notify-note">Aucune inscription réelle — juste une préférence locale sur cet appareil.</p>
-        </div>
-      </section>
-
-      <section class="view community-view" id="practice" aria-labelledby="practice-title">
-        <div class="community-hero" role="img" aria-label="Pratique avancée DDA — aperçu">
-          <img class="photo-fill" src="images/photos/terminal-desk-trading.jpg" alt="" loading="lazy">
-          <div class="photo-scrim"></div>
-          <div class="community-hero-copy">
-            <p class="eyebrow gold">Aperçu — bientôt disponible</p>
-            <h1 id="practice-title">Pratique avancée</h1>
-            <p>Des outils pour analyser tes décisions plus finement — une fois cette brique activée.</p>
+            <div class="section-cta" style="margin-top: 2rem; text-align: center;">
+              <a href="#access" class="btn btn-primary">Créer mon compte DDA Free →</a>
+            </div>
           </div>
         </div>
 
-        <div class="community-tiles community-tiles-6">
-          <div class="community-tile"><svg class="icon"><use href="#icon-calendar"/></svg><span>Revue hebdomadaire</span></div>
-          <div class="community-tile"><svg class="icon"><use href="#icon-play"/></svg><span>Decision Replay</span></div>
-          <div class="community-tile"><svg class="icon"><use href="#icon-target"/></svg><span>Analyse assistée</span></div>
-          <div class="community-tile"><svg class="icon"><use href="#icon-shield"/></svg><span>Trading Lab</span></div>
-          <div class="community-tile"><svg class="icon"><use href="#icon-spark"/></svg><span>Trader DNA</span></div>
-          <div class="community-tile"><svg class="icon"><use href="#icon-chart"/></svg><span>Skill Graph</span></div>
-        </div>
-        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Ces outils ne sont pas encore actifs — DDA ne simule jamais une analyse ou un score qu’il n’a pas réellement calculé.</p>
-
-        <section class="community-featured" aria-labelledby="practice-featured-title">
-          <p class="eyebrow">Ce qui existe déjà</p>
-          <article class="community-featured-card">
-            <div class="community-featured-copy">
-              <h2 id="practice-featured-title">Ton Journal &amp; Plan</h2>
-              <p>La base réelle sur laquelle ces outils s’appuieront : documenter chaque décision, une par une.</p>
-              <button class="primary-action" data-view="journal">Ouvrir mon Journal <span>→</span></button>
+        <div id="dda-premium" class="dda-section">
+          <div class="dda-container">
+            <div class="section-header">
+              <span class="badge badge-premium">DDA Premium</span>
+              <h2>Passez à la Vitesse Supérieure</h2>
+              <p>Un catalogue approfondi et des outils avancés pour accélérer votre maîtrise des marchés.</p>
             </div>
-            <div class="community-featured-icon"><svg class="icon"><use href="#icon-journal"/></svg></div>
-          </article>
-        </section>
 
-        <section class="community-spaces" aria-label="Tes statistiques réelles aujourd’hui">
-          <p class="eyebrow">Tes statistiques réelles aujourd’hui</p>
-          <div class="community-spaces-list">
-            <button data-view="progress" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-progress"/></svg></span><span class="chevron-row-body"><strong>Progression</strong><small>Ton Fil de maîtrise, compétence par compétence</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
-            <button data-view="profile" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-user"/></svg></span><span class="chevron-row-body"><strong>Statistiques personnelles</strong><small>XP, modules amorcés, jours d’activité — sur cet appareil</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
-          </div>
-        </section>
+            <div class="dda-grid-2">
+              <div class="dda-card card-premium">
+                <h3>Niveau Standard</h3>
+                <p class="price-tag" style="font-weight: 700; color: var(--dda-primary); margin: 0.5rem 0 1rem;">Accès Avancé</p>
+                <ul class="feature-list" style="list-style: none; padding: 0; margin-bottom: 1.5rem; line-height: 1.8;">
+                  <li>✔ Déblocage des modules avancés (M1–M6)</li>
+                  <li>✔ Exercices d'exécution et de lecture de tendance</li>
+                  <li>✔ Bibliothèque de ressources stratégiques</li>
+                  <li>✔ Support pédagogique DDA</li>
+                </ul>
+                <a href="#membership" class="btn btn-outline btn-block" style="display: block; text-align: center;">Consulter l'aperçu Standard</a>
+              </div>
 
-        <div class="community-cta">
-          <button class="primary-action" id="practice-notify" type="button">Être informé au lancement <span>→</span></button>
-          <p class="disclosure" id="practice-notify-note">Aucune inscription réelle — juste une préférence locale sur cet appareil.</p>
-        </div>
-      </section>
-
-      <section class="view community-view" id="intelligence" aria-labelledby="intelligence-title">
-        <div class="community-hero" role="img" aria-label="Intelligence DDA — aperçu">
-          <img class="photo-fill" src="images/photos/hero-market-woman.jpg" alt="" loading="lazy">
-          <div class="photo-scrim"></div>
-          <div class="community-hero-copy">
-            <p class="eyebrow gold">Aperçu — bientôt disponible</p>
-            <h1 id="intelligence-title">Intelligence DDA</h1>
-            <p>Un accompagnement plus personnalisé, pensé pour s’appuyer sur ce que tu construis déjà — jamais pour le remplacer.</p>
+              <div class="dda-card card-premium highlight" style="border: 1px solid var(--dda-accent);">
+                <span class="popular-tag" style="background: var(--dda-accent); color: #000; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px; float: right;">Incontournable</span>
+                <h3>Niveau Pro</h3>
+                <p class="price-tag" style="font-weight: 700; color: var(--dda-primary); margin: 0.5rem 0 1rem;">Maîtrise Complète</p>
+                <ul class="feature-list" style="list-style: none; padding: 0; margin-bottom: 1.5rem; line-height: 1.8;">
+                  <li>✔ Accès à l'ensemble du curriculum (M0 à M9)</li>
+                  <li>✔ Outils d'analyse de marché & Broker Hub</li>
+                  <li>✔ Contenus exclusifs Market Intelligence</li>
+                  <li>✔ Attestation de compétences DDA</li>
+                </ul>
+                <a href="#membership" class="btn btn-primary btn-block" style="display: block; text-align: center;">Consulter l'aperçu Pro</a>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="community-tiles">
-          <div class="community-tile"><svg class="icon"><use href="#icon-compass"/></svg><span>Darius AI</span></div>
-          <div class="community-tile"><svg class="icon"><use href="#icon-path"/></svg><span>Personnalisation</span></div>
-          <div class="community-tile"><svg class="icon"><use href="#icon-progress"/></svg><span>Outils intelligents</span></div>
-        </div>
-        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Rien ici n’est actif — DDA ne fait jamais parler une IA qui n’existe pas encore.</p>
-
-        <section class="community-featured" aria-labelledby="intelligence-featured-title">
-          <p class="eyebrow">Ce qui existe déjà</p>
-          <article class="community-featured-card">
-            <div class="community-featured-copy">
-              <h2 id="intelligence-featured-title">Ton parcours, déjà personnel</h2>
-              <p>Chaque étape se débloque selon ta propre progression réelle — jamais un algorithme, juste ta validation.</p>
-              <button class="primary-action" data-view="path">Voir mon parcours <span>→</span></button>
+        <div id="dda-vision" class="dda-section dda-bg-dark">
+          <div class="dda-container">
+            <div class="section-header text-white">
+              <span class="badge badge-future">Feuille de route V2 / En Développement</span>
+              <h2>L'Avenir de DDA : IA Coach & Écosystème Expert</h2>
+              <p>Nous préparons la prochaine génération de fonctionnalités d'apprentissage guidé.</p>
             </div>
-            <div class="community-featured-icon"><svg class="icon"><use href="#icon-path"/></svg></div>
-          </article>
-        </section>
 
-        <div class="community-cta">
-          <button class="primary-action" id="intelligence-notify" type="button">Être informé au lancement <span>→</span></button>
-          <p class="disclosure" id="intelligence-notify-note">Aucune inscription réelle — juste une préférence locale sur cet appareil.</p>
-        </div>
-      </section>
+            <div class="dda-grid-2">
+              <div class="dda-card card-dark">
+                <div class="card-icon">🤖</div>
+                <h3>IA Coach Pédagogique</h3>
+                <p>Un assistant virtuel personnalisé pour vous guider dans vos révisions, analyser vos erreurs d'exercice et répondre à vos questions 24/7.</p>
+                <span class="status-tag" style="display: inline-block; margin-top: 1rem; font-size: 0.8rem; color: #8b949e; border: 1px dashed var(--dda-border); padding: 0.2rem 0.5rem; border-radius: 4px;">À venir en V2</span>
+              </div>
 
-      <section class="view" id="profile" aria-labelledby="profile-title">
-        <div class="section-intro profile-intro"><p class="eyebrow gold">Espace personnel</p><h1 id="profile-title">Ton profil d’apprentissage.</h1><p>Modifie uniquement ce qui aide DDA à te proposer la prochaine étape utile.</p></div>
-        <div class="profile-layout">
-          <form class="profile-panel" id="profile-form">
-            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">RD</span><div><p class="eyebrow">Mon compte</p><h2 id="profile-heading-name">Richard</h2><p id="profile-heading-email">Aucune donnée serveur</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
-            <div class="profile-progress-strip">
-              <div><span>XP total</span><strong id="profile-total-xp">0</strong></div>
-              <div><span>Modules amorcés</span><strong id="profile-modules-started">0/10</strong></div>
-              <div><span>Jours d’activité</span><strong id="profile-active-days">0</strong></div>
+              <div class="dda-card card-dark">
+                <div class="card-icon">🎓</div>
+                <h3>Écosystème & Marketplace Experts</h3>
+                <p>Un réseau d'experts certifiés pour partager des cas pratiques réels, organiser des sessions thématiques et accompagner les apprenants.</p>
+                <span class="status-tag" style="display: inline-block; margin-top: 1rem; font-size: 0.8rem; color: #8b949e; border: 1px dashed var(--dda-border); padding: 0.2rem 0.5rem; border-radius: 4px;">À venir en V2</span>
+              </div>
             </div>
-            <button class="text-action profile-progress-link" type="button" data-view="progress">Voir la Progression complète <span>→</span></button>
-            <div class="profile-fields">
-              <label>Prénom<input id="profile-first-name" maxlength="60" required></label>
-              <label>Niveau<select id="profile-level"><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select></label>
-              <label class="field-wide">Objectif<select id="profile-goal"><option>Comprendre les marchés</option><option>Améliorer ma gestion du risque</option><option>Structurer mes décisions</option></select></label>
-              <label class="field-wide">Rythme<select id="profile-time"><option>10 minutes par jour</option><option>20 minutes par jour</option><option>45 minutes, 3 fois par semaine</option></select></label>
-            </div>
-            <p class="form-error" id="profile-error" role="alert"></p>
-            <div class="profile-actions"><button class="primary-action" type="submit">Enregistrer</button><button class="secondary-action dark-action" id="profile-reset" type="button">Réinitialiser mes données</button></div>
-          </form>
-          <aside class="preference-panel">
-            <p class="eyebrow gold">Préférences</p><h3>Une expérience adaptée à ton appareil.</h3>
-            <label class="preference-row"><span><b>Économie de données</b><small>Réduit mouvements et médias non essentiels.</small></span><input id="profile-low-data" type="checkbox"></label>
-            <label class="preference-row"><span><b>Rappels pédagogiques</b><small>Préférence enregistrée seulement ; aucun message n’est envoyé.</small></span><input id="profile-reminders" type="checkbox"></label>
-            <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité.</strong> Ton profil, tes préférences et tes réponses restent sur cet appareil. Aucun courtier, paiement ou service publicitaire n’y a accès. Une mesure d’audience anonyme et pseudonyme peut être utilisée pour comprendre comment les visiteurs découvrent DDA — jamais ton nom, ton e-mail ni tes réponses.</span></p>
-            <div class="activity-summary"><span>Activité locale</span><strong id="event-count">0 événement</strong><small>Mesure pédagogique anonyme sur cet appareil — ta relation avec l’écosystème DDA, jamais partagée.</small></div>
-          </aside>
+          </div>
         </div>
-        <div class="empty-profile" id="empty-profile" hidden><span><svg class="icon"><use href="#icon-user"/></svg></span><h2>Aucun compte sur cet appareil.</h2><p>Commence l’inscription pour créer ton premier parcours.</p><button class="primary-action" data-view="access">Commencer</button></div>
+
+        <footer class="dda-footer">
+          <div class="dda-container">
+            <div class="footer-grid">
+              <div class="footer-brand">
+                <div class="dda-brand">
+                  <span class="dda-logo-mark">DDA</span>
+                  <span class="dda-brand-text">Digital Academy</span>
+                </div>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Plateforme d'éducation financière et d'apprentissage pratique des marchés.</p>
+              </div>
+
+              <div class="footer-col">
+                <h4>Navigation</h4>
+                <a href="#landing">Accueil</a>
+                <a href="#dda-free">DDA Free</a>
+                <a href="#dda-premium">Offre Premium</a>
+                <a href="#dda-vision">Vision & IA</a>
+              </div>
+
+              <div class="footer-col">
+                <h4>Plateforme</h4>
+                <a href="#dashboard">Terminal Apprenant</a>
+                <a href="#path">Parcours M0-M9</a>
+                <a href="#resources">Ressources</a>
+                <a href="#markets">Market Intelligence</a>
+              </div>
+
+              <div class="footer-col">
+                <h4>Statut système</h4>
+                <p class="system-status"><span class="status-dot green"></span> Terminal V1.0 : Opérationnel</p>
+              </div>
+            </div>
+
+            <div class="footer-bottom">
+              <p class="disclaimer">
+                <strong>Avertissement pédagogique :</strong> DDA est une plateforme d'apprentissage à but éducatif. Aucune analyse ou donnée présentée ne constitue un conseil en investissement financier.
+              </p>
+              <p class="copyright" style="margin-top: 0.5rem;">&copy; 2026 DDA Digital Academy. Tous droits réservés.</p>
+            </div>
+          </div>
+        </footer>
       </section>
     </main>
-
-    <nav class="mobile-nav" aria-label="Navigation mobile">
-      <button class="active" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg>Accueil</button>
-      <button data-view="path"><svg class="icon"><use href="#icon-path"/></svg>Parcours</button>
-      <button data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg>Journal</button>
-      <button data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg>Progression</button>
-      <button data-view="profile"><svg class="icon"><use href="#icon-user"/></svg>Profil</button>
-    </nav>
   </div>
-  <div class="loading-layer" id="loading-layer" hidden role="status" aria-live="polite"><div class="loading-spinner"></div><span class="loading-mark">DDA</span><p>Préparation de ton parcours…</p></div>
-  <div class="toast" id="toast" hidden role="status" aria-live="polite"></div>
-  <div class="storage-warning" id="storage-warning" hidden role="status" aria-live="polite"><svg class="icon"><use href="#icon-blocked"/></svg><span>Stockage indisponible sur cet appareil — ta progression ne sera pas conservée après la fermeture de cette page.</span></div>
-  <div class="gate-layer" id="gate-layer" hidden role="dialog" aria-modal="true" aria-labelledby="gate-title">
-    <div class="gate-card">
-      <button class="reader-close" id="gate-close" aria-label="Fermer">×</button>
-      <span class="gate-symbol"><svg class="icon"><use href="#icon-spark"/></svg></span>
-      <p class="eyebrow gold" id="gate-eyebrow">DDA Premium</p>
-      <h2 id="gate-title">Cette expérience sera disponible avec Premium.</h2>
-      <p id="gate-description">Aucun achat ni paiement réel n’est proposé ici.</p>
-      <button class="primary-action" id="gate-unlock" hidden>Activer l’aperçu Standard (simulation) <span>→</span></button>
-      <button class="primary-action" id="gate-preview">Voir la formule Premium <span>→</span></button>
-    </div>
-  </div>
-  <script src="m1-1-lesson.js"></script>
-  <script src="m1-2-lesson.js"></script>
-  <script src="m1-3-lesson.js"></script>
-  <script src="dda-core.js"></script>
-  <script src="learning-engine.js"></script>
-  <script src="lesson-renderer.js"></script>
-  <script src="dda-analytics.js"></script>
-  <script src="app.js"></script>
 </body>
 </html>
