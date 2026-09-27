@@ -237,3 +237,7 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 **Bottom padding :** le shell `#landing` réserve désormais `240px + safe-area` et `scroll-padding-bottom:240px`, avec `180px` de respiration additionnelle dans la section finale. Mesure réelle à 390px : footer terminé à `603.8px`, CTA sticky commençant à `770px`, soit `166.2px` de dégagement ; overflow horizontal nul.
 
 **Validation :** `tests/test_mobile_gutters_contract.js`, mesures Playwright sur Progression/Journal/Marchés, landing publique 390px et capture du footer final.
+
+## Tranche — Premium P2 Risk & Discipline Foundations (27 septembre 2026)
+
+**Statut : CONSTRUIT — vertical slice locale prête pour revue.** Premium Track, P2.1 Risk Before Entry, P2.2 The Anatomy of a Controlled Trade, Practice Lab de Risk Plan, assessment Controlled Decision, Skill Evidence et bridge Journal sont câblés sur les abstractions authored/renderer et l’état v4 existants. La tranche ne simule ni paiement, ni entitlement serveur, ni marché réel, ni signal, ni certification officielle. Voir `DDA_PREMIUM_P2_HANDOVER_2026-09-27.md`.

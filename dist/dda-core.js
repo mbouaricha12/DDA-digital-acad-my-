@@ -4,7 +4,7 @@
   const STORAGE_KEY = 'dda-prototype-state-v4';
   const LEGACY_KEYS = ['dda-prototype-state-v3', 'dda-prototype-state-v2', 'dda-prototype-state'];
   const SCHEMA_VERSION = 4;
-  const LANDING_ROUTES = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile']);
+  const LANDING_ROUTES = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile']);
   const ATTRIBUTION_VALUES = {
     source: new Set(['newsletter', 'youtube', 'facebook', 'instagram', 'linkedin', 'tiktok', 'google', 'bing', 'direct', 'partner', 'whatsapp', 'telegram', 'community', 'x']),
     medium: new Set(['email', 'video', 'social', 'cpc', 'paid', 'organic', 'referral', 'newsletter', 'paid-social', 'paid_search']),
@@ -16,12 +16,12 @@
   // activation_v1 — deliberately versioned so a future activation_v2 definition
   // can be added alongside it without reinterpreting what activation_v1 events
   // already meant when they were recorded.
-  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved', 'landing_visit', 'landing_viewed', 'landing_section_reached', 'landing_cta_hero', 'landing_cta_differentiation', 'landing_cta_free', 'landing_cta_final', 'landing_cta_mobile_sticky', 'broker_selected', 'affiliate_link_click', 'activation_v1', 'hero_cta_click', 'signup_started', 'signup_completed', 'qualification_started', 'qualification_completed']);
-  const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan', 'source', 'medium', 'campaign', 'broker', 'section', 'position']);
+  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved', 'landing_visit', 'landing_viewed', 'landing_section_reached', 'landing_cta_hero', 'landing_cta_differentiation', 'landing_cta_free', 'landing_cta_final', 'landing_cta_mobile_sticky', 'broker_selected', 'affiliate_link_click', 'activation_v1', 'hero_cta_click', 'signup_started', 'signup_completed', 'qualification_started', 'qualification_completed', 'premium_track_viewed', 'premium_module_started', 'premium_lab_attempted', 'premium_lab_validated', 'premium_assessment_completed', 'premium_proof_created', 'premium_review_opened']);
+  const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan', 'source', 'medium', 'campaign', 'broker', 'section', 'position', 'lab', 'assessment', 'proof', 'skill', 'nextAction']);
   const ENTITLEMENTS = Object.freeze({
     visitor: ['dashboard_preview', 'access'],
     free: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'community', 'practice', 'intelligence'],
-    premium: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'resources_premium', 'certificate_preview', 'advanced_modules', 'community', 'practice', 'intelligence']
+    premium: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'resources_premium', 'certificate_preview', 'advanced_modules', 'premium_track', 'community', 'practice', 'intelligence']
   });
 
   /* ---------------------------------------------------------------------
@@ -523,7 +523,7 @@
     modules: Object.freeze([
       { id: 'M0', title: 'Fondations des marchés', lessons: Object.freeze([buildM01Lesson(), buildM02Lesson(), buildM03Lesson()]) },
       { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze([M11_LESSON, M12_LESSON, M13_LESSON].filter(Boolean)) },
-      { id: 'M2', title: 'Risque et discipline', summary: 'Protéger son capital avant de rechercher la performance.', lessons: Object.freeze([]) },
+      { id: 'M2', title: 'Risque et discipline', summary: 'Protéger son capital avant de rechercher la performance.', permission: 'premium_track', premiumOnly: true, lessons: Object.freeze([window.DDAP2Lessons?.p21, window.DDAP2Lessons?.p22].filter(Boolean)) },
       { id: 'M3', title: 'À venir', lessons: Object.freeze([]) },
       { id: 'M4', title: 'À venir', lessons: Object.freeze([]) },
       { id: 'M5', title: 'À venir', lessons: Object.freeze([]) },
@@ -568,6 +568,7 @@
       // stats, Weekly Review, Decision Replay, Darius AI, Trading Lab, Trader
       // DNA) can read from it without a migration.
       journal: { entries: [], plan: emptyJournalPlan() },
+      premium: emptyPremiumState(),
       preferences: { lowData: false, reminders: false },
       events: [],
       // Acquisition V1 — first-touch attribution only, captured once per device
@@ -591,6 +592,35 @@
   }
 
   function safePlan(value) { return value === 'premium' ? 'premium' : 'free'; }
+
+  function emptyPremiumState() {
+    return { trackId: null, modules: {}, labs: {}, assessments: {}, proofs: {}, reviews: {} };
+  }
+
+  function sanitizePremium(raw) {
+    const premium = emptyPremiumState();
+    if (!raw || typeof raw !== 'object') return premium;
+    premium.trackId = sanitizeText(raw.trackId, 80) || null;
+    const copyMap = (source, fields, limit) => {
+      if (!source || typeof source !== 'object') return {};
+      return Object.entries(source).slice(-limit).reduce((out, [id, value]) => {
+        if (!value || typeof value !== 'object') return out;
+        const item = {};
+        fields.forEach(field => { item[field] = typeof value[field] === 'boolean' ? value[field] : sanitizeText(value[field], 120); });
+        if (Number.isFinite(Number(value.attempts))) item.attempts = Math.max(0, Math.min(100, Math.floor(Number(value.attempts))));
+        if (value.passed !== undefined) item.passed = Boolean(value.passed);
+        if (value.status) item.status = sanitizeText(value.status, 40);
+        out[sanitizeText(id, 80)] = item;
+        return out;
+      }, {});
+    };
+    premium.modules = copyMap(raw.modules, ['status', 'startedAt', 'completedAt'], 20);
+    premium.labs = copyMap(raw.labs, ['status', 'lastFeedback', 'sourceLesson', 'proofId', 'startedAt', 'completedAt'], 20);
+    premium.assessments = copyMap(raw.assessments, ['completedAt'], 20);
+    premium.proofs = copyMap(raw.proofs, ['type', 'source', 'competencyId', 'skill', 'level', 'createdAt', 'nextAction'], 20);
+    premium.reviews = copyMap(raw.reviews, ['status', 'openedAt', 'sourceProof'], 20);
+    return premium;
+  }
 
   function sanitizeLessons(rawLessons) {
     const lessons = {};
@@ -763,6 +793,7 @@
         lessons: sanitizeLessons(raw.lessons),
         terminal: sanitizeTerminal(raw.terminal),
         journal: sanitizeJournal(raw.journal),
+        premium: sanitizePremium(raw.premium),
         events: Array.isArray(raw.events) ? raw.events.slice(-50) : [],
         acquisition: sanitizeAcquisition(raw.acquisition)
       });
@@ -853,6 +884,9 @@
     storageAvailable() { return storageAvailable; },
     emptyLessonProgress,
     setPlan(state, plan) { return save({ ...state, membership: { plan: safePlan(plan), status: 'demo' } }); },
+    sanitizePremium,
+    emptyPremiumState,
+    updatePremium(state, patch) { return save({ ...state, premium: sanitizePremium({ ...(state.premium || {}), ...(patch || {}) }) }); },
     updateLesson(state, lessonId, patch) {
       const current = state.lessons?.[lessonId] || emptyLessonProgress();
       return save({ ...state, lessons: { ...state.lessons, [lessonId]: { ...current, ...patch } } });

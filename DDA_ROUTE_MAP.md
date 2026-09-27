@@ -80,3 +80,15 @@ externe ne sont autorisées.
 - Le scénario navigateur couvre une tentative sans annotation (refusée), la reprise avec une zone tracée, la persistance après rechargement, le transfert prérempli vers Journal & Plan, l’enregistrement des champs de provenance (`sourceLesson`, `proofId`, `proofType`), l’apparition distincte dans Progression et le lien retour vers la vraie leçon M0.2.
 - Le contrôle tactile Terminal est vérifié à 360 px et 390 px (cibles ≥44×44 px, sans débordement) ainsi qu’à 1440 px (sans débordement). Le cache PWA a été incrémenté pour distribuer le code actualisé aux installations déjà visitées.
 - Couverture exécutée par `tests/run.js` et `tests/smoke_app_boot.js`, toutes deux intégrées au Product Gate existant.
+
+## Addendum — Premium P2 Risk & Discipline Foundations (27 septembre 2026)
+
+| Vue (`id`) | Entrées | Sortie principale | Retour | Permission | Deep link (reload) | Anonyme | Déjà inscrit |
+|---|---|---|---|---|---|---|---|
+| `premium-track` | Membership → « Ouvrir le Premium Track P2 » | Rail P2 → P2.1, P2.2, Lab, Assessment | Nav / back-link | `premium_track` | ✅ fiable | Redirige vers `access` | Premium Demo local |
+| `lesson-p21` | Premium Track | Risk Before Entry → exercice → quiz → résultat | `premium-track` | `premium_track` | ✅ avec état Premium local | Redirige vers `access` | Après activation Premium Demo |
+| `lesson-p22` | Résultat P2.1 / Premium Track | Controlled Trade Anatomy → exercice → quiz → Lab | `premium-track` | `premium_track` + prérequis P2.1 | ✅ avec quiz P2.1 validé | Redirige vers `access` | Après P2.1 validée |
+| `premium-lab` | Résultat P2.2 / Premium Track | Risk Plan synthétique → feedback → validation | `premium_track` | `premium_track` | ✅ avec état Premium local | Redirige vers `access` | Après les leçons |
+| `premium-assessment` | Lab validé / Premium Track | Controlled Decision → preuve locale | `premium_track` | `premium_track` | ✅ avec état Premium local | Redirige vers `access` | Après Lab validé |
+
+P2 est une **vertical slice locale** : aucune route ne déclenche un paiement, une connexion serveur, une donnée de marché live, un signal, une certification officielle ou un score financier. Le bridge final vers `journal` conserve la provenance de la preuve (`sourceLesson`, `proofId`, `proofType`).

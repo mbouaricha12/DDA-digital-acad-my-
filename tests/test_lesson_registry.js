@@ -53,6 +53,7 @@ const coreCtx = {
   DDAM12GoldenLesson: require('../dist/m1-2-lesson.js'),
   DDAM13GoldenLesson: require('../dist/m1-3-lesson.js')
 };
+vm.runInNewContext(fs.readFileSync(path.join(root, 'dist', 'p2-lessons.js'), 'utf8'), coreCtx);
 vm.runInNewContext(fs.readFileSync(path.join(root, 'dist', 'dda-core.js'), 'utf8'), coreCtx);
 const DDA = coreCtx.window.DDA;
 vm.runInNewContext(fs.readFileSync(path.join(root, 'dist', 'lesson-renderer.js'), 'utf8'), coreCtx);
@@ -150,6 +151,7 @@ test('question descriptors resolve against real authored blocks with honest conv
 test('the sequential gate follows the real authored curriculum order', () => {
   REGISTRY.forEach((entry, index) => {
     if (index === 0) assert.ok(!entry.prerequisite, 'the first lesson has no prerequisite');
+    else if (entry.permission === 'premium_track' && REGISTRY[index - 1].permission !== 'premium_track') assert.ok(!entry.prerequisite, `${entry.id} starts an explicit Premium Track boundary`);
     else assert.strictEqual(entry.prerequisite, REGISTRY[index - 1].id, `${entry.id} must be gated behind the previous authored lesson`);
   });
 });
@@ -162,7 +164,9 @@ test('the « j\'ai compris » scroll anchor and the summary suffix match each le
     assert.ok(summary, `${entry.id}: a summary/result block exists`);
     assert.strictEqual(summary.idSuffix || '', entry.suffix, `${entry.id}: summary idSuffix matches the registry suffix`);
     if (summary.continueTo) {
-      assert.ok(REGISTRY.some(other => other.viewId === summary.continueTo.view), `${entry.id}: continueTo points at a registered view`);
+      const authoredView = REGISTRY.some(other => other.viewId === summary.continueTo.view);
+      const productSurface = ['premium-lab', 'premium-assessment', 'premium-track'].includes(summary.continueTo.view);
+      assert.ok(authoredView || productSurface, `${entry.id}: continueTo points at a registered or declared product surface`);
     }
   });
 });
@@ -199,6 +203,8 @@ test('registry declares the honest entitlement tier for each lesson (CDCP-OS §4
   REGISTRY.forEach(entry => {
     if (entry.id.startsWith('M0.')) {
       assert.strictEqual(entry.permission || 'lesson_m01', 'lesson_m01', `${entry.id} belongs to Free/Découverte tier (lesson_m01)`);
+    } else if (entry.id.startsWith('P2.')) {
+      assert.strictEqual(entry.permission, 'premium_track', `${entry.id} requires the dedicated Premium Track entitlement`);
     } else {
       assert.strictEqual(entry.permission, 'advanced_modules', `${entry.id} requires Standard/Pro tier (advanced_modules)`);
     }
