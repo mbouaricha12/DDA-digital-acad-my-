@@ -7,8 +7,9 @@
  * in this git repository or its history — they were run in ephemeral sessions and
  * never committed. The committed safety net now covers state/migration,
  * visitor/free/premium permissions, deep-link routing, signup/onboarding, M0.1,
- * acquisition events, Terminal practice, Journal proof handoff, responsive touch
- * targets, and the authored-curriculum completion state. Scenarios use real
+ * acquisition events, fail-closed local forms, profile-reset navigation purge,
+ * Terminal practice, Journal proof handoff, responsive touch targets, and the
+ * authored-curriculum completion state. Scenarios use real
  * browser actions; local learner fixtures seed once per page context so reloads
  * test persistence rather than resetting the state.
  *
@@ -133,6 +134,29 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('local forms fail closed without JavaScript and activate after their handlers bind', async () => {
+    const disabledContext = await browser.newContext({ javaScriptEnabled: false });
+    const disabledPage = await disabledContext.newPage();
+    await disabledPage.goto(`${BASE}/#access`);
+    const withoutJs = await disabledPage.evaluate(() => ({
+      forms: [...document.querySelectorAll('form[data-js-submit]')].map(form => ({ method: form.method, disabled: form.querySelector('button[type="submit"]')?.disabled })),
+      referrerPolicy: document.querySelector('meta[name="referrer"]')?.content
+    }));
+    assert.equal(withoutJs.forms.length, 6, 'all six local-submit forms must be marked fail-closed');
+    assert.ok(withoutJs.forms.every(form => form.method === 'dialog' && form.disabled), 'forms cannot GET-fallback or submit before JavaScript is ready');
+    assert.equal(withoutJs.referrerPolicy, 'no-referrer');
+    assert.equal(await disabledPage.evaluate(() => document.querySelectorAll('link[href*="fonts.googleapis.com"], link[href*="fonts.gstatic.com"]').length), 0);
+    await disabledContext.close();
+
+    const enabledContext = await freshContext(browser);
+    const enabledPage = await enabledContext.newPage();
+    await enabledPage.goto(`${BASE}/#access`);
+    const enabled = await enabledPage.evaluate(() => [...document.querySelectorAll('form[data-js-submit] button[type="submit"]')].map(button => button.disabled));
+    assert.equal(enabled.length, 6);
+    assert.ok(enabled.every(value => value === false), 'handlers must be installed before submit controls become active');
+    await enabledContext.close();
+  });
+
   await test('legacy v1 flat localStorage payload migrates without loss', async () => {
     const context = await freshContext(browser);
     // Must be seeded before app.js's own boot-time DDA.load()/track() ever writes
@@ -151,6 +175,66 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(migrated.user.email, 'ada@example.com');
     assert.equal(migrated.lessons['M0.1'].exerciseComplete, true);
     assert.equal(migrated.lessons['M0.1'].quizComplete, true);
+    const migratedKeys = await page.evaluate(() => ({
+      v4: localStorage.getItem('dda-prototype-state-v4'),
+      legacy: ['dda-prototype-state-v3', 'dda-prototype-state-v2', 'dda-prototype-state'].map(key => localStorage.getItem(key))
+    }));
+    assert.ok(migratedKeys.v4, 'a successful migration must commit the normalized v4 state');
+    assert.deepEqual(migratedKeys.legacy, [null, null, null], 'legacy copies are deleted only after the v4 commit');
+    await context.close();
+  });
+
+  await test('legacy storage is preserved when the v4 migration write fails', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => {
+      localStorage.setItem('dda-prototype-state', JSON.stringify({ name: 'Ada', email: 'ada@example.com' }));
+      const original = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (key, value) {
+        if (key === 'dda-prototype-state-v4') throw new DOMException('quota', 'QuotaExceededError');
+        return original.call(this, key, value);
+      };
+    });
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#access`);
+    const keys = await page.evaluate(() => ({
+      v4: localStorage.getItem('dda-prototype-state-v4'),
+      legacy: localStorage.getItem('dda-prototype-state')
+    }));
+    assert.equal(keys.v4, null, 'the simulated failed migration must not create a partial v4 record');
+    assert.ok(keys.legacy, 'legacy data must remain recoverable when the v4 write fails');
+    await context.close();
+  });
+
+  await test('profile reset purges remembered navigation and no previous view returns after reload', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => {
+      localStorage.setItem('dda-prototype-state-v4', JSON.stringify({
+        schemaVersion: 4,
+        user: { id: 'reset-user', name: 'Private Name', email: 'private@example.com', mode: 'device-demo' },
+        membership: { plan: 'free', status: 'demo' },
+        onboarding: { level: 'Débutant', goal: 'Comprendre les marchés', time: '10 minutes par jour', complete: true },
+        lessons: {}, journal: { entries: [], plan: {} }, preferences: {}, events: [], acquisition: {}, updatedAt: null
+      }));
+      if (!sessionStorage.getItem('__profile_reset_test_seeded')) {
+        sessionStorage.setItem('dda-nav-previous-view', 'journal');
+        sessionStorage.setItem('__profile_reset_test_seeded', '1');
+      }
+    });
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#profile`);
+    await page.click('#profile-reset');
+    const afterReset = await page.evaluate(() => ({
+      previous: sessionStorage.getItem('dda-nav-previous-view'),
+      text: localStorage.getItem('dda-prototype-state-v4') || '',
+      active: document.querySelector('.view.active')?.id
+    }));
+    assert.equal(afterReset.previous, null, 'session-only back navigation is part of a full profile reset');
+    assert.equal(afterReset.text.includes('private@example.com'), false);
+    assert.equal(afterReset.text.includes('Private Name'), false);
+    assert.equal(afterReset.active, 'access');
+    await page.reload();
+    assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'access');
+    assert.equal(await page.evaluate(() => sessionStorage.getItem('dda-nav-previous-view')), null);
     await context.close();
   });
 
@@ -361,6 +445,32 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('acquisition keeps only known route fragments and scrubs query values from the address bar', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/?utm_source=ada%40example.com&utm_campaign=launch#landing`);
+    const result = await page.evaluate(() => {
+      const state = window.DDA.load();
+      const unsafe = window.DDA.save({ ...state, acquisition: { ...state.acquisition, landingPath: '#richard-darius@example.com', visitorId: 'ada@example.com' } });
+      const safe = window.DDA.save({ ...unsafe, acquisition: { ...unsafe.acquisition, landingPath: '#lesson-m02' } });
+      return {
+        url: location.href,
+        query: location.search,
+        capturedRoute: state.acquisition.landingPath,
+        unsafeRoute: unsafe.acquisition.landingPath,
+        unsafeVisitorId: unsafe.acquisition.visitorId,
+        safeRoute: safe.acquisition.landingPath
+      };
+    });
+    assert.equal(result.query, '', 'captured UTM parameters must not remain in the address bar');
+    assert.equal(result.url.includes('ada%40example.com'), false, 'the address bar must not retain an email-like attribution value');
+    assert.equal(result.capturedRoute, '#landing');
+    assert.equal(result.unsafeRoute, null, 'arbitrary fragments are not persisted as acquisition data');
+    assert.equal(result.unsafeVisitorId, null, 'caller-controlled PII cannot become an analytics identifier');
+    assert.equal(result.safeRoute, '#lesson-m02', 'a known product route remains available for attribution');
+    await context.close();
+  });
+
   await test('UTM values containing an email or phone number are omitted before state persistence and analytics props', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
@@ -380,6 +490,22 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal('campaign' in entry.props, false);
     assert.equal(JSON.stringify(entry).includes('ada@example.com'), false);
     assert.equal(JSON.stringify(entry).includes('2250700000000'), false);
+    await context.close();
+  });
+
+  await test('unrecognized free-text attribution values are rejected even when they contain no email or phone', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/?utm_source=Richard&utm_medium=email&utm_campaign=richard-project#landing`);
+    const result = await page.evaluate(() => ({
+      acquisition: window.DDA.load().acquisition,
+      event: window.DDAAnalytics.getDebugQueue().find(entry => entry.localName === 'landing_visit')
+    }));
+    assert.equal(result.acquisition.source, null, 'a free-text name is not a source taxonomy value');
+    assert.equal(result.acquisition.campaign, null, 'unapproved campaign strings are not persisted');
+    assert.equal(result.event.props.source, undefined, 'analytics repeats the allowlist at the transport boundary');
+    assert.equal(result.event.props.campaign, undefined);
+    assert.equal(result.event.props.medium, 'email', 'known categorical values remain measurable');
     await context.close();
   });
 
@@ -459,28 +585,43 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       };
     });
     const page = await context.newPage();
-    await page.route('https://analytics.test/static/array.js', route => route.fulfill({
-      status: 200,
-      contentType: 'application/javascript',
-      body: '/* PostHog is stubbed by this test. */'
-    }));
-    await page.goto(`${BASE}/#landing`);
+    let analyticsLoadedWithUrl = '';
+    await page.route('https://analytics.test/static/array.js', route => {
+      analyticsLoadedWithUrl = page.url();
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/javascript',
+        body: '/* PostHog is stubbed by this test. */'
+      });
+    });
+    await page.goto(`${BASE}/?utm_source=ada%40example.com&utm_medium=email#landing`);
     await page.waitForFunction(() => window.DDAAnalytics?.getTransport() === 'posthog');
     await page.evaluate(() => window.DDAAnalytics.send('landing_visit', {
       source: 'ada@example.com',
       medium: '+225 07 00 00 00 00',
       campaign: 'launch-2026',
       referrer: 'https://referrer.example/path?email=ada%40example.com#phone-2250700000000',
-      visitorId: 'visitor-playwright-safe'
+      visitorId: window.DDA.load().acquisition.visitorId,
+      view: 'ada@example.com',
+      position: 'mobile_sticky',
+      broker: 'XM',
+      section: 'free',
+      step: 'private-note@example.com'
     }));
     const calls = await page.evaluate(() => window.__posthogCalls);
     const capture = calls.findLast(call => call.method === 'capture');
     assert.ok(capture, 'the mocked PostHog transport should receive a capture call');
     assert.equal(capture.args[0], 'landing_visit');
-    assert.deepEqual(capture.args[1], { campaign: 'launch-2026', referrer: 'https://referrer.example' });
+    assert.equal(new URL(analyticsLoadedWithUrl).search, '', 'the analytics script must not see raw UTM query values');
+    assert.equal(analyticsLoadedWithUrl.includes('ada%40example.com'), false);
+    assert.deepEqual(capture.args[1], {
+      campaign: 'launch-2026', referrer: 'https://referrer.example',
+      position: 'mobile_sticky', broker: 'XM', section: 'free'
+    });
     assert.equal(JSON.stringify(calls).includes('ada@example.com'), false);
     assert.equal(JSON.stringify(calls).includes('2250700000000'), false);
     assert.equal(JSON.stringify(calls).includes('/path?'), false);
+    assert.equal(JSON.stringify(calls).includes('private-note'), false, 'unrecognized keys and free-text values are dropped');
     await context.close();
   });
 

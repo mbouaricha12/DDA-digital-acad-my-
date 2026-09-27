@@ -4,6 +4,12 @@
   const STORAGE_KEY = 'dda-prototype-state-v4';
   const LEGACY_KEYS = ['dda-prototype-state-v3', 'dda-prototype-state-v2', 'dda-prototype-state'];
   const SCHEMA_VERSION = 4;
+  const LANDING_ROUTES = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile']);
+  const ATTRIBUTION_VALUES = {
+    source: new Set(['newsletter', 'youtube', 'facebook', 'instagram', 'linkedin', 'tiktok', 'google', 'bing', 'direct', 'partner', 'whatsapp', 'telegram', 'community', 'x']),
+    medium: new Set(['email', 'video', 'social', 'cpc', 'paid', 'organic', 'referral', 'newsletter', 'paid-social', 'paid_search']),
+    campaign: new Set(['launch', 'launch-2026', 'launch-2026-09-27', 'm0-launch', 'retarget', 'private-alpha', 'private-alpha-launch', 'private-alpha-2026'])
+  };
   // Acquisition V1 (CEO-validated) adds four event names to the existing local
   // allowlist: landing_visit, broker_selected, affiliate_link_click (defined but
   // never triggered until real broker links get separate CEO validation), and
@@ -644,10 +650,10 @@
     return (withoutDates.match(/\d/g) || []).length >= 8;
   }
 
-  function sanitizeAttributionValue(value) {
+  function sanitizeAttributionValue(key, value) {
     if (value == null) return null;
-    const text = sanitizeText(value, 120);
-    return text && !containsPersonalAttribution(text) ? text : null;
+    const text = sanitizeText(value, 120).toLowerCase();
+    return ATTRIBUTION_VALUES[key]?.has(text) && !containsPersonalAttribution(text) ? text : null;
   }
 
   function sanitizeReferrer(value) {
@@ -663,15 +669,27 @@
     }
   }
 
+  function sanitizeVisitorId(value) {
+    const text = String(value ?? '').trim();
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const fallback = /^visitor-\d{10,16}-\d{1,7}$/;
+    return uuid.test(text) || fallback.test(text) ? text : null;
+  }
+
+  function sanitizeLandingPath(value) {
+    const match = String(value ?? '').trim().match(/^#([a-z0-9-]+)$/i);
+    return match && LANDING_ROUTES.has(match[1]) ? `#${match[1]}` : null;
+  }
+
   function sanitizeAcquisition(raw) {
     const acquisition = emptyAcquisition();
     if (!raw || typeof raw !== 'object') return acquisition;
-    acquisition.visitorId = raw.visitorId ? sanitizeText(raw.visitorId, 60) : null;
-    acquisition.source = sanitizeAttributionValue(raw.source);
-    acquisition.medium = sanitizeAttributionValue(raw.medium);
-    acquisition.campaign = sanitizeAttributionValue(raw.campaign);
+    acquisition.visitorId = sanitizeVisitorId(raw.visitorId);
+    acquisition.source = sanitizeAttributionValue('source', raw.source);
+    acquisition.medium = sanitizeAttributionValue('medium', raw.medium);
+    acquisition.campaign = sanitizeAttributionValue('campaign', raw.campaign);
     acquisition.referrer = sanitizeReferrer(raw.referrer);
-    acquisition.landingPath = raw.landingPath ? sanitizeText(raw.landingPath, 300) : null;
+    acquisition.landingPath = sanitizeLandingPath(raw.landingPath);
     acquisition.firstSeenAt = raw.firstSeenAt ? sanitizeText(raw.firstSeenAt, 40) : null;
     return acquisition;
   }
@@ -777,9 +795,16 @@
 
   function load() {
     try {
-      let raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) raw = LEGACY_KEYS.map(key => localStorage.getItem(key)).find(Boolean);
-      return normalizeLegacy(JSON.parse(raw || '{}'));
+      const current = localStorage.getItem(STORAGE_KEY);
+      if (current) return normalizeLegacy(JSON.parse(current));
+      const legacy = LEGACY_KEYS
+        .map(key => ({ key, value: localStorage.getItem(key) }))
+        .find(entry => entry.value);
+      if (!legacy) return emptyState();
+      const migrated = normalizeLegacy(JSON.parse(legacy.value));
+      // save() commits v4 first and deletes legacy keys only after setItem has
+      // succeeded; if quota/private mode blocks the write, the old copy survives.
+      return save(migrated);
     }
     catch { return emptyState(); }
   }
@@ -791,6 +816,11 @@
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
       storageAvailable = true;
+      // A completed v4 write is the migration commit point. Do not leave a
+      // second, stale copy of personal profile data in older schema keys.
+      LEGACY_KEYS.forEach(key => {
+        try { localStorage.removeItem(key); } catch { /* keep the successful v4 write */ }
+      });
     } catch {
       storageAvailable = false;
     }
@@ -861,7 +891,7 @@
     // later visit, so a returning visitor's original attribution isn't lost.
     // No email, name or other identity ever passes through this path.
     captureAcquisition(state, params) {
-      if (state.acquisition && state.acquisition.visitorId) return state;
+      if (sanitizeVisitorId(state.acquisition?.visitorId)) return state;
       const acquisition = sanitizeAcquisition({
         visitorId: generateVisitorId(),
         source: params?.source,

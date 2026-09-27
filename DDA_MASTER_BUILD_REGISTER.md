@@ -181,3 +181,12 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 **Correction détectée par E2E :** le dropdown ouvrait visuellement mais ne transférait pas le focus vers l’option. Le clavier déplace maintenant le focus après l’ouverture/reveal ; la sélection met à jour le `<select>` natif et la soumission existante.
 **Validation locale :** 40 scénarios Playwright passés, 25 contrôles du smoke app, contrats et carte des routes passés, syntaxe JavaScript validée ; les 28 assets du shell v15 existent. Les correctifs UTM/referrer de `main` et la persistance Terminal v4 sont conservés dans le checkout d’intégration.
 **Statut de livraison :** résultats vérifiés uniquement dans le checkout local d’intégration ; PR, gate GitHub et publication restent à effectuer avant d’annoncer un déploiement.
+
+
+## Tranche — Durcissement PII, seconde passe (27 septembre 2026)
+
+**Statut : validé localement; PR/CI/merge/déploiement à confirmer.** Cette passe traite neuf surfaces recoupées : allowlists d’acquisition/referrer, scrub query/hash avant SDK tiers, formulaires locaux fail-closed, suppression des clés legacy uniquement après commit v4, purge de la navigation de session au reset, filtrage enum des propriétés analytics, allowlist `landingPath`, retrait de Google Fonts distant et validation stricte du pseudonyme `visitorId`. La description et les limites sont documentées dans `DDA_SECURITY_PII_HARDENING_2026-09-27.md`.
+
+**Non-régression :** 45 scénarios Playwright passés, 25 smoke checks jsdom, tous les contrats Node et la cohérence route/registre passés; syntaxe JavaScript et `git diff --check` passés. Les checks responsive 360/390/1440px restent inclus dans la suite. Les polices sont locales/système; le cache service worker est `dda-shell-v16`.
+
+**Limites explicites :** données d’apprentissage volontairement stockées en clair sur l’appareil; si PostHog est activé, le fournisseur peut voir l’IP réseau malgré l’absence d’autocapture/pageviews/session recording. Consentement, conservation IP et headers HTTP de production restent à décider avant activation publique. Ne pas annoncer un déploiement avant le merge réussi dans `main` et le workflow Pages vert.
