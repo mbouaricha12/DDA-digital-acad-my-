@@ -10,8 +10,8 @@
   // activation_v1 — deliberately versioned so a future activation_v2 definition
   // can be added alongside it without reinterpreting what activation_v1 events
   // already meant when they were recorded.
-  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved', 'landing_visit', 'broker_selected', 'affiliate_link_click', 'activation_v1', 'hero_cta_click', 'signup_started', 'signup_completed', 'qualification_started', 'qualification_completed']);
-  const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan', 'source', 'medium', 'campaign', 'broker']);
+  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved', 'landing_visit', 'landing_viewed', 'landing_section_reached', 'landing_cta_hero', 'landing_cta_differentiation', 'landing_cta_free', 'landing_cta_final', 'landing_cta_mobile_sticky', 'broker_selected', 'affiliate_link_click', 'activation_v1', 'hero_cta_click', 'signup_started', 'signup_completed', 'qualification_started', 'qualification_completed']);
+  const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan', 'source', 'medium', 'campaign', 'broker', 'section', 'position']);
   const ENTITLEMENTS = Object.freeze({
     visitor: ['dashboard_preview', 'access'],
     free: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'community', 'practice', 'intelligence'],

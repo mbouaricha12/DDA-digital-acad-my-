@@ -3,12 +3,20 @@
 
   const FORWARDABLE_EVENTS = {
     landing_visit: 'landing_visit',
+    landing_viewed: 'landing_viewed',
+    landing_section_reached: 'landing_section_reached',
+    hero_cta_click: 'landing_cta_clicked',
+    landing_cta_hero: 'landing_cta_clicked',
+    landing_cta_differentiation: 'landing_cta_clicked',
+    landing_cta_free: 'landing_cta_clicked',
+    landing_cta_final: 'landing_cta_clicked',
+    landing_cta_mobile_sticky: 'landing_cta_clicked',
     onboarding_complete: 'dda_signup',
     broker_selected: 'broker_selected',
     affiliate_link_click: 'affiliate_link_click',
     activation_v1: 'activation_v1'
   };
-  const SAFE_PROP_KEYS = ['source', 'medium', 'campaign', 'referrer', 'step', 'broker'];
+  const SAFE_PROP_KEYS = ['source', 'medium', 'campaign', 'referrer', 'step', 'broker', 'section', 'position', 'view'];
   const DEBUG_QUEUE_LIMIT = 200;
   const debugQueue = [];
   let transport = 'debug';

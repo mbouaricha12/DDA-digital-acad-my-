@@ -1430,6 +1430,11 @@ function showView(id, recordEvent = true) {
   }
   if (recordEvent) trackEvent('view_opened', { view: id });
   if (id === 'landing') {
+    trackEvent('landing_viewed', {
+      source: prototypeState.acquisition?.source,
+      medium: prototypeState.acquisition?.medium,
+      campaign: prototypeState.acquisition?.campaign
+    });
     trackEvent('landing_visit', {
       source: prototypeState.acquisition?.source,
       medium: prototypeState.acquisition?.medium,
@@ -1450,7 +1455,10 @@ buttons.forEach(button => button.addEventListener('click', () => {
   // data-analytics is recorded under its own real event name before the
   // normal navigation happens — never a substitute for view_opened, which
   // still fires for every navigation regardless of this attribute.
-  if (button.dataset.analytics) trackEvent(button.dataset.analytics, { view: button.dataset.view });
+  if (button.dataset.analytics) trackEvent(button.dataset.analytics, {
+    view: button.dataset.view,
+    position: button.dataset.funnelPosition
+  });
   showView(button.dataset.view);
   if (button.dataset.terminalHandoff === 'true') openJournalComposer(null, button, terminalJournalDraft());
 }));
@@ -1965,4 +1973,24 @@ if (titles[initialView]) {
     });
     mutationObserver.observe(document.body, { childList: true, subtree: true });
   }
+})();
+
+/* Growth / conversion V1 — mesure uniquement les étapes réellement atteintes.
+   Aucun pixel tiers ni donnée personnelle : les événements passent par le même
+   adaptateur local que le reste du produit et restent inoffensifs hors GO. */
+(function initLandingFunnelMeasurement() {
+  if (typeof window === 'undefined' || typeof document === 'undefined' || !('IntersectionObserver' in window)) return;
+  const seen = new Set();
+  const nodes = document.querySelectorAll('[data-funnel-section]');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const section = entry.target.dataset.funnelSection;
+      if (!section || seen.has(section)) return;
+      seen.add(section);
+      trackEvent('landing_section_reached', { section });
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.25, rootMargin: '0px 0px -12% 0px' });
+  nodes.forEach(node => observer.observe(node));
 })();

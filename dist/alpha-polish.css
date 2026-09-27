@@ -421,3 +421,54 @@
   .public-footer{grid-template-columns:1fr 1fr;padding-top:54px}
   .public-footer-bottom{display:grid;gap:8px}
 }
+
+
+/* Conversion beat — confiance avant offre, sans revenir au card grid. */
+.landing-differentiation{
+  display:grid;
+  grid-template-columns:minmax(100px,.28fr) minmax(0,1fr) auto;
+  align-items:end;
+  gap:clamp(24px,5vw,72px);
+  max-width:1440px;
+  margin:0 auto;
+  padding:clamp(54px,8vw,96px) clamp(20px,8vw,120px);
+  border-top:1px solid var(--lp-line);
+  border-bottom:1px solid var(--lp-line);
+  background:#0a1423;
+}
+.differentiation-mark{align-self:start;color:var(--gold-soft);font-size:.68rem;font-weight:800;letter-spacing:.14em}
+.differentiation-statement{margin:8px 0 18px;color:var(--lp-heading);font-family:var(--dda-serif);font-size:clamp(2.1rem,5vw,5rem);line-height:.98;letter-spacing:-.04em}
+.differentiation-statement em{color:var(--lp-blue-2);font-style:normal}
+.differentiation-note{max-width:48ch;margin:0;color:var(--lp-body);font-size:.94rem;line-height:1.7}
+.landing-differentiation .landing-inline-cta{align-self:end;white-space:nowrap;color:var(--lp-heading)!important}
+.landing-mobile-cta{display:none}
+
+@media(max-width:820px){
+  .landing-differentiation{grid-template-columns:1fr;gap:18px}
+  .differentiation-mark{order:-1}
+  .landing-differentiation .landing-inline-cta{justify-self:start}
+}
+@media(max-width:639px){
+  .landing-mobile-cta{
+    position:fixed;
+    z-index:34;
+    left:12px;
+    right:12px;
+    bottom:calc(12px + var(--safe-b));
+    display:block;
+    padding:8px;
+    border:1px solid rgba(227,194,127,.35);
+    background:rgba(4,7,15,.92);
+    box-shadow:0 8px 26px rgba(0,0,0,.35);
+    backdrop-filter:blur(14px);
+  }
+  .landing-mobile-cta button{width:100%;min-height:44px;border:0;background:var(--lp-blue);color:#fff;font-weight:800;cursor:pointer}
+  .landing-mobile-cta button span{margin-left:8px;color:var(--gold-soft)}
+  .landing-final-cta{padding-bottom:120px}
+}
+
+
+/* Le shell public ne doit pas créer de containing block transformé : sinon la
+   barre CTA mobile fixe se positionne par rapport à la landing entière. */
+#landing.view.active{animation:dda-public-enter .32s ease both}
+@keyframes dda-public-enter{from{opacity:0}to{opacity:1}}

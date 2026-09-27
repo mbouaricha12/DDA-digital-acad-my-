@@ -113,7 +113,7 @@
         <header class="public-header" aria-label="Navigation publique DDA">
           <a class="public-header-brand" href="#landing" data-view="landing" aria-label="DDA — Accueil"><span class="public-header-mark">DDA</span><span><b>Darius Digital Academy</b><small>Learning Operating System</small></span></a>
           <nav class="public-header-nav" aria-label="Navigation publique"><button type="button" data-view="landing" class="active">Accueil</button><button type="button" data-view="access">Apprendre</button><button type="button" data-view="path">Parcours</button><button type="button" data-view="membership">Formations</button><button type="button" data-view="resources">Ressources</button><button type="button" data-view="markets">Market Intelligence</button><button type="button" data-view="community">Communauté</button></nav>
-          <div class="public-header-actions"><button type="button" class="public-login" data-view="access">Se connecter</button><button type="button" class="public-start" data-view="access" data-analytics="hero_cta_click">Commencer gratuitement <span>→</span></button></div>
+          <div class="public-header-actions"><button type="button" class="public-login" data-view="access">Se connecter</button><button type="button" class="public-start" data-view="access" data-analytics="hero_cta_click" data-funnel-position="hero">Commencer gratuitement <span>→</span></button></div>
           <details class="public-menu"><summary aria-label="Ouvrir le menu">Menu <span>＋</span></summary><div class="public-menu-panel"><button type="button" data-view="access">Apprendre</button><button type="button" data-view="path">Parcours</button><button type="button" data-view="membership">Formations</button><button type="button" data-view="resources">Ressources</button><button type="button" data-view="markets">Market Intelligence</button><button type="button" data-view="community">Communauté</button><button type="button" class="public-menu-cta" data-view="access">Commencer gratuitement <span>→</span></button></div></details>
         </header>
         <div class="landing-editorial-shell">
@@ -123,7 +123,7 @@
             <h1 id="landing-title">Comprendre les marchés.<br><em>Construire des compétences.</em></h1>
             <p class="landing-deck">DDA transforme l’apprentissage des marchés en un parcours où chaque notion doit être observée, pratiquée et prouvée — pas simplement regardée.</p>
             <div class="landing-actions">
-              <button class="primary-action" type="button" data-view="access" data-analytics="hero_cta_click">Commencer gratuitement <span>→</span></button>
+              <button class="primary-action" type="button" data-view="access" data-analytics="hero_cta_click" data-funnel-position="hero">Commencer gratuitement <span>→</span></button>
               <button class="text-action landing-secondary" type="button" data-view="path">Explorer les parcours <span>↓</span></button>
             </div>
             <ul class="trust-list landing-trust">
@@ -151,6 +151,22 @@
             <div class="aperture-thread" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
           </div>
         </div>
+
+        <section class="landing-differentiation" data-funnel-section="differentiation" aria-label="La différence DDA">
+          <div class="differentiation-mark" aria-hidden="true">DDA / 01</div>
+          <div>
+            <p class="eyebrow gold">Pourquoi DDA</p>
+            <p class="differentiation-statement">Pas de signal ici.<br><em>On t'apprend à comprendre.</em></p>
+            <p class="differentiation-note">Une méthode structurée, des exercices guidés et des preuves de progression — pas un raccourci vers une promesse de gain.</p>
+          </div>
+          <button class="text-action landing-inline-cta" type="button" data-view="access" data-analytics="landing_cta_differentiation" data-funnel-position="differentiation">Commencer gratuitement <span>→</span></button>
+        </section>
+
+        <section class="landing-free" data-funnel-section="free" aria-label="Ce que DDA Free permet d’apprendre">
+          <div class="landing-section-head"><p class="eyebrow gold">DDA Free</p><h2>Une vraie base pour apprendre les marchés, à ton rythme.</h2><p>Tu reçois un module de fondations complet : leçon, exercice, quiz et preuve de progression. Aucune carte bancaire requise pour commencer.</p></div>
+          <div class="landing-free-grid"><article><span class="free-number">01</span><h3>Fondamentaux</h3><p>Marchés, acteurs, prix, ordres et premières lectures.</p></article><article><span class="free-number">02</span><h3>Analyse &amp; risque</h3><p>Observer une structure, formuler une hypothèse et reconnaître ses limites.</p></article><article><span class="free-number">03</span><h3>Pratique guidée</h3><p>Exercices, quiz, feedback et retry — pas seulement du contenu à consommer.</p></article><article><span class="free-number">04</span><h3>Progression réelle</h3><p>Journal, preuves validées et aperçu de Market Intelligence pédagogique.</p></article></div>
+          <button class="text-action landing-inline-cta" type="button" data-view="access" data-analytics="landing_cta_free" data-funnel-position="free">Commencer gratuitement <span>→</span></button>
+        </section>
 
         <section class="landing-method" aria-label="Méthode DDA">
           <article>
@@ -206,11 +222,7 @@
           </div>
         </section>
 
-        <section class="landing-free" aria-label="Ce que DDA Free permet d’apprendre">
-          <div class="landing-section-head"><p class="eyebrow gold">DDA Free</p><h2>Une vraie base pour apprendre les marchés, à ton rythme.</h2><p>Commencer gratuitement ne veut pas dire regarder une démo. Tu peux déjà comprendre, pratiquer et valider des compétences fondatrices.</p></div>
-          <div class="landing-free-grid"><article><span class="free-number">01</span><h3>Fondamentaux</h3><p>Marchés, acteurs, prix, ordres et premières lectures.</p></article><article><span class="free-number">02</span><h3>Analyse &amp; risque</h3><p>Observer une structure, formuler une hypothèse et reconnaître ses limites.</p></article><article><span class="free-number">03</span><h3>Pratique guidée</h3><p>Exercices, quiz, feedback et retry — pas seulement du contenu à consommer.</p></article><article><span class="free-number">04</span><h3>Progression réelle</h3><p>Journal, preuves validées et aperçu de Market Intelligence pédagogique.</p></article></div>
-          <button class="text-action landing-inline-cta" type="button" data-view="access">Commencer par les fondamentaux <span>→</span></button>
-        </section>
+
 
         <section class="landing-problem" aria-label="Le problème que DDA résout">
           <div class="landing-section-head">
@@ -283,8 +295,11 @@
         <section class="landing-final-cta" aria-label="Rejoindre DDA">
           <h2>Prêt à construire de vraies compétences ?</h2>
           <p>Commence gratuitement. Ta progression reste sur cet appareil, ton rythme reste le tien.</p>
-          <button class="primary-action" type="button" data-view="access" data-analytics="hero_cta_click">Commencer gratuitement <span>→</span></button>
+          <button class="primary-action" type="button" data-view="access" data-analytics="landing_cta_final" data-funnel-position="final">Commencer gratuitement <span>→</span></button>
         </section>
+        <div class="landing-mobile-cta" aria-label="Commencer avec DDA">
+          <button type="button" data-view="access" data-analytics="landing_cta_mobile_sticky" data-funnel-position="mobile_sticky">Commencer gratuitement <span>→</span></button>
+        </div>
         <footer class="public-footer"><div class="public-footer-brand"><span class="public-header-mark">DDA</span><p>Learn Markets. Build Skills. Prove Progress.</p><small>Une plateforme éducative pour comprendre les marchés et construire des compétences durables.</small></div><div class="public-footer-col"><strong>Plateforme</strong><button data-view="landing">Accueil</button><button data-view="access">Apprendre</button><button data-view="path">Parcours</button><button data-view="membership">Formations</button><button data-view="resources">Ressources</button></div><div class="public-footer-col"><strong>Domaines</strong><button data-view="markets">Market Intelligence</button><button data-view="community">Communauté</button><button data-view="access">Marchés financiers</button><button data-view="access">Économie &amp; Finance</button></div><div class="public-footer-col"><strong>DDA</strong><button data-view="community">À propos</button><button data-view="community">Devenir Expert</button><button data-view="support">Aide &amp; Contact</button></div><div class="public-footer-col"><strong>Légal</strong><button data-view="support">Conditions</button><button data-view="support">Confidentialité</button><button data-view="support">Cookies</button><button data-view="support">Mentions légales</button></div><div class="public-footer-bottom"><span>© 2026 Darius Digital Academy</span><span>Abidjan · Afrique francophone · Monde</span><span>Contenu pédagogique — aucun signal de marché</span></div></footer>
       </section>
 
