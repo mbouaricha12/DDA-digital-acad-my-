@@ -10,8 +10,8 @@
   // activation_v1 — deliberately versioned so a future activation_v2 definition
   // can be added alongside it without reinterpreting what activation_v1 events
   // already meant when they were recorded.
-  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved', 'landing_visit', 'broker_selected', 'affiliate_link_click', 'activation_v1', 'hero_cta_click', 'signup_started', 'signup_completed', 'qualification_started', 'qualification_completed']);
-  const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan', 'source', 'medium', 'campaign', 'broker']);
+  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved', 'landing_visit', 'landing_viewed', 'landing_section_reached', 'landing_cta_hero', 'landing_cta_differentiation', 'landing_cta_free', 'landing_cta_final', 'landing_cta_mobile_sticky', 'broker_selected', 'affiliate_link_click', 'activation_v1', 'hero_cta_click', 'signup_started', 'signup_completed', 'qualification_started', 'qualification_completed']);
+  const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan', 'source', 'medium', 'campaign', 'broker', 'section', 'position']);
   const ENTITLEMENTS = Object.freeze({
     visitor: ['dashboard_preview', 'access'],
     free: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'community', 'practice', 'intelligence'],
@@ -76,24 +76,25 @@
     const practice = Object.freeze({
       id: 'exercise',
       label: 'Exercice',
-      heading: 'Qui échange quoi ?',
-      prompt: 'Quelle affirmation décrit le mieux ce qui vient de se passer ?',
-      successText: 'Correct. Tu reconnais le mécanisme fondamental de l’échange.',
+      heading: 'Lire une pression d’achat sans la surinterpréter',
+      prompt: 'Sur un actif pédagogique, des achats agressifs consomment les offres proches tandis que les vendeurs relèvent progressivement leurs prix. Quelle lecture est la plus rigoureuse ?',
+      successText: 'Darius Insight : tu relies le mouvement à l’exécution des ordres et à la liquidité disponible, sans transformer une observation en promesse de hausse.',
       choices: Object.freeze([
-        Object.freeze({ text: 'Le prix monte toujours après un achat.', correct: false, feedback: 'Un achat ne garantit rien sur la suite : le prix dépend de l’équilibre entre toutes les intentions d’achat et de vente, pas d’une seule transaction.' }),
-        Object.freeze({ text: 'Le marché met en relation des intentions d’achat et de vente.', correct: true }),
-        Object.freeze({ text: 'Le vendeur connaît forcément l’avenir.', correct: false, feedback: 'Personne ne connaît l’avenir avec certitude. Le vendeur accepte simplement de céder l’actif à ce prix, maintenant.' })
+        Object.freeze({ text: 'Le prix peut progresser parce que les achats agressifs absorbent la liquidité vendeuse proche ; je dois encore vérifier le contexte avant toute décision.', correct: true, feedback: 'Darius Insight : l’observation décrit un déséquilibre local entre exécution et liquidité. Elle explique le mouvement potentiel, mais ne suffit pas à elle seule pour décider.' }),
+        Object.freeze({ text: 'La hausse est garantie : dès qu’un acheteur frappe le marché, il faut suivre le mouvement.', correct: false, feedback: 'Darius Insight : une transaction ne garantit jamais la suite. La liquidité peut réapparaître, le déséquilibre peut s’inverser et un plan de risque reste nécessaire.' }),
+        Object.freeze({ text: 'Les vendeurs ont disparu ; il n’existe plus de contrepartie sur le marché.', correct: false, feedback: 'Darius Insight : chaque exécution a une contrepartie. Le point à observer est le prix auquel la prochaine liquidité accepte d’échanger, pas la disparition des vendeurs.' })
       ])
     });
     const evaluation = Object.freeze({
       id: 'quiz',
       label: 'Quiz de validation',
-      heading: 'Avant toute décision, que faut-il privilégier ?',
-      successText: 'Correct. La discipline du processus passe avant la précipitation.',
+      heading: 'Avant de décider face à une volatilité soudaine',
+      prompt: 'Une bougie s’accélère et le carnet pédagogique montre plusieurs niveaux consommés. Quelle séquence respecte le mieux une pratique professionnelle ?',
+      successText: 'Darius Insight : la discipline professionnelle consiste à séparer observation, hypothèse et décision. Le mouvement est une information à qualifier, pas une urgence automatique.',
       choices: Object.freeze([
-        Object.freeze({ text: 'Entrer rapidement pour ne rien manquer.', correct: false, feedback: 'La précipitation est justement ce que ce module déconseille : observer avant d’agir protège ton capital.' }),
-        Object.freeze({ text: 'Chercher un gain immédiat.', correct: false, feedback: 'Un gain isolé ne prouve rien sur la qualité d’une décision — c’est le principe essentiel vu plus haut.' }),
-        Object.freeze({ text: 'Observer, comprendre et suivre un plan.', correct: true })
+        Object.freeze({ text: 'Entrer rapidement avant que le mouvement ne disparaisse.', correct: false, feedback: 'Darius Insight : la vitesse n’est pas une méthode. Sans lecture du contexte, de la liquidité et du risque accepté, tu confonds volatilité et opportunité.' }),
+        Object.freeze({ text: 'Observer les échanges, formuler une hypothèse, vérifier le plan et seulement ensuite décider.', correct: true, feedback: 'Darius Insight : tu sépares les faits observés de l’interprétation et de l’action. C’est cette séquence qui rend une décision révisable et professionnelle.' }),
+        Object.freeze({ text: 'Chercher immédiatement la direction probable à partir de la dernière bougie.', correct: false, feedback: 'Darius Insight : une bougie isolée ne résume ni la liquidité ni le risque. Une lecture sérieuse demande davantage qu’un réflexe sur la dernière variation.' })
       ])
     });
     const result = Object.freeze({
