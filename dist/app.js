@@ -1543,12 +1543,15 @@ function showView(id, recordEvent = true) {
     } else {
       const fallbackView = currentView && currentView !== id && titles[currentView] ? currentView : 'path';
       showView(fallbackView, false);
+      const isPremiumTrack = permission === 'premium_track';
       openGate({
-        eyebrow: 'Offre Standard · M1+',
-        title: 'Ce module est réservé à l’offre Standard.',
-        description: 'DDA Free (Découverte) donne accès au module M0 Fondations. Les modules M1 et suivants sont réservés aux offres Standard et Pro (CDCP-OS §4.2). Aucun paiement réel — active l’aperçu pour explorer ce module.',
+        eyebrow: isPremiumTrack ? 'DDA Premium · P2' : 'Offre Standard · M1+',
+        title: isPremiumTrack ? 'Cette expérience est réservée à Premium.' : 'Ce module est réservé à l’offre Standard.',
+        description: isPremiumTrack
+          ? 'DDA Free (Découverte) peut voir l’aperçu, mais le contenu P2 complet est disponible uniquement dans la démonstration Premium locale. Aucun paiement réel — active l’aperçu pour explorer ce module.'
+          : 'DDA Free (Découverte) donne accès au module M0 Fondations. Les modules M1 et suivants sont réservés aux offres Standard et Pro (CDCP-OS §4.2). Aucun paiement réel — active l’aperçu pour explorer ce module.',
         canUnlock: true,
-        unlockText: 'Activer l’aperçu Standard (simulation)',
+        unlockText: isPremiumTrack ? 'Activer l’aperçu Premium (simulation)' : 'Activer l’aperçu Standard (simulation)',
         previewText: 'Voir la formule Premium',
         targetView: id
       });
