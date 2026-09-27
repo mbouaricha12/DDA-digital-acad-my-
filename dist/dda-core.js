@@ -553,6 +553,7 @@
       membership: { plan: 'free', status: 'demo' },
       onboarding: null,
       lessons: {},
+      terminal: emptyTerminalState(),
       // Journal & Plan V1 — a personal record of process, never of performance.
       // `entries` documents individual reflections (plan → act → review); `plan`
       // is the single standing document of the learner's own process rules.
@@ -572,6 +573,10 @@
 
   function emptyAcquisition() {
     return { visitorId: null, source: null, medium: null, campaign: null, referrer: null, landingPath: null, firstSeenAt: null };
+  }
+
+  function emptyTerminalState() {
+    return { instrument: 'BRVM Composite', timeframe: '1D', zoom: 1, pan: 0, drawings: [], observation: '', practice: null };
   }
 
   function sanitizeText(value, maxLength) {
@@ -640,6 +645,45 @@
     return acquisition;
   }
 
+  function sanitizeTerminal(raw) {
+    const terminal = emptyTerminalState();
+    if (!raw || typeof raw !== 'object') return terminal;
+    if (['BRVM Composite', 'BRVM 30', 'EUR/USD pédagogique'].includes(raw.instrument)) terminal.instrument = raw.instrument;
+    if (['1D', '1W', '1M'].includes(raw.timeframe)) terminal.timeframe = raw.timeframe;
+    terminal.zoom = Number.isFinite(Number(raw.zoom)) ? Math.max(1, Math.min(3, Math.round(Number(raw.zoom)))) : 1;
+    terminal.pan = Number.isFinite(Number(raw.pan)) ? Math.max(0, Math.min(200, Math.round(Number(raw.pan)))) : 0;
+    terminal.observation = sanitizeText(raw.observation, 1000);
+    terminal.drawings = Array.isArray(raw.drawings) ? raw.drawings.slice(-100).map(drawing => {
+      if (!drawing || !['zone', 'line', 'fib'].includes(drawing.type)) return null;
+      const coords = ['x1', 'y1', 'x2', 'y2'].map(key => Number(drawing[key]));
+      if (!coords.every(Number.isFinite)) return null;
+      return {
+        type: drawing.type,
+        x1: Math.max(0, Math.min(900, coords[0])),
+        y1: Math.max(0, Math.min(420, coords[1])),
+        x2: Math.max(0, Math.min(900, coords[2])),
+        y2: Math.max(0, Math.min(420, coords[3]))
+      };
+    }).filter(Boolean) : [];
+    if (raw.practice && typeof raw.practice === 'object' && (['retry', 'validated'].includes(raw.practice.status) || raw.practice.sourceLesson === 'M0.2')) {
+      const status = ['retry', 'validated'].includes(raw.practice.status) ? raw.practice.status : 'started';
+      terminal.practice = {
+        status,
+        attempts: Number.isFinite(Number(raw.practice.attempts)) ? Math.max(0, Math.min(1000, Math.floor(Number(raw.practice.attempts)))) : 0,
+        feedback: sanitizeText(raw.practice.feedback, 500),
+        ...(raw.practice.sourceLesson === 'M0.2' ? { sourceLesson: 'M0.2', sourceLessonTitle: 'Support & Résistance' } : {}),
+        proof: {
+          id: 'm02-zone-identification',
+          type: 'zone_identification',
+          lessonId: 'M0.2',
+          status
+        },
+        ...(status === 'validated' && raw.practice.completedAt ? { completedAt: sanitizeText(raw.practice.completedAt, 40) } : {})
+      };
+    }
+    return terminal;
+  }
+
   function generateVisitorId() {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
     return `visitor-${Date.now()}-${Math.round(Math.random() * 1e6)}`;
@@ -668,6 +712,7 @@
         membership: { plan: safePlan(raw.membership?.plan), status: 'demo' },
         preferences: { ...next.preferences, ...raw.preferences },
         lessons: sanitizeLessons(raw.lessons),
+        terminal: sanitizeTerminal(raw.terminal),
         journal: sanitizeJournal(raw.journal),
         events: Array.isArray(raw.events) ? raw.events.slice(-50) : [],
         acquisition: sanitizeAcquisition(raw.acquisition)
@@ -681,6 +726,7 @@
       next.onboarding = raw.onboarding || null;
       next.lessons = sanitizeLessons(raw.lessons) ;
       if (Object.keys(next.lessons).length === 0) next.lessons = migrateFlatProgress(raw.progress);
+      next.terminal = sanitizeTerminal(raw.terminal);
       next.preferences = { ...next.preferences, ...(raw.preferences || {}) };
       next.events = Array.isArray(raw.events) ? raw.events.slice(-50) : [];
       next.acquisition = sanitizeAcquisition(raw.acquisition);
