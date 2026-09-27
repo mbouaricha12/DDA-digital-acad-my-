@@ -125,3 +125,125 @@
 @media(prefers-reduced-motion:reduce){
   #progress .mastery-row,#resources .library-entry{transition:none}
 }
+
+
+/* ======================================================================
+   DDA FINAL ART DIRECTION — sobriété éditoriale
+   La sophistication vient de la hiérarchie, du rythme et de la cohérence,
+   jamais d'une accumulation de cartes, de gradients ou de mouvements.
+   ====================================================================== */
+
+/* Une surface publique plus calme : une seule profondeur, des séparateurs
+   francs et des angles légèrement éditoriaux plutôt que des tuiles SaaS. */
+#landing{
+  background:var(--lp-bg);
+  background-image:none;
+}
+#landing h1 em{
+  background:none;
+  color:var(--lp-blue-2);
+}
+#landing .primary-action{
+  background:var(--lp-blue);
+  box-shadow:0 10px 24px rgba(13,79,176,.24);
+}
+#landing .primary-action:hover{
+  background:var(--lp-blue-2);
+  box-shadow:0 12px 28px rgba(13,79,176,.32);
+}
+.landing-aperture{
+  background:#102942;
+  box-shadow:0 24px 54px rgba(6,16,28,.22);
+}
+.landing-institution,
+.landing-final-cta{
+  background:var(--lp-card-2);
+}
+.landing-institution-photo,
+.landing-aperture,
+.landing-method article,
+.landing-demo-grid article,
+.landing-problem-list li,
+.landing-steps-list li,
+.landing-plan-card,
+.landing-domain-groups article,
+.landing-future-grid article{
+  border-radius:2px 14px 2px 14px;
+}
+.landing-method article,
+.landing-demo-grid article,
+.landing-problem-list li,
+.landing-steps-list li,
+.landing-plan-card,
+.landing-domain-groups article,
+.landing-future-grid article{
+  background:var(--lp-card);
+}
+.landing-plan-card-gold{
+  background:var(--lp-card-2);
+  border-color:rgba(217,164,65,.45);
+}
+.landing-signal span{
+  animation:none;
+  background:var(--gold-soft);
+  opacity:.42;
+}
+
+/* Les micro-interactions restent présentes, mais l'interface ne se met pas
+   en scène : un mouvement bref sur les actions, aucun effet décoratif continu. */
+.view.active .panel,
+.view.active .terminal-mi,
+.view.active .terminal-two,
+.view.active .terminal-family,
+.view.active .terminal-aperture,
+.view.active .market-zone,
+.view.active .journey-current{
+  animation-duration:.28s;
+}
+[data-reveal]{
+  transform:translateY(8px);
+  transition-duration:.35s;
+}
+
+/* Une même grammaire de composants sur les surfaces apprenant : bord net,
+   accent unique, espace généreux. */
+.panel,
+.analysis-terminal,
+.terminal-lead-photo,
+.journey-current,
+.progress-stat,
+.mastery-row,
+.next-step-panel,
+.certificate-panel{
+  border-radius:2px 14px 2px 14px;
+}
+.primary-action,
+.secondary-action{
+  border-radius:2px 9px 2px 9px;
+}
+
+@media(max-width:699px){
+  .landing-editorial-shell{
+    padding-top:30px;
+    gap:26px;
+  }
+  .landing-aperture{
+    min-height:390px;
+    padding:22px;
+  }
+  .landing-method article,
+  .landing-demo-grid article,
+  .landing-problem-list li,
+  .landing-steps-list li,
+  .landing-plan-card{
+    padding:20px;
+  }
+  .landing-trust{
+    display:grid;
+    gap:10px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  [data-reveal]{transition:none}
+}
