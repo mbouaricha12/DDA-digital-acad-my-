@@ -543,3 +543,10 @@
   .landing-future-grid{grid-template-columns:1fr;gap:12px;margin-top:34px}
   .landing-future-grid article{min-height:220px;padding:22px}
 }
+
+
+/* Mobile navigation clearance — le bouton de chapitre reste entièrement
+   visible lorsque le Parcours est amené dans le viewport par une action. */
+@media(max-width:639px){
+  .journey-current{scroll-margin-bottom:calc(84px + var(--safe-b))}
+}

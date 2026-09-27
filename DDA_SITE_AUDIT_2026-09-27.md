@@ -149,3 +149,12 @@ Le projet est techniquement compatible avec un hébergement statique grâce à `
 Le produit est fonctionnellement cohérent pour une Private Alpha locale et la landing est prête pour une validation de direction. Le noyau pédagogique réel est plus avancé que les surfaces futures ; les limites de production sont documentées et non masquées.
 
 La prochaine tranche recommandée est une revue authentifiée ciblée des écrans Terminal, Parcours, Leçon, Progression et Profil, suivie d’une décision de fusion dans `main`. Aucune activation commerciale ou publication publique ne doit être déduite du simple fait que la prévisualisation est accessible.
+
+
+## 11. Tranche authentifiée — correction Parcours mobile
+
+La revue des écrans authentifiés `Terminal`, `Parcours`, `Leçon`, `Progression` et `Profil` a confirmé zéro débordement horizontal à 390px et 1440px. Un défaut réel a toutefois été trouvé sur `Parcours` : après un déplacement programmatique ou une navigation vers le chapitre courant, le bouton « Continuer » pouvait se retrouver sous la barre de navigation mobile fixe.
+
+Le correctif ajoute une marge de défilement basse au chapitre courant afin que son action reste entièrement visible au-dessus de la barre mobile. Vérification dédiée : recouvrement mesuré avant correction `68px`, après correction `0px`.
+
+La suite de non-régression après ce correctif reste verte : **31 tests E2E**, **24 smoke checks** et l’ensemble des contrats Node passent sans échec.
