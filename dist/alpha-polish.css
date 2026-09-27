@@ -493,3 +493,53 @@
   }
   .landing-trust{margin-top:18px}
 }
+
+
+/* Editorial cleanup — domaines et vision future.
+   Les sujets sont des lignes de lecture, pas des mots collés ni des cartes SaaS. */
+.landing-domains{
+  max-width:1440px;
+  margin:0 auto;
+  padding:clamp(56px,8vw,104px) clamp(20px,8vw,120px);
+  border-top:1px solid var(--lp-line);
+  background:var(--lp-bg);
+}
+.landing-domains .landing-section-head{padding:0;max-width:680px}
+.landing-domains .landing-section-head h2{max-width:18ch;font-size:clamp(2rem,4.2vw,3.8rem);line-height:1.02;letter-spacing:-.035em}
+.landing-domains .landing-section-head>p:last-child{max-width:52ch;color:var(--lp-body);font-size:.96rem;line-height:1.7}
+.landing-domain-groups{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:48px}
+.landing-domain-groups article{min-width:0;padding:22px 24px;border-top:1px solid var(--lp-line);background:transparent!important}
+.landing-domain-groups article+article{border-left:1px solid var(--lp-line)}
+.domain-label{margin:0 0 18px;color:var(--lp-heading);font-family:var(--dda-serif);font-size:1.35rem;line-height:1.15}
+.landing-domain-groups article>div{display:flex;flex-wrap:wrap;gap:8px}
+.landing-domain-groups article>div span{display:inline-flex;align-items:center;min-height:30px;padding:6px 9px;border:1px solid rgba(227,194,127,.22);border-radius:2px 8px 2px 8px;color:var(--lp-body);font-size:.75rem;line-height:1.15;white-space:nowrap}
+
+.landing-future{
+  max-width:1440px;
+  margin:0 auto;
+  padding:clamp(60px,9vw,112px) clamp(20px,8vw,120px);
+  border-top:1px solid var(--lp-line);
+  background:var(--lp-card-2);
+}
+.landing-future>div:first-child{max-width:760px}
+.landing-future h2{max-width:15ch;margin:10px 0 20px;color:var(--lp-heading);font-family:var(--dda-serif);font-size:clamp(2.15rem,4.8vw,4.6rem);line-height:.98;letter-spacing:-.04em}
+.landing-future>div:first-child>p:last-child{max-width:55ch;margin:0;color:var(--lp-body);font-size:.96rem;line-height:1.75}
+.landing-future-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:48px}
+.landing-future-grid article{display:flex;flex-direction:column;align-items:flex-start;min-height:260px;padding:24px;background:var(--lp-card)!important}
+.landing-future-grid article>span:first-child{color:var(--gold-soft);font-size:.68rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.landing-future-grid h3{margin:22px 0 8px;color:var(--lp-heading);font-size:1.55rem;line-height:1.1}
+.landing-future-grid p{max-width:38ch;margin:0;color:var(--lp-body);font-size:.9rem;line-height:1.65}
+.landing-future-grid .future-label{margin-top:auto;width:100%;padding:16px 0 0;border-top:1px solid var(--lp-line);color:var(--gold-soft);font-size:.78rem;line-height:1.4}
+
+@media(max-width:699px){
+  .landing-domains,.landing-future{padding-inline:20px}
+  .landing-domains .landing-section-head h2{font-size:clamp(2rem,9vw,2.8rem)}
+  .landing-domain-groups{grid-template-columns:1fr;margin-top:30px}
+  .landing-domain-groups article{padding:22px 0}
+  .landing-domain-groups article+article{border-left:0}
+  .domain-label{margin-bottom:14px;font-size:1.25rem}
+  .landing-domain-groups article>div span{font-size:.78rem}
+  .landing-future h2{font-size:clamp(2.15rem,10vw,3.15rem);line-height:1.02}
+  .landing-future-grid{grid-template-columns:1fr;gap:12px;margin-top:34px}
+  .landing-future-grid article{min-height:220px;padding:22px}
+}
