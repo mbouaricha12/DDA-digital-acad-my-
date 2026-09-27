@@ -71,3 +71,12 @@ Communauté native, IA réelle et Écosystème Expert restent futures ; les
 surfaces Market Intelligence, Premium et Broker restent explicitement
 démonstratives ou locales tant qu’aucune validation et aucune connexion
 externe ne sont autorisées.
+
+
+## Addendum — Vérification réelle des deep-links et de la boucle Terminal (27 septembre 2026)
+
+- La phrase de l’ancienne entrée de registre « `lessonStatusInModule()` n’est jamais consulté par `showView()` » décrit un état antérieur et n’est plus une dette actuelle. Le registre `LESSON_REGISTRY` dérive `LESSON_PREREQUISITE` ; `showView()` bloque maintenant les liens profonds vers M0.2, M0.3, M1.1, M1.2 et M1.3 tant que le quiz de la leçon précédente n’est pas validé. Le scénario Playwright essaie chaque URL avant et après le prérequis, y compris les permissions M1+.
+- L’état du Practice Terminal est désormais une partie additive et assainie du schéma local v4 : instrument/timeframe autorisés, zoom/pan bornés, annotations filtrées et plafonnées, observation limitée, statut/tentatives/preuve typés. La preuve reste locale et ne marque jamais le quiz ni la compétence de M0.2 comme accomplis.
+- Le scénario navigateur couvre une tentative sans annotation (refusée), la reprise avec une zone tracée, la persistance après rechargement, le transfert prérempli vers Journal & Plan, l’enregistrement des champs de provenance (`sourceLesson`, `proofId`, `proofType`), l’apparition distincte dans Progression et le lien retour vers la vraie leçon M0.2.
+- Le contrôle tactile Terminal est vérifié à 360 px et 390 px (cibles ≥44×44 px, sans débordement) ainsi qu’à 1440 px (sans débordement). Le cache PWA a été incrémenté pour distribuer le code actualisé aux installations déjà visitées.
+- Couverture exécutée par `tests/run.js` et `tests/smoke_app_boot.js`, toutes deux intégrées au Product Gate existant.

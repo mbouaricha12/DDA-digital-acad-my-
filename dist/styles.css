@@ -2344,3 +2344,24 @@ body.low-data .lesson-outline li{transition:none!important}
 .practice-proof-empty{margin:0;color:var(--muted);font-size:13px;line-height:1.5}.practice-proof-row{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid rgba(25,43,61,.14);border-radius:10px;background:rgba(255,255,255,.42)}.practice-proof-row.is-validated{border-color:rgba(50,145,105,.35)}.practice-proof-row.is-retry{border-color:rgba(217,164,65,.35)}.practice-proof-icon{display:grid;place-items:center;width:26px;height:26px;flex:0 0 26px;border-radius:50%;background:#e7f5ed;color:#227851;font-weight:800}.is-retry .practice-proof-icon{background:#fff4db;color:#9a6a0b}.practice-proof-row strong{color:var(--ink);font-size:14px}.practice-proof-row p{margin:4px 0;color:var(--muted);font-size:13px;line-height:1.45}.practice-proof-row small{color:var(--muted);font-size:11px}
 .lesson-practice-handoff{margin:28px 0;padding:20px;border:1px solid rgba(217,164,65,.4);border-radius:12px;background:rgba(217,164,65,.08)}.lesson-practice-handoff h3{margin:0;color:var(--ink);font-size:20px}.lesson-practice-handoff p:not(.eyebrow){max-width:620px;color:var(--muted);font-size:14px;line-height:1.55}.lesson-practice-handoff .secondary-action{width:auto;min-height:42px;padding:10px 16px}@media(max-width:700px){.lesson-practice-handoff .secondary-action{width:100%}}
 .journal-proof-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px;padding:9px 11px;border-left:3px solid var(--gold);background:rgba(217,164,65,.08);font-size:11px}.journal-proof-meta strong{color:var(--ink)}.journal-proof-meta span{color:var(--muted)}.journal-proof-source{margin-left:auto;font-size:11px}
+
+/* Terminal touch-target hardening: preserve desktop density while meeting the 44px mobile target. */
+@media (max-width: 700px) {
+  .analysis-terminal .terminal-pan-controls .terminal-icon-button,
+  .analysis-terminal [data-terminal-tool] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .analysis-terminal .analysis-observation-actions .primary-action,
+  .analysis-terminal .terminal-practice-actions .secondary-action,
+  .analysis-terminal .analysis-terminal-legend .text-action {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .analysis-terminal .analysis-terminal-legend .text-action {
+    padding: 8px 0;
+  }
+}

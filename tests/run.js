@@ -1,16 +1,16 @@
 'use strict';
 /*
- * DDA — minimal automated regression harness.
+ * DDA — Playwright product regression harness.
  *
  * Context: the Master Build Register described 33+ test files (test_dda_v2..v34,
  * test_e2e_nav_integrity.js, etc.) with over 1200 assertions. None of them exist
  * in this git repository or its history — they were run in ephemeral sessions and
- * never committed. This file is NOT an attempt to reconstruct that suite. It is
- * the minimum real, committed safety net for the surfaces the Acquisition V1
- * tranche actually touches, as directed by the CEO before any core modification:
- * state/migration, visitor/free/premium permissions, #access navigation,
- * signup/onboarding, M0.1, and the existing local event log — plus the new
- * acquisition instrumentation added on top of it.
+ * never committed. The committed safety net now covers state/migration,
+ * visitor/free/premium permissions, deep-link routing, signup/onboarding, M0.1,
+ * acquisition events, Terminal practice, Journal proof handoff, responsive touch
+ * targets, and the authored-curriculum completion state. Scenarios use real
+ * browser actions; local learner fixtures seed once per page context so reloads
+ * test persistence rather than resetting the state.
  *
  * Run with: node tests/run.js
  * Requires Chromium (pre-installed in this environment) via the globally
@@ -61,6 +61,7 @@ async function test(name, fn) {
     failures.push({ name, error });
     console.log(`  FAIL — ${name}`);
     console.log(`    ${error.message}`);
+    if (error.stack) console.log(error.stack.split('\n').slice(1, 3).map(line => `    ${line.trim()}`).join('\n'));
   }
 }
 
@@ -88,6 +89,29 @@ async function completeSignupFlow(page, opts) {
   await fillOnboarding(page, opts);
   // Onboarding submit simulates a short loading delay before navigating to the lesson.
   await page.waitForSelector('.view.active#lesson');
+}
+
+async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = 'free') {
+  await context.addInitScript(({ lessons, plan }) => {
+    if (localStorage.getItem('dda-prototype-state-v4')) return;
+    const lessonIds = ['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3'];
+    const progress = Object.fromEntries(lessonIds.map(id => [id, {
+      lessonViewed: false, exerciseComplete: false, quizComplete: false, ...(lessons[id] || {})
+    }]));
+    localStorage.setItem('dda-prototype-state-v4', JSON.stringify({
+      schemaVersion: 4,
+      user: { id: 'e2e-learner', name: 'Ada', email: 'ada@example.com', mode: 'device-demo' },
+      membership: { plan, status: 'demo' },
+      onboarding: { level: 'Débutant', goal: 'Comprendre les marchés', time: '10 minutes par jour', complete: true },
+      lessons: progress,
+      journal: { entries: [], plan: {} },
+      preferences: { lowData: false, reminders: false },
+      terminal: {},
+      events: [],
+      acquisition: {},
+      updatedAt: null
+    }));
+  }, { lessons: lessonProgress, plan: membershipPlan });
 }
 
 (async () => {
@@ -625,6 +649,135 @@ async function completeSignupFlow(page, opts) {
     assert.ok(names.includes('signup_completed'), 'signup_completed must fire once the account is created');
     assert.ok(names.includes('qualification_completed'), 'qualification_completed must fire once onboarding is submitted');
     await context.close();
+  });
+
+  console.log('\n-- M. Verrous directs et boucle Terminal → Journal --');
+
+  await test('direct lesson URLs respect every declared prerequisite, and work once it is completed', async () => {
+    const cases = [
+      { view: 'lesson-m02', prerequisite: 'M0.1' },
+      { view: 'lesson-m03', prerequisite: 'M0.2' },
+      { view: 'lesson-m11', prerequisite: 'M0.3', plan: 'premium' },
+      { view: 'lesson-m12', prerequisite: 'M1.1', plan: 'premium' },
+      { view: 'lesson-m13', prerequisite: 'M1.2', plan: 'premium' }
+    ];
+    for (const item of cases) {
+      const blockedContext = await freshContext(browser);
+      await seedLocalLearner(blockedContext, {}, item.plan || 'free');
+      const blockedPage = await blockedContext.newPage();
+      await blockedPage.goto(`${BASE}/#${item.view}`);
+      assert.equal(await blockedPage.evaluate(() => document.querySelector('.view.active')?.id), 'path', `${item.view} must be blocked without ${item.prerequisite}`);
+      assert.ok((await blockedPage.locator('#toast').textContent()).includes('se débloque'), 'the blocked learner receives a clear explanation');
+      await blockedContext.close();
+
+      const unlockedContext = await freshContext(browser);
+      await seedLocalLearner(unlockedContext, { [item.prerequisite]: { quizComplete: true } }, item.plan || 'free');
+      const unlockedPage = await unlockedContext.newPage();
+      await unlockedPage.goto(`${BASE}/#${item.view}`);
+      const unlockedState = await unlockedPage.evaluate(() => ({
+        active: [...document.querySelectorAll('.view.active')].map(view => view.id),
+        plan: window.DDA.load().membership.plan,
+        prerequisite: window.DDA.load().lessons,
+        entitled: window.DDA.can(window.DDA.load(), 'advanced_modules')
+      }));
+      assert.deepEqual(unlockedState.active, [item.view], `${item.view} must open after ${item.prerequisite} is complete: ${JSON.stringify(unlockedState)}`);
+      await unlockedContext.close();
+    }
+  });
+
+  await test('Terminal annotation → failed retry → validated proof → saved Journal metadata → Progression and source lesson', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'M0.1': { quizComplete: true } });
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#lesson-m02`);
+    await page.click('[data-practice-launch="M0.2"]');
+    assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'dashboard');
+    assert.equal(await page.evaluate(() => window.DDA.load().terminal.practice.sourceLessonTitle), 'Support & Résistance');
+
+    await page.fill('#terminal-observation', 'Plusieurs réactions apparaissent autour de la même zone centrale.');
+    await page.click('#terminal-save-observation');
+    await page.click('#terminal-practice-validate');
+    let practice = await page.evaluate(() => window.DDA.load().terminal.practice);
+    assert.ok(practice, 'Terminal state must be persisted after the first attempt');
+    assert.equal(practice.status, 'retry', 'no drawing must not validate the exercise');
+    assert.equal(practice.attempts, 1);
+    assert.equal(practice.completedAt, undefined, 'a failed attempt must never receive a completion timestamp');
+
+    await page.locator('[data-terminal-tool="zone"]').click();
+    const chart = page.locator('#terminal-chart');
+    await chart.scrollIntoViewIfNeeded();
+    const box = await chart.boundingBox();
+    assert.ok(box && box.width > 100 && box.height > 100, 'interactive chart has a real pointer target');
+    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.35);
+    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.54);
+    await page.click('#terminal-practice-validate');
+    practice = await page.evaluate(() => window.DDA.load().terminal.practice);
+    assert.equal(practice.status, 'validated', 'a learner-placed zone matching the taught range validates');
+    assert.equal(practice.attempts, 2);
+    assert.ok(practice.completedAt, 'successful proof is timestamped');
+    assert.deepEqual(practice.proof, {
+      id: 'm02-zone-identification', type: 'zone_identification', lessonId: 'M0.2', status: 'validated'
+    });
+    assert.equal(await page.locator('#terminal-practice-proof').textContent(), 'Preuve conservée localement');
+
+    await page.reload();
+    const reloadedTerminal = await page.evaluate(() => window.DDA.load().terminal);
+    assert.equal(reloadedTerminal.practice.status, 'validated', 'proof survives a full page reload');
+    assert.equal(reloadedTerminal.observation, 'Plusieurs réactions apparaissent autour de la même zone centrale.');
+
+    await page.click('#terminal-journal-handoff');
+    assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'journal');
+    assert.equal(await page.locator('#journal-source-context').isVisible(), true, 'composer names the real Terminal source');
+    assert.equal(await page.locator('#journal-market').inputValue(), 'BRVM Composite');
+    assert.ok((await page.locator('#journal-context').inputValue()).includes('sans cotation en temps réel'), 'handoff preserves the no-live-quotes disclosure');
+    assert.equal(await page.locator('#journal-scenario').inputValue(), reloadedTerminal.observation);
+    assert.ok((await page.locator('#journal-process').inputValue()).includes('annotations : zone Support/Résistance'));
+    await page.click('#journal-step-next');
+    await page.fill('#journal-decision', 'Je documente la zone observée sans en déduire un signal.');
+    await page.click('#journal-step-next');
+    await page.fill('#journal-whatworked', 'J’ai comparé plusieurs réactions avant de tracer.');
+    await page.click('#journal-step-save');
+
+    const savedEntry = await page.evaluate(() => window.DDA.load().journal.entries[0]);
+    assert.equal(savedEntry.terminalSource, true);
+    assert.equal(savedEntry.sourceLesson, 'M0.2');
+    assert.equal(savedEntry.proofId, 'm02-zone-identification');
+    assert.equal(savedEntry.proofType, 'zone_identification');
+    assert.equal(savedEntry.decision, 'Je documente la zone observée sans en déduire un signal.');
+
+    await page.click('.nav-item[data-view="progress"]');
+    const progressProof = await page.locator('#progress-practice-proof').textContent();
+    assert.ok(progressProof.includes('m02-zone-identification'), 'Progression surfaces the same stable practice proof');
+    assert.ok(progressProof.includes('Identification de zone'), 'Progression classifies the artifact as practice, not as a quiz result');
+    assert.ok(progressProof.includes('Après la leçon M0.2 · Support & Résistance'), 'Progression preserves the mission source');
+    const lessonProgress = await page.evaluate(() => window.DDA.load().lessons['M0.2']);
+    assert.equal(lessonProgress.quizComplete, false, 'a valid Practice Terminal proof does not fabricate lesson mastery');
+
+    await page.click('.nav-item[data-view="journal"]');
+    await page.locator('#journal-list details summary').click();
+    await page.locator('#journal-list .journal-proof-source').click();
+    assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'lesson-m02', 'Journal source link reaches its real M0.2 lesson');
+    await context.close();
+  });
+
+  await test('Terminal practice has no horizontal overflow and usable touch controls at 360/390/1440px', async () => {
+    for (const width of [360, 390, 1440]) {
+      const context = await freshContext(browser, { width, height: 900 });
+      await seedLocalLearner(context, { 'M0.1': { quizComplete: true } });
+      const page = await context.newPage();
+      await page.goto(`${BASE}/#dashboard`);
+      const result = await page.evaluate(() => ({
+        overflow: document.documentElement.scrollWidth - window.innerWidth,
+        controls: [...document.querySelectorAll('[data-terminal-tool], #terminal-pan-left, #terminal-pan-right, #terminal-practice-validate, #terminal-save-observation, #terminal-journal-handoff')]
+          .map(element => ({ id: element.id || element.dataset.terminalTool, width: element.getBoundingClientRect().width, height: element.getBoundingClientRect().height }))
+      }));
+      assert.ok(result.overflow <= 1, `Terminal must not overflow horizontally at ${width}px (got ${result.overflow}px)`);
+      if (width <= 700) {
+        const undersized = result.controls.filter(control => control.width < 44 || control.height < 44);
+        assert.deepEqual(undersized, [], `Terminal touch controls must be at least 44×44px at ${width}px`);
+      }
+      await context.close();
+    }
   });
 
   await browser.close();

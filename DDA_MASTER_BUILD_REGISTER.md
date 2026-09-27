@@ -152,3 +152,16 @@ existantes et réelles.
 Paiement réel, renouvellement automatique, broker réel, lien affilié réel, commission, publicité payante, données temps réel, IA autonome et lancement public : **NON ACTIVÉS**.
 
 Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve sa progression et identifie naturellement la prochaine action.
+
+
+## Tranche — Terminal practice fiable, verrous prouvés et persistance locale (27 septembre 2026)
+
+**Statut : CONSTRUIT.** Audit du flux réel après le déploiement GitHub Pages : les prérequis ne sont pas une dette de code actuelle. `LESSON_PREREQUISITE` est dérivé de `LESSON_REGISTRY` et `showView()` refuse bien les deep-links vers M0.2/M0.3/M1.1/M1.2/M1.3 quand le quiz précédent n’est pas validé. L’ancienne mention en ligne « Product Dynamics & Navigation Integrity V1 » décrivait l’état avant cette correction ; elle est désormais explicitement historique, et la carte des routes comporte des tests navigateur avant/après déverrouillage pour chaque leçon.
+
+**Défaut produit réel corrigé :** le Practice Terminal écrivait `terminal` dans l’état applicatif, mais le schéma v4 ne normalisait ni ne retenait cette propriété. La mission, les tentatives, l’observation et le dessin pouvaient donc disparaître au rechargement. Ajout d’un état Terminal v4 additif avec validation des instruments/timeframes, bornes sur zoom/pan/coordonnées/tentatives, plafond de 100 annotations, nettoyage du texte et normalisation de la preuve typée. Aucun changement du sens pédagogique : une preuve Practice ne complète pas le quiz ni la compétence de M0.2.
+
+**Boucle utilisateur maintenant couverte par de vrais clics navigateur :** annotation absente → tentative refusée sans date de réussite → tracé d’une zone conforme → preuve validée → rechargement → brouillon Terminal transféré au composeur Journal prérempli → enregistrement avec sourceLesson/proofId/proofType → preuve visible séparément dans Progression → lien vers la leçon M0.2. Les deep-links des cinq leçons suivantes sont testés bloqués puis permis après prérequis ; aucune dépendance des tests à des raccourcis de progression.
+
+**Mobile et livraison :** cibles de commande Terminal agrandies à au moins 44×44 px jusqu’à 700 px, sans débordement à 360/390/1440 px ; version de cache service worker passée à `dda-shell-v14` pour ne pas servir l’ancien script lors d’un reload.
+
+**Vérifications :** `tests/run.js` — 34 scénarios navigateur, 0 échec ; `tests/smoke_app_boot.js` — scénario complet + contrat de sanitisation du schéma ; tous les contrats `tests/test_*.js`, syntaxes JavaScript et cohérence de la carte des routes exécutés avant PR et gate GitHub.

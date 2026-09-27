@@ -182,6 +182,34 @@ async function completeLesson({ viewId, markId, exerciseName, quizName, resultId
     assert.ok(state.acquisition?.visitorId, 'acquisition visitor id persisted');
   });
 
+  await test('Terminal proof survives schema-v4 save/load and untrusted fields are normalized', () => {
+    const base = window.DDA.load();
+    const state = window.DDA.save({ ...base, terminal: {
+      instrument: 'untrusted-index', timeframe: '5m', zoom: 99, pan: -12,
+      observation: '  <zone observée>  ',
+      drawings: [
+        { type: 'zone', x1: -20, y1: 150, x2: 940, y2: 220 },
+        { type: 'signal', x1: 0, y1: 0, x2: 1, y2: 1 },
+        { type: 'line', x1: 'not-a-number', y1: 0, x2: 10, y2: 10 }
+      ],
+      practice: { status: 'validated', attempts: 2.8, feedback: '<validée>', sourceLesson: 'M0.2', sourceLessonTitle: 'faux titre', completedAt: '2026-09-27T00:00:00Z' }
+    } });
+    const persisted = window.DDA.load().terminal;
+    assert.equal(state.terminal.instrument, 'BRVM Composite', 'unknown instruments fall back to the real default');
+    assert.equal(persisted.timeframe, '1D', 'unknown timeframes fall back to the real default');
+    assert.equal(persisted.zoom, 3, 'zoom is clamped to the UI range');
+    assert.equal(persisted.pan, 0, 'pan is clamped to a non-negative range');
+    assert.equal(persisted.observation, 'zone observée', 'observation text is sanitized and bounded');
+    assert.deepEqual(JSON.parse(JSON.stringify(persisted.drawings)), [{ type: 'zone', x1: 0, y1: 150, x2: 900, y2: 220 }]);
+    assert.equal(persisted.practice.status, 'validated');
+    assert.equal(persisted.practice.attempts, 2, 'attempt count is an integer');
+    assert.equal(persisted.practice.proof.id, 'm02-zone-identification');
+    assert.equal(persisted.practice.proof.lessonId, 'M0.2');
+    assert.equal(persisted.practice.completedAt, '2026-09-27T00:00:00Z');
+    assert.equal(persisted.practice.sourceLesson, 'M0.2');
+    assert.equal(persisted.practice.sourceLessonTitle, 'Support & Résistance', 'source titles come from curriculum metadata, not persisted free text');
+  });
+
   console.log(`\nRESULT: ${pass} smoke-boot checks passed`);
 })().catch(error => {
   console.error('SMOKE BOOT FAILED:', error);
