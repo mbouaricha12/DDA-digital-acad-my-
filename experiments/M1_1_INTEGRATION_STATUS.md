@@ -10,9 +10,10 @@
 > `tests/test_lesson_registry.js`, `tests/smoke_app_boot.js` (gate closed →
 > open, full journey, reload-free resume). Kept for history.
 
-Status: branch implementation, not yet merged to main.
+Historical status at the time of the original integration branch (superseded by
+the current status above): implementation had not yet merged to main.
 
-Implemented on this branch:
+Original branch implementation, retained for history:
 - M1.1 authored lesson adapted to existing renderer contract (`content`, `practice`, `evaluation`).
 - M1 inserted into the runtime curriculum before `app.js` executes.
 - Existing `DDALearning.nextActionable()` remains the source of truth.
@@ -22,7 +23,7 @@ Implemented on this branch:
 - Three pre-gate reasoning scenarios keep wrong-answer feedback and retry.
 - Progression automatically sees M1.1 because it already flattens authored curriculum lessons.
 
-Still required before merge:
+Historical pre-merge checklist (superseded; M1.1/M1.2 are now on main):
 - GitHub Actions green.
 - Browser E2E on branch deployment or preview.
 - Verify M0 incomplete -> M1 locked.

@@ -24,21 +24,22 @@ jobs:
 
       - name: Syntax checks
         run: |
-          node --check dist/dda-core.js
-          node --check dist/learning-engine.js
-          node --check dist/lesson-renderer.js
-          node --check dist/dda-analytics.js
-          node --check dist/m1-1-lesson.js
-          node --check dist/m1-2-lesson.js
-          node --check dist/app.js
+          for file in dist/*.js; do
+            node --check "$file"
+          done
 
-      - name: Run committed contract checks
+      - name: Run all committed contract checks
         run: |
-          node tests/test_m1_golden_lesson.js
-          node tests/test_m1_integration_contract.js
-          node tests/test_m1_2_order_execution.js
-          node tests/test_path_current_module.js
-          node tests/test_m1_runtime_contract.js
+          for test in tests/test_*.js; do
+            node "$test"
+          done
+          node tests/verify_route_register_consistency.js
+
+      - name: Install jsdom for full-app smoke test
+        run: npm install --global jsdom@26.1.0
+
+      - name: Run full-app smoke test
+        run: NODE_PATH="$(npm root -g)" node tests/smoke_app_boot.js
 
       - name: Install Playwright Chromium
         run: |
