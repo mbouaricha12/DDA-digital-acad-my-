@@ -405,18 +405,23 @@ function countActiveDaysForView(events, viewId) {
 }
 
 let prototypeState = DDA.load();
+const initialAttribution = window.DDA_INITIAL_ATTRIBUTION || {};
+delete window.DDA_INITIAL_ATTRIBUTION;
 
 // Acquisition V1 — first-touch capture, a no-op after the first call on this
 // device (see DDA.captureAcquisition). Runs on every boot, before any view is
 // shown, so a shared link's UTM parameters are captured however deep into the
 // app it points (not only through #landing).
 prototypeState = DDA.captureAcquisition(prototypeState, {
-  source: new URLSearchParams(location.search).get('utm_source'),
-  medium: new URLSearchParams(location.search).get('utm_medium'),
-  campaign: new URLSearchParams(location.search).get('utm_campaign'),
+  source: initialAttribution.source,
+  medium: initialAttribution.medium,
+  campaign: initialAttribution.campaign,
   referrer: document.referrer,
-  landingPath: location.pathname + location.hash
+  landingPath: location.hash
 });
+// Attribution is captured locally once; do not leave potentially identifying
+// query parameters in the address bar, copied links, or subsequent history.
+if (location.search) history.replaceState(history.state, '', location.pathname + location.hash);
 
 function saveState(update) {
   prototypeState = DDA.save({ ...prototypeState, ...update });
@@ -1959,6 +1964,8 @@ function resetPilot() {
   });
   renderState();
   showView('access', false);
+  previousView = null;
+  storePreviousView(null);
   showToast('Tes données ont été effacées.');
 }
 
@@ -2132,3 +2139,9 @@ window.addEventListener('scroll', () => {
   if (!document.body.classList.contains('public-shell')) return;
   document.body.classList.toggle('landing-has-scrolled', window.scrollY > 520);
 }, { passive: true });
+
+// Forms are disabled in static HTML. Only expose local-submit controls after
+// every application handler above has been installed successfully.
+document.querySelectorAll('form[data-js-submit] button[type="submit"]').forEach(button => {
+  button.disabled = false;
+});

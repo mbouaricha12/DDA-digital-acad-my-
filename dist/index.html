@@ -27,9 +27,30 @@
   <link rel="icon" href="images/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="icon" href="images/icon-192.png" sizes="192x192" type="image/png">
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
+  <meta name="referrer" content="no-referrer">
+  <script>
+    (function () {
+      var params = new URLSearchParams(location.search);
+      var allowed = {
+        source: new Set(['newsletter', 'youtube', 'facebook', 'instagram', 'linkedin', 'tiktok', 'google', 'bing', 'direct', 'partner', 'whatsapp', 'telegram', 'community', 'x']),
+        medium: new Set(['email', 'video', 'social', 'cpc', 'paid', 'organic', 'referral', 'newsletter', 'paid-social', 'paid_search']),
+        campaign: new Set(['launch', 'launch-2026', 'launch-2026-09-27', 'm0-launch', 'retarget', 'private-alpha', 'private-alpha-launch', 'private-alpha-2026'])
+      };
+      function safeTag(key) {
+        var value = (params.get('utm_' + key) || '').trim().toLowerCase();
+        return allowed[key].has(value) ? value : null;
+      }
+      window.DDA_INITIAL_ATTRIBUTION = {
+        source: safeTag('source'),
+        medium: safeTag('medium'),
+        campaign: safeTag('campaign')
+      };
+      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile']);
+      var route = location.hash.slice(1);
+      var safeHash = knownRoutes.has(route) ? '#' + route : '';
+      if (location.search || location.hash !== safeHash) history.replaceState(history.state, '', location.pathname + safeHash);
+    })();
+  </script>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="alpha-polish.css">
 </head>
@@ -336,21 +357,21 @@
           </div>
           <div class="access-card">
             <div class="step-indicator"><span class="active" id="step-dot-1">1</span><i></i><span id="step-dot-2">2</span></div>
-            <form id="signup-form">
+            <form id="signup-form" data-js-submit method="dialog">
               <p class="eyebrow">Étape 1 sur 2</p><h2>Créer mon compte</h2>
               <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ex. Richard"></label>
               <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"></label>
               <label class="consent"><input id="consent" type="checkbox" required><span>J’accepte que ces informations restent uniquement sur mon appareil.</span></label>
               <p class="form-error" id="signup-error" role="alert"></p>
-              <button class="primary-action" type="submit">Continuer <span>→</span></button>
+              <button class="primary-action" type="submit" disabled>Continuer <span>→</span></button>
             </form>
-            <form id="onboarding-form" hidden>
+            <form id="onboarding-form" data-js-submit method="dialog" hidden>
               <p class="eyebrow">Étape 2 sur 2</p><h2>Quel parcours te correspond ?</h2>
               <label>Niveau<select id="level" required><option value="">Choisir</option><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select></label>
               <label>Objectif pédagogique<select id="goal" required><option value="">Choisir</option><option>Comprendre les marchés</option><option>Améliorer ma gestion du risque</option><option>Structurer mes décisions</option></select></label>
               <label>Temps disponible<select id="time" required><option value="">Choisir</option><option>10 minutes par jour</option><option>20 minutes par jour</option><option>45 minutes, 3 fois par semaine</option></select></label>
               <p class="form-error" id="onboarding-error" role="alert"></p>
-              <button class="primary-action" type="submit">Construire mon parcours <span>→</span></button>
+              <button class="primary-action" type="submit" disabled>Construire mon parcours <span>→</span></button>
             </form>
             <div class="resume-device" id="resume-device" hidden><p>Une progression existe déjà sur cet appareil.</p><button class="secondary-action dark-action" id="resume-session" type="button">Reprendre ma session</button><button class="text-action" id="reset-session" type="button">Effacer mes données</button></div>
           </div>
@@ -678,7 +699,7 @@
             <span id="journal-step-dot-2">2</span><i></i>
             <span id="journal-step-dot-3">3</span>
           </div>
-          <form id="journal-entry-form">
+          <form id="journal-entry-form" data-js-submit method="dialog">
             <div class="journal-step active" data-step="1">
               <p class="journal-step-label">Avant</p>
               <label>Marché ou instrument<input id="journal-market" maxlength="80" placeholder="Ex. EUR/USD, Or, BRVM Composite…"></label>
@@ -701,7 +722,7 @@
             <div class="journal-composer-actions">
               <button class="secondary-action dark-action" id="journal-step-prev" type="button" hidden>← Précédent</button>
               <button class="primary-action" id="journal-step-next" type="button">Suivant <span>→</span></button>
-              <button class="primary-action" id="journal-step-save" type="submit" hidden>Enregistrer l’entrée</button>
+              <button class="primary-action" id="journal-step-save" type="submit" disabled hidden>Enregistrer l’entrée</button>
               <button class="text-action" id="journal-composer-delete" type="button" hidden>Supprimer cette entrée</button>
             </div>
           </form>
@@ -709,7 +730,7 @@
 
         <section class="journal-panel" id="journal-plan-panel" hidden>
           <p class="journal-plan-intro">Documente ton processus personnel — pas tes objectifs de gain. Ces réponses orientent la manière dont DDA t’accompagne, jamais ce que tu dois trader.</p>
-          <form id="journal-plan-form">
+          <form id="journal-plan-form" data-js-submit method="dialog">
             <fieldset class="plan-group">
               <legend>Ton terrain</legend>
               <label>Marchés étudiés<textarea id="plan-markets" maxlength="600" rows="2" placeholder="Quels marchés ou instruments souhaites-tu comprendre ?"></textarea></label>
@@ -727,7 +748,7 @@
               <label>Erreurs à éviter<textarea id="plan-mistakes" maxlength="600" rows="3"></textarea></label>
             </fieldset>
             <p class="form-note" id="journal-plan-note">Pas encore enregistré</p>
-            <button class="primary-action" type="submit">Enregistrer mon plan</button>
+            <button class="primary-action" type="submit" disabled>Enregistrer mon plan</button>
           </form>
         </section>
 
@@ -963,10 +984,10 @@
         <section class="support-contact" aria-labelledby="support-contact-title">
           <p class="eyebrow gold"><svg class="icon"><use href="#icon-mail"/></svg> Demander de l’aide</p>
           <h2 id="support-contact-title">Écris-nous simplement.</h2>
-          <form id="support-form">
+          <form id="support-form" data-js-submit method="dialog">
             <label>Sujet<select id="support-subject"><option>Problème de progression</option><option>Question sur un cours</option><option>Accès au compte</option></select></label>
             <label>Message<textarea id="support-message" maxlength="500" required placeholder="Décris simplement ce qui bloque…"></textarea></label>
-            <button class="primary-action" type="submit">Préparer ma demande <span>→</span></button>
+            <button class="primary-action" type="submit" disabled>Préparer ma demande <span>→</span></button>
           </form>
           <p class="disclosure support-note"><svg class="icon"><use href="#icon-shield"/></svg> <span id="support-note">Aucun message n’est envoyé pour l’instant — ta demande reste sur cet appareil.</span></p>
         </section>
@@ -1132,7 +1153,7 @@
       <section class="view" id="profile" aria-labelledby="profile-title">
         <div class="section-intro profile-intro"><p class="eyebrow gold">Espace personnel</p><h1 id="profile-title">Ton profil d’apprentissage.</h1><p>Modifie uniquement ce qui aide DDA à te proposer la prochaine étape utile.</p></div>
         <div class="profile-layout">
-          <form class="profile-panel" id="profile-form">
+          <form class="profile-panel" id="profile-form" data-js-submit method="dialog">
             <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">RD</span><div><p class="eyebrow">Mon compte</p><h2 id="profile-heading-name">Richard</h2><p id="profile-heading-email">Aucune donnée serveur</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
             <div class="profile-progress-strip">
               <div><span>XP total</span><strong id="profile-total-xp">0</strong></div>
@@ -1147,7 +1168,7 @@
               <label class="field-wide">Rythme<select id="profile-time"><option>10 minutes par jour</option><option>20 minutes par jour</option><option>45 minutes, 3 fois par semaine</option></select></label>
             </div>
             <p class="form-error" id="profile-error" role="alert"></p>
-            <div class="profile-actions"><button class="primary-action" type="submit">Enregistrer</button><button class="secondary-action dark-action" id="profile-reset" type="button">Réinitialiser mes données</button></div>
+            <div class="profile-actions"><button class="primary-action" type="submit" disabled>Enregistrer</button><button class="secondary-action dark-action" id="profile-reset" type="button">Réinitialiser mes données</button></div>
           </form>
           <aside class="preference-panel">
             <p class="eyebrow gold">Préférences</p><h3>Une expérience adaptée à ton appareil.</h3>

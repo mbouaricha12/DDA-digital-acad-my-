@@ -16,7 +16,18 @@
     affiliate_link_click: 'affiliate_link_click',
     activation_v1: 'activation_v1'
   };
-  const SAFE_PROP_KEYS = ['source', 'medium', 'campaign', 'referrer', 'step', 'broker', 'section', 'position', 'view'];
+  const SAFE_PROP_KEYS = ['source', 'medium', 'campaign', 'referrer', 'broker', 'section', 'position', 'view'];
+  const SAFE_PROP_VALUES = {
+    broker: new Set(['Deriv', 'HFM', 'Weltrade', 'XM']),
+    section: new Set(['differentiation', 'free']),
+    position: new Set(['differentiation', 'final', 'free', 'hero', 'mobile_sticky']),
+    view: new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'back'])
+  };
+  const SAFE_ATTRIBUTION_VALUES = {
+    source: new Set(['newsletter', 'youtube', 'facebook', 'instagram', 'linkedin', 'tiktok', 'google', 'bing', 'direct', 'partner', 'whatsapp', 'telegram', 'community', 'x']),
+    medium: new Set(['email', 'video', 'social', 'cpc', 'paid', 'organic', 'referral', 'newsletter', 'paid-social', 'paid_search']),
+    campaign: new Set(['launch', 'launch-2026', 'launch-2026-09-27', 'm0-launch', 'retarget', 'private-alpha', 'private-alpha-launch', 'private-alpha-2026'])
+  };
   const DEBUG_QUEUE_LIMIT = 200;
   const debugQueue = [];
   let transport = 'debug';
@@ -25,7 +36,7 @@
   function config() { return (typeof window !== 'undefined' && window.DDA_ANALYTICS_CONFIG) || {}; }
   function pushDebug(entry) { debugQueue.push(entry); if (debugQueue.length > DEBUG_QUEUE_LIMIT) debugQueue.shift(); }
   function safeAttributionValue(key, value) {
-    const text = String(value ?? '').trim();
+    const text = String(value ?? '').trim().toLowerCase();
     if (!text) return null;
     if (key === 'referrer') {
       try {
@@ -36,6 +47,7 @@
         return null;
       }
     }
+    if (!SAFE_ATTRIBUTION_VALUES[key]?.has(text)) return null;
     if (/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(text)) return null;
     const withoutDates = text.replace(/\b(?:19|20)\d{2}[-/.](?:0?[1-9]|1[0-2])[-/.](?:0?[1-9]|[12]\d|3[01])\b/g, '');
     if ((withoutDates.match(/\d/g) || []).length >= 8) return null;
@@ -47,10 +59,15 @@
       if (!SAFE_PROP_KEYS.includes(key) || value === undefined || value === null || value === '') return;
       const safeValue = ['source', 'medium', 'campaign', 'referrer'].includes(key)
         ? safeAttributionValue(key, value)
-        : String(value).slice(0, 120);
+        : SAFE_PROP_VALUES[key]?.has(String(value).trim()) ? String(value).trim() : null;
       if (safeValue) out[key] = safeValue;
     });
     return out;
+  }
+  function safeVisitorId(value) {
+    const text = String(value ?? '').trim();
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(text)
+      || /^visitor-\d{10,16}-\d{1,7}$/.test(text) ? text : undefined;
   }
   function loadPosthogScript(host) {
     return new Promise(resolve => {
@@ -83,7 +100,7 @@
     const entry = { at: new Date().toISOString(), localName: name, externalName: externalName || null, sent: false };
     if (!externalName) { pushDebug(entry); return; }
     const props_ = safeProps(props);
-    const distinctId = props && props.visitorId ? String(props.visitorId).slice(0, 60) : undefined;
+    const distinctId = safeVisitorId(props && props.visitorId);
     entry.props = props_;
     entry.distinctId = distinctId;
     try {
