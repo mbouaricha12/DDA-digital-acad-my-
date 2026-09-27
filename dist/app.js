@@ -638,7 +638,7 @@ function renderMasteryList() {
       ? `Prochaine preuve : ${missingMilestone.label}.`
       : 'Compétence confirmée sur cet appareil.';
     return `
-      <article class="mastery-row mastery-row-focused">
+      <article class="mastery-row mastery-row-focused" data-mastery-level="${level}" data-proof-state="${level >= 4 ? 'confirmed' : level >= 3 ? 'practiced' : 'learning'}">
         <div class="mastery-row-head">
           <div><p class="mastery-lesson">${lesson.id} — ${lesson.title}</p><strong>${lesson.competency.label}</strong></div>
           <div class="mastery-level">

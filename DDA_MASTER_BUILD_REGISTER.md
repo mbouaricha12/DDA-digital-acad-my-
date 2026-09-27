@@ -210,3 +210,12 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 **Validation :** nouveau contrat `tests/test_landing_3d_contract.js`, syntaxe runtime, `git diff --check`, smoke boot et vérification navigateur ciblée mobile/desktop/reduced-motion/low-data. La suite navigateur complète a produit ses 25 smoke checks et est restée silencieuse au lancement de sa phase finale ; aucune erreur n’a été observée avant son arrêt propre.
 
 **Limite :** cette tranche est une signature CSS 3D légère, pas une scène WebGL avancée. Toute extension 3D devra mesurer poids, CPU/GPU, mémoire, batterie et fallback avant fusion.
+
+
+## Tranche — halo 3D de preuve dans Progression (27 septembre 2026)
+
+**Statut : CONSTRUIT — micro-interaction liée à l’état réel.** Chaque ligne du Fil de maîtrise expose désormais son niveau calculé (`0–4`) et son état visuel (`learning`, `practiced`, `confirmed`). Les niveaux pratiqués et confirmés reçoivent un halo 3D CSS discret autour de leurs beads de preuve ; aucun halo n’est affiché pour une compétence seulement ouverte.
+
+**Garde-fous :** le halo dépend uniquement de `competencyLevel()` et de `lessonProgress`, ne crée aucun score, ne modifie aucun événement ni aucune règle d’entitlement, et reste décoratif. Il est supprimé en reduced-motion et low-data, sans débordement à 390/1440 px.
+
+**Validation :** contrat 3D étendu, capture navigateur avec état local réel simulé avant bootstrap, niveaux confirmés/pratiqués observés dans le DOM, reduced-motion vérifié avec animation `none`, overflow horizontal égal à 0.
