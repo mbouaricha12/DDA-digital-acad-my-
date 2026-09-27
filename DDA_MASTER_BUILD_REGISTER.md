@@ -219,3 +219,12 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 **Garde-fous :** le halo dépend uniquement de `competencyLevel()` et de `lessonProgress`, ne crée aucun score, ne modifie aucun événement ni aucune règle d’entitlement, et reste décoratif. Il est supprimé en reduced-motion et low-data, sans débordement à 390/1440 px.
 
 **Validation :** contrat 3D étendu, capture navigateur avec état local réel simulé avant bootstrap, niveaux confirmés/pratiqués observés dans le DOM, reduced-motion vérifié avec animation `none`, overflow horizontal égal à 0.
+
+
+## Tranche — finition mobile des encarts bientôt et du bas de landing (27 septembre 2026)
+
+**Statut : CONSTRUIT.** Les micro-boutons `future-label` de la landing utilisent désormais une surface Deep Navy transparente/texturée, un liseré doré discret, et un texte `#94a3b8` lisible au premier regard. Le survol/focus remonte en `#f8fafc` sans réintroduire de bande grise.
+
+**Bottom padding :** à 390 px, le conteneur `#landing` réserve désormais `220px + safe-area` sous le footer et `scroll-padding-bottom:220px`; la section finale réserve `160px` supplémentaires. La mesure navigateur confirme une marge de **146 px** entre la fin du footer et le CTA fixe, avec zéro overflow horizontal. La tablette reste sans CTA sticky.
+
+**Validation :** `tests/test_landing_mobile_finish_contract.js`, captures mobile/tablette, style des encarts, scroll jusqu’au bas réel et vérification du footer au-dessus du CTA.
