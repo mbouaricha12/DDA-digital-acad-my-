@@ -653,6 +653,60 @@ DDA est mobile-first. Toute nouvelle surface Premium doit être testée au minim
 - Le mode low-data doit désactiver les images non essentielles et les animations décoratives.
 - Les transitions doivent respecter `prefers-reduced-motion`.
 
+## J.1 Animation 3D et motion design
+
+L’animation 3D fait bien partie de la direction de finition de DDA, mais elle doit
+rester une **couche d’expérience**, pas une dépendance du moteur pédagogique.
+
+### Emplacements recommandés
+
+1. **Landing / hero :** objet ou composition 3D abstraite représentant le flux
+   apprendre → pratiquer → prouver ; aucune fausse donnée de marché.
+2. **Fenêtre produit de la landing :** profondeur légère sur le cockpit DDA,
+   avec parallax très limité et désactivable.
+3. **Terminal pédagogique :** transitions de panneaux, focus d’annotation et
+   feedback de mission ; la géométrie du graphique reste lisible et prioritaire.
+4. **Premium Track :** marqueur spatial de progression ou scène d’introduction,
+   uniquement après qu’un contenu authored réel existe derrière l’écran.
+
+### Ce qui est exclu
+
+- Pas de 3D décorative lourde sur chaque page.
+- Pas de WebGL obligatoire pour ouvrir une leçon, un exercice ou le Journal.
+- Pas de rotation permanente qui détourne l’attention.
+- Pas de modèle 3D utilisé pour suggérer une performance, un prix ou une donnée
+  de marché réelle.
+- Pas de dépendance à une bibliothèque volumineuse avant mesure de son coût.
+
+### Architecture technique proposée
+
+- **Progression recommandée :** CSS 3D / transforms et SVG pour les premières
+  signatures ; WebGL/Canvas uniquement si l’effet apporte une vraie valeur et
+  si le budget de performance est démontré.
+- **Chargement différé :** la scène 3D ne doit pas bloquer le premier rendu, le
+  CTA, l’accès ou le lecteur de leçon.
+- **Fallback obligatoire :** image ou composition HTML/CSS statique équivalente
+  si WebGL est absent, si le réseau est lent ou si le mode low-data est actif.
+- **Reduced motion :** `prefers-reduced-motion: reduce` supprime rotations,
+  parallax et transitions non essentielles ; le sens de l’état reste transmis
+  par le texte, la structure et la couleur.
+- **Mobile-first :** qualité, nombre de particules, résolution et fréquence de
+  rendu doivent être réduits sur mobile ; l’animation doit rester optionnelle.
+- **Accessibilité :** aucune information essentielle ne doit être portée par la
+  profondeur, le mouvement ou la couleur seule ; le canvas décoratif doit être
+  `aria-hidden="true"` quand il n’est pas interactif.
+
+### Critères de validation 3D
+
+- pas de débordement horizontal à 320/360/390/428/1440 px ;
+- interaction principale toujours accessible au clavier et au tactile ;
+- pas de blocage du premier rendu ou du chargement d’une leçon ;
+- fallback visuel vérifié sans WebGL et en low-data ;
+- animation désactivée en reduced motion ;
+- budget de poids et de mémoire documenté avant l’ajout d’une librairie ;
+- capture desktop et mobile avant fusion ;
+- aucune régression sur les tests E2E, le PWA cache et le Terminal.
+
 ---
 
 # K. Permissions
@@ -755,6 +809,7 @@ Les entitlements locaux servent à guider l’interface du prototype. Ils ne pro
 | Performance images / CSS statique | Moyen | Budget de poids, lazy loading, audit Lighthouse avant production |
 | Navigation hash sans historique complet | Faible/Moyen | Conserver back-links contextuels ; décider pushState séparément |
 | Couverture de tests insuffisante pour nouveaux labs | Moyen | Test contractuel avant chaque nouvelle surface |
+| 3D lourde ou incompatible avec des appareils modestes | Moyen/Élevé | CSS/SVG d’abord, lazy-load, fallback statique, budget GPU et tests low-data/reduced-motion |
 
 ---
 
@@ -781,6 +836,18 @@ Les entitlements locaux servent à guider l’interface du prototype. Ils ne pro
 - Composer les blocs avec le Lesson Renderer.
 - Définir prérequis et permissions dans le registre unique.
 - Vérifier que le module vide ne devient pas automatiquement disponible.
+
+## Étape 2 bis — Direction 3D progressive
+
+- Choisir une seule scène ou signature 3D utile, d’abord sur la landing ou le
+  Premium Track, pas dans toutes les vues.
+- Produire une version CSS/SVG ou HTML statique équivalente avant toute scène
+  WebGL.
+- Ajouter le lazy-load, le fallback, le mode low-data et le mode reduced-motion.
+- Mesurer le poids, le temps de chargement, la mémoire et l’impact mobile.
+- Tester clavier, tactile, WebGL indisponible, connexion lente et capture réelle.
+- Ne fusionner la scène que si elle améliore la compréhension de DDA plutôt que
+  d’ajouter une décoration autonome.
 
 ## Étape 3 — Premium states
 
@@ -836,6 +903,8 @@ Les entitlements locaux servent à guider l’interface du prototype. Ils ne pro
 - Pas de migration React.
 - Pas de refonte globale du design existant.
 - Pas de score arbitraire.
+- Pas de 3D WebGL généralisée avant validation d’une première scène légère et
+  de ses fallbacks.
 
 ---
 
