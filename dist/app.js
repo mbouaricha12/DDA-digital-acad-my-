@@ -1572,8 +1572,9 @@ document.querySelectorAll('.resource-open').forEach(button => button.addEventLis
   document.getElementById('reader-title').textContent = resource.title;
   document.getElementById('reader-content').innerHTML = resource.body;
   readerTrigger = button;
-  document.getElementById('resource-reader').hidden = false;
-  document.getElementById('resource-reader').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const reader = document.getElementById('resource-reader');
+  reader.hidden = false;
+  reader.scrollIntoView({ behavior: prototypeState.preferences.lowData ? 'auto' : 'smooth', block: 'start' });
   document.getElementById('reader-close').focus();
 }));
 function closeReader() {

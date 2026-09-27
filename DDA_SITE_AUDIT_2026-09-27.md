@@ -203,3 +203,10 @@ Cette tranche remplit les espaces d’explication et de continuité produit sans
 ## 16. Ressources pédagogiques — glossaire renforcé
 
 Le glossaire Free couvre maintenant les notions réellement utilisées dans le parcours : actif, acheteur, vendeur, liquidité, volatilité, spread, invalidation et risque. Les définitions restent descriptives et pédagogiques ; elles ne donnent aucun signal ni conseil personnalisé. Le lecteur de ressource reste local, léger et compatible avec le mode faible consommation.
+
+
+## 17. Robustesse low-data et lecteur de ressources
+
+Le lecteur de ressources respecte maintenant le mode « économie de données » : son défilement utilise un comportement instantané lorsque les mouvements sont désactivés, au lieu de forcer une animation fluide. Le lecteur est également exposé comme une boîte de dialogue accessible (`role=dialog`, `aria-modal`, nom et description reliés), avec focus sur le bouton de fermeture, fermeture par Échap et restitution du focus sur la ressource déclenchante.
+
+Vérification réelle sur mobile : glossaire ouvert en low-data, défilement `auto`, contenu Liquidité/Volatilité/Spread/Invalidation visible, fermeture clavier et focus restauré. Non-régression : **31 tests E2E**, **24 smoke checks** et contrats Node passés.
