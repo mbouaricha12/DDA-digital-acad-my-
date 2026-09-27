@@ -472,3 +472,11 @@
    barre CTA mobile fixe se positionne par rapport à la landing entière. */
 #landing.view.active{animation:dda-public-enter .32s ease both}
 @keyframes dda-public-enter{from{opacity:0}to{opacity:1}}
+
+
+.landing-institution-photo .photo-scrim{
+  background:linear-gradient(180deg,rgba(4,7,15,.06),rgba(4,7,15,.48));
+}
+
+
+.landing-institution-photo .photo-fill{filter:brightness(1.22) saturate(1.08)}
