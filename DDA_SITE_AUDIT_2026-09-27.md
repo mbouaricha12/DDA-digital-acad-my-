@@ -158,3 +158,12 @@ La revue des écrans authentifiés `Terminal`, `Parcours`, `Leçon`, `Progressio
 Le correctif ajoute une marge de défilement basse au chapitre courant afin que son action reste entièrement visible au-dessus de la barre mobile. Vérification dédiée : recouvrement mesuré avant correction `68px`, après correction `0px`.
 
 La suite de non-régression après ce correctif reste verte : **31 tests E2E**, **24 smoke checks** et l’ensemble des contrats Node passent sans échec.
+
+
+## 12. Refonte de la vue Access / inscription
+
+La vue `#access` a été réalignée sur le registre institutionnel Deep Navy demandé par la direction.
+
+Le fond global est désormais `#060d17`. Les cartes de formulaire utilisent `#0a1424` avec une bordure fine `rgba(255,255,255,.08)`. Les titres utilisent `#f8fafc`, les descriptions, champs et textes secondaires `#94a3b8`, et les CTA reprennent le bleu électrique DDA avec un accent doré discret au survol et au focus.
+
+Le bandeau d’information est également sombre lorsque Access est actif. L’état de vue a été nommé `access-mode` afin d’éviter une collision avec la classe structurelle `.access-shell`. Cette collision avait temporairement révélé un débordement desktop de 610px pendant l’implémentation ; elle a été corrigée et la mesure finale est revenue à **0px** à 390px comme à 1440px.

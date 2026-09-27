@@ -1420,6 +1420,7 @@ function showView(id, recordEvent = true) {
   // mobile nav, prototype banner). Scoped purely via this body class, same
   // pattern as lesson-focus above — no new routing concept.
   document.body.classList.toggle('public-shell', id === 'landing');
+  document.body.classList.toggle('access-mode', id === 'access');
   document.body.classList.toggle('landing-has-scrolled', id === 'landing' && window.scrollY > 520);
   contextTitle.textContent = titles[id] || 'DDA';
   history.replaceState(null, '', `#${id}`);

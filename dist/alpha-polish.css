@@ -550,3 +550,68 @@
 @media(max-width:639px){
   .journey-current{scroll-margin-bottom:calc(84px + var(--safe-b))}
 }
+
+
+/* Access / onboarding — registre institutionnel Deep Navy.
+   La vue doit rester immersive et ne pas basculer vers le canevas ivoire. */
+body.access-mode .prototype-banner{
+  background:#060d17;
+  color:#94a3b8;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+#access{
+  background:#060d17;
+  color:#94a3b8;
+}
+#access .access-copy>p,
+#access .access-copy .trust-list,
+#access .access-card .consent,
+#access .access-card .form-error,
+#access .access-card .text-action{color:#94a3b8}
+#access h1,
+#access .access-card h2{color:#f8fafc}
+#access .eyebrow.gold{color:#d9a441}
+#access .trust-list li{color:#f8fafc}
+#access .trust-list .icon{color:#6cb8ff}
+#access .access-card{
+  background:#0a1424;
+  color:#f8fafc;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  box-shadow:0 20px 55px rgba(0,0,0,.28);
+}
+#access .step-indicator{color:#94a3b8}
+#access .step-indicator span{border-color:rgba(255,255,255,.2);background:#0a1424;color:#94a3b8}
+#access .step-indicator span.active{border-color:#f8fafc;background:#f8fafc;color:#060d17}
+#access .step-indicator i{background:rgba(255,255,255,.16)}
+#access .access-card label{color:#f8fafc}
+#access .access-card input,
+#access .access-card select{
+  border:1px solid rgba(255,255,255,.14);
+  background:#0a1424;
+  color:#f8fafc;
+  border-radius:10px;
+}
+#access .access-card input::placeholder{color:#94a3b8;opacity:1}
+#access .access-card input:focus,
+#access .access-card select:focus{border-color:#6cb8ff;box-shadow:0 0 0 3px rgba(108,184,255,.14);outline:0}
+#access .access-card .consent input{accent-color:#1769d1}
+#access .access-card .primary-action{
+  background:#1769d1;
+  color:#fff;
+  border:1px solid transparent;
+  box-shadow:none;
+}
+#access .access-card .primary-action:hover,
+#access .access-card .primary-action:focus-visible{
+  background:#1d73df;
+  border-color:#d9a441;
+  box-shadow:0 0 0 3px rgba(217,164,65,.14);
+}
+#access .access-card .secondary-action{color:#f8fafc;border-color:rgba(255,255,255,.18)}
+#access .access-card .text-action:hover{color:#f8fafc}
+#access .access-illustration{color:#94a3b8;opacity:.8}
+@media(max-width:639px){
+  #access .access-card{border-radius:16px}
+  #access .access-copy>p{font-size:.94rem;line-height:1.65}
+}
