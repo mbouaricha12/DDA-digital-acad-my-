@@ -45,7 +45,7 @@
         medium: safeTag('medium'),
         campaign: safeTag('campaign')
       };
-      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile']);
+      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile']);
       var route = location.hash.slice(1);
       var safeHash = knownRoutes.has(route) ? '#' + route : '';
       if (location.search || location.hash !== safeHash) history.replaceState(history.state, '', location.pathname + safeHash);
@@ -582,6 +582,8 @@
           <div id="progress-practice-proof"></div>
         </section>
 
+        <section class="panel premium-evidence-panel" aria-labelledby="premium-evidence-title"><div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> DDA Skill Evidence</p><h3 id="premium-evidence-title">Preuves Premium locales</h3></div></div><div id="premium-proof-progress"><p>Aucune preuve Premium validée pour le moment.</p></div></section>
+
         <section class="panel next-step-panel">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-compass"/></svg> Prochaine étape réelle</p></div></div>
           <p id="progress-next-step">—</p>
@@ -766,7 +768,7 @@
 
         <div class="plan-grid">
           <article class="plan-card current-plan"><p class="eyebrow">Ce que tu as aujourd’hui</p><h2>DDA Free</h2><p class="plan-tagline">Pour démarrer sérieusement, sans rien débourser.</p><ul><li>Parcours M0 Fondations et ses leçons</li><li>Exercices, quiz et Fil de maîtrise réel</li><li>Journal &amp; Plan</li><li>Market Intelligence (aperçu)</li></ul><span class="plan-state" id="free-plan-state">Formule active</span></article>
-          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">Ce que Premium approfondira</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><ul><li>Modules M1+ (marchés financiers, ordres, organisation)</li><li>Atelier Ressources Premium — laboratoire de gestion du risque</li><li>Aperçu de certification une fois M0.1 validé</li><li>Chaque brique ci-dessous, construite étape par étape</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aperçu local — aucun achat, aucun abonnement actif</small></article>
+          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">Ce que Premium approfondira</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><ul><li>Modules M1+ (marchés financiers, ordres, organisation)</li><li>Atelier Ressources Premium — laboratoire de gestion du risque</li><li>Aperçu de certification une fois M0.1 validé</li><li>Chaque brique ci-dessous, construite étape par étape</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aperçu local — aucun achat, aucun abonnement actif</small></article>
         </div>
 
         <section class="panel membership-roadmap">
@@ -814,6 +816,47 @@
             <li><svg class="icon"><use href="#icon-blocked"/></svg> Signal ou recommandation de position</li>
           </ul>
         </section>
+      </section>
+
+      <section class="view" id="lesson-p21" aria-labelledby="lesson-title-p21"><div class="lesson-layout lesson-layout-premium"><article class="lesson-main" id="lesson-p21-main"><button class="back-link" data-view="premium-track">← Retour au Premium Track</button></article><aside class="lesson-outline" id="lesson-p21-outline"></aside></div></section>
+      <section class="view" id="lesson-p22" aria-labelledby="lesson-title-p22"><div class="lesson-layout lesson-layout-premium"><article class="lesson-main" id="lesson-p22-main"><button class="back-link" data-view="premium-track">← Retour au Premium Track</button></article><aside class="lesson-outline" id="lesson-p22-outline"></aside></div></section>
+
+      <section class="view premium-view" id="premium-track" aria-labelledby="premium-track-title">
+        <div class="section-intro"><p class="eyebrow gold">DDA Premium · P2</p><h1 id="premium-track-title">Risk &amp; Discipline Foundations.</h1><p>Une vertical slice locale pour apprendre à contrôler le risque avant de chercher une opportunité. Démonstration sur cet appareil — aucun paiement, aucune donnée live.</p></div>
+        <div class="premium-track-status"><span class="plan-state">Premium Demo local</span><strong>BUILD → PRACTICE → VALIDATE → REVIEW → PROVE PROGRESS</strong><small id="premium-track-progress">Parcours non commencé</small></div>
+        <section class="panel premium-track-panel"><div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-path"/></svg> P2 Premium Track</p><h2>Risk &amp; Discipline Foundations</h2></div></div><p>Apprendre à définir ce que tu acceptes de risquer, pourquoi tu prends une décision et dans quelles conditions ton scénario devient invalide.</p><ol class="premium-module-rail"><li><span>01</span><div><strong>Risk Before Entry</strong><small id="p2-p21-status">À commencer</small></div><button class="secondary-action" data-view="lesson-p21">Ouvrir</button></li><li><span>02</span><div><strong>The Anatomy of a Controlled Trade</strong><small id="p2-p22-status">Après P2.1</small></div><button class="secondary-action" data-view="lesson-p22">Ouvrir</button></li><li><span>03</span><div><strong>Build the Risk Plan</strong><small id="p2-lab-status">Après les leçons</small></div><button class="secondary-action" data-view="premium-lab">Ouvrir le Lab</button></li><li><span>04</span><div><strong>Controlled Decision</strong><small id="p2-assessment-status">Après le Lab</small></div><button class="secondary-action" data-view="premium-assessment">Ouvrir l’assessment</button></li></ol></section>
+        <section class="panel premium-locked-note"><p class="eyebrow gold">État honnête</p><h3>Premium Demo uniquement</h3><p>Le contenu est local et pédagogique. Aucun abonnement serveur, aucune certification officielle et aucune performance financière ne sont activés.</p></section>
+      </section>
+
+      <section class="view premium-view" id="premium-lab" aria-labelledby="premium-lab-title">
+        <button class="back-link" data-view="premium-track">← Retour au Premium Track</button>
+        <div class="section-intro"><p class="eyebrow gold">P2 Practice Lab</p><h1 id="premium-lab-title">Build the Risk Plan.</h1><p>Scénario éducatif synthétique — XAUUSD · H1. Aucune cotation réelle, aucun signal et aucune recommandation.</p></div>
+        <section class="panel lab-brief"><p class="eyebrow">Synthetic educational scenario</p><h2>XAUUSD — SYNTHETIC SCENARIO</h2><dl class="lab-facts"><div><dt>TIMEFRAME</dt><dd>H1</dd></div><div><dt>CONTEXT</dt><dd>Price approaches a previously identified support zone.</dd></div><div><dt>STRUCTURE</dt><dd>Higher-timeframe structure remains bullish.</dd></div><div><dt>SETUP</dt><dd>Potential bullish reaction.</dd></div><div><dt>CURRENT INFORMATION</dt><dd>Price has reached the zone.</dd></div></dl><p><strong>YOUR TASK</strong><br>Build a controlled trade plan.</p></section>
+        <form class="panel premium-lab-form" id="premium-lab-form">
+          <label>01 — Direction<select id="p2-direction" required><option value="">Choisir</option><option>Long</option><option>Short</option><option>No Trade</option></select></label>
+          <label>02 — Setup / Pourquoi ?<textarea id="p2-setup" minlength="10" maxlength="600" required placeholder="Pourquoi ce setup correspond-il à ton raisonnement ?"></textarea></label>
+          <label>03 — Entry Condition / Qu'est-ce qui doit se produire ?<textarea id="p2-entry" minlength="10" maxlength="600" required placeholder="Quelle confirmation doit exister avant l'entrée ?"></textarea></label>
+          <label>04 — Invalidation / Où le scénario devient-il invalide ?<textarea id="p2-invalidation" minlength="10" maxlength="600" required placeholder="Décris la condition qui invalide l'hypothèse."></textarea></label>
+          <label>05 — Risk <span class="field-help">Exemple pédagogique : capital $10,000 · allowance 0.5 % · maximum $50.</span><input id="p2-risk" type="number" min="0" max="50" step="1" required placeholder="Montant maximum accepté"></label>
+          <label>06 — Target / Objectif cohérent<textarea id="p2-target" minlength="5" maxlength="400" required></textarea></label>
+          <label>07 — No-Trade Condition / Dans quelle situation refuses-tu finalement le trade ?<textarea id="p2-no-trade" minlength="10" maxlength="600" required></textarea></label>
+          <button class="primary-action" type="submit">Vérifier mon Risk Plan <span>→</span></button>
+          <p class="feedback" id="premium-lab-feedback" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="view premium-view" id="premium-assessment" aria-labelledby="premium-assessment-title">
+        <button class="back-link" data-view="premium-lab">← Retour au Practice Lab</button>
+        <div class="section-intro"><p class="eyebrow gold">P2 Assessment</p><h1 id="premium-assessment-title">Controlled Decision.</h1><p>Quatre questions pour valider la qualité du processus — pas un score financier, pas une certification.</p></div>
+        <form class="panel premium-assessment-form" id="premium-assessment-form">
+          <fieldset><legend>01 — Une zone est intéressante mais aucune invalidation claire n'est définie.</legend><label><input type="radio" name="p2-q1" value="wait"> Attendre de pouvoir définir clairement l'invalidation.</label><label><input type="radio" name="p2-q1" value="enter"> Entrer avec une petite position.</label></fieldset>
+          <fieldset><legend>02 — Le scénario est valide mais le risque nécessaire dépasse la limite définie.</legend><label><input type="radio" name="p2-q2" value="respect"> Ne pas exécuter dans ces conditions / revoir le plan sans dépasser la limite.</label><label><input type="radio" name="p2-q2" value="ignore"> Exécuter quand même puisque le setup est valide.</label></fieldset>
+          <fieldset><legend>03 — Le trade atteint le stop.</legend><label><input type="radio" name="p2-q3" value="a"> La stratégie est mauvaise.</label><label><input type="radio" name="p2-q3" value="b"> Le marché est truqué.</label><label><input type="radio" name="p2-q3" value="c"> Le trade peut être perdant tout en étant correctement exécuté.</label><label><input type="radio" name="p2-q3" value="d"> Doubler le risque au prochain trade.</label></fieldset>
+          <fieldset><legend>04 — Quel processus constitue la meilleure preuve de discipline ?</legend><label><input type="radio" name="p2-q4" value="a"> Trader A : gagnant, entrée improvisée, stop déplacé, risque augmenté.</label><label><input type="radio" name="p2-q4" value="b"> Trader B : perdant, setup valide, risque défini, stop et plan respectés.</label></fieldset>
+          <button class="primary-action" type="submit">Valider Controlled Decision <span>→</span></button>
+          <p class="feedback" id="premium-assessment-feedback" role="status" aria-live="polite"></p>
+        </form>
+        <section class="panel premium-proof-receipt" id="premium-proof-receipt" hidden><p class="eyebrow gold">DDA Skill Evidence</p><h2>Risk Foundations</h2><dl><div><dt>Level</dt><dd>Level 3 — Apply</dd></div><div><dt>Evidence</dt><dd>P2 Guided Risk Lab + Assessment</dd></div><div><dt>Date</dt><dd id="p2-proof-date">Local timestamp</dd></div><div><dt>Next Action</dt><dd>Continue to the next Premium Practice.</dd></div></dl><button class="primary-action" id="p2-journal-bridge" type="button">Take this into your Journal <span>→</span></button></section>
       </section>
 
       <section class="view" id="markets" aria-labelledby="markets-title">
@@ -1163,6 +1206,7 @@
   <script src="m1-1-lesson.js"></script>
   <script src="m1-2-lesson.js"></script>
   <script src="m1-3-lesson.js"></script>
+  <script src="p2-lessons.js"></script>
   <script src="dda-core.js"></script>
   <script src="learning-engine.js"></script>
   <script src="lesson-renderer.js"></script>

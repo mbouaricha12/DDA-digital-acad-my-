@@ -93,6 +93,22 @@ const LESSON_REGISTRY = Object.freeze([
       { role: 'exercise', block: 'm13-exercise', success: '@practice', gate: true },
       { role: 'quiz', block: 'm13-quiz', success: '@data', result: true }
     ]
+  },
+  {
+    id: 'P2.1', viewId: 'lesson-p21', suffix: 'p21', title: 'Risk Before Entry',
+    permission: 'premium_track', quizBlock: 'p21-quiz', understoodScrollTo: 'p21-decision-block',
+    questions: [
+      { role: 'exercise', block: 'p21-decision', success: '@practice' },
+      { role: 'quiz', block: 'p21-quiz', success: '@data', result: true }
+    ]
+  },
+  {
+    id: 'P2.2', viewId: 'lesson-p22', suffix: 'p22', title: 'The Anatomy of a Controlled Trade', prerequisite: 'P2.1',
+    permission: 'premium_track', quizBlock: 'p22-quiz', understoodScrollTo: 'p22-sequence-block',
+    questions: [
+      { role: 'exercise', block: 'p22-sequence', success: '@practice' },
+      { role: 'quiz', block: 'p22-quiz', success: '@data', result: true }
+    ]
   }
 ]);
 
@@ -116,6 +132,7 @@ mountedLessons.forEach(entry => {
   document.getElementById(`${entry.viewId}-main`).insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(entry.meta.module, entry.meta.lesson, suffix));
   document.getElementById(`${entry.viewId}-outline`).innerHTML = DDALessonRenderer.renderLessonOutline(entry.meta.lesson, suffix);
   if (entry.id === 'M0.2') document.getElementById(`${entry.viewId}-main`).insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff"><p class="eyebrow gold">Après la leçon</p><h3>Mettre la lecture en pratique</h3><p>Ouvre une mission guidée dans le Terminal pour repérer une zone sans chercher un prix exact.</p><button type="button" class="secondary-action" data-practice-launch="M0.2">Lancer la mission Practice <span>→</span></button></section>');
+  if (entry.id === 'P2.2') document.getElementById(`${entry.viewId}-main`).insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff premium-handoff"><p class="eyebrow gold">Après les leçons</p><h3>Practice Lab — Build the Risk Plan</h3><p>Construis un plan dans un scénario pédagogique synthétique, puis fais vérifier ta décision.</p><button type="button" class="secondary-action" data-view="premium-lab">Ouvrir le Practice Lab <span>→</span></button></section>');
 });
 function findLessonBlock(lessonDef, id) { return lessonDef.blocks.find(b => b.id === id); }
 
@@ -248,7 +265,7 @@ document.addEventListener('keydown', event => {
 const titles = {
   landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours',
   progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub',
-  membership: 'DDA Premium', support: 'Aide & support', profile: 'Mon profil', community: 'Communauté',
+  membership: 'DDA Premium', 'premium-track': 'Premium Track · P2', 'premium-lab': 'Premium Lab · Risk Plan', 'premium-assessment': 'Premium Assessment · Controlled Decision', support: 'Aide & support', profile: 'Mon profil', community: 'Communauté',
   practice: 'Pratique avancée', intelligence: 'Intelligence DDA',
   // Lesson screen titles are declared once, in LESSON_REGISTRY — never a
   // second hand-maintained list to keep in sync.
@@ -265,6 +282,7 @@ const viewPermissions = {
   dashboard: 'dashboard', path: 'path', progress: 'progress', journal: 'journal', resources: 'resources_free',
   markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile',
   community: 'community', practice: 'practice', intelligence: 'intelligence',
+  'premium-track': 'premium_track', 'premium-lab': 'premium_track', 'premium-assessment': 'premium_track',
   // Matrice des droits CDCP-OS §4.2 (arbitrage D1 validé, Option B) : M0 en
   // Free (lesson_m01), M1+ réservé à l'offre Standard/Pro (advanced_modules) —
   // dérivé du registre, jamais une liste parallèle écrite à la main.
@@ -405,6 +423,7 @@ function countActiveDaysForView(events, viewId) {
 }
 
 let prototypeState = DDA.load();
+const BOOT_HASH_VIEW = location.hash.replace('#', '');
 const initialAttribution = window.DDA_INITIAL_ATTRIBUTION || {};
 delete window.DDA_INITIAL_ATTRIBUTION;
 
@@ -1419,6 +1438,7 @@ function renderState() {
     button.textContent = premium ? 'Ouvrir l’atelier' : 'Voir l’aperçu Premium';
   });
   renderMembershipNextStep(premium);
+  renderPremiumState();
 
   renderPathJourney();
   renderModulesRecap();
@@ -1556,6 +1576,8 @@ function showView(id, recordEvent = true) {
     currentView = id;
   }
   if (recordEvent) trackEvent('view_opened', { view: id });
+  if (recordEvent && id === 'premium-track') trackEvent('premium_track_viewed', { view: id });
+  if (recordEvent && (id === 'lesson-p21' || id === 'lesson-p22')) trackEvent('premium_module_started', { module: 'P2', lesson: id });
   if (id === 'landing') {
     trackEvent('landing_viewed', {
       source: prototypeState.acquisition?.source,
@@ -1942,6 +1964,125 @@ function bindRegistryQuestions(entry) {
 }
 mountedLessons.forEach(bindRegistryQuestions);
 
+/* -------------------------------------------------------------------------
+   Premium P2 — local vertical slice controller.
+   It deliberately writes only through DDA.updatePremium()/DDA.track(); no server
+   entitlement, financial result or market signal is implied.                 */
+function premiumRecord() {
+  return prototypeState.premium || DDA.emptyPremiumState();
+}
+
+function renderPremiumState() {
+  const premium = premiumRecord();
+  const p21 = DDALearning.getLessonProgress(prototypeState, 'P2.1');
+  const p22 = DDALearning.getLessonProgress(prototypeState, 'P2.2');
+  const lab = premium.labs?.['p2-risk-plan'] || {};
+  const assessment = premium.assessments?.['p2-controlled-decision'] || {};
+  const proof = premium.proofs?.['p2-risk-foundations'] || null;
+  const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+  set('p2-p21-status', p21.quizComplete ? 'Validée' : p21.exerciseComplete ? 'En cours' : 'À commencer');
+  set('p2-p22-status', p22.quizComplete ? 'Validée' : p22.exerciseComplete ? 'En cours' : p21.quizComplete ? 'À commencer' : 'Après P2.1');
+  set('p2-lab-status', lab.status === 'validated' ? 'Validé' : lab.status === 'retry' ? 'À reprendre' : p22.quizComplete ? 'À commencer' : 'Après les leçons');
+  set('p2-assessment-status', assessment.passed ? 'Validé' : lab.status === 'validated' ? 'À commencer' : 'Après le Lab');
+  set('premium-track-progress', assessment.passed ? 'Preuve créée · prochaine action : Journal' : lab.status === 'validated' ? 'Lab validé · assessment disponible' : p22.quizComplete ? 'Leçons validées · Lab disponible' : p21.quizComplete ? 'P2.1 validée · P2.2 disponible' : 'Parcours non commencé');
+  const receipt = document.getElementById('premium-proof-receipt');
+  if (receipt) receipt.hidden = !proof;
+  if (proof) set('p2-proof-date', proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Local timestamp');
+  const progress = document.getElementById('premium-proof-progress');
+  if (progress) progress.innerHTML = proof
+    ? `<article class="premium-proof-row"><strong>${proof.skill || 'Risk Foundations'}</strong><span>${proof.level || 'Level 3 — Apply'}</span><p>${proof.source || 'P2 Guided Risk Lab + Assessment'}</p><small>${proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Local timestamp'} · ${proof.nextAction || 'Continue to the next Premium Practice.'}</small></article>`
+    : '<p>Aucune preuve Premium validée pour le moment.</p>';
+}
+
+function savePremiumPatch(patch) {
+  prototypeState = DDA.updatePremium(prototypeState, patch);
+  renderState();
+}
+
+function premiumFeedback(el, good, title, text) {
+  if (!el) return;
+  el.className = `feedback ${good ? 'success' : 'error'}`;
+  el.replaceChildren();
+  const strong = document.createElement('strong'); strong.className = 'feedback-kicker'; strong.textContent = title;
+  const span = document.createElement('span'); span.className = 'feedback-copy'; span.textContent = text;
+  el.append(strong, span);
+}
+
+document.getElementById('premium-lab-form')?.addEventListener('submit', event => {
+  event.preventDefault();
+  const values = {
+    direction: document.getElementById('p2-direction').value,
+    setup: document.getElementById('p2-setup').value.trim(),
+    entry: document.getElementById('p2-entry').value.trim(),
+    invalidation: document.getElementById('p2-invalidation').value.trim(),
+    risk: Number(document.getElementById('p2-risk').value),
+    target: document.getElementById('p2-target').value.trim(),
+    noTrade: document.getElementById('p2-no-trade').value.trim()
+  };
+  const feedback = document.getElementById('premium-lab-feedback');
+  const attempts = Number(premiumRecord().labs?.['p2-risk-plan']?.attempts || 0) + 1;
+  let status = 'retry';
+  let message = 'Review required. Your stop is present, but the scenario invalidation has not been established. Revisit the market structure before defining the risk.';
+  let title = 'Review required';
+  if (values.invalidation.length < 10) {
+    message = 'Review required. Your stop is present, but the scenario invalidation has not been established. Revisit the market structure before defining the risk.';
+  } else if (values.entry.length < 10) {
+    title = 'Decision check';
+    message = 'Decision check. You have identified a zone, but a zone alone does not define an entry condition.';
+  } else if (!Number.isFinite(values.risk) || values.risk <= 0 || values.risk > 50 || values.target.length < 5 || values.noTrade.length < 10) {
+    title = 'Risk boundary check';
+    message = 'Define a measurable risk at or below the $50 educational example, a coherent target and a clear no-trade condition before execution.';
+  } else {
+    status = 'validated'; title = 'Good';
+    message = 'Your invalidation is defined before execution. This gives the trade a measurable risk boundary.';
+  }
+  const lab = { status, attempts, lastFeedback: message, sourceLesson: 'P2.2', proofId: 'p2-risk-foundations', ...(status === 'validated' ? { completedAt: new Date().toISOString() } : {}) };
+  savePremiumPatch({ trackId: 'P2-risk-discipline', labs: { ...premiumRecord().labs, 'p2-risk-plan': lab } });
+  trackEvent('premium_lab_attempted', { lab: 'p2-risk-plan' });
+  if (status === 'validated') trackEvent('premium_lab_validated', { lab: 'p2-risk-plan' });
+  premiumFeedback(feedback, status === 'validated', title, message);
+});
+
+document.getElementById('premium-assessment-form')?.addEventListener('submit', event => {
+  event.preventDefault();
+  const feedback = document.getElementById('premium-assessment-feedback');
+  if (premiumRecord().labs?.['p2-risk-plan']?.status !== 'validated') {
+    premiumFeedback(feedback, false, 'Lab required', 'Valide d’abord le P2 Lab afin que l’assessment repose sur une décision construite.'); return;
+  }
+  const answers = ['p2-q1', 'p2-q2', 'p2-q3', 'p2-q4'].map(name => document.querySelector(`input[name="${name}"]:checked`)?.value);
+  const passed = answers.join('|') === 'wait|respect|c|b';
+  const previous = premiumRecord().assessments?.['p2-controlled-decision'] || {};
+  const assessment = { attempts: Number(previous.attempts || 0) + 1, passed, completedAt: passed ? new Date().toISOString() : undefined };
+  savePremiumPatch({ assessments: { ...premiumRecord().assessments, 'p2-controlled-decision': assessment } });
+  trackEvent('premium_assessment_completed', { assessment: 'p2-controlled-decision' });
+  if (!passed) {
+    premiumFeedback(feedback, false, 'Review required', 'Relis la distinction entre résultat et processus, puis vérifie que le risque ne dépasse jamais la limite définie.'); return;
+  }
+  const createdAt = new Date().toISOString();
+  const proof = { type: 'skill_evidence', source: 'P2 Guided Risk Lab + Assessment', competencyId: 'risk_foundations', skill: 'Risk Foundations', level: 'Level 3 — Apply', createdAt, nextAction: 'Continue to the next Premium Practice.' };
+  savePremiumPatch({ modules: { ...premiumRecord().modules, P2: { status: 'completed', completedAt: createdAt } }, proofs: { ...premiumRecord().proofs, 'p2-risk-foundations': proof } });
+  trackEvent('premium_proof_created', { proof: 'p2-risk-foundations', skill: 'Risk Foundations', nextAction: 'Journal' });
+  premiumFeedback(feedback, true, 'Validated', 'Controlled Decision validée. Une preuve pédagogique locale a été créée — elle ne constitue pas une certification officielle.');
+});
+
+document.getElementById('p2-journal-bridge')?.addEventListener('click', event => {
+  const proof = premiumRecord().proofs?.['p2-risk-foundations'];
+  if (!proof) return;
+  trackEvent('premium_review_opened', { proof: 'p2-risk-foundations' });
+  showView('journal');
+  openJournalComposer(null, event.currentTarget, {
+    market: 'XAUUSD — scénario synthétique',
+    context: 'Price approaches a previously identified support zone. Higher-timeframe structure remains bullish.',
+    scenario: 'Potential bullish reaction — exercice pédagogique local.',
+    process: 'Context → Setup → Entry → Invalidation → Risk → Target → Review',
+    decision: 'Risk Plan construit dans le P2 Guided Risk Lab.',
+    outcome: 'À revoir dans le Journal — aucune donnée de marché réelle.',
+    whatWorked: 'J’ai défini une invalidation avant de considérer l’entrée.',
+    toImprove: 'Continuer à distinguer résultat et qualité du processus.',
+    note: 'Risk Foundations · Level 3 — Apply', terminalSource: true, sourceLesson: 'P2.2', proofId: 'p2-risk-foundations', proofType: 'skill_evidence'
+  });
+});
+
 function updateNetworkState() {
   const online = navigator.onLine;
   const status = document.getElementById('network-state');
@@ -2022,8 +2163,8 @@ renderMarketIntelligence();
 // the real entry point — Access/onboarding — never on the Terminal's static
 // default-active markup, which would otherwise show a placeholder "Richard"
 // dashboard as if already signed in before anyone has actually onboarded.
-const initialView = location.hash.replace('#', '');
-if (titles[initialView]) {
+const initialView = BOOT_HASH_VIEW;
+if (initialView && document.getElementById(initialView)) {
   // Pre-seed currentView to the view we're actually booting into so showView()'s
   // own "record previous" logic below doesn't treat this restore as a real
   // transition and clobber the previousView just restored from sessionStorage
