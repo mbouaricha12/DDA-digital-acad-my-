@@ -125,6 +125,101 @@ const views = document.querySelectorAll('.view');
 const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
+
+// Access onboarding selects — native controls remain in the form as the
+// source of truth, while the visible interaction uses DDA's own Learning OS
+// surface. This preserves validation, keyboard semantics and existing submit
+// handlers without exposing a browser-specific radio/menu treatment.
+function initDdaSelect(select) {
+  if (!select || select.dataset.ddaReady) return;
+  select.dataset.ddaReady = 'true';
+  select.classList.add('dda-native-select');
+  const id = `${select.id}-dda-menu`;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'dda-select';
+  wrapper.dataset.selectFor = select.id;
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'dda-select-trigger';
+  trigger.setAttribute('aria-haspopup', 'listbox');
+  trigger.setAttribute('aria-controls', id);
+  trigger.setAttribute('aria-expanded', 'false');
+  const label = document.createElement('span');
+  const chevron = document.createElement('span');
+  chevron.className = 'dda-select-chevron';
+  chevron.setAttribute('aria-hidden', 'true');
+  chevron.textContent = '⌄';
+  trigger.append(label, chevron);
+  const menu = document.createElement('div');
+  menu.id = id;
+  menu.className = 'dda-select-menu';
+  menu.setAttribute('role', 'listbox');
+  menu.setAttribute('aria-label', select.previousElementSibling?.textContent || 'Choisir une option');
+  [...select.options].forEach(option => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'dda-select-option';
+    item.dataset.value = option.value;
+    item.setAttribute('role', 'option');
+    item.setAttribute('aria-selected', 'false');
+    item.textContent = option.textContent;
+    item.addEventListener('click', () => {
+      select.value = option.value;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      closeDdaSelect(wrapper);
+      trigger.focus();
+    });
+    menu.appendChild(item);
+  });
+  select.parentNode.insertBefore(wrapper, select);
+  wrapper.append(select, trigger, menu);
+
+  const sync = () => {
+    const current = select.options[select.selectedIndex];
+    label.textContent = current?.value ? current.textContent : 'Choisir';
+    label.classList.toggle('has-value', Boolean(current?.value));
+    menu.querySelectorAll('.dda-select-option').forEach(item => {
+      const selected = item.dataset.value === select.value;
+      item.setAttribute('aria-selected', String(selected));
+      item.classList.toggle('is-selected', selected);
+    });
+    trigger.setAttribute('aria-invalid', select.getAttribute('aria-invalid') || 'false');
+  };
+  const open = () => {
+    document.querySelectorAll('.dda-select.is-open').forEach(other => { if (other !== wrapper) closeDdaSelect(other); });
+    wrapper.classList.add('is-open');
+    trigger.setAttribute('aria-expanded', 'true');
+    const selected = menu.querySelector('.is-selected') || menu.querySelector('.dda-select-option');
+    selected?.focus();
+  };
+  trigger.addEventListener('click', () => wrapper.classList.contains('is-open') ? closeDdaSelect(wrapper) : open());
+  trigger.addEventListener('keydown', event => {
+    if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); }
+  });
+  menu.addEventListener('keydown', event => {
+    const options = [...menu.querySelectorAll('.dda-select-option')];
+    const index = options.indexOf(document.activeElement);
+    if (event.key === 'ArrowDown') { event.preventDefault(); options[(index + 1) % options.length]?.focus(); }
+    if (event.key === 'ArrowUp') { event.preventDefault(); options[(index - 1 + options.length) % options.length]?.focus(); }
+    if (event.key === 'Escape') { event.preventDefault(); closeDdaSelect(wrapper); trigger.focus(); }
+  });
+  select.addEventListener('change', sync);
+  new MutationObserver(sync).observe(select, { attributes: true, attributeFilter: ['aria-invalid'] });
+  sync();
+}
+function closeDdaSelect(wrapper) {
+  wrapper.classList.remove('is-open');
+  const trigger = wrapper.querySelector('.dda-select-trigger');
+  trigger?.setAttribute('aria-expanded', 'false');
+}
+['level', 'goal', 'time'].forEach(id => initDdaSelect(document.getElementById(id)));
+document.addEventListener('click', event => {
+  if (!event.target.closest('.dda-select')) document.querySelectorAll('.dda-select.is-open').forEach(closeDdaSelect);
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') document.querySelectorAll('.dda-select.is-open').forEach(closeDdaSelect);
+});
+
 const titles = {
   landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours',
   progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub',

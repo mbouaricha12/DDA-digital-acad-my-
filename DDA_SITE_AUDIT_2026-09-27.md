@@ -167,3 +167,10 @@ La vue `#access` a été réalignée sur le registre institutionnel Deep Navy de
 Le fond global est désormais `#060d17`. Les cartes de formulaire utilisent `#0a1424` avec une bordure fine `rgba(255,255,255,.08)`. Les titres utilisent `#f8fafc`, les descriptions, champs et textes secondaires `#94a3b8`, et les CTA reprennent le bleu électrique DDA avec un accent doré discret au survol et au focus.
 
 Le bandeau d’information est également sombre lorsque Access est actif. L’état de vue a été nommé `access-mode` afin d’éviter une collision avec la classe structurelle `.access-shell`. Cette collision avait temporairement révélé un débordement desktop de 610px pendant l’implémentation ; elle a été corrigée et la mesure finale est revenue à **0px** à 390px comme à 1440px.
+
+
+## 13. Composant Dropdown DDA sur mesure
+
+Les trois champs d’onboarding (`Niveau`, `Objectif pédagogique`, `Temps disponible`) utilisent désormais un composant visible DDA au lieu du menu natif du navigateur. Les éléments `select` restent présents en couche sémantique masquée : ils demeurent la source de vérité du formulaire, conservent la validation HTML et restent compatibles avec les tests et la soumission existante.
+
+Le composant ajoute des options sous forme de surfaces sombres respirantes, un état sélectionné bleu électrique avec liseré doré, la navigation clavier, `Échap`, la fermeture au clic extérieur et une Bottom Sheet mobile positionnée au-dessus de la navigation fixe. Vérification réelle sur mobile : panneau `fixed`, de `y=456` à `y=764`, navigation à `y=776`, donc aucun recouvrement.

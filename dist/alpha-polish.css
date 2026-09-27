@@ -615,3 +615,99 @@ body.access-mode .prototype-banner{
   #access .access-card{border-radius:16px}
   #access .access-copy>p{font-size:.94rem;line-height:1.65}
 }
+
+
+/* DDA custom select — surface Learning OS, sans menu natif du navigateur. */
+#access .dda-select{position:relative;z-index:2}
+#access .dda-native-select{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;border:0!important}
+#access .dda-select-trigger{
+  width:100%;
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:13px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:10px;
+  background:#0a1424;
+  color:#94a3b8;
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+  transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;
+}
+#access .dda-select-trigger span:first-child.has-value{color:#f8fafc}
+#access .dda-select-trigger:hover,
+#access .dda-select.is-open .dda-select-trigger,
+#access .dda-select-trigger:focus-visible{border-color:#6cb8ff;box-shadow:0 0 0 3px rgba(108,184,255,.14);outline:0}
+#access .dda-select-trigger[aria-invalid="true"]{border-color:var(--red)}
+#access .dda-select-chevron{color:#d9a441;font-size:18px;line-height:1;transform:translateY(-2px);transition:transform .18s ease}
+#access .dda-select.is-open .dda-select-chevron{transform:rotate(180deg) translateY(2px)}
+#access .dda-select-menu{
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(100% + 8px);
+  display:grid;
+  gap:7px;
+  padding:9px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  background:#0a1424;
+  box-shadow:0 20px 55px rgba(0,0,0,.42);
+  opacity:0;
+  visibility:hidden;
+  transform:translateY(-6px);
+  transition:opacity .18s ease,transform .18s ease,visibility .18s ease;
+}
+#access .dda-select.is-open .dda-select-menu{opacity:1;visibility:visible;transform:none}
+#access .dda-select-option{
+  min-height:48px;
+  padding:13px 14px;
+  border:1px solid transparent;
+  border-radius:9px;
+  background:rgba(255,255,255,.025);
+  color:#94a3b8;
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+  transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease;
+}
+#access .dda-select-option:hover,
+#access .dda-select-option:focus-visible,
+#access .dda-select-option.is-selected{background:rgba(23,105,209,.18);border-color:rgba(108,184,255,.62);color:#f8fafc;outline:0}
+#access .dda-select-option.is-selected{box-shadow:inset 3px 0 #d9a441}
+@media(max-width:639px){
+  #access .dda-select-menu{
+    position:fixed;
+    z-index:100;
+    left:12px;
+    right:12px;
+    top:auto;
+    bottom:calc(12px + var(--safe-b));
+    gap:8px;
+    padding:12px;
+    border-radius:18px;
+    transform:translateY(22px);
+  }
+  #access .dda-select.is-open .dda-select-menu{transform:none}
+  #access .dda-select.is-open .dda-select-menu::before{
+    content:'Choisir une option';
+    display:block;
+    padding:4px 4px 10px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    color:#f8fafc;
+    font-family:var(--dda-serif);
+    font-size:1.05rem;
+  }
+  #access .dda-select-option{min-height:52px;padding:15px 14px}
+}
+
+
+/* Le Bottom Sheet doit être ancré à la fenêtre, jamais au panneau animé. */
+#access.view.active{animation:dda-access-enter .32s ease both}
+@keyframes dda-access-enter{from{opacity:0}to{opacity:1}}
+@media(max-width:639px){
+  #access .dda-select-menu{bottom:calc(80px + var(--safe-b));max-height:min(62vh,420px);overflow:auto}
+}
