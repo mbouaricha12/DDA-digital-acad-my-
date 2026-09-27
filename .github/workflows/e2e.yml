@@ -1,0 +1,53 @@
+name: DDA E2E regression
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dda-e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Full browser regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Playwright test runtime
+        run: npm install --no-save --ignore-scripts playwright
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check dist/app.js
+          node --check dist/dda-core.js
+          node --check tests/run.js
+
+      - name: Run committed contracts
+        run: |
+          node tests/test_premium_p2_contract.js
+          node tests/verify_route_register_consistency.js
+          git diff --check
+
+      - name: Run complete E2E suite
+        env:
+          NODE_PATH: ./node_modules
+        run: node tests/run.js
