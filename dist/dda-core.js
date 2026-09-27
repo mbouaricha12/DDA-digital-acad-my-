@@ -16,7 +16,7 @@
   // activation_v1 — deliberately versioned so a future activation_v2 definition
   // can be added alongside it without reinterpreting what activation_v1 events
   // already meant when they were recorded.
-  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved', 'landing_visit', 'landing_viewed', 'landing_section_reached', 'landing_cta_hero', 'landing_cta_differentiation', 'landing_cta_free', 'landing_cta_final', 'landing_cta_mobile_sticky', 'broker_selected', 'affiliate_link_click', 'activation_v1', 'hero_cta_click', 'signup_started', 'signup_completed', 'qualification_started', 'qualification_completed', 'premium_track_viewed', 'premium_module_started', 'premium_lab_attempted', 'premium_lab_validated', 'premium_assessment_completed', 'premium_proof_created', 'premium_review_opened']);
+  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved', 'landing_visit', 'landing_viewed', 'landing_section_reached', 'landing_cta_hero', 'landing_cta_differentiation', 'landing_cta_free', 'landing_cta_final', 'landing_cta_mobile_sticky', 'broker_selected', 'affiliate_link_click', 'activation_v1', 'hero_cta_click', 'signup_started', 'signup_completed', 'qualification_started', 'qualification_completed', 'premium_track_viewed', 'premium_module_started', 'premium_lab_attempted', 'premium_lab_validated', 'premium_assessment_completed', 'premium_proof_created', 'premium_review_opened', 'premium_weekly_review_completed']);
   const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan', 'source', 'medium', 'campaign', 'broker', 'section', 'position', 'lab', 'assessment', 'proof', 'skill', 'nextAction']);
   const ENTITLEMENTS = Object.freeze({
     visitor: ['dashboard_preview', 'access'],
@@ -608,6 +608,7 @@
         const item = {};
         fields.forEach(field => { item[field] = typeof value[field] === 'boolean' ? value[field] : sanitizeText(value[field], 120); });
         if (Number.isFinite(Number(value.attempts))) item.attempts = Math.max(0, Math.min(100, Math.floor(Number(value.attempts))));
+        if (Number.isFinite(Number(value.entryCount))) item.entryCount = Math.max(0, Math.min(300, Math.floor(Number(value.entryCount))));
         if (value.passed !== undefined) item.passed = Boolean(value.passed);
         if (value.status) item.status = sanitizeText(value.status, 40);
         out[sanitizeText(id, 80)] = item;
@@ -618,7 +619,7 @@
     premium.labs = copyMap(raw.labs, ['status', 'lastFeedback', 'sourceLesson', 'proofId', 'startedAt', 'completedAt'], 20);
     premium.assessments = copyMap(raw.assessments, ['completedAt'], 20);
     premium.proofs = copyMap(raw.proofs, ['type', 'source', 'competencyId', 'skill', 'level', 'createdAt', 'nextAction'], 20);
-    premium.reviews = copyMap(raw.reviews, ['status', 'openedAt', 'sourceProof'], 20);
+    premium.reviews = copyMap(raw.reviews, ['status', 'openedAt', 'completedAt', 'sourceProof', 'windowStart', 'windowEnd', 'markets', 'reflection', 'pattern', 'focus', 'nextAction'], 20);
     return premium;
   }
 

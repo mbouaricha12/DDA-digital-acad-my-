@@ -141,7 +141,7 @@ existantes et réelles.
 |---|---|
 | Journal & Plan | PARTIEL — Foundation V1 réelle et locale construite (voir Écrans et parcours) ; couches suivantes de cette même chaîne toujours FUTUR |
 | Market Intelligence | DÉMONSTRATION — écran Marchés & BRVM déjà réel et accessible dès Free, données non connectées et explicitement étiquetées comme telles (voir Écrans et parcours) ; la couche personnalisée/connectée Premium n'existe pas |
-| → statistiques personnelles → Guided Weekly Review | FUTUR |
+| → statistiques personnelles → Guided Weekly Review | PARTIEL | Weekly Review locale Premium construite dans Journal & Plan : fenêtre explicite de 7 jours, synthèse fondée uniquement sur les entrées réellement enregistrées, réflexion structurée persistante dans `premium.reviews`, aucun score ni indicateur financier inventé ; synchronisation serveur, agrégation multi-appareils et Decision Replay restent futurs |
 | Analyse assistée → Decision Replay | FUTUR |
 | Darius AI copilote pédagogique | FUTUR — jamais générateur de signaux |
 | Trading Lab / Backtesting pédagogique | FUTUR |
@@ -242,4 +242,8 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 
 **Statut : CONSTRUIT — vertical slice locale prête pour revue.** Premium Track, P2.1 Risk Before Entry, P2.2 The Anatomy of a Controlled Trade, Practice Lab de Risk Plan, assessment Controlled Decision, Skill Evidence et bridge Journal sont câblés sur les abstractions authored/renderer et l’état v4 existants. La tranche ne simule ni paiement, ni entitlement serveur, ni marché réel, ni signal, ni certification officielle. Voir `DDA_PREMIUM_P2_HANDOVER_2026-09-27.md`.
 
-**Reprise de vérification :** le contenu authored P2 n’est plus injecté dans le DOM pour Free ; il est monté et ses interactions sont liées uniquement après activation de la démonstration Premium locale. Le test E2E dédié Free → Premium couvre ce cloisonnement sans changer le renderer, le routing ou le modèle d’état. Validation : **48 scénarios E2E réussis, 0 échec**.
+**Reprise de vérification :** le contenu authored P2 n’est plus injecté dans le DOM pour Free ; il est monté et ses interactions sont liées uniquement après activation de la démonstration Premium locale. Le test E2E dédié Free → Premium couvre ce cloisonnement sans changer le renderer, le routing ou le modèle d’état. Validation : **49 scénarios E2E réussis, 0 échec**.
+
+### Extension P2.3 — Guided Weekly Review
+
+**Statut : PARTIEL — construit localement dans Journal & Plan.** La review Premium relit une fenêtre explicite des 7 derniers jours, affiche uniquement le nombre réel d’entrées et de marchés observés, puis permet d’enregistrer une réflexion, un motif à retravailler, un focus et un engagement de méthode. Les données sont persistées et sanitizées dans `state.premium.reviews['weekly-review']`. Free voit un état verrouillé honnête ; aucun score global, aucune performance financière, aucune donnée live, synchronisation serveur ou recommandation de marché n’est ajoutée.

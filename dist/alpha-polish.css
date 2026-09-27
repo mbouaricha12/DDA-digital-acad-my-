@@ -64,6 +64,24 @@
 #journal .journal-entry-card:before{content:"";position:absolute;left:-33px;top:24px;width:11px;height:11px;border:2px solid var(--dda-gold);border-radius:50%;background:var(--navy-950)}
 #journal .journal-composer{max-width:820px;border-top:1px solid var(--dda-gold);padding-top:24px}
 #journal .journal-composer .journal-step-label{font-family:var(--dda-serif);font-size:2rem;color:var(--dda-gold-soft)}
+#journal .journal-toolbar-actions{display:flex;gap:10px;align-items:center}
+#journal .journal-toolbar-actions .secondary-action{width:auto}
+#journal .weekly-review-panel{max-width:820px;border-top:2px solid var(--dda-gold);padding-top:24px}
+#journal .weekly-review-locked{padding:26px;border:1px dashed rgba(201,154,69,.45);background:rgba(201,154,69,.07)}
+#journal .weekly-review-locked h2,#journal .weekly-review-heading h2{margin:8px 0;color:#f8fafc;font-family:var(--dda-serif);font-size:clamp(1.8rem,4vw,3rem)}
+#journal .weekly-review-locked p:not(.eyebrow),#journal .weekly-review-window{max-width:680px;color:#cbd5e1;line-height:1.6}
+#journal .weekly-review-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+#journal .weekly-review-status{padding:7px 11px;border:1px solid rgba(201,154,69,.45);color:#f1d38c;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+#journal .weekly-review-evidence{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:22px 0;padding:16px;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.035)}
+#journal .weekly-review-evidence div{display:grid;gap:4px}
+#journal .weekly-review-evidence strong{color:#f8fafc;font-family:var(--dda-serif);font-size:2rem}
+#journal .weekly-review-evidence span,#journal .weekly-review-evidence p{color:#94a3b8;font-size:13px}
+#journal .weekly-review-evidence p{grid-column:1/-1;margin:4px 0 0;line-height:1.5}
+#journal #weekly-review-form{display:grid;gap:15px}
+#journal #weekly-review-form label{display:grid;gap:7px;color:#cbd5e1;font-size:13px;font-weight:700}
+#journal #weekly-review-form textarea{width:100%;box-sizing:border-box;padding:13px 14px;border:1px solid rgba(255,255,255,.14);border-radius:11px;background:rgba(255,255,255,.04);color:#fff;font:inherit;resize:vertical}
+#journal .weekly-review-actions{display:flex;flex-wrap:wrap;gap:12px}
+#journal .weekly-review-actions .primary-action,#journal .weekly-review-actions .secondary-action{width:auto}
 
 /* Leçon = lecteur pédagogique : respiration narrative et ancrage des portes. */
 #lesson .lesson-main,#lesson-m02 .lesson-main,#lesson-m03 .lesson-main,#lesson-m11 .lesson-main,#lesson-m12 .lesson-main,#lesson-m13 .lesson-main{max-width:840px}
@@ -114,6 +132,8 @@
   #progress .progress-stat.featured:after{width:70px;height:70px;right:15px;top:15px}
   #journal .journal-toolbar{align-items:start;flex-direction:column}
   #journal .journal-toolbar .primary-action{width:100%}
+  #journal .journal-toolbar-actions{width:100%;flex-direction:column}
+  #journal .journal-toolbar-actions .primary-action,#journal .journal-toolbar-actions .secondary-action{width:100%}
   #journal .journal-empty{padding:42px 22px}
   #markets .index-grid{grid-template-columns:1fr}
   #markets .index-card:first-child{min-height:180px}
@@ -122,6 +142,7 @@
   #profile .profile-progress-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
   #profile .profile-progress-strip>div{min-width:0;padding-right:0}
 }
+@media(max-width:720px){#journal .weekly-review-heading{display:grid;gap:12px}#journal .weekly-review-status{justify-self:start}#journal .weekly-review-evidence{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){
   #progress .mastery-row,#resources .library-entry{transition:none}
 }

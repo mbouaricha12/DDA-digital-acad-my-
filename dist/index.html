@@ -638,7 +638,10 @@
               <p class="journal-count" id="journal-count">0 entrée</p>
               <p class="journal-last-entry" id="journal-last-entry" hidden></p>
             </div>
-            <button class="primary-action" id="journal-new-entry" type="button"><svg class="icon"><use href="#icon-plus"/></svg> Nouvelle entrée</button>
+            <div class="journal-toolbar-actions">
+              <button class="secondary-action" id="weekly-review-open" type="button">Weekly Review <span>→</span></button>
+              <button class="primary-action" id="journal-new-entry" type="button"><svg class="icon"><use href="#icon-plus"/></svg> Nouvelle entrée</button>
+            </div>
           </div>
           <div class="journal-empty" id="journal-empty">
             <svg class="icon"><use href="#icon-journal"/></svg>
@@ -646,6 +649,27 @@
             <p>Documente ta première analyse — ce que tu as prévu, ce que tu as fait, ce que tu en retiens.</p>
           </div>
           <ol class="journal-list" id="journal-list"></ol>
+        </section>
+
+        <section class="journal-panel weekly-review-panel" id="weekly-review-panel" hidden aria-labelledby="weekly-review-title">
+          <div class="weekly-review-locked" id="weekly-review-locked" hidden>
+            <p class="eyebrow gold">DDA Premium</p>
+            <h2>Relire ton processus, sans score inventé.</h2>
+            <p>La Weekly Review rassemble uniquement les observations réellement écrites dans ton Journal. Cette version locale est disponible dans la démonstration Premium.</p>
+            <button class="secondary-action" id="weekly-review-preview" type="button">Voir l’aperçu Premium <span>→</span></button>
+          </div>
+          <div id="weekly-review-content" hidden>
+            <div class="weekly-review-heading"><div><p class="eyebrow gold">Premium · Review</p><h2 id="weekly-review-title">Guided Weekly Review</h2><p id="weekly-review-window">Fenêtre locale de 7 jours</p></div><span class="weekly-review-status" id="weekly-review-status">À commencer</span></div>
+            <div class="weekly-review-evidence" id="weekly-review-evidence"></div>
+            <form id="weekly-review-form">
+              <label>Ce qui a été bien fait<textarea id="weekly-review-strength" maxlength="600" rows="3" placeholder="Quelle habitude ou quel processus as-tu réellement respecté ?"></textarea></label>
+              <label>Le motif à retravailler<textarea id="weekly-review-pattern" maxlength="600" rows="3" placeholder="Quelle difficulté revient dans tes observations ?"></textarea></label>
+              <label>Ton focus pour les 7 prochains jours<textarea id="weekly-review-focus" maxlength="600" rows="3" placeholder="Quelle prochaine action d’apprentissage peux-tu observer ?"></textarea></label>
+              <label>Engagement de méthode<textarea id="weekly-review-next-action" maxlength="600" rows="2" placeholder="Quelle règle de processus veux-tu garder visible ?"></textarea></label>
+              <p class="form-error" id="weekly-review-error" role="alert"></p>
+              <div class="weekly-review-actions"><button class="secondary-action" id="weekly-review-cancel" type="button">Retour au Journal</button><button class="primary-action" id="weekly-review-save" type="submit">Enregistrer la review <span>→</span></button></div>
+            </form>
+          </div>
         </section>
 
         <section class="journal-composer" id="journal-composer" hidden>

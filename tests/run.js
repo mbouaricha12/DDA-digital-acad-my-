@@ -399,6 +399,47 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('Weekly Review stays locked for Free and persists a Premium local review', async () => {
+    const freeContext = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(freeContext, {}, 'free');
+    const freePage = await freeContext.newPage();
+    await freePage.goto(`${BASE}/#journal`);
+    await freePage.click('#weekly-review-open');
+    assert.equal(await freePage.locator('#weekly-review-locked').isVisible(), true);
+    assert.equal(await freePage.locator('#weekly-review-content').isVisible(), false);
+    await freeContext.close();
+
+    const premiumContext = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(premiumContext, {}, 'premium');
+    const premiumPage = await premiumContext.newPage();
+    await premiumPage.goto(`${BASE}/#journal`);
+    await premiumPage.evaluate(() => {
+      let state = window.DDA.load();
+      state = window.DDA.addJournalEntry(state, { market: 'XAUUSD', context: 'Support zone observed.', scenario: 'Wait for confirmation.', process: 'Checklist before decision.', decision: 'No trade until invalidation is clear.', outcome: 'Observation retained.', whatWorked: 'Risk boundary written first.', toImprove: 'Describe the trigger more clearly.' });
+      state = window.DDA.addJournalEntry(state, { market: 'BRVM Composite', context: 'Range observed.', scenario: 'Study the structure.', process: 'Context before conclusion.', decision: 'Continue observing.', outcome: 'No execution.', note: 'Local learning trace.' });
+      window.DDA.save(state);
+    });
+    await premiumPage.reload();
+    await premiumPage.click('#weekly-review-open');
+    assert.equal(await premiumPage.locator('#weekly-review-content').isVisible(), true);
+    assert.ok((await premiumPage.locator('#weekly-review-evidence').innerText()).includes('2'));
+    await premiumPage.fill('#weekly-review-strength', 'J’ai gardé le risque et le contexte visibles avant toute décision.');
+    await premiumPage.fill('#weekly-review-pattern', 'Je dois mieux décrire les conditions qui invalident le scénario.');
+    await premiumPage.fill('#weekly-review-focus', 'Observer une décision complète avant de conclure.');
+    await premiumPage.fill('#weekly-review-next-action', 'Relire ma checklist avant chaque nouvelle observation.');
+    await premiumPage.click('#weekly-review-save');
+    let state = await premiumPage.evaluate(() => window.DDA.load());
+    assert.equal(state.premium.reviews['weekly-review'].status, 'completed');
+    assert.equal(state.premium.reviews['weekly-review'].entryCount, 2);
+    await premiumPage.reload();
+    assert.equal(await premiumPage.evaluate(() => window.DDA.load().premium.reviews['weekly-review']?.status), 'completed');
+    await premiumPage.click('#weekly-review-open');
+    assert.equal((await premiumPage.locator('#weekly-review-status').textContent()).trim(), 'Enregistrée');
+    assert.ok((await premiumPage.locator('#weekly-review-focus').inputValue()).includes('Observer une décision'));
+    assert.equal(await premiumPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await premiumContext.close();
+  });
+
   console.log('\n-- C. Navigation critique #access --');
 
   await test('anonymous visitor with no local profile lands on a real entry view (never a fake dashboard)', async () => {

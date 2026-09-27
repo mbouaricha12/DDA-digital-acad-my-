@@ -14,6 +14,7 @@
 - **DDA Skill Evidence** : preuve locale `Risk Foundations`, niveau `Level 3 — Apply`, source, date et prochaine action.
 - **Progression** : panneau de preuves Premium ; les leçons P2 peuvent également alimenter le Fil de maîtrise via le registre authored.
 - **Bridge Journal** : transfert du contexte synthétique, processus, décision, preuve, sourceLesson, proofId et proofType vers le Journal & Plan.
+- **P2.3 — Guided Weekly Review** : fenêtre locale explicite de 7 jours, synthèse des entrées réellement écrites, réflexion structurée et engagement de méthode persistés dans `premium.reviews['weekly-review']`.
 - **Garde-fous** : aucun paiement, entitlement serveur, marché réel, performance, signal ou certification officielle.
 
 ## Architecture respectée
@@ -35,6 +36,7 @@
 - Contrat `tests/test_premium_p2_contract.js`
 - Parcours Playwright réel : P2.1 → P2.2 → Lab validé → Assessment validé → preuve → Journal prérempli → Progression.
 - Reprise de vérification : contenu authored P2 absent du DOM Free puis monté après activation Premium Demo ; suite E2E complète portée à 48 scénarios, 0 échec ; le parcours permanent couvre P2.1 → P2.2 → Lab → Assessment → preuve → Progression → Journal avec rechargements et viewport mobile.
+- Validation P2.3 : Weekly Review verrouillée pour Free, ouverte en Premium, calculée sur les entrées des 7 derniers jours, enregistrée puis relue après rechargement ; suite E2E portée à **49 scénarios réussis, 0 échec**.
 
 ## Hors scope volontaire
 
@@ -42,4 +44,4 @@
 - Paiement ou abonnement réel.
 - Données de marché en temps réel.
 - Certification officielle ou scoring de performance.
-- P2.3, Weekly Review, Decision Replay et Darius AI.
+- Decision Replay et Darius AI.

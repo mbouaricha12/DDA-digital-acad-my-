@@ -23,4 +23,7 @@ assert(app.includes('DDA.updatePremium') && app.includes('sourceLesson: \'P2.2\'
 assert(core.includes('function sanitizePremium') && core.includes('premium: sanitizePremium(raw.premium)'), 'premium state must be sanitized at the core boundary');
 assert(core.includes("premiumOnly: true"), 'P2 module must be marked premium-only in the curriculum');
 assert(css.includes('.premium-track-status') && css.includes('.premium-proof-row'), 'P2 must have a dedicated responsive visual layer');
+assert(index.includes('id="weekly-review-panel"') && index.includes('id="weekly-review-form"'), 'Weekly Review UI must be present in Journal');
+assert(app.includes("weeklyReviewWindow") && app.includes("premium_weekly_review_completed"), 'Weekly Review must derive a local window and record completion');
+assert(core.includes("'premium_weekly_review_completed'") && core.includes("windowStart"), 'Weekly Review lifecycle and window fields must be sanitized');
 console.log('Premium P2 contract: PASS');

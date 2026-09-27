@@ -854,6 +854,36 @@ function renderJournalList() {
   }).join('');
 }
 
+function weeklyReviewWindow() {
+  const end = new Date();
+  const start = new Date(end.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const entries = (prototypeState.journal?.entries || []).filter(entry => {
+    const at = new Date(entry.createdAt).getTime();
+    return Number.isFinite(at) && at >= start.getTime() && at <= end.getTime();
+  });
+  const markets = [...new Set(entries.map(entry => entry.market).filter(Boolean))];
+  return { start, end, entries, markets };
+}
+
+function renderWeeklyReview() {
+  const panel = document.getElementById('weekly-review-panel');
+  if (!panel) return;
+  const locked = document.getElementById('weekly-review-locked');
+  const content = document.getElementById('weekly-review-content');
+  const premium = DDA.can(prototypeState, 'premium_track');
+  locked.hidden = premium;
+  content.hidden = !premium;
+  const windowData = weeklyReviewWindow();
+  const review = premiumRecord().reviews?.['weekly-review'] || {};
+  document.getElementById('weekly-review-window').textContent = `${windowData.start.toLocaleDateString('fr-FR')} → ${windowData.end.toLocaleDateString('fr-FR')} · données locales uniquement`;
+  document.getElementById('weekly-review-status').textContent = review.status === 'completed' ? 'Enregistrée' : 'À commencer';
+  document.getElementById('weekly-review-evidence').innerHTML = `<div><strong>${windowData.entries.length}</strong><span>entrée${windowData.entries.length > 1 ? 's' : ''} dans la fenêtre</span></div><div><strong>${windowData.markets.length}</strong><span>marché${windowData.markets.length > 1 ? 's' : ''} observé${windowData.markets.length > 1 ? 's' : ''}</span></div><p>${windowData.entries.length ? 'Cette synthèse relit tes traces réelles, sans extrapoler de performance.' : 'Aucune entrée récente : commence par documenter une observation avant de tirer une conclusion.'}</p>`;
+  document.getElementById('weekly-review-strength').value = review.reflection || '';
+  document.getElementById('weekly-review-pattern').value = review.pattern || '';
+  document.getElementById('weekly-review-focus').value = review.focus || '';
+  document.getElementById('weekly-review-next-action').value = review.nextAction || '';
+}
+
 function renderJournalPlan() {
   const form = document.getElementById('journal-plan-form');
   if (!form) return;
@@ -937,6 +967,24 @@ function switchJournalTab(tab) {
   document.getElementById('journal-composer').hidden = true;
   document.getElementById('journal-entries-panel').hidden = tab !== 'entries';
   document.getElementById('journal-plan-panel').hidden = tab !== 'plan';
+}
+
+function openWeeklyReview() {
+  const panel = document.getElementById('weekly-review-panel');
+  if (!panel) return;
+  switchJournalTab('entries');
+  document.getElementById('journal-entries-panel').hidden = true;
+  document.getElementById('journal-composer').hidden = true;
+  panel.hidden = false;
+  renderWeeklyReview();
+  document.getElementById('weekly-review-title')?.focus();
+  if (DDA.can(prototypeState, 'premium_track')) trackEvent('premium_review_opened', { proof: 'weekly-review' });
+}
+
+function closeWeeklyReview() {
+  document.getElementById('weekly-review-panel').hidden = true;
+  document.getElementById('journal-entries-panel').hidden = false;
+  document.getElementById('weekly-review-open')?.focus();
 }
 
 // lessonDef/loopId let this drive any lesson's stepper — M0.1 and M0.2 each
@@ -1425,6 +1473,7 @@ function renderState() {
   renderProgressHero();
   renderCertificatePreview(activeLessonProgress);
   renderJournalList();
+  renderWeeklyReview();
   renderJournalPlan();
 
   renderNavCurrentLesson(continueTarget);
@@ -1732,6 +1781,42 @@ document.querySelectorAll('.broker-detail').forEach(button => button.addEventLis
 
 document.getElementById('journal-tab-entries').addEventListener('click', () => switchJournalTab('entries'));
 document.getElementById('journal-tab-plan').addEventListener('click', () => switchJournalTab('plan'));
+document.getElementById('weekly-review-open').addEventListener('click', openWeeklyReview);
+document.getElementById('weekly-review-preview').addEventListener('click', () => { closeWeeklyReview(); showView('membership'); });
+document.getElementById('weekly-review-cancel').addEventListener('click', closeWeeklyReview);
+document.getElementById('weekly-review-form').addEventListener('submit', event => {
+  event.preventDefault();
+  if (!DDA.can(prototypeState, 'premium_track')) return;
+  const fields = {
+    reflection: document.getElementById('weekly-review-strength').value.trim(),
+    pattern: document.getElementById('weekly-review-pattern').value.trim(),
+    focus: document.getElementById('weekly-review-focus').value.trim(),
+    nextAction: document.getElementById('weekly-review-next-action').value.trim()
+  };
+  const error = document.getElementById('weekly-review-error');
+  if (!Object.values(fields).some(Boolean)) {
+    error.textContent = 'Renseigne au moins une réflexion avant d’enregistrer.';
+    return;
+  }
+  error.textContent = '';
+  const windowData = weeklyReviewWindow();
+  const previous = premiumRecord().reviews?.['weekly-review'] || {};
+  savePremiumPatch({ reviews: { ...premiumRecord().reviews, 'weekly-review': {
+    ...previous,
+    status: 'completed',
+    openedAt: previous.openedAt || new Date().toISOString(),
+    completedAt: new Date().toISOString(),
+    sourceProof: 'journal-window',
+    windowStart: windowData.start.toISOString(),
+    windowEnd: windowData.end.toISOString(),
+    entryCount: windowData.entries.length,
+    markets: windowData.markets.join(' · '),
+    ...fields
+  } } });
+  trackEvent('premium_weekly_review_completed', { proof: 'journal-window' });
+  closeWeeklyReview();
+  showToast('Weekly Review enregistrée localement.');
+});
 document.getElementById('journal-new-entry').addEventListener('click', event => openJournalComposer(null, event.currentTarget));
 document.getElementById('journal-composer-back').addEventListener('click', closeJournalComposer);
 document.getElementById('journal-step-prev').addEventListener('click', () => goToJournalStep(journalStep - 1));
