@@ -301,6 +301,91 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('Premium P2 completes lesson → lab → assessment → proof → progression → Journal with reloads', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(context, {}, 'premium');
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#premium-track`);
+    assert.equal(await page.locator('#premium-track').isVisible(), true);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'Premium Track must not overflow on mobile');
+
+    await page.click('#premium-track [data-view="lesson-p21"]');
+    await page.reload();
+    assert.equal(await page.locator('#lesson-p21').isVisible(), true, 'P2.1 deep-link survives reload for Premium Demo');
+    await page.locator('[data-question="p21-decision"] button[data-correct="true"]').click();
+    await page.locator('[data-question="p21-quiz"] button[data-correct="true"]').click();
+    let state = await page.evaluate(() => window.DDA.load());
+    assert.equal(state.lessons['P2.1'].exerciseComplete, true);
+    assert.equal(state.lessons['P2.1'].quizComplete, true);
+
+    await page.locator('#lesson-p21 [data-view="lesson-p22"]').last().click();
+    await page.reload();
+    assert.equal(await page.locator('#lesson-p22').isVisible(), true, 'P2.2 opens only after P2.1 and survives reload');
+    await page.locator('[data-question="p22-sequence"] button[data-correct="true"]').click();
+    await page.locator('[data-question="p22-quiz"] button[data-correct="true"]').click();
+    state = await page.evaluate(() => window.DDA.load());
+    assert.equal(state.lessons['P2.2'].exerciseComplete, true);
+    assert.equal(state.lessons['P2.2'].quizComplete, true);
+
+    await page.locator('#lesson-p22 [data-view="premium-lab"]').last().click();
+    await page.reload();
+    assert.equal(await page.locator('#premium-lab').isVisible(), true);
+    await page.selectOption('#p2-direction', 'Long');
+    await page.fill('#p2-setup', 'The support zone matches the controlled bullish setup context.');
+    await page.fill('#p2-entry', 'Wait for a clear reaction before considering an entry.');
+    await page.fill('#p2-invalidation', 'The bullish hypothesis is invalid if the support structure fails clearly.');
+    await page.fill('#p2-risk', '50');
+    await page.fill('#p2-target', 'Review the scenario after a coherent move away from the zone.');
+    await page.fill('#p2-no-trade', 'Do not trade when the invalidation or entry condition cannot be defined.');
+    await page.locator('#premium-lab-form button[type="submit"]').click();
+    state = await page.evaluate(() => window.DDA.load());
+    assert.equal(state.premium.labs['p2-risk-plan'].status, 'validated');
+    assert.ok((await page.locator('#premium-lab-feedback').textContent()).includes('Good'));
+
+    await page.click('#premium-lab [data-view="premium-track"]');
+    await page.click('#premium-track [data-view="premium-assessment"]');
+    await page.waitForSelector('#premium-assessment.view.active');
+    const assessmentLabels = page.locator('#premium-assessment.view.active label');
+    await assessmentLabels.filter({ hasText: 'Entrer avec une petite position.' }).click();
+    await assessmentLabels.filter({ hasText: 'Ne pas exécuter dans ces conditions' }).click();
+    await assessmentLabels.filter({ hasText: 'Le trade peut être perdant tout en étant correctement exécuté.' }).click();
+    await assessmentLabels.filter({ hasText: 'Trader B : perdant, setup valide' }).click();
+    await page.locator('#premium-assessment-form button[type="submit"]').click();
+    state = await page.evaluate(() => window.DDA.load());
+    assert.equal(state.premium.assessments['p2-controlled-decision'].passed, false);
+    assert.equal(state.premium.assessments['p2-controlled-decision'].attempts, 1);
+    await assessmentLabels.filter({ hasText: 'Attendre de pouvoir définir clairement' }).click();
+    await page.locator('#premium-assessment-form button[type="submit"]').click();
+    state = await page.evaluate(() => window.DDA.load());
+    assert.equal(state.premium.assessments['p2-controlled-decision'].passed, true);
+    assert.equal(state.premium.assessments['p2-controlled-decision'].attempts, 2);
+    assert.equal(state.premium.proofs['p2-risk-foundations'].level, 'Level 3 — Apply');
+
+    await page.reload();
+    assert.equal(await page.locator('#premium-proof-receipt').isVisible(), true, 'proof receipt survives assessment reload');
+    await page.click('#p2-journal-bridge');
+    assert.equal(await page.evaluate(() => location.hash), '#journal');
+    assert.equal(await page.locator('#journal-composer').isVisible(), true);
+    assert.equal(await page.locator('#journal-market').inputValue(), 'XAUUSD — scénario synthétique');
+    assert.ok((await page.locator('#journal-context').inputValue()).includes('support zone'));
+    await page.click('#journal-step-next');
+    await page.click('#journal-step-next');
+    await page.click('#journal-step-save');
+    state = await page.evaluate(() => window.DDA.load());
+    assert.equal(state.journal.entries.length, 1);
+    assert.equal(state.journal.entries[0].sourceLesson, 'P2.2');
+    assert.equal(state.journal.entries[0].proofId, 'p2-risk-foundations');
+
+    await page.reload();
+    assert.equal(await page.locator('#journal-list details').count(), 1, 'Journal entry survives reload');
+    await page.click('.mobile-nav button[data-view="progress"]');
+    const proofProgress = await page.locator('#premium-proof-progress').innerText();
+    assert.ok(proofProgress.includes('Risk Foundations'));
+    assert.ok(proofProgress.includes('Level 3 — Apply'));
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'Progression must not overflow on mobile');
+    await context.close();
+  });
+
   await test('premium tier unlocks resources_premium and certificate_preview', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
