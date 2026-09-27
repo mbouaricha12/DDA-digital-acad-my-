@@ -118,3 +118,137 @@ body.public-shell .landing-plan-card{box-shadow:0 18px 50px rgba(0,0,0,.12)}
 @media(max-width:1050px){.public-header{gap:14px}.public-header-brand{min-width:180px}.public-header-nav{gap:0}.public-header-nav button{padding-inline:5px;font-size:10px}.public-header-actions{gap:5px}.public-login{display:none}}
 @media(max-width:859px){.public-header{padding:14px 20px}.public-header-nav,.public-header-actions{display:none}.public-menu{display:block}.public-header-brand{min-width:0}.public-header-brand b{font-size:10px}.public-header-brand small{font-size:8px}.landing-free-grid,.landing-domain-groups{grid-template-columns:1fr 1fr}.landing-future{grid-template-columns:1fr;gap:22px}.landing-future h2{max-width:18ch}.public-footer{grid-template-columns:1.3fr 1fr 1fr;gap:24px}.public-footer-brand{grid-column:1/-1}}
 @media(max-width:560px){.landing-free,.landing-domains{padding-top:42px;padding-bottom:46px}.landing-free-grid,.landing-domain-groups,.landing-future-grid{grid-template-columns:1fr}.landing-free-grid article{min-height:0}.landing-future{padding-top:46px;padding-bottom:46px}.landing-future-grid p{min-height:0}.public-footer{grid-template-columns:1fr 1fr;padding-top:42px}.public-footer-col:last-of-type{grid-column:1/-1}.public-footer-bottom{display:grid;gap:6px}.public-footer-brand p{font-size:1rem}}
+
+
+/* ======================================================================
+   DDA VISUAL SYSTEM V3 — maison éditoriale, précision institutionnelle.
+   Cette couche ne change ni les routes ni les données : elle affine la
+   perception, la respiration et les états d'interaction des surfaces déjà
+   existantes.
+   ====================================================================== */
+:root{
+  --dda-ink:#07111f;
+  --dda-ink-soft:#13243a;
+  --dda-cyan:#54c5e8;
+  --dda-rule:rgba(226,233,245,.13);
+  --dda-warm-rule:rgba(201,154,69,.28);
+}
+
+/* Une signature plus éditoriale : les titres portent la voix de l'institution,
+   l'interface reste nette et contemporaine. */
+#landing h1,
+#access h1,
+#path h1,
+#progress h1,
+#resources h1,
+#membership h1,
+#markets h1,
+#brokers h1,
+#journal h1{
+  font-family:var(--dda-serif);
+  font-weight:600;
+  letter-spacing:-.035em;
+}
+#landing h1{font-size:clamp(3rem,6.3vw,6.6rem);line-height:.91}
+#landing h1 em{
+  background:linear-gradient(110deg,var(--dda-cyan) 0%,#9edbeb 42%,var(--dda-gold-soft) 100%);
+  -webkit-background-clip:text;background-clip:text;
+}
+
+/* Landing : une ouverture en diptyque plutôt qu'une succession de blocs. */
+#landing .landing-editorial-shell{
+  grid-template-columns:minmax(0,1.03fr) minmax(300px,.82fr);
+  gap:clamp(38px,6vw,100px);
+  align-items:center;
+  min-height:min(760px,calc(100vh - 74px));
+  padding-top:clamp(42px,7vw,98px);
+  padding-bottom:clamp(50px,7vw,96px);
+}
+#landing .landing-main-copy{max-width:690px}
+#landing .landing-masthead{
+  margin-bottom:clamp(42px,6vw,78px);
+  color:rgba(226,233,245,.5);
+}
+#landing .landing-masthead span{color:var(--dda-gold-soft)}
+#landing .landing-deck{max-width:590px;font-size:clamp(1rem,1.4vw,1.16rem);line-height:1.72}
+#landing .landing-actions{margin-top:34px}
+#landing .landing-aperture{
+  min-height:clamp(440px,52vw,650px);
+  border-radius:2px 30px 2px 30px;
+  box-shadow:24px 30px 0 rgba(201,154,69,.08),0 30px 90px rgba(6,16,28,.45);
+  transform:rotate(1deg);
+  transition:transform .5s var(--ease),box-shadow .5s var(--ease);
+}
+#landing .landing-aperture:hover{transform:rotate(0) translateY(-4px);box-shadow:18px 34px 0 rgba(201,154,69,.1),0 36px 100px rgba(6,16,28,.52)}
+#landing .landing-aperture:before{
+  content:"";position:absolute;inset:18px;border:1px solid rgba(255,255,255,.16);
+  border-radius:0 20px 0 20px;pointer-events:none;z-index:2;
+}
+#landing .landing-method{
+  max-width:1440px;margin:0 auto;padding:clamp(50px,7vw,100px) clamp(20px,5vw,72px);
+  border-top:1px solid var(--lp-line);
+  grid-template-columns:1.15fr .9fr .9fr;gap:clamp(24px,4vw,70px);
+}
+#landing .landing-method article{background:transparent;border:0;border-top:1px solid var(--dda-warm-rule);border-radius:0;box-shadow:none;padding:18px 0 0}
+#landing .landing-method article:first-child{padding-top:30px}
+#landing .landing-method h2{font-size:clamp(1.55rem,2.5vw,2.2rem);line-height:1.04}
+#landing .landing-method p:last-child{max-width:30ch;color:var(--lp-body)}
+#landing .method-index{font-family:var(--dda-serif);font-size:2rem;color:var(--dda-gold-soft)}
+
+/* Descent dans l'application : le Terminal devient plus lisible et moins
+   dépendant de surfaces identiques. */
+#dashboard .terminal-entry{padding-top:8px}
+#dashboard .terminal-entry h1{font-family:var(--dda-serif);font-weight:600;letter-spacing:-.03em}
+#dashboard .terminal-lead{border-bottom:0;align-items:stretch}
+#dashboard .terminal-lead>div:first-child{padding:clamp(8px,2vw,22px) 0}
+#dashboard .terminal-lead-photo{border-radius:2px 24px 2px 24px;box-shadow:16px 18px 0 rgba(201,154,69,.07)}
+#dashboard .terminal-lead-go{border-bottom-color:var(--dda-cyan);color:var(--dda-cyan)}
+#dashboard .terminal-divider{margin-top:8px}
+
+/* Les listes deviennent des rails de lecture : moins de boîtes, plus de rythme. */
+.view.active .panel,.view.active .journey-current{border-radius:2px 18px 2px 18px}
+#path .journey-current{background:linear-gradient(120deg,#0e2948,#09182c 72%);border-color:var(--dda-warm-rule)}
+#path .journey-rail{padding-left:28px}
+#path .journey-node{padding:20px 0;border-bottom-color:var(--dda-rule)}
+#path .journey-node strong{font-family:var(--dda-serif);font-size:1.1rem;font-weight:600}
+#progress .progress-stat.featured{background:linear-gradient(135deg,#0f3152,#07111f 78%)}
+#progress .mastery-row-focused{border-left:2px solid var(--dda-gold);border-radius:0 16px 16px 0}
+#resources .library-list{border-radius:2px 18px 2px 18px}
+#resources .library-entry{padding-block:26px}
+#resources .resource-feature{border-radius:2px 20px 2px 20px;background:linear-gradient(135deg,#102e4b,#07111f 78%)}
+#membership .plan-card{border-radius:2px 20px 2px 20px}
+#membership .premium-plan{box-shadow:12px 14px 0 rgba(201,154,69,.08)}
+
+/* États interactifs : le geste est perceptible, mais jamais spectaculaire. */
+button,.journey-current,.library-entry,.plan-card,.broker-row,.panel{touch-action:manipulation}
+button:focus-visible,.journey-current:focus-visible,.broker-row:focus-within{outline:2px solid var(--dda-cyan);outline-offset:4px}
+@media(hover:hover){
+  #path .journey-node:hover{transform:translateX(5px)}
+  #resources .library-entry:hover{background:linear-gradient(90deg,rgba(84,197,232,.07),transparent 70%)}
+  #progress .mastery-row:hover{background:rgba(84,197,232,.045)}
+}
+
+@media(max-width:859px){
+  #landing .landing-editorial-shell{grid-template-columns:1fr;min-height:0;gap:36px;padding-top:32px}
+  #landing h1{font-size:clamp(2.8rem,12.5vw,4.5rem)}
+  #landing .landing-masthead{display:block;margin-bottom:38px;line-height:1.5}
+  #landing .landing-masthead span{display:block;margin-top:5px}
+  #landing .landing-aperture{min-height:390px;transform:none;margin-inline:4px}
+  #landing .landing-aperture:hover{transform:translateY(-2px)}
+  #landing .landing-method{grid-template-columns:1fr;gap:34px}
+  #landing .landing-method article:first-child{padding-top:18px}
+  #landing .landing-method p:last-child{max-width:48ch}
+}
+@media(max-width:480px){
+  #landing .landing-editorial-shell{padding-inline:18px}
+  #landing .landing-actions{align-items:stretch;gap:10px}
+  #landing .landing-actions .primary-action{width:100%}
+  #landing .landing-secondary{width:auto;align-self:flex-start}
+  #landing .landing-trust{display:grid;gap:10px}
+  #landing .landing-aperture{min-height:340px;padding:24px;border-radius:2px 18px 2px 18px}
+  #landing .landing-aperture:before{inset:12px;border-radius:0 12px 0 12px}
+}
+@media(prefers-reduced-motion:reduce){
+  #landing .landing-aperture,#landing .landing-aperture:hover{transform:none;transition:none}
+  #path .journey-node:hover{transform:none}
+}
