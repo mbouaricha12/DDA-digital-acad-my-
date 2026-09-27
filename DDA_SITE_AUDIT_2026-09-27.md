@@ -185,3 +185,16 @@ Chaque réponse affiche désormais un bloc structuré **Darius Insight** : un in
 M0.1 a également été réécrit autour de deux situations concrètes : absorption de liquidité vendeuse et volatilité soudaine. Le contenu reste pédagogique et ne transforme aucune observation en signal, promesse ou recommandation de position.
 
 Validation finale : **31 tests E2E**, **24 smoke checks**, contrats de curriculum et syntaxe JavaScript passés sans échec. Une interaction réelle fausse puis correcte a confirmé les deux variantes de `Darius Insight` sur mobile.
+
+
+## 15. Couverture des espaces produit rappelés
+
+Le rappel d’architecture a été recroisé avec les routes existantes :
+
+- **Pratique et analyse** : Journal & Plan est réel et local ; les briques Revue guidée hebdomadaire, Decision Replay et Analyse assistée sont maintenant explicitées comme prochaines couches du Journal ; Pratique avancée documente aussi la future mesure du processus.
+- **Marchés et outils** : Market Intelligence / BRVM et Broker Hub disposent déjà d’écrans de démonstration honnêtes, sans flux réel ni lien affilié actif.
+- **Offres et communauté** : Premium, Profil et Support sont réels dans le prototype local ; Communauté dispose désormais d’un cadrage éditorial sur les espaces futurs, la modération et le lien entre échanges et compétences.
+- **Intelligence future** : Intelligence DDA expose maintenant la frontière produit « elle pourra / elle ne fera jamais », incluant l’interdiction des signaux, prédictions, transactions et diagnostics financiers.
+- **Trading Lab / Trader DNA / Skill Graph** : restent des aperçus non actifs dans Pratique avancée, conformément au cahier des charges ; aucun score, résultat ou analyse fictive n’a été ajouté.
+
+Cette tranche remplit les espaces d’explication et de continuité produit sans transformer des capacités futures en fonctionnalités disponibles. Les seuls moteurs réellement actifs restent ceux déjà authored et testés : apprentissage, progression, Journal & Plan local, ressources, aperçu marchés et Broker Hub démonstratif.
