@@ -41,6 +41,7 @@ jobs:
           node --check dist/dda-analytics.js
           node --check dist/m1-1-lesson.js
           node --check dist/m1-2-lesson.js
+          node --check dist/m1-3-lesson.js
           node --check dist/app.js
       - name: Run authored-learning contracts
         run: |
