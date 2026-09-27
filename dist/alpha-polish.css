@@ -978,3 +978,20 @@ body.access-mode .prototype-banner{
   .lesson-main .decision-note,
   .lesson-main .chart-prompt{font-size:15px;line-height:1.65}
 }
+
+
+/* Competency check — le bloc d’objectif reste dans le registre sombre des
+   leçons ; aucune carte blanche ne doit interrompre la lecture. */
+.lesson-main .competency-check-block,
+.lesson-main .competency-check-block.targets,
+.lesson-main .competency-check-block.confirms{
+  background:
+    radial-gradient(circle at 92% 18%,rgba(23,105,209,.16),transparent 42%),
+    linear-gradient(145deg,#0a1424 0%,#07111f 100%);
+  border:1px solid rgba(255,255,255,.08);
+  color:#94a3b8;
+  box-shadow:inset 3px 0 #d4af37,0 10px 25px rgba(0,0,0,.16);
+}
+.lesson-main .competency-check-block strong{color:#f8fafc}
+.lesson-main .competency-check-block .icon{color:#d4af37}
+.lesson-main .competency-check-block p{color:#94a3b8}

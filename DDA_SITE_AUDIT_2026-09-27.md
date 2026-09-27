@@ -219,3 +219,10 @@ Une couche de contraste ciblée a été ajoutée à toutes les vues de leçon au
 L’opacité héritée de l’état verrouillé a été neutralisée : le message « Termine d’abord l’exercice » reste lisible sur le fond Deep Navy, sans texte gris proche du noir. Les options d’exercice et de quiz, le feedback, les notes, les captions et les résultats ont été vérifiés sur mobile après la fin de transition. Couleurs calculées observées : descriptions `rgb(203,213,225)`, titres et choix `rgb(248,250,252)`, état verrouillé à opacité `1`.
 
 Validation : capture mobile dédiée, **31 tests E2E**, **24 smoke checks**, contrats Node et syntaxe JavaScript passés.
+
+
+## 19. Correction du bloc « Compétence »
+
+Les blocs `competency-check-block` des leçons utilisaient encore une surface claire (`#EAF3F8`) héritée du thème initial. Ils sont maintenant uniformisés sur une surface Deep Navy texturée, avec bordure `rgba(255,255,255,.08)`, liseré doré discret, texte d’introduction `#94a3b8` et compétence nommée en `#f8fafc`. La correction couvre les modes `targets` et `confirms` et toutes les leçons authored M0/M1.
+
+Contrôle mobile : six blocs de compétence inspectés, tous avec texte secondaire `rgb(148,163,184)`, libellé principal `rgb(248,250,252)` et bordure claire subtile. Validation : **31 tests E2E**, **24 smoke checks** et contrats Node passés.
