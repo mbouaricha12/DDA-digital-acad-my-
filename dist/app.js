@@ -1420,6 +1420,7 @@ function showView(id, recordEvent = true) {
   // mobile nav, prototype banner). Scoped purely via this body class, same
   // pattern as lesson-focus above — no new routing concept.
   document.body.classList.toggle('public-shell', id === 'landing');
+  document.body.classList.toggle('landing-has-scrolled', id === 'landing' && window.scrollY > 520);
   contextTitle.textContent = titles[id] || 'DDA';
   history.replaceState(null, '', `#${id}`);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1994,3 +1995,10 @@ if (titles[initialView]) {
   }, { threshold: 0.25, rootMargin: '0px 0px -12% 0px' });
   nodes.forEach(node => observer.observe(node));
 })();
+
+// The mobile CTA is useful after the hero, not on top of the first decision.
+// Keep the threshold local and reversible; desktop never receives this class.
+window.addEventListener('scroll', () => {
+  if (!document.body.classList.contains('public-shell')) return;
+  document.body.classList.toggle('landing-has-scrolled', window.scrollY > 520);
+}, { passive: true });
