@@ -165,3 +165,12 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 **Mobile et livraison :** cibles de commande Terminal agrandies à au moins 44×44 px jusqu’à 700 px, sans débordement à 360/390/1440 px ; version de cache service worker passée à `dda-shell-v14` pour ne pas servir l’ancien script lors d’un reload.
 
 **Vérifications :** `tests/run.js` — 34 scénarios navigateur, 0 échec ; `tests/smoke_app_boot.js` — scénario complet + contrat de sanitisation du schéma ; tous les contrats `tests/test_*.js`, syntaxes JavaScript et cohérence de la carte des routes exécutés avant PR et gate GitHub.
+
+
+## Tranche — Privacy des paramètres UTM et referrer (27 septembre 2026)
+
+**Objectif :** empêcher qu’une adresse e-mail ou un numéro personnel placé dans `utm_source`, `utm_medium` ou `utm_campaign` soit persisté localement ou transmis à l’analytics. Les valeurs UTM conservées restent bornées ; les longues suites de chiffres sont écartées de façon prudente, tout en préservant les dates ISO dans les noms de campagne. Le referrer est ramené à l’origine HTTP(S) seulement, sans identifiants, chemin, query ni fragment.
+
+**Défense en profondeur :** la normalisation de l’acquisition applique la règle avant sauvegarde schema-v4 ; l’adaptateur analytics la réapplique aux propriétés avant debug queue/transport externe. Les tests navigateur injectent un e-mail et un téléphone dans des champs UTM, conservent une valeur sûre, vérifient l’origine du referrer et simulent PostHog afin d’inspecter le payload réellement transmis même lorsque l’appelant fournit des données brutes.
+
+**Validation locale :** syntaxe JavaScript des fichiers modifiés et `tests/run.js` — 37 scénarios Playwright, 0 échec. Les checks complets, PR et déploiement sont exécutés avant clôture de la tranche.

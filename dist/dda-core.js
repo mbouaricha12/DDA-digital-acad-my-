@@ -632,14 +632,44 @@
     return { entries, plan: sanitizeJournalPlan(raw?.plan) };
   }
 
+  function containsPersonalAttribution(value) {
+    const text = String(value ?? '').trim();
+    if (!text) return false;
+    if (/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(text)) return true;
+    // Ignore a conventional ISO date token so campaign names such as
+    // "launch-2026-09-27" remain usable; other long digit sequences are
+    // conservatively treated as possible phone numbers even when embedded.
+    const withoutDates = text.replace(/\b(?:19|20)\d{2}[-/.](?:0?[1-9]|1[0-2])[-/.](?:0?[1-9]|[12]\d|3[01])\b/g, '');
+    return (withoutDates.match(/\d/g) || []).length >= 8;
+  }
+
+  function sanitizeAttributionValue(value) {
+    if (value == null) return null;
+    const text = sanitizeText(value, 120);
+    return text && !containsPersonalAttribution(text) ? text : null;
+  }
+
+  function sanitizeReferrer(value) {
+    if (!value) return null;
+    try {
+      const url = new URL(String(value));
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+      // Keep only the site origin; referrer paths, query strings, fragments and
+      // URL credentials can contain personal or session-specific information.
+      return url.origin.slice(0, 120);
+    } catch {
+      return null;
+    }
+  }
+
   function sanitizeAcquisition(raw) {
     const acquisition = emptyAcquisition();
     if (!raw || typeof raw !== 'object') return acquisition;
     acquisition.visitorId = raw.visitorId ? sanitizeText(raw.visitorId, 60) : null;
-    acquisition.source = raw.source ? sanitizeText(raw.source, 120) : null;
-    acquisition.medium = raw.medium ? sanitizeText(raw.medium, 120) : null;
-    acquisition.campaign = raw.campaign ? sanitizeText(raw.campaign, 120) : null;
-    acquisition.referrer = raw.referrer ? sanitizeText(raw.referrer, 300) : null;
+    acquisition.source = sanitizeAttributionValue(raw.source);
+    acquisition.medium = sanitizeAttributionValue(raw.medium);
+    acquisition.campaign = sanitizeAttributionValue(raw.campaign);
+    acquisition.referrer = sanitizeReferrer(raw.referrer);
     acquisition.landingPath = raw.landingPath ? sanitizeText(raw.landingPath, 300) : null;
     acquisition.firstSeenAt = raw.firstSeenAt ? sanitizeText(raw.firstSeenAt, 40) : null;
     return acquisition;
