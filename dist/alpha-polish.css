@@ -1301,3 +1301,48 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
   #landing .landing-final-cta{padding-bottom:160px}
   #landing .public-footer{padding-bottom:28px}
 }
+
+
+/* MOBILE GRID REPAIR — one gutter for every primary container. */
+@media(max-width:639px){
+  .view:not(#landing){
+    box-sizing:border-box;
+    width:100%;
+    max-width:none;
+    padding-left:16px;
+    padding-right:16px;
+  }
+  .view:not(#landing) .panel,
+  .view:not(#landing) .mastery-row,
+  .view:not(#landing) .journal-panel,
+  .view:not(#landing) .journal-empty,
+  .view:not(#landing) .market-zone,
+  .view:not(#landing) .index-grid,
+  .view:not(#landing) .library-list,
+  .view:not(#landing) .membership-panel,
+  .view:not(#landing) .profile-panel,
+  .view:not(#landing) .support-layout,
+  .view:not(#landing) .community-featured-card{
+    margin-left:0;
+    margin-right:0;
+    box-sizing:border-box;
+  }
+  #landing .landing-editorial-shell,
+  #landing .landing-philosophy-band,
+  #landing .landing-experience,
+  #landing .landing-product,
+  #landing .landing-proof,
+  #landing .landing-free,
+  #landing .landing-ecosystem,
+  #landing .landing-domains,
+  #landing .landing-future,
+  #landing .landing-differentiation,
+  #landing .landing-final-cta,
+  #landing .public-footer{
+    box-sizing:border-box;
+    padding-left:16px;
+    padding-right:16px;
+  }
+  #landing{padding-bottom:calc(240px + var(--safe-b));scroll-padding-bottom:240px}
+  #landing .landing-final-cta{padding-bottom:180px}
+}

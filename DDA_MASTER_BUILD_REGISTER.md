@@ -228,3 +228,12 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 **Bottom padding :** à 390 px, le conteneur `#landing` réserve désormais `220px + safe-area` sous le footer et `scroll-padding-bottom:220px`; la section finale réserve `160px` supplémentaires. La mesure navigateur confirme une marge de **146 px** entre la fin du footer et le CTA fixe, avec zéro overflow horizontal. La tablette reste sans CTA sticky.
 
 **Validation :** `tests/test_landing_mobile_finish_contract.js`, captures mobile/tablette, style des encarts, scroll jusqu’au bas réel et vérification du footer au-dessus du CTA.
+
+
+## Tranche — grille mobile symétrique et dégagement CTA (27 septembre 2026)
+
+**Statut : CONSTRUIT.** Les vues mobiles authentifiées partagent désormais un gutter rigoureusement symétrique de `16px` ; les conteneurs principaux et cartes ne portent plus de décalage latéral résiduel. Les sections principales de la landing publique utilisent la même grille mobile.
+
+**Bottom padding :** le shell `#landing` réserve désormais `240px + safe-area` et `scroll-padding-bottom:240px`, avec `180px` de respiration additionnelle dans la section finale. Mesure réelle à 390px : footer terminé à `603.8px`, CTA sticky commençant à `770px`, soit `166.2px` de dégagement ; overflow horizontal nul.
+
+**Validation :** `tests/test_mobile_gutters_contract.js`, mesures Playwright sur Progression/Journal/Marchés, landing publique 390px et capture du footer final.
