@@ -1,0 +1,50 @@
+name: DDA Product Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'dist/**'
+      - 'tests/**'
+      - '.github/workflows/product-gate.yml'
+  workflow_dispatch:
+
+jobs:
+  product-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Syntax checks
+        run: |
+          for file in dist/*.js; do
+            node --check "$file"
+          done
+
+      - name: Run all committed contract checks
+        run: |
+          for test in tests/test_*.js; do
+            node "$test"
+          done
+          node tests/verify_route_register_consistency.js
+
+      - name: Install jsdom for full-app smoke test
+        run: npm install --global jsdom@26.1.0
+
+      - name: Run full-app smoke test
+        run: NODE_PATH="$(npm root -g)" node tests/smoke_app_boot.js
+
+      - name: Install Playwright Chromium
+        run: |
+          npm install --global playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Run real browser regression harness
+        run: node tests/run.js
