@@ -77,8 +77,8 @@
     const index = modules.findIndex(m => m.id === moduleId);
     if (index === -1) return null;
     const module = modules[index];
-    if (module.premiumOnly && state?.membership?.plan !== 'premium') return MODULE_STATUS.LOCKED;
     if (!module.lessons || module.lessons.length === 0) return MODULE_STATUS.COMING_SOON;
+    if (module.premiumOnly && state?.membership?.plan !== 'premium') return MODULE_STATUS.COMING_SOON;
 
     let prevAuthored = null;
     for (let i = index - 1; i >= 0; i--) {
