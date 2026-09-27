@@ -895,3 +895,86 @@ body.access-mode .prototype-banner{
 .journal-future-grid strong{display:block;margin-top:12px;color:#f8fafc;line-height:1.35}
 .journal-future-grid p{margin:8px 0 0;color:#94a3b8;font-size:13px;line-height:1.55}
 @media(max-width:720px){.journal-future-grid{grid-template-columns:1fr}.journal-future-layers{margin-top:28px;padding-top:22px}}
+
+
+/* Contrast pass — aucune information pédagogique ne doit disparaître dans le
+   Deep Navy, y compris les états verrouillés et les textes d’aide. */
+#lesson,
+#lesson-m02,
+#lesson-m03,
+#lesson-m11,
+#lesson-m12,
+#lesson-m13{
+  color:#f8fafc;
+}
+#lesson .lesson-main > p,
+#lesson-m02 .lesson-main > p,
+#lesson-m03 .lesson-main > p,
+#lesson-m11 .lesson-main > p,
+#lesson-m12 .lesson-main > p,
+#lesson-m13 .lesson-main > p,
+.lesson-main .lesson-lead,
+.lesson-main .lesson-copy p,
+.lesson-main .lesson-beat p,
+.lesson-main .chart-prompt,
+.lesson-main .chart-caption,
+.lesson-main .decision-note,
+.lesson-main .mini-simulation-stage,
+.lesson-main .graphical-exercise-canvas,
+.lesson-outline,
+.lesson-outline ol,
+.lesson-outline li{
+  color:#cbd5e1;
+}
+.lesson-main h1,
+.lesson-main h2,
+.lesson-main h3,
+.lesson-main strong,
+.lesson-main .choice-text,
+.lesson-main .decision-option,
+.lesson-main .answer-choice{
+  color:#f8fafc;
+}
+.lesson-loop li,
+.lesson-loop li.done,
+.lesson-loop li.now,
+.lesson-main .time{
+  color:#cbd5e1;
+}
+.lesson-main .learning-check.locked-check,
+.lesson-main .locked-check{
+  opacity:1;
+}
+.lesson-main .locked-check:after{
+  color:#cbd5e1;
+  background:rgba(6,13,23,.94);
+  text-shadow:0 1px 8px rgba(0,0,0,.45);
+}
+.lesson-main .locked-check h2,
+.lesson-main .locked-check p,
+.lesson-main .locked-check .eyebrow{
+  color:#94a3b8;
+}
+.lesson-main .locked-check:after,
+.lesson-main .lesson-gate-note,
+.lesson-main [aria-disabled="true"]{
+  color:#cbd5e1;
+}
+.lesson-main .result-card,
+.lesson-main .result-card > div > p,
+.lesson-main .result-feedback,
+.lesson-main .result-stats dt{
+  color:#cbd5e1;
+}
+.lesson-main .result-card h2,
+.lesson-main .result-card h3,
+.lesson-main .result-stats dd{
+  color:#f8fafc;
+}
+@media(max-width:639px){
+  .lesson-main .lesson-lead,
+  .lesson-main .lesson-copy p,
+  .lesson-main .lesson-beat p,
+  .lesson-main .decision-note,
+  .lesson-main .chart-prompt{font-size:15px;line-height:1.65}
+}

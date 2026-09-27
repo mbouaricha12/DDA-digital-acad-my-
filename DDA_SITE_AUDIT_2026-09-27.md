@@ -210,3 +210,12 @@ Le glossaire Free couvre maintenant les notions réellement utilisées dans le p
 Le lecteur de ressources respecte maintenant le mode « économie de données » : son défilement utilise un comportement instantané lorsque les mouvements sont désactivés, au lieu de forcer une animation fluide. Le lecteur est également exposé comme une boîte de dialogue accessible (`role=dialog`, `aria-modal`, nom et description reliés), avec focus sur le bouton de fermeture, fermeture par Échap et restitution du focus sur la ressource déclenchante.
 
 Vérification réelle sur mobile : glossaire ouvert en low-data, défilement `auto`, contenu Liquidité/Volatilité/Spread/Invalidation visible, fermeture clavier et focus restauré. Non-régression : **31 tests E2E**, **24 smoke checks** et contrats Node passés.
+
+
+## 18. Passe urgente de contraste — leçons et évaluations
+
+Une couche de contraste ciblée a été ajoutée à toutes les vues de leçon authored (`lesson`, `lesson-m02`, `lesson-m03`, `lesson-m11`, `lesson-m12`, `lesson-m13`). Les titres et choix principaux utilisent désormais `#f8fafc`, les descriptions, consignes, plans, outlines et textes secondaires `#cbd5e1`, avec `#94a3b8` réservé aux états secondaires et verrouillés.
+
+L’opacité héritée de l’état verrouillé a été neutralisée : le message « Termine d’abord l’exercice » reste lisible sur le fond Deep Navy, sans texte gris proche du noir. Les options d’exercice et de quiz, le feedback, les notes, les captions et les résultats ont été vérifiés sur mobile après la fin de transition. Couleurs calculées observées : descriptions `rgb(203,213,225)`, titres et choix `rgb(248,250,252)`, état verrouillé à opacité `1`.
+
+Validation : capture mobile dédiée, **31 tests E2E**, **24 smoke checks**, contrats Node et syntaxe JavaScript passés.
