@@ -1240,3 +1240,21 @@ body.low-data #landing .landing-3d-scene{display:none}
   #landing .landing-3d-orbit,#landing .landing-3d-core,#landing .landing-3d-node{animation:none!important}
   #landing .landing-3d-orbit{transform:rotateX(64deg)}
 }
+
+
+/* DDA PROOF HALO — subtle 3D depth tied only to real mastery evidence. */
+#progress .mastery-row-focused .mastery-level{position:relative;isolation:isolate;transform-style:preserve-3d}
+#progress .mastery-row-focused[data-proof-state="practiced"] .mastery-level::before,
+#progress .mastery-row-focused[data-proof-state="confirmed"] .mastery-level::before{content:"";position:absolute;z-index:-1;inset:-10px -16px;border:1px solid rgba(201,154,69,.24);border-radius:50%;transform:rotateX(62deg) rotateY(-16deg);box-shadow:0 0 18px rgba(201,154,69,.08);pointer-events:none;animation:dda-proof-orbit 8s linear infinite}
+#progress .mastery-row-focused[data-proof-state="confirmed"] .mastery-level::before{border-color:rgba(142,224,206,.34);box-shadow:0 0 22px rgba(142,224,206,.1);animation-duration:6s}
+#progress .mastery-row-focused[data-proof-state="confirmed"] .mastery-level::after{content:"";position:absolute;z-index:-1;inset:-5px -8px;border:1px dashed rgba(142,224,206,.2);border-radius:50%;transform:rotateY(66deg);pointer-events:none;animation:dda-proof-breathe 3.8s ease-in-out infinite}
+@keyframes dda-proof-orbit{from{transform:rotateX(62deg) rotateY(-16deg) rotateZ(0deg)}to{transform:rotateX(62deg) rotateY(-16deg) rotateZ(360deg)}}
+@keyframes dda-proof-breathe{0%,100%{opacity:.45;transform:rotateY(66deg) scale(.96)}50%{opacity:1;transform:rotateY(66deg) scale(1.04)}}
+@media(max-width:639px){
+  #progress .mastery-row-focused[data-proof-state="practiced"] .mastery-level::before,
+  #progress .mastery-row-focused[data-proof-state="confirmed"] .mastery-level::before{inset:-8px -10px}
+}
+body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-level::after{display:none}
+@media(prefers-reduced-motion:reduce){
+  #progress .mastery-row-focused .mastery-level::before,#progress .mastery-row-focused .mastery-level::after{animation:none!important}
+}

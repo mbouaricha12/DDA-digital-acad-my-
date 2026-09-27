@@ -8,6 +8,7 @@ const path = require('path');
 const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'dist', 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'dist', 'alpha-polish.css'), 'utf8');
+const app = fs.readFileSync(path.join(root, 'dist', 'app.js'), 'utf8');
 
 assert.match(html, /data-3d-scene="dda-orbit"/, 'landing must mount the DDA orbit scene');
 assert.match(html, /class="landing-3d-core"/, '3D scene must have an identifiable core');
@@ -17,5 +18,8 @@ assert.match(css, /@keyframes dda-orbit-spin/, 'scene must define a restrained o
 assert.match(css, /body\.low-data #landing \.landing-3d-scene\{display:none\}/, 'low-data must disable the decorative scene');
 assert.match(css, /@media\(prefers-reduced-motion:reduce\)/, 'reduced motion override must exist');
 assert.match(css, /landing-3d-scene\{position:absolute/, 'scene must remain isolated from layout flow');
+assert.match(app, /data-mastery-level="\$\{level\}"/, 'mastery row must expose its real evidence level to the visual layer');
+assert.match(css, /data-proof-state="confirmed"/, 'confirmed proof must have a distinct 3D state');
+assert.match(css, /dda-proof-orbit/, 'mastery proof halo must use a restrained 3D orbit');
 
 console.log('RESULT: Landing 3D signature contract passed');
