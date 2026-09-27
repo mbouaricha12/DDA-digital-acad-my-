@@ -2041,6 +2041,16 @@ if (titles[initialView]) {
     '.landing-main-copy',
     '.landing-aperture',
     '.landing-method article',
+    '.landing-experience',
+    '.experience-flow li',
+    '.landing-product > *',
+    '.product-window',
+    '.product-index article',
+    '.landing-proof > *',
+    '.proof-composition > *',
+    '.proof-principles li',
+    '.landing-ecosystem > *',
+    '.domain-rail article',
     '.landing-institution > div',
     '.landing-demo-grid article',
     '.landing-problem-list li',
@@ -2156,6 +2166,35 @@ function syncLandingMobileCta() {
 }
 window.addEventListener('scroll', syncLandingMobileCta, { passive: true });
 window.addEventListener('resize', syncLandingMobileCta, { passive: true });
+
+/* Premium visual finish — narrative motion and practice preview only. */
+(function initLandingNarrativePreview() {
+  const flow = [...document.querySelectorAll('[data-experience-step]')];
+  const status = document.querySelector('[data-experience-status]');
+  const labels = ['Discover — commencer par une question claire.', 'Learn — donner un cadre à ce que tu observes.', 'Practice — essayer avec le droit au retry.', 'Analyze — comprendre ce qui a changé.', 'Improve — choisir la prochaine action utile.'];
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  let active = 0;
+  const render = (index) => {
+    active = index % flow.length;
+    flow.forEach((node, i) => node.classList.toggle('is-active', i === active));
+    if (status) status.textContent = labels[active];
+  };
+  if (flow.length && !reduced) {
+    window.setInterval(() => {
+      if (document.body.classList.contains('public-shell')) render(active + 1);
+    }, 2600);
+  }
+  document.querySelectorAll('[data-proof-choice]').forEach(button => button.addEventListener('click', () => {
+    const right = button.dataset.proofChoice === 'right';
+    const box = button.closest('[data-proof-demo]');
+    box?.classList.toggle('is-confirmed', right);
+    box?.classList.toggle('is-review', !right);
+    const state = box?.querySelector('[data-proof-state]');
+    const feedback = box?.querySelector('[data-proof-feedback]');
+    if (state) state.textContent = right ? 'Preuve comprise' : 'À revoir';
+    if (feedback) feedback.textContent = right ? 'Exact. Une observation expliquée devient une preuve de compréhension.' : 'À revoir. DDA t’indique ce qui manque, puis te permet de recommencer.';
+  }));
+})();
 
 // Forms are disabled in static HTML. Only expose local-submit controls after
 // every application handler above has been installed successfully.
