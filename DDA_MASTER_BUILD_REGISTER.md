@@ -199,3 +199,14 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 **Validation locale :** 46 scénarios Playwright passés ; smoke boot jsdom (25 checks), contrats Node et cohérence du registre de routes passés ; syntaxe JS et `git diff --check` propres. Vérifications visuelles en Chromium à 360, 390 et 414 px, sans débordement horizontal ; essai app apprenant à 390 × 844. La carte « Progression réelle » reste intégralement lisible lorsque le CTA est dans sa zone.
 
 **Livraison :** correctif préparé sur `fix/mobile-landing-layout` depuis `main` après le merge de la tranche PII. Pas encore de PR/merge ou de déploiement Pages ; attendre l’accord explicite avant publication publique.
+
+
+## Tranche — signature 3D légère de la landing (27 septembre 2026)
+
+**Statut : CONSTRUIT — finition visuelle progressive.** Une scène CSS 3D `dda-orbit` a été ajoutée dans l’aperture du hero de `#landing` pour matérialiser la boucle **Learn → Practice → Prove**. Elle n’utilise aucune librairie externe, aucune donnée de marché et aucun WebGL obligatoire : orbites, noyau DDA et trois repères sont rendus par CSS avec `transform-style: preserve-3d`.
+
+**Garde-fous :** scène décorative marquée `aria-hidden`, isolée du flux de mise en page, fallback statique naturel si les transformations 3D ne sont pas disponibles, masquage complet en `low-data`, animations supprimées en `prefers-reduced-motion`, adaptations 390 px et 1440 px, zéro débordement horizontal confirmé. La scène ne modifie ni le routing, ni le Learning Engine, ni les entitlements, ni la progression.
+
+**Validation :** nouveau contrat `tests/test_landing_3d_contract.js`, syntaxe runtime, `git diff --check`, smoke boot et vérification navigateur ciblée mobile/desktop/reduced-motion/low-data. La suite navigateur complète a produit ses 25 smoke checks et est restée silencieuse au lancement de sa phase finale ; aucune erreur n’a été observée avant son arrêt propre.
+
+**Limite :** cette tranche est une signature CSS 3D légère, pas une scène WebGL avancée. Toute extension 3D devra mesurer poids, CPU/GPU, mémoire, batterie et fallback avant fusion.
