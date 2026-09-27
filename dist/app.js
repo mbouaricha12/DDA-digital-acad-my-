@@ -1836,7 +1836,15 @@ function bindQuestion(lessonId, question, options) {
     if (feedback) {
       // A choice's own feedback (correct or not) wins when authored; otherwise
       // fall back to the block's successText / a generic retry prompt.
-      feedback.textContent = button.dataset.feedback || (correct ? successText : 'Pas encore. Relis le principe, puis essaie à nouveau.');
+      const message = button.dataset.feedback || (correct ? successText : 'Pas encore. Reviens aux faits observables, puis essaie à nouveau.');
+      feedback.replaceChildren();
+      const kicker = document.createElement('strong');
+      kicker.className = 'feedback-kicker';
+      kicker.textContent = correct ? 'Darius Insight — lecture confirmée' : 'Darius Insight — point à revoir';
+      const copy = document.createElement('span');
+      copy.className = 'feedback-copy';
+      copy.textContent = message || 'Relis le raisonnement présenté dans cette étape avant de répondre à nouveau.';
+      feedback.append(kicker, copy);
       feedback.className = `feedback ${correct ? 'success' : 'error'}`;
     }
     if (opts.revealId) {

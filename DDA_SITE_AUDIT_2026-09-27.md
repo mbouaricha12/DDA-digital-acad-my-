@@ -174,3 +174,14 @@ Le bandeau d’information est également sombre lorsque Access est actif. L’�
 Les trois champs d’onboarding (`Niveau`, `Objectif pédagogique`, `Temps disponible`) utilisent désormais un composant visible DDA au lieu du menu natif du navigateur. Les éléments `select` restent présents en couche sémantique masquée : ils demeurent la source de vérité du formulaire, conservent la validation HTML et restent compatibles avec les tests et la soumission existante.
 
 Le composant ajoute des options sous forme de surfaces sombres respirantes, un état sélectionné bleu électrique avec liseré doré, la navigation clavier, `Échap`, la fermeture au clic extérieur et une Bottom Sheet mobile positionnée au-dessus de la navigation fixe. Vérification réelle sur mobile : panneau `fixed`, de `y=456` à `y=764`, navigation à `y=776`, donc aucun recouvrement.
+
+
+## 14. Élévation pédagogique des questions-réponses
+
+Le moteur commun des leçons a été renforcé sans modifier les contrats de progression. Les choix de réponse sont maintenant rendus comme des cartes numérotées, avec une hiérarchie visuelle, un état focus/tap, une illumination bleue et un liseré doré. Les réponses correctes et incorrectes gardent leurs états distincts sans réduire le retour à une couleur seule.
+
+Chaque réponse affiche désormais un bloc structuré **Darius Insight** : un intitulé de lecture confirmée ou de point à revoir, suivi d’une explication pédagogique authored. Les feedbacks réutilisent les faits de la leçon et explicitent le raisonnement : liquidité, exécution, déséquilibre, volatilité et séparation entre observation, hypothèse, plan et décision.
+
+M0.1 a également été réécrit autour de deux situations concrètes : absorption de liquidité vendeuse et volatilité soudaine. Le contenu reste pédagogique et ne transforme aucune observation en signal, promesse ou recommandation de position.
+
+Validation finale : **31 tests E2E**, **24 smoke checks**, contrats de curriculum et syntaxe JavaScript passés sans échec. Une interaction réelle fausse puis correcte a confirmé les deux variantes de `Darius Insight` sur mobile.

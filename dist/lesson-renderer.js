@@ -28,9 +28,9 @@
   };
 
   function renderChoices(question) {
-    return question.choices.map(choice => {
+    return question.choices.map((choice, index) => {
       const feedbackAttr = choice.feedback ? ` data-feedback="${choice.feedback}"` : '';
-      return `<button data-correct="${choice.correct === true}"${feedbackAttr}>${choice.text}</button>`;
+      return `<button type="button" class="answer-choice" data-correct="${choice.correct === true}"${feedbackAttr}><span class="choice-index">${String(index + 1).padStart(2, '0')}</span><span class="choice-text">${choice.text}</span></button>`;
     }).join('');
   }
 
@@ -160,7 +160,7 @@
         <p class="eyebrow gold">${block.eyebrow || 'Choix de décision'}</p>
         <h2>${block.heading}</h2>
         ${block.prompt ? `<p>${block.prompt}</p>` : ''}
-        <div class="decision-choice-options"${graded ? ` data-question="${block.id}"` : ''}>${options.map(opt => `<button type="button" class="decision-option" data-correct="${opt.correct === true}"${opt.feedback ? ` data-feedback="${opt.feedback}"` : ''}>${opt.text}</button>`).join('')}</div>
+        <div class="decision-choice-options"${graded ? ` data-question="${block.id}"` : ''}>${options.map((opt, index) => `<button type="button" class="decision-option" data-correct="${opt.correct === true}"${opt.feedback ? ` data-feedback="${opt.feedback}"` : ''}><span class="choice-index">${String(index + 1).padStart(2, '0')}</span><span class="choice-text">${opt.text}</span></button>`).join('')}</div>
         ${graded ? `<p class="feedback" id="${block.id}-feedback" aria-live="polite"></p>` : ''}
         ${block.note ? `<p class="decision-note">${block.note}</p>` : ''}
       </section>`;
