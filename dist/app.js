@@ -125,6 +125,126 @@ const views = document.querySelectorAll('.view');
 const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
+
+// Access onboarding selects — native controls remain in the form as the
+// source of truth, while the visible interaction uses DDA's own Learning OS
+// surface. This preserves validation, keyboard semantics and existing submit
+// handlers without exposing a browser-specific radio/menu treatment.
+function initDdaSelect(select) {
+  if (!select || select.dataset.ddaReady) return;
+  select.dataset.ddaReady = 'true';
+  select.classList.add('dda-native-select');
+  const id = `${select.id}-dda-menu`;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'dda-select';
+  wrapper.dataset.selectFor = select.id;
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'dda-select-trigger';
+  trigger.setAttribute('aria-haspopup', 'listbox');
+  trigger.setAttribute('aria-controls', id);
+  trigger.setAttribute('aria-expanded', 'false');
+  const label = document.createElement('span');
+  const chevron = document.createElement('span');
+  chevron.className = 'dda-select-chevron';
+  chevron.setAttribute('aria-hidden', 'true');
+  chevron.textContent = '⌄';
+  trigger.append(label, chevron);
+  const menu = document.createElement('div');
+  menu.id = id;
+  menu.className = 'dda-select-menu';
+  menu.setAttribute('role', 'listbox');
+  menu.setAttribute('aria-label', select.previousElementSibling?.textContent || 'Choisir une option');
+  [...select.options].forEach(option => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'dda-select-option';
+    item.dataset.value = option.value;
+    item.setAttribute('role', 'option');
+    item.setAttribute('aria-selected', 'false');
+    item.textContent = option.textContent;
+    item.addEventListener('click', () => {
+      select.value = option.value;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      closeDdaSelect(wrapper);
+      trigger.focus();
+    });
+    menu.appendChild(item);
+  });
+  select.parentNode.insertBefore(wrapper, select);
+  wrapper.append(select, trigger, menu);
+
+  const sync = () => {
+    const current = select.options[select.selectedIndex];
+    label.textContent = current?.value ? current.textContent : 'Choisir';
+    label.classList.toggle('has-value', Boolean(current?.value));
+    menu.querySelectorAll('.dda-select-option').forEach(item => {
+      const selected = item.dataset.value === select.value;
+      item.setAttribute('aria-selected', String(selected));
+      item.classList.toggle('is-selected', selected);
+    });
+    trigger.setAttribute('aria-invalid', select.getAttribute('aria-invalid') || 'false');
+  };
+  const open = () => {
+    document.querySelectorAll('.dda-select.is-open').forEach(other => { if (other !== wrapper) closeDdaSelect(other); });
+    wrapper.classList.add('is-open');
+    trigger.setAttribute('aria-expanded', 'true');
+  };
+  const focusOptionWhenVisible = option => {
+    if (!option) return;
+    const focusAfterReveal = () => {
+      if (!wrapper.classList.contains('is-open')) return;
+      if (getComputedStyle(menu).visibility === 'visible' && Number(getComputedStyle(menu).opacity) >= 0.99) option.focus();
+      else requestAnimationFrame(focusAfterReveal);
+    };
+    requestAnimationFrame(focusAfterReveal);
+  };
+  trigger.addEventListener('click', () => wrapper.classList.contains('is-open') ? closeDdaSelect(wrapper) : open());
+  trigger.addEventListener('keydown', event => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      const options = [...menu.querySelectorAll('.dda-select-option')];
+      const wasOpen = wrapper.classList.contains('is-open');
+      if (!wasOpen) open();
+      const selected = options.indexOf(menu.querySelector('.is-selected'));
+      const focused = options.indexOf(document.activeElement);
+      const target = options[Math.min(focused >= 0 ? focused + 1 : selected + 1, options.length - 1)];
+      if (wasOpen) target?.focus(); else focusOptionWhenVisible(target);
+      return;
+    }
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      if (wrapper.classList.contains('is-open')) closeDdaSelect(wrapper);
+      else {
+        open();
+        focusOptionWhenVisible(menu.querySelector('.is-selected') || menu.querySelector('.dda-select-option'));
+      }
+    }
+  });
+  menu.addEventListener('keydown', event => {
+    const options = [...menu.querySelectorAll('.dda-select-option')];
+    const index = options.indexOf(document.activeElement);
+    if (event.key === 'ArrowDown') { event.preventDefault(); options[(index + 1) % options.length]?.focus(); }
+    if (event.key === 'ArrowUp') { event.preventDefault(); options[(index - 1 + options.length) % options.length]?.focus(); }
+    if (event.key === 'Escape') { event.preventDefault(); closeDdaSelect(wrapper); trigger.focus(); }
+  });
+  select.addEventListener('change', sync);
+  new MutationObserver(sync).observe(select, { attributes: true, attributeFilter: ['aria-invalid'] });
+  sync();
+}
+function closeDdaSelect(wrapper) {
+  wrapper.classList.remove('is-open');
+  const trigger = wrapper.querySelector('.dda-select-trigger');
+  trigger?.setAttribute('aria-expanded', 'false');
+}
+['level', 'goal', 'time'].forEach(id => initDdaSelect(document.getElementById(id)));
+document.addEventListener('click', event => {
+  if (!event.target.closest('.dda-select')) document.querySelectorAll('.dda-select.is-open').forEach(closeDdaSelect);
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') document.querySelectorAll('.dda-select.is-open').forEach(closeDdaSelect);
+});
+
 const titles = {
   landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours',
   progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub',
@@ -1420,6 +1540,8 @@ function showView(id, recordEvent = true) {
   // mobile nav, prototype banner). Scoped purely via this body class, same
   // pattern as lesson-focus above — no new routing concept.
   document.body.classList.toggle('public-shell', id === 'landing');
+  document.body.classList.toggle('access-mode', id === 'access');
+  document.body.classList.toggle('landing-has-scrolled', id === 'landing' && window.scrollY > 520);
   contextTitle.textContent = titles[id] || 'DDA';
   history.replaceState(null, '', `#${id}`);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1430,6 +1552,11 @@ function showView(id, recordEvent = true) {
   }
   if (recordEvent) trackEvent('view_opened', { view: id });
   if (id === 'landing') {
+    trackEvent('landing_viewed', {
+      source: prototypeState.acquisition?.source,
+      medium: prototypeState.acquisition?.medium,
+      campaign: prototypeState.acquisition?.campaign
+    });
     trackEvent('landing_visit', {
       source: prototypeState.acquisition?.source,
       medium: prototypeState.acquisition?.medium,
@@ -1450,14 +1577,17 @@ buttons.forEach(button => button.addEventListener('click', () => {
   // data-analytics is recorded under its own real event name before the
   // normal navigation happens — never a substitute for view_opened, which
   // still fires for every navigation regardless of this attribute.
-  if (button.dataset.analytics) trackEvent(button.dataset.analytics, { view: button.dataset.view });
+  if (button.dataset.analytics) trackEvent(button.dataset.analytics, {
+    view: button.dataset.view,
+    position: button.dataset.funnelPosition
+  });
   showView(button.dataset.view);
   if (button.dataset.terminalHandoff === 'true') openJournalComposer(null, button, terminalJournalDraft());
 }));
 
 const resources = {
   checklist: { title: 'Checklist avant une décision', label: 'Guide · DDA Free', body: '<ol><li>Ai-je compris le contexte du marché ?</li><li>Mon scénario est-il écrit clairement ?</li><li>Où mon idée devient-elle invalide ?</li><li>Quel risque suis-je prêt à accepter ?</li><li>Est-ce une décision prévue ou impulsive ?</li><li>Puis-je justifier mon choix sans parler de gain ?</li></ol>' },
-  glossary: { title: 'Les mots essentiels du marché', label: 'Glossaire · DDA Free', body: '<dl><dt>Actif</dt><dd>Ce qui est échangé sur un marché.</dd><dt>Acheteur</dt><dd>Participant qui cherche à acquérir un actif.</dd><dt>Vendeur</dt><dd>Participant qui accepte de céder un actif.</dd><dt>Risque</dt><dd>Part d’incertitude et de perte potentielle à maîtriser avant d’agir.</dd></dl>' }
+  glossary: { title: 'Les mots essentiels du marché', label: 'Glossaire · DDA Free', body: '<dl><dt>Actif</dt><dd>Ce qui est échangé sur un marché.</dd><dt>Acheteur</dt><dd>Participant qui cherche à acquérir un actif.</dd><dt>Vendeur</dt><dd>Participant qui accepte de céder un actif.</dd><dt>Liquidité</dt><dd>Facilité avec laquelle un actif peut être échangé sans déplacer fortement le prix.</dd><dt>Volatilité</dt><dd>Amplitude et rythme des variations observées, sans garantie sur leur direction future.</dd><dt>Spread</dt><dd>Écart entre le prix auquel un acheteur se positionne et celui auquel un vendeur accepte d’échanger.</dd><dt>Invalidation</dt><dd>Condition prévue à l’avance qui indique qu’une hypothèse n’est plus cohérente.</dd><dt>Risque</dt><dd>Part d’incertitude et de perte potentielle à maîtriser avant d’agir.</dd></dl>' }
 };
 
 let readerTrigger = null;
@@ -1467,8 +1597,9 @@ document.querySelectorAll('.resource-open').forEach(button => button.addEventLis
   document.getElementById('reader-title').textContent = resource.title;
   document.getElementById('reader-content').innerHTML = resource.body;
   readerTrigger = button;
-  document.getElementById('resource-reader').hidden = false;
-  document.getElementById('resource-reader').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const reader = document.getElementById('resource-reader');
+  reader.hidden = false;
+  reader.scrollIntoView({ behavior: prototypeState.preferences.lowData ? 'auto' : 'smooth', block: 'start' });
   document.getElementById('reader-close').focus();
 }));
 function closeReader() {
@@ -1731,7 +1862,15 @@ function bindQuestion(lessonId, question, options) {
     if (feedback) {
       // A choice's own feedback (correct or not) wins when authored; otherwise
       // fall back to the block's successText / a generic retry prompt.
-      feedback.textContent = button.dataset.feedback || (correct ? successText : 'Pas encore. Relis le principe, puis essaie à nouveau.');
+      const message = button.dataset.feedback || (correct ? successText : 'Pas encore. Reviens aux faits observables, puis essaie à nouveau.');
+      feedback.replaceChildren();
+      const kicker = document.createElement('strong');
+      kicker.className = 'feedback-kicker';
+      kicker.textContent = correct ? 'Darius Insight — lecture confirmée' : 'Darius Insight — point à revoir';
+      const copy = document.createElement('span');
+      copy.className = 'feedback-copy';
+      copy.textContent = message || 'Relis le raisonnement présenté dans cette étape avant de répondre à nouveau.';
+      feedback.append(kicker, copy);
       feedback.className = `feedback ${correct ? 'success' : 'error'}`;
     }
     if (opts.revealId) {
@@ -1966,3 +2105,30 @@ if (titles[initialView]) {
     mutationObserver.observe(document.body, { childList: true, subtree: true });
   }
 })();
+
+/* Growth / conversion V1 — mesure uniquement les étapes réellement atteintes.
+   Aucun pixel tiers ni donnée personnelle : les événements passent par le même
+   adaptateur local que le reste du produit et restent inoffensifs hors GO. */
+(function initLandingFunnelMeasurement() {
+  if (typeof window === 'undefined' || typeof document === 'undefined' || !('IntersectionObserver' in window)) return;
+  const seen = new Set();
+  const nodes = document.querySelectorAll('[data-funnel-section]');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const section = entry.target.dataset.funnelSection;
+      if (!section || seen.has(section)) return;
+      seen.add(section);
+      trackEvent('landing_section_reached', { section });
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.25, rootMargin: '0px 0px -12% 0px' });
+  nodes.forEach(node => observer.observe(node));
+})();
+
+// The mobile CTA is useful after the hero, not on top of the first decision.
+// Keep the threshold local and reversible; desktop never receives this class.
+window.addEventListener('scroll', () => {
+  if (!document.body.classList.contains('public-shell')) return;
+  document.body.classList.toggle('landing-has-scrolled', window.scrollY > 520);
+}, { passive: true });

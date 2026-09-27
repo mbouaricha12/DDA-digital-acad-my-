@@ -113,7 +113,7 @@
         <header class="public-header" aria-label="Navigation publique DDA">
           <a class="public-header-brand" href="#landing" data-view="landing" aria-label="DDA — Accueil"><span class="public-header-mark">DDA</span><span><b>Darius Digital Academy</b><small>Learning Operating System</small></span></a>
           <nav class="public-header-nav" aria-label="Navigation publique"><button type="button" data-view="landing" class="active">Accueil</button><button type="button" data-view="access">Apprendre</button><button type="button" data-view="path">Parcours</button><button type="button" data-view="membership">Formations</button><button type="button" data-view="resources">Ressources</button><button type="button" data-view="markets">Market Intelligence</button><button type="button" data-view="community">Communauté</button></nav>
-          <div class="public-header-actions"><button type="button" class="public-login" data-view="access">Se connecter</button><button type="button" class="public-start" data-view="access" data-analytics="hero_cta_click">Commencer gratuitement <span>→</span></button></div>
+          <div class="public-header-actions"><button type="button" class="public-login" data-view="access">Se connecter</button><button type="button" class="public-start" data-view="access" data-analytics="hero_cta_click" data-funnel-position="hero">Commencer gratuitement <span>→</span></button></div>
           <details class="public-menu"><summary aria-label="Ouvrir le menu">Menu <span>＋</span></summary><div class="public-menu-panel"><button type="button" data-view="access">Apprendre</button><button type="button" data-view="path">Parcours</button><button type="button" data-view="membership">Formations</button><button type="button" data-view="resources">Ressources</button><button type="button" data-view="markets">Market Intelligence</button><button type="button" data-view="community">Communauté</button><button type="button" class="public-menu-cta" data-view="access">Commencer gratuitement <span>→</span></button></div></details>
         </header>
         <div class="landing-editorial-shell">
@@ -123,8 +123,8 @@
             <h1 id="landing-title">Comprendre les marchés.<br><em>Construire des compétences.</em></h1>
             <p class="landing-deck">DDA transforme l’apprentissage des marchés en un parcours où chaque notion doit être observée, pratiquée et prouvée — pas simplement regardée.</p>
             <div class="landing-actions">
-              <button class="primary-action" type="button" data-view="access" data-analytics="hero_cta_click">Entrer dans DDA <span>→</span></button>
-              <button class="text-action landing-secondary" type="button" data-view="path">Voir la méthode <span>↓</span></button>
+              <button class="primary-action" type="button" data-view="access" data-analytics="hero_cta_click" data-funnel-position="hero">Commencer gratuitement <span>→</span></button>
+              <button class="text-action landing-secondary" type="button" data-view="path">Explorer les parcours <span>↓</span></button>
             </div>
             <ul class="trust-list landing-trust">
               <li><svg class="icon"><use href="#icon-target"/></svg> Une prochaine action claire</li>
@@ -152,6 +152,22 @@
           </div>
         </div>
 
+        <section class="landing-differentiation" data-funnel-section="differentiation" aria-label="La différence DDA">
+          <div class="differentiation-mark" aria-hidden="true">DDA / 01</div>
+          <div>
+            <p class="eyebrow gold">Pourquoi DDA</p>
+            <p class="differentiation-statement">Pas de signal ici.<br><em>On t'apprend à comprendre.</em></p>
+            <p class="differentiation-note">Une méthode structurée, des exercices guidés et des preuves de progression — pas un raccourci vers une promesse de gain.</p>
+          </div>
+          <button class="text-action landing-inline-cta" type="button" data-view="access" data-analytics="landing_cta_differentiation" data-funnel-position="differentiation">Commencer gratuitement <span>→</span></button>
+        </section>
+
+        <section class="landing-free" data-funnel-section="free" aria-label="Ce que DDA Free permet d’apprendre">
+          <div class="landing-section-head"><p class="eyebrow gold">DDA Free</p><h2>Une vraie base pour apprendre les marchés, à ton rythme.</h2><p>Tu reçois un module de fondations complet : leçon, exercice, quiz et preuve de progression. Aucune carte bancaire requise pour commencer.</p></div>
+          <div class="landing-free-grid"><article><span class="free-number">01</span><h3>Fondamentaux</h3><p>Marchés, acteurs, prix, ordres et premières lectures.</p></article><article><span class="free-number">02</span><h3>Analyse &amp; risque</h3><p>Observer une structure, formuler une hypothèse et reconnaître ses limites.</p></article><article><span class="free-number">03</span><h3>Pratique guidée</h3><p>Exercices, quiz, feedback et retry — pas seulement du contenu à consommer.</p></article><article><span class="free-number">04</span><h3>Progression réelle</h3><p>Journal, preuves validées et aperçu de Market Intelligence pédagogique.</p></article></div>
+          <button class="text-action landing-inline-cta" type="button" data-view="access" data-analytics="landing_cta_free" data-funnel-position="free">Commencer gratuitement <span>→</span></button>
+        </section>
+
         <section class="landing-method" aria-label="Méthode DDA">
           <article>
             <span class="method-index">01</span>
@@ -171,6 +187,12 @@
             <h2>Prouver la progression.</h2>
             <p>Une leçon ouverte n’est pas une compétence. DDA conserve des preuves concrètes de ce qui a été compris, appliqué et validé.</p>
           </article>
+        </section>
+
+        <section class="landing-philosophy" aria-label="Promesse DDA">
+          <p class="eyebrow gold">La promesse DDA</p>
+          <p class="philosophy-line"><span>Learn Markets.</span><i></i><span>Build Skills.</span><i></i><strong>Prove Progress.</strong></p>
+          <p class="philosophy-note">Une notion comprise devient une compétence lorsqu’elle peut être pratiquée, expliquée et retrouvée dans ta progression.</p>
         </section>
 
         <section class="landing-institution" aria-label="Positionnement DDA">
@@ -200,11 +222,7 @@
           </div>
         </section>
 
-        <section class="landing-free" aria-label="Ce que DDA Free permet d’apprendre">
-          <div class="landing-section-head"><p class="eyebrow gold">DDA Free</p><h2>Une vraie base pour apprendre les marchés, à ton rythme.</h2><p>Commencer gratuitement ne veut pas dire regarder une démo. Tu peux déjà comprendre, pratiquer et valider des compétences fondatrices.</p></div>
-          <div class="landing-free-grid"><article><span class="free-number">01</span><h3>Fondamentaux</h3><p>Marchés, acteurs, prix, ordres et premières lectures.</p></article><article><span class="free-number">02</span><h3>Analyse &amp; risque</h3><p>Observer une structure, formuler une hypothèse et reconnaître ses limites.</p></article><article><span class="free-number">03</span><h3>Pratique guidée</h3><p>Exercices, quiz, feedback et retry — pas seulement du contenu à consommer.</p></article><article><span class="free-number">04</span><h3>Progression réelle</h3><p>Journal, preuves validées et aperçu de Market Intelligence pédagogique.</p></article></div>
-          <button class="text-action landing-inline-cta" type="button" data-view="access">Commencer par les fondamentaux <span>→</span></button>
-        </section>
+
 
         <section class="landing-problem" aria-label="Le problème que DDA résout">
           <div class="landing-section-head">
@@ -277,9 +295,12 @@
         <section class="landing-final-cta" aria-label="Rejoindre DDA">
           <h2>Prêt à construire de vraies compétences ?</h2>
           <p>Commence gratuitement. Ta progression reste sur cet appareil, ton rythme reste le tien.</p>
-          <button class="primary-action" type="button" data-view="access" data-analytics="hero_cta_click">Commencer gratuitement <span>→</span></button>
+          <button class="primary-action" type="button" data-view="access" data-analytics="landing_cta_final" data-funnel-position="final">Commencer gratuitement <span>→</span></button>
         </section>
-        <footer class="public-footer"><div class="public-footer-brand"><span class="public-header-mark">DDA</span><p>Learn Markets. Build Skills. Prove Progress.</p><small>Une plateforme éducative pour comprendre les marchés et construire des compétences durables.</small></div><div class="public-footer-col"><strong>Plateforme</strong><button data-view="landing">Accueil</button><button data-view="access">Apprendre</button><button data-view="path">Parcours</button><button data-view="membership">Formations</button><button data-view="resources">Ressources</button></div><div class="public-footer-col"><strong>Domaines</strong><button data-view="markets">Market Intelligence</button><button data-view="community">Communauté</button><button data-view="access">Marchés financiers</button><button data-view="access">Économie &amp; Finance</button></div><div class="public-footer-col"><strong>DDA</strong><button data-view="community">À propos</button><button data-view="community">Devenir Expert</button><button data-view="support">Aide &amp; Contact</button><button data-view="support">Confidentialité</button></div><div class="public-footer-bottom"><span>© 2026 Darius Digital Academy</span><span>Abidjan · Afrique francophone · Monde</span><span>Contenu pédagogique — aucun signal de marché</span></div></footer>
+        <div class="landing-mobile-cta" aria-label="Commencer avec DDA">
+          <button type="button" data-view="access" data-analytics="landing_cta_mobile_sticky" data-funnel-position="mobile_sticky">Commencer gratuitement <span>→</span></button>
+        </div>
+        <footer class="public-footer"><div class="public-footer-brand"><span class="public-header-mark">DDA</span><p>Learn Markets. Build Skills. Prove Progress.</p><small>Une plateforme éducative pour comprendre les marchés et construire des compétences durables.</small></div><div class="public-footer-col"><strong>Plateforme</strong><button data-view="landing">Accueil</button><button data-view="access">Apprendre</button><button data-view="path">Parcours</button><button data-view="membership">Formations</button><button data-view="resources">Ressources</button></div><div class="public-footer-col"><strong>Domaines</strong><button data-view="markets">Market Intelligence</button><button data-view="community">Communauté</button><button data-view="access">Marchés financiers</button><button data-view="access">Économie &amp; Finance</button></div><div class="public-footer-col"><strong>DDA</strong><button data-view="community">À propos</button><button data-view="community">Devenir Expert</button><button data-view="support">Aide &amp; Contact</button></div><div class="public-footer-col"><strong>Légal</strong><button data-view="support">Conditions</button><button data-view="support">Confidentialité</button><button data-view="support">Cookies</button><button data-view="support">Mentions légales</button></div><div class="public-footer-bottom"><span>© 2026 Darius Digital Academy</span><span>Abidjan · Afrique francophone · Monde</span><span>Contenu pédagogique — aucun signal de marché</span></div></footer>
       </section>
 
       <section class="view" id="access" aria-labelledby="access-title">
@@ -709,6 +730,17 @@
             <button class="primary-action" type="submit">Enregistrer mon plan</button>
           </form>
         </section>
+
+        <section class="journal-future-layers" aria-labelledby="journal-future-title">
+          <p class="eyebrow gold">La suite du Journal</p>
+          <h2 id="journal-future-title">Des preuves simples avant des outils complexes.</h2>
+          <p class="journal-future-intro">Ces briques seront ajoutées quand le socle d’observation sera suffisamment utilisé. Pour l’instant, ton Journal et ton Plan restent la source réelle de ton travail.</p>
+          <div class="journal-future-grid">
+            <article><span>À terme</span><strong>Revue guidée hebdomadaire</strong><p>Relire les observations, les habitudes et les points à retravailler.</p></article>
+            <article><span>À terme</span><strong>Decision Replay</strong><p>Revenir sur une décision pédagogique avec son contexte initial, sans réécrire l’histoire après coup.</p></article>
+            <article><span>À terme</span><strong>Analyse assistée</strong><p>Obtenir des questions de méthode et des pistes de révision, jamais une instruction de marché.</p></article>
+          </div>
+        </section>
       </section>
 
       <section class="view" id="resources" aria-labelledby="resources-title">
@@ -748,7 +780,7 @@
           <button class="secondary-action premium-gate" data-permission="resources_premium">Voir l’aperçu Premium</button>
         </article>
 
-        <div class="resource-reader" id="resource-reader" hidden><button class="reader-close" id="reader-close" aria-label="Fermer">×</button><p class="eyebrow gold" id="reader-label">Ressource DDA</p><h2 id="reader-title"></h2><div id="reader-content"></div></div>
+        <div class="resource-reader" id="resource-reader" role="dialog" aria-modal="true" aria-labelledby="reader-title" aria-describedby="reader-label" hidden><button class="reader-close" id="reader-close" aria-label="Fermer">×</button><p class="eyebrow gold" id="reader-label">Ressource DDA</p><h2 id="reader-title"></h2><div id="reader-content"></div></div>
       </section>
 
       <section class="view" id="membership" aria-labelledby="membership-title">
@@ -958,6 +990,16 @@
         </div>
         <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Ces espaces ne sont pas encore actifs — DDA ne simule jamais une conversation qui n’existe pas.</p>
 
+        <section class="future-principles" aria-labelledby="community-principles-title">
+          <p class="eyebrow gold">Le principe de construction</p>
+          <h2 id="community-principles-title">Une communauté utile, pas un flux de bruit.</h2>
+          <div class="future-principles-grid">
+            <article class="future-principle"><span>01</span><div><strong>Par compétence</strong><p>Les échanges seront reliés à des notions et des parcours, pas organisés autour de la recherche de signaux.</p></div></article>
+            <article class="future-principle"><span>02</span><div><strong>Avec modération</strong><p>Le respect, le signalement et la protection contre les promesses irréalistes seront des prérequis.</p></div></article>
+            <article class="future-principle"><span>03</span><div><strong>Avec une sortie utile</strong><p>Chaque discussion devra pouvoir conduire vers une leçon, une ressource ou une pratique vérifiable.</p></div></article>
+          </div>
+        </section>
+
         <section class="community-featured" aria-labelledby="community-featured-title">
           <p class="eyebrow">Ce qui existe déjà</p>
           <article class="community-featured-card">
@@ -1006,6 +1048,16 @@
         </div>
         <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Ces outils ne sont pas encore actifs — DDA ne simule jamais une analyse ou un score qu’il n’a pas réellement calculé.</p>
 
+        <section class="future-principles" aria-labelledby="practice-principles-title">
+          <p class="eyebrow gold">La mesure qui compte</p>
+          <h2 id="practice-principles-title">La qualité du processus avant le résultat.</h2>
+          <div class="future-principles-grid process-grid">
+            <article class="future-principle"><span>01</span><div><strong>Contexte</strong><p>Identifier la structure observée avant de formuler une hypothèse.</p></div></article>
+            <article class="future-principle"><span>02</span><div><strong>Invalidation</strong><p>Décrire ce qui ferait changer d’avis, au lieu de défendre un scénario.</p></div></article>
+            <article class="future-principle"><span>03</span><div><strong>Risque &amp; discipline</strong><p>Vérifier la cohérence avec un plan déclaré, sans score de rentabilité fictif.</p></div></article>
+          </div>
+        </section>
+
         <section class="community-featured" aria-labelledby="practice-featured-title">
           <p class="eyebrow">Ce qui existe déjà</p>
           <article class="community-featured-card">
@@ -1049,6 +1101,15 @@
           <div class="community-tile"><svg class="icon"><use href="#icon-progress"/></svg><span>Outils intelligents</span></div>
         </div>
         <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Rien ici n’est actif — DDA ne fait jamais parler une IA qui n’existe pas encore.</p>
+
+        <section class="future-principles intelligence-principles" aria-labelledby="intelligence-principles-title">
+          <p class="eyebrow gold">La règle DDA AI</p>
+          <h2 id="intelligence-principles-title">Une assistance qui explique, jamais une machine qui décide.</h2>
+          <div class="intelligence-boundaries">
+            <article><span class="boundary-label">Elle pourra</span><p>Reformuler une notion, expliquer une erreur, proposer une révision bornée et relier une faiblesse à une activité du parcours.</p></article>
+            <article><span class="boundary-label boundary-label-muted">Elle ne fera jamais</span><p>Donner un signal, prédire un actif, exécuter une transaction ou présenter un score pédagogique comme un diagnostic financier.</p></article>
+          </div>
+        </section>
 
         <section class="community-featured" aria-labelledby="intelligence-featured-title">
           <p class="eyebrow">Ce qui existe déjà</p>

@@ -268,6 +268,56 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('custom onboarding select supports keyboard selection, Escape and native form state', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#access`);
+    await fillSignup(page);
+    await page.waitForSelector('#onboarding-form:not([hidden])');
+
+    const wrapper = page.locator('[data-select-for="level"]');
+    const trigger = wrapper.locator('.dda-select-trigger');
+    await trigger.focus();
+    await page.keyboard.press('ArrowDown');
+    await page.waitForSelector('#level-dda-menu[role="listbox"]');
+    assert.equal(await wrapper.locator('.dda-select-menu').isVisible(), true);
+    await page.waitForFunction(() => document.activeElement?.matches('.dda-select-option'));
+    assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Débutant', 'ArrowDown opens the list and focuses the next option');
+    await page.keyboard.press('Enter');
+    assert.equal(await page.locator('#level').inputValue(), 'Débutant', 'custom option updates the native select used by form validation');
+    assert.equal(await trigger.getAttribute('aria-expanded'), 'false');
+
+    await trigger.focus();
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('Escape');
+    assert.equal(await trigger.getAttribute('aria-expanded'), 'false', 'Escape closes the listbox');
+    await page.waitForFunction(() => getComputedStyle(document.querySelector('#level-dda-menu')).visibility === 'hidden');
+    assert.equal(await wrapper.locator('.dda-select-menu').isVisible(), false);
+    await context.close();
+  });
+
+  await test('mobile onboarding dropdown bottom sheet stays above the fixed navigation', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#access`);
+    await fillSignup(page);
+    await page.waitForSelector('#onboarding-form:not([hidden])');
+    const wrapper = page.locator('[data-select-for="goal"]');
+    await wrapper.locator('.dda-select-trigger').click();
+    await page.waitForTimeout(220);
+    const geometry = await page.evaluate(() => {
+      const menu = document.querySelector('[data-select-for="goal"] .dda-select-menu');
+      const nav = document.querySelector('.mobile-nav');
+      const menuBox = menu.getBoundingClientRect();
+      const navBox = nav.getBoundingClientRect();
+      return { position: getComputedStyle(menu).position, menuBottom: menuBox.bottom, navTop: navBox.top, visible: getComputedStyle(menu).visibility === 'visible' };
+    });
+    assert.equal(geometry.position, 'fixed');
+    assert.equal(geometry.visible, true);
+    assert.ok(geometry.menuBottom <= geometry.navTop, `dropdown must stay above mobile navigation: ${JSON.stringify(geometry)}`);
+    await context.close();
+  });
+
   console.log('\n-- E. M0.1 (exercice + quiz) --');
 
   await test('answering the M0.1 exercise correctly unlocks the quiz and marks exerciseComplete', async () => {
@@ -703,6 +753,25 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       assert.ok(overflow <= 1, `#landing must not overflow horizontally at ${width}px (got ${overflow}px)`);
       await context.close();
     }
+  });
+
+  await test('landing funnel records a reached section once and reveals the mobile sticky CTA after scroll', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+    assert.equal(await page.locator('.landing-mobile-cta').isVisible(), false, 'sticky CTA must not cover the first landing decision');
+
+    await page.locator('[data-funnel-section="free"]').scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => document.body.classList.contains('landing-has-scrolled'));
+    await page.waitForFunction(() => window.DDA.load().events.some(event => event.name === 'landing_section_reached' && event.metadata?.section === 'free'));
+    assert.equal(await page.locator('.landing-mobile-cta').isVisible(), true, 'sticky CTA should appear after the reader starts scrolling');
+
+    await page.locator('[data-funnel-section="differentiation"]').scrollIntoViewIfNeeded();
+    await page.locator('[data-funnel-section="free"]').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(80);
+    const funnel = await page.evaluate(() => window.DDA.load().events.filter(event => event.name === 'landing_section_reached' && event.metadata?.section === 'free'));
+    assert.equal(funnel.length, 1, 'each funnel section is recorded once per page visit');
+    await context.close();
   });
 
   await test('the hero CTA fires hero_cta_click, and #access records signup_started + qualification_started exactly once', async () => {
