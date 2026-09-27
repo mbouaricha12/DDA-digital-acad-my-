@@ -190,3 +190,12 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 **Non-régression :** 45 scénarios Playwright passés, 25 smoke checks jsdom, tous les contrats Node et la cohérence route/registre passés; syntaxe JavaScript et `git diff --check` passés. Les checks responsive 360/390/1440px restent inclus dans la suite. Les polices sont locales/système; le cache service worker est `dda-shell-v16`.
 
 **Limites explicites :** données d’apprentissage volontairement stockées en clair sur l’appareil; si PostHog est activé, le fournisseur peut voir l’IP réseau malgré l’absence d’autocapture/pageviews/session recording. Consentement, conservation IP et headers HTTP de production restent à décider avant activation publique. Ne pas annoncer un déploiement avant le merge réussi dans `main` et le workflow Pages vert.
+
+
+## Tranche — Correction du layout mobile de la landing et de l’accueil (27 septembre 2026)
+
+**Correctifs :** le canvas public et l’espace apprenant utilisent désormais le Deep Navy exact `#060d17`, en pleine largeur/plein écran. La grille DDA Free adopte des gutters de 16 px, des cartes séparées et une hiérarchie stable aux largeurs mobiles. Le CTA collant garde une cible tactile de 44 px et devient invisible/inactif uniquement pendant son intersection avec la dernière carte ; un `padding-bottom` mobile de 144 px conserve aussi une vraie zone de fin de page. Les états initiaux de landing et d’accueil apprenant sont couverts contre les dialogues et croix de fermeture non sollicités.
+
+**Validation locale :** 46 scénarios Playwright passés ; smoke boot jsdom (25 checks), contrats Node et cohérence du registre de routes passés ; syntaxe JS et `git diff --check` propres. Vérifications visuelles en Chromium à 360, 390 et 414 px, sans débordement horizontal ; essai app apprenant à 390 × 844. La carte « Progression réelle » reste intégralement lisible lorsque le CTA est dans sa zone.
+
+**Livraison :** correctif préparé sur `fix/mobile-landing-layout` depuis `main` après le merge de la tranche PII. Pas encore de PR/merge ou de déploiement Pages ; attendre l’accord explicite avant publication publique.

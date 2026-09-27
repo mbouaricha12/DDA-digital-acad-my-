@@ -485,8 +485,8 @@
 /* Mobile conversion polish — le CTA persistant intervient après le premier
    temps de lecture, jamais au-dessus du hero dès l'arrivée. */
 @media(max-width:639px){
-  .landing-mobile-cta{display:none}
-  body.landing-has-scrolled .landing-mobile-cta{display:block}
+  .landing-mobile-cta{display:block;visibility:hidden}
+  body.landing-has-scrolled .landing-mobile-cta{visibility:visible}
   #landing h1{
     font-size:clamp(2.55rem,11.2vw,4rem);
     letter-spacing:-.05em;
@@ -1014,4 +1014,32 @@ body.access-mode .prototype-banner{
 .lesson-main .result-card .result-status,
 .lesson-main .result-card .status-label{
   color:#8ee0ce;
+}
+
+
+/* Mobile viewport repair — a continuous full-bleed learning surface, not a floating white sheet. */
+body.public-shell{background:#060d17;color:var(--lp-heading)}
+body.public-shell .app-shell,
+body.public-shell main{min-height:100vh;background:#060d17}
+#landing{
+  --lp-bg:#060d17;
+  background-color:#060d17;
+}
+#landing.view.active{width:100%;max-width:none;margin:0;transform:none}
+
+@media(max-width:639px){
+  #landing{min-height:100svh;padding-bottom:calc(144px + var(--safe-b))}
+  .landing-free{padding-bottom:20px}
+  .landing-free-grid{gap:12px;padding:8px 16px 12px}
+  .landing-free-grid article{
+    min-width:0;
+    padding:18px 16px;
+    border:1px solid var(--lp-line);
+    border-radius:2px 12px 2px 12px;
+    background:var(--lp-card);
+  }
+  .landing-free-grid article+article{border-left:1px solid var(--lp-line)}
+  .landing-free-grid .free-number{display:block;margin-bottom:7px}
+  .landing-free-grid p{max-width:none}
+  body.landing-cta-covering-content .landing-mobile-cta{visibility:hidden;pointer-events:none}
 }
