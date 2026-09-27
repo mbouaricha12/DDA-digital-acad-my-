@@ -29,7 +29,8 @@ const DEFAULTS = {
   routes: path.join(ROOT, 'DDA_ROUTE_MAP.md'),
   html: path.join(ROOT, 'dist', 'index.html'),
   app: path.join(ROOT, 'dist', 'app.js'),
-  architecture: path.join(ROOT, 'DDA_INFORMATION_ARCHITECTURE_TARGET.md')
+  architecture: path.join(ROOT, 'DDA_INFORMATION_ARCHITECTURE_TARGET.md'),
+  historicalTests: path.join(__dirname, 'historical-test-references.json')
 };
 
 function parseArgs(argv) {
@@ -42,6 +43,7 @@ function parseArgs(argv) {
     else if (arg === '--html') options.html = path.resolve(argv[++i]);
     else if (arg === '--app') options.app = path.resolve(argv[++i]);
     else if (arg === '--architecture') options.architecture = path.resolve(argv[++i]);
+    else if (arg === '--historical-tests') options.historicalTests = path.resolve(argv[++i]);
     else throw new Error(`Unknown argument: ${arg}`);
   }
   return options;
@@ -117,13 +119,24 @@ function main() {
   const options = parseArgs(process.argv);
   const errors = [];
   const warnings = [];
+  const info = [];
   const register = readRequired(options.register, 'Master register', errors);
   const routesMarkdown = readRequired(options.routes, 'Route map', errors);
   const html = readRequired(options.html, 'Runtime HTML', errors);
   const app = readRequired(options.app, 'Runtime app', errors);
+  let historicalTestManifest = { archived: [] };
+  try {
+    historicalTestManifest = JSON.parse(readRequired(options.historicalTests, 'Historical test manifest', errors));
+    if (!Array.isArray(historicalTestManifest.archived) || historicalTestManifest.archived.some(name => !/^test_dda_v\d+\.js$/.test(name))) {
+      errors.push({ code: 'INVALID_HISTORICAL_TEST_MANIFEST', message: 'Historical test manifest must contain an archived array of test_dda_vN.js filenames.' });
+      historicalTestManifest = { archived: [] };
+    }
+  } catch (error) {
+    errors.push({ code: 'INVALID_HISTORICAL_TEST_MANIFEST', message: `Could not parse historical test manifest: ${error.message}` });
+  }
   const architecture = fs.existsSync(options.architecture);
 
-  if (!register || !routesMarkdown) return report(options, errors, warnings);
+  if (!register || !routesMarkdown) return report(options, errors, warnings, {}, info);
 
   const routes = parseRouteRows(routesMarkdown);
   const registerRows = parseRegisterRows(register);
@@ -231,30 +244,39 @@ function main() {
     );
   }
 
-  // Avoid false confidence from historical assertion counts in the register.
-  const historicalTestClaims = register.match(/test_dda_v\d+\.js/g) || [];
-  for (const testName of new Set(historicalTestClaims)) {
-    check(
-      fs.existsSync(path.join(ROOT, 'tests', testName)),
-      'HISTORICAL_TEST_NOT_PRESENT',
-      `Register mentions ${testName}, but the file is not present in the repository. Treat the assertion count as historical/non-auditable.`,
-      warnings
-    );
+  // Distinguish documented archive references from genuinely unclassified
+  // missing tests. An archive entry never makes a historical result runnable.
+  const referencedTests = new Set(register.match(/test_dda_v\d+\.js/g) || []);
+  const archivedTests = new Set(historicalTestManifest.archived);
+  for (const testName of referencedTests) {
+    if (fs.existsSync(path.join(__dirname, testName))) continue;
+    if (archivedTests.has(testName)) {
+      info.push({ code: 'ARCHIVED_TEST_REFERENCE', message: `${testName} is explicitly classified as historical; its old result is not a current, reproducible test.` });
+    } else {
+      warnings.push({ code: 'HISTORICAL_TEST_NOT_PRESENT', message: `Register mentions ${testName}, but it is neither present in tests/ nor classified in the historical test manifest.` });
+    }
+  }
+  for (const testName of archivedTests) {
+    if (!referencedTests.has(testName) || fs.existsSync(path.join(__dirname, testName))) {
+      warnings.push({ code: 'STALE_HISTORICAL_TEST_MANIFEST', message: `${testName} is listed as archived but is either no longer referenced by the register or exists again in tests/.` });
+    }
   }
 
   return report(options, errors, warnings, {
     routes: routes.length,
     registerRows: registerRows.length,
     architecturePresent: architecture,
+    archivedTestReferences: info.filter(item => item.code === 'ARCHIVED_TEST_REFERENCE').length,
     files: options
-  });
+  }, info);
 }
 
-function report(options, errors, warnings, summary = {}) {
+function report(options, errors, warnings, summary = {}, info = []) {
   const result = {
     ok: errors.length === 0,
     errors,
     warnings,
+    info,
     summary
   };
   if (options.json) {
@@ -267,6 +289,7 @@ function report(options, errors, warnings, summary = {}) {
     if (summary.architecturePresent !== undefined) console.log(`Architecture reference present: ${summary.architecturePresent ? 'yes' : 'no'}`);
     for (const item of errors) console.log(`ERROR [${item.code}] ${item.message}`);
     for (const item of warnings) console.log(`WARN  [${item.code}] ${item.message}`);
+    for (const item of info) console.log(`INFO  [${item.code}] ${item.message}`);
   }
   process.exitCode = result.ok ? 0 : 1;
   return result;
