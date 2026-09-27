@@ -34,6 +34,7 @@
 - `git diff --check`
 - Contrat `tests/test_premium_p2_contract.js`
 - Parcours Playwright réel : P2.1 → P2.2 → Lab validé → Assessment validé → preuve → Journal prérempli → Progression.
+- Reprise de vérification : contenu authored P2 absent du DOM Free puis monté après activation Premium Demo ; suite E2E complète portée à 47 scénarios, 0 échec.
 
 ## Hors scope volontaire
 

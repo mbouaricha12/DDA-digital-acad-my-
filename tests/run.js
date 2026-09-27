@@ -287,6 +287,20 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('free tier does not receive authored P2 content before local Premium preview', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#premium-track`);
+    const freeContent = await page.locator('#lesson-p21-main').innerText();
+    assert.equal(freeContent.includes('Before the trade, define the risk.'), false, 'authored P2 content must not be mounted for Free');
+    await page.click('#gate-unlock');
+    await page.waitForTimeout(50);
+    assert.equal(await page.evaluate(() => location.hash), '#premium-track');
+    assert.equal((await page.locator('#lesson-p21-main').innerText()).includes('Before the trade, define the risk.'), true, 'Premium Demo mounts the authored lesson after preview activation');
+    await context.close();
+  });
+
   await test('premium tier unlocks resources_premium and certificate_preview', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();

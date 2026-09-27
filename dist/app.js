@@ -112,6 +112,10 @@ const LESSON_REGISTRY = Object.freeze([
   }
 ]);
 
+// L’état est chargé avant le montage afin que les leçons Premium authored ne
+// soient jamais injectées dans le DOM d’un utilisateur Free.
+let prototypeState = DDA.load();
+
 // Résolution runtime du registre contre le curriculum réel : une leçon
 // déclarée mais absente du curriculum (fichier authored non chargé) n'est pas
 // montée — les boucles ci-dessous ne consomment que mountedLessons.
@@ -123,20 +127,43 @@ const activeLessonId = DDA.primaryLessonId;
 const activeLessonMeta = DDALearning.findLesson(DDA.curriculum, activeLessonId);
 const activeLessonDef = activeLessonMeta.lesson;
 
-// The lesson reader is data-driven: render each mounted lesson's markup into
-// its mount points BEFORE anything below captures [data-view] buttons, so
-// buttons generated inside lessons (Quitter, Voir ma Progression, …) get
-// bound too. Une seule boucle pour toutes les leçons — plus de bloc copié.
-mountedLessons.forEach(entry => {
+// The lesson reader is data-driven: render each lesson's markup into its mount
+// points only when its local entitlement allows it. Premium lessons are
+// mounted later when the local demo is activated, before their interactions
+// are bound. Une seule boucle pour toutes les leçons — plus de bloc copié.
+function mountLesson(entry) {
+  const main = document.getElementById(`${entry.viewId}-main`);
+  const outline = document.getElementById(`${entry.viewId}-outline`);
+  if (!main || !outline || main.dataset.ddaLessonMounted === 'true') return;
   const suffix = entry.suffix || undefined;
-  document.getElementById(`${entry.viewId}-main`).insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(entry.meta.module, entry.meta.lesson, suffix));
-  document.getElementById(`${entry.viewId}-outline`).innerHTML = DDALessonRenderer.renderLessonOutline(entry.meta.lesson, suffix);
-  if (entry.id === 'M0.2') document.getElementById(`${entry.viewId}-main`).insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff"><p class="eyebrow gold">Après la leçon</p><h3>Mettre la lecture en pratique</h3><p>Ouvre une mission guidée dans le Terminal pour repérer une zone sans chercher un prix exact.</p><button type="button" class="secondary-action" data-practice-launch="M0.2">Lancer la mission Practice <span>→</span></button></section>');
-  if (entry.id === 'P2.2') document.getElementById(`${entry.viewId}-main`).insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff premium-handoff"><p class="eyebrow gold">Après les leçons</p><h3>Practice Lab — Build the Risk Plan</h3><p>Construis un plan dans un scénario pédagogique synthétique, puis fais vérifier ta décision.</p><button type="button" class="secondary-action" data-view="premium-lab">Ouvrir le Practice Lab <span>→</span></button></section>');
+  main.insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(entry.meta.module, entry.meta.lesson, suffix));
+  outline.innerHTML = DDALessonRenderer.renderLessonOutline(entry.meta.lesson, suffix);
+  if (entry.id === 'M0.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff"><p class="eyebrow gold">Après la leçon</p><h3>Mettre la lecture en pratique</h3><p>Ouvre une mission guidée dans le Terminal pour repérer une zone sans chercher un prix exact.</p><button type="button" class="secondary-action" data-practice-launch="M0.2">Lancer la mission Practice <span>→</span></button></section>');
+  if (entry.id === 'P2.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff premium-handoff"><p class="eyebrow gold">Après les leçons</p><h3>Practice Lab — Build the Risk Plan</h3><p>Construis un plan dans un scénario pédagogique synthétique, puis fais vérifier ta décision.</p><button type="button" class="secondary-action" data-view="premium-lab">Ouvrir le Practice Lab <span>→</span></button></section>');
+  main.dataset.ddaLessonMounted = 'true';
+}
+mountedLessons.forEach(entry => {
+  if (entry.permission === 'premium_track' && !DDA.can(prototypeState, 'premium_track')) return;
+  mountLesson(entry);
 });
 function findLessonBlock(lessonDef, id) { return lessonDef.blocks.find(b => b.id === id); }
 
+function bindViewButton(button) {
+  button.addEventListener('click', () => {
+    // Acquisition V1 landing funnel: any button explicitly opting in via
+    // data-analytics is recorded under its own real event name before the
+    // normal navigation happens — never a substitute for view_opened, which
+    // still fires for every navigation regardless of this attribute.
+    if (button.dataset.analytics) trackEvent(button.dataset.analytics, {
+      view: button.dataset.view,
+      position: button.dataset.funnelPosition
+    });
+    showView(button.dataset.view);
+    if (button.dataset.terminalHandoff === 'true') openJournalComposer(null, button, terminalJournalDraft());
+  });
+}
 const buttons = document.querySelectorAll('[data-view]');
+buttons.forEach(bindViewButton);
 document.querySelectorAll('[data-practice-launch]').forEach(button => button.addEventListener('click', () => { const lesson = button.dataset.practiceLaunch; saveState({ terminal: { ...getTerminalState(), practice: { ...(getTerminalState().practice || {}), sourceLesson: lesson, sourceLessonTitle: 'Support & Résistance' } } }); showView('dashboard'); setTimeout(() => document.getElementById('analysis-terminal')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0); }));
 const views = document.querySelectorAll('.view');
 const desktopItems = document.querySelectorAll('.nav-item');
@@ -422,7 +449,6 @@ function countActiveDaysForView(events, viewId) {
     .map(event => event.at.slice(0, 10))).size;
 }
 
-let prototypeState = DDA.load();
 const BOOT_HASH_VIEW = location.hash.replace('#', '');
 const initialAttribution = window.DDA_INITIAL_ATTRIBUTION || {};
 delete window.DDA_INITIAL_ATTRIBUTION;
@@ -1605,19 +1631,6 @@ function showView(id, recordEvent = true) {
   }
 }
 
-buttons.forEach(button => button.addEventListener('click', () => {
-  // Acquisition V1 landing funnel: any button explicitly opting in via
-  // data-analytics is recorded under its own real event name before the
-  // normal navigation happens — never a substitute for view_opened, which
-  // still fires for every navigation regardless of this attribute.
-  if (button.dataset.analytics) trackEvent(button.dataset.analytics, {
-    view: button.dataset.view,
-    position: button.dataset.funnelPosition
-  });
-  showView(button.dataset.view);
-  if (button.dataset.terminalHandoff === 'true') openJournalComposer(null, button, terminalJournalDraft());
-}));
-
 const resources = {
   checklist: { title: 'Checklist avant une décision', label: 'Guide · DDA Free', body: '<ol><li>Ai-je compris le contexte du marché ?</li><li>Mon scénario est-il écrit clairement ?</li><li>Où mon idée devient-elle invalide ?</li><li>Quel risque suis-je prêt à accepter ?</li><li>Est-ce une décision prévue ou impulsive ?</li><li>Puis-je justifier mon choix sans parler de gain ?</li></ol>' },
   glossary: { title: 'Les mots essentiels du marché', label: 'Glossaire · DDA Free', body: '<dl><dt>Actif</dt><dd>Ce qui est échangé sur un marché.</dd><dt>Acheteur</dt><dd>Participant qui cherche à acquérir un actif.</dd><dt>Vendeur</dt><dd>Participant qui accepte de céder un actif.</dd><dt>Liquidité</dt><dd>Facilité avec laquelle un actif peut être échangé sans déplacer fortement le prix.</dd><dt>Volatilité</dt><dd>Amplitude et rythme des variations observées, sans garantie sur leur direction future.</dd><dt>Spread</dt><dd>Écart entre le prix auquel un acheteur se positionne et celui auquel un vendeur accepte d’échanger.</dd><dt>Invalidation</dt><dd>Condition prévue à l’avance qui indique qu’une hypothèse n’est plus cohérente.</dd><dt>Risque</dt><dd>Part d’incertitude et de perte potentielle à maîtriser avant d’agir.</dd></dl>' }
@@ -1660,9 +1673,10 @@ document.getElementById('gate-unlock')?.addEventListener('click', () => {
   const target = pendingGatedView;
   prototypeState = DDA.setPlan(prototypeState, 'premium');
   prototypeState = DDA.track(prototypeState, 'plan_preview', { plan: 'premium' });
+  mountPremiumLessons();
   renderState();
   closeGate();
-  showToast('Accès Standard débloqué en aperçu.');
+  showToast('Accès Premium débloqué en aperçu.');
   if (target) showView(target);
 });
 document.getElementById('gate-close')?.addEventListener('click', closeGate);
@@ -1678,6 +1692,7 @@ document.addEventListener('keydown', event => {
 document.getElementById('preview-premium').addEventListener('click', () => {
   prototypeState = DDA.setPlan(prototypeState, 'premium');
   prototypeState = DDA.track(prototypeState, 'plan_preview', { plan: 'premium' });
+  mountPremiumLessons();
   renderState();
   showToast('Accès Premium simulé sur cet appareil.');
 });
@@ -1969,6 +1984,19 @@ function bindRegistryQuestions(entry) {
   });
 }
 mountedLessons.forEach(bindRegistryQuestions);
+
+function mountPremiumLessons() {
+  if (!DDA.can(prototypeState, 'premium_track')) return;
+  mountedLessons.filter(entry => entry.permission === 'premium_track').forEach(entry => {
+    const main = document.getElementById(`${entry.viewId}-main`);
+    const wasMounted = main?.dataset.ddaLessonMounted === 'true';
+    mountLesson(entry);
+    if (!wasMounted && main) {
+      bindRegistryQuestions(entry);
+      main.querySelectorAll('[data-view]').forEach(bindViewButton);
+    }
+  });
+}
 
 /* -------------------------------------------------------------------------
    Premium P2 — local vertical slice controller.
