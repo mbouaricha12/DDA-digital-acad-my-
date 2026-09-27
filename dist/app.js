@@ -616,7 +616,10 @@ function renderMarketIntelligence() {
 // two screens can never disagree about the same competency's real state.
 function authoredLessons() {
   const flat = [];
-  DDA.curriculum.modules.forEach(module => module.lessons.forEach(lesson => flat.push({ module, lesson })));
+  DDA.curriculum.modules.forEach(module => {
+    if (module.premiumOnly && prototypeState.membership?.plan !== 'premium') return;
+    module.lessons.forEach(lesson => flat.push({ module, lesson }));
+  });
   return flat;
 }
 
