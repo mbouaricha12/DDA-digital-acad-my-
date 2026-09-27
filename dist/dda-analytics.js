@@ -16,10 +16,31 @@
 
   function config() { return (typeof window !== 'undefined' && window.DDA_ANALYTICS_CONFIG) || {}; }
   function pushDebug(entry) { debugQueue.push(entry); if (debugQueue.length > DEBUG_QUEUE_LIMIT) debugQueue.shift(); }
+  function safeAttributionValue(key, value) {
+    const text = String(value ?? '').trim();
+    if (!text) return null;
+    if (key === 'referrer') {
+      try {
+        const url = new URL(text);
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+        return url.origin.slice(0, 120);
+      } catch {
+        return null;
+      }
+    }
+    if (/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(text)) return null;
+    const withoutDates = text.replace(/\b(?:19|20)\d{2}[-/.](?:0?[1-9]|1[0-2])[-/.](?:0?[1-9]|[12]\d|3[01])\b/g, '');
+    if ((withoutDates.match(/\d/g) || []).length >= 8) return null;
+    return text.slice(0, 120);
+  }
   function safeProps(props) {
     const out = {};
     Object.entries(props || {}).forEach(([key, value]) => {
-      if (SAFE_PROP_KEYS.includes(key) && value !== undefined && value !== null && value !== '') out[key] = String(value).slice(0, 120);
+      if (!SAFE_PROP_KEYS.includes(key) || value === undefined || value === null || value === '') return;
+      const safeValue = ['source', 'medium', 'campaign', 'referrer'].includes(key)
+        ? safeAttributionValue(key, value)
+        : String(value).slice(0, 120);
+      if (safeValue) out[key] = safeValue;
     });
     return out;
   }

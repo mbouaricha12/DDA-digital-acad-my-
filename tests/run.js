@@ -301,13 +301,58 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
   await test('UTM params are captured once into state.acquisition with a pseudonymous visitorId', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
-    await page.goto(`${BASE}/?utm_source=newsletter&utm_medium=email&utm_campaign=launch#landing`);
+    await page.goto(`${BASE}/?utm_source=newsletter&utm_medium=email&utm_campaign=launch-2026-09-27#landing`);
     const acquisition = await page.evaluate(() => window.DDA.load().acquisition);
     assert.equal(acquisition.source, 'newsletter');
     assert.equal(acquisition.medium, 'email');
-    assert.equal(acquisition.campaign, 'launch');
+    assert.equal(acquisition.campaign, 'launch-2026-09-27');
     assert.equal(typeof acquisition.visitorId, 'string');
     assert.ok(acquisition.visitorId.length > 0);
+    await context.close();
+  });
+
+  await test('UTM values containing an email or phone number are omitted before state persistence and analytics props', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/?utm_source=ada%40example.com&utm_medium=email&utm_campaign=tel-2250700000000-launch-2026-09-27#landing`);
+    const { acquisition, entry } = await page.evaluate(() => ({
+      acquisition: window.DDA.load().acquisition,
+      entry: window.DDAAnalytics.getDebugQueue().find(event => event.localName === 'landing_visit')
+    }));
+    assert.equal(acquisition.source, null, 'email-like UTM source must not be persisted');
+    assert.equal(acquisition.medium, 'email');
+    assert.equal(acquisition.campaign, null, 'a phone number embedded in a campaign label must not be persisted');
+    assert.equal(JSON.stringify(acquisition).includes('ada@example.com'), false);
+    assert.equal(JSON.stringify(acquisition).includes('2250700000000'), false);
+    assert.ok(entry, 'landing_visit should reach the analytics adapter');
+    assert.equal('source' in entry.props, false);
+    assert.equal(entry.props.medium, 'email');
+    assert.equal('campaign' in entry.props, false);
+    assert.equal(JSON.stringify(entry).includes('ada@example.com'), false);
+    assert.equal(JSON.stringify(entry).includes('2250700000000'), false);
+    await context.close();
+  });
+
+  await test('referrer attribution keeps only a credential-free HTTP(S) origin', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+    const acquisition = await page.evaluate(() => {
+      const state = window.DDA.load();
+      return window.DDA.captureAcquisition({
+        ...state,
+        acquisition: { ...state.acquisition, visitorId: null }
+      }, {
+        source: 'newsletter',
+        medium: 'email',
+        campaign: 'launch',
+        referrer: 'https://ada%40example.com:secret@referrer.example/path?email=ada%40example.com#phone-2250700000000'
+      }).acquisition;
+    });
+    assert.equal(acquisition.referrer, 'https://referrer.example');
+    assert.equal(JSON.stringify(acquisition).includes('ada@example.com'), false);
+    assert.equal(JSON.stringify(acquisition).includes('secret'), false);
+    assert.equal(JSON.stringify(acquisition).includes('2250700000000'), false);
     await context.close();
   });
 
@@ -349,6 +394,43 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(entry.props.campaign, 'launch');
     assert.equal('level' in entry.props, false);
     assert.equal('goal' in entry.props, false);
+    await context.close();
+  });
+
+  await test('PostHog transport applies the UTM privacy filter even to unsanitized caller props', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => {
+      window.__posthogCalls = [];
+      window.DDA_ANALYTICS_CONFIG = { posthogKey: 'playwright-test-key', posthogHost: 'https://analytics.test' };
+      window.posthog = {
+        init: (...args) => window.__posthogCalls.push({ method: 'init', args }),
+        identify: (...args) => window.__posthogCalls.push({ method: 'identify', args }),
+        capture: (...args) => window.__posthogCalls.push({ method: 'capture', args })
+      };
+    });
+    const page = await context.newPage();
+    await page.route('https://analytics.test/static/array.js', route => route.fulfill({
+      status: 200,
+      contentType: 'application/javascript',
+      body: '/* PostHog is stubbed by this test. */'
+    }));
+    await page.goto(`${BASE}/#landing`);
+    await page.waitForFunction(() => window.DDAAnalytics?.getTransport() === 'posthog');
+    await page.evaluate(() => window.DDAAnalytics.send('landing_visit', {
+      source: 'ada@example.com',
+      medium: '+225 07 00 00 00 00',
+      campaign: 'launch-2026',
+      referrer: 'https://referrer.example/path?email=ada%40example.com#phone-2250700000000',
+      visitorId: 'visitor-playwright-safe'
+    }));
+    const calls = await page.evaluate(() => window.__posthogCalls);
+    const capture = calls.findLast(call => call.method === 'capture');
+    assert.ok(capture, 'the mocked PostHog transport should receive a capture call');
+    assert.equal(capture.args[0], 'landing_visit');
+    assert.deepEqual(capture.args[1], { campaign: 'launch-2026', referrer: 'https://referrer.example' });
+    assert.equal(JSON.stringify(calls).includes('ada@example.com'), false);
+    assert.equal(JSON.stringify(calls).includes('2250700000000'), false);
+    assert.equal(JSON.stringify(calls).includes('/path?'), false);
     await context.close();
   });
 
