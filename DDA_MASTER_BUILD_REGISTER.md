@@ -18,6 +18,12 @@ App Apprenant, Premium et Futur Écosystème Expert — sans renommer ni modifie
 routes existantes. Les zones futures restent documentées, non actives et non
 présentées comme construites.
 
+**Références à des tests historiques :** les anciens fichiers `test_dda_vN.js`
+mentionnés dans les comptes rendus ne sont pas tous conservés dans le dépôt.
+Le manifeste `tests/historical-test-references.json` les classe explicitement
+comme archives ; leurs résultats restent historiques et ne sont pas présentés
+comme reproductibles par la suite de tests actuelle.
+
 ## Légende
 
 - **CONSTRUIT** : présent et utilisable dans le prototype.
