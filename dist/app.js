@@ -1562,7 +1562,7 @@ buttons.forEach(button => button.addEventListener('click', () => {
 
 const resources = {
   checklist: { title: 'Checklist avant une décision', label: 'Guide · DDA Free', body: '<ol><li>Ai-je compris le contexte du marché ?</li><li>Mon scénario est-il écrit clairement ?</li><li>Où mon idée devient-elle invalide ?</li><li>Quel risque suis-je prêt à accepter ?</li><li>Est-ce une décision prévue ou impulsive ?</li><li>Puis-je justifier mon choix sans parler de gain ?</li></ol>' },
-  glossary: { title: 'Les mots essentiels du marché', label: 'Glossaire · DDA Free', body: '<dl><dt>Actif</dt><dd>Ce qui est échangé sur un marché.</dd><dt>Acheteur</dt><dd>Participant qui cherche à acquérir un actif.</dd><dt>Vendeur</dt><dd>Participant qui accepte de céder un actif.</dd><dt>Risque</dt><dd>Part d’incertitude et de perte potentielle à maîtriser avant d’agir.</dd></dl>' }
+  glossary: { title: 'Les mots essentiels du marché', label: 'Glossaire · DDA Free', body: '<dl><dt>Actif</dt><dd>Ce qui est échangé sur un marché.</dd><dt>Acheteur</dt><dd>Participant qui cherche à acquérir un actif.</dd><dt>Vendeur</dt><dd>Participant qui accepte de céder un actif.</dd><dt>Liquidité</dt><dd>Facilité avec laquelle un actif peut être échangé sans déplacer fortement le prix.</dd><dt>Volatilité</dt><dd>Amplitude et rythme des variations observées, sans garantie sur leur direction future.</dd><dt>Spread</dt><dd>Écart entre le prix auquel un acheteur se positionne et celui auquel un vendeur accepte d’échanger.</dd><dt>Invalidation</dt><dd>Condition prévue à l’avance qui indique qu’une hypothèse n’est plus cohérente.</dd><dt>Risque</dt><dd>Part d’incertitude et de perte potentielle à maîtriser avant d’agir.</dd></dl>' }
 };
 
 let readerTrigger = null;

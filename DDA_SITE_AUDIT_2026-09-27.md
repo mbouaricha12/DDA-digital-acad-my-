@@ -198,3 +198,8 @@ Le rappel d’architecture a été recroisé avec les routes existantes :
 - **Trading Lab / Trader DNA / Skill Graph** : restent des aperçus non actifs dans Pratique avancée, conformément au cahier des charges ; aucun score, résultat ou analyse fictive n’a été ajouté.
 
 Cette tranche remplit les espaces d’explication et de continuité produit sans transformer des capacités futures en fonctionnalités disponibles. Les seuls moteurs réellement actifs restent ceux déjà authored et testés : apprentissage, progression, Journal & Plan local, ressources, aperçu marchés et Broker Hub démonstratif.
+
+
+## 16. Ressources pédagogiques — glossaire renforcé
+
+Le glossaire Free couvre maintenant les notions réellement utilisées dans le parcours : actif, acheteur, vendeur, liquidité, volatilité, spread, invalidation et risque. Les définitions restent descriptives et pédagogiques ; elles ne donnent aucun signal ni conseil personnalisé. Le lecteur de ressource reste local, léger et compatible avec le mode faible consommation.
