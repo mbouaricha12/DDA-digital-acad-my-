@@ -287,6 +287,38 @@ La nomenclature finale du module doit être validée avant création du contenu 
 
 `Perform` ne signifie pas promettre une performance financière. Il signifie analyser la qualité du processus lorsque les données collectées sont suffisantes.
 
+## C.4 Motion design et animation 3D
+
+L’animation 3D est bien retenue comme **couche de finition et de différenciation visuelle**, mais elle ne doit pas devenir une fonctionnalité Premium autonome ni retarder la boucle pédagogique.
+
+### Rôle prévu
+
+- renforcer l’identité DDA sur la landing et les transitions de produit ;
+- donner de la profondeur au Terminal, aux fils de maîtrise et aux preuves ;
+- visualiser une relation pédagogique — progression, structure, flux, zones — plutôt qu’ajouter un décor gratuit ;
+- rendre les états `loading`, `locked`, `validated` et `review` plus lisibles.
+
+### Séquence recommandée
+
+1. **Phase de finition du site actuel :** une scène 3D légère sur la landing ou un objet institutionnel DDA, avec fallback statique.
+2. **Phase Premium MVP :** micro-animation 3D ou pseudo-3D limitée à un moment de preuve ou de progression, sans dépendance à des données réelles.
+3. **Phase ultérieure :** expériences 3D interactives uniquement si elles améliorent réellement l’apprentissage et restent utilisables sur mobile.
+
+### Contraintes techniques
+
+- privilégier CSS 3D, SVG animé ou Canvas léger avant d’ajouter une dépendance WebGL lourde ;
+- ne pas charger de modèle 3D volumineux dans le chemin critique mobile ;
+- prévoir une image ou une composition CSS de remplacement si WebGL est indisponible ;
+- respecter `prefers-reduced-motion` et le mode low-data ;
+- limiter l’animation aux propriétés performantes quand c’est possible (`transform`, `opacity`) ;
+- ne transmettre aucune information essentielle par le mouvement seul ;
+- tester 320/360/390/428/768/1024/1440 px, appareils modestes et installation PWA ;
+- mesurer le poids, le temps de chargement et l’impact batterie avant publication.
+
+### Décision de produit
+
+La 3D doit servir **la compréhension et la preuve de progression**. Elle ne doit pas transformer DDA en vitrine décorative, casino visuel, clone de plateforme de trading ou expérience inaccessible. Elle appartient à la finition visuelle de la Phase 1 et à une extension pédagogique éventuelle, pas au modèle de données Premium.
+
 ---
 
 # D. Information Architecture
@@ -414,6 +446,7 @@ Free learner
 | Weekly Review | Non | Non au MVP, structure réservée | V2 | P1 |
 | Decision Replay | Non | Non au MVP | V2 | P1 |
 | DDA Progress Score | Aucun score arbitraire | Aucun score arbitraire | V2 après données suffisantes | P1 |
+| Animation 3D / motion design | Finition visuelle progressive | Micro-interaction de preuve au MVP | Expériences 3D pédagogiques avancées | P1 |
 | Strategy Builder | Non | Vision seulement | V3 | P3 |
 | Backtesting Lab | Non | Vision seulement | V3 | P3 |
 | Performance metrics | Non | Non tant que les données ne sont pas collectées | V2/V3 | P2 |
@@ -653,6 +686,15 @@ DDA est mobile-first. Toute nouvelle surface Premium doit être testée au minim
 - Le mode low-data doit désactiver les images non essentielles et les animations décoratives.
 - Les transitions doivent respecter `prefers-reduced-motion`.
 
+## J.1 Règles spécifiques à la 3D
+
+- Une animation 3D doit avoir une fonction narrative identifiable avant d’être développée.
+- La landing peut recevoir une scène 3D institutionnelle, mais le contenu principal doit rester immédiatement lisible sans elle.
+- Dans l’app apprenant, la 3D doit être subordonnée à un état réel : compétence, lab, preuve, verrou ou progression.
+- Les modèles lourds, textures haute résolution et bibliothèques WebGL ne doivent pas entrer dans le bundle principal sans budget de performance validé.
+- Le fallback statique est une expérience supportée, pas une erreur.
+- Une capture mobile, un test reduced-motion et un test réseau dégradé sont obligatoires avant publication.
+
 ## J.1 Animation 3D et motion design
 
 L’animation 3D fait bien partie de la direction de finition de DDA, mais elle doit
@@ -889,6 +931,14 @@ Les entitlements locaux servent à guider l’interface du prototype. Ils ne pro
 - Ajouter captures représentatives et limites restantes.
 - Exécuter le workflow Pages/Product Gate.
 - Fusionner seulement après validation des tests et de la gouvernance.
+
+## Étape 7 bis — Finition 3D contrôlée
+
+- Choisir un seul emplacement prioritaire : landing institutionnelle ou preuve Premium.
+- Définir le sens de l’animation et son fallback statique avant de choisir une technologie.
+- Mesurer le poids initial, le temps de rendu, le coût CPU/GPU et la batterie sur mobile.
+- Ajouter les tests reduced-motion, low-data, WebGL indisponible et écran étroit.
+- Publier la 3D uniquement si elle améliore la compréhension ou le rythme sans dégrader l’accès au contenu.
 
 ## Étape 8 — Ce qui ne doit pas être fait dans cette tranche
 
