@@ -1,6 +1,6 @@
 /* DDA Design System — mobile-first base. Tablet/desktop refine via min-width queries below. */
 :root{
-  --navy-950:#050B14;--navy-900:#081426;--navy-800:#0B1B30;--navy-700:#0F2440;--navy-600:#15304F;
+  --navy-950:#060d17;--navy-900:#081426;--navy-800:#0B1B30;--navy-700:#0F2440;--navy-600:#15304F;
   --ink:#122F48;--line:#1E3854;--line-soft:#16283d;
   --ivory:#F6F3EC;--ivory-2:#ECE6D6;--paper:#FFFDF8;--white:#F8FAFC;
   --blue:#0B6FAE;--blue-2:#0DA6D9;--teal:#189B92;--gold:#D9A441;--gold-soft:#E8C685;

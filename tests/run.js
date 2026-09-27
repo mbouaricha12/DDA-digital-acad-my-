@@ -896,16 +896,98 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     }
   });
 
+  await test('mobile landing is full-bleed Deep Navy with inset cards and no sticky-CTA overlap', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+
+    const shell = await page.evaluate(() => {
+      const landing = document.getElementById('landing');
+      const style = getComputedStyle(landing);
+      return {
+        width: landing.getBoundingClientRect().width,
+        viewportWidth: window.innerWidth,
+        background: style.backgroundColor,
+        paddingBottom: parseFloat(style.paddingBottom),
+        visibleDialogs: [...document.querySelectorAll('[role="dialog"], dialog, [aria-modal="true"]')]
+          .filter(node => !node.hidden && getComputedStyle(node).display !== 'none' && node.getBoundingClientRect().width > 0)
+          .length,
+        visibleCloseButtons: [...document.querySelectorAll('.reader-close')]
+          .filter(node => getComputedStyle(node).display !== 'none' && getComputedStyle(node).visibility !== 'hidden' && node.getBoundingClientRect().width > 0)
+          .length
+      };
+    });
+    assert.equal(shell.width, shell.viewportWidth, 'landing must occupy the full mobile viewport width');
+    assert.equal(shell.background, 'rgb(6, 13, 23)', 'landing must use Deep Navy #060d17');
+    assert.ok(shell.paddingBottom >= 120, `landing needs substantial bottom clearance (got ${shell.paddingBottom}px)`);
+    assert.equal(shell.visibleDialogs, 0, 'no closeable modal/dialog should appear over the idle landing');
+    assert.equal(shell.visibleCloseButtons, 0, 'no modal close button should appear over the idle landing');
+
+    const cards = await page.locator('.landing-free-grid article').evaluateAll(nodes => nodes.map(node => {
+      const rect = node.getBoundingClientRect();
+      return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom };
+    }));
+    assert.equal(cards.length, 4, 'DDA Free must keep all four numbered cards');
+    assert.ok(cards[0].left >= 15, `cards need visible mobile gutters (left=${cards[0].left}px)`);
+    assert.ok(cards[0].right <= 375, `cards need visible mobile gutters (right=${cards[0].right}px)`);
+    assert.ok(cards[1].top - cards[0].bottom >= 10, 'cards should have consistent breathing room');
+
+    await page.locator('[data-funnel-section="differentiation"]').scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => document.body.classList.contains('landing-has-scrolled'));
+    assert.equal(await page.locator('.landing-mobile-cta').isVisible(), true, 'CTA should remain visible between sections when it does not cover content');
+    const touchTargetMinHeight = await page.locator('.landing-mobile-cta button').evaluate(node => parseFloat(getComputedStyle(node).minHeight));
+    assert.ok(touchTargetMinHeight >= 44, 'the sticky CTA should retain a usable touch target');
+    await page.locator('.landing-free-grid article:last-child').evaluate(node => node.scrollIntoView({ block: 'end' }));
+    await page.waitForFunction(() => document.body.classList.contains('landing-cta-covering-content'));
+    assert.equal(await page.locator('.landing-mobile-cta').isVisible(), false, 'sticky CTA must yield while it geometrically overlaps card 04');
+    const overlap = await page.evaluate(() => {
+      const card = document.querySelector('.landing-free-grid article:last-child').getBoundingClientRect();
+      return {
+        intersectsStickyBounds: card.bottom > window.innerHeight - 12 - 62 && card.top < window.innerHeight - 12,
+        guardActive: document.body.classList.contains('landing-cta-covering-content')
+      };
+    });
+    assert.ok(overlap.intersectsStickyBounds, 'the regression fixture must position the CTA over the last card to exercise the guard');
+    assert.equal(overlap.guardActive, true, 'the overlap guard should activate when the last card enters the sticky area');
+    await context.close();
+
+    const learnerContext = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(learnerContext);
+    const learnerPage = await learnerContext.newPage();
+    await learnerPage.goto(`${BASE}/#dashboard`);
+    const learnerHome = await learnerPage.evaluate(() => ({
+      activeView: document.querySelector('.view.active')?.id,
+      background: getComputedStyle(document.body).backgroundColor,
+      dialogs: [...document.querySelectorAll('[role="dialog"], dialog, [aria-modal="true"]')]
+        .filter(node => !node.hidden && getComputedStyle(node).display !== 'none' && node.getBoundingClientRect().width > 0).length,
+      closeButtons: [...document.querySelectorAll('.reader-close')]
+        .filter(node => getComputedStyle(node).display !== 'none' && getComputedStyle(node).visibility !== 'hidden' && node.getBoundingClientRect().width > 0).length
+    }));
+    assert.equal(learnerHome.activeView, 'dashboard', 'a local learner should see the actual learning home');
+    assert.equal(learnerHome.background, 'rgb(6, 13, 23)', 'learning home should use the same Deep Navy canvas');
+    assert.equal(learnerHome.dialogs, 0, 'learning home should not be enclosed by a fake white dialog');
+    assert.equal(learnerHome.closeButtons, 0, 'learning home should not show an unrelated dialog close button');
+    await learnerContext.close();
+  });
+
   await test('landing funnel records a reached section once and reveals the mobile sticky CTA after scroll', async () => {
     const context = await freshContext(browser, { width: 390, height: 844 });
     const page = await context.newPage();
     await page.goto(`${BASE}/#landing`);
     assert.equal(await page.locator('.landing-mobile-cta').isVisible(), false, 'sticky CTA must not cover the first landing decision');
 
-    await page.locator('[data-funnel-section="free"]').scrollIntoViewIfNeeded();
+    await page.locator('[data-funnel-section="differentiation"]').scrollIntoViewIfNeeded();
     await page.waitForFunction(() => document.body.classList.contains('landing-has-scrolled'));
+    assert.equal(await page.locator('.landing-mobile-cta').isVisible(), true, 'sticky CTA should appear after the reader passes the hero');
+
+    await page.locator('[data-funnel-section="free"]').scrollIntoViewIfNeeded();
     await page.waitForFunction(() => window.DDA.load().events.some(event => event.name === 'landing_section_reached' && event.metadata?.section === 'free'));
-    assert.equal(await page.locator('.landing-mobile-cta').isVisible(), true, 'sticky CTA should appear after the reader starts scrolling');
+    const freeCardOverlap = await page.evaluate(() => {
+      const card = document.querySelector('.landing-free-grid article:last-child').getBoundingClientRect();
+      const cta = document.querySelector('.landing-mobile-cta').getBoundingClientRect();
+      return card.bottom > cta.top && card.top < cta.bottom;
+    });
+    assert.equal(await page.locator('.landing-mobile-cta').isVisible(), !freeCardOverlap, 'sticky CTA should yield only when it would cover the final Free card');
 
     await page.locator('[data-funnel-section="differentiation"]').scrollIntoViewIfNeeded();
     await page.locator('[data-funnel-section="free"]').scrollIntoViewIfNeeded();
