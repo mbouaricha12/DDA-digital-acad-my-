@@ -995,3 +995,23 @@ body.access-mode .prototype-banner{
 .lesson-main .competency-check-block strong{color:#f8fafc}
 .lesson-main .competency-check-block .icon{color:#d4af37}
 .lesson-main .competency-check-block p{color:#94a3b8}
+
+
+/* Lesson result actions — les liens de sortie doivent rester lisibles sur
+   la surface sombre, y compris après une validation complète. */
+.lesson-main .result-action,
+.lesson-main .result-action:visited{
+  color:#cbd5e1;
+  border-color:rgba(255,255,255,.16);
+}
+.lesson-main .result-action:hover,
+.lesson-main .result-action:focus-visible{
+  color:#f8fafc;
+  border-color:#d4af37;
+  background:rgba(23,105,209,.16);
+}
+.lesson-main .result-card .result-label,
+.lesson-main .result-card .result-status,
+.lesson-main .result-card .status-label{
+  color:#8ee0ce;
+}

@@ -226,3 +226,10 @@ Validation : capture mobile dédiée, **31 tests E2E**, **24 smoke checks**, con
 Les blocs `competency-check-block` des leçons utilisaient encore une surface claire (`#EAF3F8`) héritée du thème initial. Ils sont maintenant uniformisés sur une surface Deep Navy texturée, avec bordure `rgba(255,255,255,.08)`, liseré doré discret, texte d’introduction `#94a3b8` et compétence nommée en `#f8fafc`. La correction couvre les modes `targets` et `confirms` et toutes les leçons authored M0/M1.
 
 Contrôle mobile : six blocs de compétence inspectés, tous avec texte secondaire `rgb(148,163,184)`, libellé principal `rgb(248,250,252)` et bordure claire subtile. Validation : **31 tests E2E**, **24 smoke checks** et contrats Node passés.
+
+
+## 20. Revue globale des surfaces pédagogiques
+
+Le scan mobile des surfaces de leçon a identifié un dernier héritage clair : les actions de sortie des cartes de résultat (`Voir mon Terminal`, `Voir ma Progression`) utilisaient encore la couleur sombre du thème historique. Elles utilisent maintenant `#cbd5e1`, passent en `#f8fafc` au focus ou survol, et reçoivent une bordure visible avec accent doré.
+
+Le scan a confirmé que la seule surface claire restante est le bouton de lecture vidéo, volontairement contrasté comme contrôle interactif. Les cartes Compétence, quiz, feedback, résultats et états verrouillés sont maintenant intégrées au registre Deep Navy. Validation mobile et non-régression : **31 E2E**, **24 smoke checks**, contrats Node passés.
