@@ -1408,7 +1408,12 @@ function showView(id, recordEvent = true) {
     }
   }
   views.forEach(view => view.classList.toggle('active', view.id === id));
-  [...desktopItems, ...mobileItems].forEach(item => item.classList.toggle('active', item.dataset.view === id));
+  [...desktopItems, ...mobileItems].forEach(item => {
+    const isActive = item.dataset.view === id;
+    item.classList.toggle('active', isActive);
+    if (isActive) item.setAttribute('aria-current', 'page');
+    else item.removeAttribute('aria-current');
+  });
   document.body.classList.toggle('lesson-focus', LESSON_VIEW_IDS.has(id));
   // Acquisition V1 — #landing is a public marketing surface, not an app screen:
   // it must never show the authenticated chrome (sidebar/plan/profile, topbar,

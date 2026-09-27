@@ -77,17 +77,20 @@
         <span class="brand-name">Darius Digital Academy</span>
       </a>
       <nav>
+        <p class="nav-section-label">Apprendre</p>
         <button class="nav-item active" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Aujourd’hui</button>
         <button class="nav-item" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mon parcours</button>
         <button class="nav-item" id="nav-current-lesson" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Leçon en cours</button>
         <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
         <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal &amp; Plan</button>
+        <p class="nav-section-label">Explorer</p>
         <button class="nav-item" data-view="community"><svg class="icon"><use href="#icon-users"/></svg> Communauté</button>
         <button class="nav-item" data-view="practice"><svg class="icon"><use href="#icon-target"/></svg> Pratique avancée</button>
         <button class="nav-item" data-view="intelligence"><svg class="icon"><use href="#icon-compass"/></svg> Intelligence DDA</button>
         <button class="nav-item" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
         <button class="nav-item" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg> Marchés & BRVM</button>
         <button class="nav-item" data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg> Broker Hub</button>
+        <p class="nav-section-label">Compte</p>
         <button class="nav-item" data-view="membership"><svg class="icon"><use href="#icon-spark"/></svg> DDA Premium</button>
         <button class="nav-item" data-view="support"><svg class="icon"><use href="#icon-help"/></svg> Aide & support</button>
         <button class="nav-item" data-view="profile"><svg class="icon"><use href="#icon-user"/></svg> Profil</button>
@@ -125,7 +128,7 @@
           </div>
 
           <div class="dda-aperture landing-aperture" role="img" aria-label="Signature éditoriale DDA : apprendre, pratiquer, prouver sa progression">
-            <img class="photo-fill" src="images/photos/hero-market-woman.jpg" alt="" loading="lazy">
+            <img class="photo-fill" src="images/photos/hero-market-woman.jpg" alt="" loading="eager" fetchpriority="high">
             <div class="photo-scrim"></div>
             <div class="aperture-grid" aria-hidden="true"></div>
             <div class="landing-aperture-top">
