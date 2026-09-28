@@ -52,6 +52,18 @@ Le verrou séquentiel est désormais bien appliqué par `showView()` via `LESSON
 
 **Lesson Registry (septembre 2026)** : `LESSON_PREREQUISITE`, `LESSON_VIEW_ID`, les titres d'écran des leçons et leurs permissions ne sont plus des littéraux maintenus à la main — ils sont **dérivés de `LESSON_REGISTRY`** (haut de `dist/app.js`), une table unique déclarant chaque leçon une seule fois (id, vue, titre, suffixe d'ids, prérequis, bloc quiz, ancres et interactions notées). Cette carte des routes reflète ce que le registre produit ; `tests/test_lesson_registry.js` garantit en CI que les deux restent cohérents.
 
+## Addendum — Surfaces d'expérience (28 septembre 2026)
+
+Les routes restent un **SPA hash-based à un seul niveau**, mais le DOM n'est plus une liste plate de vues mélangées. Les vues sont maintenant regroupées dans trois surfaces explicites, pilotées par le même `showView(id)` :
+
+| Surface | Routes | Shell attendu | Rôle |
+|---|---|---|---|
+| `PUBLIC` | `#landing` | navigation publique, sans chrome apprenant | découverte, confiance, positionnement DDA |
+| `AUTHENTICATION` | `#access` | shell d'inscription/onboarding, tonalité claire | inscription locale et qualification |
+| `LEARNER APP` | `#dashboard`, `#path`, `#lesson*`, `#progress`, `#journal`, `#resources`, `#markets`, `#brokers`, `#membership`, `#support`, `#community`, `#practice`, `#intelligence`, `#profile` | sidebar/topbar/mobile-nav apprenant | progression, apprentissage, preuves et aperçus locaux |
+
+La classe `body.public-shell` continue de gérer l'exception landing. Les classes `body.dda-auth-shell` et `body.dda-app-shell` rendent explicite le contexte visuel courant ; `.dda-surface.is-active` garantit qu'une seule surface est visible à la fois. **Aucun identifiant de vue, aucune permission et aucune route n'a été renommé.**
+
 ## Addendum — Acquisition Engine V1 (CEO decision)
 
 `landing` devient le point d'entrée anonyme par défaut (`!prototypeState.user` sans hash valide), `access` reste atteignable directement par lien/deep-link et reste la cible de tout refus de permission (`showView()` continue de rediriger vers `access`, jamais vers `landing`, quand un visiteur anonyme tente une vue protégée — `landing` est un point d'entrée marketing, pas une destination de gate). Aucune autre règle de `smartBackTarget()`/`previousView` n'est modifiée par cette tranche.

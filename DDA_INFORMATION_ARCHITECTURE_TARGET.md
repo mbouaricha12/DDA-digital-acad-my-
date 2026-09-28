@@ -1,6 +1,6 @@
 # DDA — Architecture d’information cible réajustée
 
-**Statut : cadrage cible — aucune route existante modifiée**  
+**Statut : cadrage cible — surfaces DOM implémentées, aucune route existante modifiée**
 **Date : 26 septembre 2026**  
 **Autorité finale : Richard Darius, CEO**
 
@@ -152,4 +152,4 @@ Utiliser cette architecture comme **structure de menu et de roadmap documentaire
 - la place du Journal dans V1 ou V1.5 ;
 - les conditions d’ouverture des zones Communauté, Premium et Expert.
 
-**Aucune modification du code ou des routes n’est engagée par ce document.**
+**Les routes et la logique métier restent inchangées.** La structure DOM est désormais alignée sur cette cible via trois surfaces explicites : `PUBLIC` (`#landing`), `AUTHENTIFICATION` (`#access`) et `APP APPRENANT` (vues protégées). Les branches `PREMIUM` et `FUTUR ÉCOSYSTÈME EXPERT` restent des domaines de navigation/roadmap, pas des capacités artificiellement activées.

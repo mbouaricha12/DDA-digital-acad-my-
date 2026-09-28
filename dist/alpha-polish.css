@@ -2127,3 +2127,45 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 .page-mission{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:0 0 26px;padding:16px 18px;border:1px solid rgba(216,174,97,.2);border-radius:14px;background:linear-gradient(120deg,rgba(18,43,68,.78),rgba(7,17,29,.9));box-shadow:0 16px 34px rgba(0,0,0,.16),inset 0 1px rgba(255,255,255,.05)}
 .page-mission>div{display:grid;gap:3px;min-width:0}.page-mission .eyebrow{margin:0;color:var(--dda-material-brass-soft);font-size:.62rem;letter-spacing:.15em;text-transform:uppercase}.page-mission strong{color:#f3f6fa;font-size:.95rem}.page-mission span{color:rgba(214,226,239,.62);font-size:.78rem;line-height:1.45}.page-mission .text-action{flex:none;white-space:nowrap;color:var(--dda-material-brass-soft)}
 @media(max-width:700px){.page-mission{align-items:flex-start;flex-direction:column;gap:12px;margin-bottom:18px;padding:14px}.page-mission .text-action{white-space:normal;text-align:left}}
+
+
+
+/* ======================================================================
+   DDA INFORMATION ARCHITECTURE — explicit surface separation
+   PUBLIC / AUTHENTICATION / LEARNER APP
+   The hash routes remain unchanged; only their visual and semantic shells
+   are now explicit so landing content cannot bleed into the product chrome.
+   ====================================================================== */
+.dda-surface{display:none;min-width:0;min-height:100%}
+.dda-surface.is-active{display:block}
+.dda-public-surface,.dda-auth-surface{width:100%}
+.dda-app-surface{width:100%;background:var(--navy-950);min-height:calc(100vh - 84px)}
+body.dda-app-shell main{background:var(--navy-950)}
+body.dda-auth-shell main{background:var(--ivory)}
+body.dda-auth-shell .topbar{background:rgba(247,245,240,.92);border-bottom-color:rgba(10,17,40,.12);color:var(--ink)}
+body.dda-auth-shell .context{color:var(--ink)}
+body.dda-auth-shell .network-state{color:var(--muted-2)}
+body.dda-auth-shell .network-state i{background:var(--teal)}
+body.dda-auth-shell .icon-button{color:var(--ink);border-color:rgba(10,17,40,.15)}
+body.dda-auth-shell .prototype-banner{background:var(--ivory);color:var(--muted-2);border-bottom-color:rgba(10,17,40,.12)}
+body.dda-auth-shell .mobile-nav{background:rgba(247,245,240,.96);border-top-color:rgba(10,17,40,.14)}
+body.dda-auth-shell .mobile-nav button{color:var(--muted-2)}
+body.dda-auth-shell .mobile-nav button.active{color:var(--blue)}
+body.dda-auth-shell .dda-auth-surface{background:var(--ivory)}
+body.dda-auth-shell #access{max-width:1280px;margin-inline:auto}
+body.dda-app-shell .dda-public-surface,
+body.dda-app-shell .dda-auth-surface{display:none!important}
+body.public-shell .dda-app-surface,
+body.public-shell .dda-auth-surface{display:none!important}
+body.public-shell main{background:transparent}
+body.public-shell .prototype-banner{display:none}
+
+@media(min-width:860px){
+  .dda-auth-surface #access{min-height:calc(100vh - 84px);display:grid;align-items:center;padding-top:34px;padding-bottom:70px}
+  .dda-app-surface .view{max-width:1280px}
+}
+@media(max-width:859px){
+  .dda-app-surface{min-height:calc(100vh - 62px)}
+  body.dda-auth-shell .topbar{height:62px}
+  .dda-auth-surface #access{padding-top:20px;padding-bottom:86px}
+}

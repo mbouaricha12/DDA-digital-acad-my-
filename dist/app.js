@@ -2066,6 +2066,9 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
     }
   }
   views.forEach(view => view.classList.toggle('active', view.id === id));
+  document.querySelectorAll('.dda-surface').forEach(surface => {
+    surface.classList.toggle('is-active', Boolean(surface.querySelector('.view.active')));
+  });
   [...desktopItems, ...mobileItems].forEach(item => {
     const isActive = item.dataset.view === id;
     item.classList.toggle('active', isActive);
@@ -2073,6 +2076,8 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
     else item.removeAttribute('aria-current');
   });
   document.body.classList.toggle('lesson-focus', LESSON_VIEW_IDS.has(id));
+  document.body.classList.toggle('dda-auth-shell', id === 'access');
+  document.body.classList.toggle('dda-app-shell', id !== 'landing' && id !== 'access');
   // Acquisition V1 — #landing is a public marketing surface, not an app screen:
   // it must never show the authenticated chrome (sidebar/plan/profile, topbar,
   // mobile nav, prototype banner). Scoped purely via this body class, same
