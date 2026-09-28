@@ -309,3 +309,22 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 **Préservation :** CSS et tests uniquement, plus versionnement PWA. Aucun changement au BFF/Supabase/RLS, à l’architecture, aux routes, au modèle local, aux permissions ni aux handoffs; aucune cotation ou statistique d’apprenant inventée.
 
 **Validation locale :** contrats Node et cohérence route/registre PASS; syntaxe PASS; `git diff --check` PASS; Playwright **53/53** PASS, incluant l’onboarding mobile et les préférences de mouvement/données. Captures multi-vues desktop/mobile inspectées, sans overflow ni erreur console. Compte rendu détaillé : `DDA_ELITE_UX_NAVIGATION_REVIEW_2026-09-28.md`.
+
+## Publication vérifiée — DDA Elite / Aurora (28 septembre 2026)
+
+**Statut final :** PR #94 fusionnée dans `main` au commit `cc3c96d9a4204948dc5fcc445da7b06ddf61b122`; les statuts de préparation « non fusionnée/non déployée » consignés plus haut sont historiques et supersédés par cette section. Le workflow [GitHub Pages run 36388831251](https://github.com/mbouaricha12/DDA-digital-acad-my-/actions/runs/36388831251) a terminé avec succès (`verify` + `deploy`). Production : https://mbouaricha12.github.io/DDA-digital-acad-my-/; shell `dda-shell-v21`, signature Aurora `#1887ff`.
+
+**Smoke test public post-déploiement :** exécution Chromium avec état local de démonstration (sans session Supabase réelle); Accueil/Terminal, Parcours, Journal, Progression, Marchés et Profil sur desktop 1440 px et mobile 390 px; 0 erreur console, 0 overflow horizontal. CTA et routes protégées conformes; navigation History API/Back ramène à la vue interne précédente sur les deux viewports. Ce test vérifie le parcours UI seulement et ne certifie pas l'auth/backend. Captures live : `/home/ubuntu/dda-live-check/`.
+
+
+## Tranche — Finition de la palette DDA et du Journal (v22, 28 septembre 2026)
+
+**Statut à ce point :** candidate locale validée; publication en attente du merge/deploy de suivi. Le site public demeure sur `dda-shell-v21` jusqu'au contrôle live.
+
+**Identité :** Deep Navy `#060d17` conservé; cobalt Aurora `#2588ff`, turquoise minéral `#39d6cf`, or DDA `#f3c76c`. Glassmorphism plus bleu et plus lisible, CTA bleu-vers-turquoise renforcés sans recolorer les états sémantiques du Terminal. Progression affiche mieux la texture de son bandeau tout en gardant le scrim de contraste.
+
+**Finition Journal :** retrait intérieur de 18 px au toolbar et francisation des libellés de revue. Service worker passé à `dda-shell-v22`.
+
+**Validation locale :** `node --check` runtime/service worker; registre cohérent (23 routes, 38 entrées); contrats Node; `tests/run.js` : **53/53**; `git diff --check` : **PASS**. Captures desktop/mobile de l'Accueil, du Terminal, du Journal et de Progression inspectées : aucune erreur console ni largeur excédentaire.
+
+**Périmètre de préservation :** pas de changement au BFF, Supabase, RLS, schéma, routes, permissions, données synthétiques ou logique métier.

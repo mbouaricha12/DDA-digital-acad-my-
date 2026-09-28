@@ -2,7 +2,7 @@
 
 **Date :** 28 septembre 2026
 **Branche :** `feat/darius-analysis-terminal`
-**Pull request :** [#94 — Darius Analysis Terminal Pro](https://github.com/mbouaricha12/DDA-digital-acad-my-/pull/94) — ouverte, non fusionnée
+**Pull request :** [#94 — Darius Analysis Terminal Pro](https://github.com/mbouaricha12/DDA-digital-acad-my-/pull/94) — fusionnée dans `main` et publiée (état vérifié ci-dessous)
 **Périmètre :** harmonisation visuelle globale, hiérarchie des espaces, raccourci Terminal et retour mobile.
 
 ## Résumé
@@ -11,7 +11,7 @@ La surcouche Elite applique un langage visuel plus cohérent et reposant : toile
 
 La navigation a été clarifiée sans créer ni supprimer de route. Le Terminal reste un espace intégré au Dashboard, accessible depuis la sidebar desktop et depuis le lien « Explorer le Terminal ». Sur mobile, Retour/Avancer et le bouton Retour de l’application suivent maintenant l’historique interne des écrans.
 
-**Aucun fichier BFF, Supabase, RLS, schéma de données ou secret n’a été modifié.** Aucun déploiement ni fusion de la PR n’a été effectué.
+**Aucun fichier BFF, Supabase, RLS, schéma de données ou secret n’a été modifié.** La PR #94 a depuis été fusionnée et déployée; les validations de production sont consignées dans l’addendum final.
 
 ## Hiérarchie produit appliquée
 
@@ -63,7 +63,7 @@ Le raccourci Terminal utilise l’ancre `#analysis-terminal` à l’intérieur d
 - Le raccourci desktop et le lien mobile amènent au graphique en faisant défiler le Dashboard, sans nouvelle route.
 - Routes, gardes d’accès, stockage local, logique des leçons, permissions et handoffs existants sont conservés.
 - Aucun chiffre de confiance, statistique apprenant ou cotation n’a été fabriqué. Les instruments et mini-courbes de démonstration restent identifiés comme pédagogiques/synthétiques.
-- Le cache du shell PWA est passé à `dda-shell-v20` pour publier ensemble le HTML, la feuille Elite et le routeur actualisés.
+- Le cache du shell PWA est passé à `dda-shell-v20` dans la tranche Elite initiale, puis à `dda-shell-v21` pour publier la couche Aurora (voir l’addendum ci-dessous).
 
 ## Validation effectuée
 
@@ -84,9 +84,9 @@ Le raccourci Terminal utilise l’ancre `#analysis-terminal` à l’intérieur d
 - [Progression — mobile, 390 px](/home/ubuntu/dda-elite-preview/progress-mobile.png)
 - [Progression — panneau de compétences, 390 px](/home/ubuntu/dda-elite-preview/progress-context-mobile.png)
 
-## État de livraison
+## État de livraison à la rédaction initiale (avant fusion)
 
-Les changements restent sur `feat/darius-analysis-terminal` dans la PR #94 ouverte vers `main`. La branche n’est ni fusionnée ni déployée. Les checks GitHub du code livré ont été vérifiés après la mise à jour de la PR : **8 réussis, 1 ignoré, 0 en attente, échec ou annulation**.
+À cette étape de la revue, les changements étaient encore sur `feat/darius-analysis-terminal`, dans la PR #94 ouverte vers `main`. Les checks GitHub étaient alors **8 réussis, 1 ignoré, 0 en attente, échec ou annulation**. Cet état est historique et a été supersédé par le merge et le déploiement confirmés ci-dessous.
 
 
 ## Addendum — DDA Aurora (28 septembre 2026)
@@ -109,4 +109,34 @@ La référence BizNext a servi uniquement à préciser la qualité de lumière e
 - [Journal — mobile](/home/ubuntu/dda-aurora-preview/aurora-journal-mobile.png) · [Progression — mobile](/home/ubuntu/dda-aurora-preview/aurora-progress-mobile.png)
 - [Marchés — desktop](/home/ubuntu/dda-aurora-preview/aurora-markets-desktop.png) · [Profil — mobile](/home/ubuntu/dda-aurora-preview/aurora-profile-mobile.png)
 
-**Livraison :** changements préparés sur `feat/darius-analysis-terminal`, PR #94 ouverte vers `main`; aucun merge ni déploiement.
+**État à la rédaction de cet addendum (avant l’approbation de publication) :** changements préparés sur `feat/darius-analysis-terminal`, PR #94 ouverte vers `main`; aucun merge ni déploiement n’avait encore été effectué.
+
+## Mise à jour post-fusion et post-publication — 28 septembre 2026
+
+- PR #94 fusionnée dans `main` au merge commit `cc3c96d9a4204948dc5fcc445da7b06ddf61b122`.
+- Workflow [Verify and deploy static site to GitHub Pages](https://github.com/mbouaricha12/DDA-digital-acad-my-/actions/runs/36388831251) : vérification et déploiement réussis; les deux jobs `verify` et `deploy` sont verts.
+- Site public : https://mbouaricha12.github.io/DDA-digital-acad-my-/ — le shell servi est `dda-shell-v21` et le token Aurora `#1887ff` est présent.
+- Smoke test Chromium post-déploiement, avec état local de démonstration (sans session Supabase réelle) : Accueil, Dashboard/Terminal, Parcours, Journal, Progression, Marchés et Profil testés en desktop (1440 px) et mobile (390 px); aucune erreur console ni aucun débordement horizontal. Le CTA ouvre l’accès, Back/Forward revient bien aux vues précédentes, et un visiteur reste redirigé vers l’accès lorsqu’il demande une route protégée. Le socle backend/auth n’a pas été modifié ni certifié par ce test UI.
+- Les anciens statuts « non fusionnée / non déployée » ci-dessus décrivent la situation avant l’approbation; cette mise à jour constitue l’état final.
+
+Si un navigateur ou une PWA affiche encore l’ancien cache, fermer puis rouvrir l’application ou effectuer un rechargement forcé afin de laisser le service worker v21 s’activer.
+
+
+## Addendum — Palette DDA pure et inspirante (v22, 28 septembre 2026)
+
+**Direction chromatique :** le Deep Navy `#060d17` reste la toile stable; les accents gagnent en présence avec un cobalt Aurora `#2588ff`, un turquoise minéral `#39d6cf` et un or DDA plus pur `#f3c76c`. Les surfaces de verre fumé et les liserés prennent une nuance bleue plus lisible; les CTA passent du bleu lumineux vers le turquoise. Les couleurs sémantiques des bougies et des états pédagogiques ne changent pas.
+
+- **Progression :** le visuel du bandeau conserve son voile de contraste et sa fonction d'arrière-plan, tout en passant de `saturate(.45) brightness(.68)` à `saturate(.68) brightness(.8)` pour laisser mieux percevoir sa matière et ses couleurs.
+- **Journal :** le toolbar gagne `18px` de retrait intérieur; « Weekly Review » est harmonisé en « Revue hebdomadaire » dans le Journal, le parcours et la confirmation d'enregistrement.
+- **Cache :** service worker `dda-shell-v22` afin de faire recharger les styles et libellés aux clients installés.
+- **Préservation :** changements de présentation, de microcopie et de cache uniquement. Aucune modification des routes, des handlers métier, des données pédagogiques synthétiques, du BFF, de Supabase, de RLS ou des permissions.
+- **Validation locale v22 :** syntaxe JS, cohérence du registre (23 routes / 38 entrées), contrats Node, `git diff --check` et Playwright complet : **53 réussis, 0 échec**. Les captures locales desktop/mobile montrent l'Accueil, le Terminal, le Journal et Progression sans erreur console ni débordement horizontal.
+
+### Aperçus locaux de la palette v22
+
+- [Accueil — desktop, 1440 px](/home/ubuntu/dda-live-check/candidate-v22-landing-desktop.png) · [mobile, 390 px](/home/ubuntu/dda-live-check/candidate-v22-landing-mobile.png)
+- [Terminal — mobile, 390 px](/home/ubuntu/dda-live-check/candidate-v22-terminal-mobile.png)
+- [Journal — mobile, 390 px](/home/ubuntu/dda-live-check/candidate-v22-journal-mobile.png)
+- [Progression — mobile, 390 px](/home/ubuntu/dda-live-check/candidate-v22-progress-mobile.png)
+
+**État à cette étape :** validation locale terminée; la version publique est toujours v21 jusqu'à la publication du suivi v22. L'addendum de production sera complété après le smoke test public.

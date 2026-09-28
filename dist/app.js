@@ -2263,7 +2263,7 @@ document.getElementById('weekly-review-form').addEventListener('submit', event =
   } } });
   trackEvent('premium_weekly_review_completed', { proof: 'journal-window' });
   closeWeeklyReview();
-  showToast('Weekly Review enregistrée localement.');
+  showToast('Revue hebdomadaire enregistrée localement.');
 });
 document.getElementById('journal-new-entry').addEventListener('click', event => openJournalComposer(null, event.currentTarget));
 document.getElementById('journal-composer-back').addEventListener('click', closeJournalComposer);
