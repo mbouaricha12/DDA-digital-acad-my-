@@ -296,3 +296,16 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 **Corrections visuelles relevées :** l'héritage CSS du titre hero agrandissait « BRVM Composite » dans le mockup à 76,8 px ; la typo est explicitement ramenée à 8 px. Les notes de compétences futures sortent des surfaces crème et la photo Progression est désaturée/assombrie. Les courbes restent pédagogiques et synthétiques ; aucune donnée réelle ni statistique apprenant n'est inventée. Cache shell : `dda-shell-v20`.
 
 **Préservation :** aucun changement au BFF, Supabase, RLS, schéma, permissions métier, routes existantes, stockage local ou contenu des leçons. Validation : tous les contrats `tests/test_*.js`, syntaxe JavaScript, `git diff --check` et cohérence route/registre passent ; `tests/run.js` : **52 réussis, 0 échec**. Le contrôle route/registre vérifie 23 routes et 38 entrées. Compte rendu : `DDA_ELITE_UX_NAVIGATION_REVIEW_2026-09-28.md` ; captures desktop/mobile hors dépôt : `/home/ubuntu/dda-elite-preview/`.
+
+
+## Tranche — DDA Aurora : lumière, verre fumé et profondeur (28 septembre 2026)
+
+**Statut :** surcouche visuelle préparée sur `feat/darius-analysis-terminal`, dans la PR #94 ouverte; non fusionnée et non déployée. La référence BizNext a été limitée à l’ambiance lumineuse et à la matière : aucune reprise de template ou d’identité. La signature DDA demeure l’Aperture produit, le Terminal pédagogique et le fil de maîtrise fondé sur les preuves.
+
+**Implémentation :** champ de lumière bleu électrique statique sur les 26 vues, cartes existantes en verre fumé bleu-nuit, liserés/reflets, CTAs lumineux, stage 3D à mouvement faible pour ordinateur/téléphone, micro-profondeur de cartes interactives et lueur réservée aux preuves confirmées. Cache PWA `dda-shell-v21`.
+
+**Performance / accessibilité :** animations désactivées en `prefers-reduced-motion` et `low-data`; blur coupé en mobile pour ne pas modifier le repère des overlays/feuilles fixes — transparence sombre maintenue sans backdrop filter. Les gestes, tailles tactiles et états sémantiques restent en place.
+
+**Préservation :** CSS et tests uniquement, plus versionnement PWA. Aucun changement au BFF/Supabase/RLS, à l’architecture, aux routes, au modèle local, aux permissions ni aux handoffs; aucune cotation ou statistique d’apprenant inventée.
+
+**Validation locale :** contrats Node et cohérence route/registre PASS; syntaxe PASS; `git diff --check` PASS; Playwright **53/53** PASS, incluant l’onboarding mobile et les préférences de mouvement/données. Captures multi-vues desktop/mobile inspectées, sans overflow ni erreur console. Compte rendu détaillé : `DDA_ELITE_UX_NAVIGATION_REVIEW_2026-09-28.md`.

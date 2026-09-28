@@ -87,3 +87,26 @@ Le raccourci Terminal utilise l’ancre `#analysis-terminal` à l’intérieur d
 ## État de livraison
 
 Les changements restent sur `feat/darius-analysis-terminal` dans la PR #94 ouverte vers `main`. La branche n’est ni fusionnée ni déployée. Les checks GitHub du code livré ont été vérifiés après la mise à jour de la PR : **8 réussis, 1 ignoré, 0 en attente, échec ou annulation**.
+
+
+## Addendum — DDA Aurora (28 septembre 2026)
+
+La référence BizNext a servi uniquement à préciser la qualité de lumière et la matière des surfaces. La composition et le vocabulaire restent propres à DDA : l’**Aperture** qui met en scène le Terminal et le Journal, les instruments pédagogiques du Terminal, et le **fil de maîtrise** qui n’émet un accent lumineux que sur les états de preuve réellement confirmés. Aucun template, texte, métrique ou identité BizNext n’est repris.
+
+- **Portée :** surcouche CSS additive `dist/alpha-polish.css`, cache PWA `dda-shell-v21`, contrats visuels et Playwright. Aucune modification du BFF, Supabase, RLS, des permissions, du schéma local, des routes, des handlers métier ou des contenus de leçons.
+- **Matière et lumière :** champ Deep Navy `#060d17` conservé sur les 26 vues; nappes/rayons bleu électrique statiques, verre fumé bleu-nuit, liserés fins, reflets d’instrument dans l’Aperture; CTAs d’action en dégradé bleu lumineux et or gardé pour les preuves/repères DDA.
+- **Profondeur en usage :** mouvement lent du stage ordinateur/téléphone, reflet de bureau, entrée de route avec profondeur très légère et inclinaison discrète des cartes réellement interactives sur desktop.
+- **Performance et ergonomie :** motion et reflet coupés en `prefers-reduced-motion`/`low-data`; transparence blur supprimée sur mobile afin de préserver les feuilles fixes et les cibles tactiles. Les fonds restent translucides et lisibles sans filtre coûteux.
+- **Garde-fous fonctionnels :** courbes et données toujours pédagogiques/synthétiques, aucune statistique apprenant ni cotation inventée; routes, navigation et handoff Terminal → Journal inchangés.
+- **Validation locale :** tous les contrats Node, syntaxe, cohérence des routes et `git diff --check` : **PASS**; Playwright : **53 réussis, 0 échec**, y compris l’onboarding mobile, reduced-motion, low-data, toutes les vues et le Terminal.
+- **Inspection visuelle :** Accueil, Terminal, Parcours, Journal, Progression, Marchés et Profil capturés sur desktop et mobile; aucune erreur console, largeur de page conforme au viewport.
+
+### Captures Aurora
+
+- [Accueil — desktop](/home/ubuntu/dda-aurora-preview/aurora-landing-desktop.png) · [mobile](/home/ubuntu/dda-aurora-preview/aurora-landing-mobile.png)
+- [Terminal — desktop](/home/ubuntu/dda-aurora-preview/aurora-dashboard-desktop.png) · [mobile](/home/ubuntu/dda-aurora-preview/aurora-dashboard-mobile.png)
+- [Parcours — desktop](/home/ubuntu/dda-aurora-preview/aurora-path-desktop.png) · [mobile](/home/ubuntu/dda-aurora-preview/aurora-path-mobile.png)
+- [Journal — mobile](/home/ubuntu/dda-aurora-preview/aurora-journal-mobile.png) · [Progression — mobile](/home/ubuntu/dda-aurora-preview/aurora-progress-mobile.png)
+- [Marchés — desktop](/home/ubuntu/dda-aurora-preview/aurora-markets-desktop.png) · [Profil — mobile](/home/ubuntu/dda-aurora-preview/aurora-profile-mobile.png)
+
+**Livraison :** changements préparés sur `feat/darius-analysis-terminal`, PR #94 ouverte vers `main`; aucun merge ni déploiement.

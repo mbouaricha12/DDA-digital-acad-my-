@@ -1829,3 +1829,193 @@ button:disabled{cursor:not-allowed}
 /* Progress is a work surface: keep the poster texture, soften its neon colors. */
 #progress .view-photo-band .photo-fill{filter:saturate(.45) brightness(.68)}
 #progress .view-photo-band .photo-scrim{background:linear-gradient(180deg,rgba(6,13,23,.42),rgba(6,13,23,.6) 44%,rgba(6,13,23,.9))}
+
+
+/* ======================================================================
+   DDA AURORA — signature lumineuse propriétaire, inspirée par la matière,
+   pas par une maquette SaaS générique. L'Aperture + preuves restent le motif.
+   ====================================================================== */
+:root{
+  --dda-aurora-electric:#1887ff;
+  --dda-aurora-cyan:#49c9ff;
+  --dda-aurora-beam:rgba(34,132,255,.16);
+  --dda-aurora-glass:rgba(10,24,41,.82);
+  --dda-aurora-edge:rgba(107,177,255,.23);
+  --dda-aurora-gold-glint:rgba(224,203,155,.18);
+}
+
+/* Static optical depth across every route; background-color remains #060d17. */
+:is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile).view{
+  background-image:
+    radial-gradient(ellipse 54% 26% at 96% 2%,rgba(24,119,239,.16),transparent 74%),
+    radial-gradient(ellipse 44% 25% at 0% 44%,rgba(28,119,211,.085),transparent 76%),
+    radial-gradient(ellipse 50% 24% at 72% 100%,rgba(34,162,231,.075),transparent 75%),
+    linear-gradient(118deg,transparent 44%,rgba(76,151,255,.025) 45%,transparent 46%) !important;
+  background-attachment:fixed;
+}
+
+/* Smoked-glass work surfaces: translucency reveals the route's DDA light field. */
+.view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.terminal-aperture,.terminal-mi,.terminal-two,.terminal-family,.journal-panel,.journal-composer,.journal-entry-card,.journal-empty,.journal-source-context,.weekly-review-evidence,.weekly-review-locked,.resource-feature,.resource-reader,.library-shelf,.landing-plan-card,.plan-card,.membership-status-line,.membership-roadmap,.membership-guardrails,.family-panel,.market-zone,.market-brief,.brvm-panel,.market-calendar,.index-card,.journal-link-block,.broker-row,.broker-empty,.broker-criteria-panel,.broker-list-panel,.support-faq-panel,.support-contact,.community-spaces,.community-featured-card,.community-tile,.community-cta,.future-principle,.intelligence-boundaries article,.premium-track-status,.premium-lab-form,.premium-assessment-form,.certificate-mock,.result-card,.principle,.example-callout,.competency-check-block,.result-stats,.mastery-row,.progress-stat,.next-step-panel,.practice-proof-row,.practice-proof-receipt,.journey-future-note,.library-entry){
+  border-color:var(--dda-aurora-edge);
+  background:linear-gradient(142deg,rgba(20,43,68,.79),rgba(8,19,34,.86));
+  box-shadow:0 18px 44px rgba(0,0,0,.22),0 0 0 1px rgba(33,125,234,.035) inset,0 1px rgba(255,255,255,.045) inset;
+}
+#path .journey-current,#path .journey-future-note{
+  border-color:var(--dda-aurora-edge);
+  background:linear-gradient(142deg,rgba(20,43,68,.83),rgba(8,19,34,.9));
+  box-shadow:0 20px 48px rgba(0,0,0,.24),0 0 32px rgba(25,119,242,.075),0 1px rgba(255,255,255,.06) inset;
+}
+#path .journey-current{color:var(--dda-elite-ink)}
+#path .journey-current :is(h2,p,small,strong,span){color:inherit}
+
+@supports(backdrop-filter:blur(1px)){
+  .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.terminal-aperture,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.resource-reader,.landing-plan-card,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-faq-panel,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form,.journey-future-note){
+    backdrop-filter:blur(10px) saturate(118%);
+  }
+  #path .journey-current{backdrop-filter:blur(10px) saturate(118%)}
+}
+
+/* DDA's Aperture: blue instrument light, gold proof glints, reflected desk pool. */
+#landing .landing-aperture{
+  isolation:isolate;
+  border-color:rgba(93,173,255,.34);
+  background-color:#081321;
+  box-shadow:0 32px 82px rgba(0,0,0,.38),0 0 58px rgba(18,113,244,.16),0 0 0 1px rgba(224,203,155,.055) inset;
+}
+#landing .landing-aperture .photo-scrim{
+  background:
+    radial-gradient(ellipse 34% 30% at 17% 72%,rgba(34,132,255,.29),transparent 78%),
+    radial-gradient(ellipse 38% 28% at 78% 48%,rgba(10,157,242,.20),transparent 78%),
+    linear-gradient(180deg,rgba(6,13,23,.12),rgba(6,13,23,.34) 42%,rgba(6,13,23,.88));
+}
+#landing .landing-device-stage{animation:dda-aperture-float 9s cubic-bezier(.45,0,.55,1) infinite;}
+#landing .landing-device-stage::before{
+  content:"";position:absolute;z-index:0;inset:20% 3% 1%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse at 52% 54%,rgba(24,125,255,.42),rgba(29,116,219,.19) 35%,rgba(33,175,255,.08) 54%,transparent 74%);
+  filter:blur(24px);transform:translateZ(-24px);animation:dda-desk-reflection 7.5s ease-in-out infinite;
+}
+#landing .landing-device-laptop{z-index:2;filter:drop-shadow(0 20px 24px rgba(0,0,0,.38)) drop-shadow(0 0 18px rgba(35,135,255,.16));}
+#landing .landing-device-phone{z-index:3;box-shadow:0 20px 38px rgba(0,0,0,.42),0 0 22px rgba(39,144,255,.14),inset 0 1px rgba(255,255,255,.16);}
+#landing .landing-device-caption{z-index:4;color:rgba(166,205,255,.9);text-shadow:0 0 16px rgba(49,145,255,.35)}
+#landing .landing-3d-scene{opacity:.34;filter:drop-shadow(0 0 20px rgba(19,133,255,.22));mix-blend-mode:screen}
+#landing .landing-3d-orbit{border-color:rgba(75,168,255,.32);box-shadow:0 0 18px rgba(26,129,255,.12)}
+#landing .landing-3d-core{box-shadow:0 0 0 1px rgba(89,185,255,.32),0 0 34px rgba(23,132,255,.28),inset 0 0 22px rgba(56,154,255,.14)}
+#landing .landing-3d-node{border-color:rgba(95,176,255,.32);background:rgba(8,22,39,.84);color:#b8ddff;box-shadow:0 0 20px rgba(21,125,244,.14)}
+#landing .landing-device-candles{filter:drop-shadow(0 0 5px rgba(52,163,255,.2))}
+
+@keyframes dda-aperture-float{
+  0%,100%{transform:translate3d(0,0,0) rotateX(0deg)}
+  50%{transform:translate3d(0,-5px,0) rotateX(.55deg)}
+}
+@keyframes dda-desk-reflection{
+  0%,100%{opacity:.66;transform:translate3d(-1%,0,-24px) scale(.97)}
+  50%{opacity:1;transform:translate3d(1%,-2px,-24px) scale(1.03)}
+}
+@keyframes dda-reveal{
+  from{opacity:0;transform:translateY(8px) perspective(900px) rotateX(-.8deg)}
+  to{opacity:1;transform:translateY(0) perspective(900px) rotateX(0deg)}
+}
+
+/* The DDA proof thread catches light only on real active/confirmed states. */
+#progress .mastery-row-focused[data-proof-state="confirmed"] .mastery-level,
+#progress .proof-timeline .done .proof-dot,
+:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22) .lesson-loop li.now .loop-bead,
+.terminal-thread-bead.is-active{
+  filter:drop-shadow(0 0 8px rgba(35,145,255,.34));
+}
+#progress .mastery-row-focused[data-proof-state="confirmed"]{box-shadow:0 18px 46px rgba(0,0,0,.2),0 0 28px rgba(24,129,244,.1),0 1px rgba(255,255,255,.045) inset}
+#dashboard .analysis-terminal-tools{border-color:rgba(79,157,255,.22);background:rgba(7,17,30,.86);box-shadow:0 12px 34px rgba(0,0,0,.26),0 0 24px rgba(18,119,233,.08)}
+#dashboard .analysis-chart-shell{box-shadow:0 18px 44px rgba(0,0,0,.28),0 0 28px rgba(18,119,233,.08),0 0 0 1px rgba(91,169,255,.08)}
+#dashboard .terminal-tool.active{border-color:rgba(62,157,255,.44);background:linear-gradient(145deg,rgba(27,119,224,.2),rgba(12,57,103,.17));color:#9fd3ff;box-shadow:0 0 20px rgba(24,132,255,.16),inset 0 0 0 1px rgba(101,184,255,.1)}
+
+/* Blue-light CTAs are reserved for genuine actions; DDA gold remains the proof accent. */
+.primary-action,.public-start,.landing-mobile-cta button,#landing .landing-actions .primary-action,#landing .landing-final-cta .primary-action{
+  border:1px solid rgba(113,194,255,.58);
+  background:linear-gradient(112deg,#1269ef 0%,#198bff 48%,#39c7f4 100%);
+  color:#fff;
+  box-shadow:0 10px 28px rgba(9,99,234,.27),0 0 24px rgba(28,142,255,.18),inset 0 1px rgba(255,255,255,.24);
+  text-shadow:0 1px 5px rgba(4,28,69,.28);
+  transition:transform .22s ease,box-shadow .22s ease,filter .22s ease,border-color .22s ease;
+}
+.public-start{border-radius:999px}
+
+/* Interactive depth is restrained, opt-in to hover hardware, and never tilts controls. */
+.view.active :is(.journey-current,.landing-market-card,.landing-plan-card,.plan-card,.journal-entry-card,.resource-feature,.broker-row,.community-tile,.chevron-row){
+  transform-style:preserve-3d;
+  transition:transform .28s cubic-bezier(.2,.72,.24,1),border-color .28s ease,box-shadow .28s ease,background .28s ease;
+}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  .view.active :is(.journey-current,.landing-market-card,.landing-plan-card,.plan-card,.journal-entry-card,.resource-feature,.broker-row,.community-tile,.chevron-row):hover{
+    transform:translateY(-3px) perspective(1000px) rotateX(.45deg);
+    border-color:rgba(82,171,255,.42);
+    box-shadow:0 22px 48px rgba(0,0,0,.28),0 0 26px rgba(20,128,244,.13),0 1px rgba(255,255,255,.07) inset;
+  }
+  .primary-action:hover:not(:disabled),.public-start:hover:not(:disabled),.landing-mobile-cta button:hover:not(:disabled),#landing .landing-actions .primary-action:hover:not(:disabled),#landing .landing-final-cta .primary-action:hover:not(:disabled){
+    transform:translateY(-2px);
+    border-color:rgba(154,218,255,.82);
+    box-shadow:0 14px 34px rgba(9,99,234,.38),0 0 34px rgba(28,142,255,.28),inset 0 1px rgba(255,255,255,.32);
+    filter:saturate(1.12) brightness(1.04);
+  }
+}
+
+/* Keep the glass readable and inexpensive on phones, data-saver, and transparency-sensitive setups. */
+@media(max-width:700px){
+  :is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile).view{background-attachment:scroll}
+  .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form){background-color:rgba(9,21,36,.91)}
+  #path .journey-current{background-color:rgba(9,21,36,.93)}
+  #landing .landing-device-stage{animation-duration:12s}
+}
+@media(prefers-reduced-transparency:reduce){
+  .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.resource-feature,.plan-card,.market-zone,.broker-row,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form),#path .journey-current{backdrop-filter:none!important;background-color:#0a1424}
+}
+body.low-data :is(#landing .landing-device-stage,#landing .landing-device-stage::before){animation:none!important}
+body.low-data .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.resource-feature,.plan-card,.market-zone,.broker-row,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form){backdrop-filter:none!important}
+
+@media(prefers-reduced-motion:reduce){
+  #landing .landing-device-stage,#landing .landing-device-stage::before{animation:none!important}
+  #landing .landing-aperture,#landing .landing-device-stage,#landing .landing-device-laptop,#landing .landing-device-phone{transition:none!important}
+  .view.active :is(.journey-current,.landing-market-card,.landing-plan-card,.plan-card,.journal-entry-card,.resource-feature,.broker-row,.community-tile,.chevron-row){transition:none!important;transform:none!important}
+  .primary-action,.public-start,.landing-mobile-cta button{transition:none!important}
+}
+
+
+/* Landing modules echo the DDA proof-thread, not a stock four-card SaaS template. */
+#landing .landing-free-grid article,
+#landing .product-index article,
+#landing .proof-practice-demo,
+#landing .proof-measure,
+#landing .landing-plan-card,
+#landing .landing-domain-groups article:not(.landing-market-group),
+#landing .landing-future-grid article,
+#landing .landing-market-card,
+#landing .product-window,
+#landing .experience-flow li{
+  border:1px solid var(--dda-aurora-edge);
+  border-radius:14px;
+  background:linear-gradient(145deg,rgba(18,42,69,.78),rgba(8,19,34,.88));
+  box-shadow:0 16px 38px rgba(0,0,0,.2),0 0 24px rgba(22,126,245,.07),inset 0 1px rgba(255,255,255,.05);
+}
+#landing .experience-flow li.is-active{border-color:rgba(65,162,255,.44);background:linear-gradient(145deg,rgba(23,71,117,.66),rgba(9,22,39,.88));box-shadow:0 0 28px rgba(24,128,244,.12),inset 0 1px rgba(255,255,255,.08)}
+#landing .landing-market-card{backdrop-filter:blur(8px) saturate(120%)}
+#landing .landing-market-card:hover,#landing .landing-market-card:focus-visible{border-color:rgba(92,184,255,.65);box-shadow:0 16px 34px rgba(0,0,0,.24),0 0 28px rgba(22,126,245,.18),inset 0 1px rgba(255,255,255,.08)}
+#landing .landing-free-grid article:hover,#landing .product-index article:hover,#landing .landing-future-grid article:hover{border-color:rgba(92,184,255,.4);box-shadow:0 18px 40px rgba(0,0,0,.24),0 0 24px rgba(22,126,245,.12),inset 0 1px rgba(255,255,255,.07)}
+#landing .product-window{border-color:rgba(92,184,255,.3);box-shadow:0 24px 58px rgba(0,0,0,.34),0 0 36px rgba(22,126,245,.14),inset 0 1px rgba(255,255,255,.07)}
+@media(max-width:700px),(prefers-reduced-transparency:reduce){
+  #landing .landing-market-card{backdrop-filter:none;background-color:rgba(8,19,34,.92)}
+}
+@media(prefers-reduced-motion:reduce){
+  #landing .landing-free-grid article,#landing .product-index article,#landing .landing-future-grid article{transition:none!important}
+}
+
+
+/* Mobile sheets/tooltips use viewport-fixed positioning; glass blur would create a containing block. */
+@media(max-width:700px){
+  .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.terminal-aperture,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.resource-reader,.landing-plan-card,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-faq-panel,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form,.landing-market-card){backdrop-filter:none!important}
+  #path .journey-current{backdrop-filter:none!important}
+}
+body.low-data .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.terminal-aperture,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.resource-reader,.landing-plan-card,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-faq-panel,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form,.landing-market-card){backdrop-filter:none!important}
+body.low-data #path .journey-current{backdrop-filter:none!important}
+
+/* Explicit pseudo-element target: conservative selector support for data-saver devices. */
+body.low-data #landing .landing-device-stage{animation:none!important}
+body.low-data #landing .landing-device-stage::before{animation:none!important}

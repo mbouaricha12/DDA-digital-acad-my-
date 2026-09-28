@@ -35,12 +35,14 @@ assert.match(toolbar, /id="terminal-undo-drawing"[\s\S]*id="terminal-clear-drawi
 assert.match(toolbar, /<svg viewBox="0 0 24 24" aria-hidden="true"><path/, 'toolbar actions use vector icons');
 
 assert.match(css, /--dda-elite-canvas:#060d17/, 'the resting Deep Navy canvas is part of the shared visual layer');
+assert.match(css, /--dda-aurora-electric:#1887ff/, 'the DDA Aurora light signature is explicit and branded');
+assert.match(css, /radial-gradient\(ellipse 54% 26% at 96% 2%/, 'every route receives a restrained DDA light field');
 assert.match(css, /#dashboard \.analysis-terminal-tools\{position:sticky/, 'the Terminal tools use a compact floating dock');
 assert.match(css, /#dashboard \.terminal-tool-label\{display:none\}/, 'mobile tools are icon-first while accessible names remain on buttons');
 assert.match(css, /#landing \.landing-market-cards\{display:grid/, 'market cards adapt to a responsive grid');
 assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/, 'reduced-motion preference is respected');
 assert.match(css, /body\.low-data #landing \.landing-3d-scene\{display:none\}/, 'the existing low-data guard for decorative 3D remains');
-assert.match(sw, /const CACHE = 'dda-shell-v20';/, 'PWA cache is bumped for the latest navigation and visual assets');
+assert.match(sw, /const CACHE = 'dda-shell-v21';/, 'PWA cache is bumped for the latest navigation and visual assets');
 assert.match(app, /window\.addEventListener\('popstate'/, 'browser Back/Forward is handled by the existing SPA router');
 assert.match(app, /window\.addEventListener\('hashchange'/, 'hash links remain synchronized with application navigation');
 assert.match(app, /history\.back\(\)/, 'in-app Retour uses the native route history when available');
@@ -64,5 +66,10 @@ assert.match(css, /#landing \.landing-aperture-copy\{display:none!important\}/, 
 assert.match(css, /#landing \.landing-device-chart-head strong\{[^}]*font:600 8px\//, 'device mockup labels stay at product scale rather than inheriting the hero headline');
 assert.match(css, /#progress \.mastery-context-note\{[^}]*background:rgba\(10,20,36,\.78\)/, 'future skill context uses the same calm dark surface as the rest of Progression');
 assert.match(css, /#progress \.view-photo-band \.photo-fill\{filter:saturate\(\.45\) brightness\(\.68\)\}/, 'the Progress hero image is deliberately restrained for a calmer work surface');
+assert.match(css, /#landing \.landing-device-stage::before\{/, 'the laptop and phone mockups receive a reflected DDA light pool');
+assert.match(css, /@keyframes dda-aperture-float/, 'the Aperture has a slow, low-amplitude 3D motion');
+assert.match(css, /body\.low-data #landing \.landing-device-stage\{animation:none!important\}/, 'low-data mode disables decorative 3D motion');
+assert.match(css, /body\.low-data #landing \.landing-device-stage::before\{animation:none!important\}/, 'low-data mode disables the reflected light animation');
+assert.match(css, /#landing \.landing-market-card\{backdrop-filter:blur\(8px\)/, 'market preview cards use the DDA smoked-glass treatment');
 
 console.log('RESULT: Elite UI visual contract passed');

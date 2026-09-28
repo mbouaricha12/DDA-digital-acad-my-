@@ -1078,6 +1078,47 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('DDA Aurora carries branded glass light and respects motion preferences', async () => {
+    const context = await freshContext(browser, { width: 1440, height: 900 });
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'landing');
+    const visuals = await page.evaluate(() => {
+      const get = selector => document.querySelector(selector);
+      const style = selector => getComputedStyle(get(selector));
+      const views = [...document.querySelectorAll('.view')];
+      return {
+        viewsWithLightField: views.filter(node => getComputedStyle(node).backgroundImage.includes('radial-gradient')).length,
+        viewCount: views.length,
+        apertureLight: style('#landing .landing-aperture .photo-scrim').backgroundImage,
+        stageMotion: style('#landing .landing-device-stage').animationName,
+        reflectionMotion: getComputedStyle(get('#landing .landing-device-stage'), '::before').animationName,
+        glass: style('#landing .landing-market-card').backdropFilter,
+        action: style('#landing .landing-actions .primary-action').backgroundImage,
+        landingFeatureBackground: style('#landing .landing-free-grid article').backgroundImage
+      };
+    });
+    assert.ok(visuals.viewsWithLightField >= 24, 'the route light field should apply throughout the platform');
+    assert.match(visuals.apertureLight, /radial-gradient/, 'the DDA Aperture has a custom instrument-light treatment');
+    assert.match(visuals.stageMotion, /dda-aperture-float/, 'the laptop/phone stage has gentle 3D movement');
+    assert.match(visuals.glass, /blur\(8px\)/, 'market cards use restrained glass on desktop');
+    assert.match(visuals.action, /linear-gradient/, 'the landing action uses the DDA electric-blue finish');
+    assert.match(visuals.landingFeatureBackground, /linear-gradient/, 'feature modules use smoked glass rather than a generic light card');
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const reducedMotion = await page.locator('#landing .landing-device-stage').evaluate(node => getComputedStyle(node).animationName);
+    assert.equal(reducedMotion, 'none', 'reduced-motion turns off decorative 3D movement');
+    const reducedReflection = await page.locator('#landing .landing-device-stage').evaluate(node => getComputedStyle(node, '::before').animationName);
+    assert.equal(reducedReflection, 'none', 'reduced-motion also stops the reflected light animation');
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.evaluate(() => document.body.classList.add('low-data'));
+    const lowDataMotion = await page.locator('#landing .landing-device-stage').evaluate(node => getComputedStyle(node).animationName);
+    assert.equal(lowDataMotion, 'none', 'low-data mode keeps the scene static');
+    const lowDataReflection = await page.locator('#landing .landing-device-stage').evaluate(node => getComputedStyle(node, '::before').animationName);
+    assert.equal(lowDataReflection, 'none', 'low-data mode also stops the reflected light animation');
+    await context.close();
+  });
+
   await test('mobile Back, Forward and in-app Retour follow DDA screen history', async () => {
     const context = await freshContext(browser, { width: 390, height: 844 });
     await seedLocalLearner(context);
