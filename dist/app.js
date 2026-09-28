@@ -2958,3 +2958,6 @@ window.addEventListener('resize', syncLandingMobileCta, { passive: true });
 document.querySelectorAll('form[data-js-submit] button[type="submit"]').forEach(button => {
   button.disabled = false;
 });
+
+/* Mission rails — each destination states its job and offers one contextual next step. */
+document.getElementById('journal-mission-new')?.addEventListener('click', () => document.getElementById('journal-new-entry')?.click());

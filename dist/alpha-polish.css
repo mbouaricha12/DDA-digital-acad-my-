@@ -2122,3 +2122,8 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 #landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#profile.view{
   background-color:#060d17!important;
 }
+
+/* Mission rails keep page purpose visible and reduce destination repetition. */
+.page-mission{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:0 0 26px;padding:16px 18px;border:1px solid rgba(216,174,97,.2);border-radius:14px;background:linear-gradient(120deg,rgba(18,43,68,.78),rgba(7,17,29,.9));box-shadow:0 16px 34px rgba(0,0,0,.16),inset 0 1px rgba(255,255,255,.05)}
+.page-mission>div{display:grid;gap:3px;min-width:0}.page-mission .eyebrow{margin:0;color:var(--dda-material-brass-soft);font-size:.62rem;letter-spacing:.15em;text-transform:uppercase}.page-mission strong{color:#f3f6fa;font-size:.95rem}.page-mission span{color:rgba(214,226,239,.62);font-size:.78rem;line-height:1.45}.page-mission .text-action{flex:none;white-space:nowrap;color:var(--dda-material-brass-soft)}
+@media(max-width:700px){.page-mission{align-items:flex-start;flex-direction:column;gap:12px;margin-bottom:18px;padding:14px}.page-mission .text-action{white-space:normal;text-align:left}}
