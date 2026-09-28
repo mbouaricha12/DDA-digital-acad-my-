@@ -10,6 +10,12 @@
 
 **Architecture d'information cible ajoutée :** elle réorganise la lecture du produit en cinq domaines — Public, Authentification, App Apprenant, Premium et Futur Écosystème Expert — sans renommer ni modifier les routes existantes. Les zones futures restent documentées, non actives et non présentées comme construites.
 
+**Instructions prioritaires post-audit ajoutées :** `DDA_NEXT_PRIORITY_INSTRUCTIONS.md`
+transforme les constats Mission + Content Depth en ordre de travail. Les P0
+portent d’abord sur la mission du Dashboard, la séparation d’Access et le
+contrat de complétude des leçons ; aucune nouvelle capacité P2/P3, connexion
+externe ou backend n’est autorisée par ce document.
+
 ## Légende
 
 - **CONSTRUIT** : présent et utilisable dans le prototype.
