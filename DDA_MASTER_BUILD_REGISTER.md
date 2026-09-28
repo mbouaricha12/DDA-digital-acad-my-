@@ -4,25 +4,11 @@
 **Base :** prototype V10 + travaux Private Alpha déployés  
 **Autorité finale :** Richard Darius, CEO
 
-**État d’intégration documentaire (26 septembre 2026) :** le registre, la carte des routes et l’architecture d’information cible sont présents dans le dépôt. Le fichier `DDA_Instruction_Finale_Agent_Unique_V1.md` est référencé mais n’a pas été fourni ; son contenu n’est pas reconstitué.
+**État d’intégration documentaire (26 septembre 2026) :** le registre, la carte des routes et l’architecture d’information cible sont présents dans le dépôt. Les documents `DDA_Instruction_Finale_Agent_Unique_V1.md`, `DDA_TERMINAL_FOUNDATION_SCOPE_VALIDATION.md` et `DDA_INFORMATION_ARCHITECTURE_TARGET.md` cadrent la gouvernance et la cible sans engager de capacité fonctionnelle supplémentaire.
 
-**Document de gouvernance ajouté :** `DDA_Instruction_Finale_Agent_Unique_V1.md`.
-Il complète la hiérarchie documentaire et confirme que le dépôt reste un
-prototype non connecté : aucune nouvelle capacité de production, publication,
-connexion externe ou activation commerciale n'est engagée sans validation
-écrite spécifique de Richard.
+**Références à des tests historiques :** les anciens fichiers `test_dda_vN.js` mentionnés dans les comptes rendus ne sont pas tous conservés dans le dépôt. Le manifeste `tests/historical-test-references.json` les classe explicitement comme archives ; leurs résultats restent historiques et ne sont pas présentés comme reproductibles par la suite de tests actuelle.
 
-**Architecture d'information cible ajoutée :** `DDA_INFORMATION_ARCHITECTURE_TARGET.md`.
-Elle réorganise la lecture du produit en cinq domaines — Public, Authentification,
-App Apprenant, Premium et Futur Écosystème Expert — sans renommer ni modifier les
-routes existantes. Les zones futures restent documentées, non actives et non
-présentées comme construites.
-
-**Références à des tests historiques :** les anciens fichiers `test_dda_vN.js`
-mentionnés dans les comptes rendus ne sont pas tous conservés dans le dépôt.
-Le manifeste `tests/historical-test-references.json` les classe explicitement
-comme archives ; leurs résultats restent historiques et ne sont pas présentés
-comme reproductibles par la suite de tests actuelle.
+**Architecture d'information cible ajoutée :** elle réorganise la lecture du produit en cinq domaines — Public, Authentification, App Apprenant, Premium et Futur Écosystème Expert — sans renommer ni modifier les routes existantes. Les zones futures restent documentées, non actives et non présentées comme construites.
 
 ## Légende
 
