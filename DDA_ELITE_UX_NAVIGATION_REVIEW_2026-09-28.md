@@ -86,4 +86,4 @@ Le raccourci Terminal utilise l’ancre `#analysis-terminal` à l’intérieur d
 
 ## État de livraison
 
-Les changements restent sur `feat/darius-analysis-terminal` dans la PR #94 ouverte vers `main`. La branche n’est ni fusionnée ni déployée. La validation locale est complète ; les checks GitHub seront contrôlés après la mise à jour de la PR.
+Les changements restent sur `feat/darius-analysis-terminal` dans la PR #94 ouverte vers `main`. La branche n’est ni fusionnée ni déployée. Les checks GitHub du code livré ont été vérifiés après la mise à jour de la PR : **8 réussis, 1 ignoré, 0 en attente, échec ou annulation**.
