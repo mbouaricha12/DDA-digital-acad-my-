@@ -729,7 +729,7 @@
     const terminal = emptyTerminalState();
     if (!raw || typeof raw !== 'object') return terminal;
     if (['BRVM Composite', 'BRVM 30', 'EUR/USD pédagogique'].includes(raw.instrument)) terminal.instrument = raw.instrument;
-    if (['1D', '1W', '1M'].includes(raw.timeframe)) terminal.timeframe = raw.timeframe;
+    if (['15m', '1H', '4H', '1D', '1W', '1M'].includes(raw.timeframe)) terminal.timeframe = raw.timeframe;
     terminal.zoom = Number.isFinite(Number(raw.zoom)) ? Math.max(1, Math.min(3, Math.round(Number(raw.zoom)))) : 1;
     terminal.pan = Number.isFinite(Number(raw.pan)) ? Math.max(0, Math.min(200, Math.round(Number(raw.pan)))) : 0;
     terminal.observation = sanitizeText(raw.observation, 1000);

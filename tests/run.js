@@ -1210,6 +1210,10 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
     await page.fill('#terminal-observation', 'Plusieurs réactions apparaissent autour de la même zone centrale.');
     await page.click('#terminal-save-observation');
+    await page.selectOption('#terminal-timeframe', '4H');
+    await page.click('#terminal-zoom-in');
+    assert.equal(await page.locator('[data-terminal-tool="crosshair"]').getAttribute('aria-pressed'), 'true', 'crosshair is the accessible initial tool');
+    assert.equal(await page.locator('#terminal-zoom-value').textContent(), '2×', 'compact zoom dock reflects its selected level');
     await page.click('#terminal-practice-validate');
     let practice = await page.evaluate(() => window.DDA.load().terminal.practice);
     assert.ok(practice, 'Terminal state must be persisted after the first attempt');
@@ -1217,18 +1221,33 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(practice.attempts, 1);
     assert.equal(practice.completedAt, undefined, 'a failed attempt must never receive a completion timestamp');
 
-    await page.locator('[data-terminal-tool="zone"]').click();
     const chart = page.locator('#terminal-chart');
     await chart.scrollIntoViewIfNeeded();
     const box = await chart.boundingBox();
     assert.ok(box && box.width > 100 && box.height > 100, 'interactive chart has a real pointer target');
-    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.35);
-    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.54);
+    await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.4);
+    assert.match(await page.locator('#terminal-candle-readout').textContent(), /Séquence \d{2}/, 'crosshair immediately reports the hovered synthetic candle');
+    const crosshairValueY = await page.locator('#terminal-chart .crosshair-value-label').evaluate(node => Number(node.getAttribute('transform').match(/translate\(0\s*([^)]+)\)/)?.[1]));
+    assert.ok(crosshairValueY > 100 && crosshairValueY < 250, `crosshair value label follows the hovered chart level (got ${crosshairValueY})`);
+    await page.locator('[data-terminal-tool="zone"]').click();
+    assert.equal(await page.locator('[data-terminal-tool="zone"]').getAttribute('aria-pressed'), 'true', 'selected drawing tool exposes its active state');
+    await chart.scrollIntoViewIfNeeded();
+    const drawingBox = await chart.boundingBox();
+    assert.ok(drawingBox && drawingBox.width > 100 && drawingBox.height > 100, 'drawing gesture uses the chart box after toolbar selection');
+    await page.mouse.move(drawingBox.x + drawingBox.width * 0.24, drawingBox.y + drawingBox.height * 0.35);
+    await page.mouse.down();
+    await page.mouse.move(drawingBox.x + drawingBox.width * 0.76, drawingBox.y + drawingBox.height * 0.54, { steps: 8 });
+    await page.mouse.up();
     await page.click('#terminal-practice-validate');
     practice = await page.evaluate(() => window.DDA.load().terminal.practice);
     assert.equal(practice.status, 'validated', 'a learner-placed zone matching the taught range validates');
     assert.equal(practice.attempts, 2);
     assert.ok(practice.completedAt, 'successful proof is timestamped');
+    const drawnTerminal = await page.evaluate(() => window.DDA.load().terminal);
+    assert.equal(drawnTerminal.drawings.length, 1, 'a pointer drag creates and persists one annotation');
+    assert.equal(drawnTerminal.drawings[0].type, 'zone');
+    assert.equal(drawnTerminal.timeframe, '4H', 'compact timeframe selector persists in schema v4');
+    assert.equal(drawnTerminal.zoom, 2, 'compact zoom controls persist their selected level');
     assert.deepEqual(practice.proof, {
       id: 'm02-zone-identification', type: 'zone_identification', lessonId: 'M0.2', status: 'validated'
     });
@@ -1238,13 +1257,18 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const reloadedTerminal = await page.evaluate(() => window.DDA.load().terminal);
     assert.equal(reloadedTerminal.practice.status, 'validated', 'proof survives a full page reload');
     assert.equal(reloadedTerminal.observation, 'Plusieurs réactions apparaissent autour de la même zone centrale.');
+    assert.equal(reloadedTerminal.timeframe, '4H');
 
+    const unsavedObservation = 'Hypothèse de travail : plusieurs réactions encadrent cette aire pédagogique.';
+    await page.fill('#terminal-observation', unsavedObservation);
     await page.click('#terminal-journal-handoff');
     assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'journal');
     assert.equal(await page.locator('#journal-source-context').isVisible(), true, 'composer names the real Terminal source');
     assert.equal(await page.locator('#journal-market').inputValue(), 'BRVM Composite');
+    assert.ok((await page.locator('#journal-context').inputValue()).includes('timeframe 4H'), 'handoff transfers the selected timeframe');
     assert.ok((await page.locator('#journal-context').inputValue()).includes('sans cotation en temps réel'), 'handoff preserves the no-live-quotes disclosure');
-    assert.equal(await page.locator('#journal-scenario').inputValue(), reloadedTerminal.observation);
+    assert.equal(await page.locator('#journal-scenario').inputValue(), unsavedObservation, 'one-click Journal handoff includes the current unsaved hypothesis');
+    assert.ok((await page.locator('#journal-process').inputValue()).includes('zoom 2/3'));
     assert.ok((await page.locator('#journal-process').inputValue()).includes('annotations : zone Support/Résistance'));
     await page.click('#journal-step-next');
     await page.fill('#journal-decision', 'Je documente la zone observée sans en déduire un signal.');
@@ -1282,7 +1306,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       await page.goto(`${BASE}/#dashboard`);
       const result = await page.evaluate(() => ({
         overflow: document.documentElement.scrollWidth - window.innerWidth,
-        controls: [...document.querySelectorAll('[data-terminal-tool], #terminal-pan-left, #terminal-pan-right, #terminal-practice-validate, #terminal-save-observation, #terminal-journal-handoff')]
+        controls: [...document.querySelectorAll('[data-terminal-tool], #terminal-zoom-in, #terminal-zoom-out, #terminal-pan-left, #terminal-pan-right, #terminal-undo-drawing, #terminal-clear-drawings, #terminal-practice-validate, #terminal-save-observation, #terminal-journal-handoff')]
           .map(element => ({ id: element.id || element.dataset.terminalTool, width: element.getBoundingClientRect().width, height: element.getBoundingClientRect().height }))
       }));
       assert.ok(result.overflow <= 1, `Terminal must not overflow horizontally at ${width}px (got ${result.overflow}px)`);

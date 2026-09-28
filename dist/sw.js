@@ -1,4 +1,4 @@
-const CACHE = 'dda-shell-v16';
+const CACHE = 'dda-shell-v17';
 const CORE = ['./', './index.html', './styles.css', './alpha-polish.css', './m1-1-lesson.js', './m1-2-lesson.js', './m1-3-lesson.js', './dda-core.js', './learning-engine.js', './lesson-renderer.js', './dda-analytics.js', './app.js', './manifest.webmanifest', './images/dda-og-image.jpg', './images/icon-192.png', './images/dda-mark-512.png', './images/photos/hero-market-woman.jpg', './images/photos/institution-gold-bull.jpg', './images/photos/community-hero-handshake.jpg', './images/photos/membership-handshake-africa.jpg', './images/photos/access-two-women-market.jpg', './images/photos/path-crystal-forecast.jpg', './images/photos/progress-trader-poster.jpg', './images/photos/terminal-desk-trading.jpg', './images/photos/brvm-market-fruits.jpg', './images/photos/brokers-trading-floor.jpg', './images/photos/family-three-colleagues.jpg', './images/lessons/support-resistance-diagram.jpg'];
 
 self.addEventListener('install', event => {

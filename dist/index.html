@@ -408,43 +408,72 @@
             <span class="demo-data-badge"><span class="status-dot"></span>Données pédagogiques locales</span>
           </div>
 
-          <div class="analysis-terminal-toolbar" aria-label="Contrôles du graphique">
-            <label>Instrument
+          <div class="analysis-terminal-toolbar" role="group" aria-label="Marché et unité de temps">
+            <label class="terminal-selector">Marché pédagogique
               <select id="terminal-instrument">
                 <option value="BRVM Composite">BRVM Composite</option>
                 <option value="BRVM 30">BRVM 30</option>
                 <option value="EUR/USD pédagogique">EUR/USD pédagogique</option>
               </select>
             </label>
-            <label>Timeframe
+            <label class="terminal-selector terminal-timeframe-selector">Unité de temps
               <select id="terminal-timeframe">
                 <option value="1D">1D</option>
+                <option value="4H">4H</option>
+                <option value="1H">1H</option>
+                <option value="15m">15m</option>
                 <option value="1W">1W</option>
                 <option value="1M">1M</option>
               </select>
             </label>
-            <label class="terminal-zoom-control">Zoom
-              <input id="terminal-zoom" type="range" min="1" max="3" step="1" value="1" aria-label="Zoom du graphique">
-            </label>
-            <div class="terminal-pan-controls" aria-label="Déplacement du graphique">
-              <button type="button" class="terminal-icon-button" id="terminal-pan-left" aria-label="Déplacer vers la gauche">←</button>
-              <button type="button" class="terminal-icon-button" id="terminal-pan-right" aria-label="Déplacer vers la droite">→</button>
+            <span class="terminal-data-mark"><span class="status-dot"></span> Série synthétique · locale</span>
+          </div>
+
+          <div class="analysis-chart-workspace">
+            <div class="analysis-terminal-tools" role="toolbar" aria-label="Outils du graphique">
+              <button type="button" class="terminal-tool active" data-terminal-tool="crosshair" aria-label="Curseur et crosshair" aria-pressed="true" title="Curseur et crosshair">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="3"/></svg><span class="terminal-tool-label">Curseur</span>
+              </button>
+              <button type="button" class="terminal-tool" data-terminal-tool="zone" aria-label="Tracer une zone Support / Résistance" aria-pressed="false" title="Zone Support / Résistance">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="2"/><path d="M4 9h16M4 15h16"/></svg><span class="terminal-tool-label">Zone S/R</span>
+              </button>
+              <button type="button" class="terminal-tool" data-terminal-tool="line" aria-label="Tracer une ligne de tendance" aria-pressed="false" title="Ligne de tendance">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 18 6-6 4 2 6-9"/><circle cx="4" cy="18" r="1.2"/><circle cx="20" cy="5" r="1.2"/></svg><span class="terminal-tool-label">Tendance</span>
+              </button>
+              <button type="button" class="terminal-tool" data-terminal-tool="fib" aria-label="Tracer les niveaux de Fibonacci" aria-pressed="false" title="Fibonacci">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14M5 10h14M5 14h14M5 19h14"/><circle cx="7" cy="5" r="1"/><circle cx="17" cy="19" r="1"/></svg><span class="terminal-tool-label">Fibo</span>
+              </button>
+              <span class="terminal-tool-divider" aria-hidden="true"></span>
+              <div class="terminal-zoom-dock" role="group" aria-label="Zoom du graphique">
+                <button type="button" class="terminal-icon-button" id="terminal-zoom-out" aria-label="Dézoomer">−</button>
+                <span class="terminal-zoom-value" id="terminal-zoom-value">1×</span>
+                <button type="button" class="terminal-icon-button" id="terminal-zoom-in" aria-label="Zoomer">+</button>
+                <input id="terminal-zoom" type="range" min="1" max="3" step="1" value="1" aria-label="Niveau de zoom">
+              </div>
+              <div class="terminal-pan-controls" role="group" aria-label="Déplacer la fenêtre du graphique">
+                <button type="button" class="terminal-icon-button" id="terminal-pan-left" aria-label="Déplacer les séquences vers la gauche" title="Déplacer vers la gauche">←</button>
+                <button type="button" class="terminal-icon-button" id="terminal-pan-right" aria-label="Déplacer les séquences vers la droite" title="Déplacer vers la droite">→</button>
+              </div>
+              <span class="terminal-tool-divider terminal-actions-divider" aria-hidden="true"></span>
+              <button type="button" class="terminal-icon-button terminal-edit-action" id="terminal-undo-drawing" aria-label="Annuler le dernier tracé" title="Annuler le dernier tracé" disabled>↶</button>
+              <button type="button" class="terminal-icon-button terminal-edit-action" id="terminal-clear-drawings" aria-label="Effacer tous les tracés" title="Effacer tous les tracés" disabled>⌫</button>
+            </div>
+
+            <div class="analysis-chart-frame">
+              <div class="analysis-chart-meta">
+                <div class="terminal-chart-identity"><strong id="terminal-chart-market">BRVM Composite</strong><span class="terminal-chart-market-tag">PÉDAGOGIQUE · NORMALISÉ</span></div>
+                <div class="terminal-chart-readout" id="terminal-candle-readout" role="status" aria-live="polite">Survole une bougie pour lire sa séquence et ses valeurs pédagogiques.</div>
+              </div>
+              <div class="analysis-chart-shell">
+                <span class="analysis-chart-axis-label" aria-hidden="true">INDICE PÉDAGOGIQUE · SANS UNITÉ</span>
+                <svg id="terminal-chart" class="analysis-chart" viewBox="0 0 900 420" preserveAspectRatio="none" tabindex="0" role="img" aria-label="Graphique de chandeliers pédagogiques interactif — valeurs synthétiques normalisées" aria-describedby="terminal-chart-caption"></svg>
+              </div>
+              <div class="analysis-chart-footer">
+                <p class="analysis-chart-caption" id="terminal-chart-caption">Série historique locale contrôlée · valeurs normalisées · aucune cotation en temps réel.</p>
+                <span class="terminal-tool-hint" id="terminal-tool-hint" role="status" aria-live="polite">Déplace le pointeur sur le graphique.</span>
+              </div>
             </div>
           </div>
-
-          <div class="analysis-terminal-tools" role="toolbar" aria-label="Outils d’annotation">
-            <button type="button" class="terminal-tool active" data-terminal-tool="crosshair">✣ Crosshair</button>
-            <button type="button" class="terminal-tool" data-terminal-tool="zone">▧ Zone S/R</button>
-            <button type="button" class="terminal-tool" data-terminal-tool="line">╱ Ligne</button>
-            <button type="button" class="terminal-tool" data-terminal-tool="fib">⌁ Fibonacci</button>
-            <span class="terminal-tool-hint" id="terminal-tool-hint">Déplace le pointeur sur le graphique.</span>
-          </div>
-
-          <div class="analysis-chart-shell">
-            <div class="analysis-chart-y-labels" aria-hidden="true"><span>haut</span><span>milieu</span><span>bas</span></div>
-            <svg id="terminal-chart" class="analysis-chart" viewBox="0 0 900 420" role="img" aria-label="Graphique pédagogique interactif"></svg>
-          </div>
-          <p class="analysis-chart-caption" id="terminal-chart-caption">Série historique locale contrôlée · valeurs normalisées · aucune cotation en temps réel.</p>
 
           <section class="terminal-practice-mission" aria-labelledby="terminal-practice-title">
             <div class="panel-heading"><div><p class="eyebrow gold">Practice Terminal · mission guidée</p><h3 id="terminal-practice-title">Repère une zone, sans chercher à prédire.</h3></div><span class="practice-proof-badge" id="terminal-practice-proof">À commencer</span></div>

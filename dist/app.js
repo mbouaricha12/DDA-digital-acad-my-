@@ -160,6 +160,10 @@ function bindViewButton(button) {
       view: button.dataset.view,
       position: button.dataset.funnelPosition
     });
+    if (button.dataset.terminalHandoff === 'true') {
+      const observation = document.getElementById('terminal-observation');
+      if (observation) saveState({ terminal: { ...getTerminalState(), observation: observation.value.trim() } });
+    }
     showView(button.dataset.view);
     if (button.dataset.terminalHandoff === 'true') openJournalComposer(null, button, terminalJournalDraft());
   });
@@ -1410,35 +1414,153 @@ function renderTerminalMarketIntelligence() {
     </div>`).join('');
 }
 
-// Darius Analysis Terminal P0.4 — local, deterministic teaching data only.
-// The series is deliberately normalized and labelled as pedagogical: it is not
-// a quote feed, not an investment signal, and not a substitute for market data.
+// Darius Analysis Terminal — only deterministic, pedagogical series are rendered.
+// Values are normalized indices, not quotes, recommendations or live market data.
 const TERMINAL_SERIES = Object.freeze({
   'BRVM Composite': [48, 50, 49, 52, 55, 54, 57, 56, 58, 61, 60, 63, 62, 65, 64, 67, 66, 64, 68, 70, 69, 72, 71, 74, 73, 76, 75, 77, 76, 79, 78, 80],
   'BRVM 30': [54, 53, 55, 54, 57, 59, 58, 56, 57, 60, 62, 61, 63, 62, 65, 64, 66, 68, 67, 69, 68, 71, 70, 72, 71, 73, 72, 74, 73, 76, 75, 77],
   'EUR/USD pédagogique': [72, 71, 70, 72, 73, 72, 74, 75, 74, 73, 75, 77, 76, 78, 77, 76, 78, 79, 78, 80, 79, 81, 80, 79, 81, 82, 81, 83, 82, 84, 83, 85]
 });
-const terminalInteraction = { tool: 'crosshair', draft: null, crosshair: null, ready: false };
-function getTerminalState() { return { instrument: prototypeState.terminal?.instrument || 'BRVM Composite', timeframe: prototypeState.terminal?.timeframe || '1D', zoom: Number(prototypeState.terminal?.zoom) || 1, pan: Number(prototypeState.terminal?.pan) || 0, drawings: Array.isArray(prototypeState.terminal?.drawings) ? prototypeState.terminal.drawings : [], observation: prototypeState.terminal?.observation || '', practice: prototypeState.terminal?.practice || null }; }
+const TERMINAL_VIEWBOX = Object.freeze({ width: 900, height: 420, left: 58, right: 824, top: 48, bottom: 350 });
+const terminalInteraction = { tool: 'crosshair', draft: null, crosshair: null, view: null, ready: false };
+function getTerminalState() {
+  return {
+    instrument: prototypeState.terminal?.instrument || 'BRVM Composite',
+    timeframe: prototypeState.terminal?.timeframe || '1D',
+    zoom: Number(prototypeState.terminal?.zoom) || 1,
+    pan: Number(prototypeState.terminal?.pan) || 0,
+    drawings: Array.isArray(prototypeState.terminal?.drawings) ? prototypeState.terminal.drawings : [],
+    observation: prototypeState.terminal?.observation || '',
+    practice: prototypeState.terminal?.practice || null
+  };
+}
 function terminalClamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
-function terminalDataset(instrument) { const source = TERMINAL_SERIES[instrument] || TERMINAL_SERIES['BRVM Composite']; return source.map((close, index) => { const open = index ? source[index - 1] : close - 1; return { open, close, high: Math.max(open, close) + 1 + (index % 3) * .35, low: Math.min(open, close) - 1 - (index % 2) * .3, index }; }); }
-function terminalSvgPoint(event) { const svg = document.getElementById('terminal-chart'); const rect = svg.getBoundingClientRect(); return { x: terminalClamp((event.clientX - rect.left) / rect.width * 900, 0, 900), y: terminalClamp((event.clientY - rect.top) / rect.height * 420, 0, 420) }; }
-function renderTerminalCrosshair() { const group = document.getElementById('terminal-crosshair'); if (!group) return; const point = terminalInteraction.crosshair; group.hidden = !point; if (!point) return; group.querySelector('.crosshair-v').setAttribute('x1', point.x); group.querySelector('.crosshair-v').setAttribute('x2', point.x); group.querySelector('.crosshair-h').setAttribute('y1', point.y); group.querySelector('.crosshair-h').setAttribute('y2', point.y); group.querySelector('.crosshair-x-label').setAttribute('x', terminalClamp(point.x - 22, 4, 852)); group.querySelector('.crosshair-x-label').textContent = `x ${Math.round(point.x)}`; }
+function terminalDataset(instrument) {
+  const source = TERMINAL_SERIES[instrument] || TERMINAL_SERIES['BRVM Composite'];
+  return source.map((close, index) => {
+    const open = index ? source[index - 1] : close - 1;
+    return { open, close, high: Math.max(open, close) + 1 + (index % 3) * .35, low: Math.min(open, close) - 1 - (index % 2) * .3, index };
+  });
+}
+function terminalSvgPoint(event) {
+  const svg = document.getElementById('terminal-chart');
+  const rect = svg.getBoundingClientRect();
+  return {
+    x: terminalClamp((event.clientX - rect.left) / Math.max(1, rect.width) * TERMINAL_VIEWBOX.width, 0, TERMINAL_VIEWBOX.width),
+    y: terminalClamp((event.clientY - rect.top) / Math.max(1, rect.height) * TERMINAL_VIEWBOX.height, 0, TERMINAL_VIEWBOX.height)
+  };
+}
+function terminalDrawingMarkup(drawing, className = '') {
+  if (!drawing) return '';
+  const extra = className ? ` ${className}` : '';
+  if (drawing.type === 'zone') {
+    return `<rect class="sr-zone${extra}" x="${Math.min(drawing.x1, drawing.x2)}" y="${Math.min(drawing.y1, drawing.y2)}" width="${Math.abs(drawing.x2 - drawing.x1)}" height="${Math.abs(drawing.y2 - drawing.y1)}" rx="3"/>`;
+  }
+  if (drawing.type === 'fib') {
+    return [0, .382, .5, .618, 1].map(level => {
+      const yy = drawing.y1 + (drawing.y2 - drawing.y1) * level;
+      return `<line class="fib-line${extra}" x1="${Math.min(drawing.x1, drawing.x2)}" x2="${Math.max(drawing.x1, drawing.x2)}" y1="${yy}" y2="${yy}"/><text class="fib-label" x="${terminalClamp(Math.max(drawing.x1, drawing.x2) - 38, 6, 850)}" y="${yy - 4}">${Math.round(level * 100)}%</text>`;
+    }).join('');
+  }
+  return `<line class="draw-line${extra}" x1="${drawing.x1}" y1="${drawing.y1}" x2="${drawing.x2}" y2="${drawing.y2}"/>`;
+}
+function renderTerminalDraft() {
+  const group = document.getElementById('terminal-drawing-draft');
+  if (group) group.innerHTML = terminalDrawingMarkup(terminalInteraction.draft, 'is-preview');
+}
+function renderTerminalCrosshair() {
+  const group = document.getElementById('terminal-crosshair');
+  const readout = document.getElementById('terminal-candle-readout');
+  if (!group) return;
+  const point = terminalInteraction.crosshair;
+  const view = terminalInteraction.view;
+  group.hidden = !point || terminalInteraction.tool !== 'crosshair';
+  if (!point || !view) {
+    if (readout) readout.textContent = 'Survole une bougie pour lire sa séquence et ses valeurs pédagogiques.';
+    return;
+  }
+  const { left, right, top, bottom } = TERMINAL_VIEWBOX;
+  const candleIndex = terminalClamp(Math.round((point.x - left) / (right - left) * (view.visible.length - 1)), 0, view.visible.length - 1);
+  const candle = view.visible[candleIndex];
+  const value = view.max - (point.y - top) / (bottom - top) * (view.max - view.min);
+  const vertical = group.querySelector('.crosshair-v');
+  const horizontal = group.querySelector('.crosshair-h');
+  const xLabel = group.querySelector('.crosshair-x-label');
+  const yLabel = group.querySelector('.crosshair-y-label');
+  vertical.setAttribute('x1', point.x);
+  vertical.setAttribute('x2', point.x);
+  horizontal.setAttribute('y1', point.y);
+  horizontal.setAttribute('y2', point.y);
+  xLabel.setAttribute('x', terminalClamp(point.x - 26, 6, 850));
+  xLabel.textContent = `SEQ ${String(candle.index + 1).padStart(2, '0')}`;
+  const labelY = terminalClamp(point.y - 9, top, bottom - 18);
+  yLabel.parentElement.setAttribute('transform', `translate(0 ${labelY})`);
+  yLabel.textContent = value.toFixed(1);
+  if (readout) readout.textContent = `Séquence ${String(candle.index + 1).padStart(2, '0')} · O ${candle.open.toFixed(1)} · H ${candle.high.toFixed(1)} · B ${candle.low.toFixed(1)} · C ${candle.close.toFixed(1)} · indices sans unité`;
+}
 function renderDariusAnalysisTerminal() {
-  const svg = document.getElementById('terminal-chart'); if (!svg) return;
-  const state = getTerminalState(); const data = terminalDataset(state.instrument); const visibleCount = Math.max(12, Math.round(data.length / state.zoom)); const maxPan = Math.max(0, data.length - visibleCount); const start = terminalClamp(state.pan, 0, maxPan); const visible = data.slice(start, start + visibleCount); const min = Math.min(...visible.map(c => c.low)) - 1; const max = Math.max(...visible.map(c => c.high)) + 1; const x = i => 34 + i * (832 / Math.max(1, visible.length - 1)); const y = value => 24 + (max - value) / (max - min) * 332; const candleWidth = Math.max(5, 680 / visible.length);
-  const grid = [0, 1, 2, 3, 4].map(i => `<line class="grid" x1="24" x2="876" y1="${24 + i * 83}" y2="${24 + i * 83}"/>`).join('');
-  const candles = visible.map((candle, i) => { const cx = x(i); const top = y(Math.max(candle.open, candle.close)); const bottom = y(Math.min(candle.open, candle.close)); return `<line class="wick" x1="${cx}" x2="${cx}" y1="${y(candle.high)}" y2="${y(candle.low)}"/><rect class="${candle.close >= candle.open ? 'candle-up' : 'candle-down'}" x="${cx - candleWidth / 2}" y="${top}" width="${candleWidth}" height="${Math.max(3, bottom - top)}" rx="1"/>`; }).join('');
-  const labels = visible.filter((_, i) => i % Math.max(1, Math.floor(visible.length / 5)) === 0).map((candle, i) => `<text x="${x(i * Math.max(1, Math.floor(visible.length / 5)))}" y="388">${candle.index + 1}</text>`).join('');
-  const drawings = state.drawings.map(drawing => { if (drawing.type === 'zone') return `<rect class="sr-zone" x="${Math.min(drawing.x1, drawing.x2)}" y="${Math.min(drawing.y1, drawing.y2)}" width="${Math.abs(drawing.x2 - drawing.x1)}" height="${Math.abs(drawing.y2 - drawing.y1)}"/>`; if (drawing.type === 'fib') return [0, .382, .5, .618, 1].map(level => { const yy = drawing.y1 + (drawing.y2 - drawing.y1) * level; return `<line class="fib-line" x1="${Math.min(drawing.x1, drawing.x2)}" x2="${Math.max(drawing.x1, drawing.x2)}" y1="${yy}" y2="${yy}"/><text class="fib-label" x="${Math.max(drawing.x1, drawing.x2) - 34}" y="${yy - 3}">${Math.round(level * 100)}%</text>`; }).join(''); return `<line class="draw-line" x1="${drawing.x1}" y1="${drawing.y1}" x2="${drawing.x2}" y2="${drawing.y2}"/>`; }).join('');
-  svg.innerHTML = `${grid}${drawings}${candles}${labels}<g id="terminal-crosshair" hidden><line class="crosshair crosshair-v" x1="0" x2="0" y1="18" y2="368"/><line class="crosshair crosshair-h" x1="24" x2="876" y1="0" y2="0"/><rect class="crosshair-label" x="4" y="372" width="44" height="18" rx="3"/><text class="crosshair-x-label" x="10" y="385">x 0</text></g>`;
-  document.getElementById('terminal-instrument').value = state.instrument; document.getElementById('terminal-timeframe').value = state.timeframe; document.getElementById('terminal-zoom').value = String(state.zoom); const observation = document.getElementById('terminal-observation'); if (document.activeElement !== observation) observation.value = state.observation; document.getElementById('terminal-observation-state').textContent = state.observation ? 'Observation conservée localement' : 'Non enregistré'; document.getElementById('terminal-chart-caption').textContent = `${state.instrument} · ${state.timeframe} · série historique locale contrôlée · valeurs normalisées · aucune cotation en temps réel.`; renderTerminalCrosshair();
-  const practice = state.practice || {}; document.getElementById('terminal-practice-proof').textContent = practice.status === 'validated' ? 'Preuve conservée localement' : practice.attempts ? 'À reprendre' : 'À commencer'; document.getElementById('terminal-practice-feedback').textContent = practice.feedback || 'Aucune vérification effectuée.'; document.getElementById('terminal-practice-validate').textContent = practice.status === 'validated' ? 'Rejouer la mission' : 'Vérifier ma lecture';
+  const svg = document.getElementById('terminal-chart');
+  if (!svg) return;
+  const state = getTerminalState();
+  const data = terminalDataset(state.instrument);
+  const visibleCount = Math.max(12, Math.round(data.length / state.zoom));
+  const maxPan = Math.max(0, data.length - visibleCount);
+  const start = terminalClamp(state.pan, 0, maxPan);
+  const visible = data.slice(start, start + visibleCount);
+  const min = Math.min(...visible.map(candle => candle.low)) - 1;
+  const max = Math.max(...visible.map(candle => candle.high)) + 1;
+  const { left, right, top, bottom } = TERMINAL_VIEWBOX;
+  const x = index => left + index * ((right - left) / Math.max(1, visible.length - 1));
+  const y = value => top + (max - value) / (max - min) * (bottom - top);
+  const candleWidth = Math.max(5, Math.min(22, (right - left) / visible.length * .5));
+  terminalInteraction.view = { visible, min, max };
+
+  const horizontalGrid = Array.from({ length: 5 }, (_, index) => {
+    const yy = top + index * (bottom - top) / 4;
+    const value = (max - index * (max - min) / 4).toFixed(1);
+    return `<line class="grid grid-horizontal" x1="${left}" x2="${right}" y1="${yy}" y2="${yy}"/><text class="axis-value" x="${right + 12}" y="${yy + 4}">${value}</text>`;
+  }).join('');
+  const verticalGrid = Array.from({ length: 7 }, (_, index) => {
+    const xx = left + index * (right - left) / 6;
+    return `<line class="grid grid-vertical" x1="${xx}" x2="${xx}" y1="${top}" y2="${bottom}"/>`;
+  }).join('');
+  const candles = visible.map((candle, index) => {
+    const centerX = x(index);
+    const openY = y(candle.open);
+    const closeY = y(candle.close);
+    const klass = candle.close >= candle.open ? 'candle-up' : 'candle-down';
+    return `<g class="terminal-candle ${klass}" data-sequence="${candle.index + 1}"><line class="wick" x1="${centerX}" x2="${centerX}" y1="${y(candle.high)}" y2="${y(candle.low)}"/><rect class="candle-body" x="${centerX - candleWidth / 2}" y="${Math.min(openY, closeY)}" width="${candleWidth}" height="${Math.max(3, Math.abs(closeY - openY))}" rx="1.5"/></g>`;
+  }).join('');
+  const sequenceLabels = Array.from({ length: 6 }, (_, labelIndex) => {
+    const index = Math.round(labelIndex * (visible.length - 1) / 5);
+    const candle = visible[index];
+    return `<text class="axis-sequence" x="${x(index)}" y="389">SEQ ${String(candle.index + 1).padStart(2, '0')}</text>`;
+  }).join('');
+  const drawings = state.drawings.map(drawing => terminalDrawingMarkup(drawing)).join('');
+  svg.innerHTML = `<rect class="chart-canvas" x="0" y="0" width="900" height="420"/><g class="terminal-grid">${horizontalGrid}${verticalGrid}</g><g class="terminal-candles">${candles}</g><g class="terminal-drawings">${drawings}</g><g id="terminal-drawing-draft"></g>${sequenceLabels}<g id="terminal-crosshair" hidden><line class="crosshair crosshair-v" x1="0" x2="0" y1="${top}" y2="${bottom}"/><line class="crosshair crosshair-h" x1="${left}" x2="${right}" y1="0" y2="0"/><rect class="crosshair-label-x" x="0" y="365" width="52" height="19" rx="4"/><text class="crosshair-x-label" x="5" y="378">SEQ 00</text><g class="crosshair-value-label"><rect x="${right + 5}" y="0" width="54" height="19" rx="4"/><text class="crosshair-y-label" x="${right + 32}" y="13">0.0</text></g></g>`;
+
+  document.getElementById('terminal-instrument').value = state.instrument;
+  document.getElementById('terminal-timeframe').value = state.timeframe;
+  document.getElementById('terminal-zoom').value = String(state.zoom);
+  document.getElementById('terminal-zoom-value').textContent = `${state.zoom}×`;
+  document.getElementById('terminal-chart-market').textContent = state.instrument;
+  const observation = document.getElementById('terminal-observation');
+  if (document.activeElement !== observation) observation.value = state.observation;
+  document.getElementById('terminal-observation-state').textContent = state.observation ? 'Observation conservée localement' : 'Non enregistré';
+  document.getElementById('terminal-chart-caption').textContent = `${state.instrument} · ${state.timeframe} · série synthétique locale · indices normalisés sans unité · aucune cotation en temps réel.`;
+  document.getElementById('terminal-undo-drawing').disabled = state.drawings.length === 0;
+  document.getElementById('terminal-clear-drawings').disabled = state.drawings.length === 0;
+  const practice = state.practice || {};
+  document.getElementById('terminal-practice-proof').textContent = practice.status === 'validated' ? 'Preuve conservée localement' : practice.attempts ? 'À reprendre' : 'À commencer';
+  document.getElementById('terminal-practice-feedback').textContent = practice.feedback || 'Aucune vérification effectuée.';
+  document.getElementById('terminal-practice-validate').textContent = practice.status === 'validated' ? 'Rejouer la mission' : 'Vérifier ma lecture';
+  renderTerminalDraft();
+  renderTerminalCrosshair();
 }
 function terminalJournalDraft() {
   const state = getTerminalState();
   const proof = state.practice?.proof || {};
-  const drawingLabels = state.drawings.map(drawing => ({ zone: 'zone Support/Résistance', line: 'ligne', fib: 'Fibonacci' }[drawing.type] || 'annotation')).join(', ');
+  const drawingLabels = state.drawings.map(drawing => ({ zone: 'zone Support/Résistance', line: 'ligne de tendance', fib: 'Fibonacci' }[drawing.type] || 'annotation')).join(', ');
   return {
     market: state.instrument,
     context: `Observation du Darius Analysis Terminal — timeframe ${state.timeframe}. Série pédagogique locale contrôlée, sans cotation en temps réel.`,
@@ -1452,12 +1574,129 @@ function terminalJournalDraft() {
   };
 }
 function initDariusAnalysisTerminal() {
-  const svg = document.getElementById('terminal-chart'); if (!svg || terminalInteraction.ready) return; terminalInteraction.ready = true; const update = patch => saveState({ terminal: { ...getTerminalState(), ...patch } });
-  document.getElementById('terminal-instrument').addEventListener('change', event => update({ instrument: event.target.value, pan: 0 })); document.getElementById('terminal-timeframe').addEventListener('change', event => update({ timeframe: event.target.value })); document.getElementById('terminal-zoom').addEventListener('input', event => update({ zoom: Number(event.target.value), pan: 0 })); document.getElementById('terminal-pan-left').addEventListener('click', () => update({ pan: Math.max(0, getTerminalState().pan - 3) })); document.getElementById('terminal-pan-right').addEventListener('click', () => { const state = getTerminalState(); const data = terminalDataset(state.instrument); update({ pan: Math.min(data.length - Math.max(12, Math.round(data.length / state.zoom)), state.pan + 3) }); });
-  document.querySelectorAll('[data-terminal-tool]').forEach(button => button.addEventListener('click', () => { terminalInteraction.tool = button.dataset.terminalTool; document.querySelectorAll('[data-terminal-tool]').forEach(item => item.classList.toggle('active', item === button)); document.getElementById('terminal-tool-hint').textContent = terminalInteraction.tool === 'crosshair' ? 'Déplace le pointeur sur le graphique.' : 'Clique deux fois sur le graphique pour placer cette annotation.'; terminalInteraction.draft = null; }));
-  svg.addEventListener('pointermove', event => { terminalInteraction.crosshair = terminalSvgPoint(event); renderTerminalCrosshair(); }); svg.addEventListener('pointerleave', () => { terminalInteraction.crosshair = null; renderTerminalCrosshair(); }); svg.addEventListener('pointerdown', event => { if (terminalInteraction.tool === 'crosshair') return; const point = terminalSvgPoint(event); if (!terminalInteraction.draft) { terminalInteraction.draft = point; document.getElementById('terminal-tool-hint').textContent = 'Encore un clic pour terminer l’annotation.'; return; } const drawing = { type: terminalInteraction.tool, x1: terminalInteraction.draft.x, y1: terminalInteraction.draft.y, x2: point.x, y2: point.y }; update({ drawings: [...getTerminalState().drawings, drawing] }); terminalInteraction.draft = null; document.getElementById('terminal-tool-hint').textContent = 'Annotation conservée localement. Tu peux en ajouter une autre.'; });
-  document.getElementById('terminal-save-observation').addEventListener('click', () => { const observation = document.getElementById('terminal-observation').value.trim(); if (!observation) { document.getElementById('terminal-observation-state').textContent = 'Écris une observation avant de l’enregistrer.'; return; } update({ observation }); showToast('Observation conservée sur cet appareil.'); });
-  document.getElementById('terminal-practice-validate').addEventListener('click', () => { const state = getTerminalState(); const zones = state.drawings.filter(drawing => drawing.type === 'zone'); const zone = zones[zones.length - 1]; const height = zone ? Math.abs(zone.y2 - zone.y1) : 0; const center = zone ? (zone.y1 + zone.y2) / 2 : 0; const valid = Boolean(zone && height >= 45 && height <= 130 && center >= 100 && center <= 320); const attempts = Number(state.practice?.attempts || 0) + 1; const status = valid ? 'validated' : 'retry'; const practice = { ...(state.practice || {}), status, attempts, feedback: valid ? 'Bonne lecture : tu as matérialisé une zone, sans la réduire à un prix exact. Preuve conservée localement.' : zone ? 'Relis la consigne : élargis ou déplace ta zone vers la partie centrale du graphique, puis réessaie.' : 'Choisis Zone S/R et place deux points pour créer une zone avant de vérifier.', proof: { id: 'm02-zone-identification', type: 'zone_identification', lessonId: state.practice?.sourceLesson || 'M0.2', status }, ...(valid ? { completedAt: new Date().toISOString() } : {}) }; update({ practice }); if (valid) showToast('Preuve de pratique conservée sur cet appareil.'); });
+  const svg = document.getElementById('terminal-chart');
+  if (!svg || terminalInteraction.ready) return;
+  terminalInteraction.ready = true;
+  const update = patch => saveState({ terminal: { ...getTerminalState(), ...patch } });
+  const setZoom = value => update({ zoom: terminalClamp(Math.round(value), 1, 3), pan: 0 });
+  const hint = document.getElementById('terminal-tool-hint');
+
+  document.getElementById('terminal-instrument').addEventListener('change', event => update({ instrument: event.target.value, pan: 0 }));
+  document.getElementById('terminal-timeframe').addEventListener('change', event => update({ timeframe: event.target.value }));
+  document.getElementById('terminal-zoom').addEventListener('input', event => setZoom(Number(event.target.value)));
+  document.getElementById('terminal-zoom-out').addEventListener('click', () => setZoom(getTerminalState().zoom - 1));
+  document.getElementById('terminal-zoom-in').addEventListener('click', () => setZoom(getTerminalState().zoom + 1));
+  document.getElementById('terminal-pan-left').addEventListener('click', () => update({ pan: Math.max(0, getTerminalState().pan - 3) }));
+  document.getElementById('terminal-pan-right').addEventListener('click', () => {
+    const state = getTerminalState();
+    const data = terminalDataset(state.instrument);
+    update({ pan: Math.min(data.length - Math.max(12, Math.round(data.length / state.zoom)), state.pan + 3) });
+  });
+  document.querySelectorAll('[data-terminal-tool]').forEach(button => button.addEventListener('click', () => {
+    terminalInteraction.tool = button.dataset.terminalTool;
+    terminalInteraction.draft = null;
+    document.querySelectorAll('[data-terminal-tool]').forEach(item => {
+      const active = item === button;
+      item.classList.toggle('active', active);
+      item.setAttribute('aria-pressed', String(active));
+    });
+    hint.textContent = terminalInteraction.tool === 'crosshair' ? 'Survole le graphique pour lire une bougie et ses indices normalisés.' : 'Glisse sur le graphique pour placer ton annotation.';
+    renderTerminalDraft();
+    renderTerminalCrosshair();
+  }));
+
+  svg.addEventListener('pointermove', event => {
+    const point = terminalSvgPoint(event);
+    terminalInteraction.crosshair = point;
+    if (terminalInteraction.draft) {
+      terminalInteraction.draft = { ...terminalInteraction.draft, x2: point.x, y2: point.y };
+      renderTerminalDraft();
+    }
+    renderTerminalCrosshair();
+  });
+  svg.addEventListener('pointerleave', () => {
+    if (!terminalInteraction.draft) terminalInteraction.crosshair = null;
+    renderTerminalCrosshair();
+  });
+  svg.addEventListener('pointerdown', event => {
+    if (terminalInteraction.tool === 'crosshair' || event.button !== 0) return;
+    event.preventDefault();
+    const point = terminalSvgPoint(event);
+    terminalInteraction.draft = { type: terminalInteraction.tool, x1: point.x, y1: point.y, x2: point.x, y2: point.y };
+    if (svg.setPointerCapture) svg.setPointerCapture(event.pointerId);
+    hint.textContent = 'Continue le geste puis relâche pour conserver le tracé.';
+    renderTerminalDraft();
+  });
+  svg.addEventListener('pointerup', () => {
+    const draft = terminalInteraction.draft;
+    if (!draft) return;
+    terminalInteraction.draft = null;
+    renderTerminalDraft();
+    const distance = Math.hypot(draft.x2 - draft.x1, draft.y2 - draft.y1);
+    if (distance < 12) {
+      hint.textContent = 'Geste trop court — étire le tracé sur le graphique.';
+      return;
+    }
+    const drawings = [...getTerminalState().drawings, draft].slice(-100);
+    update({ drawings });
+    hint.textContent = draft.type === 'zone'
+      ? 'Zone S/R tracée et conservée localement. Annule ou efface avec les commandes du dock.'
+      : draft.type === 'fib'
+        ? 'Niveaux Fibonacci tracés et conservés localement. Annule ou efface avec les commandes du dock.'
+        : 'Ligne de tendance tracée et conservée localement. Annule ou efface avec les commandes du dock.';
+  });
+  svg.addEventListener('pointercancel', () => {
+    terminalInteraction.draft = null;
+    renderTerminalDraft();
+    hint.textContent = 'Geste annulé.';
+  });
+  svg.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || !terminalInteraction.draft) return;
+    terminalInteraction.draft = null;
+    renderTerminalDraft();
+    hint.textContent = 'Tracé annulé.';
+  });
+  document.getElementById('terminal-undo-drawing').addEventListener('click', () => {
+    const drawings = getTerminalState().drawings;
+    if (drawings.length) update({ drawings: drawings.slice(0, -1) });
+    hint.textContent = 'Dernier tracé annulé.';
+  });
+  document.getElementById('terminal-clear-drawings').addEventListener('click', () => {
+    if (!getTerminalState().drawings.length) return;
+    update({ drawings: [] });
+    hint.textContent = 'Tous les tracés ont été effacés du graphique local.';
+  });
+  document.getElementById('terminal-save-observation').addEventListener('click', () => {
+    const observation = document.getElementById('terminal-observation').value.trim();
+    if (!observation) {
+      document.getElementById('terminal-observation-state').textContent = 'Écris une observation avant de l’enregistrer.';
+      return;
+    }
+    update({ observation });
+    showToast('Observation conservée sur cet appareil.');
+  });
+  document.getElementById('terminal-practice-validate').addEventListener('click', () => {
+    const state = getTerminalState();
+    const zones = state.drawings.filter(drawing => drawing.type === 'zone');
+    const zone = zones[zones.length - 1];
+    const height = zone ? Math.abs(zone.y2 - zone.y1) : 0;
+    const center = zone ? (zone.y2 + zone.y1) / 2 : 0;
+    const valid = Boolean(zone && height >= 45 && height <= 130 && center >= 100 && center <= 320);
+    const attempts = Number(state.practice?.attempts || 0) + 1;
+    const status = valid ? 'validated' : 'retry';
+    const practice = {
+      ...(state.practice || {}), status, attempts,
+      feedback: valid
+        ? 'Bonne lecture : tu as matérialisé une zone, sans la réduire à un prix exact. Preuve conservée localement.'
+        : zone
+          ? 'Relis la consigne : élargis ou déplace ta zone vers la partie centrale du graphique, puis réessaie.'
+          : 'Choisis Zone S/R et glisse sur deux niveaux pour matérialiser une zone avant de vérifier.',
+      proof: { id: 'm02-zone-identification', type: 'zone_identification', lessonId: state.practice?.sourceLesson || 'M0.2', status },
+      ...(valid ? { completedAt: new Date().toISOString() } : {})
+    };
+    update({ practice });
+    if (valid) showToast('Preuve de pratique conservée sur cet appareil.');
+  });
 }
 
 // The learner's own most recent Journal entry, or an honest empty state — never an
