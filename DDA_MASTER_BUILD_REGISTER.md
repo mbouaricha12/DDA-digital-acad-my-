@@ -284,3 +284,6 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 **Limites inchangées :** les séries et valeurs sont synthétiques, normalisées et locales; aucun fournisseur de marché, signal, authentification ou service de synchronisation n’est ajouté. Aucune route ni architecture applicative n’est renommée ou remplacée.
 
 **Validation :** tous les contrats Node présents, vérification de cohérence route/registre, syntaxe JavaScript et `git diff --check` passent; suite Playwright complète : **49 scénarios passants, 0 échec**, incluant tracé, preuve Practice, persistance 4H/zoom 2×, transfert d’une note non sauvegardée et viewports 360/390/1440px sans débordement. Branche isolée : `feat/darius-analysis-terminal`.
+
+
+**Fiabilité CI :** le Product Gate révélait que `tests/smoke_app_boot.js` gardait jsdom ouvert après ses assertions et expirait au délai de 15 minutes. Le smoke ferme maintenant sa fenêtre dans `finally` (y compris en cas d'échec, sans masquer le code de sortie) ; validation locale : **25 contrôles réussis et processus terminé**.
