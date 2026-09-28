@@ -2,8 +2,25 @@
 
 const assert = require('node:assert/strict');
 const http = require('node:http');
-const { createBff, SESSION_COOKIE, CSRF_COOKIE } = require('../bff/src/app');
+const { createBff, configFromEnv, validateRuntimeConfig, SESSION_COOKIE, CSRF_COOKIE } = require('../bff/src/app');
 const { MemorySessionStore } = require('../bff/src/session-store');
+
+const encryptionKey = require('node:crypto').randomBytes(32).toString('base64url');
+const validEnv = {
+  SUPABASE_URL: 'https://project.supabase.co',
+  SUPABASE_PUBLISHABLE_KEY: 'publishable-key',
+  SUPABASE_SERVICE_ROLE_KEY: 'service-role-key',
+  SESSION_ENCRYPTION_KEY: encryptionKey,
+  ALLOWED_ORIGINS: 'https://app.example.dda.academy',
+  EMAIL_REDIRECT_TO: 'https://app.example.dda.academy/#access',
+  BFF_COOKIE_SECURE: 'true'
+};
+assert.deepEqual(validateRuntimeConfig(configFromEnv(validEnv), validEnv), []);
+assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, ALLOWED_ORIGINS: '*' }), { ...validEnv, ALLOWED_ORIGINS: '*' }).some(issue => /exact HTTPS origins/.test(issue)));
+assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, BFF_COOKIE_SECURE: 'false' }), { ...validEnv, BFF_COOKIE_SECURE: 'false' }).some(issue => /__Host- cookies/.test(issue)));
+assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, SESSION_ENCRYPTION_KEY: 'short' }), { ...validEnv, SESSION_ENCRYPTION_KEY: 'short' }).some(issue => /32 bytes/.test(issue)));
+assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, EMAIL_REDIRECT_TO: 'https://other.example/#access' }), { ...validEnv, EMAIL_REDIRECT_TO: 'https://other.example/#access' }).some(issue => /origin listed/.test(issue)));
+assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, SUPABASE_URL: 'https://project.supabase.co/extra' }), { ...validEnv, SUPABASE_URL: 'https://project.supabase.co/extra' }).some(issue => /root HTTPS URL/.test(issue)));
 
 function makeAuth() {
   const users = new Map();
@@ -20,24 +37,37 @@ function makeAuth() {
   };
 }
 
-function request(server, method, path, { body, headers = {}, cookies = {} } = {}) {
+function request(server, method, path, { body, rawBody, headers = {}, cookies = {} } = {}) {
   return new Promise((resolve, reject) => {
     const cookie = Object.entries(cookies).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('; ');
-    const req = http.request({ ...server.address(), method, path, headers: { Origin: 'http://localhost:8744', ...(body ? { 'Content-Type': 'application/json' } : {}), ...(cookie ? { Cookie: cookie } : {}), ...headers } }, res => {
+    const hasBody = body !== undefined || rawBody !== undefined;
+    const req = http.request({ ...server.address(), method, path, headers: { Origin: 'http://localhost:8744', ...(hasBody ? { 'Content-Type': 'application/json' } : {}), ...(cookie ? { Cookie: cookie } : {}), ...headers } }, res => {
       let text = ''; res.on('data', chunk => { text += chunk; }); res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, body: text ? JSON.parse(text) : null }));
     });
-    req.on('error', reject); if (body) req.write(JSON.stringify(body)); req.end();
+    req.on('error', reject); if (rawBody !== undefined) req.write(rawBody); else if (hasBody) req.write(JSON.stringify(body)); req.end();
   });
 }
 
 (async () => {
   const auth = makeAuth();
   const sessions = new MemorySessionStore();
-  const handler = createBff({ auth, sessions, config: { allowedOrigins: ['http://localhost:8744'], secureCookies: false, sessionIdleMs: 60 * 60 * 1000, sessionAbsoluteMs: 24 * 60 * 60 * 1000, sessionEncryptionKey: null, emailRedirectTo: 'http://localhost:8744/access' }, clock: () => new Date('2026-09-28T00:00:00.000Z') });
+  const handler = createBff({ auth, sessions, config: { allowedOrigins: ['http://localhost:8744'], secureCookies: true, sessionIdleMs: 60 * 60 * 1000, sessionAbsoluteMs: 24 * 60 * 60 * 1000, sessionEncryptionKey: null, emailRedirectTo: 'http://localhost:8744/access' }, clock: () => new Date('2026-09-28T00:00:00.000Z') });
   const server = http.createServer(handler);
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   try {
-    let response = await request(server, 'POST', '/v1/auth/register', { body: { email: 'a@example.com', password: 'long-enough-password', display_name: 'A' } });
+    let response = await request(server, 'GET', '/healthz');
+    assert.equal(response.status, 200);
+    assert.deepEqual(response.body, { status: 'ok' });
+    assert.equal(response.headers['set-cookie'], undefined);
+    response = await request(server, 'POST', '/v1/auth/register', { rawBody: '{' });
+    assert.equal(response.status, 400);
+    assert.equal(response.body.code, 'validation_error');
+    response = await request(server, 'POST', '/v1/auth/register', { body: { email: 'a@example.com' }, headers: { 'Content-Type': 'text/plain' } });
+    assert.equal(response.status, 415);
+    response = await request(server, 'POST', '/v1/auth/register', { rawBody: 'null' });
+    assert.equal(response.status, 400);
+
+    response = await request(server, 'POST', '/v1/auth/register', { body: { email: 'a@example.com', password: 'long-enough-password', display_name: 'A' } });
     assert.equal(response.status, 202);
     assert.match(response.body.message, /verification/i);
 
@@ -48,6 +78,7 @@ function request(server, method, path, { body, headers = {}, cookies = {} } = {}
     const sessionCookie = setCookies.find(value => value.startsWith(`${SESSION_COOKIE}=`)).split(';')[0].split('=')[1];
     const csrfCookie = setCookies.find(value => value.startsWith(`${CSRF_COOKIE}=`)).split(';')[0].split('=')[1];
     assert.match(setCookies.find(value => value.startsWith(`${SESSION_COOKIE}=`)), /HttpOnly/);
+    assert.match(setCookies.find(value => value.startsWith(`${SESSION_COOKIE}=`)), /Secure/);
     assert.match(setCookies.find(value => value.startsWith(`${SESSION_COOKIE}=`)), /SameSite=Lax/);
 
     response = await request(server, 'GET', '/v1/me', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });

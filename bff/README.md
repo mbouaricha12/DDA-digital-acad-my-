@@ -21,11 +21,14 @@ SUPABASE_PUBLISHABLE_KEY
 SUPABASE_SERVICE_ROLE_KEY
 SESSION_ENCRYPTION_KEY   # 32 octets encodés base64url
 ALLOWED_ORIGINS          # ex. https://app.example.dda.academy
+EMAIL_REDIRECT_TO        # URL de retour, sur une origine allowlistée
 BFF_COOKIE_SECURE=true
 PORT=8744
 ```
 
 Le fichier `supabase/schema.sql` doit être relu et appliqué manuellement dans un projet Supabase validé. La `SERVICE_ROLE_KEY` ne doit jamais être livrée au navigateur, au dépôt ou aux logs.
+
+Le health check `/healthz` répond `200` sans créer de cookie. Au démarrage, le serveur valide les variables obligatoires, une clé de chiffrement base64url de 32 octets, des origines exactes HTTPS (localhost HTTP uniquement pour le développement) et un redirect e-mail dont l'origine est allowlistée. Les cookies `__Host-` restent toujours `Secure`.
 
 ## Intégration frontend progressive
 
