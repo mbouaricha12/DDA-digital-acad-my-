@@ -531,3 +531,268 @@ un nombre limité de destinations secondaires
 ```
 
 **Aucune modification fonctionnelle, aucun changement de design, aucune modification P2/P3 et aucun backend n’ont été effectués pendant cet audit.**
+
+
+---
+
+# ADDENDUM — CONTENT DEPTH & PAGE VALUE AUDIT
+
+**Ajout au mandat :** 28 septembre 2026  
+**Principe :** une mission principale ne justifie pas une page pauvre.  
+**Règle complémentaire :** `ONE PAGE ≠ ONE CARD + ONE BUTTON`.
+
+## A. Nouvelle définition d’une page réussie
+
+Une page DDA doit être évaluée sur deux axes indépendants :
+
+1. **Mission** — pourquoi cette page existe-t-elle ?
+2. **Valeur** — pourquoi l’utilisateur devrait-il rester sur cette page plutôt que cliquer immédiatement ailleurs ?
+
+Une page est **content complete** lorsque son contenu permet de comprendre et d’accomplir sa mission sans dépendre immédiatement d’une autre page, sauf lorsque la page est explicitement un point d’entrée ou un gate.
+
+### Le minimum attendu selon le type de page
+
+| Type de page | Contenu minimum attendu | Action / sortie minimum |
+|---|---|---|
+| Acquisition / Landing | Promesse, problème, méthode, preuve de sérieux, public cible, limites, orientation | Commencer ou approfondir la méthode |
+| Accès / Onboarding | Contexte, ce qui est créé, confidentialité, étapes, conséquences | Créer/reprendre une session |
+| Dashboard | État actuel, priorité, raison de cette priorité, contexte suffisant, résumé utile | Une prochaine action claire |
+| Parcours | Introduction du curriculum, module actif, statuts, leçons, prérequis, horizon proche | Ouvrir la prochaine étape |
+| Leçon | Objectif, explication, exemple, média ou représentation, pratique, feedback, évaluation, résultat | Prouver la compétence ou recommencer |
+| Practice / Terminal | Mission, instruments pédagogiques, contexte, consigne, espace d’action, validation, feedback, preuve | Produire une preuve pratique |
+| Progression | Compétences, preuves, erreurs ou étapes en construction, prochain travail, contexte temporel | Revoir ou pratiquer une compétence |
+| Journal / Plan | Contexte, structure de saisie, exemples, historique, review, plan | Conserver une réflexion ou un plan |
+| Ressources | Catégories, descriptions, niveau, durée, usage recommandé, lecteur ou accès | Lire une ressource utile |
+| Market Intelligence | Fait, source/statut, importance, notion, contenu associé, limites des données | Comprendre puis ouvrir le contenu DDA associé |
+| Premium | Différence de valeur, inclusions, limites, droits réels, statut paiement, prochaine étape | Comprendre un entitlement, pas seulement cliquer |
+| Profil | Identité, préférences, statistiques si pertinentes, confidentialité, actions de compte | Mettre à jour ou réinitialiser |
+| Support | Catégories de problème, réponses, diagnostic, formulaire, statut d’envoi | Résoudre ou formuler un blocage |
+| Future preview | Vision, ce qui existe déjà, ce qui n’existe pas, conditions de lancement | Comprendre le futur sans croire à une fonctionnalité active |
+
+---
+
+## B. Mesure du produit actuel
+
+La mesure a été faite sur les blocs présents dans `dist/index.html`. Elle compte le texte statique visible dans le shell ; elle **sous-estime volontairement les leçons**, dont le contenu est injecté par `lesson-renderer.js` depuis `dda-core.js` et les fichiers M1 authored.
+
+### Classification de densité
+
+- **Riche** : contenu suffisant pour rester, comprendre et agir ; peut cependant être trop large.
+- **Adéquate mais à cadrer** : valeur réelle présente, mais mission ou hiérarchie à clarifier.
+- **Mince** : l’utilisateur comprend le titre mais doit presque immédiatement cliquer ailleurs.
+- **Shell dynamique** : le HTML initial est vide ou presque ; la valeur dépend entièrement d’un rendu runtime ou d’une permission.
+- **Preview future** : contenu descriptif présent, mais pas de capacité active ; doit être évalué selon la qualité de l’explication, pas selon le nombre de boutons.
+
+| Vue runtime | Texte statique mesuré | Éléments visibles indicatifs | Diagnostic Content Depth | Valeur réelle sur place |
+|---|---:|---|---|---|
+| `landing` | ~1037 mots | 8 h2, 21 h3, 15 articles, 48 boutons/liens | **Riche mais surchargée** | Forte valeur éditoriale ; risque de trop expliquer et de concurrencer l’unique CTA |
+| `access` | ~201 mots | 5 inputs, 3 selects, 10 boutons/liens | **Adéquate pour l’accès, trop large dans ses sorties** | Inscription/onboarding compréhensible, mais les liens vers 8 domaines diluent la mission |
+| `dashboard` | ~415 mots | 7 sections, 24 boutons, Terminal et cartes multiples | **Riche mais non focalisée** | Beaucoup de valeur, mais le volume de missions empêche la prochaine action de dominer |
+| `path` | ~60 mots | 1 h1, 4 paragraphes, 1 bouton avant rendu journey | **Mince / dépendante du runtime** | Le chapitre rendu par `renderPathJourney()` ajoute de la valeur, mais l’introduction seule ne suffit pas |
+| `lesson*` | 2–5 mots dans le shell | 1 bouton / 1 article placeholder | **Shell dynamique** | Ne pas juger sur le shell ; la complétude doit être contrôlée dans le curriculum et le renderer |
+| `progress` | ~222 mots | 7 sections, 6 h3 | **Adéquate mais fragmentée** | Preuves et prochaine étape présentes ; certification, badges et modules recap dispersent la mission |
+| `journal` | ~386 mots | 19 textareas, 3 articles, 15 boutons | **Riche et exploitable** | Vraie valeur de saisie et de review ; risque de sur-formulaire si le contexte n’est pas progressif |
+| `resources` | ~120 mots | 4 h2, 1 article, 5 boutons | **Mince à adéquate** | Le lecteur intégré apporte de la valeur ; la bibliothèque manque de contexte de tri, durée et usage |
+| `membership` | ~354 mots | Free, Premium, garde-fous, communauté, roadmap | **Riche mais mélangée** | Explique l’aperçu ; confond plan, roadmap, certification et futur écosystème |
+| `premium-track` | ~138 mots | 1 h1, 1 h2, 1 h3, 4 boutons | **Preview structurée mais limitée** | Suffit comme teaser si elle explique le futur ; pas suffisante comme espace Premium actif |
+| `premium-lab` | ~141 mots | 1 h1, 1 h2, 5 champs, 1 select | **Mince si présentée comme laboratoire** | Peut être un brief de future fonctionnalité, pas encore un outil complet |
+| `premium-assessment` | ~186 mots | 1 h1, 10 inputs, 3 boutons | **Fonctionnelle mais étroite** | Une évaluation nécessite feedback, interprétation et sortie ; sinon elle n’est qu’un formulaire |
+| `markets` | ~253 mots | 3 h2, 2 articles, 3 boutons | **Adéquate** | La chaîne Fait → Pourquoi → Notion → Contenu donne une vraie valeur pédagogique ; éviter le doublon Dashboard |
+| `brokers` | ~380 mots | 4 profils, filtres, critères, disclosures | **Riche mais périphérique** | Bonne valeur de comparaison honnête ; nécessite source, date de vérification et limites visibles |
+| `support` | ~151 mots | 4 details, formulaire, 2 boutons | **Adéquate pour aide initiale** | FAQ + contact local ; les raccourcis vers trop de pages en font un mini-menu |
+| `community` | ~216 mots | tuiles, atelier, espaces, CTA | **Preview correctement contextualisée** | Valeur de compréhension du futur ; aucune valeur sociale active, ce qui est honnêtement indiqué |
+| `practice` | ~205 mots | 6 tuiles futures, Journal, CTA | **Preview riche mais redondante** | Explique une vision de Practice avancé ; risque majeur de confusion avec le Practice Terminal réel |
+| `intelligence` | ~177 mots | tuiles Darius AI, personnalisation, outils | **Preview adéquate** | Explique des intentions futures ; doit rester séparée de la prochaine action calculée actuelle |
+| `profile` | ~208 mots | 3 inputs, 3 selects, stats et préférences | **Adéquate** | Identité et préférences modifiables ; les statistiques dupliquent Progression |
+
+### Conclusion de mesure
+
+Le produit n’est pas globalement « vide ». Le problème est plus précis :
+
+- certaines pages sont **trop riches mais trop polyvalentes** (`dashboard`, `membership`, `landing`) ;
+- certaines pages sont **trop minces pour leur promesse** (`path`, `resources`, `premium-lab`) ;
+- certaines pages sont **des previews futures correctement honnêtes**, mais elles ne doivent pas être évaluées comme des fonctionnalités livrées (`community`, `practice`, `intelligence`) ;
+- les leçons sont **dynamiques**, donc leur Content Depth doit être testée depuis les données authored, pas uniquement depuis le HTML initial.
+
+---
+
+## C. Audit page par page : mission + valeur
+
+### 1. Landing — valeur éditoriale forte, hiérarchie à réduire
+
+**Mission :** donner envie de commencer DDA et expliquer la méthode.  
+**Valeur actuelle :** la page explique le problème des apprentissages passifs, la boucle Learn → Practice → Prove, les principes, les limites et les niveaux Free/Premium.  
+**Pourquoi rester :** pour comprendre la différence DDA avant de créer une session.  
+**Risque :** 48 destinations ou boutons/liens rendent la page plus proche d’un site complet que d’un point d’entrée.  
+**Content Complete ?** Oui pour l’acquisition ; non si l’on attend une présentation exhaustive de tout le produit.  
+**Décision :** conserver une forte profondeur éditoriale, mais désigner un CTA primaire et une seule sortie secondaire « comprendre la méthode ».
+
+### 2. Access — assez d’information pour l’accès, pas pour l’exploration
+
+**Mission :** créer ou reprendre une session locale.  
+**Valeur :** comprendre la confidentialité locale, le niveau, l’objectif et le rythme.  
+**Pourquoi rester :** compléter un onboarding qui personnalise le premier pas.  
+**Risque :** les liens Journal, Markets, Community, Premium, Brokers, Resources et Support donnent de la valeur de navigation mais pas de valeur d’accès.  
+**Content Complete ?** Oui pour inscription/onboarding ; non comme mini-hub public.  
+**Décision :** séparer la valeur d’accès de la valeur de découverte.
+
+### 3. Dashboard — riche, mais chaque carte ne peut pas être une mission
+
+**Mission :** décider de la prochaine action.  
+**Valeur :** résumé de l’état apprenant, raison de la prochaine action, accès à une pratique et à des éléments contextuels.  
+**Pourquoi rester :** savoir exactement quoi faire maintenant et pourquoi.  
+**Risque :** si chaque carte cherche à être complète, la page devient un second site entier.  
+**Content Complete ?** Oui pour un cockpit ; non si chaque sous-produit est censé être utilisable complètement depuis ici.  
+**Décision :** une carte principale complète + des aperçus qui répondent à « pourquoi cette destination existe », sans reproduire leur contenu.
+
+### 4. Parcours — risque de sous-contenu
+
+**Mission :** comprendre où l’on se situe dans le curriculum.  
+**Valeur actuelle :** chapitre actif, modules authored et statuts honnêtes une fois `renderPathJourney()` exécuté.  
+**Pourquoi rester :** comparer l’étape en cours aux prochaines étapes.  
+**Risque :** l’introduction statique de 60 mots et un seul bouton ne suffisent pas si le rail de journey échoue, si le contenu est verrouillé ou si le curriculum s’étend.  
+**Content Complete ?** À condition que le rail fournisse : objectif du module, nombre de leçons, prérequis, statut, durée, prochaine action et raison du verrouillage.  
+**Décision :** le Parcours doit avoir une fiche de chapitre active et un horizon proche ; il ne doit pas être une simple liste de cartes.
+
+### 5. Leçons — content depth à tester dans le renderer
+
+**Mission :** comprendre, observer, pratiquer, recevoir du feedback et prouver.  
+**Valeur :** la structure authored contient des blocs de lecture, pratique, exercice, quiz, résultat et lien optionnel vers Journal.  
+**Pourquoi rester :** une leçon complète permet d’acquérir et de vérifier une compétence sans sortir immédiatement.  
+**Risque :** le shell HTML paraît vide ; une erreur de montage ou de permission pourrait laisser un écran pauvre.  
+**Content Complete ?** Oui uniquement si chaque leçon montée possède objectif, contexte, explication, exemple, exercice, feedback d’erreur, gate, quiz, résultat et prochaine étape.  
+**Décision :** l’audit doit considérer `dda-core.js`, `lesson-renderer.js`, `LESSON_REGISTRY` et les fichiers M1 comme le contenu réel de la page.
+
+### 6. Progression — preuve profonde, mais attention au catalogue
+
+**Mission :** comprendre ce qui est réellement acquis et ce qui vient ensuite.  
+**Valeur :** Fil de maîtrise, preuves Practice, prochaine étape, curriculum et certification locale.  
+**Pourquoi rester :** interpréter sa progression, pas seulement voir un chiffre.  
+**Risque :** modules recap, certification, badges et statistiques deviennent quatre pages en une.  
+**Content Complete ?** Oui pour la preuve ; non si les métriques personnelles et la roadmap future dominent les compétences.  
+**Décision :** profondeur centrée sur preuves, erreurs, compétences en construction et prochaine pratique.
+
+### 7. Journal & Plan — contenu réellement utilisable
+
+**Mission :** documenter un processus personnel.  
+**Valeur :** structure de saisie en trois étapes, entrées, plan et provenance depuis Terminal/lesson.  
+**Pourquoi rester :** le Journal produit une trace personnelle, même sans donnée externe.  
+**Risque :** 19 textareas peuvent devenir une charge cognitive disproportionnée pour une première entrée.  
+**Content Complete ?** Oui sur le fond ; à rendre progressivement guidé pour éviter une page formulaire sans exemple ni contexte.  
+**Décision :** garder une vraie page riche, mais avec une première étape courte et des champs avancés différés.
+
+### 8. Resources — valeur insuffisamment explicitée
+
+**Mission :** trouver et consulter le support utile au bon moment.  
+**Valeur actuelle :** ressources Free, atelier Premium, lecteur intégré.  
+**Pourquoi rester :** choisir une ressource en fonction d’un objectif.  
+**Risque :** 120 mots et peu de métadonnées rendent la bibliothèque proche d’une liste de boutons.  
+**Content Complete ?** Pas encore pour une bibliothèque produit. Il manque au minimum : niveau, durée, bénéfice, lien avec une compétence, statut lu/non lu et recommandation de moment.  
+**Décision :** enrichir la fiche de chaque ressource avant d’ajouter de nouvelles catégories.
+
+### 9. Market Intelligence — bonne profondeur pédagogique, données à encadrer
+
+**Mission :** transformer un fait de marché en question d’apprentissage.  
+**Valeur :** chaîne éditoriale explicite, exemples BRVM, calendrier local de démonstration et pont vers une leçon/Journal.  
+**Pourquoi rester :** comprendre avant d’agir, pas consulter un signal.  
+**Content Complete ?** Oui pour un aperçu pédagogique ; non pour un service Market Intelligence réel, car les sources, timestamps et données live sont absents par mandat.  
+**Décision :** conserver la profondeur conceptuelle et afficher systématiquement le statut de démonstration.
+
+### 10. Premium — riche mais pas encore une expérience de produit
+
+**Mission :** comprendre les droits et la profondeur des offres.  
+**Valeur :** comparaison Free/Premium, garde-fous et aperçu des briques.  
+**Pourquoi rester :** décider si l’on comprend ce que Premium débloquerait réellement.  
+**Risque :** la page promet une pile de fonctionnalités (certification, Practice, Weekly Review, IA, communauté) qui ne sont pas toutes actives.  
+**Content Complete ?** Oui pour un aperçu gouverné ; non pour une page d’abonnement, puisqu’aucun achat ni catalogue final n’existe.  
+**Décision :** séparer clairement « disponible aujourd’hui », « aperçu local » et « futur ».
+
+### 11. Future previews — contenu suffisant pour comprendre, insuffisant pour utiliser
+
+`community`, `practice`, `intelligence`, `premium-track`, `premium-lab` et `premium-assessment` doivent être considérées comme des **pages d’orientation future**.
+
+Elles doivent toutes répondre à quatre questions :
+
+1. Qu’est-ce que cette capacité permettra de faire ?
+2. Qu’est-ce qui est déjà réel aujourd’hui ?
+3. Qu’est-ce qui n’est pas encore actif ?
+4. Quel est le déclencheur de lancement ou d’accès ?
+
+Elles ne doivent pas simuler une activité vide, un score, un membre, une analyse IA ou une évaluation produisant un résultat sans moteur réel.
+
+---
+
+## D. Seuils de qualité avant toute nouvelle page
+
+Avant d’ajouter une route ou une vue, le dossier produit doit répondre à cette checklist :
+
+### Mission
+
+- [ ] Une phrase décrit la mission principale.
+- [ ] L’audience et le moment d’usage sont connus.
+- [ ] La page a une action primaire et une sortie claire.
+
+### Content Depth
+
+- [ ] Une introduction explique pourquoi la page existe.
+- [ ] Le contexte nécessaire est présent sans dépendre immédiatement d’une autre page.
+- [ ] Les termes spécifiques sont définis ou reliés à une notion connue.
+- [ ] Les informations affichées sont datées, sourcées ou explicitement démonstratives.
+- [ ] Les exemples, preuves ou états vides sont réels et honnêtes.
+- [ ] Les éléments visuels ont une fonction de compréhension, pas seulement de décoration.
+- [ ] Les erreurs, verrous et états futurs sont expliqués.
+
+### Valeur et action
+
+- [ ] L’utilisateur peut rester et apprendre, décider, écrire, comparer ou pratiquer.
+- [ ] Le CTA principal ne renvoie pas simplement vers une page qui aurait pu contenir l’essentiel.
+- [ ] Les CTA secondaires ont des intentions différentes et nommées.
+- [ ] La sortie restitue un résultat, une preuve, une décision ou un état sauvegardé.
+
+### Cohérence
+
+- [ ] La source de vérité est identifiée.
+- [ ] Aucun contenu n’est dupliqué sans raison éditoriale.
+- [ ] Les métriques et labels appartiennent à un propriétaire clair.
+- [ ] La page n’est pas une seconde version du Dashboard, Parcours, Progression ou Journal.
+- [ ] Le contenu future/preview ne ressemble pas à une fonctionnalité active.
+
+---
+
+## E. Nouvelles décisions bloquantes ajoutées
+
+1. **Quel niveau de contenu minimum doit avoir une ressource de Bibliothèque avant d’être publiée ?**
+2. **Le Parcours doit-il afficher un résumé pédagogique de chaque module, ou seulement l’horizon authored proche ?**
+3. **Quels blocs du Dashboard sont des résumés et lesquels sont de vraies expériences utilisables ?**
+4. **Le Journal doit-il commencer par une note courte avant d’exposer les 19 champs ?**
+5. **Les pages `premium-track`, `premium-lab` et `premium-assessment` sont-elles des previews documentaires ou des surfaces expérimentales séparées ?**
+6. **Quel est le contrat minimal de content depth pour une leçon authored M0/M1/M2 ?**
+7. **Une page future peut-elle être visible dans la navigation principale si elle ne possède aucune action active ?**
+8. **Qui possède les contenus récurrents : BRVM, XP, modules recap, Journal CTA et Premium roadmap ?**
+
+---
+
+## F. Verdict complémentaire
+
+Le principe « une page = une mission » est nécessaire mais insuffisant.
+
+DDA doit appliquer simultanément :
+
+```text
+ONE PAGE = ONE PRIMARY MISSION
+ONE PAGE ≠ ONE CARD + ONE BUTTON
+ONE PAGE = ENOUGH CONTEXT TO UNDERSTAND
+ONE PAGE = ENOUGH CONTENT TO ACT
+ONE PAGE = AN HONEST OUTPUT OR STATE
+```
+
+Le prochain travail ne doit donc pas être l’ajout de nouvelles pages. Il doit être une **revue de complétude par page** :
+
+1. valider la mission ;
+2. valider la valeur de rester ;
+3. valider le contenu minimum ;
+4. valider l’action ;
+5. valider la sortie ;
+6. vérifier les duplications et la source de vérité.
+
+**Cet addendum n’a modifié aucun fichier fonctionnel, aucun design, aucune route, aucune logique P2/P3 et aucun backend.**
