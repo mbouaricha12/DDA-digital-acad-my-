@@ -1,0 +1,55 @@
+name: Supabase RLS audit
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'bff/supabase/**/*.sql'
+      - 'supabase/migrations/**/*.sql'
+      - 'scripts/audit_rls_policies.js'
+      - 'scripts/remote_rls_audit.sql'
+      - '.github/workflows/rls-audit.yml'
+  pull_request:
+    paths:
+      - 'bff/supabase/**/*.sql'
+      - 'supabase/migrations/**/*.sql'
+      - 'scripts/audit_rls_policies.js'
+      - 'scripts/remote_rls_audit.sql'
+      - '.github/workflows/rls-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rls-audit:
+    name: Static and optional remote RLS audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run static RLS audit
+        run: |
+          node tests/test_rls_policy_audit.js
+          node scripts/audit_rls_policies.js
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install --yes --no-install-recommends postgresql-client
+
+      - name: Run remote RLS audit
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "Remote RLS audit skipped: configure the SUPABASE_DB_URL GitHub secret to enable it."
+            exit 0
+          fi
+          psql "$SUPABASE_DB_URL" --set=ON_ERROR_STOP=1 --file=scripts/remote_rls_audit.sql

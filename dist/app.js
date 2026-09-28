@@ -115,6 +115,8 @@ const LESSON_REGISTRY = Object.freeze([
 // L’état est chargé avant le montage afin que les leçons Premium authored ne
 // soient jamais injectées dans le DOM d’un utilisateur Free.
 let prototypeState = DDA.load();
+let remoteUser = null;
+let bffAuthMode = 'signup';
 
 // Résolution runtime du registre contre le curriculum réel : une leçon
 // déclarée mais absente du curriculum (fichier authored non chargé) n'est pas
@@ -471,6 +473,137 @@ if (location.search) history.replaceState(history.state, '', location.pathname +
 function saveState(update) {
   prototypeState = DDA.save({ ...prototypeState, ...update });
   renderState();
+}
+
+// P3 BFF bridge — deliberately opt-in. With no deployment URL, the existing
+// localStorage prototype remains the only source of truth and this is a no-op.
+async function hydrateRemoteSession() {
+  if (!window.DDABFF?.enabled()) return null;
+  try {
+    const user = await window.DDABFF.getMe();
+    if (!user) return null;
+    remoteUser = user;
+    const localUser = prototypeState.user || {};
+    prototypeState = DDA.save({
+      ...prototypeState,
+      user: {
+        ...localUser,
+        name: user.display_name || localUser.name || 'Apprenant',
+        email: user.email || localUser.email || ''
+      }
+    });
+    renderState();
+    return user;
+  } catch {
+    // A temporary BFF outage must not destroy the learner's local prototype.
+    return null;
+  }
+}
+
+function setBffAuthMode(mode) {
+  if (!window.DDABFF?.enabled()) return;
+  bffAuthMode = mode === 'login' ? 'login' : 'signup';
+  const login = bffAuthMode === 'login';
+  const firstNameField = document.getElementById('first-name');
+  const firstNameLabel = firstNameField?.closest('label');
+  const passwordField = document.getElementById('access-password');
+  const passwordLabel = document.getElementById('access-password-field');
+  const consentField = document.getElementById('access-consent-field');
+  const consent = document.getElementById('consent');
+  const title = document.getElementById('access-form-title');
+  const step = document.getElementById('access-step-label');
+  const submit = document.querySelector('#signup-form button[type="submit"]');
+  const forgot = document.getElementById('bff-forgot-password');
+  if (firstNameLabel) firstNameLabel.hidden = login;
+  if (firstNameField) firstNameField.required = !login;
+  if (passwordLabel) passwordLabel.hidden = false;
+  if (passwordField) { passwordField.required = true; passwordField.autocomplete = login ? 'current-password' : 'new-password'; }
+  if (consentField) consentField.hidden = login;
+  if (consent) consent.required = !login;
+  if (title) title.textContent = login ? 'Se connecter' : 'Créer mon compte';
+  if (step) step.textContent = login ? 'Accès sécurisé' : 'Créer un compte';
+  if (submit) submit.innerHTML = login ? 'Ouvrir ma session <span>→</span>' : 'Recevoir le lien de vérification <span>→</span>';
+  if (forgot) forgot.hidden = !login;
+  document.getElementById('signup-error').textContent = '';
+}
+
+function showOnboardingAfterRemoteAuth(user) {
+  if (!user) return;
+  const name = user.display_name || prototypeState.user?.name || 'Apprenant';
+  prototypeState = DDA.save({ ...prototypeState, user: DDA.createUser(name, user.email || '') });
+  renderState();
+  document.getElementById('signup-form').hidden = true;
+  document.getElementById('bff-recovery-form').hidden = true;
+  document.getElementById('bff-verify-panel').hidden = true;
+  if (prototypeState.onboarding?.complete) {
+    showView('lesson');
+    return;
+  }
+  document.getElementById('onboarding-form').hidden = false;
+  document.getElementById('step-dot-2').classList.add('active');
+}
+
+async function handleBffVerificationToken() {
+  const token = window.DDA_VERIFY_TOKEN;
+  delete window.DDA_VERIFY_TOKEN;
+  if (!token || !window.DDABFF?.enabled()) return;
+  const panel = document.getElementById('bff-verify-panel');
+  const message = document.getElementById('bff-verify-message');
+  const form = document.getElementById('signup-form');
+  if (panel) panel.hidden = false;
+  if (form) form.hidden = true;
+  try {
+    await window.DDABFF.verifyEmail(token);
+    if (message) message.textContent = 'Adresse confirmée. Tu peux maintenant ouvrir ta session.';
+  } catch {
+    if (message) message.textContent = 'Ce lien est invalide, expiré ou déjà utilisé. Demande un nouveau lien depuis l’inscription.';
+  }
+}
+
+function initBffAuthUi() {
+  if (!window.DDABFF?.enabled()) return;
+  document.getElementById('bff-auth-tools').hidden = false;
+  setBffAuthMode('signup');
+  document.getElementById('bff-mode-signup').addEventListener('click', () => {
+    document.getElementById('bff-recovery-form').hidden = true;
+    document.getElementById('bff-verify-panel').hidden = true;
+    document.getElementById('signup-form').hidden = false;
+    setBffAuthMode('signup');
+  });
+  document.getElementById('bff-mode-login').addEventListener('click', () => {
+    document.getElementById('bff-recovery-form').hidden = true;
+    document.getElementById('bff-verify-panel').hidden = true;
+    document.getElementById('signup-form').hidden = false;
+    setBffAuthMode('login');
+  });
+  document.getElementById('bff-verify-login').addEventListener('click', () => {
+    document.getElementById('bff-verify-panel').hidden = true;
+    document.getElementById('signup-form').hidden = false;
+    setBffAuthMode('login');
+  });
+  document.getElementById('bff-forgot-password').addEventListener('click', () => {
+    document.getElementById('signup-form').hidden = true;
+    document.getElementById('bff-recovery-form').hidden = false;
+    document.getElementById('recovery-email').value = document.getElementById('email').value;
+  });
+  document.getElementById('recovery-back').addEventListener('click', () => {
+    document.getElementById('bff-recovery-form').hidden = true;
+    document.getElementById('signup-form').hidden = false;
+    setBffAuthMode('login');
+  });
+  document.getElementById('bff-recovery-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const email = document.getElementById('recovery-email').value.trim();
+    const error = document.getElementById('recovery-error');
+    if (!email) { error.textContent = 'Indique ton adresse e-mail.'; return; }
+    error.textContent = '';
+    try {
+      await window.DDABFF.requestPasswordReset(email);
+      error.textContent = 'Si un compte correspond, un message de récupération va être envoyé.';
+    } catch {
+      error.textContent = 'La demande ne peut pas être traitée pour le moment. Réessaie plus tard.';
+    }
+  });
 }
 
 function updateLessonState(lessonId, patch) {
@@ -1930,19 +2063,47 @@ mountedLessons.forEach(entry => {
   bindMarkUnderstood(entry.id, { buttonId: ui.markUnderstoodId, savedStateId: ui.savedStateId, scrollToId: entry.understoodScrollTo });
 });
 
-document.getElementById('signup-form').addEventListener('submit', event => {
+document.getElementById('signup-form').addEventListener('submit', async event => {
   event.preventDefault();
   const nameField = document.getElementById('first-name');
   const emailField = document.getElementById('email');
+  const passwordField = document.getElementById('access-password');
   const consentField = document.getElementById('consent');
   const name = nameField.value.trim();
   const email = emailField.value.trim();
+  const password = passwordField?.value || '';
   const consent = consentField.checked;
   const error = document.getElementById('signup-error');
-  const invalidFields = [!name && nameField, !email && emailField, !consent && consentField].filter(Boolean);
-  [nameField, emailField, consentField].forEach(field => field.setAttribute('aria-invalid', String(invalidFields.includes(field))));
-  if (invalidFields.length) { error.textContent = 'Complète les champs et confirme le stockage local.'; invalidFields[0].focus(); return; }
+  const bffMode = Boolean(window.DDABFF?.enabled());
+  const invalidFields = [((!bffMode || bffAuthMode !== 'login') && !name) && nameField, !email && emailField, (bffMode && password.length < 12) && passwordField, (!bffMode && !consent) && consentField].filter(Boolean);
+  [nameField, emailField, passwordField, consentField].filter(Boolean).forEach(field => field.setAttribute('aria-invalid', String(invalidFields.includes(field))));
+  if (invalidFields.length) {
+    error.textContent = bffMode
+      ? (bffAuthMode === 'login' ? 'Indique ton e-mail et ton mot de passe.' : 'Complète les champs et utilise un mot de passe d’au moins 12 caractères.')
+      : 'Complète les champs et confirme le stockage local.';
+    invalidFields[0].focus();
+    return;
+  }
   error.textContent = '';
+  if (bffMode) {
+    try {
+      if (bffAuthMode === 'signup') {
+        await window.DDABFF.register({ email, password, display_name: name });
+        document.getElementById('bff-auth-status').textContent = 'Si l’inscription peut être finalisée, un lien de vérification vient d’être envoyé. Vérifie ta boîte mail puis connecte-toi.';
+        setBffAuthMode('login');
+        document.getElementById('email').value = email;
+      } else {
+        await window.DDABFF.login({ email, password });
+        const user = await hydrateRemoteSession();
+        if (!user) throw new Error('session_missing');
+        document.getElementById('bff-auth-status').textContent = '';
+        showOnboardingAfterRemoteAuth(user);
+      }
+    } catch (authError) {
+      error.textContent = authError?.status === 401 ? 'E-mail ou mot de passe incorrect.' : 'Impossible de terminer cette étape pour le moment. Réessaie plus tard.';
+    }
+    return;
+  }
   saveState({ user: DDA.createUser(name, email) });
   trackEvent('signup_completed', {});
   event.currentTarget.hidden = true;
@@ -2232,7 +2393,7 @@ function resetPilot() {
 document.getElementById('reset-session').addEventListener('click', resetPilot);
 document.getElementById('profile-reset').addEventListener('click', resetPilot);
 
-document.getElementById('profile-form').addEventListener('submit', event => {
+document.getElementById('profile-form').addEventListener('submit', async event => {
   event.preventDefault();
   const nameField = document.getElementById('profile-first-name');
   const name = nameField.value.trim();
@@ -2246,6 +2407,19 @@ document.getElementById('profile-form').addEventListener('submit', event => {
   const level = document.getElementById('profile-level').value;
   const goal = document.getElementById('profile-goal').value;
   const time = document.getElementById('profile-time').value;
+  if (remoteUser && window.DDABFF?.enabled()) {
+    try {
+      const updated = await window.DDABFF.updateMe({ display_name: name });
+      if (!updated) {
+        document.getElementById('profile-error').textContent = 'Ta session serveur a expiré. Reconnecte-toi pour modifier ce profil.';
+        return;
+      }
+      remoteUser = updated;
+    } catch {
+      document.getElementById('profile-error').textContent = 'Le profil serveur est momentanément indisponible. Réessaie sans perdre tes données locales.';
+      return;
+    }
+  }
   saveState({
     user: { ...prototypeState.user, name },
     onboarding: { level, goal, time, complete: true }
@@ -2276,6 +2450,9 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 }
 
 renderState();
+initBffAuthUi();
+hydrateRemoteSession();
+handleBffVerificationToken();
 renderMarketIntelligence();
 
 // A first-time visitor (no local profile yet, no deep-link hash) must land on

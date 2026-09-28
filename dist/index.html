@@ -45,6 +45,8 @@
         medium: safeTag('medium'),
         campaign: safeTag('campaign')
       };
+      var verificationToken = params.get('token_hash') || params.get('token');
+      if (verificationToken && verificationToken.length >= 32) window.DDA_VERIFY_TOKEN = verificationToken;
       var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile']);
       var route = location.hash.slice(1);
       var safeHash = knownRoutes.has(route) ? '#' + route : '';
@@ -313,13 +315,34 @@
           </div>
           <div class="access-card">
             <div class="step-indicator"><span class="active" id="step-dot-1">1</span><i></i><span id="step-dot-2">2</span></div>
+            <div id="bff-auth-tools" hidden>
+              <button class="text-action" id="bff-mode-signup" type="button">Créer un compte</button>
+              <button class="text-action" id="bff-mode-login" type="button">Se connecter</button>
+            </div>
+            <p class="form-error" id="bff-auth-status" role="status" aria-live="polite"></p>
             <form id="signup-form" data-js-submit method="dialog">
-              <p class="eyebrow">Étape 1 sur 2</p><h2>Créer mon compte</h2>
+              <p class="eyebrow" id="access-step-label">Étape 1 sur 2</p><h2 id="access-form-title">Créer mon compte</h2>
               <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ex. Richard"></label>
               <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"></label>
-              <label class="consent"><input id="consent" type="checkbox" required><span>J’accepte que ces informations restent uniquement sur mon appareil.</span></label>
+              <label id="access-password-field" hidden>Mot de passe<input id="access-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128"></label>
+              <label class="consent" id="access-consent-field"><input id="consent" type="checkbox" required><span id="access-consent-label">J’accepte que ces informations restent uniquement sur mon appareil.</span></label>
               <p class="form-error" id="signup-error" role="alert"></p>
               <button class="primary-action" type="submit" disabled>Continuer <span>→</span></button>
+            </form>
+            <button class="text-action" id="bff-forgot-password" type="button" hidden>Mot de passe oublié ?</button>
+            <section id="bff-verify-panel" hidden aria-live="polite">
+              <p class="eyebrow gold">Vérification e-mail</p>
+              <h2>Confirme ton adresse e-mail.</h2>
+              <p id="bff-verify-message">Le lien de vérification est en cours de traitement.</p>
+              <button class="secondary-action" id="bff-verify-login" type="button">Se connecter</button>
+            </section>
+            <form id="bff-recovery-form" method="dialog" hidden>
+              <p class="eyebrow gold">Récupération</p>
+              <h2>Réinitialiser ton mot de passe.</h2>
+              <label>Adresse e-mail<input id="recovery-email" type="email" autocomplete="email" required></label>
+              <p class="form-error" id="recovery-error" role="alert"></p>
+              <button class="primary-action" type="submit">Recevoir le lien <span>→</span></button>
+              <button class="text-action" id="recovery-back" type="button">Retour à la connexion</button>
             </form>
             <form id="onboarding-form" data-js-submit method="dialog" hidden>
               <p class="eyebrow">Étape 2 sur 2</p><h2>Quel parcours te correspond ?</h2>
@@ -1231,10 +1254,15 @@
   <script src="m1-2-lesson.js"></script>
   <script src="m1-3-lesson.js"></script>
   <script src="p2-lessons.js"></script>
+  <script>
+    // Optional deployment flag. Leave empty to preserve the local prototype.
+    window.DDA_BFF_BASE_URL = window.DDA_BFF_BASE_URL || '';
+  </script>
   <script src="dda-core.js"></script>
   <script src="learning-engine.js"></script>
   <script src="lesson-renderer.js"></script>
   <script src="dda-analytics.js"></script>
+  <script src="bff-client.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

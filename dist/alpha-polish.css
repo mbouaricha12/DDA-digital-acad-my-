@@ -631,6 +631,14 @@ body.access-mode .prototype-banner{
 }
 #access .access-card .secondary-action{color:#f8fafc;border-color:rgba(255,255,255,.18)}
 #access .access-card .text-action:hover{color:#f8fafc}
+#access .access-card #bff-auth-tools{display:flex;gap:16px;align-items:center;margin:-6px 0 18px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.1)}
+#access .access-card #bff-auth-tools .text-action{min-height:32px;padding:0;color:#94a3b8}
+#access .access-card #bff-auth-tools .text-action:hover{color:#f8fafc}
+#access .access-card #bff-auth-status{color:#d9a441}
+#access .access-card #bff-recovery-form,
+#access .access-card #bff-verify-panel{padding-top:4px}
+#access .access-card #bff-recovery-form .text-action{justify-self:start}
+#access .access-card #bff-verify-panel p:not(.eyebrow){color:#cbd5e1;line-height:1.6}
 #access .access-illustration{color:#94a3b8;opacity:.8}
 @media(max-width:639px){
   #access .access-card{border-radius:16px}

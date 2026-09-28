@@ -43,6 +43,12 @@ jobs:
 
       - name: Run committed contracts
         run: |
+          node tests/test_p3_data_contract.js
+          node tests/test_p3_identity_session_api.js
+          node tests/test_bff_implementation.js
+          node tests/test_bff_frontend_integration.js
+          node tests/test_rls_policy_audit.js
+          node scripts/audit_rls_policies.js
           node tests/test_premium_p2_contract.js
           node tests/verify_route_register_consistency.js
           git diff --check

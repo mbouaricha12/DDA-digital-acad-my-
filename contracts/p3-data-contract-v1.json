@@ -1,0 +1,297 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dda-academy.example/contracts/p3-data-contract-v1.json",
+  "title": "DDA Academy P3 Data Contract and Ownership",
+  "description": "Canonical contract for the future remote API/database. It does not change the local v4 prototype and is not an authorization implementation.",
+  "contractVersion": "p3-data-contract-v1",
+  "localSource": {
+    "schemaVersion": 4,
+    "storageKey": "dda-prototype-state-v4",
+    "migrationPolicy": "explicit-consent-idempotent-reversible"
+  },
+  "securityBoundary": {
+    "clientIsUntrusted": true,
+    "clientStateIsNeverAuthority": true,
+    "serverOwnsIdentity": true,
+    "serverOwnsEntitlements": true,
+    "serverAssignsOwnership": true,
+    "serverTimestampsAreCanonical": true
+  },
+  "common": {
+    "serverId": {
+      "type": "string",
+      "format": "uuid",
+      "generatedBy": "server",
+      "clientMayProvide": false,
+      "immutable": true
+    },
+    "ownerId": {
+      "type": "string",
+      "format": "uuid",
+      "generatedBy": "server",
+      "clientMayProvide": false,
+      "immutable": true,
+      "requiredOn": "user-owned entities"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "generatedBy": "server",
+      "clientMayProvide": false,
+      "immutable": true
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "generatedBy": "server",
+      "clientMayProvide": false,
+      "immutable": false
+    },
+    "clientMutationId": {
+      "type": "string",
+      "format": "uuid",
+      "generatedBy": "client",
+      "clientMayProvide": true,
+      "uniqueScope": "ownerId + endpoint",
+      "purpose": "idempotency only; never identity or authorization"
+    }
+  },
+  "ownershipRules": [
+    {
+      "id": "OWN-001",
+      "rule": "Every user-owned row has exactly one server-assigned ownerId.",
+      "enforcement": ["API authorization", "database foreign key", "row-level policy where supported"]
+    },
+    {
+      "id": "OWN-002",
+      "rule": "The API derives ownerId from the authenticated session; it ignores or rejects a client-supplied ownerId.",
+      "enforcement": ["API middleware"]
+    },
+    {
+      "id": "OWN-003",
+      "rule": "A user may read, create, update, export, and delete only records whose ownerId equals the authenticated user id, subject to product policy.",
+      "enforcement": ["API authorization", "database policy"]
+    },
+    {
+      "id": "OWN-004",
+      "rule": "Membership and entitlements are server-owned; a client plan field is only a display cache.",
+      "enforcement": ["entitlement service", "API authorization"]
+    },
+    {
+      "id": "OWN-005",
+      "rule": "Authored curriculum and lesson content are system-owned and immutable from learner endpoints.",
+      "enforcement": ["API route separation", "database role separation"]
+    },
+    {
+      "id": "OWN-006",
+      "rule": "Audit events are append-only and server-owned; users cannot edit or delete them through learner APIs.",
+      "enforcement": ["append-only service", "database permissions"]
+    }
+  ],
+  "entities": {
+    "users": {
+      "ownership": "system-authenticated",
+      "purpose": "Server identity and account lifecycle.",
+      "primaryKey": "user_id",
+      "fields": {
+        "user_id": { "type": "uuid", "generatedBy": "server", "immutable": true },
+        "email": { "type": "string", "classification": "identity", "unique": true, "verified": true },
+        "display_name": { "type": "string", "classification": "profile", "maxLength": 60 },
+        "status": { "type": "enum", "values": ["pending", "active", "locked", "deleted"] },
+        "created_at": { "type": "date-time", "generatedBy": "server" },
+        "updated_at": { "type": "date-time", "generatedBy": "server" }
+      },
+      "clientWritable": ["display_name"],
+      "clientNeverWritable": ["user_id", "email_verified", "status", "created_at", "updated_at"]
+    },
+    "memberships": {
+      "ownership": "server-owned-by-user",
+      "purpose": "Current product plan and entitlement source.",
+      "primaryKey": "membership_id",
+      "requiredForeignKeys": ["user_id"],
+      "fields": {
+        "membership_id": { "type": "uuid", "generatedBy": "server" },
+        "user_id": { "type": "uuid", "generatedBy": "server" },
+        "plan": { "type": "enum", "values": ["free", "premium"] },
+        "status": { "type": "enum", "values": ["active", "trial", "expired", "revoked"] },
+        "source": { "type": "enum", "values": ["system", "provider", "manual"] },
+        "starts_at": { "type": "date-time", "generatedBy": "server" },
+        "ends_at": { "type": "date-time", "nullable": true, "generatedBy": "server" }
+      },
+      "clientWritable": [],
+      "clientNeverWritable": ["plan", "status", "source", "starts_at", "ends_at"]
+    },
+    "onboarding": {
+      "ownership": "user-owned",
+      "sourceLocalPath": "onboarding",
+      "fields": {
+        "level": { "type": "string", "maxLength": 40, "classification": "profile" },
+        "goal": { "type": "string", "maxLength": 80, "classification": "profile" },
+        "time": { "type": "string", "maxLength": 80, "classification": "profile" },
+        "complete": { "type": "boolean" }
+      },
+      "clientWritable": ["level", "goal", "time", "complete"]
+    },
+    "lesson_progress": {
+      "ownership": "user-owned",
+      "sourceLocalPath": "lessons",
+      "primaryKey": "progress_id",
+      "uniqueBy": ["owner_id", "lesson_id"],
+      "fields": {
+        "progress_id": { "type": "uuid", "generatedBy": "server" },
+        "owner_id": { "type": "uuid", "generatedBy": "server" },
+        "lesson_id": { "type": "enum", "source": "authored_lesson_registry" },
+        "lesson_viewed": { "type": "boolean" },
+        "exercise_complete": { "type": "boolean" },
+        "quiz_complete": { "type": "boolean" }
+      },
+      "clientWritable": ["lesson_viewed", "exercise_complete", "quiz_complete"]
+    },
+    "terminal_state": {
+      "ownership": "user-owned",
+      "sourceLocalPath": "terminal",
+      "classification": "learning-content",
+      "fields": {
+        "instrument": { "type": "enum", "values": ["BRVM Composite", "BRVM 30", "EUR/USD pédagogique"] },
+        "timeframe": { "type": "enum", "values": ["1D", "1W", "1M"] },
+        "zoom": { "type": "integer", "minimum": 1, "maximum": 3 },
+        "pan": { "type": "integer", "minimum": 0, "maximum": 200 },
+        "observation": { "type": "string", "maxLength": 1000, "classification": "free-text" },
+        "drawings": { "type": "array", "maxItems": 100, "classification": "learning-content" },
+        "practice": { "type": "object", "classification": "proof-input" }
+      },
+      "clientWritable": ["instrument", "timeframe", "zoom", "pan", "observation", "drawings", "practice"]
+    },
+    "journal_entries": {
+      "ownership": "user-owned",
+      "sourceLocalPath": "journal.entries",
+      "primaryKey": "entry_id",
+      "requiredForeignKeys": ["owner_id"],
+      "classification": "free-text-sensitive",
+      "fields": {
+        "entry_id": { "type": "uuid", "generatedBy": "server" },
+        "owner_id": { "type": "uuid", "generatedBy": "server" },
+        "market": { "type": "string", "maxLength": 800 },
+        "context": { "type": "string", "maxLength": 800 },
+        "scenario": { "type": "string", "maxLength": 800 },
+        "process": { "type": "string", "maxLength": 800 },
+        "decision": { "type": "string", "maxLength": 800 },
+        "outcome": { "type": "string", "maxLength": 800 },
+        "what_worked": { "type": "string", "maxLength": 800 },
+        "to_improve": { "type": "string", "maxLength": 800 },
+        "note": { "type": "string", "maxLength": 800 },
+        "source_lesson": { "type": "string", "maxLength": 80 },
+        "proof_id": { "type": "string", "maxLength": 80 },
+        "proof_type": { "type": "string", "maxLength": 80 },
+        "terminal_source": { "type": "boolean" }
+      },
+      "clientWritable": ["market", "context", "scenario", "process", "decision", "outcome", "what_worked", "to_improve", "note", "source_lesson", "proof_id", "proof_type", "terminal_source"]
+    },
+    "journal_plans": {
+      "ownership": "user-owned",
+      "sourceLocalPath": "journal.plan",
+      "primaryKey": "plan_id",
+      "uniqueBy": ["owner_id"],
+      "classification": "free-text-sensitive",
+      "fields": {
+        "plan_id": { "type": "uuid", "generatedBy": "server" },
+        "owner_id": { "type": "uuid", "generatedBy": "server" },
+        "markets_studied": { "type": "string", "maxLength": 600 },
+        "study_slots": { "type": "string", "maxLength": 600 },
+        "checklist": { "type": "string", "maxLength": 600 },
+        "discipline_rules": { "type": "string", "maxLength": 600 },
+        "learning_goals": { "type": "string", "maxLength": 600 },
+        "mistakes_to_avoid": { "type": "string", "maxLength": 600 },
+        "points_to_verify": { "type": "string", "maxLength": 600 }
+      },
+      "clientWritable": ["markets_studied", "study_slots", "checklist", "discipline_rules", "learning_goals", "mistakes_to_avoid", "points_to_verify"]
+    },
+    "premium_progress": {
+      "ownership": "user-owned-server-validated",
+      "sourceLocalPath": "premium",
+      "classification": "learning-proof",
+      "subcollections": ["modules", "labs", "assessments", "proofs", "reviews"],
+      "serverValidationRequired": ["assessment_result", "proof_level", "entitlement", "source_lesson"],
+      "clientWritable": ["attempt_input", "review_reflection", "review_pattern", "review_focus", "review_next_action"],
+      "clientNeverWritable": ["proof_level", "passed", "entitlement", "created_at"]
+    },
+    "preferences": {
+      "ownership": "user-owned",
+      "sourceLocalPath": "preferences",
+      "fields": {
+        "low_data": { "type": "boolean" },
+        "reminders": { "type": "boolean" }
+      },
+      "clientWritable": ["low_data", "reminders"]
+    },
+    "acquisition": {
+      "ownership": "device-scoped-pseudonymous",
+      "sourceLocalPath": "acquisition",
+      "defaultSync": "not-synced-until-consent-and-policy",
+      "classification": "analytics-pseudonymous",
+      "fields": {
+        "visitor_id": { "type": "string", "classification": "pseudonymous" },
+        "source": { "type": "enum" },
+        "medium": { "type": "enum" },
+        "campaign": { "type": "enum" },
+        "referrer": { "type": "origin-only" },
+        "landing_path": { "type": "known-route-only" },
+        "first_seen_at": { "type": "date-time" }
+      },
+      "ownershipNote": "visitor_id is not an authentication identifier and must never be promoted to user_id."
+    },
+    "audit_events": {
+      "ownership": "system-append-only",
+      "classification": "operational-metadata",
+      "fields": {
+        "event_id": { "type": "uuid", "generatedBy": "server" },
+        "actor_user_id": { "type": "uuid", "nullable": true },
+        "event_name": { "type": "enum", "source": "server_allowlist" },
+        "resource_type": { "type": "enum", "source": "server_allowlist" },
+        "resource_id": { "type": "uuid", "nullable": true },
+        "request_id": { "type": "string", "maxLength": 80 },
+        "created_at": { "type": "date-time", "generatedBy": "server" }
+      },
+      "contentPolicy": "never store passwords, tokens, cookies, full email addresses, Journal text, or raw request bodies",
+      "clientWritable": []
+    }
+  },
+  "localToRemoteMapping": {
+    "user": "users.profile fields after verified account; local id is never reused as user_id",
+    "membership": "memberships display cache only; local demo plan is not authoritative",
+    "onboarding": "onboarding",
+    "lessons": "lesson_progress keyed by authored lesson id",
+    "terminal": "terminal_state",
+    "journal.entries": "journal_entries one row per entry",
+    "journal.plan": "journal_plans one row per owner",
+    "premium": "premium_progress subcollections after server validation",
+    "preferences": "preferences",
+    "events": "not migrated wholesale; only explicitly allowlisted product events if policy permits",
+    "acquisition": "not migrated by default; retain device scope unless consent and policy allow otherwise"
+  },
+  "migration": {
+    "sourceSchema": 4,
+    "targetContract": "p3-data-contract-v1",
+    "requiresAuthenticatedUser": true,
+    "requiresExplicitConsent": true,
+    "idempotencyKey": "clientMutationId",
+    "preserveLocalCopyUntil": "server-confirmed-import-and-user-visible-summary",
+    "conflictPolicy": "never-silent-merge; surface conflict with local and server timestamps",
+    "unknownFields": "ignore-and-report",
+    "rollback": "logical-import-reversal by migration_id; never destructive local cleanup in first release",
+    "mustNotImport": ["local membership entitlement as authority", "local user id as server id", "raw analytics history without policy"]
+  },
+  "requiredSecurityTests": [
+    "cross-user read denied",
+    "cross-user update denied",
+    "cross-user delete denied",
+    "client owner_id ignored or rejected",
+    "client membership plan cannot grant entitlement",
+    "server timestamps cannot be forged",
+    "duplicate clientMutationId is idempotent",
+    "migration retry creates no duplicates",
+    "migration interruption preserves local copy",
+    "journal free-text output is safely encoded",
+    "audit events contain no secrets or free-text journal content"
+  ]
+}

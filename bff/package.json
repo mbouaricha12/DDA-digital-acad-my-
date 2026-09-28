@@ -1,0 +1,14 @@
+{
+  "name": "dda-academy-bff",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DDA Academy Backend For Frontend boundary for Supabase Auth + Postgres",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node ../tests/test_bff_implementation.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

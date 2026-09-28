@@ -1,0 +1,396 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DDA Academy Identity and Session API",
+    "version": "p3.2-v1",
+    "description": "Design-only contract. No endpoint is deployed by this repository. The API must enforce the P3.1 ownership contract server-side."
+  },
+  "servers": [
+    {
+      "url": "https://api.example.dda.academy/v1",
+      "description": "Reserved production shape; replace only after infrastructure and domain decisions."
+    }
+  ],
+  "tags": [
+    { "name": "registration" },
+    { "name": "session" },
+    { "name": "account" },
+    { "name": "security" }
+  ],
+  "security": [],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["registration"],
+        "operationId": "register",
+        "summary": "Create a pending account",
+        "description": "Creates a pending user and sends a verification message. Never returns a session or reveals whether an email already exists.",
+        "requestBody": { "$ref": "#/components/requestBodies/RegisterRequest" },
+        "responses": {
+          "202": { "$ref": "#/components/responses/AcceptedRegistration" },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/auth/verify-email": {
+      "post": {
+        "tags": ["registration"],
+        "operationId": "verifyEmail",
+        "summary": "Consume a one-time email verification token",
+        "requestBody": { "$ref": "#/components/requestBodies/VerifyEmailRequest" },
+        "responses": {
+          "204": { "description": "Email verified; no session is created implicitly." },
+          "400": { "$ref": "#/components/responses/InvalidToken" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["session"],
+        "operationId": "login",
+        "summary": "Authenticate and create a server session",
+        "description": "On success, sets an opaque __Host-dda_session cookie. Passwords are handled by the selected identity provider or Argon2id service; they are never stored by the SPA.",
+        "requestBody": { "$ref": "#/components/requestBodies/LoginRequest" },
+        "responses": {
+          "204": {
+            "description": "Authenticated session created.",
+            "headers": {
+              "Set-Cookie": { "$ref": "#/components/headers/SessionCookie" },
+              "Set-Cookie-CSRF": { "$ref": "#/components/headers/CsrfCookie" }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/GenericAuthFailure" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["session"],
+        "operationId": "logout",
+        "summary": "Revoke the current session",
+        "security": [{ "sessionCookie": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/CsrfHeader" }],
+        "responses": {
+          "204": { "description": "Session revoked and cookies expired." },
+          "401": { "$ref": "#/components/responses/Unauthenticated" },
+          "403": { "$ref": "#/components/responses/CsrfFailure" }
+        }
+      }
+    },
+    "/auth/logout-all": {
+      "post": {
+        "tags": ["session"],
+        "operationId": "logoutAll",
+        "summary": "Revoke every session for the current user",
+        "security": [{ "sessionCookie": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/CsrfHeader" }],
+        "responses": {
+          "204": { "description": "All sessions revoked." },
+          "401": { "$ref": "#/components/responses/Unauthenticated" },
+          "403": { "$ref": "#/components/responses/CsrfFailure" }
+        }
+      }
+    },
+    "/auth/password-reset/request": {
+      "post": {
+        "tags": ["security"],
+        "operationId": "requestPasswordReset",
+        "summary": "Request an account recovery message",
+        "description": "Always returns the same response regardless of account existence.",
+        "requestBody": { "$ref": "#/components/requestBodies/EmailRequest" },
+        "responses": {
+          "202": { "$ref": "#/components/responses/AcceptedRecovery" },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/auth/password-reset/confirm": {
+      "post": {
+        "tags": ["security"],
+        "operationId": "confirmPasswordReset",
+        "summary": "Consume a one-time recovery token",
+        "requestBody": { "$ref": "#/components/requestBodies/PasswordResetRequest" },
+        "responses": {
+          "204": { "description": "Password changed and all existing sessions revoked." },
+          "400": { "$ref": "#/components/responses/InvalidToken" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "tags": ["account"],
+        "operationId": "getCurrentUser",
+        "summary": "Read the authenticated account and server entitlements",
+        "security": [{ "sessionCookie": [] }],
+        "responses": {
+          "200": { "$ref": "#/components/responses/CurrentUser" },
+          "401": { "$ref": "#/components/responses/Unauthenticated" }
+        }
+      },
+      "patch": {
+        "tags": ["account"],
+        "operationId": "updateCurrentUser",
+        "summary": "Update user-owned profile fields only",
+        "security": [{ "sessionCookie": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/CsrfHeader" }],
+        "requestBody": { "$ref": "#/components/requestBodies/ProfilePatch" },
+        "responses": {
+          "200": { "$ref": "#/components/responses/CurrentUser" },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/Unauthenticated" },
+          "403": { "$ref": "#/components/responses/CsrfFailure" }
+        }
+      }
+    },
+    "/sessions": {
+      "get": {
+        "tags": ["session"],
+        "operationId": "listSessions",
+        "summary": "List the current user’s sessions without secrets",
+        "security": [{ "sessionCookie": [] }],
+        "responses": {
+          "200": { "$ref": "#/components/responses/SessionList" },
+          "401": { "$ref": "#/components/responses/Unauthenticated" }
+        }
+      }
+    },
+    "/sessions/{sessionId}": {
+      "delete": {
+        "tags": ["session"],
+        "operationId": "revokeSession",
+        "summary": "Revoke one session owned by the current user",
+        "security": [{ "sessionCookie": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/SessionId" },
+          { "$ref": "#/components/parameters/CsrfHeader" }
+        ],
+        "responses": {
+          "204": { "description": "Session revoked." },
+          "401": { "$ref": "#/components/responses/Unauthenticated" },
+          "403": { "$ref": "#/components/responses/CsrfFailure" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/security/csrf": {
+      "get": {
+        "tags": ["security"],
+        "operationId": "issueCsrfToken",
+        "summary": "Issue or rotate the CSRF double-submit cookie",
+        "responses": {
+          "204": {
+            "description": "CSRF cookie issued; client copies its value to X-CSRF-Token for mutations.",
+            "headers": { "Set-Cookie": { "$ref": "#/components/headers/CsrfCookie" } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-dda_session",
+        "description": "Opaque random session identifier; server stores only a hash. Never expose as JavaScript-readable storage."
+      }
+    },
+    "parameters": {
+      "CsrfHeader": {
+        "name": "X-CSRF-Token",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "minLength": 32, "maxLength": 256 }
+      },
+      "SessionId": {
+        "name": "sessionId",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" }
+      }
+    },
+    "headers": {
+      "SessionCookie": {
+        "description": "__Host-dda_session=<opaque>; Path=/; Secure; HttpOnly; SameSite=Lax (or None only with strict Origin and CSRF controls).",
+        "schema": { "type": "string" }
+      },
+      "CsrfCookie": {
+        "description": "__Host-dda_csrf=<random>; Path=/; Secure; SameSite=Lax; not HttpOnly so the SPA can copy it to X-CSRF-Token.",
+        "schema": { "type": "string" }
+      }
+    },
+    "requestBodies": {
+      "RegisterRequest": {
+        "required": true,
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/RegisterRequest" } } }
+      },
+      "VerifyEmailRequest": {
+        "required": true,
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TokenRequest" } } }
+      },
+      "LoginRequest": {
+        "required": true,
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginRequest" } } }
+      },
+      "EmailRequest": {
+        "required": true,
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/EmailRequest" } } }
+      },
+      "PasswordResetRequest": {
+        "required": true,
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PasswordResetRequest" } } }
+      },
+      "ProfilePatch": {
+        "required": true,
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProfilePatch" } } }
+      }
+    },
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email", "maxLength": 254 },
+          "password": { "type": "string", "minLength": 12, "maxLength": 128, "writeOnly": true },
+          "display_name": { "type": "string", "maxLength": 60 }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email", "maxLength": 254 },
+          "password": { "type": "string", "minLength": 1, "maxLength": 128, "writeOnly": true }
+        }
+      },
+      "EmailRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["email"],
+        "properties": { "email": { "type": "string", "format": "email", "maxLength": 254 } }
+      },
+      "TokenRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["token"],
+        "properties": { "token": { "type": "string", "minLength": 32, "maxLength": 512, "writeOnly": true } }
+      },
+      "PasswordResetRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["token", "new_password"],
+        "properties": {
+          "token": { "type": "string", "minLength": 32, "maxLength": 512, "writeOnly": true },
+          "new_password": { "type": "string", "minLength": 12, "maxLength": 128, "writeOnly": true }
+        }
+      },
+      "ProfilePatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": { "display_name": { "type": "string", "maxLength": 60 } }
+      },
+      "CurrentUser": {
+        "type": "object",
+        "required": ["user_id", "email", "email_verified", "display_name", "status", "entitlements"],
+        "properties": {
+          "user_id": { "type": "string", "format": "uuid", "readOnly": true },
+          "email": { "type": "string", "format": "email", "readOnly": true },
+          "email_verified": { "type": "boolean", "readOnly": true },
+          "display_name": { "type": "string", "maxLength": 60 },
+          "status": { "type": "string", "enum": ["active", "locked", "deleted"], "readOnly": true },
+          "entitlements": { "type": "array", "items": { "type": "string" }, "readOnly": true }
+        }
+      },
+      "Session": {
+        "type": "object",
+        "required": ["session_id", "created_at", "last_seen_at", "current"],
+        "properties": {
+          "session_id": { "type": "string", "format": "uuid", "readOnly": true },
+          "created_at": { "type": "string", "format": "date-time", "readOnly": true },
+          "last_seen_at": { "type": "string", "format": "date-time", "readOnly": true },
+          "approximate_device": { "type": "string", "maxLength": 120, "readOnly": true },
+          "current": { "type": "boolean", "readOnly": true }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["code", "message", "request_id"],
+        "properties": {
+          "code": { "type": "string", "enum": ["validation_error", "unauthenticated", "authentication_failed", "csrf_failed", "not_found", "rate_limited", "conflict", "internal_error"] },
+          "message": { "type": "string", "maxLength": 240 },
+          "request_id": { "type": "string", "maxLength": 80 },
+          "field_errors": { "type": "object", "additionalProperties": { "type": "string", "maxLength": 160 } }
+        }
+      }
+    },
+    "responses": {
+      "AcceptedRegistration": {
+        "description": "Registration accepted without account enumeration.",
+        "content": { "application/json": { "schema": { "type": "object", "required": ["message"], "properties": { "message": { "type": "string" } } } } }
+      },
+      "AcceptedRecovery": {
+        "description": "Recovery request accepted without account enumeration.",
+        "content": { "application/json": { "schema": { "type": "object", "required": ["message"], "properties": { "message": { "type": "string" } } } } }
+      },
+      "CurrentUser": {
+        "description": "Current user; no password, token, session secret, or local plan authority is returned.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CurrentUser" } } }
+      },
+      "SessionList": {
+        "description": "Current user sessions without secrets.",
+        "content": { "application/json": { "schema": { "type": "object", "required": ["items"], "properties": { "items": { "type": "array", "items": { "$ref": "#/components/schemas/Session" } } } } } }
+      },
+      "ValidationError": { "description": "Request validation failed.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "InvalidToken": { "description": "Token invalid, expired, already used, or intentionally indistinguishable.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "GenericAuthFailure": { "description": "Authentication failed without account enumeration.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "Unauthenticated": { "description": "No valid session.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "CsrfFailure": { "description": "CSRF cookie/header mismatch or invalid token.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "RateLimited": { "description": "Rate limit exceeded; response must not reveal account existence.", "headers": { "Retry-After": { "schema": { "type": "integer" } } }, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "NotFound": { "description": "Resource not found or not owned by the current user.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+    }
+  },
+  "x-dda-security": {
+    "contract": "p3-data-contract-v1",
+    "session": {
+      "cookieName": "__Host-dda_session",
+      "storage": "opaque-random-cookie; server stores hash only",
+      "idleTimeoutMinutes": 720,
+      "absoluteTimeoutDays": 30,
+      "rotateOnLogin": true,
+      "rotateOnPrivilegeChange": true,
+      "refreshTokensInLocalStorage": false
+    },
+    "csrf": {
+      "method": "double-submit-cookie",
+      "cookieName": "__Host-dda_csrf",
+      "headerName": "X-CSRF-Token",
+      "requiredFor": ["POST", "PUT", "PATCH", "DELETE"],
+      "originCheck": true
+    },
+    "cors": {
+      "allowCredentials": true,
+      "allowedOrigins": ["https://app.example.dda.academy"],
+      "wildcardOriginWithCredentials": false
+    },
+    "logging": {
+      "allowed": ["request_id", "route", "status", "latency_ms", "coarse_outcome"],
+      "forbidden": ["password", "token", "cookie", "authorization", "full_email", "journal_text", "raw_body"]
+    },
+    "rateLimits": {
+      "register": "5 per hour per IP; 3 per hour per normalized email hash",
+      "login": "10 per 15 minutes per account key and IP; progressive backoff",
+      "recovery": "5 per hour per IP and normalized email hash",
+      "verify": "10 per hour per IP and token family",
+      "authenticatedMutations": "120 per minute per user and IP"
+    }
+  }
+}
