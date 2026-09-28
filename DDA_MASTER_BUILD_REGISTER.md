@@ -275,3 +275,37 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 ## Tranche — Intégration frontend progressive du BFF (28 septembre 2026)
 
 **Statut : UX IMPLÉMENTÉE — BFF non déployé.** `dist/bff-client.js` est chargé avant `app.js` et reste désactivé tant que `window.DDA_BFF_BASE_URL` est vide. Lorsqu’une URL est fournie par la configuration de déploiement, Access expose l’inscription avec mot de passe, la réponse d’anti-énumération, le traitement automatique des tokens `token_hash`/`token` de vérification, la connexion, la récupération de mot de passe, la restauration de session via `GET /v1/me` et la synchronisation du nom via `PATCH /v1/me`. Les mutations demandent le CSRF via `/v1/security/csrf`. Sans URL ou sans session distante, le prototype conserve exactement son parcours localStorage et ses comportements P2. Aucun secret serveur n’est livré au navigateur. Validation : `tests/test_bff_frontend_integration.js`, contrats BFF/P3 et suite E2E complète — 49 scénarios passants.
+
+
+## Tranche — Darius Analysis Terminal Pro (28 septembre 2026)
+
+**Statut : INTERFACE REFONDUE — démonstration pédagogique locale, aucune cotation réelle.** Le Terminal existant conserve ses routes, son schéma v4, son stockage local et son parcours Practice/Journal, mais reçoit une composition graphique Deep Navy, une grille discrète, un graphique de chandeliers synthétiques avec axes normalisés, un crosshair OHLC lisible et des sélecteurs compacts marché/timeframe (15m, 1H, 4H, 1D, 1W, 1M). Le dock flottant remplace les gros contrôles; zones S/R, tendances et Fibonacci se tracent au pointeur/doigt par glisser-déposer et disposent d’annulation/effacement. Les contrôles, états accessibles et cibles tactiles sont adaptés au mobile. Le clic unique Terminal → Journal capture désormais aussi l’hypothèse encore non enregistrée, ainsi que l’instrument, le timeframe, le zoom, les annotations et la preuve pédagogiques. Le cache offline passe à `dda-shell-v17` pour récupérer le shell actualisé.
+
+**Limites inchangées :** les séries et valeurs sont synthétiques, normalisées et locales; aucun fournisseur de marché, signal, authentification ou service de synchronisation n’est ajouté. Aucune route ni architecture applicative n’est renommée ou remplacée.
+
+**Validation :** tous les contrats Node présents, vérification de cohérence route/registre, syntaxe JavaScript et `git diff --check` passent; suite Playwright complète : **49 scénarios passants, 0 échec**, incluant tracé, preuve Practice, persistance 4H/zoom 2×, transfert d’une note non sauvegardée et viewports 360/390/1440px sans débordement. Branche isolée : `feat/darius-analysis-terminal`.
+
+
+**Fiabilité CI :** le Product Gate révélait que `tests/smoke_app_boot.js` gardait jsdom ouvert après ses assertions et expirait au délai de 15 minutes. Le smoke ferme maintenant sa fenêtre dans `finally` (y compris en cas d'échec, sans masquer le code de sortie) ; validation locale : **25 contrôles réussis et processus terminé**.
+
+
+## Tranche — DDA Elite : harmonisation globale et navigation mobile (28 septembre 2026)
+
+**Statut : implémentée sur `feat/darius-analysis-terminal`, PR #94 ouverte — non fusionnée/non déployée.** La surcouche visuelle calme les surfaces des vues (Deep Navy `#060d17`, panneaux navy, or mesuré, champs sombres), clarifie les groupes de navigation Apprendre / Pratiquer / Mon travail / Explorer / Compte et expose le Terminal dans le Dashboard sans nouvelle route ni changement de garde. L'historique interne utilise History API pour Back/Forward mobile et le bouton Retour. Le Journal garde son onglet « Mon plan » comme action interne, tandis que les libellés « Journal & Plan » répétés sont harmonisés.
+
+**Corrections visuelles relevées :** l'héritage CSS du titre hero agrandissait « BRVM Composite » dans le mockup à 76,8 px ; la typo est explicitement ramenée à 8 px. Les notes de compétences futures sortent des surfaces crème et la photo Progression est désaturée/assombrie. Les courbes restent pédagogiques et synthétiques ; aucune donnée réelle ni statistique apprenant n'est inventée. Cache shell : `dda-shell-v20`.
+
+**Préservation :** aucun changement au BFF, Supabase, RLS, schéma, permissions métier, routes existantes, stockage local ou contenu des leçons. Validation : tous les contrats `tests/test_*.js`, syntaxe JavaScript, `git diff --check` et cohérence route/registre passent ; `tests/run.js` : **52 réussis, 0 échec**. Le contrôle route/registre vérifie 23 routes et 38 entrées. Compte rendu : `DDA_ELITE_UX_NAVIGATION_REVIEW_2026-09-28.md` ; captures desktop/mobile hors dépôt : `/home/ubuntu/dda-elite-preview/`.
+
+
+## Tranche — DDA Aurora : lumière, verre fumé et profondeur (28 septembre 2026)
+
+**Statut :** surcouche visuelle préparée sur `feat/darius-analysis-terminal`, dans la PR #94 ouverte; non fusionnée et non déployée. La référence BizNext a été limitée à l’ambiance lumineuse et à la matière : aucune reprise de template ou d’identité. La signature DDA demeure l’Aperture produit, le Terminal pédagogique et le fil de maîtrise fondé sur les preuves.
+
+**Implémentation :** champ de lumière bleu électrique statique sur les 26 vues, cartes existantes en verre fumé bleu-nuit, liserés/reflets, CTAs lumineux, stage 3D à mouvement faible pour ordinateur/téléphone, micro-profondeur de cartes interactives et lueur réservée aux preuves confirmées. Cache PWA `dda-shell-v21`.
+
+**Performance / accessibilité :** animations désactivées en `prefers-reduced-motion` et `low-data`; blur coupé en mobile pour ne pas modifier le repère des overlays/feuilles fixes — transparence sombre maintenue sans backdrop filter. Les gestes, tailles tactiles et états sémantiques restent en place.
+
+**Préservation :** CSS et tests uniquement, plus versionnement PWA. Aucun changement au BFF/Supabase/RLS, à l’architecture, aux routes, au modèle local, aux permissions ni aux handoffs; aucune cotation ou statistique d’apprenant inventée.
+
+**Validation locale :** contrats Node et cohérence route/registre PASS; syntaxe PASS; `git diff --check` PASS; Playwright **53/53** PASS, incluant l’onboarding mobile et les préférences de mouvement/données. Captures multi-vues desktop/mobile inspectées, sans overflow ni erreur console. Compte rendu détaillé : `DDA_ELITE_UX_NAVIGATION_REVIEW_2026-09-28.md`.

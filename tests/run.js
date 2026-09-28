@@ -1025,6 +1025,139 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('landing market cards preserve the existing visitor access gate', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+    assert.equal(await page.locator('.landing-market-card').count(), 5);
+    await page.locator('.landing-market-card').first().click();
+    await page.waitForFunction(() => document.querySelector('#access')?.classList.contains('active'));
+    assert.equal(await page.locator('#markets').evaluate(node => node.classList.contains('active')), false, 'anonymous visitors must not bypass the existing access gate');
+    assert.equal(await page.locator('#access').isVisible(), true, 'the existing signup/access view is the visitor destination');
+    await context.close();
+  });
+
+  await test('the Elite theme covers every route and remaining product surface', async () => {
+    const context = await freshContext(browser, { width: 1440, height: 1000 });
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#progress`);
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
+    const theme = await page.evaluate(() => {
+      const deepNavy = [6, 13, 23];
+      const views = [...document.querySelectorAll('.view')].map(node => ({
+        id: node.id,
+        color: getComputedStyle(node).backgroundColor
+      }));
+      const selectors = '.prototype-banner,.access-card,.principle,.example-callout,.result-card,.result-stats,.certificate-mock,.practice-proof-row,.brvm-panel,.plan-card,.premium-lab-form,.premium-assessment-form,.broker-row,.support-contact,.support-faq-panel,.community-tile,.profile-panel,.preference-panel,.journal-panel,.journal-composer,.resource-feature,.journey-future-note,.mastery-context-note,.gate-card,.toast,.storage-warning';
+      const surfaces = [...document.querySelectorAll(selectors)].map(node => {
+        const style = getComputedStyle(node);
+        const values = style.backgroundColor.match(/[\d.]+/g)?.map(Number) || [0, 0, 0, 0];
+        const alpha = values.length > 3 ? values[3] : 1;
+        const effective = values.slice(0, 3).map((channel, index) => channel * alpha + deepNavy[index] * (1 - alpha));
+        return { selector: node.id || node.className, color: style.backgroundColor, luminanceCeiling: Math.max(...effective) };
+      });
+      const progressPhotoFilter = getComputedStyle(document.querySelector('#progress .view-photo-band .photo-fill')).filter;
+      return { views, surfaces, progressPhotoFilter };
+    });
+    assert.ok(theme.views.length >= 24, `all app views must be audited (got ${theme.views.length})`);
+    for (const view of theme.views) {
+      assert.equal(view.color, 'rgb(6, 13, 23)', `${view.id} must use the resting Deep Navy canvas`);
+    }
+    assert.ok(theme.surfaces.length >= 20, `expected to inspect common page surfaces (got ${theme.surfaces.length})`);
+    for (const surface of theme.surfaces) {
+      assert.ok(surface.luminanceCeiling < 150, `${surface.selector} must not regress to a light/cream surface (${surface.color})`);
+    }
+    assert.match(theme.progressPhotoFilter, /saturate\(0\.45\)/, 'the Progress poster stays atmospheric instead of visually overpowering the work surface');
+    await page.locator('.nav-item[data-scroll-to="analysis-terminal"]').click();
+    await page.waitForFunction(() => {
+      const chart = document.querySelector('#terminal-chart')?.getBoundingClientRect();
+      return document.querySelector('.view.active')?.id === 'dashboard' && chart && chart.top >= 0 && chart.top < innerHeight;
+    });
+    assert.equal(await page.locator('.view.active').getAttribute('id'), 'dashboard', 'the desktop shortcut scrolls to the existing Terminal inside Dashboard');
+    await context.close();
+  });
+
+  await test('DDA Aurora carries branded glass light and respects motion preferences', async () => {
+    const context = await freshContext(browser, { width: 1440, height: 900 });
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'landing');
+    const visuals = await page.evaluate(() => {
+      const get = selector => document.querySelector(selector);
+      const style = selector => getComputedStyle(get(selector));
+      const views = [...document.querySelectorAll('.view')];
+      return {
+        viewsWithLightField: views.filter(node => getComputedStyle(node).backgroundImage.includes('radial-gradient')).length,
+        viewCount: views.length,
+        apertureLight: style('#landing .landing-aperture .photo-scrim').backgroundImage,
+        stageMotion: style('#landing .landing-device-stage').animationName,
+        reflectionMotion: getComputedStyle(get('#landing .landing-device-stage'), '::before').animationName,
+        glass: style('#landing .landing-market-card').backdropFilter,
+        action: style('#landing .landing-actions .primary-action').backgroundImage,
+        landingFeatureBackground: style('#landing .landing-free-grid article').backgroundImage
+      };
+    });
+    assert.ok(visuals.viewsWithLightField >= 24, 'the route light field should apply throughout the platform');
+    assert.match(visuals.apertureLight, /radial-gradient/, 'the DDA Aperture has a custom instrument-light treatment');
+    assert.match(visuals.stageMotion, /dda-aperture-float/, 'the laptop/phone stage has gentle 3D movement');
+    assert.match(visuals.glass, /blur\(8px\)/, 'market cards use restrained glass on desktop');
+    assert.match(visuals.action, /linear-gradient/, 'the landing action uses the DDA electric-blue finish');
+    assert.match(visuals.landingFeatureBackground, /linear-gradient/, 'feature modules use smoked glass rather than a generic light card');
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const reducedMotion = await page.locator('#landing .landing-device-stage').evaluate(node => getComputedStyle(node).animationName);
+    assert.equal(reducedMotion, 'none', 'reduced-motion turns off decorative 3D movement');
+    const reducedReflection = await page.locator('#landing .landing-device-stage').evaluate(node => getComputedStyle(node, '::before').animationName);
+    assert.equal(reducedReflection, 'none', 'reduced-motion also stops the reflected light animation');
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.evaluate(() => document.body.classList.add('low-data'));
+    const lowDataMotion = await page.locator('#landing .landing-device-stage').evaluate(node => getComputedStyle(node).animationName);
+    assert.equal(lowDataMotion, 'none', 'low-data mode keeps the scene static');
+    const lowDataReflection = await page.locator('#landing .landing-device-stage').evaluate(node => getComputedStyle(node, '::before').animationName);
+    assert.equal(lowDataReflection, 'none', 'low-data mode also stops the reflected light animation');
+    await context.close();
+  });
+
+  await test('mobile Back, Forward and in-app Retour follow DDA screen history', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#dashboard`);
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'dashboard');
+
+    await page.locator('.mobile-nav button[data-view="path"]').click();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'path');
+    await page.locator('.mobile-nav button[data-view="progress"]').click();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
+
+    await page.goBack();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'path');
+    assert.equal(await page.evaluate(() => history.state?.__ddaAppView), 'path');
+    await page.goForward();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
+
+    await page.locator('.mobile-nav button[data-view="journal"]').click();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'journal');
+    await page.locator('#journal > .back-link[data-view="back"]').click();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
+    assert.equal(await page.evaluate(() => location.hash), '#progress', 'the in-app back button returns to the previous route');
+    await page.goForward();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'journal');
+    assert.equal(await page.evaluate(() => location.origin), new URL(BASE).origin, 'mobile Back/Forward stays in the DDA document');
+
+    await page.locator('.mobile-nav button[data-view="dashboard"]').click();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'dashboard');
+    await page.locator('.terminal-divider-go').click();
+    await page.waitForFunction(() => {
+      const chart = document.getElementById('terminal-chart');
+      const rect = chart?.getBoundingClientRect();
+      return rect && rect.top >= 0 && rect.top < innerHeight;
+    });
+    assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'dashboard', 'Terminal shortcut keeps the existing Dashboard route');
+    await context.close();
+  });
+
   await test('#landing renders with no horizontal overflow at 360px, 390px and 1440px', async () => {
     for (const width of [360, 390, 1440]) {
       const context = await freshContext(browser, { width, height: 900 });
@@ -1210,6 +1343,10 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
     await page.fill('#terminal-observation', 'Plusieurs réactions apparaissent autour de la même zone centrale.');
     await page.click('#terminal-save-observation');
+    await page.selectOption('#terminal-timeframe', '4H');
+    await page.click('#terminal-zoom-in');
+    assert.equal(await page.locator('[data-terminal-tool="crosshair"]').getAttribute('aria-pressed'), 'true', 'crosshair is the accessible initial tool');
+    assert.equal(await page.locator('#terminal-zoom-value').textContent(), '2×', 'compact zoom dock reflects its selected level');
     await page.click('#terminal-practice-validate');
     let practice = await page.evaluate(() => window.DDA.load().terminal.practice);
     assert.ok(practice, 'Terminal state must be persisted after the first attempt');
@@ -1217,18 +1354,33 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(practice.attempts, 1);
     assert.equal(practice.completedAt, undefined, 'a failed attempt must never receive a completion timestamp');
 
-    await page.locator('[data-terminal-tool="zone"]').click();
     const chart = page.locator('#terminal-chart');
     await chart.scrollIntoViewIfNeeded();
     const box = await chart.boundingBox();
     assert.ok(box && box.width > 100 && box.height > 100, 'interactive chart has a real pointer target');
-    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.35);
-    await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.54);
+    await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.4);
+    assert.match(await page.locator('#terminal-candle-readout').textContent(), /Séquence \d{2}/, 'crosshair immediately reports the hovered synthetic candle');
+    const crosshairValueY = await page.locator('#terminal-chart .crosshair-value-label').evaluate(node => Number(node.getAttribute('transform').match(/translate\(0\s*([^)]+)\)/)?.[1]));
+    assert.ok(crosshairValueY > 100 && crosshairValueY < 250, `crosshair value label follows the hovered chart level (got ${crosshairValueY})`);
+    await page.locator('[data-terminal-tool="zone"]').click();
+    assert.equal(await page.locator('[data-terminal-tool="zone"]').getAttribute('aria-pressed'), 'true', 'selected drawing tool exposes its active state');
+    await chart.scrollIntoViewIfNeeded();
+    const drawingBox = await chart.boundingBox();
+    assert.ok(drawingBox && drawingBox.width > 100 && drawingBox.height > 100, 'drawing gesture uses the chart box after toolbar selection');
+    await page.mouse.move(drawingBox.x + drawingBox.width * 0.24, drawingBox.y + drawingBox.height * 0.35);
+    await page.mouse.down();
+    await page.mouse.move(drawingBox.x + drawingBox.width * 0.76, drawingBox.y + drawingBox.height * 0.54, { steps: 8 });
+    await page.mouse.up();
     await page.click('#terminal-practice-validate');
     practice = await page.evaluate(() => window.DDA.load().terminal.practice);
     assert.equal(practice.status, 'validated', 'a learner-placed zone matching the taught range validates');
     assert.equal(practice.attempts, 2);
     assert.ok(practice.completedAt, 'successful proof is timestamped');
+    const drawnTerminal = await page.evaluate(() => window.DDA.load().terminal);
+    assert.equal(drawnTerminal.drawings.length, 1, 'a pointer drag creates and persists one annotation');
+    assert.equal(drawnTerminal.drawings[0].type, 'zone');
+    assert.equal(drawnTerminal.timeframe, '4H', 'compact timeframe selector persists in schema v4');
+    assert.equal(drawnTerminal.zoom, 2, 'compact zoom controls persist their selected level');
     assert.deepEqual(practice.proof, {
       id: 'm02-zone-identification', type: 'zone_identification', lessonId: 'M0.2', status: 'validated'
     });
@@ -1238,13 +1390,18 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const reloadedTerminal = await page.evaluate(() => window.DDA.load().terminal);
     assert.equal(reloadedTerminal.practice.status, 'validated', 'proof survives a full page reload');
     assert.equal(reloadedTerminal.observation, 'Plusieurs réactions apparaissent autour de la même zone centrale.');
+    assert.equal(reloadedTerminal.timeframe, '4H');
 
+    const unsavedObservation = 'Hypothèse de travail : plusieurs réactions encadrent cette aire pédagogique.';
+    await page.fill('#terminal-observation', unsavedObservation);
     await page.click('#terminal-journal-handoff');
     assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'journal');
     assert.equal(await page.locator('#journal-source-context').isVisible(), true, 'composer names the real Terminal source');
     assert.equal(await page.locator('#journal-market').inputValue(), 'BRVM Composite');
+    assert.ok((await page.locator('#journal-context').inputValue()).includes('timeframe 4H'), 'handoff transfers the selected timeframe');
     assert.ok((await page.locator('#journal-context').inputValue()).includes('sans cotation en temps réel'), 'handoff preserves the no-live-quotes disclosure');
-    assert.equal(await page.locator('#journal-scenario').inputValue(), reloadedTerminal.observation);
+    assert.equal(await page.locator('#journal-scenario').inputValue(), unsavedObservation, 'one-click Journal handoff includes the current unsaved hypothesis');
+    assert.ok((await page.locator('#journal-process').inputValue()).includes('zoom 2/3'));
     assert.ok((await page.locator('#journal-process').inputValue()).includes('annotations : zone Support/Résistance'));
     await page.click('#journal-step-next');
     await page.fill('#journal-decision', 'Je documente la zone observée sans en déduire un signal.');
@@ -1282,7 +1439,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       await page.goto(`${BASE}/#dashboard`);
       const result = await page.evaluate(() => ({
         overflow: document.documentElement.scrollWidth - window.innerWidth,
-        controls: [...document.querySelectorAll('[data-terminal-tool], #terminal-pan-left, #terminal-pan-right, #terminal-practice-validate, #terminal-save-observation, #terminal-journal-handoff')]
+        controls: [...document.querySelectorAll('[data-terminal-tool], #terminal-zoom-in, #terminal-zoom-out, #terminal-pan-left, #terminal-pan-right, #terminal-undo-drawing, #terminal-clear-drawings, #terminal-practice-validate, #terminal-save-observation, #terminal-journal-handoff')]
           .map(element => ({ id: element.id || element.dataset.terminalTool, width: element.getBoundingClientRect().width, height: element.getBoundingClientRect().height }))
       }));
       assert.ok(result.overflow <= 1, `Terminal must not overflow horizontally at ${width}px (got ${result.overflow}px)`);

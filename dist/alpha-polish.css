@@ -1388,3 +1388,634 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 /* P2 visual correction — rail labels must remain legible on Deep Navy. */
 .premium-module-rail strong{color:#f8fafc}
 @media(max-width:639px){#premium-track .section-intro{padding-top:24px}.premium-module-rail small{color:#cbd5e1}}
+
+
+/* ======================================================================
+   DDA ELITE UI — institutionnel, technologique, calme.
+   Présentation uniquement : aucune logique applicative ni donnée métier.
+   ====================================================================== */
+:root{
+  --dda-elite-canvas:#060d17;
+  --dda-elite-surface:#0a1424;
+  --dda-elite-surface-raised:#101c2d;
+  --dda-elite-line:rgba(174,191,213,.14);
+  --dda-elite-ink:#edf1f6;
+  --dda-elite-muted:#9ba8b8;
+  --dda-elite-gold:#cbb174;
+  --dda-elite-gold-soft:#e0cb9b;
+  --dda-elite-blue:#718ba6;
+}
+
+/* Consistent, low-glare product surfaces; the guided Path palette is intentionally untouched. */
+#dashboard.view,#journal.view,#progress.view,#profile.view,#markets.view{background-color:var(--dda-elite-canvas);color:var(--dda-elite-ink)}
+#dashboard .analysis-terminal,
+#journal .panel,
+#progress .panel,
+#profile .panel,
+#markets .index-card,
+#markets .market-calendar{
+  border-color:var(--dda-elite-line);
+  border-radius:16px;
+  background:linear-gradient(155deg,rgba(13,25,41,.98),rgba(8,18,31,.98));
+  box-shadow:0 16px 38px rgba(0,0,0,.16);
+}
+#dashboard .analysis-terminal{border-color:rgba(174,191,213,.16);box-shadow:0 24px 60px rgba(0,0,0,.22)}
+#dashboard .analysis-terminal-head h2,#journal .section-intro h1,#progress .section-intro h1,#profile .section-intro h1,#markets .section-intro h1{letter-spacing:-.025em}
+#dashboard .analysis-observation textarea,#journal :is(input,select,textarea),#profile :is(input,select,textarea){border-color:var(--dda-elite-line);background:#091523;color:var(--dda-elite-ink)}
+#dashboard .analysis-observation textarea:focus-visible,#journal :is(input,select,textarea):focus-visible,#profile :is(input,select,textarea):focus-visible{outline:2px solid rgba(203,177,116,.7);outline-offset:2px;border-color:var(--dda-elite-gold)}
+#markets .index-card{box-shadow:0 12px 30px rgba(0,0,0,.12)}
+#markets .index-card:hover{border-color:rgba(203,177,116,.3);box-shadow:0 16px 34px rgba(0,0,0,.18)}
+#markets .market-visit-cue{border-color:var(--dda-elite-line);background:rgba(10,20,36,.64)}
+
+/* The public landing uses the same quiet navy system with a restrained institutional gold. */
+#landing .landing-editorial-shell{gap:clamp(30px,5vw,72px)}
+#landing .landing-main-copy{max-width:690px}
+#landing .landing-masthead{color:rgba(226,233,241,.62);letter-spacing:.14em}
+#landing .landing-masthead span{color:rgba(203,177,116,.76)}
+#landing .landing-main-copy .eyebrow.gold,#landing .landing-section-head .eyebrow.gold{color:var(--dda-elite-gold-soft)}
+#landing h1,#landing h2,#landing h3{ text-wrap:balance }
+#landing h1{color:#f1f3f5;letter-spacing:-.045em}
+#landing h1 em{color:var(--dda-elite-gold-soft);font-style:normal}
+#landing .landing-deck,#landing .landing-section-head>p:not(.eyebrow),#landing .ecosystem-copy>p:not(.eyebrow){color:#aab5c2;line-height:1.72}
+#landing .landing-actions .primary-action,#landing .landing-final-cta .primary-action{
+  border:1px solid rgba(239,220,176,.34);
+  background:linear-gradient(120deg,#b39a68,#d0bc8d);
+  color:#101722;
+  box-shadow:0 9px 24px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.26);
+  transition:transform .2s ease,box-shadow .2s ease,background .2s ease;
+}
+#landing .landing-actions .primary-action:hover,#landing .landing-final-cta .primary-action:hover{transform:translateY(-2px);box-shadow:0 13px 28px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.32)}
+#landing .landing-secondary{color:#d8dfe7!important}
+#landing .landing-secondary span{color:var(--dda-elite-gold-soft)}
+#landing .landing-aperture{
+  min-height:520px;
+  overflow:hidden;
+  border:1px solid rgba(189,204,221,.18);
+  border-radius:18px;
+  background:radial-gradient(ellipse at 76% 23%,rgba(102,128,153,.16),transparent 34%),linear-gradient(145deg,#0a1422 0%,#0a1727 66%,#0b1b2d 100%);
+  box-shadow:0 26px 64px rgba(0,0,0,.24);
+}
+#landing .landing-aperture .photo-scrim{background:linear-gradient(180deg,rgba(6,13,23,.2),rgba(6,13,23,.52) 46%,rgba(6,13,23,.94))}
+#landing .landing-edition{color:rgba(224,230,238,.58)}
+#landing .landing-aperture-copy strong{color:#eef1f5;font-size:clamp(2.4rem,4.8vw,4.2rem);letter-spacing:-.045em}
+#landing .landing-aperture-copy em{color:rgba(221,207,173,.9);font-size:clamp(1.15rem,2.4vw,1.8rem)}
+#landing .landing-signal{z-index:1;opacity:.1}
+#landing .landing-aperture .aperture-thread{opacity:.28}
+#landing .landing-trust{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:26px;list-style:none;padding:0}
+#landing .landing-trust li{display:flex;align-items:flex-start;gap:9px;min-width:0;padding:10px 12px;border:1px solid rgba(174,191,213,.12);border-radius:12px;background:rgba(10,20,36,.46);color:#aab5c2;font-size:.78rem;line-height:1.45}
+#landing .landing-trust .icon{flex:none;width:16px;height:16px;margin-top:1px;color:var(--dda-elite-gold)}
+#landing .landing-trust strong{color:var(--dda-elite-gold-soft);font-size:.86rem;font-variant-numeric:tabular-nums}
+
+/* Low-poly device mockups: CSS/SVG only, no WebGL, external feed, or remote image. */
+#landing .landing-device-stage{position:absolute;z-index:2;inset:17% 5% 24%;perspective:1100px;transform-style:preserve-3d;pointer-events:none}
+#landing .landing-device-laptop{position:absolute;left:0;top:5%;width:83%;transform:rotateY(-10deg) rotateX(3deg);transform-style:preserve-3d;filter:drop-shadow(0 18px 22px rgba(0,0,0,.3))}
+#landing .landing-laptop-screen{overflow:hidden;padding:7px;border:1px solid rgba(205,216,229,.48);border-radius:11px 11px 5px 5px;background:linear-gradient(145deg,#142235,#0a1423);box-shadow:inset 0 1px rgba(255,255,255,.12),0 0 0 1px rgba(4,9,16,.7)}
+#landing .landing-device-topbar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 8px;color:#afbbc8;font:700 7px/1.2 var(--dda-sans,system-ui,sans-serif);letter-spacing:.1em}
+#landing .landing-device-topbar span:last-child{display:flex;align-items:center;gap:5px;color:#c9bd9c;font-size:6px}
+#landing .landing-device-topbar i{width:5px;height:5px;border-radius:50%;background:#8eb6a8;box-shadow:0 0 0 3px rgba(142,182,168,.1)}
+#landing .landing-device-screen-body{padding:8px 9px 6px;border:1px solid rgba(174,191,213,.1);border-radius:6px;background:#070f1a}
+#landing .landing-device-chart-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px;color:#e2e7ed;font:600 8px/1.2 var(--dda-sans,system-ui,sans-serif)}
+#landing .landing-device-chart-head span{color:#8d9bad;font:500 6px/1.2 var(--dda-sans,system-ui,sans-serif)}
+#landing .landing-device-candles{display:block;width:100%;height:96px;border-radius:4px;background:linear-gradient(180deg,rgba(255,255,255,.012),transparent)}
+#landing .landing-device-candles .device-chart-grid{fill:none;stroke:rgba(150,168,190,.1);stroke-width:.7}
+#landing .landing-device-candles .device-candle-muted{fill:none;stroke:#91aa9d;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#landing .landing-device-tools{display:flex;justify-content:space-between;gap:5px;margin-top:7px;color:#9eabb9;font:500 6px/1.2 var(--dda-sans,system-ui,sans-serif)}
+#landing .landing-device-tools span:first-child{color:#d6bf88}
+#landing .landing-laptop-base{width:109%;height:8px;margin-left:-4.5%;border:1px solid rgba(207,218,231,.24);border-top:0;border-radius:0 0 50% 50%;background:linear-gradient(180deg,#28384a,#111d2d 64%,#09111c);box-shadow:0 6px 10px rgba(0,0,0,.28)}
+#landing .landing-device-phone{position:absolute;right:0;bottom:2%;width:27%;min-width:104px;padding:5px;border:1px solid rgba(218,225,233,.54);border-radius:17px;background:linear-gradient(150deg,#182638,#0b1421);box-shadow:0 18px 34px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.13);transform:rotateY(9deg) rotateZ(4deg) translateZ(26px)}
+#landing .landing-phone-camera{position:absolute;z-index:1;top:7px;left:50%;width:25px;height:4px;border-radius:4px;background:#03070c;transform:translateX(-50%)}
+#landing .landing-phone-screen{display:flex;flex-direction:column;gap:7px;min-height:176px;padding:20px 8px 8px;border-radius:12px;background:linear-gradient(160deg,#0b1726,#08111d);color:#e8edf2}
+#landing .landing-phone-brand{color:#c6b17f;font:700 6px/1.2 var(--dda-sans,system-ui,sans-serif);letter-spacing:.09em}
+#landing .landing-phone-screen>strong{font:600 11px/1.25 var(--dda-sans,system-ui,sans-serif)}
+#landing .landing-phone-market{color:#9daaba;font:500 6px/1.3 var(--dda-sans,system-ui,sans-serif)}
+#landing .landing-phone-note{display:grid;gap:4px;padding:9px 7px;border:1px solid rgba(174,191,213,.13);border-radius:7px;background:rgba(255,255,255,.025)}
+#landing .landing-phone-note i{display:block;width:88%;height:3px;border-radius:2px;background:rgba(204,215,227,.38)}
+#landing .landing-phone-note i:nth-child(2){width:70%}
+#landing .landing-phone-note i:nth-child(3){width:52%;background:rgba(203,177,116,.55)}
+#landing .landing-phone-proof{display:flex;align-items:center;gap:4px;margin-top:auto;color:#aab7c3;font:500 5px/1.3 var(--dda-sans,system-ui,sans-serif)}
+#landing .landing-phone-proof b{width:5px;height:5px;border-radius:50%;background:#91b8a8}
+#landing .landing-device-caption{position:absolute;right:3%;bottom:-16px;color:rgba(221,207,173,.78);font:700 6px/1.2 var(--dda-sans,system-ui,sans-serif);letter-spacing:.14em}
+#landing .landing-3d-scene{z-index:1;right:8%;width:min(55%,340px);opacity:.2}
+#landing .landing-3d-orbit{animation-duration:30s}
+#landing .landing-3d-orbit-middle{animation-duration:25s}
+#landing .landing-3d-orbit-inner{animation-duration:21s}
+#landing .landing-3d-core{animation-duration:7s}
+#landing .landing-3d-node{animation-duration:8s;opacity:.7}
+#landing .landing-aperture-top,#landing .landing-aperture-copy{z-index:4}
+
+/* Editorial, non-live market cards reuse the existing Market Intelligence destination. */
+#landing .domain-rail .landing-section-head h3{max-width:30ch;color:#e7ebef}
+#landing .domain-rail .landing-market-intro{max-width:68ch;margin:14px 0 22px;color:#9eabba;font-size:.9rem;line-height:1.65}
+#landing .domain-rail .landing-domain-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 28px}
+#landing .domain-rail .landing-domain-groups article{min-width:0;padding:18px 0 0;border:0;border-top:1px solid var(--dda-elite-line);border-radius:0;background:transparent}
+#landing .domain-rail .landing-domain-groups article+article{padding-left:0;border-left:0}
+#landing .domain-rail .landing-market-group{grid-column:1/-1}
+#landing .domain-rail .domain-label{margin:0 0 14px;color:#c9b27b;font-size:.67rem;letter-spacing:.13em}
+#landing .landing-market-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+#landing .landing-market-card{display:flex;flex-direction:column;justify-content:space-between;min-width:0;min-height:124px;padding:13px 12px 10px;border:1px solid rgba(174,191,213,.14);border-radius:12px;background:linear-gradient(160deg,rgba(16,29,46,.92),rgba(9,19,32,.96));color:#e7ebef;text-align:left;cursor:pointer;transition:transform .2s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease}
+#landing .landing-market-card:hover,#landing .landing-market-card:focus-visible{transform:translateY(-2px);border-color:rgba(203,177,116,.4);background:#101e30;box-shadow:0 12px 26px rgba(0,0,0,.18)}
+#landing .landing-market-card:focus-visible{outline:2px solid var(--dda-elite-gold);outline-offset:3px}
+#landing .landing-market-card-head{display:flex;flex-direction:column;gap:4px;min-width:0}
+#landing .landing-market-card-head strong{overflow:hidden;color:#e9edf1;font-size:.78rem;font-weight:700;text-overflow:ellipsis;white-space:nowrap}
+#landing .landing-market-card-head small{color:#94a2b3;font-size:.56rem;letter-spacing:.1em}
+#landing .landing-market-sparkline{display:block;width:100%;height:34px;overflow:visible;fill:none;stroke:#93a99d;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
+#landing .landing-market-sparkline.spark-forex{stroke:#9caec0}
+#landing .landing-market-sparkline.spark-actions{stroke:#b9aa83;opacity:.56}
+#landing .landing-market-sparkline.spark-indices{stroke:#91a6b7}
+#landing .landing-market-sparkline.spark-crypto{stroke:#b78f86;opacity:.52}
+#landing .landing-market-card-foot{display:flex;align-items:center;justify-content:space-between;gap:5px;color:#8e9bac}
+#landing .landing-market-card-foot small{font-size:.56rem;line-height:1.25}
+#landing .landing-market-card-foot b{color:#c9b27b;font-size:.9rem;font-weight:500}
+#landing .landing-market-disclosure{max-width:88ch;margin:12px 0 0;color:#8593a4;font-size:.73rem;line-height:1.55}
+#landing .domain-rail .landing-domain-groups article:not(.landing-market-group)>div{display:flex;flex-wrap:wrap;gap:8px}
+#landing .domain-rail .landing-domain-groups article:not(.landing-market-group)>div span{padding:5px 9px;border:1px solid rgba(174,191,213,.11);border-radius:999px;color:#9ba8b8;font-size:.72rem}
+
+/* A restrained depth cue on real mastery and chapter states, not decorative dashboard noise. */
+#landing .experience-flow li{transform-style:preserve-3d;transition:transform .28s ease,border-color .28s ease,background .28s ease}
+#landing .experience-flow li.is-active{transform:translateZ(4px);border-color:rgba(203,177,116,.27);background:linear-gradient(145deg,rgba(16,29,46,.74),rgba(10,20,36,.42))}
+#landing .experience-flow li.is-active .method-index{transform:translateZ(5px)}
+#path .journey-current{transform-style:preserve-3d}
+#progress .mastery-row-focused .mastery-level{transition:transform .3s ease,filter .3s ease}
+#progress .mastery-row-focused[data-proof-state="confirmed"] .mastery-level{transform:translateZ(3px)}
+@keyframes dda-elite-panel-arrive{from{opacity:.84;transform:translateY(7px) rotateX(-1deg)}to{opacity:1;transform:translateY(0) rotateX(0)}}
+#path.active .journey-current{animation:dda-elite-panel-arrive .38s cubic-bezier(.2,.7,.25,1) both;transform-origin:50% 0}
+
+/* Compact icon toolbar; all existing controls remain in place and keep their original IDs. */
+#dashboard .analysis-terminal-tools{position:sticky;top:76px;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;margin:12px 0 10px;padding:7px 9px;border:1px solid rgba(174,191,213,.12);border-radius:14px;background:rgba(7,16,28,.94);box-shadow:0 9px 24px rgba(0,0,0,.18);backdrop-filter:blur(12px)}
+#dashboard .terminal-tool-primary-group,#dashboard .terminal-tool-utility-group,#dashboard .terminal-edit-controls{display:flex;align-items:center;gap:5px;min-width:0}
+#dashboard .terminal-tool-utility-group{gap:9px}
+#dashboard .terminal-tool{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:44px;min-height:42px;padding:0 11px;border:1px solid transparent;border-radius:10px;background:transparent;color:#acb7c4;font:600 11px/1 var(--dda-sans,system-ui,sans-serif);transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+#dashboard .terminal-tool svg,#dashboard .terminal-icon-button svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}
+#dashboard .terminal-tool:hover,#dashboard .terminal-tool:focus-visible{border-color:rgba(203,177,116,.28);background:rgba(203,177,116,.06);color:#e2d0a6}
+#dashboard .terminal-tool.active{border-color:rgba(203,177,116,.28);background:rgba(203,177,116,.1);color:#e0cb9b;box-shadow:inset 0 0 0 1px rgba(203,177,116,.05)}
+#dashboard .terminal-tool-label{font-size:10px;letter-spacing:.01em}
+#dashboard .terminal-zoom-dock{gap:5px;padding:0 5px 0 0}
+#dashboard .terminal-zoom-value{min-width:28px;color:#bac5d0;font:600 10px/1 var(--dda-sans,system-ui,sans-serif);text-align:center}
+#dashboard .terminal-zoom-dock input[type=range]{width:70px;accent-color:var(--dda-elite-gold)}
+#dashboard .terminal-pan-controls,#dashboard .terminal-edit-controls{display:flex;align-items:center;gap:4px}
+#dashboard .terminal-icon-button{width:38px;height:38px;min-width:38px;min-height:38px;border-color:rgba(174,191,213,.13);border-radius:10px;background:#0a1424;color:#aeb9c6;font-size:0;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+#dashboard .terminal-icon-button:hover:not(:disabled),#dashboard .terminal-icon-button:focus-visible{border-color:rgba(203,177,116,.42);background:rgba(203,177,116,.08);color:#e1cd9e;transform:translateY(-1px)}
+#dashboard .terminal-icon-button:disabled{opacity:.38}
+#dashboard .analysis-chart-shell{border-color:rgba(174,191,213,.13);border-radius:14px;background:#060d17}
+#dashboard .analysis-chart-meta,#dashboard .analysis-chart-footer{border-color:rgba(174,191,213,.1);background:#0a1424}
+
+@media(max-width:899px){
+  #landing .landing-trust{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #landing .landing-trust li:last-child{grid-column:1/-1}
+  #landing .landing-device-stage{inset:18% 3% 25%}
+  #landing .landing-device-laptop{width:84%}
+  #landing .landing-device-phone{width:29%;min-width:100px}
+  #landing .domain-rail .landing-domain-groups{grid-template-columns:1fr;gap:14px}
+  #landing .domain-rail .landing-market-group{grid-column:auto}
+  #landing .landing-market-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  #landing .landing-market-card{min-height:116px}
+  #landing .landing-experience,#landing .landing-product,#landing .landing-proof,#landing .landing-ecosystem,#landing .landing-free{padding-block:clamp(54px,8vw,72px)}
+}
+@media(max-width:700px){
+  #dashboard .analysis-terminal-tools{top:66px;display:grid;grid-template-columns:minmax(0,1fr);gap:5px;padding:6px;border-radius:13px}
+  #dashboard .terminal-tool-primary-group{display:grid;grid-template-columns:repeat(4,minmax(44px,1fr));gap:4px}
+  #dashboard .terminal-tool{width:100%;min-width:44px;min-height:44px;padding:0;border-radius:10px}
+  #dashboard .terminal-tool svg{width:19px;height:19px}
+  #dashboard .terminal-tool-label{display:none}
+  #dashboard .terminal-tool-utility-group{display:flex;justify-content:space-between;gap:7px;width:100%;padding-top:4px;border-top:1px solid rgba(174,191,213,.1)}
+  #dashboard .terminal-zoom-dock{gap:4px;min-height:44px;padding:0}
+  #dashboard .terminal-zoom-dock #terminal-zoom-out,#dashboard .terminal-zoom-dock #terminal-zoom-in{display:none}
+  #dashboard .terminal-zoom-dock input[type=range]{width:54px;height:34px;margin:0}
+  #dashboard .terminal-zoom-value{min-width:26px;font-size:10px}
+  #dashboard .terminal-icon-button,#dashboard .terminal-edit-action{width:44px;height:44px;min-width:44px;min-height:44px}
+  #dashboard .terminal-icon-button svg{width:19px;height:19px}
+  #dashboard .terminal-pan-controls,#dashboard .terminal-edit-controls{gap:4px}
+  #dashboard .analysis-chart-shell{scroll-margin-top:120px}
+  #landing .landing-aperture{min-height:420px}
+  #landing .landing-device-stage{inset:19% 3% 25%}
+  #landing .landing-device-candles{height:78px}
+  #landing .landing-device-phone{min-width:94px;width:30%}
+  #landing .landing-phone-screen{min-height:156px}
+  #landing .landing-aperture-copy strong{font-size:clamp(2.25rem,11vw,3.3rem)}
+  #landing .landing-aperture-copy em{font-size:clamp(1.1rem,5.5vw,1.5rem)}
+}
+@media(max-width:420px){
+  #landing .landing-trust{grid-template-columns:1fr;gap:6px}
+  #landing .landing-trust li:last-child{grid-column:auto}
+  #landing .landing-aperture{min-height:400px;padding:20px}
+  #landing .landing-device-stage{inset:19% 1% 26%}
+  #landing .landing-device-laptop{top:6%;width:84%}
+  #landing .landing-device-phone{right:-1%;bottom:0;width:31%;min-width:88px}
+  #landing .landing-device-topbar{padding:4px 5px;font-size:6px}
+  #landing .landing-device-candles{height:68px}
+  #landing .landing-phone-screen{min-height:144px;padding:18px 7px 7px}
+  #landing .landing-device-caption{font-size:5px;letter-spacing:.1em}
+  #landing .landing-market-card{min-height:108px;padding:11px 9px 8px}
+  #landing .landing-market-card-head strong{font-size:.72rem}
+  #landing .landing-market-card-foot small{font-size:.53rem}
+}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  #landing .landing-aperture:hover .landing-device-laptop{transform:rotateY(-7deg) rotateX(2deg) translateZ(5px)}
+  #landing .landing-aperture:hover .landing-device-phone{transform:rotateY(6deg) rotateZ(2deg) translateZ(34px)}
+  #landing .landing-device-laptop,#landing .landing-device-phone{transition:transform .42s cubic-bezier(.2,.75,.24,1)}
+}
+@media(prefers-reduced-motion:reduce){
+  #landing .landing-device-laptop,#landing .landing-device-phone,#landing .landing-market-card,#dashboard .terminal-tool,#dashboard .terminal-icon-button,#landing .experience-flow li{transition:none!important;animation:none!important}
+  #landing .landing-3d-orbit,#landing .landing-3d-core,#landing .landing-3d-node{animation:none!important}
+  #path.active .journey-current{animation:none!important}
+}
+@media(max-width:700px) and (prefers-reduced-motion:no-preference){
+  #landing .landing-3d-orbit,#landing .landing-3d-core,#landing .landing-3d-node{animation:none!important}
+}
+
+
+/* Keep every tactile zoom/pan/edit target visible, even at narrow phones. */
+@media(max-width:700px){
+  #dashboard .terminal-tool-utility-group{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"zoom pan" "edits edits";gap:4px 6px;justify-content:initial}
+  #dashboard .terminal-zoom-dock{grid-area:zoom;justify-content:flex-start}
+  #dashboard .terminal-zoom-dock #terminal-zoom-out,#dashboard .terminal-zoom-dock #terminal-zoom-in{display:inline-grid}
+  #dashboard .terminal-zoom-dock input[type=range]{width:48px;height:44px;margin:0}
+  #dashboard .terminal-pan-controls{grid-area:pan;justify-self:end}
+  #dashboard .terminal-edit-controls{grid-area:edits;justify-self:end}
+}
+@media(max-width:380px){
+  #dashboard .terminal-zoom-dock input[type=range]{width:36px}
+  #dashboard .terminal-zoom-value{display:none}
+}
+
+
+/* ======================================================================
+   DDA ELITE — whole-platform surface system.
+   Strictly presentational cascade: IDs, routes, data, and state classes stay intact.
+   ====================================================================== */
+:root{
+  --dda-elite-canvas:#060d17;
+  --dda-elite-surface:#0a1424;
+  --dda-elite-surface-raised:#101c2d;
+  --dda-elite-surface-soft:#0d1929;
+  --dda-elite-line:rgba(174,191,213,.14);
+  --dda-elite-line-strong:rgba(174,191,213,.22);
+  --dda-elite-ink:#edf1f6;
+  --dda-elite-muted:#9ba8b8;
+  --dda-elite-gold:#cbb174;
+  --dda-elite-gold-soft:#e0cb9b;
+  --dda-elite-blue:#718ba6;
+  --dda-elite-teal:#78aa9f;
+}
+body,body.public-shell{background:var(--dda-elite-canvas);color:var(--dda-elite-ink)}
+.app-shell,main{background:transparent}
+#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#profile.view{background:var(--dda-elite-canvas)!important;color:var(--dda-elite-ink)}
+
+/* Product chrome and global navigation. */
+.prototype-banner{border-bottom:1px solid var(--dda-elite-line);background:linear-gradient(90deg,#0a1424,#0d1929);color:#aab6c4}
+.topbar{border-bottom:1px solid rgba(174,191,213,.11);background:rgba(7,15,26,.91);color:var(--dda-elite-ink)}
+.sidebar{border-right:1px solid rgba(174,191,213,.11);background:linear-gradient(180deg,#091321,#07101b)}
+.sidebar-foot{border-top:1px solid rgba(174,191,213,.1)}
+.nav-section-label{color:#8291a3;letter-spacing:.14em}
+.nav-item{border:1px solid transparent;border-radius:9px;color:#a9b5c2;transition:background .18s ease,border-color .18s ease,color .18s ease}
+.nav-item:hover{border-color:rgba(174,191,213,.13);background:rgba(255,255,255,.035);color:#e7ebf0}
+.nav-item.active{border-color:rgba(203,177,116,.2);background:rgba(203,177,116,.085);color:var(--dda-elite-gold-soft)}
+.profile-chip{border:1px solid rgba(174,191,213,.1);border-radius:12px;background:rgba(255,255,255,.025);color:var(--dda-elite-ink)}
+.avatar{border:1px solid rgba(203,177,116,.24);background:linear-gradient(145deg,#18283a,#0a1424);color:var(--dda-elite-gold-soft)}
+.mobile-brand{color:#e5eaf0}
+.icon-button{border:1px solid rgba(174,191,213,.16);border-radius:10px;background:rgba(10,20,36,.8);color:#c7d0da}
+.mobile-nav{border-top:1px solid rgba(174,191,213,.14);background:rgba(7,15,26,.96);box-shadow:0 -10px 30px rgba(0,0,0,.16)}
+.mobile-nav button{color:#96a3b2}
+.mobile-nav button.active{color:var(--dda-elite-gold-soft)}
+.public-header{border-bottom:1px solid rgba(174,191,213,.12);background:rgba(6,13,23,.9)}
+.public-header-nav button,.public-login,.public-menu summary{color:#c1cad4}
+.public-header-nav button:hover,.public-login:hover,.public-menu summary:hover{color:var(--dda-elite-gold-soft)}
+.public-menu-panel,.public-footer{border-color:var(--dda-elite-line);background:#091523;color:#dce3ea}
+.public-menu-panel a{color:#dce3ea}
+.public-menu-panel a:hover{background:rgba(203,177,116,.08);color:var(--dda-elite-gold-soft)}
+.public-footer{border-top:1px solid var(--dda-elite-line)}
+
+/* Shared restrained glass surfaces. Cards stay opaque enough for legibility and mobile performance. */
+.view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.resource-feature,.resource-reader,.plan-card,.membership-status-line,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.broker-criteria-panel,.broker-list-panel,.support-faq-panel,.support-contact,.community-featured-card,.future-principle,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form,.certificate-mock,.result-card,.principle,.example-callout,.competency-check-block,.result-stats,.mastery-row,.progress-stat,.next-step-panel,.practice-proof-row,.practice-proof-receipt,.terminal-aperture,.terminal-two>section,.terminal-family-copy,.library-shelf){
+  border-color:var(--dda-elite-line);
+  background:linear-gradient(155deg,rgba(16,28,45,.96),rgba(10,20,36,.96));
+  color:var(--dda-elite-ink);
+  box-shadow:0 14px 34px rgba(0,0,0,.17);
+}
+.view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.resource-feature,.resource-reader,.plan-card,.membership-status-line,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.broker-criteria-panel,.broker-list-panel,.support-faq-panel,.support-contact,.community-featured-card,.future-principle,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form,.certificate-mock,.result-card,.principle,.example-callout,.competency-check-block,.result-stats,.mastery-row,.progress-stat,.next-step-panel,.practice-proof-row,.practice-proof-receipt,.terminal-aperture,.terminal-two>section,.terminal-family-copy,.library-shelf){border-radius:14px}
+#landing .landing-aperture,#landing .landing-market-card,#access .access-card,#dashboard .analysis-terminal,#dashboard .terminal-lead,#path .journey-current,#progress .panel,#journal .journal-panel,#journal .journal-composer,#resources .resource-feature,#resources .resource-reader,#membership .plan-card,#markets .market-zone,#markets .market-brief,#markets .brvm-panel,#markets .market-calendar,#brokers .panel,#brokers .broker-row,#support .support-faq-panel,#support .support-contact,#community .community-featured-card,#practice .community-featured-card,#intelligence .community-featured-card,#profile .profile-panel,#profile .preference-panel,#premium-track .panel,#premium-lab .panel,#premium-assessment .panel{border:1px solid var(--dda-elite-line)}
+#landing .landing-aperture,#access .access-card,#dashboard .analysis-terminal,#dashboard .terminal-lead,#progress .panel,#journal .journal-panel,#journal .journal-composer,#resources .resource-feature,#resources .resource-reader,#membership .plan-card,#markets .market-zone,#markets .market-brief,#markets .brvm-panel,#markets .market-calendar,#brokers .panel,#brokers .broker-row,#support .support-faq-panel,#support .support-contact,#community .community-featured-card,#practice .community-featured-card,#intelligence .community-featured-card,#profile .profile-panel,#profile .preference-panel,#premium-track .panel,#premium-lab .panel,#premium-assessment .panel{background-color:rgba(10,20,36,.94)}
+@supports(backdrop-filter:blur(1px)){
+  #landing .landing-aperture,#access .access-card,#dashboard .analysis-terminal,#dashboard .terminal-lead,#journal .journal-panel,#journal .journal-composer,#progress .panel,#resources .resource-feature,#resources .resource-reader,#membership .plan-card,#markets .market-zone,#brokers .panel,#brokers .broker-row,#support .support-faq-panel,#support .support-contact,#community .community-featured-card,#practice .community-featured-card,#intelligence .community-featured-card,#profile .profile-panel,#profile .preference-panel,#premium-track .panel,#premium-lab .panel,#premium-assessment .panel{backdrop-filter:blur(6px)}
+}
+@media(max-width:700px), (prefers-reduced-transparency:reduce){
+  .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.journal-panel,.journal-composer,.resource-feature,.plan-card,.market-zone,.broker-row,.support-faq-panel,.support-contact,.community-featured-card,.premium-track-status,.premium-lab-form,.premium-assessment-form){backdrop-filter:none}
+}
+@supports not (backdrop-filter:blur(1px)){
+  .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.journal-panel,.journal-composer,.resource-feature,.plan-card,.market-zone,.broker-row,.support-faq-panel,.support-contact,.community-featured-card,.premium-track-status,.premium-lab-form,.premium-assessment-form){background-color:#0a1424}
+}
+
+/* All forms share the same calm, accessible field treatment; validation and disabled state remain native. */
+.view :is(input:not([type=checkbox]):not([type=radio]),select,textarea){border-color:var(--dda-elite-line-strong);background:#091523;color:var(--dda-elite-ink);color-scheme:dark}
+.view :is(input,select,textarea)::placeholder{color:#8492a2;opacity:1}
+.view select option{background:#0a1424;color:#edf1f6}
+.view :is(input[type=checkbox],input[type=radio]){accent-color:var(--dda-elite-gold)}
+.view :is(input,select,textarea):disabled{border-color:rgba(174,191,213,.09);background:#0a1424;color:#8390a0;opacity:.68}
+#access .access-card,#access .access-card :is(label,h2,p,small,.eyebrow),#access .access-card :is(input,select,textarea){color:var(--dda-elite-ink)}
+#access .access-card :is(input,select,textarea){background:#091523}
+#access .access-card .consent{border-color:var(--dda-elite-line);background:rgba(255,255,255,.025)}
+#access .access-photo .photo-scrim,#landing .landing-institution-photo .photo-scrim,#brokers .view-photo-band .photo-scrim,#path .view-photo-band .photo-scrim,#progress .view-photo-band .photo-scrim,#community .community-hero .photo-scrim,#practice .community-hero .photo-scrim,#intelligence .community-hero .photo-scrim{background:linear-gradient(180deg,rgba(6,13,23,.08),rgba(6,13,23,.35) 44%,rgba(6,13,23,.88))}
+#access .access-illustration .lane-a,#access .access-illustration path:not(.lane-a){stroke:rgba(184,199,216,.43)}
+#access .access-illustration text{fill:#a4b0be}
+.form-error{color:#ffb4ab}
+.form-note,.field-help{color:#a4b0be}
+
+/* Learning and validation: remove every legacy paper/cream block without repainting semantic states. */
+:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22) .lesson-main :is(.principle,.example-callout,.competency-check-block,.targets,.result-card,.result-stats,.certificate-mock,.play-button){border-color:var(--dda-elite-line);background:linear-gradient(155deg,#101c2d,#0a1424);color:var(--dda-elite-ink)}
+:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22) .lesson-main :is(.principle,.example-callout,.competency-check-block,.targets,.result-card,.result-stats,.certificate-mock,.play-button) :is(h2,h3,h4,p,strong,span,li,dt,dd,small,label){color:inherit}
+:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22) .lesson-main .play-button{border:1px solid var(--dda-elite-line-strong)}
+:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22) .lesson-loop li:not(:last-child):after{background:rgba(174,191,213,.22)}
+:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22) .lesson-loop li.now .loop-bead{background:var(--dda-elite-gold-soft);box-shadow:0 0 0 4px rgba(203,177,116,.14)}
+#progress .certificate-mock{border-color:rgba(203,177,116,.32);background:linear-gradient(155deg,#122035,#0a1424);color:var(--dda-elite-ink)}
+#progress .certificate-mock :is(h4,p,strong,span){color:inherit}
+#progress .progress-stat{border:1px solid var(--dda-elite-line);background:linear-gradient(155deg,#101c2d,#0a1424);color:var(--dda-elite-ink)}
+#progress .progress-stat.featured{border-color:rgba(203,177,116,.24)}
+#progress .mastery-row,#progress .proof-timeline li{border-color:var(--dda-elite-line);background:rgba(10,20,36,.78);color:var(--dda-elite-ink)}
+#progress .practice-proof-row,.practice-proof-row,.premium-proof-row{border:1px solid var(--dda-elite-line);background:linear-gradient(145deg,#101c2d,#0a1424);color:var(--dda-elite-ink)}
+.practice-proof-row :is(strong,p,span,small),.premium-proof-row :is(strong,p,span,small){color:inherit}
+.is-retry .practice-proof-icon{border:1px solid rgba(203,177,116,.24);background:rgba(203,177,116,.1);color:#e0cb9b}
+.is-validated .practice-proof-icon{border:1px solid rgba(120,170,159,.28);background:rgba(120,170,159,.1);color:#9bc8bb}
+.progress-ring{background:radial-gradient(circle closest-side,#091523 76%,transparent 79% 99%),conic-gradient(var(--gold) calc(var(--progress)*1%),rgba(174,191,213,.12) 0)}
+
+/* Personal work, journal, profile and preferences. */
+#journal .journal-tabs{border-bottom:1px solid var(--dda-elite-line)}
+#journal .journal-tab{border:1px solid transparent;color:#aab5c2}
+#journal .journal-tab.active{border-color:rgba(203,177,116,.28);background:rgba(203,177,116,.09);color:var(--dda-elite-gold-soft)}
+#journal .journal-empty,#journal .journal-entry-card,#journal .weekly-review-locked,#journal .weekly-review-evidence,#journal .journal-source-context,#journal .plan-group,#journal .journal-future-grid article{border:1px solid var(--dda-elite-line);background:linear-gradient(150deg,#101c2d,#0a1424);color:var(--dda-elite-ink)}
+#journal .journal-empty :is(h2,p),#journal .journal-entry-card :is(h2,h3,p,dd),#journal .weekly-review-locked :is(h2,p),#journal .weekly-review-evidence :is(strong,p),#journal .journal-future-grid article :is(span,strong,p){color:inherit}
+#journal .journal-count,#journal .journal-entry-market{color:#dbe2e9}
+#profile .profile-panel,#profile .preference-panel{border:1px solid var(--dda-elite-line);background:linear-gradient(155deg,rgba(16,28,45,.96),rgba(10,20,36,.96));color:var(--dda-elite-ink)}
+#profile .profile-large-avatar{border:1px solid rgba(203,177,116,.28);background:linear-gradient(145deg,#17283b,#0a1424);color:var(--dda-elite-gold-soft)}
+#profile .profile-progress-strip,#profile .preference-row,#profile .activity-summary,#profile .empty-profile{border-color:var(--dda-elite-line);background:rgba(255,255,255,.025);color:var(--dda-elite-ink)}
+#profile .profile-fields :is(input,select){background:#091523;color:var(--dda-elite-ink)}
+#profile .privacy-note{border-color:var(--dda-elite-line);background:rgba(255,255,255,.025);color:#aeb9c6}
+
+/* Explore, regional markets, membership and help. */
+#resources .resource-feature,#resources .resource-reader{border:1px solid var(--dda-elite-line);background:linear-gradient(155deg,#101c2d,#0a1424);color:var(--dda-elite-ink)}
+#resources .library-shelf{border-color:var(--dda-elite-line);background:rgba(10,20,36,.42)}
+#resources .library-entry{border-bottom-color:var(--dda-elite-line)}
+#resources .resource-reader .reader-close{border:1px solid var(--dda-elite-line);background:#101c2d;color:#e7ebf0}
+#membership .plan-card,#membership .membership-status-line,#membership .membership-roadmap,#membership .family-panel,#membership .membership-guardrails,#membership .next-step-panel{border:1px solid var(--dda-elite-line);background:linear-gradient(155deg,#101c2d,#0a1424);color:var(--dda-elite-ink)}
+#membership .plan-card :is(h2,p,li,small),#membership .family-copy :is(h2,p){color:inherit}
+#membership .premium-plan{border-color:rgba(203,177,116,.28)}
+#membership .dda-community-visual.light{border-color:var(--dda-elite-line);background:linear-gradient(145deg,#0d1929,#0a1424)}
+#membership .photo-scrim.light{background:linear-gradient(180deg,rgba(6,13,23,.08),rgba(6,13,23,.85))}
+#markets .market-visit-cue,#markets .market-zone,#markets .index-card,#markets .market-brief,#markets .brvm-panel,#markets .market-calendar,#markets .journal-link-block{border-color:var(--dda-elite-line);background:linear-gradient(155deg,#101c2d,#0a1424);color:var(--dda-elite-ink)}
+#markets :is(.market-brief,.brvm-panel,.market-calendar,.journal-link-block) :is(h2,h3,p,strong,li,small,dt,dd){color:inherit}
+#markets .brvm-panel{border-color:rgba(203,177,116,.18)}
+#brokers .broker-row,#brokers .broker-empty,#brokers .broker-criteria-panel,#brokers .broker-list-panel{border:1px solid var(--dda-elite-line);background:linear-gradient(155deg,#101c2d,#0a1424);color:var(--dda-elite-ink)}
+#brokers .broker-monogram{border:1px solid rgba(203,177,116,.24);background:#0a1424;color:var(--dda-elite-gold-soft)}
+#brokers .broker-row :is(h2,p,dt,dd,strong,small){color:inherit}
+#brokers .broker-controls select{background:#091523;color:var(--dda-elite-ink)}
+#support .support-faq-panel,#support .support-contact{border:1px solid var(--dda-elite-line);background:linear-gradient(155deg,#101c2d,#0a1424);color:var(--dda-elite-ink)}
+#support .support-faq-panel details{border-bottom:1px solid var(--dda-elite-line)}
+#support .support-faq-panel summary{min-height:44px;color:#e5eaf0}
+#support .support-contact :is(input,select,textarea){background:#091523;color:var(--dda-elite-ink)}
+
+/* Honest future surfaces: still premium, but visibly inactive and never simulated. */
+:is(#community,#practice,#intelligence) .community-tiles-note,
+:is(#community,#practice,#intelligence) .community-spaces,
+:is(#community,#practice,#intelligence) .community-featured-card,
+:is(#community,#practice,#intelligence) .future-principle,
+:is(#community,#practice,#intelligence) .intelligence-boundaries article,
+:is(#community,#practice,#intelligence) .community-tile,
+:is(#community,#practice,#intelligence) .community-cta{border-color:var(--dda-elite-line);background:linear-gradient(155deg,rgba(16,28,45,.92),rgba(10,20,36,.95));color:var(--dda-elite-ink)}
+:is(#community,#practice,#intelligence) :is(.community-featured-copy,.future-principle,.intelligence-boundaries article) :is(h2,h3,p,strong,span){color:inherit}
+:is(#community,#practice,#intelligence) .community-tile{border:1px solid var(--dda-elite-line);border-radius:12px}
+:is(#community,#practice,#intelligence) .community-spaces-list .chevron-row{border:1px solid var(--dda-elite-line);border-radius:12px;background:rgba(10,20,36,.8);color:var(--dda-elite-ink)}
+:is(#community,#practice,#intelligence) .community-spaces-list .chevron-row:hover{border-color:rgba(203,177,116,.32);background:#101c2d}
+
+/* Shared overlays/feedback cannot fall back to paper-white outside a view. */
+.toast,.storage-warning,#gate-layer .gate-card,#resource-reader{border:1px solid var(--dda-elite-line-strong);border-radius:14px;background:rgba(10,20,36,.97);color:var(--dda-elite-ink);box-shadow:0 20px 48px rgba(0,0,0,.38)}
+.toast :is(p,strong,span),.storage-warning :is(p,strong,span),#gate-layer .gate-card :is(h2,h3,p,small){color:inherit}
+#gate-layer{background:rgba(3,8,15,.76)}
+#gate-layer .gate-card{backdrop-filter:blur(10px)}
+.disclosure,.future-label,.demo-note,.status-line{color:#9ba8b8}
+
+/* Consistent keyboard focus and reduced-motion fallbacks; no action or status is hidden. */
+:where(button,a[href],input,select,textarea,summary,[tabindex]):focus-visible{outline:2px solid var(--dda-elite-gold-soft);outline-offset:3px;box-shadow:0 0 0 4px rgba(203,177,116,.12)}
+button:disabled{cursor:not-allowed}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto!important}
+  .view.active{animation:none!important}
+  .view :is(button,a[href],summary,.panel,.journey-current,.market-card,.index-card,.broker-row,.community-tile,.community-featured-card){transition:none!important;animation:none!important;transform:none!important}
+  .view .progress-ring{animation:none!important}
+}
+@media(max-width:700px){
+  .toast,.storage-warning,#gate-layer .gate-card,#resource-reader{max-width:calc(100vw - 24px);}
+  #gate-layer .gate-card{max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 32px);overflow:auto}
+}
+
+/* Small form-state surfaces use the same measured DDA accent, never a white flash. */
+#access .step-indicator span.active,#journal .journal-step-indicator span.active{border-color:var(--dda-elite-gold);background:var(--dda-elite-gold);color:#101722}
+#premium-assessment .premium-assessment-form fieldset{border:1px solid var(--dda-elite-line);border-radius:12px;background:rgba(10,20,36,.72);color:var(--dda-elite-ink)}
+#premium-assessment .premium-assessment-form legend{color:#e2e8ef}
+#premium-assessment .premium-assessment-form label{color:#c3ccd6}
+
+/* Final composition polish: let the product mockups breathe instead of stacking a duplicate slogan over them. */
+#landing .landing-aperture-copy{display:none!important}
+@media(min-width:1100px){#landing .landing-aperture{align-self:start;margin-top:clamp(42px,5vw,72px)}}
+#dashboard .analysis-terminal{scroll-margin-top:88px}
+#dashboard .terminal-divider-go{flex:none;margin-top:12px;color:var(--dda-elite-gold-soft);white-space:nowrap}
+@media(max-width:700px){#dashboard .terminal-divider-go{margin-left:0}}
+
+/* Nested device content must not inherit the hero's display headline scale. */
+#landing .landing-device-chart-head strong{margin:0;color:inherit;font:600 8px/1.2 var(--dda-sans,system-ui,sans-serif)}
+#landing .landing-phone-screen>strong{margin:0}
+/* Future competency notes are informative surfaces, not cream cards. */
+#path .journey-future-note,#progress .mastery-context-note{border-color:rgba(174,191,213,.16);background:rgba(10,20,36,.78);color:#9eabba}
+#progress .mastery-context-note strong{color:#e6ebf0}
+
+/* Progress is a work surface: keep the poster texture, soften its neon colors. */
+#progress .view-photo-band .photo-fill{filter:saturate(.45) brightness(.68)}
+#progress .view-photo-band .photo-scrim{background:linear-gradient(180deg,rgba(6,13,23,.42),rgba(6,13,23,.6) 44%,rgba(6,13,23,.9))}
+
+
+/* ======================================================================
+   DDA AURORA — signature lumineuse propriétaire, inspirée par la matière,
+   pas par une maquette SaaS générique. L'Aperture + preuves restent le motif.
+   ====================================================================== */
+:root{
+  --dda-aurora-electric:#1887ff;
+  --dda-aurora-cyan:#49c9ff;
+  --dda-aurora-beam:rgba(34,132,255,.16);
+  --dda-aurora-glass:rgba(10,24,41,.82);
+  --dda-aurora-edge:rgba(107,177,255,.23);
+  --dda-aurora-gold-glint:rgba(224,203,155,.18);
+}
+
+/* Static optical depth across every route; background-color remains #060d17. */
+:is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile).view{
+  background-image:
+    radial-gradient(ellipse 54% 26% at 96% 2%,rgba(24,119,239,.16),transparent 74%),
+    radial-gradient(ellipse 44% 25% at 0% 44%,rgba(28,119,211,.085),transparent 76%),
+    radial-gradient(ellipse 50% 24% at 72% 100%,rgba(34,162,231,.075),transparent 75%),
+    linear-gradient(118deg,transparent 44%,rgba(76,151,255,.025) 45%,transparent 46%) !important;
+  background-attachment:fixed;
+}
+
+/* Smoked-glass work surfaces: translucency reveals the route's DDA light field. */
+.view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.terminal-aperture,.terminal-mi,.terminal-two,.terminal-family,.journal-panel,.journal-composer,.journal-entry-card,.journal-empty,.journal-source-context,.weekly-review-evidence,.weekly-review-locked,.resource-feature,.resource-reader,.library-shelf,.landing-plan-card,.plan-card,.membership-status-line,.membership-roadmap,.membership-guardrails,.family-panel,.market-zone,.market-brief,.brvm-panel,.market-calendar,.index-card,.journal-link-block,.broker-row,.broker-empty,.broker-criteria-panel,.broker-list-panel,.support-faq-panel,.support-contact,.community-spaces,.community-featured-card,.community-tile,.community-cta,.future-principle,.intelligence-boundaries article,.premium-track-status,.premium-lab-form,.premium-assessment-form,.certificate-mock,.result-card,.principle,.example-callout,.competency-check-block,.result-stats,.mastery-row,.progress-stat,.next-step-panel,.practice-proof-row,.practice-proof-receipt,.journey-future-note,.library-entry){
+  border-color:var(--dda-aurora-edge);
+  background:linear-gradient(142deg,rgba(20,43,68,.79),rgba(8,19,34,.86));
+  box-shadow:0 18px 44px rgba(0,0,0,.22),0 0 0 1px rgba(33,125,234,.035) inset,0 1px rgba(255,255,255,.045) inset;
+}
+#path .journey-current,#path .journey-future-note{
+  border-color:var(--dda-aurora-edge);
+  background:linear-gradient(142deg,rgba(20,43,68,.83),rgba(8,19,34,.9));
+  box-shadow:0 20px 48px rgba(0,0,0,.24),0 0 32px rgba(25,119,242,.075),0 1px rgba(255,255,255,.06) inset;
+}
+#path .journey-current{color:var(--dda-elite-ink)}
+#path .journey-current :is(h2,p,small,strong,span){color:inherit}
+
+@supports(backdrop-filter:blur(1px)){
+  .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.terminal-aperture,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.resource-reader,.landing-plan-card,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-faq-panel,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form,.journey-future-note){
+    backdrop-filter:blur(10px) saturate(118%);
+  }
+  #path .journey-current{backdrop-filter:blur(10px) saturate(118%)}
+}
+
+/* DDA's Aperture: blue instrument light, gold proof glints, reflected desk pool. */
+#landing .landing-aperture{
+  isolation:isolate;
+  border-color:rgba(93,173,255,.34);
+  background-color:#081321;
+  box-shadow:0 32px 82px rgba(0,0,0,.38),0 0 58px rgba(18,113,244,.16),0 0 0 1px rgba(224,203,155,.055) inset;
+}
+#landing .landing-aperture .photo-scrim{
+  background:
+    radial-gradient(ellipse 34% 30% at 17% 72%,rgba(34,132,255,.29),transparent 78%),
+    radial-gradient(ellipse 38% 28% at 78% 48%,rgba(10,157,242,.20),transparent 78%),
+    linear-gradient(180deg,rgba(6,13,23,.12),rgba(6,13,23,.34) 42%,rgba(6,13,23,.88));
+}
+#landing .landing-device-stage{animation:dda-aperture-float 9s cubic-bezier(.45,0,.55,1) infinite;}
+#landing .landing-device-stage::before{
+  content:"";position:absolute;z-index:0;inset:20% 3% 1%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse at 52% 54%,rgba(24,125,255,.42),rgba(29,116,219,.19) 35%,rgba(33,175,255,.08) 54%,transparent 74%);
+  filter:blur(24px);transform:translateZ(-24px);animation:dda-desk-reflection 7.5s ease-in-out infinite;
+}
+#landing .landing-device-laptop{z-index:2;filter:drop-shadow(0 20px 24px rgba(0,0,0,.38)) drop-shadow(0 0 18px rgba(35,135,255,.16));}
+#landing .landing-device-phone{z-index:3;box-shadow:0 20px 38px rgba(0,0,0,.42),0 0 22px rgba(39,144,255,.14),inset 0 1px rgba(255,255,255,.16);}
+#landing .landing-device-caption{z-index:4;color:rgba(166,205,255,.9);text-shadow:0 0 16px rgba(49,145,255,.35)}
+#landing .landing-3d-scene{opacity:.34;filter:drop-shadow(0 0 20px rgba(19,133,255,.22));mix-blend-mode:screen}
+#landing .landing-3d-orbit{border-color:rgba(75,168,255,.32);box-shadow:0 0 18px rgba(26,129,255,.12)}
+#landing .landing-3d-core{box-shadow:0 0 0 1px rgba(89,185,255,.32),0 0 34px rgba(23,132,255,.28),inset 0 0 22px rgba(56,154,255,.14)}
+#landing .landing-3d-node{border-color:rgba(95,176,255,.32);background:rgba(8,22,39,.84);color:#b8ddff;box-shadow:0 0 20px rgba(21,125,244,.14)}
+#landing .landing-device-candles{filter:drop-shadow(0 0 5px rgba(52,163,255,.2))}
+
+@keyframes dda-aperture-float{
+  0%,100%{transform:translate3d(0,0,0) rotateX(0deg)}
+  50%{transform:translate3d(0,-5px,0) rotateX(.55deg)}
+}
+@keyframes dda-desk-reflection{
+  0%,100%{opacity:.66;transform:translate3d(-1%,0,-24px) scale(.97)}
+  50%{opacity:1;transform:translate3d(1%,-2px,-24px) scale(1.03)}
+}
+@keyframes dda-reveal{
+  from{opacity:0;transform:translateY(8px) perspective(900px) rotateX(-.8deg)}
+  to{opacity:1;transform:translateY(0) perspective(900px) rotateX(0deg)}
+}
+
+/* The DDA proof thread catches light only on real active/confirmed states. */
+#progress .mastery-row-focused[data-proof-state="confirmed"] .mastery-level,
+#progress .proof-timeline .done .proof-dot,
+:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22) .lesson-loop li.now .loop-bead,
+.terminal-thread-bead.is-active{
+  filter:drop-shadow(0 0 8px rgba(35,145,255,.34));
+}
+#progress .mastery-row-focused[data-proof-state="confirmed"]{box-shadow:0 18px 46px rgba(0,0,0,.2),0 0 28px rgba(24,129,244,.1),0 1px rgba(255,255,255,.045) inset}
+#dashboard .analysis-terminal-tools{border-color:rgba(79,157,255,.22);background:rgba(7,17,30,.86);box-shadow:0 12px 34px rgba(0,0,0,.26),0 0 24px rgba(18,119,233,.08)}
+#dashboard .analysis-chart-shell{box-shadow:0 18px 44px rgba(0,0,0,.28),0 0 28px rgba(18,119,233,.08),0 0 0 1px rgba(91,169,255,.08)}
+#dashboard .terminal-tool.active{border-color:rgba(62,157,255,.44);background:linear-gradient(145deg,rgba(27,119,224,.2),rgba(12,57,103,.17));color:#9fd3ff;box-shadow:0 0 20px rgba(24,132,255,.16),inset 0 0 0 1px rgba(101,184,255,.1)}
+
+/* Blue-light CTAs are reserved for genuine actions; DDA gold remains the proof accent. */
+.primary-action,.public-start,.landing-mobile-cta button,#landing .landing-actions .primary-action,#landing .landing-final-cta .primary-action{
+  border:1px solid rgba(113,194,255,.58);
+  background:linear-gradient(112deg,#1269ef 0%,#198bff 48%,#39c7f4 100%);
+  color:#fff;
+  box-shadow:0 10px 28px rgba(9,99,234,.27),0 0 24px rgba(28,142,255,.18),inset 0 1px rgba(255,255,255,.24);
+  text-shadow:0 1px 5px rgba(4,28,69,.28);
+  transition:transform .22s ease,box-shadow .22s ease,filter .22s ease,border-color .22s ease;
+}
+.public-start{border-radius:999px}
+
+/* Interactive depth is restrained, opt-in to hover hardware, and never tilts controls. */
+.view.active :is(.journey-current,.landing-market-card,.landing-plan-card,.plan-card,.journal-entry-card,.resource-feature,.broker-row,.community-tile,.chevron-row){
+  transform-style:preserve-3d;
+  transition:transform .28s cubic-bezier(.2,.72,.24,1),border-color .28s ease,box-shadow .28s ease,background .28s ease;
+}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  .view.active :is(.journey-current,.landing-market-card,.landing-plan-card,.plan-card,.journal-entry-card,.resource-feature,.broker-row,.community-tile,.chevron-row):hover{
+    transform:translateY(-3px) perspective(1000px) rotateX(.45deg);
+    border-color:rgba(82,171,255,.42);
+    box-shadow:0 22px 48px rgba(0,0,0,.28),0 0 26px rgba(20,128,244,.13),0 1px rgba(255,255,255,.07) inset;
+  }
+  .primary-action:hover:not(:disabled),.public-start:hover:not(:disabled),.landing-mobile-cta button:hover:not(:disabled),#landing .landing-actions .primary-action:hover:not(:disabled),#landing .landing-final-cta .primary-action:hover:not(:disabled){
+    transform:translateY(-2px);
+    border-color:rgba(154,218,255,.82);
+    box-shadow:0 14px 34px rgba(9,99,234,.38),0 0 34px rgba(28,142,255,.28),inset 0 1px rgba(255,255,255,.32);
+    filter:saturate(1.12) brightness(1.04);
+  }
+}
+
+/* Keep the glass readable and inexpensive on phones, data-saver, and transparency-sensitive setups. */
+@media(max-width:700px){
+  :is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile).view{background-attachment:scroll}
+  .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form){background-color:rgba(9,21,36,.91)}
+  #path .journey-current{background-color:rgba(9,21,36,.93)}
+  #landing .landing-device-stage{animation-duration:12s}
+}
+@media(prefers-reduced-transparency:reduce){
+  .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.resource-feature,.plan-card,.market-zone,.broker-row,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form),#path .journey-current{backdrop-filter:none!important;background-color:#0a1424}
+}
+body.low-data :is(#landing .landing-device-stage,#landing .landing-device-stage::before){animation:none!important}
+body.low-data .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.resource-feature,.plan-card,.market-zone,.broker-row,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form){backdrop-filter:none!important}
+
+@media(prefers-reduced-motion:reduce){
+  #landing .landing-device-stage,#landing .landing-device-stage::before{animation:none!important}
+  #landing .landing-aperture,#landing .landing-device-stage,#landing .landing-device-laptop,#landing .landing-device-phone{transition:none!important}
+  .view.active :is(.journey-current,.landing-market-card,.landing-plan-card,.plan-card,.journal-entry-card,.resource-feature,.broker-row,.community-tile,.chevron-row){transition:none!important;transform:none!important}
+  .primary-action,.public-start,.landing-mobile-cta button{transition:none!important}
+}
+
+
+/* Landing modules echo the DDA proof-thread, not a stock four-card SaaS template. */
+#landing .landing-free-grid article,
+#landing .product-index article,
+#landing .proof-practice-demo,
+#landing .proof-measure,
+#landing .landing-plan-card,
+#landing .landing-domain-groups article:not(.landing-market-group),
+#landing .landing-future-grid article,
+#landing .landing-market-card,
+#landing .product-window,
+#landing .experience-flow li{
+  border:1px solid var(--dda-aurora-edge);
+  border-radius:14px;
+  background:linear-gradient(145deg,rgba(18,42,69,.78),rgba(8,19,34,.88));
+  box-shadow:0 16px 38px rgba(0,0,0,.2),0 0 24px rgba(22,126,245,.07),inset 0 1px rgba(255,255,255,.05);
+}
+#landing .experience-flow li.is-active{border-color:rgba(65,162,255,.44);background:linear-gradient(145deg,rgba(23,71,117,.66),rgba(9,22,39,.88));box-shadow:0 0 28px rgba(24,128,244,.12),inset 0 1px rgba(255,255,255,.08)}
+#landing .landing-market-card{backdrop-filter:blur(8px) saturate(120%)}
+#landing .landing-market-card:hover,#landing .landing-market-card:focus-visible{border-color:rgba(92,184,255,.65);box-shadow:0 16px 34px rgba(0,0,0,.24),0 0 28px rgba(22,126,245,.18),inset 0 1px rgba(255,255,255,.08)}
+#landing .landing-free-grid article:hover,#landing .product-index article:hover,#landing .landing-future-grid article:hover{border-color:rgba(92,184,255,.4);box-shadow:0 18px 40px rgba(0,0,0,.24),0 0 24px rgba(22,126,245,.12),inset 0 1px rgba(255,255,255,.07)}
+#landing .product-window{border-color:rgba(92,184,255,.3);box-shadow:0 24px 58px rgba(0,0,0,.34),0 0 36px rgba(22,126,245,.14),inset 0 1px rgba(255,255,255,.07)}
+@media(max-width:700px),(prefers-reduced-transparency:reduce){
+  #landing .landing-market-card{backdrop-filter:none;background-color:rgba(8,19,34,.92)}
+}
+@media(prefers-reduced-motion:reduce){
+  #landing .landing-free-grid article,#landing .product-index article,#landing .landing-future-grid article{transition:none!important}
+}
+
+
+/* Mobile sheets/tooltips use viewport-fixed positioning; glass blur would create a containing block. */
+@media(max-width:700px){
+  .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.terminal-aperture,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.resource-reader,.landing-plan-card,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-faq-panel,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form,.landing-market-card){backdrop-filter:none!important}
+  #path .journey-current{backdrop-filter:none!important}
+}
+body.low-data .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.terminal-aperture,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.resource-reader,.landing-plan-card,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-faq-panel,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form,.landing-market-card){backdrop-filter:none!important}
+body.low-data #path .journey-current{backdrop-filter:none!important}
+
+/* Explicit pseudo-element target: conservative selector support for data-saver devices. */
+body.low-data #landing .landing-device-stage{animation:none!important}
+body.low-data #landing .landing-device-stage::before{animation:none!important}
