@@ -1068,7 +1068,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     for (const surface of theme.surfaces) {
       assert.ok(surface.luminanceCeiling < 150, `${surface.selector} must not regress to a light/cream surface (${surface.color})`);
     }
-    assert.match(theme.progressPhotoFilter, /saturate\(0\.45\)/, 'the Progress poster stays atmospheric instead of visually overpowering the work surface');
+    assert.match(theme.progressPhotoFilter, /saturate\(0\.68\)/, 'the Progress poster keeps an atmospheric feel while DDA color remains visible');
     await page.locator('.nav-item[data-scroll-to="analysis-terminal"]').click();
     await page.waitForFunction(() => {
       const chart = document.querySelector('#terminal-chart')?.getBoundingClientRect();
