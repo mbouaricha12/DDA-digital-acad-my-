@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: dda-academy-bff
+    runtime: node
+    rootDir: bff
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /v1/security/csrf
+    autoDeploy: true
+    envVars:
+      - key: SUPABASE_URL
+        value: https://vcvrjogdhdakrwmemoxl.supabase.co
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SESSION_ENCRYPTION_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: BFF_COOKIE_SECURE
+        value: "true"
+      - key: EMAIL_REDIRECT_TO
+        sync: false
+      - key: SESSION_IDLE_MS
+        value: "43200000"
+      - key: SESSION_ABSOLUTE_MS
+        value: "2592000000"
