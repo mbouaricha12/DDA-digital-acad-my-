@@ -2026,3 +2026,99 @@ body.low-data #path .journey-current{backdrop-filter:none!important}
 /* Explicit pseudo-element target: conservative selector support for data-saver devices. */
 body.low-data #landing .landing-device-stage{animation:none!important}
 body.low-data #landing .landing-device-stage::before{animation:none!important}
+
+
+/* ======================================================================
+   DDA MATERIAL PASS — institutional depth, warmer brass, restrained light.
+   This is a surface layer only: routes, components and interaction contracts
+   remain unchanged.
+   ====================================================================== */
+:root{
+  --dda-material-ink:#050b14;
+  --dda-material-deep:#07111e;
+  --dda-material-mid:#0b1b2d;
+  --dda-material-blue:#2e8cff;
+  --dda-material-cyan:#55c9d0;
+  --dda-material-brass:#d8ae61;
+  --dda-material-brass-soft:#f0cf8a;
+  --dda-material-line:rgba(178,205,229,.14);
+  --dda-material-grain:rgba(199,219,237,.035);
+}
+
+/* A quiet paper-like grain replaces the flat SaaS canvas without adding assets. */
+:is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile).view{
+  background-color:var(--dda-material-ink)!important;
+  background-image:
+    radial-gradient(ellipse 58% 34% at 92% 0%,rgba(46,140,255,.15),transparent 72%),
+    radial-gradient(ellipse 44% 30% at 3% 58%,rgba(38,181,184,.085),transparent 73%),
+    radial-gradient(ellipse 42% 28% at 78% 100%,rgba(216,174,97,.07),transparent 72%),
+    repeating-linear-gradient(118deg,transparent 0 23px,rgba(187,214,233,.018) 24px,transparent 25px 49px),
+    linear-gradient(135deg,var(--dda-material-ink),var(--dda-material-deep) 52%,#081525)!important;
+  background-size:auto,auto,auto,auto,100% 100%;
+}
+
+/* Warm brass is reserved for trust, status, and authored progress. */
+.eyebrow.gold,.brand-mark,.path-number,.lesson-index,.resource-type,
+.public-header-mark,.free-number,.domain-label,.future-label,
+#landing .method-index,#landing .landing-coming-note span{color:var(--dda-material-brass-soft)}
+
+.sidebar,.topbar,.prototype-banner,.public-header{
+  background-image:
+    linear-gradient(120deg,rgba(9,24,40,.98),rgba(4,11,20,.96)),
+    repeating-linear-gradient(135deg,transparent 0 18px,var(--dda-material-grain) 19px,transparent 20px 39px)!important;
+  border-color:var(--dda-material-line)!important;
+}
+.sidebar{box-shadow:12px 0 40px rgba(0,0,0,.12)}
+.topbar,.public-header{box-shadow:0 8px 28px rgba(0,0,0,.1)}
+
+/* Shared surfaces gain a bespoke mineral/glass texture instead of a single fill. */
+.view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.terminal-aperture,.terminal-mi,.terminal-two,.terminal-family,.journal-panel,.journal-composer,.journal-entry-card,.journal-empty,.journal-source-context,.weekly-review-evidence,.weekly-review-locked,.resource-feature,.resource-reader,.library-shelf,.landing-plan-card,.plan-card,.membership-status-line,.membership-roadmap,.membership-guardrails,.family-panel,.market-zone,.market-brief,.brvm-panel,.market-calendar,.index-card,.journal-link-block,.broker-row,.broker-empty,.broker-criteria-panel,.broker-list-panel,.support-faq-panel,.support-contact,.community-spaces,.community-featured-card,.community-tile,.community-cta,.future-principle,.intelligence-boundaries article,.premium-track-status,.premium-lab-form,.premium-assessment-form,.certificate-mock,.result-card,.principle,.example-callout,.competency-check-block,.result-stats,.mastery-row,.progress-stat,.next-step-panel,.practice-proof-row,.practice-proof-receipt,.journey-future-note,.library-entry){
+  border-color:rgba(101,174,232,.24);
+  background-image:
+    linear-gradient(145deg,rgba(17,42,68,.91),rgba(7,18,31,.95)),
+    repeating-linear-gradient(130deg,transparent 0 17px,rgba(215,231,242,.025) 18px,transparent 19px 37px);
+  background-blend-mode:normal,screen;
+  box-shadow:0 22px 58px rgba(0,0,0,.24),0 0 0 1px rgba(216,174,97,.035) inset,0 1px rgba(255,255,255,.08) inset;
+}
+
+#landing .landing-aperture{
+  border-color:rgba(216,174,97,.36);
+  background-image:
+    linear-gradient(145deg,rgba(7,20,35,.5),rgba(7,14,25,.2)),
+    repeating-linear-gradient(120deg,transparent 0 22px,rgba(240,207,138,.035) 23px,transparent 24px 48px);
+  box-shadow:0 34px 92px rgba(0,0,0,.46),0 0 64px rgba(46,140,255,.14),0 0 0 1px rgba(240,207,138,.08) inset;
+}
+#landing .landing-editorial-shell{position:relative}
+#landing .landing-editorial-shell:before{
+  content:"";position:absolute;z-index:-1;top:8%;right:9%;width:28%;height:36%;pointer-events:none;
+  background:radial-gradient(ellipse,rgba(46,140,255,.16),transparent 68%);
+  filter:blur(18px);
+}
+#landing .landing-masthead{border-bottom-color:rgba(216,174,97,.2)}
+#landing .landing-actions .primary-action,#landing .landing-final-cta .primary-action,.public-start{
+  background:linear-gradient(112deg,#174fae 0%,#2e8cff 54%,#4cc3c4 100%);
+  border-color:rgba(240,207,138,.42);
+  box-shadow:0 14px 34px rgba(18,91,205,.28),0 0 24px rgba(46,140,255,.17),inset 0 1px rgba(255,255,255,.28);
+}
+#landing .landing-free-grid article,#landing .landing-domain-groups article,#landing .landing-future-grid article,#landing .landing-plan-card{
+  border-color:rgba(216,174,97,.2);
+  background-image:linear-gradient(145deg,rgba(20,45,71,.72),rgba(7,18,31,.92)),repeating-linear-gradient(135deg,transparent 0 18px,rgba(240,207,138,.022) 19px,transparent 20px 40px);
+}
+#landing .landing-free-grid article:hover,#landing .landing-domain-groups article:hover,#landing .landing-future-grid article:hover,#landing .landing-plan-card:hover{border-color:rgba(240,207,138,.46)}
+#landing .landing-domains,#landing .landing-future,#landing .landing-free{border-top-color:rgba(216,174,97,.16)}
+#landing .landing-future{background-image:linear-gradient(145deg,rgba(17,40,64,.66),rgba(4,10,18,.86)),repeating-linear-gradient(118deg,transparent 0 24px,rgba(216,174,97,.025) 25px,transparent 26px 52px)}
+.public-footer{background-image:linear-gradient(145deg,#071321,#03070e),repeating-linear-gradient(135deg,transparent 0 18px,rgba(216,174,97,.025) 19px,transparent 20px 40px)!important}
+.public-footer-bottom{border-top-color:rgba(216,174,97,.18)}
+
+@media(max-width:700px){
+  :is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile).view{background-attachment:scroll!important}
+  .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form){box-shadow:0 14px 32px rgba(0,0,0,.2),0 0 0 1px rgba(216,174,97,.025) inset}
+}
+@media(prefers-reduced-transparency:reduce){
+  .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form){background-image:linear-gradient(145deg,#112a44,#07121f)!important}
+}
+
+/* Contract-safe base: the optical texture sits above the canonical Deep Navy canvas. */
+#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#profile.view{
+  background-color:#060d17!important;
+}
