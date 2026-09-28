@@ -165,6 +165,12 @@ function bindViewButton(button) {
       if (observation) saveState({ terminal: { ...getTerminalState(), observation: observation.value.trim() } });
     }
     showView(button.dataset.view);
+    if (button.dataset.scrollTo) {
+      requestAnimationFrame(() => document.getElementById(button.dataset.scrollTo)?.scrollIntoView({
+        behavior: prototypeState.preferences?.lowData ? 'auto' : 'smooth',
+        block: 'start'
+      }));
+    }
     if (button.dataset.terminalHandoff === 'true') openJournalComposer(null, button, terminalJournalDraft());
   });
 }
@@ -297,7 +303,7 @@ document.addEventListener('keydown', event => {
 
 const titles = {
   landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours',
-  progress: 'Progression', journal: 'Journal & Plan', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub',
+  progress: 'Progression', journal: 'Journal', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub',
   membership: 'DDA Premium', 'premium-track': 'Premium Track · P2', 'premium-lab': 'Premium Lab · Risk Plan', 'premium-assessment': 'Premium Assessment · Controlled Decision', support: 'Aide & support', profile: 'Mon profil', community: 'Communauté',
   practice: 'Pratique avancée', intelligence: 'Intelligence DDA',
   // Lesson screen titles are declared once, in LESSON_REGISTRY — never a
@@ -1380,7 +1386,7 @@ function renderTerminalLeadComplete() {
   const whyText = document.getElementById('terminal-lead-why-text');
   if (whyText) {
     whyText.textContent = journalEmpty
-      ? 'Proposé parce que tu as validé tout le curriculum disponible — ton Journal & Plan est encore vide, c’est la prochaine chose réelle à faire.'
+      ? 'Proposé parce que tu as validé tout le curriculum disponible — ton Journal est encore vide, c’est la prochaine chose réelle à faire.'
       : 'Proposé parce que tu as validé tout le curriculum disponible — Market Intelligence est une destination réelle pour continuer à observer les marchés.';
   }
   const primary = document.getElementById('lesson-primary-action');
@@ -1938,6 +1944,52 @@ function smartBackTarget() {
   return 'dashboard';
 }
 
+// Native-feeling in-app history. Only route IDs are stored in history.state;
+// learner data remains in the existing local/BFF stores and is never copied here.
+const DDA_APP_HISTORY_MARKER = '__ddaAppNav';
+const DDA_APP_HISTORY_VIEW = '__ddaAppView';
+const DDA_APP_HISTORY_INDEX = '__ddaAppIndex';
+let appHistoryInitialized = false;
+
+function isKnownAppView(id) {
+  return typeof id === 'string' && Boolean(document.getElementById(id)?.classList.contains('view'));
+}
+
+function getDdaHistoryState() {
+  const state = history.state;
+  return state && typeof state === 'object' && !Array.isArray(state) ? state : {};
+}
+
+function writeDdaHistory(viewId, mode = 'push') {
+  if (!isKnownAppView(viewId)) return;
+  const state = getDdaHistoryState();
+  const marked = state[DDA_APP_HISTORY_MARKER] === true
+    && Number.isInteger(state[DDA_APP_HISTORY_INDEX])
+    && state[DDA_APP_HISTORY_INDEX] >= 0;
+  const index = marked ? state[DDA_APP_HISTORY_INDEX] : 0;
+  const nextState = {
+    ...state,
+    [DDA_APP_HISTORY_MARKER]: true,
+    [DDA_APP_HISTORY_VIEW]: viewId,
+    [DDA_APP_HISTORY_INDEX]: index
+  };
+
+  if (!appHistoryInitialized || !marked) {
+    history.replaceState(nextState, '', `#${viewId}`);
+    appHistoryInitialized = true;
+    return;
+  }
+  if (mode === 'anchor') {
+    history.replaceState({ ...nextState, [DDA_APP_HISTORY_INDEX]: index + 1 }, '', `#${viewId}`);
+    return;
+  }
+  if (mode === 'push' && state[DDA_APP_HISTORY_VIEW] !== viewId) {
+    history.pushState({ ...nextState, [DDA_APP_HISTORY_INDEX]: index + 1 }, '', `#${viewId}`);
+    return;
+  }
+  history.replaceState(nextState, '', `#${viewId}`);
+}
+
 let gateTrigger = null;
 let pendingGatedView = null;
 
@@ -1974,8 +2026,16 @@ function closeGate() {
   if (gateTrigger) { gateTrigger.focus(); gateTrigger = null; }
 }
 
-function showView(id, recordEvent = true) {
-  if (id === 'back') id = smartBackTarget();
+function showView(id, recordEvent = true, historyMode = 'auto') {
+  if (id === 'back') {
+    const state = getDdaHistoryState();
+    if (state[DDA_APP_HISTORY_MARKER] === true && Number.isInteger(state[DDA_APP_HISTORY_INDEX]) && state[DDA_APP_HISTORY_INDEX] > 0) {
+      history.back();
+      return;
+    }
+    id = smartBackTarget();
+    if (historyMode === 'auto') historyMode = 'replace';
+  }
   const prerequisiteLessonId = LESSON_PREREQUISITE[id];
   if (prerequisiteLessonId && !DDALearning.getLessonProgress(prototypeState, prerequisiteLessonId).quizComplete) {
     showToast('Cette leçon se débloque après la validation de l’étape précédente.');
@@ -2021,7 +2081,8 @@ function showView(id, recordEvent = true) {
   document.body.classList.toggle('access-mode', id === 'access');
   syncLandingMobileCta();
   contextTitle.textContent = titles[id] || 'DDA';
-  history.replaceState(null, '', `#${id}`);
+  const navigationMode = historyMode === 'auto' ? (recordEvent ? 'push' : 'replace') : historyMode;
+  writeDdaHistory(id, navigationMode);
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (id !== currentView) {
     previousView = currentView;
@@ -2051,6 +2112,21 @@ function showView(id, recordEvent = true) {
     trackEvent('qualification_started', {});
   }
 }
+
+window.addEventListener('popstate', event => {
+  const viewId = event.state?.[DDA_APP_HISTORY_VIEW];
+  if (!isKnownAppView(viewId)) return;
+  appHistoryInitialized = true;
+  showView(viewId, true, 'pop');
+});
+
+// Keep hash links (including the DDA brand link and shared deep links) on the
+// same router/history path as buttons without adding a second route system.
+window.addEventListener('hashchange', () => {
+  const viewId = location.hash.slice(1);
+  if (!isKnownAppView(viewId) || viewId === currentView) return;
+  showView(viewId, true, 'anchor');
+});
 
 const resources = {
   checklist: { title: 'Checklist avant une décision', label: 'Guide · DDA Free', body: '<ol><li>Ai-je compris le contexte du marché ?</li><li>Mon scénario est-il écrit clairement ?</li><li>Où mon idée devient-elle invalide ?</li><li>Quel risque suis-je prêt à accepter ?</li><li>Est-ce une décision prévue ou impulsive ?</li><li>Puis-je justifier mon choix sans parler de gain ?</li></ol>' },
@@ -2707,6 +2783,11 @@ if (initialView && document.getElementById(initialView)) {
   currentView = initialView;
   showView(initialView);
 } else if (!prototypeState.user) showView('landing');
+
+if (!appHistoryInitialized) {
+  const activeViewId = document.querySelector('.view.active')?.id || 'dashboard';
+  writeDdaHistory(activeViewId, 'replace');
+}
 
 
 /* DDA Visual Identity V2 — progressive reveals for premium editorial rhythm.

@@ -287,3 +287,12 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 
 
 **Fiabilité CI :** le Product Gate révélait que `tests/smoke_app_boot.js` gardait jsdom ouvert après ses assertions et expirait au délai de 15 minutes. Le smoke ferme maintenant sa fenêtre dans `finally` (y compris en cas d'échec, sans masquer le code de sortie) ; validation locale : **25 contrôles réussis et processus terminé**.
+
+
+## Tranche — DDA Elite : harmonisation globale et navigation mobile (28 septembre 2026)
+
+**Statut : implémentée sur `feat/darius-analysis-terminal`, PR #94 ouverte — non fusionnée/non déployée.** La surcouche visuelle calme les surfaces des vues (Deep Navy `#060d17`, panneaux navy, or mesuré, champs sombres), clarifie les groupes de navigation Apprendre / Pratiquer / Mon travail / Explorer / Compte et expose le Terminal dans le Dashboard sans nouvelle route ni changement de garde. L'historique interne utilise History API pour Back/Forward mobile et le bouton Retour. Le Journal garde son onglet « Mon plan » comme action interne, tandis que les libellés « Journal & Plan » répétés sont harmonisés.
+
+**Corrections visuelles relevées :** l'héritage CSS du titre hero agrandissait « BRVM Composite » dans le mockup à 76,8 px ; la typo est explicitement ramenée à 8 px. Les notes de compétences futures sortent des surfaces crème et la photo Progression est désaturée/assombrie. Les courbes restent pédagogiques et synthétiques ; aucune donnée réelle ni statistique apprenant n'est inventée. Cache shell : `dda-shell-v20`.
+
+**Préservation :** aucun changement au BFF, Supabase, RLS, schéma, permissions métier, routes existantes, stockage local ou contenu des leçons. Validation : tous les contrats `tests/test_*.js`, syntaxe JavaScript, `git diff --check` et cohérence route/registre passent ; `tests/run.js` : **52 réussis, 0 échec**. Le contrôle route/registre vérifie 23 routes et 38 entrées. Compte rendu : `DDA_ELITE_UX_NAVIGATION_REVIEW_2026-09-28.md` ; captures desktop/mobile hors dépôt : `/home/ubuntu/dda-elite-preview/`.

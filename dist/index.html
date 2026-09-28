@@ -103,12 +103,15 @@
         <p class="nav-section-label">Apprendre</p>
         <button class="nav-item active" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Aujourd’hui</button>
         <button class="nav-item" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mon parcours</button>
-        <button class="nav-item" id="nav-current-lesson" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Leçon en cours</button>
+        <button class="nav-item" id="nav-current-lesson" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Leçon &amp; validation</button>
+        <p class="nav-section-label">Pratiquer</p>
+        <button class="nav-item" data-view="dashboard" data-scroll-to="analysis-terminal"><svg class="icon"><use href="#icon-chart"/></svg> Terminal d’analyse</button>
+        <button class="nav-item" data-view="practice"><svg class="icon"><use href="#icon-target"/></svg> Pratique avancée</button>
+        <p class="nav-section-label">Mon travail</p>
         <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
-        <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal &amp; Plan</button>
+        <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal</button>
         <p class="nav-section-label">Explorer</p>
         <button class="nav-item" data-view="community"><svg class="icon"><use href="#icon-users"/></svg> Communauté</button>
-        <button class="nav-item" data-view="practice"><svg class="icon"><use href="#icon-target"/></svg> Pratique avancée</button>
         <button class="nav-item" data-view="intelligence"><svg class="icon"><use href="#icon-compass"/></svg> Intelligence DDA</button>
         <button class="nav-item" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
         <button class="nav-item" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg> Marchés & BRVM</button>
@@ -150,19 +153,46 @@
               <button class="text-action landing-secondary" type="button" data-view="path">Explorer les parcours <span>↓</span></button>
             </div>
             <ul class="trust-list landing-trust">
-              <li><svg class="icon"><use href="#icon-target"/></svg> Une prochaine action claire</li>
-              <li><svg class="icon"><use href="#icon-check-circle"/></svg> Exercice + preuve de progression</li>
-              <li><svg class="icon"><use href="#icon-shield"/></svg> Zéro signal, zéro promesse de gain</li>
+              <li><svg class="icon"><use href="#icon-target"/></svg><span><strong>4 outils</strong> de lecture technique</span></li>
+              <li><svg class="icon"><use href="#icon-check-circle"/></svg><span>Progression fondée sur des preuves réelles</span></li>
+              <li><svg class="icon"><use href="#icon-shield"/></svg><span>Journal personnel, sans partage par défaut</span></li>
             </ul>
           </div>
 
-          <div class="dda-aperture landing-aperture" role="img" aria-label="Signature éditoriale DDA : apprendre, pratiquer, prouver sa progression">
+          <div class="dda-aperture landing-aperture" role="img" aria-label="Aperçu visuel DDA : Terminal d’analyse sur ordinateur et Journal de bord sur smartphone, avec données pédagogiques locales">
             <img class="photo-fill" src="images/photos/hero-market-woman.jpg" alt="" loading="eager" fetchpriority="high">
             <div class="photo-scrim"></div>
             <div class="aperture-grid" aria-hidden="true"></div>
             <div class="landing-aperture-top">
               <span class="aperture-kicker">THE DDA METHOD</span>
               <span class="landing-edition">PRIVATE ALPHA · 2026</span>
+            </div>
+            <div class="landing-device-stage" aria-hidden="true">
+              <div class="landing-device-laptop">
+                <div class="landing-laptop-screen">
+                  <div class="landing-device-topbar"><span>DDA / ANALYSIS</span><span><i></i> PÉDAGOGIQUE</span></div>
+                  <div class="landing-device-screen-body">
+                    <div class="landing-device-chart-head"><strong>BRVM Composite</strong><span>1D · Série locale</span></div>
+                    <svg class="landing-device-candles" viewBox="0 0 520 196" preserveAspectRatio="none" aria-hidden="true">
+                      <path class="device-chart-grid" d="M0 34H520M0 78H520M0 122H520M0 166H520M70 0V196M175 0V196M280 0V196M385 0V196M490 0V196"/>
+                      <g class="device-candle-muted"><path d="M35 48v72m-7-52h14v29H28zM88 58v62m-7-43h14v25H81zM141 42v84m-7-61h14v35h-14zM194 71v63m-7-43h14v25h-14zM247 52v70m-7-52h14v32h-14zM300 40v77m-7-57h14v32h-14zM353 63v76m-7-55h14v30h-14zM406 35v80m-7-60h14v34h-14zM459 49v74m-7-52h14v30h-14zM502 37v67m-7-49h14v26h-14z"/></g>
+                    </svg>
+                    <div class="landing-device-tools"><span>＋ Crosshair</span><span>Zone S/R</span><span>Tendance</span><span>Fibonacci</span></div>
+                  </div>
+                </div>
+                <div class="landing-laptop-base"></div>
+              </div>
+              <div class="landing-device-phone">
+                <div class="landing-phone-camera"></div>
+                <div class="landing-phone-screen">
+                  <span class="landing-phone-brand">DDA / JOURNAL</span>
+                  <strong>Mon observation</strong>
+                  <span class="landing-phone-market">BRVM Composite · pédagogique</span>
+                  <div class="landing-phone-note"><i></i><i></i><i></i></div>
+                  <span class="landing-phone-proof"><b></b> Conservé sur cet appareil</span>
+                </div>
+              </div>
+              <span class="landing-device-caption">APERÇU PRODUIT · SÉRIES SYNTHÉTIQUES</span>
             </div>
             <div class="landing-3d-scene" data-3d-scene="dda-orbit" aria-hidden="true">
               <div class="landing-3d-orbit landing-3d-orbit-outer"><i></i></div>
@@ -229,7 +259,7 @@
           <div class="landing-demo-grid product-index" aria-label="Les surfaces réelles de DDA">
             <article><span class="product-index-number">01</span><h3>Aujourd'hui</h3><p>Une prochaine action calculée depuis ta progression.</p></article>
             <article><span class="product-index-number">02</span><h3>Parcours</h3><p>Des modules avec un statut réel : à suivre, en cours ou validé.</p></article>
-            <article><span class="product-index-number">03</span><h3>Journal &amp; Plan</h3><p>Un espace pour documenter ton processus, pas un flux social.</p></article>
+            <article><span class="product-index-number">03</span><h3>Journal de bord</h3><p>Observations et plan de travail personnel, dans un espace privé.</p></article>
             <article><span class="product-index-number">04</span><h3>Progression</h3><p>Des exercices et quiz réellement validés, jamais une barre fictive.</p></article>
           </div>
         </section>
@@ -270,7 +300,25 @@
         <section class="landing-ecosystem" aria-labelledby="landing-ecosystem-title">
           <div class="ecosystem-copy"><p class="eyebrow gold">Born in Africa. Built for serious learners.</p><h2 id="landing-ecosystem-title">Une académie qui relie les marchés, les compétences et le contexte.</h2><p>Les fondations commencent ici. La vision s'élargit ensuite vers les marchés financiers, l'économie, l'analyse et les espaces d'apprentissage futurs.</p><div class="institution-proof"><span>ABIDJAN</span><i></i><span>AFRIQUE FRANCOPHONE</span><i></i><span>MONDE</span></div></div>
           <div class="landing-institution-photo ecosystem-photo" role="img" aria-label="Vision institutionnelle DDA en Afrique"><img class="photo-fill" src="images/photos/institution-gold-bull.jpg" alt="Environnement institutionnel africain associé à la vision DDA" loading="lazy"><div class="photo-scrim"></div><span class="photo-caption">Une lecture locale, une ambition internationale.</span></div>
-          <div class="landing-domains domain-rail"><div class="landing-section-head"><p class="eyebrow gold">Domaines en construction</p><h3>Une méthode qui peut s'étendre sans perdre sa rigueur.</h3></div><div class="landing-domain-groups"><article><p class="domain-label">Marchés financiers</p><div><span>Forex</span><span>Or</span><span>Indices</span><span>Actions</span></div></article><article><p class="domain-label">Économie &amp; finance</p><div><span>Inflation</span><span>Taux</span><span>PIB</span><span>Banques centrales</span></div></article><article><p class="domain-label">Compétences</p><div><span>Analyse</span><span>Risque</span><span>Psychologie</span><span>Journalisation</span></div></article></div></div>
+          <div class="landing-domains domain-rail">
+            <div class="landing-section-head"><p class="eyebrow gold">Marchés &amp; instruments pédagogiques</p><h3>Lire des structures de marché, sans les confondre avec des cotations en direct.</h3></div>
+            <p class="landing-market-intro">Un aperçu des univers étudiés dans DDA. Les mini-courbes sont illustratives et statiques; aucune source de marché réelle n’est connectée.</p>
+            <div class="landing-domain-groups">
+              <article class="landing-market-group">
+                <p class="domain-label">Explorer les marchés</p>
+                <div class="landing-market-cards">
+                  <button type="button" class="landing-market-card" data-view="markets" aria-label="Ouvrir l’aperçu pédagogique BRVM Composite"><span class="landing-market-card-head"><strong>BRVM Composite</strong><small>INDICE</small></span><svg class="landing-market-sparkline spark-brvm" viewBox="0 0 128 40" aria-hidden="true"><path d="M2 29 18 24 31 27 45 15 59 20 73 11 88 18 102 8 126 12"/></svg><span class="landing-market-card-foot"><small>Série locale · synthétique</small><b aria-hidden="true">↗</b></span></button>
+                  <button type="button" class="landing-market-card" data-view="markets" aria-label="Ouvrir l’aperçu pédagogique Forex EUR/USD"><span class="landing-market-card-head"><strong>Forex</strong><small>EUR/USD · PÉDAGO</small></span><svg class="landing-market-sparkline spark-forex" viewBox="0 0 128 40" aria-hidden="true"><path d="M2 15 17 19 31 11 46 23 61 18 76 26 91 14 106 20 126 10"/></svg><span class="landing-market-card-foot"><small>Exemple pédagogique</small><b aria-hidden="true">↗</b></span></button>
+                  <button type="button" class="landing-market-card" data-view="markets" aria-label="Ouvrir l’aperçu éditorial des actions"><span class="landing-market-card-head"><strong>Actions</strong><small>À VENIR</small></span><svg class="landing-market-sparkline spark-actions" viewBox="0 0 128 40" aria-hidden="true"><path d="M2 26 17 13 32 21 47 18 62 27 77 14 92 20 107 11 126 16"/></svg><span class="landing-market-card-foot"><small>Domaine en préparation</small><b aria-hidden="true">↗</b></span></button>
+                  <button type="button" class="landing-market-card" data-view="markets" aria-label="Ouvrir l’aperçu pédagogique des indices BRVM 30"><span class="landing-market-card-head"><strong>Indices</strong><small>BRVM 30</small></span><svg class="landing-market-sparkline spark-indices" viewBox="0 0 128 40" aria-hidden="true"><path d="M2 21 17 25 32 17 47 20 62 12 77 18 92 9 107 15 126 7"/></svg><span class="landing-market-card-foot"><small>Série locale · synthétique</small><b aria-hidden="true">↗</b></span></button>
+                  <button type="button" class="landing-market-card" data-view="markets" aria-label="Ouvrir l’aperçu éditorial des cryptoactifs"><span class="landing-market-card-head"><strong>Crypto</strong><small>À VENIR</small></span><svg class="landing-market-sparkline spark-crypto" viewBox="0 0 128 40" aria-hidden="true"><path d="M2 30 17 9 32 28 47 14 62 23 77 8 92 26 107 12 126 18"/></svg><span class="landing-market-card-foot"><small>Domaine en préparation</small><b aria-hidden="true">↗</b></span></button>
+                </div>
+                <p class="landing-market-disclosure">Les cartes ouvrent l’aperçu Market Intelligence aux apprenants; les visiteurs sont orientés vers l’accès DDA. Les tracés ne représentent ni prix, ni performance, ni signal.</p>
+              </article>
+              <article><p class="domain-label">Économie &amp; finance</p><div><span>Inflation</span><span>Taux</span><span>PIB</span><span>Banques centrales</span></div></article>
+              <article><p class="domain-label">Compétences</p><div><span>Analyse</span><span>Risque</span><span>Psychologie</span><span>Journalisation</span></div></article>
+            </div>
+          </div>
         </section>
 
         <section class="landing-future" aria-label="Vision future DDA"><div><p class="eyebrow gold">La suite, avec transparence</p><h2>DDA deviendra plus qu'un parcours. Elle deviendra un écosystème.</h2><p>Les prochaines briques viendront quand elles seront prêtes : experts, intelligence artificielle pédagogique, communauté et marketplace éducative.</p></div><div class="landing-future-grid future-editorial-grid"><article><span>À terme / 01</span><h3>DDA Experts</h3><p>Des professionnels qualifiés pourront proposer ateliers, formations et accompagnements.</p><button type="button" class="future-label" data-view="community">Devenir expert — bientôt <span>→</span></button></article><article><span>À terme / 02</span><h3>DDA AI</h3><p>Une aide pour comprendre une notion et choisir la prochaine étape — jamais pour prédire le marché.</p><button type="button" class="future-label" data-view="intelligence">Explorer la vision IA — bientôt <span>→</span></button></article></div></section>
@@ -396,9 +444,9 @@
           </div>
         </article>
 
-        <div class="terminal-divider"><span class="terminal-divider-label">Terminal</span><p>Ta vision complète : marchés, journal, compétences — au-delà de la prochaine étape.</p></div>
+        <div class="terminal-divider"><span class="terminal-divider-label">Terminal</span><p>Ta vision complète : marchés, journal, compétences — au-delà de la prochaine étape.</p><button type="button" class="text-action terminal-divider-go" data-view="dashboard" data-scroll-to="analysis-terminal">Explorer le Terminal <span>→</span></button></div>
 
-        <section class="analysis-terminal" aria-labelledby="analysis-terminal-title">
+        <section class="analysis-terminal" id="analysis-terminal" aria-labelledby="analysis-terminal-title">
           <div class="analysis-terminal-head">
             <div>
               <p class="eyebrow gold">Darius Analysis Terminal · P0.4</p>
@@ -431,32 +479,36 @@
 
           <div class="analysis-chart-workspace">
             <div class="analysis-terminal-tools" role="toolbar" aria-label="Outils du graphique">
-              <button type="button" class="terminal-tool active" data-terminal-tool="crosshair" aria-label="Curseur et crosshair" aria-pressed="true" title="Curseur et crosshair">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="3"/></svg><span class="terminal-tool-label">Curseur</span>
-              </button>
-              <button type="button" class="terminal-tool" data-terminal-tool="zone" aria-label="Tracer une zone Support / Résistance" aria-pressed="false" title="Zone Support / Résistance">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="2"/><path d="M4 9h16M4 15h16"/></svg><span class="terminal-tool-label">Zone S/R</span>
-              </button>
-              <button type="button" class="terminal-tool" data-terminal-tool="line" aria-label="Tracer une ligne de tendance" aria-pressed="false" title="Ligne de tendance">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 18 6-6 4 2 6-9"/><circle cx="4" cy="18" r="1.2"/><circle cx="20" cy="5" r="1.2"/></svg><span class="terminal-tool-label">Tendance</span>
-              </button>
-              <button type="button" class="terminal-tool" data-terminal-tool="fib" aria-label="Tracer les niveaux de Fibonacci" aria-pressed="false" title="Fibonacci">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14M5 10h14M5 14h14M5 19h14"/><circle cx="7" cy="5" r="1"/><circle cx="17" cy="19" r="1"/></svg><span class="terminal-tool-label">Fibo</span>
-              </button>
-              <span class="terminal-tool-divider" aria-hidden="true"></span>
-              <div class="terminal-zoom-dock" role="group" aria-label="Zoom du graphique">
-                <button type="button" class="terminal-icon-button" id="terminal-zoom-out" aria-label="Dézoomer">−</button>
-                <span class="terminal-zoom-value" id="terminal-zoom-value">1×</span>
-                <button type="button" class="terminal-icon-button" id="terminal-zoom-in" aria-label="Zoomer">+</button>
-                <input id="terminal-zoom" type="range" min="1" max="3" step="1" value="1" aria-label="Niveau de zoom">
+              <div class="terminal-tool-primary-group" role="group" aria-label="Outils d’analyse">
+                <button type="button" class="terminal-tool active" data-terminal-tool="crosshair" aria-label="Curseur et crosshair" aria-pressed="true" title="Curseur et crosshair">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="3"/></svg><span class="terminal-tool-label">Curseur</span>
+                </button>
+                <button type="button" class="terminal-tool" data-terminal-tool="zone" aria-label="Tracer une zone Support / Résistance" aria-pressed="false" title="Zone Support / Résistance">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="2"/><path d="M4 9h16M4 15h16"/></svg><span class="terminal-tool-label">Zone S/R</span>
+                </button>
+                <button type="button" class="terminal-tool" data-terminal-tool="line" aria-label="Tracer une ligne de tendance" aria-pressed="false" title="Ligne de tendance">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 18 6-6 4 2 6-9"/><circle cx="4" cy="18" r="1.2"/><circle cx="20" cy="5" r="1.2"/></svg><span class="terminal-tool-label">Tendance</span>
+                </button>
+                <button type="button" class="terminal-tool" data-terminal-tool="fib" aria-label="Tracer les niveaux de Fibonacci" aria-pressed="false" title="Fibonacci">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14M5 10h14M5 14h14M5 19h14"/><circle cx="7" cy="5" r="1"/><circle cx="17" cy="19" r="1"/></svg><span class="terminal-tool-label">Fibo</span>
+                </button>
               </div>
-              <div class="terminal-pan-controls" role="group" aria-label="Déplacer la fenêtre du graphique">
-                <button type="button" class="terminal-icon-button" id="terminal-pan-left" aria-label="Déplacer les séquences vers la gauche" title="Déplacer vers la gauche">←</button>
-                <button type="button" class="terminal-icon-button" id="terminal-pan-right" aria-label="Déplacer les séquences vers la droite" title="Déplacer vers la droite">→</button>
+              <div class="terminal-tool-utility-group" role="group" aria-label="Navigation et édition du graphique">
+                <div class="terminal-zoom-dock" role="group" aria-label="Zoom du graphique">
+                  <button type="button" class="terminal-icon-button" id="terminal-zoom-out" aria-label="Dézoomer" title="Dézoomer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+                  <span class="terminal-zoom-value" id="terminal-zoom-value">1×</span>
+                  <button type="button" class="terminal-icon-button" id="terminal-zoom-in" aria-label="Zoomer" title="Zoomer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+                  <input id="terminal-zoom" type="range" min="1" max="3" step="1" value="1" aria-label="Niveau de zoom">
+                </div>
+                <div class="terminal-pan-controls" role="group" aria-label="Déplacer la fenêtre du graphique">
+                  <button type="button" class="terminal-icon-button" id="terminal-pan-left" aria-label="Déplacer les séquences vers la gauche" title="Déplacer vers la gauche"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5-7 7 7 7M7 12h12"/></svg></button>
+                  <button type="button" class="terminal-icon-button" id="terminal-pan-right" aria-label="Déplacer les séquences vers la droite" title="Déplacer vers la droite"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 5 7 7-7 7M5 12h12"/></svg></button>
+                </div>
+                <div class="terminal-edit-controls" role="group" aria-label="Gérer les tracés">
+                  <button type="button" class="terminal-icon-button terminal-edit-action" id="terminal-undo-drawing" aria-label="Annuler le dernier tracé" title="Annuler le dernier tracé" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h9a6 6 0 0 1 0 12h-1"/></svg></button>
+                  <button type="button" class="terminal-icon-button terminal-edit-action" id="terminal-clear-drawings" aria-label="Effacer tous les tracés" title="Effacer tous les tracés" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
+                </div>
               </div>
-              <span class="terminal-tool-divider terminal-actions-divider" aria-hidden="true"></span>
-              <button type="button" class="terminal-icon-button terminal-edit-action" id="terminal-undo-drawing" aria-label="Annuler le dernier tracé" title="Annuler le dernier tracé" disabled>↶</button>
-              <button type="button" class="terminal-icon-button terminal-edit-action" id="terminal-clear-drawings" aria-label="Effacer tous les tracés" title="Effacer tous les tracés" disabled>⌫</button>
             </div>
 
             <div class="analysis-chart-frame">
@@ -490,7 +542,7 @@
             <div class="analysis-terminal-legend">
               <p class="eyebrow">Méthode DDA</p>
               <ol><li><b>Observer</b><span>Repère les bougies et la structure.</span></li><li><b>Manipuler</b><span>Zoome, déplace et annote.</span></li><li><b>Justifier</b><span>Conserve ton raisonnement dans le Journal.</span></li></ol>
-              <button type="button" class="text-action" data-view="journal" data-terminal-handoff="true" id="terminal-journal-handoff">Continuer dans Journal &amp; Plan <span>→</span></button>
+              <button type="button" class="text-action" data-view="journal" data-terminal-handoff="true" id="terminal-journal-handoff">Continuer dans le Journal <span>→</span></button>
             </div>
           </div>
         </section>
@@ -502,7 +554,7 @@
 
         <div class="terminal-two">
           <section aria-labelledby="terminal-journal-title">
-            <p class="eyebrow">Journal &amp; Plan</p>
+            <p class="eyebrow">Journal de bord</p>
             <h4 id="terminal-journal-title">Ton outil de travail</h4>
             <div class="terminal-journal-note" id="terminal-journal-note"></div>
             <button class="text-action" data-view="journal">Ouvrir ton Journal <span>→</span></button>
@@ -677,7 +729,7 @@
 
       <section class="view" id="journal" aria-labelledby="journal-title">
         <button class="back-link" data-view="back">← Retour</button>
-        <div class="section-intro"><p class="eyebrow gold">Journal &amp; Plan</p><h1 id="journal-title">Qu’avais-tu prévu ? Qu’as-tu fait ? Qu’en retiens-tu ?</h1><p>Un espace pour documenter ton processus de décision — jamais un signal, jamais un conseil d’achat ou de vente, jamais un chiffre de gain inventé. Conservé uniquement sur cet appareil.</p></div>
+        <div class="section-intro"><p class="eyebrow gold">Journal de bord</p><h1 id="journal-title">Qu’avais-tu prévu ? Qu’as-tu fait ? Qu’en retiens-tu ?</h1><p>Un espace pour documenter ton processus de décision — jamais un signal, jamais un conseil d’achat ou de vente, jamais un chiffre de gain inventé. Conservé uniquement sur cet appareil.</p></div>
 
         <div class="journal-tabs" role="tablist" aria-label="Sections du Journal">
           <button class="journal-tab active" id="journal-tab-entries" type="button" role="tab" aria-selected="true" data-journal-tab="entries">Journal</button>
@@ -977,7 +1029,7 @@
 
         <section class="market-zone market-zone-reflect">
           <p class="eyebrow gold zone-label">Réfléchir / documenter</p>
-          <div class="journal-link-block"><svg class="icon"><use href="#icon-journal"/></svg><p>Un mouvement de marché t’interpelle ? Documente ton observation avant d’agir.</p><button class="secondary-action" data-view="journal">Ouvrir Journal &amp; Plan <span>→</span></button></div>
+          <div class="journal-link-block"><svg class="icon"><use href="#icon-journal"/></svg><p>Un mouvement de marché t’interpelle ? Documente ton observation avant d’agir.</p><button class="secondary-action" data-view="journal">Ouvrir le Journal <span>→</span></button></div>
         </section>
       </section>
 
@@ -1158,7 +1210,7 @@
           <p class="eyebrow">Ce qui existe déjà</p>
           <article class="community-featured-card">
             <div class="community-featured-copy">
-              <h2 id="practice-featured-title">Ton Journal &amp; Plan</h2>
+              <h2 id="practice-featured-title">Ton Journal de bord</h2>
               <p>La base réelle sur laquelle ces outils s’appuieront : documenter chaque décision, une par une.</p>
               <button class="primary-action" data-view="journal">Ouvrir mon Journal <span>→</span></button>
             </div>

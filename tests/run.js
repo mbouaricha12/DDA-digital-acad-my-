@@ -1025,6 +1025,98 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('landing market cards preserve the existing visitor access gate', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+    assert.equal(await page.locator('.landing-market-card').count(), 5);
+    await page.locator('.landing-market-card').first().click();
+    await page.waitForFunction(() => document.querySelector('#access')?.classList.contains('active'));
+    assert.equal(await page.locator('#markets').evaluate(node => node.classList.contains('active')), false, 'anonymous visitors must not bypass the existing access gate');
+    assert.equal(await page.locator('#access').isVisible(), true, 'the existing signup/access view is the visitor destination');
+    await context.close();
+  });
+
+  await test('the Elite theme covers every route and remaining product surface', async () => {
+    const context = await freshContext(browser, { width: 1440, height: 1000 });
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#progress`);
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
+    const theme = await page.evaluate(() => {
+      const deepNavy = [6, 13, 23];
+      const views = [...document.querySelectorAll('.view')].map(node => ({
+        id: node.id,
+        color: getComputedStyle(node).backgroundColor
+      }));
+      const selectors = '.prototype-banner,.access-card,.principle,.example-callout,.result-card,.result-stats,.certificate-mock,.practice-proof-row,.brvm-panel,.plan-card,.premium-lab-form,.premium-assessment-form,.broker-row,.support-contact,.support-faq-panel,.community-tile,.profile-panel,.preference-panel,.journal-panel,.journal-composer,.resource-feature,.journey-future-note,.mastery-context-note,.gate-card,.toast,.storage-warning';
+      const surfaces = [...document.querySelectorAll(selectors)].map(node => {
+        const style = getComputedStyle(node);
+        const values = style.backgroundColor.match(/[\d.]+/g)?.map(Number) || [0, 0, 0, 0];
+        const alpha = values.length > 3 ? values[3] : 1;
+        const effective = values.slice(0, 3).map((channel, index) => channel * alpha + deepNavy[index] * (1 - alpha));
+        return { selector: node.id || node.className, color: style.backgroundColor, luminanceCeiling: Math.max(...effective) };
+      });
+      const progressPhotoFilter = getComputedStyle(document.querySelector('#progress .view-photo-band .photo-fill')).filter;
+      return { views, surfaces, progressPhotoFilter };
+    });
+    assert.ok(theme.views.length >= 24, `all app views must be audited (got ${theme.views.length})`);
+    for (const view of theme.views) {
+      assert.equal(view.color, 'rgb(6, 13, 23)', `${view.id} must use the resting Deep Navy canvas`);
+    }
+    assert.ok(theme.surfaces.length >= 20, `expected to inspect common page surfaces (got ${theme.surfaces.length})`);
+    for (const surface of theme.surfaces) {
+      assert.ok(surface.luminanceCeiling < 150, `${surface.selector} must not regress to a light/cream surface (${surface.color})`);
+    }
+    assert.match(theme.progressPhotoFilter, /saturate\(0\.45\)/, 'the Progress poster stays atmospheric instead of visually overpowering the work surface');
+    await page.locator('.nav-item[data-scroll-to="analysis-terminal"]').click();
+    await page.waitForFunction(() => {
+      const chart = document.querySelector('#terminal-chart')?.getBoundingClientRect();
+      return document.querySelector('.view.active')?.id === 'dashboard' && chart && chart.top >= 0 && chart.top < innerHeight;
+    });
+    assert.equal(await page.locator('.view.active').getAttribute('id'), 'dashboard', 'the desktop shortcut scrolls to the existing Terminal inside Dashboard');
+    await context.close();
+  });
+
+  await test('mobile Back, Forward and in-app Retour follow DDA screen history', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#dashboard`);
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'dashboard');
+
+    await page.locator('.mobile-nav button[data-view="path"]').click();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'path');
+    await page.locator('.mobile-nav button[data-view="progress"]').click();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
+
+    await page.goBack();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'path');
+    assert.equal(await page.evaluate(() => history.state?.__ddaAppView), 'path');
+    await page.goForward();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
+
+    await page.locator('.mobile-nav button[data-view="journal"]').click();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'journal');
+    await page.locator('#journal > .back-link[data-view="back"]').click();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
+    assert.equal(await page.evaluate(() => location.hash), '#progress', 'the in-app back button returns to the previous route');
+    await page.goForward();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'journal');
+    assert.equal(await page.evaluate(() => location.origin), new URL(BASE).origin, 'mobile Back/Forward stays in the DDA document');
+
+    await page.locator('.mobile-nav button[data-view="dashboard"]').click();
+    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'dashboard');
+    await page.locator('.terminal-divider-go').click();
+    await page.waitForFunction(() => {
+      const chart = document.getElementById('terminal-chart');
+      const rect = chart?.getBoundingClientRect();
+      return rect && rect.top >= 0 && rect.top < innerHeight;
+    });
+    assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'dashboard', 'Terminal shortcut keeps the existing Dashboard route');
+    await context.close();
+  });
+
   await test('#landing renders with no horizontal overflow at 360px, 390px and 1440px', async () => {
     for (const width of [360, 390, 1440]) {
       const context = await freshContext(browser, { width, height: 900 });
