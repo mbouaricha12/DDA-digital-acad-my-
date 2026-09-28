@@ -28,7 +28,7 @@ Ne jamais utiliser `*` dans `ALLOWED_ORIGINS`. La `SERVICE_ROLE_KEY` et la clé 
 1. Ouvrir Render → **New +** → **Blueprint**.
 2. Connecter le dépôt GitHub `mbouaricha12/DDA-digital-acad-my-`.
 3. Sélectionner le fichier `render.yaml` à la racine.
-4. Vérifier que le service est un **Web Service**, que `rootDir` vaut `bff` et que le health check est `/v1/security/csrf`.
+4. Vérifier que le service est un **Web Service**, que `rootDir` vaut `bff` et que le health check est `/healthz` (sans émission de cookie).
 5. Dans **Environment → Secret Files / Environment Variables**, renseigner les variables marquées `sync: false` :
    - `SUPABASE_PUBLISHABLE_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
@@ -88,7 +88,7 @@ railway up
 ```
 
 6. Générer un domaine Railway ou rattacher `api.example.dda.academy` via **Settings → Networking**.
-7. Vérifier que le service écoute le `PORT` injecté par Railway.
+7. Vérifier que le service écoute le `PORT` injecté par Railway et que `/healthz` répond `200` sans cookie.
 
 ## Validation post-déploiement
 
@@ -96,6 +96,7 @@ Remplacer `BFF_URL` par l'URL réelle du service :
 
 ```bash
 BFF_URL='https://api.example.dda.academy'
+curl -i "$BFF_URL/healthz"
 curl -i "$BFF_URL/v1/security/csrf"
 curl -i -X OPTIONS "$BFF_URL/v1/auth/login" \
   -H 'Origin: https://app.example.dda.academy' \
@@ -106,9 +107,11 @@ curl -i -X OPTIONS "$BFF_URL/v1/auth/login" \
 À vérifier avant de connecter le frontend :
 
 - `/v1/security/csrf` répond `204` et émet un cookie CSRF ;
+- `/healthz` répond `200` sans `Set-Cookie` ;
 - le preflight CORS autorise uniquement l'origine frontend ;
 - une requête sans `Origin` ou avec une mauvaise origine est rejetée ;
 - le serveur refuse de démarrer si un secret obligatoire manque ;
+- le serveur refuse les origines wildcard/non-HTTPS, un redirect e-mail hors allowlist et une clé de chiffrement qui ne décode pas en 32 octets ;
 - les logs ne contiennent aucune clé, cookie, mot de passe ou e-mail complet ;
 - `GET /v1/me` retourne `401` sans cookie de session ;
 - le parcours réel inscription → vérification → connexion est testé avec une adresse de test dédiée.

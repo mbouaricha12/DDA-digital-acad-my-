@@ -275,3 +275,14 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 ## Tranche — Intégration frontend progressive du BFF (28 septembre 2026)
 
 **Statut : UX IMPLÉMENTÉE — BFF non déployé.** `dist/bff-client.js` est chargé avant `app.js` et reste désactivé tant que `window.DDA_BFF_BASE_URL` est vide. Lorsqu’une URL est fournie par la configuration de déploiement, Access expose l’inscription avec mot de passe, la réponse d’anti-énumération, le traitement automatique des tokens `token_hash`/`token` de vérification, la connexion, la récupération de mot de passe, la restauration de session via `GET /v1/me` et la synchronisation du nom via `PATCH /v1/me`. Les mutations demandent le CSRF via `/v1/security/csrf`. Sans URL ou sans session distante, le prototype conserve exactement son parcours localStorage et ses comportements P2. Aucun secret serveur n’est livré au navigateur. Validation : `tests/test_bff_frontend_integration.js`, contrats BFF/P3 et suite E2E complète — 49 scénarios passants.
+
+
+## Addendum — P3.4 durcissement de la préparation au déploiement BFF (28 septembre 2026)
+
+**Statut : corrigé et validé localement; aucun déploiement externe effectué.** Les manifests Render/Railway utilisent maintenant `/healthz`, endpoint sans effet secondaire qui ne crée pas de cookie. Le démarrage refuse une configuration incomplète, des cookies `__Host-` non `Secure`, une clé de chiffrement qui ne décode pas en 32 octets, des origines non exactes/non HTTPS (localhost HTTP toléré pour le développement), une URL Supabase non HTTPS ou un redirect e-mail hors allowlist. Les payloads JSON mal formés/non-objet et les contenus au mauvais `Content-Type` reçoivent une erreur client générique (400/415) au lieu d’un 500; les logs de requête n’incluent plus `error.message`. L’exemple local garde les cookies `Secure`.
+
+**Validation :** tests BFF enrichis pour la configuration, `/healthz` sans `Set-Cookie`, JSON invalide, Content-Type incorrect, cookies `Secure` et refus de paramètres dangereux; contrats BFF frontend, syntaxe JavaScript et `git diff --check`.
+
+**Limites inchangées :** BFF toujours non déployé et non activé sur le frontend. La limitation de débit distribuée, l’endpoint de confirmation de récupération, export/suppression, restauration éprouvée, revue DPA/région et les secrets/domaine contrôlés restent requis avant production; aucune donnée ou identité réelle n’a été utilisée.
+
+**Fiabilité du harness :** `tests/smoke_app_boot.js` ferme désormais la fenêtre jsdom après ses 25 vérifications, ce qui évite que des timers d'environnement maintiennent le processus CI ouvert après le résumé.

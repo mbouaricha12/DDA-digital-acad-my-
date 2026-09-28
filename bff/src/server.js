@@ -1,13 +1,14 @@
 'use strict';
 
 const http = require('node:http');
-const { createBff, configFromEnv } = require('./app');
+const { createBff, configFromEnv, validateRuntimeConfig } = require('./app');
 const { SupabaseAuthAdapter } = require('./supabase-auth');
 const { PostgrestSessionStore } = require('./session-store');
 
 const config = configFromEnv();
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_PUBLISHABLE_KEY || !process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.SESSION_ENCRYPTION_KEY) {
-  console.error('BFF startup refused: set SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SERVICE_ROLE_KEY and SESSION_ENCRYPTION_KEY.');
+const configIssues = validateRuntimeConfig(config);
+if (configIssues.length) {
+  console.error(`BFF startup refused: ${configIssues.join('; ')}.`);
   process.exit(1);
 }
 

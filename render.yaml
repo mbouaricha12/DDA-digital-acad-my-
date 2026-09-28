@@ -5,7 +5,7 @@ services:
     rootDir: bff
     buildCommand: npm install --omit=dev
     startCommand: npm start
-    healthCheckPath: /v1/security/csrf
+    healthCheckPath: /healthz
     autoDeploy: true
     envVars:
       - key: SUPABASE_URL
