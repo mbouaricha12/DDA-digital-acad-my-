@@ -446,7 +446,7 @@
           </div>
         </article>
 
-        <div class="terminal-divider"><span class="terminal-divider-label">Terminal</span><p>Ta vision complète : marchés, journal, compétences — au-delà de la prochaine étape.</p><button type="button" class="text-action terminal-divider-go" data-view="dashboard" data-scroll-to="analysis-terminal">Explorer le Terminal <span>→</span></button></div>
+        <div class="terminal-divider"><span class="terminal-divider-label">Pratique guidée</span><p>Après ta prochaine leçon, manipule une série pédagogique et transforme ton observation en preuve.</p><button type="button" class="text-action terminal-divider-go" data-view="dashboard" data-scroll-to="terminal-practice-mission">Aller à la mission guidée <span>→</span></button></div>
 
         <section class="analysis-terminal" id="analysis-terminal" aria-labelledby="analysis-terminal-title">
           <div class="analysis-terminal-head">
@@ -549,6 +549,13 @@
           </div>
         </section>
 
+        <section class="dashboard-supporting" aria-labelledby="dashboard-supporting-title">
+          <div class="dashboard-supporting-intro">
+            <p class="eyebrow gold">Repères secondaires</p>
+            <h2 id="dashboard-supporting-title">Le reste de ton espace, au bon moment.</h2>
+            <p>Ces aperçus ne remplacent pas leurs pages dédiées. Ils t’aident à savoir quand ouvrir le Journal, le contexte de marché, les outils et les espaces encore à venir.</p>
+          </div>
+
         <section class="terminal-mi" aria-labelledby="terminal-mi-title">
           <div class="terminal-mi-head"><div><p class="eyebrow">Intelligence marché</p><h3 id="terminal-mi-title">Ce qui bouge aujourd’hui</h3></div><button class="text-action" data-view="markets">Marchés &amp; BRVM <span>→</span></button></div>
           <div class="terminal-mi-row" id="terminal-mi-row"></div>
@@ -598,6 +605,7 @@
           <button data-view="resources" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-book"/></svg></span><span class="chevron-row-body"><strong>Ressources</strong><small>Guides et outils</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
           <button data-view="support" class="chevron-row"><span class="chevron-row-icon"><svg class="icon"><use href="#icon-help"/></svg></span><span class="chevron-row-body"><strong>Centre d’aide</strong><small>Trouver une réponse</small></span><svg class="icon chevron-row-arrow"><use href="#icon-chevron-right"/></svg></button>
         </div>
+        </section>
       </section>
 
       <section class="view" id="path" aria-labelledby="path-title">
@@ -608,6 +616,11 @@
         </div>
         <div class="section-intro"><p class="eyebrow gold">Darius Free</p><h1 id="path-title">Ton parcours commence par les fondations.</h1><p>Chaque étape se débloque après une vraie validation, jamais après une simple ouverture.</p></div>
         <div class="page-mission" data-mission="path"><div><p class="eyebrow">Mission de cette page</p><strong>Choisir une seule prochaine validation.</strong><span>Le Parcours ordonne les leçons ; il ne remplace ni la pratique ni le Journal.</span></div><button class="text-action" data-view="lesson">Continuer la prochaine leçon <span>→</span></button></div>
+        <div class="path-context-grid" aria-label="Comment lire ton parcours">
+          <article><span class="path-context-index">01</span><h2>Un ordre, pas une course</h2><p>Les modules suivent une progression pédagogique. Un module verrouillé indique un prérequis à construire, pas un échec.</p></article>
+          <article><span class="path-context-index">02</span><h2>Une validation par étape</h2><p>Une leçon devient utile quand son exercice et son quiz confirment ce que tu as compris et appliqué.</p></article>
+          <article><span class="path-context-index">03</span><h2>Un horizon proche</h2><p>Commence par la prochaine validation réelle. Les modules à venir restent visibles sans inventer de contenu.</p></article>
+        </div>
         <div class="journey" id="path-list"></div>
       </section>
 
@@ -868,6 +881,7 @@
                 <span class="resource-type">Guide · DDA Free</span>
                 <h2>Checklist avant une décision</h2>
                 <p>Six vérifications simples pour éviter la précipitation et protéger ton processus.</p>
+                <ul class="resource-meta" aria-label="Métadonnées de la checklist"><li>5 min</li><li>Débutant</li><li>Avant une pratique</li></ul>
                 <button class="secondary-action dark-action resource-open" data-resource="checklist">Consulter le guide</button>
               </div>
             </li>
@@ -877,6 +891,7 @@
                 <span class="resource-type">Glossaire · DDA Free</span>
                 <h2>Les mots essentiels du marché</h2>
                 <p>Acheteur, vendeur, actif, liquidité et risque expliqués sans jargon.</p>
+                <ul class="resource-meta" aria-label="Métadonnées du glossaire"><li>8 min</li><li>Fondations</li><li>À garder ouvert</li></ul>
                 <button class="secondary-action dark-action resource-open" data-resource="glossary">Ouvrir le glossaire</button>
               </div>
             </li>
@@ -890,8 +905,11 @@
           </div>
           <h2>Laboratoire de gestion du risque</h2>
           <p>Des scénarios guidés pour travailler sizing, invalidation et discipline.</p>
+          <ul class="resource-meta resource-meta-dark" aria-label="Métadonnées de l’atelier Premium"><li>20 min</li><li>Premium</li><li>Après M0</li></ul>
           <button class="secondary-action premium-gate" data-permission="resources_premium">Voir l’aperçu Premium</button>
         </article>
+
+        <aside class="resource-use-note" aria-labelledby="resource-use-title"><p class="eyebrow gold">Comment utiliser la bibliothèque</p><h2 id="resource-use-title">Un outil, une intention, une prochaine pratique.</h2><p>Choisis une ressource pour débloquer une question précise. Lis-la, note ce que tu peux réutiliser, puis retourne à ton parcours ou à ton Terminal pour l’appliquer.</p></aside>
 
         <div class="resource-reader" id="resource-reader" role="dialog" aria-modal="true" aria-labelledby="reader-title" aria-describedby="reader-label" hidden><button class="reader-close" id="reader-close" aria-label="Fermer">×</button><p class="eyebrow gold" id="reader-label">Ressource DDA</p><h2 id="reader-title"></h2><div id="reader-content"></div></div>
       </section>

@@ -16,6 +16,17 @@ portent d’abord sur la mission du Dashboard, la séparation d’Access et le
 contrat de complétude des leçons ; aucune nouvelle capacité P2/P3, connexion
 externe ou backend n’est autorisée par ce document.
 
+**Tranche frontend exécutée (28 septembre 2026) :** le Dashboard garde une
+action primaire unique et regroupe ses autres surfaces sous « Repères
+secondaires » ; le CTA de pratique pointe vers la mission Terminal sans créer
+une nouvelle route. Le Parcours explique désormais l’ordre, la validation et
+l’horizon proche avant le curriculum. La Bibliothèque expose la durée, le
+niveau, le moment d’usage et une consigne de lecture pour chaque ressource.
+Les identifiants runtime, les routes SPA, la source `nextActionable()` et les
+surfaces futures restent inchangés. Un contrat `tests/test_content_depth_contract.js`
+verrouille cette hiérarchie. La CSS existante a été conservée et enrichie par
+append uniquement.
+
 ## Légende
 
 - **CONSTRUIT** : présent et utilisable dans le prototype.
