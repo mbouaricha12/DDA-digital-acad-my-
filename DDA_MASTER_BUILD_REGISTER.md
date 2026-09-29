@@ -27,6 +27,15 @@ surfaces futures restent inchangés. Un contrat `tests/test_content_depth_contra
 verrouille cette hiérarchie. La CSS existante a été conservée et enrichie par
 append uniquement.
 
+**Réajustement landing (29 septembre 2026) :** `#landing` est traité comme
+une page publique d’acquisition autonome. Sa navigation principale défile vers
+les sections « La méthode », « Le produit », « DDA Free », « Domaines » et
+« Vision » ; elle n’ouvre plus directement `path`, `resources`, `markets` ou
+`community`. Les seules sorties vers l’application sont les CTA explicites
+vers `access`. Les fonctionnalités futures sont signalées comme « bientôt »
+sans faux lien. Le contrat `tests/test_landing_structure_contract.js` verrouille
+la séparation landing/app.
+
 ## Légende
 
 - **CONSTRUIT** : présent et utilisable dans le prototype.
