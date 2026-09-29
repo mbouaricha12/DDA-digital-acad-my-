@@ -36,6 +36,16 @@ vers `access`. Les fonctionnalités futures sont signalées comme « bientôt »
 sans faux lien. Le contrat `tests/test_landing_structure_contract.js` verrouille
 la séparation landing/app.
 
+**Garde-fous de structure et de confiance (29 septembre 2026) :**
+`DDA_STRUCTURE_GUARDRAILS.md` définit les invariants public/authentification/
+app, les règles fail-closed, les limites des fonctionnalités différées et le
+protocole obligatoire de modification. Le contrat
+`tests/test_surface_boundary_contract.js` vérifie désormais les frontières de
+navigation, le registre `viewPermissions`, l’appel `DDA.can(...)`, les
+entitlements visitor/free/premium, la politique `no-referrer`, les formulaires
+contrôlés par JavaScript et le masquage du chrome prototype sur la landing.
+Cette tranche ne crée aucune capacité fonctionnelle ni connexion externe.
+
 ## Légende
 
 - **CONSTRUIT** : présent et utilisable dans le prototype.
