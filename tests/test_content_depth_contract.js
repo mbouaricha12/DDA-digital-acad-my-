@@ -1,7 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
 
-const html = fs.readFileSync('dist/index.html', 'utf8');
+const html = fs.readFileSync('dist/academy.html', 'utf8');
 const css = fs.readFileSync('dist/styles.css', 'utf8');
 
 const dashboard = html.match(/<section class="view[^>]*id="dashboard"[\s\S]*?<section class="view[^>]*id="path"/i)?.[0] || '';

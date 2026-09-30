@@ -2,7 +2,7 @@
 const assert = require('assert/strict');
 const fs = require('fs');
 const path = require('path');
-const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '..', 'dist', 'academy.html'), 'utf8');
 
 const missions = {
   dashboard: 'Choisir l’action utile d’aujourd’hui.',

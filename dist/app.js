@@ -2027,6 +2027,13 @@ function closeGate() {
 }
 
 function showView(id, recordEvent = true, historyMode = 'auto') {
+  // The public website is a separate document. Keep old Academy deep-links
+  // deterministic instead of attempting to render a public view in the app
+  // shell (which would recreate the architecture mixing we just removed).
+  if (id === 'landing' && !document.getElementById('landing')) {
+    window.location.assign('./index.html#landing');
+    return;
+  }
   if (id === 'back') {
     const state = getDdaHistoryState();
     if (state[DDA_APP_HISTORY_MARKER] === true && Number.isInteger(state[DDA_APP_HISTORY_INDEX]) && state[DDA_APP_HISTORY_INDEX] > 0) {
@@ -2787,7 +2794,7 @@ if (initialView && document.getElementById(initialView)) {
   // above (see V1.1 correction) with the hardcoded 'dashboard' default.
   currentView = initialView;
   showView(initialView);
-} else if (!prototypeState.user) showView('landing');
+} else if (!prototypeState.user) showView('access');
 
 if (!appHistoryInitialized) {
   const activeViewId = document.querySelector('.view.active')?.id || 'dashboard';

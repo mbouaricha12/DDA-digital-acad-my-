@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const client = fs.readFileSync(path.join(__dirname, '..', 'dist', 'bff-client.js'), 'utf8');
 const app = fs.readFileSync(path.join(__dirname, '..', 'dist', 'app.js'), 'utf8');
-const index = fs.readFileSync(path.join(__dirname, '..', 'dist', 'index.html'), 'utf8');
+const index = fs.readFileSync(path.join(__dirname, '..', 'dist', 'academy.html'), 'utf8');
 
 assert.match(client, /credentials:\s*'include'/);
 assert.match(client, /\/v1\/security\/csrf/);

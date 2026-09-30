@@ -29,12 +29,21 @@
     campaign: new Set(['launch', 'launch-2026', 'launch-2026-09-27', 'm0-launch', 'retarget', 'private-alpha', 'private-alpha-launch', 'private-alpha-2026'])
   };
   const DEBUG_QUEUE_LIMIT = 200;
-  const debugQueue = [];
+  const DEBUG_QUEUE_KEY = 'dda-analytics-debug-v1';
+  let debugQueue = [];
+  try {
+    const persisted = JSON.parse(localStorage.getItem(DEBUG_QUEUE_KEY) || '[]');
+    if (Array.isArray(persisted)) debugQueue = persisted.slice(-DEBUG_QUEUE_LIMIT);
+  } catch {}
   let transport = 'debug';
   let initAttempted = false;
 
   function config() { return (typeof window !== 'undefined' && window.DDA_ANALYTICS_CONFIG) || {}; }
-  function pushDebug(entry) { debugQueue.push(entry); if (debugQueue.length > DEBUG_QUEUE_LIMIT) debugQueue.shift(); }
+  function pushDebug(entry) {
+    debugQueue.push(entry);
+    if (debugQueue.length > DEBUG_QUEUE_LIMIT) debugQueue = debugQueue.slice(-DEBUG_QUEUE_LIMIT);
+    try { localStorage.setItem(DEBUG_QUEUE_KEY, JSON.stringify(debugQueue)); } catch {}
+  }
   function safeAttributionValue(key, value) {
     const text = String(value ?? '').trim().toLowerCase();
     if (!text) return null;

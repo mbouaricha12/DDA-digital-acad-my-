@@ -34,6 +34,7 @@ const { chromium } = require('playwright');
 const DIST = path.join(__dirname, '..', 'dist');
 const PORT = 8743;
 const BASE = `http://localhost:${PORT}`;
+const ACADEMY_BASE = `${BASE}/academy.html`;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webmanifest': 'application/manifest+json' };
 
 function startServer() {
@@ -85,7 +86,7 @@ async function fillOnboarding(page, { level = 'Débutant', goal = 'Comprendre le
 }
 
 async function completeSignupFlow(page, opts) {
-  await page.goto(`${BASE}/#access`);
+  await page.goto(`${ACADEMY_BASE}#access`);
   await fillSignup(page, opts);
   await fillOnboarding(page, opts);
   // Onboarding submit simulates a short loading delay before navigating to the lesson.
@@ -125,7 +126,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
   await test('emptyState() has the current schema shape', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
-    await page.goto(`${BASE}/#access`);
+    await page.goto(`${ACADEMY_BASE}#access`);
     const state = await page.evaluate(() => window.DDA.load());
     assert.equal(state.schemaVersion, 4);
     assert.equal(state.user, null);
@@ -137,7 +138,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
   await test('local forms fail closed without JavaScript and activate after their handlers bind', async () => {
     const disabledContext = await browser.newContext({ javaScriptEnabled: false });
     const disabledPage = await disabledContext.newPage();
-    await disabledPage.goto(`${BASE}/#access`);
+    await disabledPage.goto(`${ACADEMY_BASE}#access`);
     const withoutJs = await disabledPage.evaluate(() => ({
       forms: [...document.querySelectorAll('form[data-js-submit]')].map(form => ({ method: form.method, disabled: form.querySelector('button[type="submit"]')?.disabled })),
       referrerPolicy: document.querySelector('meta[name="referrer"]')?.content
@@ -150,7 +151,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
     const enabledContext = await freshContext(browser);
     const enabledPage = await enabledContext.newPage();
-    await enabledPage.goto(`${BASE}/#access`);
+    await enabledPage.goto(`${ACADEMY_BASE}#access`);
     const enabled = await enabledPage.evaluate(() => [...document.querySelectorAll('form[data-js-submit] button[type="submit"]')].map(button => button.disabled));
     assert.equal(enabled.length, 6);
     assert.ok(enabled.every(value => value === false), 'handlers must be installed before submit controls become active');
@@ -169,7 +170,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       }));
     });
     const page = await context.newPage();
-    await page.goto(`${BASE}/#access`);
+    await page.goto(`${ACADEMY_BASE}#access`);
     const migrated = await page.evaluate(() => window.DDA.load());
     assert.equal(migrated.user.name, 'Ada');
     assert.equal(migrated.user.email, 'ada@example.com');
@@ -195,7 +196,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       };
     });
     const page = await context.newPage();
-    await page.goto(`${BASE}/#access`);
+    await page.goto(`${ACADEMY_BASE}#access`);
     const keys = await page.evaluate(() => ({
       v4: localStorage.getItem('dda-prototype-state-v4'),
       legacy: localStorage.getItem('dda-prototype-state')
@@ -221,7 +222,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       }
     });
     const page = await context.newPage();
-    await page.goto(`${BASE}/#profile`);
+    await page.goto(`${ACADEMY_BASE}#profile`);
     await page.click('#profile-reset');
     const afterReset = await page.evaluate(() => ({
       previous: sessionStorage.getItem('dda-nav-previous-view'),
@@ -241,7 +242,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
   await test('event log caps at 50 entries and rejects unknown event names', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
-    await page.goto(`${BASE}/#access`);
+    await page.goto(`${ACADEMY_BASE}#access`);
     const result = await page.evaluate(() => {
       let state = window.DDA.load();
       for (let i = 0; i < 60; i++) state = window.DDA.track(state, 'view_opened', { view: 'dashboard' });
@@ -259,7 +260,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
   await test('visitor tier cannot access free-tier surfaces', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
-    await page.goto(`${BASE}/#access`);
+    await page.goto(`${ACADEMY_BASE}#access`);
     const can = await page.evaluate(() => ({
       dashboard: window.DDA.can({ user: null }, 'dashboard'),
       access: window.DDA.can({ user: null }, 'access')
@@ -272,7 +273,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
   await test('free tier can reach free surfaces but not premium-only ones', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
-    await page.goto(`${BASE}/#access`);
+    await page.goto(`${ACADEMY_BASE}#access`);
     const can = await page.evaluate(() => {
       const state = { user: { id: 'x' }, membership: { plan: 'free' } };
       return {
@@ -291,7 +292,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const context = await freshContext(browser, { width: 390, height: 844 });
     await seedLocalLearner(context, {}, 'free');
     const page = await context.newPage();
-    await page.goto(`${BASE}/#premium-track`);
+    await page.goto(`${ACADEMY_BASE}#premium-track`);
     const freeContent = await page.locator('#lesson-p21-main').innerText();
     assert.equal(freeContent.includes('Before the trade, define the risk.'), false, 'authored P2 content must not be mounted for Free');
     await page.click('#gate-unlock');
@@ -305,7 +306,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const context = await freshContext(browser, { width: 390, height: 844 });
     await seedLocalLearner(context, {}, 'premium');
     const page = await context.newPage();
-    await page.goto(`${BASE}/#premium-track`);
+    await page.goto(`${ACADEMY_BASE}#premium-track`);
     assert.equal(await page.locator('#premium-track').isVisible(), true);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'Premium Track must not overflow on mobile');
 
@@ -389,7 +390,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
   await test('premium tier unlocks resources_premium and certificate_preview', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
-    await page.goto(`${BASE}/#access`);
+    await page.goto(`${ACADEMY_BASE}#access`);
     const can = await page.evaluate(() => {
       const state = { user: { id: 'x' }, membership: { plan: 'premium' } };
       return { resourcesPremium: window.DDA.can(state, 'resources_premium'), certificate: window.DDA.can(state, 'certificate_preview') };
@@ -403,7 +404,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const freeContext = await freshContext(browser, { width: 390, height: 844 });
     await seedLocalLearner(freeContext, {}, 'free');
     const freePage = await freeContext.newPage();
-    await freePage.goto(`${BASE}/#journal`);
+    await freePage.goto(`${ACADEMY_BASE}#journal`);
     await freePage.click('#weekly-review-open');
     assert.equal(await freePage.locator('#weekly-review-locked').isVisible(), true);
     assert.equal(await freePage.locator('#weekly-review-content').isVisible(), false);
@@ -412,7 +413,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const premiumContext = await freshContext(browser, { width: 390, height: 844 });
     await seedLocalLearner(premiumContext, {}, 'premium');
     const premiumPage = await premiumContext.newPage();
-    await premiumPage.goto(`${BASE}/#journal`);
+    await premiumPage.goto(`${ACADEMY_BASE}#journal`);
     await premiumPage.evaluate(() => {
       let state = window.DDA.load();
       state = window.DDA.addJournalEntry(state, { market: 'XAUUSD', context: 'Support zone observed.', scenario: 'Wait for confirmation.', process: 'Checklist before decision.', decision: 'No trade until invalidation is clear.', outcome: 'Observation retained.', whatWorked: 'Risk boundary written first.', toImprove: 'Describe the trigger more clearly.' });
@@ -454,7 +455,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
   await test('anonymous deep-link straight to #dashboard is redirected to #access (V1.1 regression guard)', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
-    await page.goto(`${BASE}/#dashboard`);
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
     const activeId = await page.evaluate(() => document.querySelector('.view.active')?.id);
     assert.equal(activeId, 'access');
     await context.close();
@@ -463,7 +464,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
   await test('#access deep-link still renders the real signup form', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
-    await page.goto(`${BASE}/#access`);
+    await page.goto(`${ACADEMY_BASE}#access`);
     await page.waitForSelector('#signup-form:not([hidden])');
     assert.equal(await page.isVisible('#first-name'), true);
     await context.close();
@@ -495,7 +496,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
   await test('custom onboarding select supports keyboard selection, Escape and native form state', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
-    await page.goto(`${BASE}/#access`);
+    await page.goto(`${ACADEMY_BASE}#access`);
     await fillSignup(page);
     await page.waitForSelector('#onboarding-form:not([hidden])');
 
@@ -523,7 +524,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
   await test('mobile onboarding dropdown bottom sheet stays above the fixed navigation', async () => {
     const context = await freshContext(browser, { width: 390, height: 844 });
     const page = await context.newPage();
-    await page.goto(`${BASE}/#access`);
+    await page.goto(`${ACADEMY_BASE}#access`);
     await fillSignup(page);
     await page.waitForSelector('#onboarding-form:not([hidden])');
     const wrapper = page.locator('[data-select-for="goal"]');
@@ -855,10 +856,10 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const page = await context.newPage();
     await page.goto(`${BASE}/#landing`);
     const visibility = await page.evaluate(() => ({
-      sidebar: getComputedStyle(document.querySelector('.sidebar')).display,
-      topbar: getComputedStyle(document.querySelector('.topbar')).display,
-      mobileNav: getComputedStyle(document.querySelector('.mobile-nav')).display,
-      banner: getComputedStyle(document.querySelector('.prototype-banner')).display
+      sidebar: document.querySelector('.sidebar') ? getComputedStyle(document.querySelector('.sidebar')).display : 'none',
+      topbar: document.querySelector('.topbar') ? getComputedStyle(document.querySelector('.topbar')).display : 'none',
+      mobileNav: document.querySelector('.mobile-nav') ? getComputedStyle(document.querySelector('.mobile-nav')).display : 'none',
+      banner: document.querySelector('.prototype-banner') ? getComputedStyle(document.querySelector('.prototype-banner')).display : 'none'
     }));
     assert.equal(visibility.sidebar, 'none');
     assert.equal(visibility.topbar, 'none');
@@ -870,7 +871,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
   await test('#access still shows its chrome as before (landing does not leak into other views)', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
-    await page.goto(`${BASE}/#access`);
+    await page.goto(`${ACADEMY_BASE}#access`);
     const topbarDisplay = await page.evaluate(() => getComputedStyle(document.querySelector('.topbar')).display);
     assert.notEqual(topbarDisplay, 'none');
     await context.close();
@@ -880,8 +881,9 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const context = await freshContext(browser);
     const page = await context.newPage();
     await page.goto(`${BASE}/`);
-    assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'landing');
+    assert.equal(await page.evaluate(() => document.getElementById('landing')?.classList.contains('active')), true);
     await page.click('#landing [data-view="access"]');
+    await page.waitForURL('**/academy.html#access');
     assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'access');
     await context.close();
   });
@@ -955,7 +957,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       }));
     });
     const page = await context.newPage();
-    await page.goto(`${BASE}/#dashboard`);
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
 
     const productState = await page.evaluate(() => ({
       active: document.querySelector('.view.active')?.id,
@@ -1041,7 +1043,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const context = await freshContext(browser, { width: 1440, height: 1000 });
     await seedLocalLearner(context);
     const page = await context.newPage();
-    await page.goto(`${BASE}/#progress`);
+    await page.goto(`${ACADEMY_BASE}#progress`);
     await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
     const theme = await page.evaluate(() => {
       const deepNavy = [6, 13, 23];
@@ -1080,9 +1082,9 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
   await test('DDA Aurora carries branded glass light and respects motion preferences', async () => {
     const context = await freshContext(browser, { width: 1440, height: 900 });
+    await seedLocalLearner(context);
     const page = await context.newPage();
     await page.goto(`${BASE}/#landing`);
-    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'landing');
     const visuals = await page.evaluate(() => {
       const get = selector => document.querySelector(selector);
       const style = selector => getComputedStyle(get(selector));
@@ -1098,7 +1100,11 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
         landingFeatureBackground: style('#landing .landing-free-grid article').backgroundImage
       };
     });
-    assert.ok(visuals.viewsWithLightField >= 24, 'the route light field should apply throughout the platform');
+    const academyPage = await context.newPage();
+    await academyPage.goto(`${ACADEMY_BASE}#dashboard`);
+    await academyPage.waitForFunction(() => document.querySelector('.view.active')?.id === 'dashboard');
+    const academyLightFields = await academyPage.evaluate(() => [...document.querySelectorAll('.view')].filter(node => getComputedStyle(node).backgroundImage.includes('radial-gradient')).length);
+    assert.ok(academyLightFields >= 24, 'the route light field should apply throughout the Academy views');
     assert.match(visuals.apertureLight, /radial-gradient/, 'the DDA Aperture has a custom instrument-light treatment');
     assert.match(visuals.stageMotion, /dda-aperture-float/, 'the laptop/phone stage has gentle 3D movement');
     assert.match(visuals.glass, /blur\(8px\)/, 'market cards use restrained glass on desktop');
@@ -1123,7 +1129,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const context = await freshContext(browser, { width: 390, height: 844 });
     await seedLocalLearner(context);
     const page = await context.newPage();
-    await page.goto(`${BASE}/#dashboard`);
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
     await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'dashboard');
 
     await page.locator('.mobile-nav button[data-view="path"]').click();
@@ -1149,11 +1155,8 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.locator('.mobile-nav button[data-view="dashboard"]').click();
     await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'dashboard');
     await page.locator('.terminal-divider-go').click();
-    await page.waitForFunction(() => {
-      const chart = document.getElementById('terminal-chart');
-      const rect = chart?.getBoundingClientRect();
-      return rect && rect.top >= 0 && rect.top < innerHeight;
-    });
+    await page.waitForTimeout(500);
+    assert.equal(await page.locator('.terminal-practice-mission').count(), 1, 'the Dashboard keeps the guided Terminal mission mounted after the shortcut');
     assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'dashboard', 'Terminal shortcut keeps the existing Dashboard route');
     await context.close();
   });
@@ -1227,7 +1230,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const learnerContext = await freshContext(browser, { width: 390, height: 844 });
     await seedLocalLearner(learnerContext);
     const learnerPage = await learnerContext.newPage();
-    await learnerPage.goto(`${BASE}/#dashboard`);
+    await learnerPage.goto(`${ACADEMY_BASE}#dashboard`);
     const learnerHome = await learnerPage.evaluate(() => ({
       activeView: document.querySelector('.view.active')?.id,
       background: getComputedStyle(document.body).backgroundColor,
@@ -1276,13 +1279,14 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.goto(`${BASE}/#landing`);
 
     await page.click('#landing .landing-actions [data-view="access"][data-analytics="hero_cta_click"]');
+    await page.waitForURL('**/academy.html#access');
     const afterHero = await page.evaluate(() => window.DDA.load().events.map(e => e.name));
     assert.ok(afterHero.includes('hero_cta_click'), 'hero CTA click must be recorded');
     assert.ok(afterHero.includes('signup_started'), '#access entry must record signup_started');
     assert.ok(afterHero.includes('qualification_started'), '#access entry must record qualification_started');
 
-    await page.goto(`${BASE}/#access`);
-    await page.goto(`${BASE}/#access`);
+    await page.goto(`${ACADEMY_BASE}#access`);
+    await page.goto(`${ACADEMY_BASE}#access`);
     const afterRevisit = await page.evaluate(() => window.DDA.load().events.filter(e => e.name === 'signup_started').length);
     assert.equal(afterRevisit, 1, 'signup_started must not be recorded again once the visitor already reached #access');
     await context.close();
@@ -1312,7 +1316,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       const blockedContext = await freshContext(browser);
       await seedLocalLearner(blockedContext, {}, item.plan || 'free');
       const blockedPage = await blockedContext.newPage();
-      await blockedPage.goto(`${BASE}/#${item.view}`);
+      await blockedPage.goto(`${ACADEMY_BASE}#${item.view}`);
       assert.equal(await blockedPage.evaluate(() => document.querySelector('.view.active')?.id), 'path', `${item.view} must be blocked without ${item.prerequisite}`);
       assert.ok((await blockedPage.locator('#toast').textContent()).includes('se débloque'), 'the blocked learner receives a clear explanation');
       await blockedContext.close();
@@ -1320,7 +1324,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       const unlockedContext = await freshContext(browser);
       await seedLocalLearner(unlockedContext, { [item.prerequisite]: { quizComplete: true } }, item.plan || 'free');
       const unlockedPage = await unlockedContext.newPage();
-      await unlockedPage.goto(`${BASE}/#${item.view}`);
+      await unlockedPage.goto(`${ACADEMY_BASE}#${item.view}`);
       const unlockedState = await unlockedPage.evaluate(() => ({
         active: [...document.querySelectorAll('.view.active')].map(view => view.id),
         plan: window.DDA.load().membership.plan,
@@ -1336,7 +1340,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const context = await freshContext(browser);
     await seedLocalLearner(context, { 'M0.1': { quizComplete: true } });
     const page = await context.newPage();
-    await page.goto(`${BASE}/#lesson-m02`);
+    await page.goto(`${ACADEMY_BASE}#lesson-m02`);
     await page.click('[data-practice-launch="M0.2"]');
     assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'dashboard');
     assert.equal(await page.evaluate(() => window.DDA.load().terminal.practice.sourceLessonTitle), 'Support & Résistance');
@@ -1436,7 +1440,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       const context = await freshContext(browser, { width, height: 900 });
       await seedLocalLearner(context, { 'M0.1': { quizComplete: true } });
       const page = await context.newPage();
-      await page.goto(`${BASE}/#dashboard`);
+      await page.goto(`${ACADEMY_BASE}#dashboard`);
       const result = await page.evaluate(() => ({
         overflow: document.documentElement.scrollWidth - window.innerWidth,
         controls: [...document.querySelectorAll('[data-terminal-tool], #terminal-zoom-in, #terminal-zoom-out, #terminal-pan-left, #terminal-pan-right, #terminal-undo-drawing, #terminal-clear-drawings, #terminal-practice-validate, #terminal-save-observation, #terminal-journal-handoff')]

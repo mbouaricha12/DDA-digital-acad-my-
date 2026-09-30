@@ -10,7 +10,7 @@
  *
  *   1. the registry literal itself is pure data (vm-evaluated verbatim) ;
  *   2. it covers exactly the authored curriculum, in order, no orphan lesson ;
- *   3. every declared mount point exists in dist/index.html ;
+ *   3. every declared mount point exists in dist/academy.html ;
  *   4. every question descriptor points at a real block of the real lesson,
  *      with the role/step/gate conventions the interaction layer expects ;
  *   5. the ids app.js derives (lessonUiIds) are ids the REAL renderer
@@ -28,7 +28,7 @@ const path = require('path');
 
 const root = path.join(__dirname, '..');
 const app = fs.readFileSync(path.join(root, 'dist', 'app.js'), 'utf8');
-const html = fs.readFileSync(path.join(root, 'dist', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(root, 'dist', 'academy.html'), 'utf8');
 
 let pass = 0;
 function test(name, fn) { fn(); pass++; console.log('PASS -', name); }
@@ -100,7 +100,7 @@ test('ids, views and suffixes are unique across the registry', () => {
   assert.strictEqual(new Set(suffixes).size, suffixes.length, 'duplicate id suffix');
 });
 
-test('every registered lesson has its mount points in index.html', () => {
+test('every registered lesson has its mount points in academy.html', () => {
   REGISTRY.forEach(entry => {
     ['', '-main', '-outline'].forEach(suffix => {
       assert.ok(html.includes(`id="${entry.viewId}${suffix}"`), `missing mount point #${entry.viewId}${suffix}`);

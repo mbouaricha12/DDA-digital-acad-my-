@@ -42,7 +42,16 @@ jobs:
           node --check dist/m1-1-lesson.js
           node --check dist/m1-2-lesson.js
           node --check dist/m1-3-lesson.js
+          node --check dist/public.js
           node --check dist/app.js
+      - name: Verify Public / Academy shell separation
+        run: node tests/test_architecture_shells_contract.js
+      - name: Verify route register and deployment fallback
+        run: |
+          node tests/verify_route_register_consistency.js
+          test -s dist/index.html
+          test -s dist/academy.html
+          test -s dist/404.html
       - name: Run authored-learning contracts
         run: |
           node tests/test_m0_golden_lessons.js

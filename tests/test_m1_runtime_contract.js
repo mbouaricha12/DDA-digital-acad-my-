@@ -6,7 +6,7 @@ const path = require('path');
 
 const root = path.join(__dirname, '..');
 const app = fs.readFileSync(path.join(root, 'dist', 'app.js'), 'utf8');
-const html = fs.readFileSync(path.join(root, 'dist', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(root, 'dist', 'academy.html'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'dist', 'sw.js'), 'utf8');
 const m11 = require('../dist/m1-1-lesson.js');
 const m12 = require('../dist/m1-2-lesson.js');

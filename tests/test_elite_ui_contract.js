@@ -5,7 +5,10 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.join(__dirname, '..');
-const html = fs.readFileSync(path.join(root, 'dist', 'index.html'), 'utf8');
+const publicHtml = fs.readFileSync(path.join(root, 'dist', 'index.html'), 'utf8');
+const academyHtml = fs.readFileSync(path.join(root, 'dist', 'academy.html'), 'utf8');
+// The contract spans both layers, but production keeps them in separate documents.
+const html = `${publicHtml}\n${academyHtml}`;
 const css = fs.readFileSync(path.join(root, 'dist', 'alpha-polish.css'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'dist', 'sw.js'), 'utf8');
 const app = fs.readFileSync(path.join(root, 'dist', 'app.js'), 'utf8');

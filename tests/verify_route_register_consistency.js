@@ -27,7 +27,8 @@ const ROOT = path.join(__dirname, '..');
 const DEFAULTS = {
   register: path.join(ROOT, 'DDA_MASTER_BUILD_REGISTER.md'),
   routes: path.join(ROOT, 'DDA_ROUTE_MAP.md'),
-  html: path.join(ROOT, 'dist', 'index.html'),
+  html: path.join(ROOT, 'dist', 'academy.html'),
+  publicHtml: path.join(ROOT, 'dist', 'index.html'),
   app: path.join(ROOT, 'dist', 'app.js'),
   architecture: path.join(ROOT, 'DDA_INFORMATION_ARCHITECTURE_TARGET.md'),
   historicalTests: path.join(__dirname, 'historical-test-references.json')
@@ -41,6 +42,7 @@ function parseArgs(argv) {
     else if (arg === '--register') options.register = path.resolve(argv[++i]);
     else if (arg === '--routes') options.routes = path.resolve(argv[++i]);
     else if (arg === '--html') options.html = path.resolve(argv[++i]);
+    else if (arg === '--public-html') options.publicHtml = path.resolve(argv[++i]);
     else if (arg === '--app') options.app = path.resolve(argv[++i]);
     else if (arg === '--architecture') options.architecture = path.resolve(argv[++i]);
     else if (arg === '--historical-tests') options.historicalTests = path.resolve(argv[++i]);
@@ -123,6 +125,8 @@ function main() {
   const register = readRequired(options.register, 'Master register', errors);
   const routesMarkdown = readRequired(options.routes, 'Route map', errors);
   const html = readRequired(options.html, 'Runtime HTML', errors);
+  const publicHtml = readRequired(options.publicHtml, 'Public runtime HTML', errors);
+  const runtimeHtml = `${publicHtml}\n${html}`;
   const app = readRequired(options.app, 'Runtime app', errors);
   let historicalTestManifest = { archived: [] };
   try {
@@ -148,11 +152,11 @@ function main() {
   for (const route of routes) {
     check(route.permission.length > 0, 'EMPTY_PERMISSION', `${route.id}: permission cell is empty.`, errors);
     check(route.deepLink.includes('✅') || route.deepLink.toLowerCase().includes('fiable'), 'UNVERIFIED_DEEPLINK', `${route.id}: deep-link/reload is not marked reliable.`, errors);
-    if (html) {
+    if (runtimeHtml) {
       check(
-        html.includes(`id="${route.id}"`),
+        runtimeHtml.includes(`id="${route.id}"`),
         'MISSING_RUNTIME_VIEW',
-        `${route.id}: route map entry has no matching id="${route.id}" in dist/index.html.`,
+        `${route.id}: route map entry has no matching runtime view in dist/index.html or dist/academy.html.`,
         errors
       );
     }

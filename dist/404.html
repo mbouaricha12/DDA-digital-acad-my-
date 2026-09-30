@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>DDA — Redirection</title>
+  <script>
+    (function () {
+      var path = location.pathname || '/';
+      var file = path.split('/').pop();
+      var known = ['academy.html', 'index.html'];
+      if (known.indexOf(file) !== -1) return;
+      var base = path.slice(0, path.lastIndexOf('/') + 1) || '/';
+      var target = base + 'index.html' + (location.search || '') + (location.hash || '');
+      location.replace(target);
+    })();
+  </script>
+</head>
+<body style="margin:0;background:#060d17;color:#f8fafc;font:16px system-ui,sans-serif;display:grid;min-height:100vh;place-items:center">
+  <main style="padding:24px;text-align:center"><p>Redirection vers DDA…</p><a href="./index.html" style="color:#7dd3fc">Ouvrir DDA</a></main>
+</body>
+</html>

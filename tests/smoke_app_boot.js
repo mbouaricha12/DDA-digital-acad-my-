@@ -3,11 +3,11 @@
 /*
  * DDA — full-app smoke boot (no browser required).
  *
- * Boots the real product (dist/index.html + every dist script, in the real
+ * Boots the real product (dist/academy.html + every dist script, in the real
  * load order) inside jsdom, then walks the entire learner journey with real
  * DOM events, exactly like a user would:
  *
- *   landing → access → signup → onboarding → M0.1 (compris → exercice →
+ *   Academy access → signup → onboarding → M0.1 (compris → exercice →
  *   mauvaise réponse quiz → bonne réponse → résultat) → verrou séquentiel
  *   vérifié FERMÉ (M1.1 refusé tant que M0.3 n'est pas validée) → M0.2 →
  *   M0.3 → verrou séquentiel vérifié OUVERT → M1.1 → verrou séquentiel
@@ -42,7 +42,7 @@ const root = path.join(__dirname, '..');
 const dist = (...segments) => path.join(root, 'dist', ...segments);
 const SCRIPTS = ['m1-1-lesson.js', 'm1-2-lesson.js', 'm1-3-lesson.js', 'dda-core.js', 'learning-engine.js', 'lesson-renderer.js', 'dda-analytics.js', 'app.js'];
 
-const dom = new JSDOM(fs.readFileSync(dist('index.html'), 'utf8'), {
+const dom = new JSDOM(fs.readFileSync(dist('academy.html'), 'utf8'), {
   url: 'http://localhost/',
   runScripts: 'outside-only',
   pretendToBeVisual: true
@@ -97,13 +97,9 @@ async function completeLesson({ viewId, markId, exerciseName, quizName, resultId
 }
 
 (async () => {
-  await test('anonymous visitor lands on #landing, never a fake dashboard', () => {
-    assert.equal(activeViewId(), 'landing');
-  });
-
-  await test('landing CTA reaches #access', () => {
-    click(document.querySelector('#landing [data-view="access"]'));
+  await test('Academy shell boots on #access, never a fake dashboard', () => {
     assert.equal(activeViewId(), 'access');
+    assert.equal(document.getElementById('landing'), null, 'public landing is not mounted in Academy');
   });
 
   await test('signup + onboarding create the local user and land on M0.1', async () => {
