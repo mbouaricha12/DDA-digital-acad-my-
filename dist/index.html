@@ -96,9 +96,9 @@
       <section class="view" id="landing" aria-labelledby="landing-title">
         <header class="public-header" aria-label="Navigation publique DDA">
           <a class="public-header-brand" href="#landing" data-view="landing" aria-label="DDA — Accueil"><span class="public-header-mark">DDA</span><span><b>Darius Digital Academy</b><small>Learning Operating System</small></span></a>
-          <nav class="public-header-nav" aria-label="Navigation publique"><button type="button" data-view="landing" class="active">Accueil</button><button type="button" data-view="access">Apprendre</button><button type="button" data-view="path">Parcours</button><button type="button" data-view="membership">Formations</button><button type="button" data-view="resources">Ressources</button><button type="button" data-view="markets">Market Intelligence</button><button type="button" data-view="community">Communauté</button></nav>
+          <nav class="public-header-nav" aria-label="Navigation publique"><a href="#landing" class="active" aria-current="page">Accueil</a><a href="#landing-experience">La méthode</a><a href="#landing-product">Le produit</a><a href="#landing-free">DDA Free</a><a href="#landing-ecosystem">Domaines</a><a href="#landing-future">Vision</a></nav>
           <div class="public-header-actions"><button type="button" class="public-login" data-view="access">Se connecter</button><button type="button" class="public-start" data-view="access" data-analytics="hero_cta_click" data-funnel-position="hero">Commencer gratuitement <span>→</span></button></div>
-          <details class="public-menu"><summary aria-label="Ouvrir le menu">Menu <span>＋</span></summary><div class="public-menu-panel"><button type="button" data-view="access">Apprendre</button><button type="button" data-view="path">Parcours</button><button type="button" data-view="membership">Formations</button><button type="button" data-view="resources">Ressources</button><button type="button" data-view="markets">Market Intelligence</button><button type="button" data-view="community">Communauté</button><button type="button" class="public-menu-cta" data-view="access">Commencer gratuitement <span>→</span></button></div></details>
+          <details class="public-menu"><summary aria-label="Ouvrir le menu">Menu <span>＋</span></summary><div class="public-menu-panel"><a href="#landing-experience">La méthode</a><a href="#landing-product">Le produit</a><a href="#landing-free">DDA Free</a><a href="#landing-ecosystem">Domaines</a><a href="#landing-future">Vision</a><button type="button" class="public-menu-cta" data-view="access">Commencer gratuitement <span>→</span></button></div></details>
         </header>
         <div class="landing-editorial-shell">
           <div class="landing-main-copy">
@@ -108,7 +108,7 @@
             <p class="landing-deck">DDA transforme l’apprentissage des marchés en un parcours où chaque notion doit être observée, pratiquée et prouvée — pas simplement regardée.</p>
             <div class="landing-actions">
               <button class="primary-action" type="button" data-view="access" data-analytics="hero_cta_click" data-funnel-position="hero">Commencer gratuitement <span>→</span></button>
-              <button class="text-action landing-secondary" type="button" data-view="path">Explorer les parcours <span>↓</span></button>
+              <a class="text-action landing-secondary" href="#landing-experience">Voir la méthode <span>↓</span></a>
             </div>
             <ul class="trust-list landing-trust">
               <li><svg class="icon"><use href="#icon-target"/></svg><span><strong>4 outils</strong> de lecture technique</span></li>
@@ -182,7 +182,7 @@
           <button class="text-action landing-inline-cta" type="button" data-view="access" data-analytics="landing_cta_differentiation" data-funnel-position="differentiation">Commencer gratuitement <span>→</span></button>
         </section>
 
-        <section class="landing-experience" aria-labelledby="landing-experience-title">
+        <section class="landing-experience" id="landing-experience" aria-labelledby="landing-experience-title">
           <div class="landing-section-head experience-heading">
             <p class="eyebrow gold">L'expérience DDA</p>
             <h2 id="landing-experience-title">Un système qui transforme la curiosité en compétence.</h2>
@@ -198,7 +198,7 @@
           <p class="experience-status" aria-live="polite"><span class="experience-status-dot"></span><span data-experience-status>Discover — commencer par une question claire.</span></p>
         </section>
 
-        <section class="landing-product" aria-labelledby="landing-product-title">
+        <section class="landing-product" id="landing-product" aria-labelledby="landing-product-title">
           <div class="landing-section-head">
             <p class="eyebrow gold">Le produit, en pratique</p>
             <h2 id="landing-product-title">Un cockpit d'apprentissage, pas une galerie de contenus.</h2>
@@ -222,7 +222,7 @@
           </div>
         </section>
 
-        <section class="landing-proof" aria-labelledby="landing-proof-title">
+        <section class="landing-proof" id="landing-proof" aria-labelledby="landing-proof-title">
           <div class="landing-section-head">
             <p class="eyebrow gold">Practice / Progress</p>
             <h2 id="landing-proof-title">La compétence laisse une trace.</h2>
@@ -248,14 +248,14 @@
           </ul>
         </section>
 
-        <section class="landing-free" data-funnel-section="free" aria-labelledby="landing-free-title">
+        <section class="landing-free" id="landing-free" data-funnel-section="free" aria-labelledby="landing-free-title">
           <div class="landing-section-head"><p class="eyebrow gold">DDA Free</p><h2 id="landing-free-title">Une vraie base pour apprendre les marchés, à ton rythme.</h2><p>Un module de fondations complet : leçon, exercice, quiz et preuve de progression. Aucune carte bancaire requise pour commencer.</p></div>
           <div class="landing-free-grid value-rail"><article><span class="free-number">01</span><h3>Fondamentaux</h3><p>Marchés, acteurs, prix, ordres et premières lectures.</p></article><article><span class="free-number">02</span><h3>Analyse &amp; risque</h3><p>Observer une structure, formuler une hypothèse et reconnaître ses limites.</p></article><article><span class="free-number">03</span><h3>Pratique guidée</h3><p>Exercices, quiz, feedback et retry — pas seulement du contenu à consommer.</p></article><article><span class="free-number">04</span><h3>Progression réelle</h3><p>Journal, preuves validées et aperçu de Market Intelligence pédagogique.</p></article></div>
           <button class="text-action landing-inline-cta" type="button" data-view="access" data-analytics="landing_cta_free" data-funnel-position="free">Commencer gratuitement <span>→</span></button>
           <div class="landing-plans plan-rail" aria-label="Accès Free et Premium"><article class="landing-plan-card"><p class="eyebrow">Aujourd'hui</p><h3>DDA Free</h3><p class="plan-tagline">Démarrer sérieusement, sans rien débourser.</p><ul><li>Parcours M0 et ses leçons</li><li>Exercices, quiz et Fil de maîtrise réel</li><li>Journal &amp; Plan local</li></ul></article><article class="landing-plan-card landing-plan-card-gold"><p class="eyebrow gold">À venir</p><h3>DDA Premium</h3><p class="plan-tagline">Ajouter progressivement des couches de compétence mesurable.</p><ul><li>Atelier Ressources Premium</li><li>Aperçu de certification interne</li><li>Chaque brique construite étape par étape</li></ul></article></div>
         </section>
 
-        <section class="landing-ecosystem" aria-labelledby="landing-ecosystem-title">
+        <section class="landing-ecosystem" id="landing-ecosystem" aria-labelledby="landing-ecosystem-title">
           <div class="ecosystem-copy"><p class="eyebrow gold">Born in Africa. Built for serious learners.</p><h2 id="landing-ecosystem-title">Une académie qui relie les marchés, les compétences et le contexte.</h2><p>Les fondations commencent ici. La vision s'élargit ensuite vers les marchés financiers, l'économie, l'analyse et les espaces d'apprentissage futurs.</p><div class="institution-proof"><span>ABIDJAN</span><i></i><span>AFRIQUE FRANCOPHONE</span><i></i><span>MONDE</span></div></div>
           <div class="landing-institution-photo ecosystem-photo" role="img" aria-label="Vision institutionnelle DDA en Afrique"><img class="photo-fill" src="images/photos/institution-gold-bull.jpg" alt="Environnement institutionnel africain associé à la vision DDA" loading="lazy"><div class="photo-scrim"></div><span class="photo-caption">Une lecture locale, une ambition internationale.</span></div>
           <div class="landing-domains domain-rail">
@@ -279,13 +279,13 @@
           </div>
         </section>
 
-        <section class="landing-future" aria-label="Vision future DDA"><div><p class="eyebrow gold">La suite, avec transparence</p><h2>DDA deviendra plus qu'un parcours. Elle deviendra un écosystème.</h2><p>Les prochaines briques viendront quand elles seront prêtes : experts, intelligence artificielle pédagogique, communauté et marketplace éducative.</p></div><div class="landing-future-grid future-editorial-grid"><article><span>À terme / 01</span><h3>DDA Experts</h3><p>Des professionnels qualifiés pourront proposer ateliers, formations et accompagnements.</p><button type="button" class="future-label" data-view="community">Devenir expert — bientôt <span>→</span></button></article><article><span>À terme / 02</span><h3>DDA AI</h3><p>Une aide pour comprendre une notion et choisir la prochaine étape — jamais pour prédire le marché.</p><button type="button" class="future-label" data-view="intelligence">Explorer la vision IA — bientôt <span>→</span></button></article></div></section>
+        <section class="landing-future" id="landing-future" aria-label="Vision future DDA"><div><p class="eyebrow gold">La suite, avec transparence</p><h2>DDA deviendra plus qu'un parcours. Elle deviendra un écosystème.</h2><p>Les prochaines briques viendront quand elles seront prêtes : experts, intelligence artificielle pédagogique, communauté et marketplace éducative.</p></div><div class="landing-future-grid future-editorial-grid"><article><span>À terme / 01</span><h3>DDA Experts</h3><p>Des professionnels qualifiés pourront proposer ateliers, formations et accompagnements.</p><span class="future-label">Devenir expert — bientôt <span>→</span></span></article><article><span>À terme / 02</span><h3>DDA AI</h3><p>Une aide pour comprendre une notion et choisir la prochaine étape — jamais pour prédire le marché.</p><span class="future-label">Explorer la vision IA — bientôt <span>→</span></span></article></div></section>
 
-        <section class="landing-guardrails" aria-label="Ce que DDA ne fera jamais"><div class="landing-section-head"><p class="eyebrow gold">Confiance</p><h2>Une plateforme sérieuse dit aussi ce qu'elle ne fera pas.</h2></div><ul class="guardrail-list landing-guardrail-list"><li><svg class="icon"><use href="#icon-blocked"/></svg> Aucun signal ou recommandation de position</li><li><svg class="icon"><use href="#icon-blocked"/></svg> Aucune donnée temps réel présentée comme connectée</li><li><svg class="icon"><use href="#icon-blocked"/></svg> Aucun paiement ou lien affilié caché</li><li><svg class="icon"><use href="#icon-blocked"/></svg> Aucune progression inventée</li></ul></section>
+        <section class="landing-guardrails" id="landing-trust" aria-label="Ce que DDA ne fera jamais"><div class="landing-section-head"><p class="eyebrow gold">Confiance</p><h2>Une plateforme sérieuse dit aussi ce qu'elle ne fera pas.</h2></div><ul class="guardrail-list landing-guardrail-list"><li><svg class="icon"><use href="#icon-blocked"/></svg> Aucun signal ou recommandation de position</li><li><svg class="icon"><use href="#icon-blocked"/></svg> Aucune donnée temps réel présentée comme connectée</li><li><svg class="icon"><use href="#icon-blocked"/></svg> Aucun paiement ou lien affilié caché</li><li><svg class="icon"><use href="#icon-blocked"/></svg> Aucune progression inventée</li></ul></section>
 
         <section class="landing-final-cta" aria-label="Rejoindre DDA"><p class="eyebrow gold">La prochaine étape t'appartient</p><h2>Commence par comprendre.</h2><p>Ta progression reste sur cet appareil, ton rythme reste le tien.</p><button class="primary-action" type="button" data-view="access" data-analytics="landing_cta_final" data-funnel-position="final">Commencer gratuitement <span>→</span></button></section>
         <div class="landing-mobile-cta" aria-label="Commencer avec DDA"><button type="button" data-view="access" data-analytics="landing_cta_mobile_sticky" data-funnel-position="mobile_sticky">Commencer gratuitement <span>→</span></button></div>
-        <footer class="public-footer"><div class="public-footer-brand"><span class="public-header-mark">DDA</span><p>Learn Markets. Build Skills. Prove Progress.</p><small>Une plateforme éducative pour comprendre les marchés et construire des compétences durables.</small><div class="footer-socials" aria-label="Présence DDA"><span>ABIDJAN</span><span>AFRIQUE FRANCOPHONE</span><span>MONDE</span></div></div><div class="public-footer-col"><strong>Plateforme</strong><button data-view="landing">Accueil</button><button data-view="access">Apprendre</button><button data-view="path">Parcours</button><button data-view="membership">Formations</button><button data-view="resources">Ressources</button></div><div class="public-footer-col"><strong>Domaines</strong><button data-view="markets">Market Intelligence</button><button data-view="community">Communauté</button><button data-view="markets">Marchés financiers</button><button data-view="resources">Économie &amp; Finance</button></div><div class="public-footer-col"><strong>DDA</strong><button data-view="community">À propos</button><button data-view="community">Devenir Expert</button><button data-view="support">Aide &amp; Contact</button></div><div class="public-footer-col"><strong>Légal</strong><button data-view="support">Conditions</button><button data-view="support">Confidentialité</button><button data-view="support">Cookies</button><button data-view="support">Mentions légales</button></div><div class="public-footer-bottom"><span>© 2026 Darius Digital Academy</span><span>Abidjan · Afrique francophone · Monde</span><span>Contenu pédagogique — aucun signal de marché</span></div></footer>
+        <footer class="public-footer"><div class="public-footer-brand"><span class="public-header-mark">DDA</span><p>Learn Markets. Build Skills. Prove Progress.</p><small>Une plateforme éducative pour comprendre les marchés et construire des compétences durables.</small><div class="footer-socials" aria-label="Présence DDA"><span>ABIDJAN</span><span>AFRIQUE FRANCOPHONE</span><span>MONDE</span></div></div><div class="public-footer-col"><strong>Plateforme</strong><a href="#landing">Accueil</a><button data-view="access">Apprendre</button><a href="#landing-product">Le produit</a><a href="#landing-free">DDA Free</a><a href="#landing-ecosystem">Domaines</a></div><div class="public-footer-col"><strong>Domaines</strong><a href="#landing-ecosystem">Market Intelligence</a><a href="#landing-future">Communauté — bientôt</a><a href="#landing-ecosystem">Marchés financiers</a><a href="#landing-ecosystem">Économie &amp; Finance</a></div><div class="public-footer-col"><strong>DDA</strong><a href="#landing-trust">À propos de la méthode</a><span>Devenir Expert — bientôt</span><button data-view="support">Aide &amp; Contact</button></div><div class="public-footer-col"><strong>Légal</strong><span>Conditions — bientôt</span><span>Confidentialité locale</span><span>Cookies — bientôt</span><span>Mentions légales — bientôt</span></div><div class="public-footer-bottom"><span>© 2026 Darius Digital Academy</span><span>Abidjan · Afrique francophone · Monde</span><span>Contenu pédagogique — aucun signal de marché</span></div></footer>
       </section>
       </div>
 
