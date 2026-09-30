@@ -47,6 +47,35 @@
     window.location.assign(destination(view));
   }));
 
+  /* DDA Visual Identity V2 — progressive reveals for the public editorial shell. */
+  const revealSelector = [
+    '.landing-main-copy', '.landing-aperture', '.landing-method article', '.landing-experience',
+    '.experience-flow li', '.landing-product > *', '.product-window', '.product-index article',
+    '.landing-proof > *', '.proof-composition > *', '.proof-principles li', '.landing-ecosystem > *',
+    '.domain-rail article', '.landing-institution > div', '.landing-demo-grid article',
+    '.landing-problem-list li', '.landing-steps-list li', '.landing-plan-card', '.landing-guardrails > *',
+    '.landing-final-cta > *'
+  ].join(',');
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const revealObserver = !reducedMotion && 'IntersectionObserver' in window
+    ? new IntersectionObserver(entries => entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('revealed');
+        revealObserver.unobserve(entry.target);
+      }), { threshold: 0.08, rootMargin: '0px 0px -7% 0px' })
+    : null;
+  if (!revealObserver) {
+    document.documentElement.classList.add('no-reveal-motion');
+    document.querySelectorAll(revealSelector).forEach(node => node.classList.add('revealed'));
+  } else {
+    document.querySelectorAll(revealSelector).forEach((node, index) => {
+      node.dataset.revealReady = 'true';
+      node.setAttribute('data-reveal', '');
+      node.setAttribute('data-reveal-delay', String(index % 4));
+      revealObserver.observe(node);
+    });
+  }
+
   const seen = new Set();
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver(entries => entries.forEach(entry => {
@@ -63,7 +92,7 @@
   let active = 0;
   const renderFlow = index => { if (!flow.length) return; active = index % flow.length; flow.forEach((node, i) => node.classList.toggle('is-active', i === active)); if (status) status.textContent = labels[active]; };
   renderFlow(0);
-  if (flow.length && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) window.setInterval(() => renderFlow(active + 1), 2600);
+  if (flow.length && !reducedMotion) window.setInterval(() => renderFlow(active + 1), 2600);
 
   document.querySelectorAll('[data-proof-choice]').forEach(button => button.addEventListener('click', () => {
     const right = button.dataset.proofChoice === 'right';

@@ -6,6 +6,7 @@ const root = path.join(__dirname, '..', 'dist');
 const publicHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const academyHtml = fs.readFileSync(path.join(root, 'academy.html'), 'utf8');
 const publicJs = fs.readFileSync(path.join(root, 'public.js'), 'utf8');
+const academyJs = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
 const fallbackHtml = fs.readFileSync(path.join(root, '404.html'), 'utf8');
 
 assert.match(publicHtml, /data-layer="public"/);
@@ -28,6 +29,9 @@ assert.doesNotMatch(academyHtml, /id="landing"|class="public-header"|class="land
   'Academy shell must not mount the public marketing landing');
 assert.match(publicJs, /academy\.html/);
 assert.match(publicJs, /window\.location\.assign/);
+assert.match(publicJs, /landing-main-copy|revealSelector/, 'public runtime owns Landing reveal behavior');
+assert.doesNotMatch(academyJs, /syncLandingMobileCta|initLandingNarrativePreview|landing_section_reached/,
+  'Academy runtime must not retain Landing-only interaction code');
 assert.match(fallbackHtml, /location\.replace/);
 assert.match(fallbackHtml, /index\.html/);
 console.log('RESULT: physical public/Academy shell contract passed');

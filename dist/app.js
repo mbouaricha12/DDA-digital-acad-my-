@@ -2091,7 +2091,6 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
   // pattern as lesson-focus above — no new routing concept.
   document.body.classList.toggle('public-shell', id === 'landing');
   document.body.classList.toggle('access-mode', id === 'access');
-  syncLandingMobileCta();
   contextTitle.textContent = titles[id] || 'DDA';
   const navigationMode = historyMode === 'auto' ? (recordEvent ? 'push' : 'replace') : historyMode;
   writeDdaHistory(id, navigationMode);
@@ -2802,54 +2801,19 @@ if (!appHistoryInitialized) {
 }
 
 
-/* DDA Visual Identity V2 — progressive reveals for premium editorial rhythm.
-   Purely presentational: no learning state, navigation, or analytics semantics. */
-(function initDDAVisualRhythm() {
+/* DDA Visual Identity V2 — progressive reveals for Academy surfaces only. */
+(function initAcademyVisualRhythm() {
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
   const selector = [
-    '.landing-main-copy',
-    '.landing-aperture',
-    '.landing-method article',
-    '.landing-experience',
-    '.experience-flow li',
-    '.landing-product > *',
-    '.product-window',
-    '.product-index article',
-    '.landing-proof > *',
-    '.proof-composition > *',
-    '.proof-principles li',
-    '.landing-ecosystem > *',
-    '.domain-rail article',
-    '.landing-institution > div',
-    '.landing-demo-grid article',
-    '.landing-problem-list li',
-    '.landing-steps-list li',
-    '.landing-plan-card',
-    '.landing-guardrails > *',
-    '.landing-final-cta > *',
-    '.terminal-entry',
-    '.terminal-lead',
-    '.terminal-mi',
-    '.terminal-two > section',
-    '.terminal-family',
-    '.terminal-aperture',
-    '.terminal-tools',
-    '.section-intro',
-    '.journey-current',
-    '.journey-node',
-    '.panel',
-    '.lesson-main > *',
-    '.library-entry',
-    '.resource-feature',
-    '.plan-card',
-    '.broker-row',
+    '.terminal-entry', '.terminal-lead', '.terminal-mi', '.terminal-two > section', '.terminal-family',
+    '.terminal-aperture', '.terminal-tools', '.section-intro', '.journey-current', '.journey-node',
+    '.panel', '.lesson-main > *', '.library-entry', '.resource-feature', '.plan-card', '.broker-row',
     '.journal-entry-card'
   ].join(',');
-
   function prepare(root = document) {
-    // querySelectorAll only matches descendants — when called with a single
-    // newly-added element as root, it must be considered too, not just its children.
-    const nodes = root !== document && root.matches?.(selector) ? [root, ...root.querySelectorAll(selector)] : root.querySelectorAll(selector);
+    const nodes = root !== document && root.matches?.(selector)
+      ? [root, ...root.querySelectorAll(selector)]
+      : root.querySelectorAll(selector);
     nodes.forEach((node, index) => {
       if (node.dataset.revealReady === 'true') return;
       node.dataset.revealReady = 'true';
@@ -2858,111 +2822,24 @@ if (!appHistoryInitialized) {
       observer?.observe(node);
     });
   }
-
   const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const observer = !reduced && 'IntersectionObserver' in window
-    ? new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add('revealed');
-          observer.unobserve(entry.target);
-        });
-      }, { threshold: 0.08, rootMargin: '0px 0px -7% 0px' })
+    ? new IntersectionObserver(entries => entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('revealed');
+        observer.unobserve(entry.target);
+      }), { threshold: 0.08, rootMargin: '0px 0px -7% 0px' })
     : null;
-
   if (!observer) {
     document.documentElement.classList.add('no-reveal-motion');
     document.querySelectorAll(selector).forEach(node => node.classList.add('revealed'));
-  } else {
-    prepare();
-    // Scoped to each mutation's own added nodes, never the whole document:
-    // renderState() replaces dozens of subtrees via innerHTML per learner
-    // action (each one itself a childList mutation), so a full-document
-    // re-scan on every mutation re-queries and re-observes the same targets
-    // over and over across a session, growing unboundedly instead of doing
-    // fixed, bounded work per render.
-    const mutationObserver = new MutationObserver(mutations => {
-      mutations.forEach(mutation => {
-        mutation.addedNodes.forEach(node => {
-          if (node.nodeType === 1) prepare(node);
-        });
-      });
-    });
-    mutationObserver.observe(document.body, { childList: true, subtree: true });
+    return;
   }
-})();
-
-/* Growth / conversion V1 — mesure uniquement les étapes réellement atteintes.
-   Aucun pixel tiers ni donnée personnelle : les événements passent par le même
-   adaptateur local que le reste du produit et restent inoffensifs hors GO. */
-(function initLandingFunnelMeasurement() {
-  if (typeof window === 'undefined' || typeof document === 'undefined' || !('IntersectionObserver' in window)) return;
-  const seen = new Set();
-  const nodes = document.querySelectorAll('[data-funnel-section]');
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      const section = entry.target.dataset.funnelSection;
-      if (!section || seen.has(section)) return;
-      seen.add(section);
-      trackEvent('landing_section_reached', { section });
-      observer.unobserve(entry.target);
-    });
-  }, { threshold: 0.25, rootMargin: '0px 0px -12% 0px' });
-  nodes.forEach(node => observer.observe(node));
-})();
-
-// The mobile CTA is useful after the hero, not on top of the first decision.
-// Keep it out of the reader's way when it would cover the final Free card.
-// Desktop never receives either mobile-only visibility state.
-function syncLandingMobileCta() {
-  const isPublicLanding = document.body.classList.contains('public-shell');
-  const isMobileViewport = window.matchMedia
-    ? window.matchMedia('(max-width: 639px)').matches
-    : window.innerWidth <= 639;
-  let coversLastCard = false;
-  if (isPublicLanding && isMobileViewport) {
-    const lastCard = document.querySelector('.landing-free-grid article:last-child');
-    const cta = document.querySelector('.landing-mobile-cta');
-    if (lastCard && cta) {
-      const cardRect = lastCard.getBoundingClientRect();
-      const ctaRect = cta.getBoundingClientRect();
-      coversLastCard = cardRect.bottom > ctaRect.top && cardRect.top < ctaRect.bottom;
-    }
-  }
-  document.body.classList.toggle('landing-cta-covering-content', coversLastCard);
-  document.body.classList.toggle('landing-has-scrolled', isPublicLanding && window.scrollY > 520);
-}
-window.addEventListener('scroll', syncLandingMobileCta, { passive: true });
-window.addEventListener('resize', syncLandingMobileCta, { passive: true });
-
-/* Premium visual finish — narrative motion and practice preview only. */
-(function initLandingNarrativePreview() {
-  const flow = [...document.querySelectorAll('[data-experience-step]')];
-  const status = document.querySelector('[data-experience-status]');
-  const labels = ['Discover — commencer par une question claire.', 'Learn — donner un cadre à ce que tu observes.', 'Practice — essayer avec le droit au retry.', 'Analyze — comprendre ce qui a changé.', 'Improve — choisir la prochaine action utile.'];
-  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  let active = 0;
-  const render = (index) => {
-    active = index % flow.length;
-    flow.forEach((node, i) => node.classList.toggle('is-active', i === active));
-    if (status) status.textContent = labels[active];
-  };
-  if (flow.length && !reduced) {
-    window.setInterval(() => {
-      if (document.body.classList.contains('public-shell')) render(active + 1);
-    }, 2600);
-  }
-  document.querySelectorAll('[data-proof-choice]').forEach(button => button.addEventListener('click', () => {
-    const right = button.dataset.proofChoice === 'right';
-    const box = button.closest('[data-proof-demo]');
-    box?.classList.toggle('is-confirmed', right);
-    box?.classList.toggle('is-review', !right);
-    const state = box?.querySelector('[data-proof-state]');
-    const feedback = box?.querySelector('[data-proof-feedback]');
-    if (state) state.textContent = right ? 'Preuve comprise' : 'À revoir';
-    if (feedback) feedback.textContent = right ? 'Exact. Une observation expliquée devient une preuve de compréhension.' : 'À revoir. DDA t’indique ce qui manque, puis te permet de recommencer.';
+  prepare();
+  const mutationObserver = new MutationObserver(mutations => mutations.forEach(mutation => {
+    mutation.addedNodes.forEach(node => { if (node.nodeType === 1) prepare(node); });
   }));
+  mutationObserver.observe(document.body, { childList: true, subtree: true });
 })();
 
 // Forms are disabled in static HTML. Only expose local-submit controls after
