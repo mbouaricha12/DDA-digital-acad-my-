@@ -255,7 +255,9 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       }
       return sendError(res, 404, 'not_found', 'Resource not found.', requestId);
     } catch (error) {
-      logger('request_failed', { requestId, status: error.status || 500, error: error.message });
+      // Never copy exception messages into operational logs: they may contain
+      // free-text Journal content, provider responses, or other user data.
+      logger('request_failed', { requestId, status: error.status || 500, error_code: error.code || 'internal_error' });
       return sendError(res, error.status === 413 ? 413 : 500, error.status === 413 ? 'validation_error' : 'internal_error', error.status === 413 ? 'Request could not be processed.' : 'Request could not be processed.', requestId);
     }
   };

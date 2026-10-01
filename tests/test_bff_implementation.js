@@ -33,10 +33,11 @@ function request(server, method, path, { body, headers = {}, cookies = {} } = {}
 (async () => {
   const auth = makeAuth();
   const sessions = new MemorySessionStore();
+  const logs = [];
   let membership = { plan: 'free', status: 'active', ends_at: null, revoked_at: null };
   let entitlementNames = [];
   const entitlements = { async getForUser(userId) { assert.equal(userId, 'user-1'); return { membership, entitlements: entitlementNames }; } };
-  const handler = createBff({ auth, sessions, entitlements, config: { allowedOrigins: ['http://localhost:8744'], secureCookies: false, sessionIdleMs: 60 * 60 * 1000, sessionAbsoluteMs: 24 * 60 * 60 * 1000, sessionEncryptionKey: null, emailRedirectTo: 'http://localhost:8744/access' }, clock: () => new Date('2026-09-28T00:00:00.000Z') });
+  const handler = createBff({ auth, sessions, entitlements, logger: (...entry) => logs.push(entry), config: { allowedOrigins: ['http://localhost:8744'], secureCookies: false, sessionIdleMs: 60 * 60 * 1000, sessionAbsoluteMs: 24 * 60 * 60 * 1000, sessionEncryptionKey: null, emailRedirectTo: 'http://localhost:8744/access' }, clock: () => new Date('2026-09-28T00:00:00.000Z') });
   const server = http.createServer(handler);
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   try {
@@ -76,6 +77,13 @@ function request(server, method, path, { body, headers = {}, cookies = {} } = {}
     assert.equal(response.status, 403, 'Revoked membership is denied');
     membership = { plan: 'free', status: 'active', ends_at: null, revoked_at: null };
     entitlementNames = [];
+
+    entitlements.getForUser = async () => { throw new Error('Journal secret <script>alert(1)</script>'); };
+    response = await request(server, 'GET', '/v1/premium/preview', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
+    assert.equal(response.status, 500);
+    const failedLog = logs.find(entry => entry[0] === 'request_failed');
+    assert.ok(failedLog, 'request failure is logged with a safe event');
+    assert.equal(Object.hasOwn(failedLog[1], 'error'), false, 'raw exception message is not logged');
 
     response = await request(server, 'PATCH', '/v1/me', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie), [CSRF_COOKIE]: decodeURIComponent(csrfCookie) }, headers: { 'X-CSRF-Token': decodeURIComponent(csrfCookie) }, body: { display_name: 'Updated', owner_id: 'attacker' } });
     assert.equal(response.status, 400);
