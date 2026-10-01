@@ -360,8 +360,14 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 
 **Périmètre :** landing publique uniquement (`dist/index.html`, `dist/public.js`); l’application apprenante et le backend ne sont pas modifiés. L’audit de référence est `DDA_LANDING_UX_AUDIT_2026-10-01.md`. Il confirme la séquence hero → méthode → produit → preuve → offre Free → domaines → vision future → confiance; les surfaces Premium/Experts/IA restent explicitement futures.
 
-**Correctif préparé :** la CTA fixe mobile contrôlait uniquement la carte Free 04. `syncCta()` examine maintenant les textes et actions lisibles du shell public et masque la barre uniquement pendant un recouvrement géométrique, en la faisant apparaître de nouveau dans une plage sûre. Le seuil d’affichage après le premier scroll, la taille tactile et les marges de fin sont conservés.
+**Correctif livré :** la CTA fixe mobile contrôlait uniquement la carte Free 04. `syncCta()` examine maintenant les textes et actions lisibles du shell public et masque la barre uniquement pendant un recouvrement géométrique, en la faisant apparaître de nouveau dans une plage sûre. Le seuil d’affichage après le premier scroll, la taille tactile et les marges de fin sont conservés.
 
 **Validation locale :** Playwright `tests/run.js` **54/54**; 34 contrats Node (dont registre de routes) PASS; smoke boot jsdom **24/24**; syntaxe JS et `git diff --check` PASS. Chromium : widths 360/390/414 et desktop 1440, sans overflow ni erreur console; images locales chargées après scroll et aucun reveal restant masqué. Le scénario anti-recouvrement vise 15 titres/descriptions sur les trois viewports mobiles.
 
-**État de publication :** correctif sur branche dédiée `fix/landing-sticky-cta-clearance`; il n’est pas encore fusionné ni déployé. Le dernier déploiement vérifié demeure le run [36811190163](https://github.com/mbouaricha12/DDA-digital-acad-my-/actions/runs/36811190163), succès sur `main` SHA `4c91c169c89d1310e319d65de79f35a4d752e57f`; site public https://mbouaricha12.github.io/DDA-digital-acad-my-/. Validation de cette tranche requise avant d’ouvrir la tranche « Identité DDA ».
+**État au moment de la préparation (historique) :** branche dédiée `fix/landing-sticky-cta-clearance`, en attente de validation.
+
+## Publication vérifiée — Audit landing et garde CTA mobile (1 octobre 2026)
+
+**Statut final :** PR [#96](https://github.com/mbouaricha12/DDA-digital-acad-my-/pull/96) fusionnée dans `main`; commit de merge `b3c0989209d4b8815ec4673414b17b36cf5b6809`. Le workflow [Pages run 36814527869](https://github.com/mbouaricha12/DDA-digital-acad-my-/actions/runs/36814527869) est terminé avec succès (`verify` et `deploy`). Site public : https://mbouaricha12.github.io/DDA-digital-acad-my-/.
+
+**Smoke public :** Chromium mobile 390×844; CTA visible dans un intervalle dégagé et masquée sur le titre DDA Free quand elle le recouvre; scrollWidth 390, aucune erreur JavaScript. `index.html`, `public.js` et la feuille de styles répondent en HTTP 200; le JavaScript live inclut le garde-fou anti-recouvrement. L’audit complet reste dans `DDA_LANDING_UX_AUDIT_2026-10-01.md`. La tranche est validée/déployée; l’identité DDA n’a pas encore été commencée.
