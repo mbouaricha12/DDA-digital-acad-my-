@@ -33,11 +33,16 @@ function request(server, method, path, { body, headers = {}, cookies = {} } = {}
 (async () => {
   const auth = makeAuth();
   const sessions = new MemorySessionStore();
-  const handler = createBff({ auth, sessions, config: { allowedOrigins: ['http://localhost:8744'], secureCookies: false, sessionIdleMs: 60 * 60 * 1000, sessionAbsoluteMs: 24 * 60 * 60 * 1000, sessionEncryptionKey: null, emailRedirectTo: 'http://localhost:8744/access' }, clock: () => new Date('2026-09-28T00:00:00.000Z') });
+  let membership = { plan: 'free', status: 'active', ends_at: null, revoked_at: null };
+  let entitlementNames = [];
+  const entitlements = { async getForUser(userId) { assert.equal(userId, 'user-1'); return { membership, entitlements: entitlementNames }; } };
+  const handler = createBff({ auth, sessions, entitlements, config: { allowedOrigins: ['http://localhost:8744'], secureCookies: false, sessionIdleMs: 60 * 60 * 1000, sessionAbsoluteMs: 24 * 60 * 60 * 1000, sessionEncryptionKey: null, emailRedirectTo: 'http://localhost:8744/access' }, clock: () => new Date('2026-09-28T00:00:00.000Z') });
   const server = http.createServer(handler);
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   try {
-    let response = await request(server, 'POST', '/v1/auth/register', { body: { email: 'a@example.com', password: 'long-enough-password', display_name: 'A' } });
+    let response = await request(server, 'GET', '/v1/premium/preview');
+    assert.equal(response.status, 401, 'Visitor is denied Premium');
+    response = await request(server, 'POST', '/v1/auth/register', { body: { email: 'a@example.com', password: 'long-enough-password', display_name: 'A' } });
     assert.equal(response.status, 202);
     assert.match(response.body.message, /verification/i);
 
@@ -54,6 +59,23 @@ function request(server, method, path, { body, headers = {}, cookies = {} } = {}
     assert.equal(response.status, 200);
     assert.equal(response.body.user_id, 'user-1');
     assert.equal(Object.hasOwn(response.body, 'access_token'), false);
+
+    response = await request(server, 'GET', '/v1/premium/preview', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
+    assert.equal(response.status, 403, 'Free user is denied Premium');
+    membership = { plan: 'premium', status: 'active', ends_at: null, revoked_at: null };
+    entitlementNames = ['premium_track'];
+    response = await request(server, 'GET', '/v1/premium/preview', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
+    assert.equal(response.status, 200, 'Active server membership grants Premium');
+    response = await request(server, 'GET', '/v1/premium/preview', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
+    assert.equal(response.body.server_authorized, true);
+    membership = { plan: 'premium', status: 'active', ends_at: '2026-09-27T00:00:00.000Z', revoked_at: null };
+    response = await request(server, 'GET', '/v1/premium/preview', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
+    assert.equal(response.status, 403, 'Expired membership is denied');
+    membership = { plan: 'premium', status: 'revoked', ends_at: null, revoked_at: '2026-09-27T00:00:00.000Z' };
+    response = await request(server, 'GET', '/v1/premium/preview', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
+    assert.equal(response.status, 403, 'Revoked membership is denied');
+    membership = { plan: 'free', status: 'active', ends_at: null, revoked_at: null };
+    entitlementNames = [];
 
     response = await request(server, 'PATCH', '/v1/me', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie), [CSRF_COOKIE]: decodeURIComponent(csrfCookie) }, headers: { 'X-CSRF-Token': decodeURIComponent(csrfCookie) }, body: { display_name: 'Updated', owner_id: 'attacker' } });
     assert.equal(response.status, 400);

@@ -148,6 +148,20 @@
         }
       }
     },
+    "/premium/preview": {
+      "get": {
+        "tags": ["account"],
+        "operationId": "getPremiumPreview",
+        "summary": "Read a server-authorized Premium preview resource",
+        "description": "Requires a valid session, active or trialing membership, an unexpired non-revoked premium_track entitlement, and ignores all client-local plan or proof claims.",
+        "security": [{ "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Premium preview authorized." },
+          "401": { "$ref": "#/components/responses/Unauthenticated" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
     "/sessions": {
       "get": {
         "tags": ["session"],
@@ -325,7 +339,7 @@
         "type": "object",
         "required": ["code", "message", "request_id"],
         "properties": {
-          "code": { "type": "string", "enum": ["validation_error", "unauthenticated", "authentication_failed", "csrf_failed", "not_found", "rate_limited", "conflict", "internal_error"] },
+        "code": { "type": "string", "enum": ["validation_error", "unauthenticated", "authentication_failed", "csrf_failed", "premium_required", "not_found", "rate_limited", "conflict", "internal_error"] },
           "message": { "type": "string", "maxLength": 240 },
           "request_id": { "type": "string", "maxLength": 80 },
           "field_errors": { "type": "object", "additionalProperties": { "type": "string", "maxLength": 160 } }
@@ -355,7 +369,8 @@
       "Unauthenticated": { "description": "No valid session.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
       "CsrfFailure": { "description": "CSRF cookie/header mismatch or invalid token.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
       "RateLimited": { "description": "Rate limit exceeded; response must not reveal account existence.", "headers": { "Retry-After": { "schema": { "type": "integer" } } }, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
-      "NotFound": { "description": "Resource not found or not owned by the current user.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+      "NotFound": { "description": "Resource not found or not owned by the current user.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "Forbidden": { "description": "The authenticated user does not satisfy the server-side authorization policy.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
     }
   },
   "x-dda-security": {

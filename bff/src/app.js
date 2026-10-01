@@ -89,8 +89,24 @@ function publicUser(user) {
   return { user_id: user.user_id, email: user.email, email_verified: Boolean(user.email_verified), display_name: user.display_name || '', status: user.status, entitlements: Array.isArray(user.entitlements) ? user.entitlements : [] };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
+
+  async function currentEntitlements(userId) {
+    if (!entitlements || typeof entitlements.getForUser !== 'function') return { membership: null, entitlements: [] };
+    const snapshot = await entitlements.getForUser(userId);
+    return {
+      membership: snapshot?.membership || null,
+      entitlements: Array.isArray(snapshot?.entitlements) ? snapshot.entitlements : []
+    };
+  }
+
+  function hasActivePremium(snapshot, now) {
+    const membership = snapshot.membership;
+    if (!membership || !['active', 'trial'].includes(membership.status) || membership.revoked_at) return false;
+    if (membership.ends_at && new Date(membership.ends_at).getTime() <= now.getTime()) return false;
+    return snapshot.entitlements.includes('premium_track');
+  }
 
   async function createSession(userId, provider, req) {
     const now = clock();
@@ -193,6 +209,12 @@ function createBff({ config = configFromEnv(), auth, sessions, clock = () => new
       if (method === 'GET' && path === '/v1/me') {
         const current = await withUser(req, res, requestId); if (!current) return;
         return json(res, 200, publicUser(current.user));
+      }
+      if (method === 'GET' && path === '/v1/premium/preview') {
+        const current = await withUser(req, res, requestId); if (!current) return;
+        const snapshot = await currentEntitlements(current.user.user_id);
+        if (!hasActivePremium(snapshot, clock())) return sendError(res, 403, 'premium_required', 'An active Premium entitlement is required.', requestId);
+        return json(res, 200, { resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true });
       }
       if (method === 'PATCH' && path === '/v1/me') {
         const current = await withUser(req, res, requestId); if (!current) return;
