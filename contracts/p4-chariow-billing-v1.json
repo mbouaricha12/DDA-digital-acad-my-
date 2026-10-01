@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dda-academy.example/contracts/p4-chariow-billing-v1.json",
+  "title": "DDA P4 Chariow Billing and Entitlement Contract",
+  "description": "Provider adapter contract for Chariow checkout and signed Pulses. It is inactive until server secrets, product mapping and a deployed HTTPS BFF are configured.",
+  "contractVersion": "p4-chariow-billing-v1",
+  "provider": {
+    "name": "chariow",
+    "apiBaseUrl": "https://api.chariow.com/v1",
+    "apiAuthentication": "Bearer API key, server-only",
+    "webhookName": "Pulse",
+    "signature": "HMAC-SHA256 over untouched raw body, x-chariow-signature=sha256=<hex>",
+    "idempotencyHeader": "x-pulse-delivery-id",
+    "endpointMustBeHttps": true
+  },
+  "checkout": {
+    "endpoint": "POST /v1/checkout",
+    "sourceOfTruth": "successful.sale Pulse, not browser redirect",
+    "requiredServerInputs": ["product_id", "email", "first_name", "last_name", "phone"],
+    "optionalDdaMetadata": ["dda_user_id", "checkout_intent_id"],
+    "clientMustNeverReceive": ["CHARIOW_API_KEY", "CHARIOW_PULSE_SECRET"],
+    "supportedSteps": ["payment", "completed", "already_purchased"]
+  },
+  "membershipModel": {
+    "provider": "chariow",
+    "identityLink": "server-created checkout_intent or verified customer reference",
+    "productMapping": "explicit allowlist of Chariow product IDs; never product name matching",
+    "statuses": ["pending", "active", "expired", "revoked"],
+    "entitlementGrant": "active status from an allowlisted product only",
+    "entitlementRevoke": ["expired", "revoked"],
+    "entitlements": ["premium_track", "resources_premium", "certificate_preview", "advanced_modules"],
+    "proofCannotGrantAccess": true,
+    "localPlanCannotGrantAccess": true,
+    "refundPolicy": "revoke through provider event or an explicit server reconciliation job before access is removed"
+  },
+  "acceptedPulseEvents": {
+    "successful.sale": "activate mapped Premium membership after idempotent persistence",
+    "abandoned.sale": "record pending/abandoned checkout; never grant access",
+    "failed.sale": "record failed checkout; never grant access",
+    "license.activated": "activate mapped license-backed membership",
+    "license.expired": "expire mapped membership",
+    "license.revoked": "revoke mapped membership"
+  },
+  "processingRules": [
+    "capture raw request bytes before JSON parsing",
+    "reject invalid signatures with 401",
+    "require x-pulse-delivery-id for real deliveries",
+    "deduplicate by delivery ID before applying a transition",
+    "persist the event before asynchronous entitlement processing",
+    "derive owner_id from the authenticated account or a server-created checkout intent",
+    "return 2xx only after the delivery is durably accepted"
+  ],
+  "notYetActivated": [
+    "no Chariow API key is committed",
+    "no Pulse secret is committed",
+    "no production product ID is committed",
+    "no payment is made by this repository change",
+    "no recurring-subscription event is assumed unless Chariow enables and documents it for the store"
+  ],
+  "requiredSecurityTests": [
+    "invalid Pulse signature rejected",
+    "raw body bytes used for HMAC",
+    "duplicate delivery ID does not reapply transition",
+    "unknown product cannot grant Premium",
+    "failed or abandoned sale cannot grant Premium",
+    "expired or revoked license removes entitlement",
+    "client cannot submit provider secrets",
+    "checkout redirect is not treated as payment confirmation"
+  ]
+}

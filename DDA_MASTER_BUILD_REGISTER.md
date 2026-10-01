@@ -307,6 +307,10 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 
 **Validation :** tous les contrats Node présents, vérification de cohérence route/registre, syntaxe JavaScript et `git diff --check` passent; suite Playwright complète : **49 scénarios passants, 0 échec**, incluant tracé, preuve Practice, persistance 4H/zoom 2×, transfert d’une note non sauvegardée et viewports 360/390/1440px sans débordement. Branche isolée : `feat/darius-analysis-terminal`.
 
+## Tranche — P4 Checkout & Membership Chariow (1 octobre 2026)
+
+**Statut : SOCLE PRÉPARÉ — paiement réel et abonnements non activés.** `bff/src/chariow.js` prépare le Checkout serveur, la vérification HMAC-SHA256 des Pulses sur le corps brut, la déduplication par `x-pulse-delivery-id` et le mapping contrôlé vers les transitions `pending / active / expired / revoked`. Les produits Premium sont explicitement allowlistés par ID ; ni le plan local, ni une preuve pédagogique, ni une redirection navigateur ne peut accorder un entitlement. Le contrat machine-readable est `contracts/p4-chariow-billing-v1.json`, avec sa suite `tests/test_p4_chariow_billing.js`. La documentation publique Chariow consultée ne permet pas encore d’affirmer un jeu complet d’événements de renouvellement récurrent : aucune facturation mensuelle automatique n’est donc annoncée ou simulée. Voir `DDA_P4_CHARIOW_BILLING.md`.
+
 
 **Fiabilité CI :** le Product Gate révélait que `tests/smoke_app_boot.js` gardait jsdom ouvert après ses assertions et expirait au délai de 15 minutes. Le smoke ferme maintenant sa fenêtre dans `finally` (y compris en cas d'échec, sans masquer le code de sortie) ; validation locale : **25 contrôles réussis et processus terminé**.
 
