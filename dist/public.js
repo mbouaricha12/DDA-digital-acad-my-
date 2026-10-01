@@ -103,13 +103,25 @@
     if (feedback) feedback.textContent = right ? 'Exact. Une observation expliquée devient une preuve de compréhension.' : 'À revoir. DDA t’indique ce qui manque, puis te permet de recommencer.';
   }));
 
-  const ctaLastCard = document.querySelector('.landing-free-grid article:last-child');
   const ctaElement = document.querySelector('.landing-mobile-cta');
+  const readableContent = [...landing.querySelectorAll('h1,h2,h3,h4,p,li,small,summary,button,a,blockquote,figcaption,span')]
+    .filter(node => !node.closest('.landing-mobile-cta') && !node.closest('[aria-hidden="true"]') && node.textContent.trim());
   let ctaFrame = 0;
   function syncCta() {
     const mobile = window.matchMedia?.('(max-width: 639px)').matches || window.innerWidth <= 639;
     let covered = false;
-    if (mobile && ctaLastCard && ctaElement) { const a = ctaLastCard.getBoundingClientRect(); const b = ctaElement.getBoundingClientRect(); covered = a.bottom > b.top && a.top < b.bottom; }
+    if (mobile && window.scrollY > 520 && ctaElement) {
+      const cta = ctaElement.getBoundingClientRect();
+      for (const node of readableContent) {
+        const style = window.getComputedStyle(node);
+        if (style.display === 'none' || style.visibility === 'hidden') continue;
+        const rect = node.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0 && rect.right > cta.left && rect.left < cta.right && rect.bottom > cta.top && rect.top < cta.bottom) {
+          covered = true;
+          break;
+        }
+      }
+    }
     document.body.classList.toggle('landing-cta-covering-content', covered);
     document.body.classList.toggle('landing-has-scrolled', window.scrollY > 520);
   }
