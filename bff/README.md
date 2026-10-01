@@ -9,7 +9,8 @@ BFF Node.js minimal pour la frontière `app.example.dda.academy` → `api.exampl
 - **Pont frontend :** `dist/bff-client.js` couvre l’inscription, la vérification e-mail, la connexion, la récupération de mot de passe, la restauration de session via `/v1/me` et la synchronisation du nom via `PATCH /v1/me` lorsque `window.DDA_BFF_BASE_URL` est renseigné.
 - **Sécurité :** cookies `__Host-`, session opaque hashée, tokens Supabase chiffrés côté serveur, CSRF double-submit, CORS exact, Origin check, réponse anti-énumération, ownership dérivé de la session.
 - **Non déployé :** aucun secret, aucun projet Supabase, aucun domaine ou endpoint distant n’est configuré par ce dépôt.
-- **À compléter avant production :** endpoints d’export/suppression, profils/entitlements métier Postgres, migrations P3.1, rate limiting distribué, observabilité redacted, tests de restauration et revue DPA/région.
+- **Schéma P3.1 préparé :** `dda_lesson_progress`, `dda_journal_entries`, `dda_journal_plans` et `dda_preferences` sont définies avec ownership serveur, bornes de taille, index et RLS ; elles ne sont pas encore appliquées au projet distant.
+- **À compléter avant production :** endpoints d’export/suppression, profils/entitlements métier Postgres, migration distante P3.1, rate limiting distribué, observabilité redacted, tests de restauration et revue DPA/région.
 
 ## Lancer en environnement configuré
 
@@ -25,7 +26,7 @@ BFF_COOKIE_SECURE=true
 PORT=8744
 ```
 
-Le fichier `supabase/schema.sql` doit être relu et appliqué manuellement dans un projet Supabase validé. La `SERVICE_ROLE_KEY` ne doit jamais être livrée au navigateur, au dépôt ou aux logs.
+Le fichier `bff/supabase/schema.sql` doit être relu et appliqué manuellement dans un projet Supabase validé. La `SERVICE_ROLE_KEY` ne doit jamais être livrée au navigateur, au dépôt ou aux logs.
 
 ## Intégration frontend progressive
 

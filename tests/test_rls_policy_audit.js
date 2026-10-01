@@ -7,7 +7,14 @@ const { auditSql } = require('../scripts/audit_rls_policies');
 
 const schema = fs.readFileSync(path.join(__dirname, '..', 'bff', 'supabase', 'schema.sql'), 'utf8');
 const good = auditSql(schema, 'schema.sql');
-assert.deepEqual(good.tables.sort(), ['public.dda_profiles', 'public.dda_sessions']);
+assert.deepEqual(good.tables.sort(), [
+  'public.dda_journal_entries',
+  'public.dda_journal_plans',
+  'public.dda_lesson_progress',
+  'public.dda_preferences',
+  'public.dda_profiles',
+  'public.dda_sessions'
+]);
 assert.deepEqual(good.findings, []);
 
 const bad = auditSql(`
