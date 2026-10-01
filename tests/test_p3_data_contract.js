@@ -16,6 +16,21 @@ assert.equal(contract.securityBoundary.clientStateIsNeverAuthority, true);
 assert.equal(contract.securityBoundary.serverOwnsIdentity, true);
 assert.equal(contract.securityBoundary.serverOwnsEntitlements, true);
 assert.equal(contract.securityBoundary.serverAssignsOwnership, true);
+assert.equal(contract.securityBoundary.localPremiumDemoIsNonAuthoritative, true);
+
+const premiumEntitlements = contract.premiumEntitlementContract;
+assert.equal(premiumEntitlements.sourceOfTruth, 'server-membership-and-entitlement-service');
+assert.equal(premiumEntitlements.localPlanMeaning, 'device-demo-display-only');
+assert.equal(premiumEntitlements.clientRepresentation, 'read-only-server-snapshot');
+for (const entitlement of ['resources_premium', 'certificate_preview', 'advanced_modules', 'premium_track']) {
+  assert.ok(premiumEntitlements.allowedEntitlements.includes(entitlement), `missing Premium entitlement: ${entitlement}`);
+}
+for (const rule of [
+  'grant or revoke an entitlement',
+  'derive entitlement from premium proof_level',
+  'treat a local demo plan as server membership',
+  'use a proof id as an authorization credential'
+]) assert.ok(premiumEntitlements.clientMustNot.includes(rule), `missing Premium client boundary: ${rule}`);
 
 const requiredEntities = [
   'users', 'memberships', 'onboarding', 'lesson_progress', 'terminal_state',
@@ -32,6 +47,10 @@ assert.equal(contract.entities.memberships.clientWritable.length, 0);
 assert.equal(contract.entities.memberships.clientNeverWritable.includes('plan'), true);
 assert.equal(contract.entities.premium_progress.clientNeverWritable.includes('proof_level'), true);
 assert.equal(contract.entities.premium_progress.clientNeverWritable.includes('entitlement'), true);
+assert.deepEqual(contract.entities.premium_progress.clientInputOnly, contract.entities.premium_progress.clientWritable);
+for (const field of ['assessment_result', 'passed', 'proof_level', 'entitlement', 'source_lesson', 'created_at', 'updated_at']) {
+  assert.ok(contract.entities.premium_progress.serverDerived.includes(field), `missing server-derived Premium field: ${field}`);
+}
 assert.equal(contract.entities.audit_events.clientWritable.length, 0);
 assert.equal(contract.entities.acquisition.defaultSync, 'not-synced-until-consent-and-policy');
 assert.match(contract.entities.acquisition.ownershipNote, /never be promoted to user_id/);

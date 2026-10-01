@@ -15,7 +15,35 @@
     "serverOwnsIdentity": true,
     "serverOwnsEntitlements": true,
     "serverAssignsOwnership": true,
-    "serverTimestampsAreCanonical": true
+    "serverTimestampsAreCanonical": true,
+    "localPremiumDemoIsNonAuthoritative": true
+  },
+  "premiumEntitlementContract": {
+    "sourceOfTruth": "server-membership-and-entitlement-service",
+    "localPlanMeaning": "device-demo-display-only",
+    "clientRepresentation": "read-only-server-snapshot",
+    "allowedEntitlements": [
+      "resources_premium",
+      "certificate_preview",
+      "advanced_modules",
+      "premium_track"
+    ],
+    "grantConditions": [
+      "authenticated session is valid",
+      "server membership is active or explicitly trialing",
+      "entitlement has not expired or been revoked"
+    ],
+    "denyConditions": [
+      "visitor or unauthenticated request",
+      "expired or revoked membership",
+      "client-only plan or proof claims"
+    ],
+    "clientMustNot": [
+      "grant or revoke an entitlement",
+      "derive entitlement from premium proof_level",
+      "treat a local demo plan as server membership",
+      "use a proof id as an authorization credential"
+    ]
   },
   "common": {
     "serverId": {
@@ -211,7 +239,9 @@
       "sourceLocalPath": "premium",
       "classification": "learning-proof",
       "subcollections": ["modules", "labs", "assessments", "proofs", "reviews"],
-      "serverValidationRequired": ["assessment_result", "proof_level", "entitlement", "source_lesson"],
+      "serverValidationRequired": ["assessment_result", "proof_level", "entitlement", "source_lesson", "created_at"],
+      "clientInputOnly": ["attempt_input", "review_reflection", "review_pattern", "review_focus", "review_next_action"],
+      "serverDerived": ["assessment_result", "passed", "proof_level", "entitlement", "source_lesson", "created_at", "updated_at"],
       "clientWritable": ["attempt_input", "review_reflection", "review_pattern", "review_focus", "review_next_action"],
       "clientNeverWritable": ["proof_level", "passed", "entitlement", "created_at"]
     },
@@ -287,6 +317,8 @@
     "cross-user delete denied",
     "client owner_id ignored or rejected",
     "client membership plan cannot grant entitlement",
+    "expired membership revokes premium entitlement",
+    "client proof cannot unlock premium route",
     "server timestamps cannot be forged",
     "duplicate clientMutationId is idempotent",
     "migration retry creates no duplicates",
