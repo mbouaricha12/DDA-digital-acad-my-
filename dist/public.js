@@ -105,7 +105,7 @@
 
   const ctaElement = document.querySelector('.landing-mobile-cta');
   const readableContent = [...landing.querySelectorAll('h1,h2,h3,h4,p,li,small,summary,button,a,blockquote,figcaption,span')]
-    .filter(node => !node.closest('.landing-mobile-cta') && !node.closest('[aria-hidden="true"]') && node.textContent.trim());
+    .filter(node => !node.closest('.landing-mobile-cta') && !node.closest('.landing-inline-cta') && !node.closest('[aria-hidden="true"]') && node.textContent.trim());
   let ctaFrame = 0;
   function syncCta() {
     const mobile = window.matchMedia?.('(max-width: 639px)').matches || window.innerWidth <= 639;

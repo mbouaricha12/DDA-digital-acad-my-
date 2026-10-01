@@ -2586,10 +2586,19 @@ function renderPremiumState() {
   const assessment = premium.assessments?.['p2-controlled-decision'] || {};
   const proof = premium.proofs?.['p2-risk-foundations'] || null;
   const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-  set('p2-p21-status', p21.quizComplete ? 'Validée' : p21.exerciseComplete ? 'En cours' : 'À commencer');
-  set('p2-p22-status', p22.quizComplete ? 'Validée' : p22.exerciseComplete ? 'En cours' : p21.quizComplete ? 'À commencer' : 'Après P2.1');
-  set('p2-lab-status', lab.status === 'validated' ? 'Validé' : lab.status === 'retry' ? 'À reprendre' : p22.quizComplete ? 'À commencer' : 'Après les leçons');
-  set('p2-assessment-status', assessment.passed ? 'Validé' : lab.status === 'validated' ? 'À commencer' : 'Après le Lab');
+  const syncStep = (step, state, text) => {
+    document.querySelector(`[data-p2-step="${step}"]`)?.setAttribute('data-state', state);
+    set(`p2-progress-${step}-status`, text);
+  };
+  const p21Status = p21.quizComplete ? 'Validée' : p21.exerciseComplete ? 'En cours' : 'À commencer';
+  const p22Status = p22.quizComplete ? 'Validée' : p22.exerciseComplete ? 'En cours' : p21.quizComplete ? 'À commencer' : 'Après P2.1';
+  const labStatus = lab.status === 'validated' ? 'Validé' : lab.status === 'retry' ? 'À reprendre' : p22.quizComplete ? 'À commencer' : 'Après les leçons';
+  const assessmentStatus = assessment.passed ? 'Validé' : lab.status === 'validated' ? 'À commencer' : 'Après le Lab';
+  set('p2-p21-status', p21Status); set('p2-p22-status', p22Status); set('p2-lab-status', labStatus); set('p2-assessment-status', assessmentStatus);
+  syncStep('p21', p21.quizComplete ? 'complete' : p21.exerciseComplete ? 'active' : 'ready', p21Status);
+  syncStep('p22', p22.quizComplete ? 'complete' : p22.exerciseComplete ? 'active' : p21.quizComplete ? 'ready' : 'locked', p22Status);
+  syncStep('lab', lab.status === 'validated' ? 'complete' : lab.status === 'retry' ? 'active' : p22.quizComplete ? 'ready' : 'locked', labStatus);
+  syncStep('assessment', assessment.passed ? 'complete' : lab.status === 'validated' ? 'ready' : 'locked', assessmentStatus);
   set('premium-track-progress', assessment.passed ? 'Preuve créée · prochaine action : Journal' : lab.status === 'validated' ? 'Lab validé · assessment disponible' : p22.quizComplete ? 'Leçons validées · Lab disponible' : p21.quizComplete ? 'P2.1 validée · P2.2 disponible' : 'Parcours non commencé');
   const receipt = document.getElementById('premium-proof-receipt');
   if (receipt) receipt.hidden = !proof;
