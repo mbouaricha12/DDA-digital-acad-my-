@@ -103,13 +103,21 @@
     if (feedback) feedback.textContent = right ? 'Exact. Une observation expliquée devient une preuve de compréhension.' : 'À revoir. DDA t’indique ce qui manque, puis te permet de recommencer.';
   }));
 
+  const ctaLastCard = document.querySelector('.landing-free-grid article:last-child');
+  const ctaElement = document.querySelector('.landing-mobile-cta');
+  let ctaFrame = 0;
   function syncCta() {
     const mobile = window.matchMedia?.('(max-width: 639px)').matches || window.innerWidth <= 639;
-    const lastCard = document.querySelector('.landing-free-grid article:last-child'); const cta = document.querySelector('.landing-mobile-cta');
     let covered = false;
-    if (mobile && lastCard && cta) { const a = lastCard.getBoundingClientRect(); const b = cta.getBoundingClientRect(); covered = a.bottom > b.top && a.top < b.bottom; }
+    if (mobile && ctaLastCard && ctaElement) { const a = ctaLastCard.getBoundingClientRect(); const b = ctaElement.getBoundingClientRect(); covered = a.bottom > b.top && a.top < b.bottom; }
     document.body.classList.toggle('landing-cta-covering-content', covered);
     document.body.classList.toggle('landing-has-scrolled', window.scrollY > 520);
   }
-  window.addEventListener('scroll', syncCta, { passive: true }); window.addEventListener('resize', syncCta, { passive: true }); syncCta();
+  const requestCtaSync = () => {
+    if (ctaFrame) return;
+    ctaFrame = window.requestAnimationFrame(() => { ctaFrame = 0; syncCta(); });
+  };
+  window.addEventListener('scroll', requestCtaSync, { passive: true });
+  window.addEventListener('resize', requestCtaSync, { passive: true });
+  syncCta();
 })();
