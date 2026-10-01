@@ -45,6 +45,7 @@ jobs:
         run: |
           node tests/test_p3_data_contract.js
           node tests/test_p3_business_schema.js
+          node tests/test_p3_account_lifecycle.js
           node tests/test_p3_identity_session_api.js
           node tests/test_bff_implementation.js
           node tests/test_bff_frontend_integration.js

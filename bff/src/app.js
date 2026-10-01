@@ -89,8 +89,12 @@ function publicUser(user) {
   return { user_id: user.user_id, email: user.email, email_verified: Boolean(user.email_verified), display_name: user.display_name || '', status: user.status, entitlements: Array.isArray(user.entitlements) ? user.entitlements : [] };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, businessStore, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
+  businessStore = businessStore || {
+    exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
+    deleteUserData: async () => {}
+  };
 
   async function createSession(userId, provider, req) {
     const now = clock();
@@ -200,6 +204,27 @@ function createBff({ config = configFromEnv(), auth, sessions, clock = () => new
         const validation = validateProfile(await readJson(req));
         if (validation.error) return sendError(res, 400, 'validation_error', validation.error, requestId);
         return json(res, 200, publicUser(await auth.updateUser(current.user.user_id, validation.patch)));
+      }
+      if (method === 'GET' && path === '/v1/account/export') {
+        const current = await withUser(req, res, requestId); if (!current) return;
+        return json(res, 200, {
+          contract: 'p3-data-contract-v1',
+          exported_at: clock().toISOString(),
+          account: publicUser(current.user),
+          sessions: await sessions.list(current.user.user_id),
+          data: await businessStore.exportUserData(current.user.user_id)
+        });
+      }
+      if (method === 'DELETE' && path === '/v1/account') {
+        const current = await withUser(req, res, requestId); if (!current) return;
+        if (!validateCsrf(req, config, current.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        const body = await readJson(req);
+        if (body.confirmation !== 'DELETE') return sendError(res, 400, 'confirmation_required', 'Type DELETE to confirm account deletion.', requestId);
+        await businessStore.deleteUserData(current.user.user_id);
+        await sessions.revokeAll(current.user.user_id, clock());
+        await auth.deleteUser(current.user.user_id);
+        setCookies(res, cookieHeaders(config, '', '', true));
+        return json(res, 204);
       }
       if (method === 'GET' && path === '/v1/sessions') {
         const current = await withUser(req, res, requestId); if (!current) return;

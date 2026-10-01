@@ -148,6 +148,38 @@
         }
       }
     },
+    "/account/export": {
+      "get": {
+        "tags": ["account"],
+        "operationId": "exportAccountData",
+        "summary": "Export the authenticated account and owned learning data",
+        "security": [{ "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "JSON export containing server account, non-secret session metadata and P3.1 owned data." },
+          "401": { "$ref": "#/components/responses/Unauthenticated" }
+        }
+      }
+    },
+    "/account": {
+      "delete": {
+        "tags": ["account"],
+        "operationId": "deleteAccount",
+        "summary": "Permanently delete the authenticated account",
+        "description": "Requires an explicit DELETE confirmation. Server-owned sessions and P3.1 data are removed; provider account deletion is performed server-side.",
+        "security": [{ "sessionCookie": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/CsrfHeader" }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "additionalProperties": false, "required": ["confirmation"], "properties": { "confirmation": { "const": "DELETE" } } } } }
+        },
+        "responses": {
+          "204": { "description": "Account and owned data deleted; cookies expired." },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/Unauthenticated" },
+          "403": { "$ref": "#/components/responses/CsrfFailure" }
+        }
+      }
+    },
     "/sessions": {
       "get": {
         "tags": ["session"],
