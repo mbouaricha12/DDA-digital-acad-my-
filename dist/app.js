@@ -937,6 +937,9 @@ function renderCertificatePreview(lessonProgress) {
 }
 
 // ---------- Journal & Plan ----------
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
 const JOURNAL_FIELD_LABELS = {
   context: 'Contexte',
   scenario: 'Scénario envisagé',
@@ -969,10 +972,10 @@ function renderJournalList() {
   list.innerHTML = entries.map((entry, idx) => {
     const detailRows = Object.entries(JOURNAL_FIELD_LABELS)
       .filter(([field]) => entry[field])
-      .map(([field, label]) => `<div><dt>${label}</dt><dd>${entry[field]}</dd></div>`)
+      .map(([field, label]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(entry[field])}</dd></div>`)
       .join('');
     const sourceView = entry.sourceLesson === 'M0.2' ? 'lesson-m02' : '';
-    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve ${entry.proofId || 'locale'}</strong><span>${entry.sourceLesson || 'M0.2'} · ${entry.proofType || 'zone_identification'}</span>${sourceView ? `<button type="button" class="text-action journal-proof-source" data-view="${sourceView}">Revoir la leçon <span>→</span></button>` : ''}</div>` : '';
+    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve ${escapeHtml(entry.proofId || 'locale')}</strong><span>${escapeHtml(entry.sourceLesson || 'M0.2')} · ${escapeHtml(entry.proofType || 'zone_identification')}</span>${sourceView ? `<button type="button" class="text-action journal-proof-source" data-view="${sourceView}">Revoir la leçon <span>→</span></button>` : ''}</div>` : '';
     const snippet = entry.decision || entry.scenario || entry.context || 'Aucun détail renseigné.';
     const entryNumber = String(entries.length - idx).padStart(2, '0');
     return `
@@ -980,16 +983,16 @@ function renderJournalList() {
         <details>
           <summary>
             <span class="journal-entry-index">${entryNumber}</span>
-            <span class="journal-entry-market">${entry.market || 'Sans marché précisé'}</span>
-            <span class="journal-entry-date">${formatJournalDate(entry.createdAt)}</span>
-            <span class="journal-entry-snippet">${snippet.slice(0, 90)}</span>
+            <span class="journal-entry-market">${escapeHtml(entry.market || 'Sans marché précisé')}</span>
+            <span class="journal-entry-date">${escapeHtml(formatJournalDate(entry.createdAt))}</span>
+            <span class="journal-entry-snippet">${escapeHtml(snippet.slice(0, 90))}</span>
           </summary>
           <div class="journal-entry-detail">
             ${proofMeta}
             <dl>${detailRows || '<div><dd>Aucun détail renseigné.</dd></div>'}</dl>
             <div class="journal-entry-actions">
-              <button class="secondary-action dark-action journal-entry-edit" data-id="${entry.id}" type="button">Modifier</button>
-              <button class="text-action journal-entry-delete" data-id="${entry.id}" type="button">Supprimer</button>
+              <button class="secondary-action dark-action journal-entry-edit" data-id="${escapeHtml(entry.id)}" type="button">Modifier</button>
+              <button class="text-action journal-entry-delete" data-id="${escapeHtml(entry.id)}" type="button">Supprimer</button>
             </div>
           </div>
         </details>
@@ -1718,7 +1721,13 @@ function renderTerminalJournalNote() {
   const entry = entries[0];
   const snippet = entry.decision || entry.scenario || entry.context || entry.note || '';
   const trimmed = snippet.length > 140 ? `${snippet.slice(0, 140)}…` : snippet;
-  el.innerHTML = `<p>« ${trimmed || 'Entrée enregistrée sans détail.'} »<small>${entry.market || 'Sans marché précisé'} — ${formatJournalDate(entry.createdAt)}</small></p>`;
+  el.innerHTML = '';
+  const p = document.createElement('p');
+  p.textContent = `« ${trimmed || 'Entrée enregistrée sans détail.'} »`;
+  const small = document.createElement('small');
+  small.textContent = `${entry.market || 'Sans marché précisé'} — ${formatJournalDate(entry.createdAt)}`;
+  p.appendChild(small);
+  el.appendChild(p);
 }
 
 // Only the active lesson's own competency is real; the other two rows mirror the
@@ -1841,7 +1850,6 @@ function renderState() {
   renderTerminalThread(continueTarget);
   renderTerminalMeta(continueTarget);
   renderDariusAnalysisTerminal();
-  renderTerminalMarketIntelligence();
   renderTerminalJournalNote();
   renderTerminalSkillmap(continueTarget);
 

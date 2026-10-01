@@ -2245,3 +2245,6 @@ body.public-shell .prototype-banner{display:none}
 @media (max-width:859px){
   #dashboard .terminal-icon-button{width:44px;height:44px;min-width:44px;min-height:44px}
 }
+
+/* Market Intelligence is editorial context; the Terminal owns interaction. */
+.terminal-mi-copy{max-width:620px;margin:6px 0 0;color:rgba(214,226,239,.66);font-size:.82rem;line-height:1.55}

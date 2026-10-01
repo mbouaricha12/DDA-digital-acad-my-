@@ -643,7 +643,8 @@
 
   function sanitizeJournalEntry(raw) {
     if (!raw || typeof raw !== 'object') return null;
-    const entry = { id: sanitizeText(raw.id, 40) || `entry-${Date.now()}-${Math.round(Math.random() * 1000)}` };
+    const candidateId = String(raw.id || '').trim().replace(/[^A-Za-z0-9._:-]/g, '').slice(0, 40);
+    const entry = { id: candidateId || `entry-${Date.now()}-${Math.round(Math.random() * 1000)}` };
     JOURNAL_TEXT_FIELDS.forEach(field => { entry[field] = sanitizeText(raw[field], 800); });
     JOURNAL_PROOF_FIELDS.forEach(field => { entry[field] = sanitizeText(raw[field], 80); });
     entry.terminalSource = Boolean(raw.terminalSource);
