@@ -1208,12 +1208,19 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.ok(cards[0].right <= 375, `cards need visible mobile gutters (right=${cards[0].right}px)`);
     assert.ok(cards[1].top - cards[0].bottom >= 10, 'cards should have consistent breathing room');
 
-    await page.locator('[data-funnel-section="differentiation"]').scrollIntoViewIfNeeded();
+    await page.evaluate(() => window.scrollTo({ top: 960, behavior: 'instant' }));
     await page.waitForFunction(() => document.body.classList.contains('landing-has-scrolled'));
-    assert.equal(await page.locator('.landing-mobile-cta').isVisible(), true, 'CTA should remain visible between sections when it does not cover content');
+    await page.waitForTimeout(40);
+    assert.equal(await page.locator('.landing-mobile-cta').isVisible(), true, 'CTA should appear in a safe mobile scroll interval');
     const touchTargetMinHeight = await page.locator('.landing-mobile-cta button').evaluate(node => parseFloat(getComputedStyle(node).minHeight));
     assert.ok(touchTargetMinHeight >= 44, 'the sticky CTA should retain a usable touch target');
-    await page.locator('.landing-free-grid article:last-child').evaluate(node => node.scrollIntoView({ block: 'end' }));
+    await page.evaluate(() => {
+      const card = document.querySelector('.landing-free-grid article:last-child');
+      const cta = document.querySelector('.landing-mobile-cta');
+      const top = card.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top: top - (window.innerHeight - cta.getBoundingClientRect().height / 2), behavior: 'instant' });
+    });
+    await page.waitForTimeout(40);
     await page.waitForFunction(() => document.body.classList.contains('landing-cta-covering-content'));
     assert.equal(await page.locator('.landing-mobile-cta').isVisible(), false, 'sticky CTA must yield while it geometrically overlaps card 04');
     const overlap = await page.evaluate(() => {
@@ -1252,25 +1259,60 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.goto(`${BASE}/#landing`);
     assert.equal(await page.locator('.landing-mobile-cta').isVisible(), false, 'sticky CTA must not cover the first landing decision');
 
-    await page.locator('[data-funnel-section="differentiation"]').scrollIntoViewIfNeeded();
+    await page.evaluate(() => window.scrollTo({ top: 960, behavior: 'instant' }));
     await page.waitForFunction(() => document.body.classList.contains('landing-has-scrolled'));
-    assert.equal(await page.locator('.landing-mobile-cta').isVisible(), true, 'sticky CTA should appear after the reader passes the hero');
+    await page.waitForTimeout(40);
+    assert.equal(await page.locator('.landing-mobile-cta').isVisible(), true, 'sticky CTA should appear in a safe interval after the hero');
 
     await page.locator('[data-funnel-section="free"]').scrollIntoViewIfNeeded();
     await page.waitForFunction(() => window.DDA.load().events.some(event => event.name === 'landing_section_reached' && event.metadata?.section === 'free'));
-    const freeCardOverlap = await page.evaluate(() => {
-      const card = document.querySelector('.landing-free-grid article:last-child').getBoundingClientRect();
-      const cta = document.querySelector('.landing-mobile-cta').getBoundingClientRect();
-      return card.bottom > cta.top && card.top < cta.bottom;
-    });
-    assert.equal(await page.locator('.landing-mobile-cta').isVisible(), !freeCardOverlap, 'sticky CTA should yield only when it would cover the final Free card');
+    await page.waitForTimeout(40);
+    const freeCardOverlap = await page.evaluate(() => document.body.classList.contains('landing-cta-covering-content'));
+    assert.equal(await page.locator('.landing-mobile-cta').isVisible(), !freeCardOverlap, 'sticky CTA should yield whenever readable content intersects its bounds');
 
-    await page.locator('[data-funnel-section="differentiation"]').scrollIntoViewIfNeeded();
+    await page.evaluate(() => window.scrollTo({ top: 960, behavior: 'instant' }));
+    await page.waitForTimeout(40);
+    assert.equal(await page.locator('.landing-mobile-cta').isVisible(), true, 'CTA should be visible once a safe interval follows the hero');
     await page.locator('[data-funnel-section="free"]').scrollIntoViewIfNeeded();
     await page.waitForTimeout(80);
     const funnel = await page.evaluate(() => window.DDA.load().events.filter(event => event.name === 'landing_section_reached' && event.metadata?.section === 'free'));
     assert.equal(funnel.length, 1, 'each funnel section is recorded once per page visit');
     await context.close();
+  });
+
+  await test('landing sticky CTA never covers readable copy across mobile sections', async () => {
+    const targets = [
+      '#landing-experience h2', '#landing-experience p',
+      '#landing-product h2', '#landing-product h3',
+      '#landing-proof h2', '#landing-proof p',
+      '#landing-free h2', '#landing-free h3',
+      '#landing-ecosystem h2', '#landing-ecosystem p',
+      '#landing-future h2', '#landing-future p',
+      '#landing-trust h2', '.landing-final-cta h2', '.landing-final-cta p'
+    ];
+    for (const width of [360, 390, 414]) {
+      const context = await freshContext(browser, { width, height: 844 });
+      const page = await context.newPage();
+      await page.goto(`${BASE}/#landing`);
+      for (const selector of targets) {
+        const geometry = await page.evaluate(async (targetSelector) => {
+          const target = document.querySelector(targetSelector);
+          const cta = document.querySelector('.landing-mobile-cta');
+          const targetRect = target.getBoundingClientRect();
+          const ctaHeight = cta.getBoundingClientRect().height;
+          const targetTop = targetRect.top + window.scrollY;
+          window.scrollTo({ top: targetTop - (window.innerHeight - ctaHeight / 2), behavior: 'instant' });
+          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+          const rect = target.getBoundingClientRect();
+          const sticky = cta.getBoundingClientRect();
+          return { intersects: rect.bottom > sticky.top && rect.top < sticky.bottom };
+        }, selector);
+        await page.waitForFunction(() => document.body.classList.contains('landing-cta-covering-content'));
+        assert.equal(geometry.intersects, true, `${selector} must intersect sticky bounds at ${width}px`);
+        assert.equal(await page.locator('.landing-mobile-cta').isVisible(), false, `sticky CTA must yield over ${selector} at ${width}px`);
+      }
+      await context.close();
+    }
   });
 
   await test('the hero CTA fires hero_cta_click, and #access records signup_started + qualification_started exactly once', async () => {
