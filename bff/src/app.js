@@ -2,6 +2,7 @@
 
 const { randomUUID } = require('node:crypto');
 const { randomToken, sha256, timingSafeEqualText, parseCookies, serializeCookie, encrypt, decrypt, normalizeEmail } = require('./security');
+const { executeIdempotentMutation, validateClientMutationId } = require('./idempotency');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
@@ -80,16 +81,17 @@ function validateRegistration(body) {
 }
 
 function validateProfile(body) {
-  if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(key => key !== 'display_name')) return { error: 'Only display_name can be updated.' };
+  if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(key => !['display_name', 'clientMutationId'].includes(key))) return { error: 'Only display_name and clientMutationId can be updated.' };
   if (typeof body.display_name !== 'string' || body.display_name.length > 60) return { error: 'Display name is invalid.' };
-  return { patch: { display_name: body.display_name } };
+  if (body.clientMutationId !== undefined && !validateClientMutationId(body.clientMutationId)) return { error: 'clientMutationId is invalid.' };
+  return { patch: { display_name: body.display_name }, clientMutationId: body.clientMutationId || null };
 }
 
 function publicUser(user) {
   return { user_id: user.user_id, email: user.email, email_verified: Boolean(user.email_verified), display_name: user.display_name || '', status: user.status, entitlements: Array.isArray(user.entitlements) ? user.entitlements : [] };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, businessStore, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, businessStore, mutationStore = null, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   businessStore = businessStore || {
     exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
@@ -225,7 +227,10 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         if (!validateCsrf(req, config, current.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
         const validation = validateProfile(await readJson(req));
         if (validation.error) return sendError(res, 400, 'validation_error', validation.error, requestId);
-        return json(res, 200, publicUser(await auth.updateUser(current.user.user_id, validation.patch)));
+        const execute = () => auth.updateUser(current.user.user_id, validation.patch).then(user => ({ status: 200, body: publicUser(user) }));
+        if (!validation.clientMutationId) return json(res, 200, publicUser(await auth.updateUser(current.user.user_id, validation.patch)));
+        const result = await executeIdempotentMutation({ store: mutationStore, ownerId: current.user.user_id, endpoint: '/v1/me', clientMutationId: validation.clientMutationId, payload: validation.patch, execute });
+        return json(res, result.status, result.body);
       }
       if (method === 'GET' && path === '/v1/account/export') {
         const current = await withUser(req, res, requestId); if (!current) return;
@@ -283,7 +288,9 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       // Never copy exception messages into operational logs: they may contain
       // free-text Journal content, provider responses, or other user data.
       logger('request_failed', { requestId, status: error.status || 500, error_code: error.code || 'internal_error' });
-      return sendError(res, error.status === 413 ? 413 : 500, error.status === 413 ? 'validation_error' : 'internal_error', error.status === 413 ? 'Request could not be processed.' : 'Request could not be processed.', requestId);
+      const status = [400, 409, 413].includes(error.status) ? error.status : 500;
+      const code = status === 413 ? 'validation_error' : (error.code || (status === 409 ? 'conflict' : 'internal_error'));
+      return sendError(res, status, code, status === 409 ? 'The mutation conflicts with an earlier request.' : 'Request could not be processed.', requestId);
     }
   };
 }
