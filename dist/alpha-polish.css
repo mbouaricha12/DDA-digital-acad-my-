@@ -2248,3 +2248,59 @@ body.public-shell .prototype-banner{display:none}
 
 /* Market Intelligence is editorial context; the Terminal owns interaction. */
 .terminal-mi-copy{max-width:620px;margin:6px 0 0;color:rgba(214,226,239,.66);font-size:.82rem;line-height:1.55}
+
+/* ================================================================
+   DDA FINISHING PASS — editorial rhythm, not feature expansion.
+   Mobile sections become denser without deleting content; the visual
+   language stays institutional, calm, and evidence-led.
+   ================================================================ */
+#landing .landing-product{background:linear-gradient(180deg,rgba(14,31,52,.38),rgba(6,13,23,.08));}
+#landing .landing-proof{background:linear-gradient(135deg,#0b1729 0%,#081321 58%,#101f31 100%);}
+#landing .landing-free{background:linear-gradient(180deg,rgba(13,29,49,.72),rgba(6,13,23,.3));}
+#landing .landing-future{position:relative;overflow:hidden;}
+#landing .landing-future::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(180deg,transparent,var(--dda-material-brass),transparent);opacity:.7;}
+#landing .landing-future>div{position:relative;z-index:1;}
+#landing .landing-section-head h2{letter-spacing:-.028em;}
+@media(max-width:639px){
+  #landing .landing-philosophy-band{padding-block:48px;}
+  #landing .landing-experience,
+  #landing .landing-product,
+  #landing .landing-proof,
+  #landing .landing-ecosystem,
+  #landing .landing-free{padding-block:40px;}
+  #landing .landing-section-head>p:last-child{font-size:.88rem;line-height:1.52;}
+  #landing .experience-flow{margin-top:28px;}
+  #landing .experience-flow li{padding-bottom:20px;}
+  #landing .experience-flow p{font-size:.78rem;}
+  #landing .product-composition,#landing .proof-composition{gap:18px;margin-top:24px;}
+  #landing .product-window-body{padding:15px;}
+  #landing .product-window-lead h3{font-size:1.9rem;}
+  #landing .product-index,#landing .proof-principles,#landing .value-rail{gap:0;margin-top:22px;}
+  #landing .product-index article,#landing .value-rail article{padding:14px 12px 12px 0;}
+  #landing .proof-principles{margin-top:18px;}
+  #landing .proof-practice-demo,#landing .proof-measure{min-height:0;padding:18px;}
+  #landing .proof-measure{gap:18px;}
+  #landing .proof-ring{width:96px;height:96px;}
+  #landing .proof-ring span{font-size:2.6rem;}
+  #landing .landing-free>.landing-inline-cta{margin-bottom:22px;}
+  #landing .plan-rail{gap:10px;}
+  #landing .plan-rail .landing-plan-card{padding:15px;}
+  #landing .landing-ecosystem{gap:20px;}
+  #landing .ecosystem-photo{min-height:210px;}
+  #landing .domain-rail{padding-top:14px;}
+  #landing .landing-future{padding-block:48px;}
+  #landing .landing-final-cta{padding-top:56px;}
+}
+@media(max-width:420px){
+  #landing .landing-free-grid.value-rail{grid-template-columns:1fr;row-gap:10px;}
+  #landing .product-index,#landing .value-rail,#landing .proof-principles{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:10px;column-gap:0;}
+  #landing .product-index article+article,#landing .value-rail article+article,#landing .proof-principles li+li{padding-left:10px;border-left:1px solid var(--lp-line);border-top:0;}
+  #landing .product-index article:nth-child(odd),#landing .value-rail article:nth-child(odd),#landing .proof-principles li:nth-child(odd){padding-left:0;border-left:0;}
+  #landing .product-index article:nth-child(n+3),#landing .value-rail article:nth-child(n+3),#landing .proof-principles li:nth-child(n+3){border-top:1px solid var(--lp-line);padding-top:12px;}
+  #landing .product-index h3,#landing .value-rail h3{font-size:.86rem;}
+  #landing .product-index p,#landing .value-rail p,#landing .proof-principles p{font-size:.7rem;line-height:1.42;}
+  #landing .landing-future-grid article{padding-block:16px;}
+}
+@media(prefers-reduced-motion:reduce){
+  #landing .landing-future::before{opacity:.45;}
+}
