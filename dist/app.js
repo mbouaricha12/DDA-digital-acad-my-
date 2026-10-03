@@ -2443,6 +2443,8 @@ document.getElementById('signup-form').addEventListener('submit', async event =>
   event.currentTarget.hidden = true;
   document.getElementById('onboarding-form').hidden = false;
   document.getElementById('step-dot-2').classList.add('active');
+  document.getElementById('step-dot-1').removeAttribute('aria-current');
+  document.getElementById('step-dot-2').setAttribute('aria-current', 'step');
 });
 
 document.getElementById('onboarding-form').addEventListener('submit', async event => {

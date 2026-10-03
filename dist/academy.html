@@ -150,6 +150,7 @@
               <em>Prove Progress.</em>
               <div class="aperture-thread" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
             </div>
+            <div class="access-sequence" aria-label="Le parcours d’entrée DDA en trois étapes"><span><b>01</b><small>Créer</small></span><i></i><span><b>02</b><small>Calibrer</small></span><i></i><span><b>03</b><small>Commencer M0.1</small></span></div>
             <svg class="access-illustration" viewBox="0 0 300 160" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
               <path class="lane-a" d="M10 130 C 70 40, 150 150, 290 30" stroke="#c9beaa" stroke-dasharray="3 6"/>
               <circle cx="10" cy="130" r="5" fill="#0B6FAE" stroke="none"/>
@@ -160,24 +161,24 @@
               <text x="130" y="112" font-size="9" fill="#8a7f6a" stroke="none" font-family="Inter, sans-serif">Practice</text>
               <text x="258" y="52" font-size="9" fill="#8a7f6a" stroke="none" font-family="Inter, sans-serif">Prove</text>
             </svg>
-            <p class="eyebrow gold">Fondations des marchés</p>
-            <h1 id="access-title">Commence par une expérience claire.</h1>
-            <p>Ton inscription personnalise ton parcours et reste sur cet appareil : ton nom, ton e-mail et tes réponses ne sont jamais transmis. Une mesure d’audience anonyme (jamais ton identité) peut être utilisée pour comprendre comment les visiteurs découvrent DDA.</p>
+            <p class="eyebrow gold">Ton point de départ</p>
+            <h1 id="access-title">Construis ton premier parcours.</h1>
+            <p>Deux étapes pour définir ton niveau, ton objectif et ton rythme. Ensuite, DDA t’envoie directement vers ta première leçon — sans abonnement à choisir ni catalogue à parcourir.</p>
             <ul class="trust-list">
-              <li><svg class="icon"><use href="#icon-target"/></svg> Une seule prochaine action</li>
-              <li><svg class="icon"><use href="#icon-check-circle"/></svg> Validation par exercice et quiz</li>
-              <li><svg class="icon"><use href="#icon-shield"/></svg> Progression enregistrée sur cet appareil</li>
+              <li><svg class="icon"><use href="#icon-target"/></svg> Une première leçon adaptée à ton point de départ</li>
+              <li><svg class="icon"><use href="#icon-check-circle"/></svg> Un parcours construit depuis tes réponses</li>
+              <li><svg class="icon"><use href="#icon-shield"/></svg> Tes données restent locales sur cet appareil</li>
             </ul>
           </div>
           <div class="access-card">
-            <div class="step-indicator"><span class="active" id="step-dot-1">1</span><i></i><span id="step-dot-2">2</span></div>
+            <div class="step-indicator" aria-label="Progression de l’inscription"><span class="active" id="step-dot-1" aria-current="step">1</span><i></i><span id="step-dot-2">2</span></div>
             <div id="bff-auth-tools" hidden>
               <button class="text-action" id="bff-mode-signup" type="button">Créer un compte</button>
               <button class="text-action" id="bff-mode-login" type="button">Se connecter</button>
             </div>
             <p class="form-error" id="bff-auth-status" role="status" aria-live="polite"></p>
             <form id="signup-form" data-js-submit method="dialog">
-              <p class="eyebrow" id="access-step-label">Étape 1 sur 2</p><h2 id="access-form-title">Créer mon compte</h2>
+              <p class="eyebrow" id="access-step-label">Étape 1 sur 2 · créer</p><h2 id="access-form-title">Créer mon compte</h2>
               <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ex. Richard"></label>
               <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"></label>
               <label id="access-password-field" hidden>Mot de passe<input id="access-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128"></label>
@@ -201,7 +202,7 @@
               <button class="text-action" id="recovery-back" type="button">Retour à la connexion</button>
             </form>
             <form id="onboarding-form" data-js-submit method="dialog" hidden>
-              <p class="eyebrow">Étape 2 sur 2</p><h2>Quel parcours te correspond ?</h2>
+              <p class="eyebrow">Étape 2 sur 2 · calibrer</p><h2>Quel parcours te correspond ?</h2>
               <label>Niveau<select id="level" required><option value="">Choisir</option><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select></label>
               <label>Objectif pédagogique<select id="goal" required><option value="">Choisir</option><option>Comprendre les marchés</option><option>Améliorer ma gestion du risque</option><option>Structurer mes décisions</option></select></label>
               <label>Temps disponible<select id="time" required><option value="">Choisir</option><option>10 minutes par jour</option><option>20 minutes par jour</option><option>45 minutes, 3 fois par semaine</option></select></label>
