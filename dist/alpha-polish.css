@@ -2328,3 +2328,23 @@ body.public-shell .prototype-banner{display:none}
 /* Authentication surface continuity: no unrelated ivory band above the access checkpoint. */
 body.dda-auth-shell main,
 body.dda-auth-shell .dda-auth-surface{background:#060d17;}
+
+/* Dashboard mission layer — only two post-session destinations remain. */
+#dashboard .dashboard-supporting{margin-top:34px;padding-top:30px;border-top:1px solid var(--dda-elite-line);}
+#dashboard .dashboard-supporting-intro{max-width:760px;margin-bottom:18px;}
+#dashboard .dashboard-supporting-intro h2{max-width:680px;margin:5px 0 8px;}
+#dashboard .dashboard-supporting-intro p:last-child{max-width:720px;color:var(--dda-elite-muted);}
+#dashboard .dashboard-next-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+#dashboard .dashboard-next-card{min-height:148px;padding:20px;border:1px solid var(--dda-elite-line);border-radius:14px;background:linear-gradient(145deg,#112a44,#07121f);box-shadow:0 14px 32px rgba(0,0,0,.2);}
+#dashboard .dashboard-next-card h3{margin:5px 0 8px;color:var(--dda-elite-ink);font-size:1.15rem;}
+#dashboard .dashboard-next-card p:not(.eyebrow){color:var(--dda-elite-muted);line-height:1.55;}
+#dashboard .dashboard-next-journal{display:flex;flex-direction:column;align-items:flex-start;}
+#dashboard .dashboard-next-journal .terminal-journal-note{margin:0 0 12px;color:var(--dda-elite-muted);font-size:.84rem;line-height:1.45;}
+#dashboard .dashboard-next-card .text-action{margin-top:auto;}
+#dashboard .dashboard-next-card .terminal-mi-head{height:100%;align-items:flex-start;}
+#dashboard .dashboard-next-card .terminal-mi-head>div{max-width:620px;}
+@media(max-width:700px){
+  #dashboard .dashboard-supporting{margin-top:26px;padding-top:24px;}
+  #dashboard .dashboard-next-actions{grid-template-columns:1fr;gap:10px;}
+  #dashboard .dashboard-next-card{min-height:0;padding:16px;}
+}
