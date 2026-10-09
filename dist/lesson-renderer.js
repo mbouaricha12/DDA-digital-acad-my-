@@ -34,6 +34,49 @@
     }).join('');
   }
 
+  // Only Vimeo HTTPS player URLs are accepted for iframe embeds. This keeps
+  // the lesson metadata flexible (vimeoId, videoUrl or embedUrl) without
+  // allowing arbitrary origins to become executable markup.
+  function escapeAttr(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+  }
+
+  function getVimeoEmbedUrl(video) {
+    if (!video) return '';
+    if (video.vimeoId != null && /^\d+$/.test(String(video.vimeoId))) {
+      return `https://player.vimeo.com/video/${String(video.vimeoId)}?dnt=1&title=0&byline=0&portrait=0`;
+    }
+    const raw = String(video.videoUrl || video.embedUrl || '').trim();
+    if (!raw) return '';
+    try {
+      const url = new URL(raw);
+      const allowedHost = url.hostname === 'player.vimeo.com' || url.hostname === 'vimeo.com' || url.hostname.endsWith('.vimeo.com');
+      if (url.protocol !== 'https:' || !allowedHost) return '';
+      if (url.hostname === 'vimeo.com') {
+        const id = url.pathname.match(/\/(\d+)(?:$|\/)/)?.[1];
+        return id ? `https://player.vimeo.com/video/${id}?dnt=1&title=0&byline=0&portrait=0` : '';
+      }
+      url.searchParams.set('dnt', '1');
+      return url.toString();
+    } catch (_) {
+      return '';
+    }
+  }
+
+  function renderVideoSurface(video, id) {
+    const embedUrl = getVimeoEmbedUrl(video);
+    const directSrc = video && typeof video.src === 'string' && /^https:\/\//.test(video.src) ? video.src : '';
+    const label = escapeAttr((video && (video.title || video.caption)) || 'Vidéo pédagogique DDA');
+    const caption = video && video.caption ? `<p class="video-explainer-caption">${video.caption}</p>` : '';
+    if (!embedUrl && !directSrc) {
+      return `<div class="video-explainer-block video-explainer-fallback" id="${escapeAttr(id)}-block" data-video-state="missing"><div class="video-fallback-panel" role="status"><svg class="icon"><use href="#icon-play"/></svg><strong>Vidéo bientôt disponible</strong><span>Le parcours reste entièrement accessible : lis la séquence puis réalise l’exercice.</span></div>${caption}</div>`;
+    }
+    if (embedUrl) {
+      return `<figure class="video-explainer-block" id="${escapeAttr(id)}-block" data-video-state="loading"><div class="video-frame"><iframe src="${escapeAttr(embedUrl)}" title="${label}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" data-video-frame></iframe><div class="video-fallback-panel" data-video-fallback hidden role="status"><svg class="icon"><use href="#icon-play"/></svg><strong>Vidéo momentanément indisponible</strong><span>Continue avec le texte et l’exercice ci-dessous. La vidéo pourra être réessayée plus tard.</span></div></div>${caption}</figure>`;
+    }
+    return `<figure class="video-explainer-block" id="${escapeAttr(id)}-block" data-video-state="ready"><div class="video-frame"><video controls preload="metadata" src="${escapeAttr(directSrc)}"${video.poster ? ` poster="${escapeAttr(video.poster)}"` : ''} aria-label="${label}"></video><div class="video-fallback-panel" data-video-fallback hidden role="status"><strong>Vidéo momentanément indisponible</strong><span>Continue avec le texte et l’exercice ci-dessous.</span></div></div>${caption}</figure>`;
+  }
+
   // Hand-authored synthetic pedagogical price geometry — never real market data.
   // Every chart_observe/zone_identify block renders through here and always
   // carries an explicit "no real data" caption (see those renderers below).
@@ -90,18 +133,7 @@
     },
 
     video(block) {
-      if (!block.src) {
-        return `
-        <div class="video-explainer-block" id="${block.id}-block">
-          <div class="photo-frame dark ratio-wide"><svg class="icon"><use href="#icon-play"/></svg><span>${block.placeholderLabel || 'Vidéo à intégrer'}</span></div>
-          ${block.caption ? `<p class="video-explainer-caption">${block.caption}</p>` : ''}
-        </div>`;
-      }
-      return `
-      <div class="video-explainer-block" id="${block.id}-block">
-        <video controls src="${block.src}"${block.poster ? ` poster="${block.poster}"` : ''}></video>
-        ${block.caption ? `<p class="video-explainer-caption">${block.caption}</p>` : ''}
-      </div>`;
+      return renderVideoSurface(block, block.id);
     },
 
     case_study(block) {
@@ -291,6 +323,7 @@
       <p class="lesson-lead">${lesson.content.lead}</p>
       <ol class="lesson-loop" id="lesson-loop${suffix}" aria-label="Progression dans la leçon">${lesson.steps.map(s => `<li data-step="${s.id}"><i class="loop-bead"></i><span>${s.label}</span></li>`).join('')}</ol>
 
+      ${lesson.video ? renderVideoSurface(lesson.video, `lesson-video${suffix}`) : ''}
       ${lesson.blocks.map(renderBlock).join('\n')}
 
       <div class="lesson-actions">

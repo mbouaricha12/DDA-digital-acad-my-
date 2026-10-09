@@ -140,6 +140,16 @@ function mountLesson(entry) {
   const suffix = entry.suffix || undefined;
   main.insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(entry.meta.module, entry.meta.lesson, suffix));
   outline.innerHTML = DDALessonRenderer.renderLessonOutline(entry.meta.lesson, suffix);
+  main.querySelectorAll('[data-video-frame], .video-frame video').forEach(media => {
+    media.addEventListener('error', () => {
+      const surface = media.closest('.video-explainer-block');
+      const fallback = surface?.querySelector('[data-video-fallback]');
+      if (!surface || !fallback) return;
+      surface.dataset.videoState = 'error';
+      media.hidden = true;
+      fallback.hidden = false;
+    }, { once: true });
+  });
   if (entry.id === 'M0.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff"><p class="eyebrow gold">Après la leçon</p><h3>Mettre la lecture en pratique</h3><p>Ouvre une mission guidée dans le Terminal pour repérer une zone sans chercher un prix exact.</p><button type="button" class="secondary-action" data-practice-launch="M0.2">Lancer la mission Practice <span>→</span></button></section>');
   if (entry.id === 'P2.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff premium-handoff"><p class="eyebrow gold">Après les leçons</p><h3>Practice Lab — Build the Risk Plan</h3><p>Construis un plan dans un scénario pédagogique synthétique, puis fais vérifier ta décision.</p><button type="button" class="secondary-action" data-view="premium-lab">Ouvrir le Practice Lab <span>→</span></button></section>');
   main.dataset.ddaLessonMounted = 'true';
