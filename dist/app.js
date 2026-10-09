@@ -448,8 +448,22 @@ function relativeTime(iso) {
   return `il y a ${days} j`;
 }
 
-function countActiveDays(events) {
-  return new Set((events || []).map(event => event.at.slice(0, 10))).size;
+// Activity is a strict rolling seven-day measure of learning work, not page
+// traffic. Opening a route, changing a preference, or viewing a premium teaser
+// must never inflate the learner's active-day metric.
+const LEARNING_ACTIVITY_EVENTS = new Set([
+  'lesson_understood', 'exercise_complete', 'quiz_complete',
+  'practice_attempted', 'journal_entry_created', 'journal_entry_updated',
+  'journal_plan_saved', 'premium_lab_attempted', 'premium_lab_validated',
+  'premium_assessment_completed', 'premium_weekly_review_completed'
+]);
+function countActiveDays(events, now = Date.now()) {
+  const windowStart = now - (7 * 24 * 60 * 60 * 1000);
+  return new Set((events || [])
+    .filter(event => LEARNING_ACTIVITY_EVENTS.has(event.name))
+    .map(event => ({ event, timestamp: Date.parse(event.at) }))
+    .filter(({ timestamp }) => Number.isFinite(timestamp) && timestamp >= windowStart && timestamp <= now)
+    .map(({ event }) => new Date(event.at).toISOString().slice(0, 10))).size;
 }
 
 // Real, computed from the same event log as countActiveDays — never fabricated —
@@ -1704,6 +1718,7 @@ function initDariusAnalysisTerminal() {
       ...(valid ? { completedAt: new Date().toISOString() } : {})
     };
     update({ practice });
+    trackEvent('practice_attempted', { practice: 'm02-zone-identification', status });
     if (valid) showToast('Preuve de pratique conservée sur cet appareil.');
   });
 }
@@ -1788,7 +1803,7 @@ function renderState() {
   const name = prototypeState.user?.name || 'Richard';
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'RD';
   const activeLessonProgress = DDALearning.getLessonProgress(prototypeState, activeLessonId);
-  const xp = DDALearning.totalXp(DDA.curriculum, prototypeState) || 20;
+  const xp = DDALearning.totalXp(DDA.curriculum, prototypeState);
   // Deliberately out of scope for the Daily Value Loop correction: `complete`
   // only tracks M0.1's own quizComplete and drives the certificate preview
   // below — Parcours itself follows resolveContinueTarget(), never a pinned

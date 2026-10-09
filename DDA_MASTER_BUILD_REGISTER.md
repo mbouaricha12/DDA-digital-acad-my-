@@ -371,3 +371,12 @@ Critère Private Alpha : un débutant comprend où aller, termine M0.1, retrouve
 **Statut final :** PR [#96](https://github.com/mbouaricha12/DDA-digital-acad-my-/pull/96) fusionnée dans `main`; commit de merge `b3c0989209d4b8815ec4673414b17b36cf5b6809`. Le workflow [Pages run 36814527869](https://github.com/mbouaricha12/DDA-digital-acad-my-/actions/runs/36814527869) est terminé avec succès (`verify` et `deploy`). Site public : https://mbouaricha12.github.io/DDA-digital-acad-my-/.
 
 **Smoke public :** Chromium mobile 390×844; CTA visible dans un intervalle dégagé et masquée sur le titre DDA Free quand elle le recouvre; scrollWidth 390, aucune erreur JavaScript. `index.html`, `public.js` et la feuille de styles répondent en HTTP 200; le JavaScript live inclut le garde-fou anti-recouvrement. L’audit complet reste dans `DDA_LANDING_UX_AUDIT_2026-10-01.md`. La tranche est validée/déployée; l’identité DDA n’a pas encore été commencée.
+
+
+## Note de tranche — P1 Dashboard & métriques (9 octobre 2026)
+
+Le fallback artificiel `|| 20` a été supprimé : le Dashboard, Progression et Profil lisent désormais exclusivement `DDALearning.totalXp(...)`, avec un état initial honnête à `0 XP`. Le libellé Dashboard est devenu « XP total ».
+
+`countActiveDays()` ne compte plus les ouvertures de routes ou autres événements de navigation. Il applique une fenêtre glissante stricte de 7 jours et une allowlist d’actions pédagogiques réelles : jalons de leçon, exercice/quiz, Practice, Journal et étapes Premium effectivement pratiquées. Les écrans déclarent explicitement « Activité (7 j) » / « Jours actifs (7 j) ». L’action Practice émet `practice_attempted`, ajouté à la liste d’événements autorisés du noyau avec métadonnées filtrées.
+
+La tranche est couverte par `tests/test_dashboard_metrics_contract.js` et documentée dans `DDA_P1_DASHBOARD_METRICS_REPORT.md`. Les contrats Node, la syntaxe JS, l’intégrité des IDs HTML et `git diff --check` passent ; la suite Playwright `tests/run.js` est relancée après installation temporaire de Chromium.
