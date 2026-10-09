@@ -1589,12 +1589,46 @@ button {
 :root{
   --dda-serif:"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Baskerville, Georgia, "Times New Roman", serif;
   --dda-sans:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --dda-mono:"SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --dda-void:#040912;
+  --dda-navy-950:#060d17;
+  --dda-navy-900:#081426;
+  --dda-navy-850:#0a1728;
+  --dda-navy-800:#0b1b30;
+  --dda-navy-700:#0f2440;
+  --dda-navy-600:#15304f;
   --dda-ivory:#f5f0e6;
   --dda-paper:#fbf8f1;
   --dda-navy:#07111f;
   --dda-navy-2:#0d1e34;
   --dda-gold:#c99a45;
   --dda-gold-soft:#e3c27f;
+  --dda-brass:var(--dda-gold);
+  --dda-brass-soft:var(--dda-gold-soft);
+  --dda-ink:#122f48;
+  --dda-white:#f8fafc;
+  --dda-muted:#93a6ba;
+  --dda-muted-strong:#c4d0de;
+  --dda-cyan:#54c5e8;
+  --dda-teal:#189b92;
+  --dda-line-subtle:rgba(174,191,213,.10);
+  --dda-line:rgba(174,191,213,.16);
+  --dda-line-strong:rgba(217,164,65,.34);
+  --dda-glass:rgba(255,255,255,.045);
+  --dda-glass-strong:rgba(255,255,255,.075);
+  --dda-surface-base:linear-gradient(155deg,rgba(15,36,64,.92),rgba(6,13,23,.98));
+  --dda-surface-raised:linear-gradient(145deg,rgba(20,43,72,.96),rgba(9,22,39,.98));
+  --dda-surface-inset:linear-gradient(180deg,rgba(4,9,18,.72),rgba(11,27,48,.58));
+  --dda-texture-grid:linear-gradient(rgba(174,191,213,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(174,191,213,.035) 1px,transparent 1px);
+  --dda-texture-grid-size:32px 32px;
+  --dda-texture-halo:radial-gradient(circle at 78% 8%,rgba(217,164,65,.13),transparent 30%),radial-gradient(circle at 12% 18%,rgba(84,197,232,.08),transparent 26%);
+  --dda-shadow-card:0 20px 55px rgba(0,0,0,.22);
+  --dda-shadow-deep:0 30px 80px rgba(0,0,0,.34);
+  --dda-shadow-brass:0 12px 34px rgba(201,154,69,.16);
+  --dda-ease:cubic-bezier(.22,.68,0,1);
+  --dda-duration-fast:160ms;
+  --dda-duration-base:260ms;
+  --dda-duration-slow:480ms;
 }
 body{font-family:var(--dda-sans)}
 h1,h2{font-family:var(--dda-serif)}
