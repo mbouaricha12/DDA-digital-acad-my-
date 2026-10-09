@@ -879,6 +879,54 @@ function renderPracticeProof() {
   container.innerHTML = `<div class="practice-proof-row ${validated ? 'is-validated' : 'is-retry'}"><span class="practice-proof-icon">${validated ? '✓' : '↻'}</span><div><strong>${proofType} — Practice Terminal</strong><p>${source}</p><p>${practice.feedback || 'Mission tentée localement.'}</p><small>Preuve ${proof.id || 'locale'} · ${validated ? 'conservée sur cet appareil.' : 'à reprendre — elle ne compte pas comme compétence acquise.'}</small></div></div>`;
 }
 
+// Dashboard orientation layer: expose one recent, auditable proof without
+// creating a second progress engine. Practice state and the existing event log
+// remain the only sources; a view opening is never presented as proof.
+function renderDashboardProof(continueTarget, curriculumComplete) {
+  const titleEl = document.getElementById('dashboard-proof-title');
+  const metaEl = document.getElementById('dashboard-proof-meta');
+  const statusEl = document.getElementById('dashboard-proof-status');
+  const stateEl = document.getElementById('dashboard-proof-state');
+  const inlineEl = document.getElementById('dashboard-proof-state-inline');
+  const actionEl = document.getElementById('dashboard-action-label');
+  if (!titleEl || !metaEl || !statusEl || !stateEl || !inlineEl || !actionEl) return;
+
+  let title = 'Aucune preuve enregistrée pour le moment.';
+  let meta = 'Une leçon, un exercice ou une mission validée apparaîtra ici.';
+  let status = 'À construire';
+  const practice = prototypeState.terminal?.practice;
+  if (practice?.attempts) {
+    const proof = practice.proof || {};
+    const proofType = proof.type === 'zone_identification' ? 'Identification de zone' : 'Mission Practice';
+    const validated = practice.status === 'validated';
+    title = validated ? `${proofType} validée dans le Terminal.` : `${proofType} tentée — à reprendre.`;
+    meta = practice.feedback || 'Mission tentée localement.';
+    status = validated ? 'Conservée localement' : 'À reprendre';
+  } else {
+    const event = [...(prototypeState.events || [])].reverse().find(item => ['quiz_complete', 'exercise_complete', 'lesson_understood'].includes(item.name));
+    if (event) {
+      const lesson = event.metadata?.lesson || 'une leçon';
+      const labels = { quiz_complete: 'Quiz validé', exercise_complete: 'Exercice complété', lesson_understood: 'Leçon comprise' };
+      title = `${labels[event.name]} — ${lesson}.`;
+      meta = 'Preuve pédagogique enregistrée dans l’état local de cet appareil.';
+      status = 'Enregistrée localement';
+    }
+  }
+  titleEl.textContent = title;
+  metaEl.textContent = meta;
+  statusEl.textContent = status;
+  stateEl.textContent = status;
+  inlineEl.textContent = status;
+
+  if (curriculumComplete) {
+    actionEl.textContent = (prototypeState.journal?.entries || []).length === 0 ? 'Ouvrir le Journal' : 'Explorer les marchés';
+  } else if (continueTarget) {
+    actionEl.textContent = `Reprendre ${continueTarget.lesson.id}`;
+  } else {
+    actionEl.textContent = '—';
+  }
+}
+
 // Product state connection (Navigation Integrity V1, mandat §4/§9): Progression
 // → compétence → leçon pertinente. Delegated once on the stable container since
 // renderMasteryList() regenerates its children on every renderState() call —
@@ -1864,6 +1912,7 @@ function renderState() {
   }
   renderTerminalThread(continueTarget);
   renderTerminalMeta(continueTarget);
+  renderDashboardProof(continueTarget, curriculumComplete);
   renderDariusAnalysisTerminal();
   renderTerminalJournalNote();
   renderTerminalSkillmap(continueTarget);

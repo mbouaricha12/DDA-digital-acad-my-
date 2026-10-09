@@ -203,6 +203,27 @@ body.public-shell main{padding-bottom:0}
 .terminal-thread-next{margin-left:auto;font-size:11px;color:rgba(244,247,252,.6);max-width:100%}
 .terminal-thread-next b{color:var(--gold-soft);font-weight:700}
 
+/* Dashboard orientation layer — the mastery thread is the first control signal,
+   while the proof strip makes the learning claim auditable without duplicating
+   the deeper Terminal panels below. */
+#dashboard .dashboard-mastery-thread{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:20px;padding:16px 20px;margin-bottom:24px;border-radius:14px;background:linear-gradient(100deg,rgba(255,255,255,.09),rgba(255,255,255,.035));border-color:rgba(197,160,89,.4)}
+#dashboard .terminal-thread-copy{display:grid;gap:5px;min-width:0}
+#dashboard .terminal-thread-copy .eyebrow{margin:0;font-size:10px;letter-spacing:.11em}
+#dashboard .terminal-thread-copy .terminal-thread-label{font-family:Georgia,serif;font-size:18px;color:#fff;text-transform:none;letter-spacing:0;line-height:1.2}
+#dashboard .dashboard-mastery-thread .terminal-thread-next{margin:0;font-size:11px;line-height:1.35}
+.terminal-thread-proof{display:grid;gap:3px;padding-left:20px;border-left:1px solid rgba(255,255,255,.16);text-align:right}
+.terminal-thread-proof span{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:rgba(244,247,252,.55)}
+.terminal-thread-proof strong{font-family:Georgia,serif;font-size:14px;color:var(--gold-soft);font-weight:400}
+.dashboard-proof-strip{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px;padding:18px 20px;margin:-4px 0 28px;border-top:1px solid rgba(197,160,89,.42);border-bottom:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.035)}
+.dashboard-proof-mark{width:34px;height:34px;border:1px solid rgba(197,160,89,.55);border-radius:50%;display:grid;place-items:center;color:var(--gold-soft);font-family:Georgia,serif;font-size:19px}
+.dashboard-proof-copy{min-width:0}
+.dashboard-proof-copy .eyebrow{margin:0 0 4px;font-size:10px}
+.dashboard-proof-copy h3{margin:0 0 4px;color:#fff;font-family:Georgia,serif;font-size:17px;font-weight:400}
+.dashboard-proof-copy p:not(.eyebrow){margin:0;color:rgba(244,247,252,.62);font-size:12.5px;line-height:1.45}
+.dashboard-proof-status{padding:7px 10px;border:1px solid rgba(255,255,255,.15);border-radius:999px;color:rgba(244,247,252,.72);font-size:10px;font-weight:800;white-space:nowrap}
+#dashboard .terminal-entry-state{align-items:center}
+#dashboard .terminal-entry-state span:first-child strong{color:var(--gold-soft)}
+
 .terminal-entry{display:flex;flex-direction:column;gap:10px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.14);margin-bottom:24px}
 .terminal-entry h1{font-size:clamp(22px,5vw,26px);color:#fff}
 .terminal-entry #personalized-next{color:rgba(244,247,252,.68);font-size:14px;max-width:560px}
@@ -2504,4 +2525,15 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
   .path-context-grid article { min-height: 0; }
   .path-context-index { margin-bottom: 14px; }
   .dashboard-supporting { padding-top: 24px; }
+}
+
+@media(max-width:700px){
+  #dashboard .dashboard-mastery-thread{grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:14px 15px}
+  #dashboard .dashboard-mastery-thread .terminal-thread-beads{grid-column:2;grid-row:1;align-self:start;margin-top:3px}
+  #dashboard .dashboard-mastery-thread .terminal-thread-proof{grid-column:1 / -1;grid-row:2;display:flex;justify-content:space-between;align-items:center;border-left:0;border-top:1px solid rgba(255,255,255,.14);padding:10px 0 0;text-align:left}
+  #dashboard .dashboard-mastery-thread .terminal-thread-next{display:block}
+  #dashboard .terminal-entry-state{gap:8px 14px}
+  #dashboard .terminal-entry-state span{flex:1 1 40%;min-width:120px}
+  .dashboard-proof-strip{grid-template-columns:auto minmax(0,1fr);gap:12px;padding:15px}
+  .dashboard-proof-status{grid-column:2;justify-self:start}
 }
