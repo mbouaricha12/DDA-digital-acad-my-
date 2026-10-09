@@ -2348,3 +2348,68 @@ body.dda-auth-shell .dda-auth-surface{background:#060d17;}
   #dashboard .dashboard-next-actions{grid-template-columns:1fr;gap:10px;}
   #dashboard .dashboard-next-card{min-height:0;padding:16px;}
 }
+
+/* ======================================================================
+   DDA Phase 3 — Dashboard cockpit hierarchy
+   The Dashboard answers: where am I, what next, what proof exists?
+   ====================================================================== */
+#dashboard .terminal-thread{
+  order:-3;
+  margin-bottom:24px;
+  padding:13px 18px;
+  border-color:var(--dda-line-strong);
+  background:linear-gradient(100deg,rgba(217,164,65,.12),rgba(255,255,255,.035) 48%,rgba(4,9,18,.58));
+  box-shadow:var(--dda-shadow-brass),inset 0 1px rgba(255,255,255,.07);
+}
+#dashboard .terminal-thread-label{color:var(--dda-brass-soft);font-weight:850;letter-spacing:.12em}
+#dashboard .terminal-thread-beads{gap:7px}
+#dashboard .terminal-thread-beads i{background:rgba(255,255,255,.23);box-shadow:0 0 0 1px rgba(255,255,255,.04)}
+#dashboard .terminal-thread-beads i.on{background:var(--dda-brass-soft);box-shadow:0 0 0 4px rgba(217,164,65,.10)}
+#dashboard .terminal-thread-beads i.now{background:var(--dda-void);border-color:var(--dda-brass-soft);box-shadow:0 0 0 4px rgba(217,164,65,.12)}
+#dashboard .terminal-thread-next{color:rgba(230,238,248,.7)}
+#dashboard .terminal-thread-next b{color:var(--dda-brass-soft)}
+#dashboard .dashboard-command-head{position:relative;margin-bottom:18px;padding:20px 0 22px;border-bottom:1px solid var(--dda-line)}
+#dashboard .dashboard-command-head::after{content:"COCKPIT D’ACTION";position:absolute;right:0;top:22px;color:rgba(232,198,133,.48);font:800 9px/1 var(--dda-mono);letter-spacing:.16em}
+#dashboard .dashboard-command-head h1{max-width:15ch;margin-bottom:8px;font-family:var(--dda-serif);font-size:clamp(2.25rem,5.5vw,4.4rem);line-height:.98;letter-spacing:-.045em}
+#dashboard .dashboard-command-head #personalized-next{max-width:46ch;font-size:15px;color:rgba(230,238,248,.76)}
+#dashboard .terminal-entry-state{gap:10px;margin-top:4px}
+#dashboard .terminal-entry-state span{display:inline-flex;align-items:baseline;gap:7px;padding:7px 10px;border:1px solid var(--dda-line-subtle);border-radius:999px;background:rgba(255,255,255,.035)}
+#dashboard .terminal-entry-state strong{color:var(--dda-brass-soft)}
+#dashboard .dashboard-mission{margin-bottom:22px;border-color:var(--dda-line-strong);background:linear-gradient(105deg,rgba(217,164,65,.11),rgba(7,17,29,.76) 68%);box-shadow:var(--dda-shadow-brass)}
+#dashboard .dashboard-mission strong{font-family:var(--dda-serif);font-size:1.05rem}
+#dashboard .dashboard-mission .text-action{font-weight:850}
+#dashboard .terminal-lead{margin-bottom:26px}
+#dashboard .terminal-lead-kicker .pill{border:1px solid var(--dda-line-strong);background:rgba(217,164,65,.12);color:var(--dda-brass-soft)}
+#dashboard .terminal-lead-meta{margin-top:24px;padding-top:16px;border-top:1px solid var(--dda-line-subtle)}
+#dashboard .terminal-lead-meta span{color:rgba(230,238,248,.56)}
+#dashboard .terminal-divider{display:flex;align-items:center;gap:12px;margin:4px 0 18px;padding:10px 0;border-top:1px solid var(--dda-line-subtle);border-bottom:1px solid var(--dda-line-subtle)}
+#dashboard .terminal-divider-label{padding-top:0;color:var(--dda-brass-soft);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+#dashboard .terminal-divider p{padding-top:0;color:rgba(230,238,248,.58);font-size:12px}
+#dashboard .terminal-divider-go{margin-left:auto;white-space:nowrap;color:var(--dda-brass-soft);font-size:11px}
+#dashboard .dashboard-supporting{margin-top:30px;padding-top:28px}
+#dashboard .dashboard-supporting-intro{max-width:600px;margin-bottom:16px}
+#dashboard .dashboard-supporting-intro h2{font-size:clamp(1.55rem,3vw,2.25rem)}
+#dashboard .dashboard-next-actions{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:14px}
+#dashboard .dashboard-next-card{min-height:168px;padding:21px;border:1px solid var(--dda-line);border-radius:var(--r-md);background:var(--dda-surface-raised);box-shadow:var(--dda-shadow-card);transition:transform var(--dda-duration-base) var(--dda-ease),border-color var(--dda-duration-base) var(--dda-ease),box-shadow var(--dda-duration-base) var(--dda-ease)}
+#dashboard .dashboard-next-card:hover{transform:translateY(-2px);border-color:var(--dda-line-strong);box-shadow:var(--dda-shadow-brass)}
+#dashboard .dashboard-next-card h3{font-family:var(--dda-serif);font-size:1.28rem}
+#dashboard .dashboard-next-card p:not(.eyebrow){color:rgba(230,238,248,.7)}
+#dashboard .dashboard-proof-kicker{color:var(--dda-brass-soft)}
+#dashboard .dashboard-proof-status{display:inline-block;width:7px;height:7px;margin-right:2px;border-radius:50%;background:var(--dda-brass);box-shadow:0 0 0 4px rgba(217,164,65,.12)}
+#dashboard .dashboard-next-journal{border-left:2px solid var(--dda-brass);background:linear-gradient(145deg,rgba(217,164,65,.13),rgba(7,18,31,.9) 72%)}
+#dashboard .dashboard-next-journal .terminal-journal-note{min-height:48px;margin:10px 0 8px;padding:11px 13px;border-color:var(--dda-line);background:rgba(4,9,18,.42)}
+#dashboard .dashboard-next-journal .terminal-journal-note p{margin:0;font-family:var(--dda-serif);font-size:14px;color:var(--dda-white)}
+#dashboard .dashboard-next-journal .terminal-journal-note small{color:rgba(230,238,248,.55)}
+#dashboard .dashboard-next-actions .terminal-mi{margin:0;padding:0;border:0}
+#dashboard .dashboard-next-actions .terminal-mi .dashboard-next-card{height:100%;background:var(--dda-surface-inset)}
+#dashboard .dashboard-proof-kicker{display:flex;align-items:center;gap:7px}
+@media(max-width:700px){
+  #dashboard .dashboard-command-head{padding-top:14px}
+  #dashboard .dashboard-command-head::after{position:static;display:block;margin-top:16px}
+  #dashboard .dashboard-command-head h1{max-width:none;font-size:clamp(2.2rem,11vw,3.4rem)}
+  #dashboard .terminal-entry-state span{flex:1;justify-content:space-between}
+  #dashboard .dashboard-mission{margin-bottom:18px}
+  #dashboard .dashboard-next-actions{grid-template-columns:1fr;gap:10px}
+  #dashboard .dashboard-next-card{min-height:0;padding:17px}
+}
+@media(prefers-reduced-motion:reduce){#dashboard .dashboard-next-card{transition:none}#dashboard .dashboard-next-card:hover{transform:none}}
