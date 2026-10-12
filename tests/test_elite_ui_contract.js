@@ -49,7 +49,7 @@ assert.match(css, /#dashboard \.terminal-tool-label\{display:none\}/, 'mobile to
 assert.match(css, /#landing \.landing-market-cards\{display:grid/, 'market cards adapt to a responsive grid');
 assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/, 'reduced-motion preference is respected');
 assert.match(css, /body\.low-data #landing \.landing-3d-scene\{display:none\}/, 'the existing low-data guard for decorative 3D remains');
-assert.match(sw, /const CACHE = 'dda-shell-v22';/, 'PWA cache is bumped for the latest Journal copy and visual refinements');
+assert.match(sw, /const CACHE = 'dda-shell-v23';/, 'PWA cache is bumped for the lazy Academy modules');
 assert.match(app, /window\.addEventListener\('popstate'/, 'browser Back/Forward is handled by the existing SPA router');
 assert.match(app, /window\.addEventListener\('hashchange'/, 'hash links remain synchronized with application navigation');
 assert.match(app, /history\.back\(\)/, 'in-app Retour uses the native route history when available');

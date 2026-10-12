@@ -517,22 +517,28 @@
   // real title exists yet for M3-M9 there, so their title is the honest "À
   // venir" fallback (Learning Experience & Progression Depth V1, mandat §9) —
   // never a generic "Module M3" placeholder that reads as a broken feature.
-  const curriculum = Object.freeze({
-    id: 'darius-free',
-    title: 'Darius Free',
-    modules: Object.freeze([
-      { id: 'M0', title: 'Fondations des marchés', lessons: Object.freeze([buildM01Lesson(), buildM02Lesson(), buildM03Lesson()]) },
-      { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze([M11_LESSON, M12_LESSON, M13_LESSON].filter(Boolean)) },
-      { id: 'M2', title: 'Risque et discipline', summary: 'Protéger son capital avant de rechercher la performance.', permission: 'premium_track', premiumOnly: true, lessons: Object.freeze([window.DDAP2Lessons?.p21, window.DDAP2Lessons?.p22].filter(Boolean)) },
-      { id: 'M3', title: 'À venir', lessons: Object.freeze([]) },
-      { id: 'M4', title: 'À venir', lessons: Object.freeze([]) },
-      { id: 'M5', title: 'À venir', lessons: Object.freeze([]) },
-      { id: 'M6', title: 'À venir', lessons: Object.freeze([]) },
-      { id: 'M7', title: 'À venir', lessons: Object.freeze([]) },
-      { id: 'M8', title: 'À venir', lessons: Object.freeze([]) },
-      { id: 'M9', title: 'À venir', lessons: Object.freeze([]) }
-    ])
-  });
+  function buildCurriculum() {
+    const M11_LESSON = globalThis.DDAM1GoldenLesson || null;
+    const M12_LESSON = globalThis.DDAM12GoldenLesson || null;
+    const M13_LESSON = globalThis.DDAM13GoldenLesson || null;
+    return Object.freeze({
+      id: 'darius-free',
+      title: 'Darius Free',
+      modules: Object.freeze([
+        { id: 'M0', title: 'Fondations des marchés', lessons: Object.freeze([buildM01Lesson(), buildM02Lesson(), buildM03Lesson()]) },
+        { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze([M11_LESSON, M12_LESSON, M13_LESSON].filter(Boolean)) },
+        { id: 'M2', title: 'Risque et discipline', summary: 'Protéger son capital avant de rechercher la performance.', permission: 'premium_track', premiumOnly: true, lessons: Object.freeze([(globalThis.DDAP2Lessons || globalThis.window?.DDAP2Lessons)?.p21, (globalThis.DDAP2Lessons || globalThis.window?.DDAP2Lessons)?.p22].filter(Boolean)) },
+        { id: 'M3', title: 'À venir', lessons: Object.freeze([]) },
+        { id: 'M4', title: 'À venir', lessons: Object.freeze([]) },
+        { id: 'M5', title: 'À venir', lessons: Object.freeze([]) },
+        { id: 'M6', title: 'À venir', lessons: Object.freeze([]) },
+        { id: 'M7', title: 'À venir', lessons: Object.freeze([]) },
+        { id: 'M8', title: 'À venir', lessons: Object.freeze([]) },
+        { id: 'M9', title: 'À venir', lessons: Object.freeze([]) }
+      ])
+    });
+  }
+  let curriculum = buildCurriculum();
 
   const PRIMARY_LESSON_ID = curriculum.modules[0].lessons[0].id;
 
@@ -873,8 +879,9 @@
 
   window.DDA = Object.freeze({
     schemaVersion: SCHEMA_VERSION,
-    curriculum,
-    primaryLessonId: PRIMARY_LESSON_ID,
+    get curriculum() { return curriculum; },
+    get primaryLessonId() { return curriculum.modules[0].lessons[0].id; },
+    refreshCurriculum() { curriculum = buildCurriculum(); return curriculum; },
     entitlements: ENTITLEMENTS,
     can,
     createUser(name, email) {

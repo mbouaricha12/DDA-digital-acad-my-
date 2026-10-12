@@ -9,9 +9,11 @@ const index = fs.readFileSync(path.join(root, 'dist/academy.html'), 'utf8');
 const app = fs.readFileSync(path.join(root, 'dist/app.js'), 'utf8');
 const core = fs.readFileSync(path.join(root, 'dist/dda-core.js'), 'utf8');
 const lessons = fs.readFileSync(path.join(root, 'dist/p2-lessons.js'), 'utf8');
+const lazy = fs.readFileSync(path.join(root, 'dist/dda-lazy-modules.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'dist/alpha-polish.css'), 'utf8');
 
-assert(index.includes('<script src="p2-lessons.js"></script>'), 'P2 authored lesson script must load before core');
+assert(index.includes('<script src="dda-lazy-modules.js"></script>'), 'Academy must load the route-aware lazy module loader');
+assert(lazy.includes("premium: ['p2-lessons.js']") && lazy.includes("'premium-track'"), 'P2 authored lesson script must be lazy-loaded for Premium routes');
 assert(index.includes('id="premium-track"') && index.includes('id="premium-lab"') && index.includes('id="premium-assessment"'), 'P2 views must exist');
 assert(index.includes('id="premium-proof-progress"') && index.includes('id="p2-journal-bridge"'), 'proof and Journal bridge hooks must exist');
 assert(index.includes('id="p2-progress-strip"') && index.includes('data-p2-step="assessment"'), 'P2 must expose an accessible four-step progress strip');
