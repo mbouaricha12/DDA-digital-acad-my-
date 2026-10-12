@@ -46,7 +46,11 @@ function auditSql(sql, source = '<inline>') {
 
 function auditPaths(paths) {
   const reports = paths.map(file => auditSql(fs.readFileSync(file, 'utf8'), file));
-  return { reports, tables: reports.flatMap(report => report.tables), findings: reports.flatMap(report => report.findings) };
+  // A versioned migration set is cumulative: a table created in 0002 may receive
+  // its RLS and policy in 0003. Auditing each file in isolation creates false
+  // blockers and does not reflect the schema produced by replaying the sequence.
+  const cumulative = auditSql(paths.map(file => fs.readFileSync(file, 'utf8')).join('\n'), paths.join(', '));
+  return { reports, tables: cumulative.tables, findings: cumulative.findings };
 }
 
 if (require.main === module) {

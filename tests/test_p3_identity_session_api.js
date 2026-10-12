@@ -17,13 +17,16 @@ assert.equal(contract['x-dda-security'].contract, 'p3-data-contract-v1');
 const paths = contract.paths;
 for (const route of [
   '/auth/register', '/auth/verify-email', '/auth/login', '/auth/logout', '/auth/logout-all',
-  '/auth/password-reset/request', '/auth/password-reset/confirm', '/me', '/sessions',
+  '/auth/password-reset/request', '/auth/password-reset/confirm', '/me', '/account/export', '/account', '/sessions',
   '/sessions/{sessionId}', '/security/csrf'
 ]) assert.ok(paths[route], `missing API route: ${route}`);
 
 assert.ok(paths['/me'].get.security.some(scheme => scheme.sessionCookie));
 assert.ok(paths['/me'].patch.security.some(scheme => scheme.sessionCookie));
 assert.ok(paths['/me'].patch.parameters.some(parameter => parameter.$ref.endsWith('/CsrfHeader')));
+assert.ok(paths['/account/export'].get.security.some(scheme => scheme.sessionCookie));
+assert.ok(paths['/account'].delete.security.some(scheme => scheme.sessionCookie));
+assert.ok(paths['/account'].delete.parameters.some(parameter => parameter.$ref.endsWith('/CsrfHeader')));
 assert.ok(paths['/auth/logout'].post.parameters.some(parameter => parameter.$ref.endsWith('/CsrfHeader')));
 assert.ok(paths['/sessions/{sessionId}'].delete.parameters.some(parameter => parameter.$ref.endsWith('/SessionId')));
 

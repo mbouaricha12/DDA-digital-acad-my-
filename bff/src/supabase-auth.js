@@ -72,6 +72,10 @@ class SupabaseAuthAdapter {
     return { user_id: user.id, email: user.email, email_verified: Boolean(user.email_confirmed_at), display_name: user.user_metadata?.display_name || '', status: user.banned_until ? 'locked' : 'active', entitlements: [] };
   }
 
+  async deleteUser(userId) {
+    await this.adminRequest(`/auth/v1/admin/users/${encodeURIComponent(userId)}`, { method: 'DELETE' });
+  }
+
   async revokeProviderSession(accessToken) {
     if (!accessToken) return;
     try { await this.request('/auth/v1/logout', { method: 'POST', key: accessToken }); } catch { /* BFF session revocation remains authoritative. */ }
