@@ -2586,3 +2586,27 @@ body.dda-auth-shell .dda-auth-surface{background:#060d17;}
   .access-model-grid{grid-template-columns:1fr}
   .access-model-grid article{min-height:0}
 }
+
+
+/* Responsive integrity — evaluation beats use negative gutters on mobile;
+   border-box keeps their padding inside the viewport instead of adding a
+   2px horizontal page overflow on narrow devices. */
+@media (max-width:720px){
+  .lesson-beat-decision_choice,
+  .lesson-beat-quiz{
+    box-sizing:border-box;
+    width:calc(100% + 36px);
+    max-width:calc(100% + 36px);
+  }
+}
+
+/* The content column has 16px mobile gutters; neutralize exactly those
+   gutters so evaluation beats reach the viewport edge without overshooting. */
+@media (max-width:720px){
+  .lesson-beat-decision_choice,
+  .lesson-beat-quiz{
+    margin-inline:-16px;
+    width:calc(100% + 32px);
+    max-width:calc(100% + 32px);
+  }
+}
