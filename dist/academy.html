@@ -544,11 +544,11 @@
         <div class="page-mission" data-mission="journal"><div><p class="eyebrow">Mission de cette page</p><strong>Conserver le raisonnement pendant qu’il est encore frais.</strong><span>Le Journal reçoit tes observations depuis le Terminal et les transforme en trace relisible.</span></div><button class="text-action" id="journal-mission-new" type="button">Commencer une entrée <span>→</span></button></div>
 
         <div class="journal-tabs" role="tablist" aria-label="Sections du Journal">
-          <button class="journal-tab active" id="journal-tab-entries" type="button" role="tab" aria-selected="true" data-journal-tab="entries">Journal</button>
-          <button class="journal-tab" id="journal-tab-plan" type="button" role="tab" aria-selected="false" data-journal-tab="plan">Mon plan</button>
+          <button class="journal-tab active" id="journal-tab-entries" type="button" role="tab" aria-selected="true" aria-controls="journal-entries-panel" data-journal-tab="entries">Journal</button>
+          <button class="journal-tab" id="journal-tab-plan" type="button" role="tab" aria-selected="false" aria-controls="journal-plan-panel" data-journal-tab="plan">Mon plan</button>
         </div>
 
-        <section class="journal-panel" id="journal-entries-panel">
+        <section class="journal-panel" id="journal-entries-panel" role="tabpanel" aria-labelledby="journal-tab-entries">
           <div class="journal-toolbar">
             <div>
               <p class="journal-count" id="journal-count">0 entrée</p>
@@ -626,7 +626,7 @@
           </form>
         </section>
 
-        <section class="journal-panel" id="journal-plan-panel" hidden>
+        <section class="journal-panel" id="journal-plan-panel" role="tabpanel" aria-labelledby="journal-tab-plan" hidden>
           <p class="journal-plan-intro">Documente ton processus personnel — pas tes objectifs de gain. Ces réponses orientent la manière dont DDA t’accompagne, jamais ce que tu dois trader.</p>
           <form id="journal-plan-form" data-js-submit method="dialog">
             <fieldset class="plan-group">
