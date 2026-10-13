@@ -24,7 +24,7 @@ Le footer ne contient plus de mentions « bientôt ». Quatre documents sont acc
 
 Les textes couvrent l’usage pédagogique, la conservation locale, la minimisation des données, l’absence de conseil financier/signal, les limites des scénarios synthétiques et la propriété intellectuelle.
 
-**Point de conformité à traiter avant lancement commercial :** compléter l’identité juridique exacte de l’éditeur, l’adresse, l’immatriculation, le contact, le directeur de publication et l’hébergeur, puis faire relire les textes par un conseil compétent. Le site ne présente pas ces champs comme finalisés.
+**Statut administratif provisoire confirmé :** l’entité n’est pas encore immatriculée. La modale indique désormais explicitement ce statut et ne revendique aucun numéro RCCM ou identifiant fiscal. L’adresse légale complète, l’e-mail officiel, le directeur de publication et les coordonnées définitives de l’hébergeur restent à publier et à faire relire avant toute ouverture commerciale.
 
 ### Accessibilité et confiance
 
