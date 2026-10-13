@@ -24,7 +24,7 @@ Le footer ne contient plus de mentions « bientôt ». Quatre documents sont acc
 
 Les textes couvrent l’usage pédagogique, la conservation locale, la minimisation des données, l’absence de conseil financier/signal, les limites des scénarios synthétiques et la propriété intellectuelle.
 
-**Statut administratif provisoire confirmé :** l’entité n’est pas encore immatriculée. La modale indique désormais explicitement ce statut et ne revendique aucun numéro RCCM ou identifiant fiscal. L’adresse légale complète, l’e-mail officiel, le directeur de publication et les coordonnées définitives de l’hébergeur restent à publier et à faire relire avant toute ouverture commerciale.
+**Statut administratif provisoire confirmé :** l’entité n’est pas encore immatriculée et se présente comme un projet africain à vocation internationale. La modale indique désormais explicitement ce statut et ne revendique aucun numéro RCCM ou identifiant fiscal. L’adresse légale complète, l’e-mail officiel, le directeur de publication et les coordonnées définitives de l’hébergeur restent à publier et à faire relire avant toute ouverture commerciale.
 
 ### Accessibilité et confiance
 
