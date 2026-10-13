@@ -718,6 +718,17 @@
           <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">Ce que Premium approfondira</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><ul><li>Modules M1+ (marchés financiers, ordres, organisation)</li><li>Atelier Ressources Premium — laboratoire de gestion du risque</li><li>Aperçu de certification une fois M0.1 validé</li><li>Chaque brique ci-dessous, construite étape par étape</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aperçu local — aucun achat, aucun abonnement actif</small></article>
         </div>
 
+        <section class="panel access-model-panel" aria-labelledby="access-model-title">
+          <div class="panel-heading"><div><p class="eyebrow gold">Premium First · Accessible by Design</p><h2 id="access-model-title">Trois niveaux, trois responsabilités.</h2></div></div>
+          <p class="access-model-intro">Free doit rester utile. Premium doit apporter une profondeur réellement construite. Access préparera plus tard des bourses ou accès sponsorisés — rien n’est encore ouvert ni financé.</p>
+          <div class="access-model-grid">
+            <article><span class="access-model-kicker">Disponible maintenant</span><h3>DDA Free</h3><p>M0, exercices, feedback, progression, Journal &amp; Plan local et ressources Free.</p><strong>Valeur autonome</strong></article>
+            <article><span class="access-model-kicker gold">Démonstration locale</span><h3>DDA Premium</h3><p>P2 Risk &amp; Discipline, leçons authored, Risk Plan Lab, assessment et preuve locale.</p><strong>Aucun paiement actif</strong></article>
+            <article><span class="access-model-kicker muted">À préparer</span><h3>DDA Access</h3><p>Bourses, tarifs réduits ou accès sponsorisés selon des règles publiées et validées côté serveur.</p><strong>Non disponible aujourd’hui</strong></article>
+          </div>
+          <div class="access-model-rules"><strong>Conditions actuelles :</strong> aucun prix, checkout, abonnement ou renouvellement automatique n’est activé. Une modification de l’état local ne pourra jamais constituer un achat ou un droit Premium serveur.</div>
+        </section>
+
         <section class="panel membership-roadmap">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-path"/></svg> Pourquoi Premium continue d’apporter de la valeur</p><h3>Une pile construite étape par étape, jamais livrée en une fois</h3></div></div>
           <p>Journal &amp; Plan est la première brique réellement construite de cette pile ; DDA l’étoffera puis construira le reste étape par étape — jamais toutes en même temps. Statuts réels ci-dessous, pas une promesse uniforme.</p>
@@ -1164,10 +1175,7 @@
       <button class="primary-action" id="gate-preview">Voir la formule Premium <span>→</span></button>
     </div>
   </div>
-  <script src="m1-1-lesson.js"></script>
-  <script src="m1-2-lesson.js"></script>
-  <script src="m1-3-lesson.js"></script>
-  <script src="p2-lessons.js"></script>
+  <script src="dda-lazy-modules.js"></script>
   <script>
     // Optional deployment flag. Leave empty to preserve the local prototype.
     window.DDA_BFF_BASE_URL = window.DDA_BFF_BASE_URL || '';

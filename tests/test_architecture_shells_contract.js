@@ -22,6 +22,9 @@ assert.match(academyHtml, /id="academy-shell"/);
 assert.match(academyHtml, /id="dashboard"/);
 assert.match(academyHtml, /id="journal"/);
 assert.match(academyHtml, /id="progress"/);
+assert.match(academyHtml, /src="dda-lazy-modules\.js"/);
+assert.doesNotMatch(academyHtml, /src="m1-1-lesson\.js"|src="m1-2-lesson\.js"|src="m1-3-lesson\.js"|src="p2-lessons\.js"/,
+  'optional authored modules must not load in the initial Academy document');
 assert.match(academyHtml, /src="app\.js"/);
 assert.doesNotMatch(academyHtml, /src="public\.js"/,
   'Academy shell must not load public-only runtime scripts');

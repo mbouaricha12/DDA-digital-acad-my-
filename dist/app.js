@@ -121,7 +121,7 @@ let bffAuthMode = 'signup';
 // Résolution runtime du registre contre le curriculum réel : une leçon
 // déclarée mais absente du curriculum (fichier authored non chargé) n'est pas
 // montée — les boucles ci-dessous ne consomment que mountedLessons.
-const mountedLessons = LESSON_REGISTRY
+let mountedLessons = LESSON_REGISTRY
   .map(entry => ({ ...entry, meta: DDALearning.findLesson(DDA.curriculum, entry.id) }))
   .filter(entry => entry.meta);
 
@@ -158,6 +158,24 @@ mountedLessons.forEach(entry => {
   if (entry.permission === 'premium_track' && !DDA.can(prototypeState, 'premium_track')) return;
   mountLesson(entry);
 });
+function refreshMountedLessons() {
+  mountedLessons = LESSON_REGISTRY
+    .map(entry => ({ ...entry, meta: DDALearning.findLesson(DDA.curriculum, entry.id) }))
+    .filter(entry => entry.meta);
+  mountedLessons.forEach(entry => {
+    if (entry.permission === 'premium_track' && !DDA.can(prototypeState, 'premium_track')) return;
+    const main = document.getElementById(`${entry.viewId}-main`);
+    const wasMounted = main?.dataset.ddaLessonMounted === 'true';
+    mountLesson(entry);
+    if (!wasMounted) bindRegistryQuestions(entry);
+  });
+  renderState();
+  if (window.DDAMarketIntelligence) {
+    renderMarketIntelligence();
+    renderTerminalMarketIntelligence();
+  }
+}
+window.DDA_LAZY_REFRESH = refreshMountedLessons;
 function findLessonBlock(lessonDef, id) { return lessonDef.blocks.find(b => b.id === id); }
 
 function bindViewButton(button) {
@@ -174,7 +192,16 @@ function bindViewButton(button) {
       const observation = document.getElementById('terminal-observation');
       if (observation) saveState({ terminal: { ...getTerminalState(), observation: observation.value.trim() } });
     }
-    showView(button.dataset.view);
+    const targetView = button.dataset.view;
+    const lazy = window.DDALazyModules;
+    if (lazy?.needs(targetView) && !lazy.isReady(targetView)) {
+      lazy.ensure(targetView).then(() => showView(targetView)).catch(error => {
+        console.error(error);
+        showToast('Cette section est momentanément indisponible.');
+      });
+    } else {
+      showView(targetView);
+    }
     if (button.dataset.scrollTo) {
       requestAnimationFrame(() => document.getElementById(button.dataset.scrollTo)?.scrollIntoView({
         behavior: prototypeState.preferences?.lowData ? 'auto' : 'smooth',
@@ -359,29 +386,19 @@ function lessonUiIds(entry) {
   };
 }
 const MODULE_STATUS_LABEL = { completed: 'Terminé', in_progress: 'En cours', available: 'Disponible', locked: 'Verrouillé', coming_soon: 'Prochainement' };
-// Structural demo only — no real index value, date or amount. Swap for a real feed's response later without touching the markup.
-const MARKET_DEMO = {
-  indices: [
-    { label: 'BRVM Composite', description: 'Indice large de la cote BRVM.' },
-    { label: 'BRVM 30', description: 'Indice des valeurs les plus liquides de la cote.' }
-  ],
-  calendar: [
-    { company: 'Société A', event: 'Détachement de dividende' },
-    { company: 'Société B', event: 'Mise en paiement' },
-    { company: 'Société C', event: 'Assemblée générale' }
-  ]
-};
+// Market Intelligence is loaded only when its route is opened. Keep an empty
+// safe value here so the Academy shell can boot without the optional module.
+const MARKET_DEMO = Object.freeze({ indices: [], calendar: [] });
+function marketDemo() { return window.DDAMarketIntelligence?.demo || MARKET_DEMO; }
 const NEXT_STEP_PHRASE = { lesson: 'voir la leçon', exercise: 'réussir l’exercice', quiz: 'valider le quiz' };
 
 // Illustrative candlestick shape (never real price data — same "Mode pédagogique"
 // honesty as the badge next to it) replacing a generic line sparkline with DDA's
 // own visual signature: blue/ivory candles, never green/red (§ zéro signal).
-const CANDLE_PATTERNS = [
-  [6, 14, 4, 16, 9, 15, 5, 17],
-  [10, 15, 12, 6, 16, 8, 13, 7]
-];
+const CANDLE_PATTERNS = [[6, 14, 4, 16, 9, 15, 5, 17]];
 function candlestickSpark(patternIndex) {
-  const pattern = CANDLE_PATTERNS[patternIndex % CANDLE_PATTERNS.length];
+  const patterns = window.DDAMarketIntelligence?.candlePatterns || CANDLE_PATTERNS;
+  const pattern = patterns[patternIndex % patterns.length];
   const bars = pattern.map((open, i) => {
     const close = pattern[(i + 1) % pattern.length];
     const x = 6 + i * 15.5;
@@ -786,7 +803,7 @@ function renderModulesRecap() {
 function renderMarketIntelligence() {
   const indices = document.getElementById('market-indices');
   if (indices) {
-    indices.innerHTML = MARKET_DEMO.indices.map((item, i) => `
+    indices.innerHTML = marketDemo().indices.map((item, i) => `
       <article class="index-card">
         <div class="index-card-head"><strong>${item.label}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Mode pédagogique</span></div>
         ${candlestickSpark(i)}
@@ -796,7 +813,7 @@ function renderMarketIntelligence() {
   }
   const calendar = document.getElementById('market-calendar-list');
   if (calendar) {
-    calendar.innerHTML = MARKET_DEMO.calendar.map(row => `
+    calendar.innerHTML = marketDemo().calendar.map(row => `
       <li><div><strong>${row.company}</strong><small>${row.event}</small></div><span class="data-badge"><svg class="icon"><use href="#icon-clock"/></svg>Exemple</span></li>
     `).join('');
   }
@@ -1488,7 +1505,7 @@ function renderTerminalLeadComplete() {
 function renderTerminalMarketIntelligence() {
   const row = document.getElementById('terminal-mi-row');
   if (!row) return;
-  row.innerHTML = MARKET_DEMO.indices.map((item, i) => `
+  row.innerHTML = marketDemo().indices.map((item, i) => `
     <div class="terminal-mi-idx">
       <div class="top"><b>${item.label}</b><span class="badge"><svg class="icon"><use href="#icon-blocked"/></svg>Mode pédagogique</span></div>
       ${candlestickSpark(i)}
@@ -2114,6 +2131,13 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
   // shell (which would recreate the architecture mixing we just removed).
   if (id === 'landing' && !document.getElementById('landing')) {
     window.location.assign('./index.html#landing');
+    return;
+  }
+  if (window.DDALazyModules?.needs(id) && !window.DDALazyModules.isReady(id)) {
+    window.DDALazyModules.ensure(id).then(() => showView(id, recordEvent, historyMode)).catch(error => {
+      console.error(error);
+      showToast('Cette section est momentanément indisponible.');
+    });
     return;
   }
   if (id === 'back') {

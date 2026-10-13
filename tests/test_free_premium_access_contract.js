@@ -1,0 +1,21 @@
+'use strict';
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const root = path.join(__dirname, '..', 'dist');
+const html = fs.readFileSync(path.join(root, 'academy.html'), 'utf8');
+const strategy = fs.readFileSync(path.join(root, '..', 'DDA_FREE_PREMIUM_ACCESS_STRATEGY.md'), 'utf8');
+
+assert.match(html, /id="membership"/);
+assert.match(html, /id="access-model-panel"|class="panel access-model-panel"/);
+assert.match(html, /DDA Free/);
+assert.match(html, /DDA Premium/);
+assert.match(html, /DDA Access/);
+assert.match(html, /Aucun paiement actif/);
+assert.match(html, /Non disponible aujourd’hui/);
+assert.match(html, /aucun prix, checkout, abonnement ou renouvellement automatique/);
+assert.doesNotMatch(html, /[0-9]+\s*(FCFA|EUR|USD|€|\$)/i, 'no unapproved price may appear in the prototype offer');
+assert.match(strategy, /KEEP \/ MODIFY \/ ADD \/ DEFER/);
+assert.match(strategy, /entitlements.*côté serveur|Entitlements serveur/i);
+assert.match(strategy, /bourses|tarifs réduits|accès sponsorisés/i);
+console.log('Free/Premium/Access contract: PASS');

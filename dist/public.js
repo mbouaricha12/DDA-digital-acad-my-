@@ -132,4 +132,7 @@
   window.addEventListener('scroll', requestCtaSync, { passive: true });
   window.addEventListener('resize', requestCtaSync, { passive: true });
   syncCta();
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
 })();
