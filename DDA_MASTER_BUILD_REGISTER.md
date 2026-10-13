@@ -16,6 +16,8 @@ portent d’abord sur la mission du Dashboard, la séparation d’Access et le
 contrat de complétude des leçons ; aucune nouvelle capacité P2/P3, connexion
 externe ou backend n’est autorisée par ce document.
 
+**Tranche stratégie commerciale Free/Premium/Access (13 octobre 2026) :** audit du prototype et clarification visible dans `#membership` selon le principe « Premium First, Accessible by Design ». DDA Free reste une expérience pédagogique autonome ; DDA Premium est présenté comme une vertical slice locale démonstrative autour de P2 Risk & Discipline ; DDA Access (bourses, tarifs réduits, accès sponsorisés) est explicitement marqué comme à préparer et non disponible. Aucun prix, checkout, abonnement ou renouvellement n’est annoncé. La matrice KEEP / MODIFY / ADD / DEFER, les coûts, les règles d’entitlement serveur et le plan de validation sont versionnés dans `DDA_FREE_PREMIUM_ACCESS_STRATEGY.md`. Un contrat `tests/test_free_premium_access_contract.js` verrouille la présence des trois niveaux et l’absence de prix non validé.
+
 **Tranche frontend exécutée (28 septembre 2026) :** le Dashboard garde une
 action primaire unique et regroupe ses autres surfaces sous « Repères
 secondaires » ; le CTA de pratique pointe vers la mission Terminal sans créer
