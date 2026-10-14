@@ -391,3 +391,8 @@ La tranche est couverte par `tests/test_dashboard_metrics_contract.js` et docume
 **Accessibilité :** les rails de leçons et outlines sont focusables et pilotables au clavier avec flèches/Home/End; les feedbacks pédagogiques utilisent des régions live; les contrastes des micro-libellés Dashboard/Terminal, Access et Premium sont renforcés; `prefers-reduced-motion` reste respecté.
 
 **Validation :** contrats statiques PASS, contrats landing/légal et accessibilité PASS, syntaxe JS PASS, HTML sans doublon d’ID PASS, `git diff --check` PASS, Playwright `tests/run.js` **54/54**. Le workflow Pages exécute désormais les deux nouveaux contrats avant le déploiement. Aucun CodeQL n’est configuré dans le dépôt au moment de cette tranche; ce point est documenté dans `DDA_LANDING_FINALIZATION_REPORT.md`.
+
+
+## Tranche — P4 BillingStore Supabase Chariow (14 octobre 2026)
+
+**Statut : SOCLE BFF IMPLÉMENTÉ — provisionnement Supabase et paiement réel encore séparés.** `bff/src/billing-store.js` persiste les livraisons Pulse avec idempotence par `x-pulse-delivery-id`, écrit les transitions dans `dda_billing_memberships`, expose uniquement les entitlements actifs au BFF et supprime les memberships lors d’une suppression de compte. `bff/src/server.js` branche l’endpoint HTTPS `/webhooks/chariow`; `bff/supabase/schema.sql` ajoute les tables avec RLS et aucun droit d’écriture navigateur. Validation : contrats Chariow, billingStore PostgREST simulé, audit RLS, syntaxe BFF, contrats landing/légal et suite E2E. Aucun secret, produit réel ou paiement n’est activé dans le dépôt.

@@ -91,7 +91,7 @@ function publicUser(user) {
   return { user_id: user.user_id, email: user.email, email_verified: Boolean(user.email_verified), display_name: user.display_name || '', status: user.status, entitlements: Array.isArray(user.entitlements) ? user.entitlements : [] };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, businessStore, mutationStore = null, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, mutationStore = null, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   businessStore = businessStore || {
     exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
@@ -248,6 +248,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         if (body.confirmation !== 'DELETE') return sendError(res, 400, 'confirmation_required', 'Type DELETE to confirm account deletion.', requestId);
         await businessStore.deleteUserData(current.user.user_id);
+        await billingStore?.deleteUserData?.(current.user.user_id);
         await sessions.revokeAll(current.user.user_id, clock());
         await auth.deleteUser(current.user.user_id);
         setCookies(res, cookieHeaders(config, '', '', true));
