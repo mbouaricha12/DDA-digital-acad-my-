@@ -1246,6 +1246,26 @@ function updateLessonOutline(step, outlineListId) {
     item.classList.toggle('active', item.dataset.outlineStep === step);
   });
 }
+// WCAG keyboard affordance for the two scrollable lesson rails. They are
+// informational, but their overflow must not hide the remaining steps from a
+// keyboard-only learner. The handler is delegated because lesson markup is
+// mounted from the curriculum after boot.
+document.addEventListener('keydown', event => {
+  const rail = event.target.closest?.('.lesson-loop, .lesson-outline');
+  if (!rail || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
+  const horizontal = rail.classList.contains('lesson-loop') && window.matchMedia('(max-width: 720px)').matches;
+  const amount = horizontal ? Math.max(160, Math.round(rail.clientWidth * 0.8)) : Math.max(120, Math.round(rail.clientHeight * 0.8));
+  if (event.key === 'Home' || event.key === 'End') {
+    event.preventDefault();
+    rail.scrollTo({ left: horizontal && event.key === 'End' ? rail.scrollWidth : 0, top: !horizontal && event.key === 'End' ? rail.scrollHeight : 0, behavior: 'smooth' });
+    return;
+  }
+  const forward = event.key === 'ArrowRight' || event.key === 'ArrowDown';
+  const relevant = horizontal ? ['ArrowLeft', 'ArrowRight'].includes(event.key) : ['ArrowUp', 'ArrowDown'].includes(event.key);
+  if (!relevant) return;
+  event.preventDefault();
+  rail.scrollBy({ left: horizontal ? (forward ? amount : -amount) : 0, top: horizontal ? 0 : (forward ? amount : -amount), behavior: 'smooth' });
+});
 
 // Real data only: XP already earned on this lesson, the competency it maps to,
 // and the next actionable lesson from the engine — never a fabricated stat.

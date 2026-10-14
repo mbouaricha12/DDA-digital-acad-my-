@@ -193,7 +193,7 @@
         <h2>${block.heading}</h2>
         ${block.prompt ? `<p>${block.prompt}</p>` : ''}
         <div class="decision-choice-options"${graded ? ` data-question="${block.id}"` : ''}>${options.map((opt, index) => `<button type="button" class="decision-option" data-correct="${opt.correct === true}"${opt.feedback ? ` data-feedback="${opt.feedback}"` : ''}><span class="choice-index">${String(index + 1).padStart(2, '0')}</span><span class="choice-text">${opt.text}</span></button>`).join('')}</div>
-        ${graded ? `<p class="feedback" id="${block.id}-feedback" aria-live="polite"></p>` : ''}
+        ${graded ? `<p class="feedback" id="${block.id}-feedback" role="status" aria-live="polite" aria-atomic="true"></p>` : ''}
         ${block.note ? `<p class="decision-note">${block.note}</p>` : ''}
       </section>`;
     },
@@ -233,7 +233,7 @@
             ${zones.map(z => `<button type="button" class="zone-band" data-correct="${z.correct === true}"${z.feedback ? ` data-feedback="${z.feedback}"` : ''}><span>${z.label}</span></button>`).join('')}
           </div>
         </div>
-        <p class="feedback" id="${block.id}-feedback" aria-live="polite"></p>
+        <p class="feedback" id="${block.id}-feedback" role="status" aria-live="polite" aria-atomic="true"></p>
         ${block.reveal ? `<div class="zone-reveal" id="${block.id}-reveal" hidden><svg class="icon"><use href="#icon-check-circle"/></svg><p>${block.reveal}</p></div>` : ''}
         <p class="chart-caption">Graphique pédagogique synthétique — aucune donnée de marché réelle.</p>
       </section>`;
@@ -247,7 +247,7 @@
         <h2>${q.heading}</h2>
         ${q.prompt ? `<p>${q.prompt}</p>` : ''}
         <div class="answer-grid" data-question="${q.id}">${renderChoices(q)}</div>
-        <p class="feedback" id="${q.id}-feedback" aria-live="polite"></p>
+        <p class="feedback" id="${q.id}-feedback" role="status" aria-live="polite" aria-atomic="true"></p>
       </section>`;
     },
 
@@ -321,7 +321,7 @@
       <p class="eyebrow gold">${module.title} · Leçon ${lessonIndex}</p>
       <h1 id="lesson-title${suffix}">${lesson.title}</h1>
       <p class="lesson-lead">${lesson.content.lead}</p>
-      <ol class="lesson-loop" id="lesson-loop${suffix}" aria-label="Progression dans la leçon">${lesson.steps.map(s => `<li data-step="${s.id}"><i class="loop-bead"></i><span>${s.label}</span></li>`).join('')}</ol>
+      <ol class="lesson-loop" id="lesson-loop${suffix}" tabindex="0" aria-label="Progression dans la leçon — utilise les flèches pour faire défiler les étapes">${lesson.steps.map(s => `<li data-step="${s.id}"><i class="loop-bead" aria-hidden="true"></i><span>${s.label}</span></li>`).join('')}</ol>
 
       ${lesson.video ? renderVideoSurface(lesson.video, `lesson-video${suffix}`) : ''}
       ${lesson.blocks.map(renderBlock).join('\n')}
@@ -338,7 +338,7 @@
     return `
       <p class="eyebrow">Dans cette leçon</p>
       <ol id="lesson-outline-list${suffix}">${beats.map(beat => `<li data-outline-step="${beat.step}">${beat.outline}</li>`).join('')}</ol>
-      <div class="saved-state" id="saved-state${suffix}">Progression enregistrée sur cet appareil — jamais envoyée à un serveur</div>`;
+      <div class="saved-state" id="saved-state${suffix}" role="status" aria-live="polite" aria-atomic="true">Progression enregistrée sur cet appareil — jamais envoyée à un serveur</div>`;
   }
 
   window.DDALessonRenderer = Object.freeze({ renderLessonMain, renderLessonOutline, renderBlock, BLOCK_RENDERERS });
