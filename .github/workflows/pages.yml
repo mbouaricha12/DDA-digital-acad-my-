@@ -39,6 +39,8 @@ jobs:
           node --check dist/learning-engine.js
           node --check dist/lesson-renderer.js
           node --check dist/dda-analytics.js
+          node --check dist/public-docs.js
+          node --check dist/public-document.js
           node --check dist/m1-1-lesson.js
           node --check dist/m1-2-lesson.js
           node --check dist/m1-3-lesson.js
@@ -53,6 +55,8 @@ jobs:
       - name: Verify route register and deployment fallback
         run: |
           node tests/verify_route_register_consistency.js
+          node tests/test_public_information_contract.js
+          node tests/test_public_autonomous_pages.js
           test -s dist/index.html
           test -s dist/academy.html
           test -s dist/404.html
