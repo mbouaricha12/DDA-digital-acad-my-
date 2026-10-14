@@ -3,6 +3,7 @@ const assert = require('assert');
 const fs = require('fs');
 
 const html = fs.readFileSync('dist/index.html', 'utf8');
+const academyHtml = fs.readFileSync('dist/academy.html', 'utf8');
 const publicJs = fs.readFileSync('dist/public.js', 'utf8');
 const css = fs.readFileSync('dist/alpha-polish.css', 'utf8');
 
@@ -26,5 +27,7 @@ assert(publicJs.includes('https://whatsapp.com/channel/0029VbCISPsI1rcb3sbxiI0A'
 assert(publicJs.includes('Que comprend DDA Free ?') && publicJs.includes('DDA Free est-il vraiment gratuit ?'), 'La FAQ doit expliquer l’offre Free et l’absence de paiement actuel');
 assert(publicJs.includes('Comment obtenir de l’aide ?'), 'La FAQ doit expliquer les canaux de support');
 assert(html.includes('mailto:dariusdigitalacademy@gmail.com') && html.includes('Canal Telegram') && html.includes('Chaîne WhatsApp'), 'Le footer doit exposer les canaux de contact officiels');
+assert(academyHtml.includes('class="academy-footer"'), 'L’Academy doit exposer un footer dédié');
+assert(academyHtml.includes('mailto:dariusdigitalacademy@gmail.com') && academyHtml.includes('https://t.me/+Wny_VS9f-blmOWFk') && academyHtml.includes('https://whatsapp.com/channel/0029VbCISPsI1rcb3sbxiI0A'), 'Le footer Academy doit exposer les canaux de contact officiels');
 assert(css.includes('.public-info-content'), 'Les documents publics doivent disposer d’un style dédié');
 console.log('RESULT: Public information and legal depth contract passed');
