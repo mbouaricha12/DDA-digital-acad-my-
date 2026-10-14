@@ -382,3 +382,12 @@ Le fallback artificiel `|| 20` a été supprimé : le Dashboard, Progression et 
 `countActiveDays()` ne compte plus les ouvertures de routes ou autres événements de navigation. Il applique une fenêtre glissante stricte de 7 jours et une allowlist d’actions pédagogiques réelles : jalons de leçon, exercice/quiz, Practice, Journal et étapes Premium effectivement pratiquées. Les écrans déclarent explicitement « Activité (7 j) » / « Jours actifs (7 j) ». L’action Practice émet `practice_attempted`, ajouté à la liste d’événements autorisés du noyau avec métadonnées filtrées.
 
 La tranche est couverte par `tests/test_dashboard_metrics_contract.js` et documentée dans `DDA_P1_DASHBOARD_METRICS_REPORT.md`. Les contrats Node, la syntaxe JS, l’intégrité des IDs HTML et `git diff --check` passent ; la suite Playwright `tests/run.js` est relancée après installation temporaire de Chromium.
+
+## Tranche — Finalisation landing, légal et accessibilité (13 octobre 2026)
+**Périmètre :** landing publique et garde-fous de navigation, sans changement backend, routes métier ni permissions.
+
+**Livré :** les ancres publiques défilent sans rechargement, le logo revient en haut, le menu mobile est opaque et se ferme après sélection. Le footer expose maintenant quatre documents fonctionnels — CGU, confidentialité, cookies/stockage local et mentions légales — dans une modale accessible. Les textes rappellent le caractère pédagogique de DDA, l’absence de conseil financier, de signal et de promesse de rendement. Le statut administratif provisoire est désormais explicite : entité non encore immatriculée, sans numéro RCCM ou identifiant fiscal revendiqué. Adresse légale, e-mail officiel, directeur de publication et hébergeur définitifs restent à publier avant lancement commercial.
+
+**Accessibilité :** les rails de leçons et outlines sont focusables et pilotables au clavier avec flèches/Home/End; les feedbacks pédagogiques utilisent des régions live; les contrastes des micro-libellés Dashboard/Terminal, Access et Premium sont renforcés; `prefers-reduced-motion` reste respecté.
+
+**Validation :** contrats statiques PASS, contrats landing/légal et accessibilité PASS, syntaxe JS PASS, HTML sans doublon d’ID PASS, `git diff --check` PASS, Playwright `tests/run.js` **54/54**. Le workflow Pages exécute désormais les deux nouveaux contrats avant le déploiement. Aucun CodeQL n’est configuré dans le dépôt au moment de cette tranche; ce point est documenté dans `DDA_LANDING_FINALIZATION_REPORT.md`.

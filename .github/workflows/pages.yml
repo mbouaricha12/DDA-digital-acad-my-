@@ -46,6 +46,10 @@ jobs:
           node --check dist/app.js
       - name: Verify Public / Academy shell separation
         run: node tests/test_architecture_shells_contract.js
+      - name: Verify landing launch and legal surfaces
+        run: |
+          node tests/test_landing_launch_contract.js
+          node tests/test_accessibility_contract.js
       - name: Verify route register and deployment fallback
         run: |
           node tests/verify_route_register_consistency.js
