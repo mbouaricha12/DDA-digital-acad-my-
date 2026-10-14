@@ -1,0 +1,121 @@
+'use strict';
+
+const { sha256 } = require('./security');
+
+const USER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ENTITLEMENTS = ['premium_track', 'resources_premium', 'certificate_preview', 'advanced_modules'];
+
+class PostgrestBillingStore {
+  constructor({ supabaseUrl, serviceRoleKey, fetchImpl = fetch }) {
+    if (!supabaseUrl || !serviceRoleKey) throw new Error('Supabase billing store requires URL and service role key');
+    this.base = `${String(supabaseUrl).replace(/\/$/, '')}/rest/v1`;
+    this.key = serviceRoleKey;
+    this.fetch = fetchImpl;
+  }
+
+  async request(table, query = '', options = {}) {
+    const response = await this.fetch(`${this.base}/${table}${query}`, {
+      ...options,
+      headers: {
+        apikey: this.key,
+        Authorization: `Bearer ${this.key}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation',
+        ...(options.headers || {})
+      }
+    });
+    if (!response.ok) throw new Error(`billing store error ${response.status}`);
+    const text = await response.text();
+    return text ? JSON.parse(text) : [];
+  }
+
+  async claim(deliveryId, metadata = {}) {
+    const rows = await this.request('dda_billing_deliveries', '', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=ignore-duplicates,return=representation' },
+      body: JSON.stringify({
+        delivery_id: deliveryId,
+        provider: 'chariow',
+        event_name: metadata.event || null,
+        payload_sha256: metadata.payloadSha256 || null,
+        processed_status: 'accepted',
+        received_at: metadata.receivedAt || new Date().toISOString()
+      })
+    });
+    return rows.length > 0;
+  }
+
+  async has(deliveryId) {
+    const rows = await this.request('dda_billing_deliveries', `?delivery_id=eq.${encodeURIComponent(deliveryId)}&select=delivery_id`, { method: 'GET' });
+    return rows.length > 0;
+  }
+
+  async add(deliveryId, metadata = {}) {
+    return this.claim(deliveryId, metadata);
+  }
+
+  async markProcessed(deliveryId, status = 'processed') {
+    await this.request('dda_billing_deliveries', `?delivery_id=eq.${encodeURIComponent(deliveryId)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ processed_status: status, processed_at: new Date().toISOString() })
+    });
+  }
+
+  async recordRawPayload(deliveryId, rawBody) {
+    await this.request('dda_billing_deliveries', `?delivery_id=eq.${encodeURIComponent(deliveryId)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ payload_sha256: sha256(rawBody) })
+    });
+  }
+
+  async applyChariowTransition(transition) {
+    if (!transition || transition.kind !== 'membership_transition') return null;
+    if (!USER_ID.test(String(transition.userReference || ''))) throw new Error('Chariow transition requires a server-owned DDA UUID');
+    const active = transition.status === 'active';
+    const row = {
+      user_id: transition.userReference,
+      provider: 'chariow',
+      provider_customer_id: transition.customer?.externalCustomerId || null,
+      product_id: transition.productId,
+      sale_id: transition.saleId,
+      license_id: transition.licenseId,
+      external_id: transition.externalId,
+      status: transition.status,
+      entitlement_snapshot: active ? ENTITLEMENTS : [],
+      source_event: transition.event,
+      starts_at: active ? (transition.occurredAt || new Date().toISOString()) : null,
+      ends_at: transition.status === 'expired' ? (transition.occurredAt || new Date().toISOString()) : null,
+      updated_at: new Date().toISOString()
+    };
+    const rows = await this.request('dda_billing_memberships', '?on_conflict=provider,external_id', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+      body: JSON.stringify(row)
+    });
+    return rows[0] || null;
+  }
+
+  async getForUser(userId) {
+    if (!USER_ID.test(String(userId || ''))) throw new Error('billing lookup requires a valid DDA UUID');
+    const rows = await this.request('dda_billing_memberships', `?user_id=eq.${encodeURIComponent(userId)}&status=eq.active&order=updated_at.desc&limit=1&select=*`, { method: 'GET' });
+    const membership = rows[0] || null;
+    return {
+      membership: membership ? {
+        provider: membership.provider,
+        status: membership.status,
+        ends_at: membership.ends_at || null,
+        revoked_at: membership.status === 'revoked' ? membership.updated_at : null,
+        product_id: membership.product_id,
+        external_id: membership.external_id
+      } : null,
+      entitlements: Array.isArray(membership?.entitlement_snapshot) ? membership.entitlement_snapshot : []
+    };
+  }
+
+  async deleteUserData(userId) {
+    if (!USER_ID.test(String(userId || ''))) throw new Error('billing deletion requires a valid DDA UUID');
+    await this.request('dda_billing_memberships', `?user_id=eq.${encodeURIComponent(userId)}`, { method: 'DELETE' });
+  }
+}
+
+module.exports = { PostgrestBillingStore, ENTITLEMENTS };

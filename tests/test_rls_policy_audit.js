@@ -3,17 +3,25 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { auditSql } = require('../scripts/audit_rls_policies');
+const { auditSql, auditPaths } = require('../scripts/audit_rls_policies');
 
-const schema = fs.readFileSync(path.join(__dirname, '..', 'bff', 'supabase', 'schema.sql'), 'utf8');
-const good = auditSql(schema, 'schema.sql');
+const migrationDir = path.join(__dirname, '..', 'supabase', 'migrations');
+const migrationFiles = fs.readdirSync(migrationDir).sort().map(file => path.join(migrationDir, file));
+const good = auditPaths(migrationFiles);
 assert.deepEqual(good.tables.sort(), [
-  'public.dda_journal_entries',
-  'public.dda_journal_plans',
-  'public.dda_lesson_progress',
-  'public.dda_preferences',
+  'public.audit_events',
+  'public.dda_billing_deliveries',
+  'public.dda_billing_memberships',
   'public.dda_profiles',
-  'public.dda_sessions'
+  'public.dda_sessions',
+  'public.journal_entries',
+  'public.journal_plans',
+  'public.lesson_progress',
+  'public.memberships',
+  'public.onboarding',
+  'public.preferences',
+  'public.premium_progress',
+  'public.terminal_state'
 ]);
 assert.deepEqual(good.findings, []);
 

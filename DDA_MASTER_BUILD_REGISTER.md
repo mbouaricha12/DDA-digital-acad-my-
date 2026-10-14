@@ -401,3 +401,7 @@ La tranche est couverte par `tests/test_dashboard_metrics_contract.js` et docume
 **Limites inchangées :** BFF toujours non déployé et non activé sur le frontend. La limitation de débit distribuée, l’endpoint de confirmation de récupération, export/suppression, restauration éprouvée, revue DPA/région et les secrets/domaine contrôlés restent requis avant production; aucune donnée ou identité réelle n’a été utilisée.
 
 **Fiabilité du harness :** `tests/smoke_app_boot.js` ferme désormais la fenêtre jsdom après ses 25 vérifications, ce qui évite que des timers d'environnement maintiennent le processus CI ouvert après le résumé.
+
+## Tranche — P4 BillingStore Supabase Chariow (14 octobre 2026)
+
+**Statut : SOCLE BFF IMPLÉMENTÉ — provisionnement Supabase et paiement réel encore séparés.** `bff/src/billing-store.js` persiste les livraisons Pulse avec idempotence par `x-pulse-delivery-id`, écrit les transitions dans `dda_billing_memberships`, expose uniquement les entitlements actifs au BFF et supprime les memberships lors d’une suppression de compte. `bff/src/server.js` branche l’endpoint HTTPS `/webhooks/chariow`; `bff/supabase/schema.sql` ajoute les tables avec RLS et aucun droit d’écriture navigateur. Validation : contrats Chariow, billingStore PostgREST simulé, audit RLS, syntaxe BFF, contrats landing/légal et suite E2E. Aucun secret, produit réel ou paiement n’est activé dans le dépôt.
