@@ -18,6 +18,8 @@ assert(publicJs.includes("removeAttribute('open')"), 'Le menu mobile doit se fer
 assert(publicJs.includes('legalDialog.showModal'), 'Les documents légaux doivent s’ouvrir dans une vraie modale');
 assert(publicJs.includes('entité n’est pas encore immatriculée'), 'Le statut non immatriculé doit être explicitement signalé');
 assert(publicJs.includes('Aucun numéro RCCM ou identifiant fiscal'), 'Aucun identifiant administratif ne doit être inventé');
+assert(!/\b(?:Abidjan|Bouaké|Côte d['’]Ivoire)\b/i.test(html), 'La landing ne doit pas revendiquer une ville ou un siège non validé');
+assert(html.includes('AFRIQUE FRANCOPHONE') && html.includes('VOCATION INTERNATIONALE'), 'Le positionnement doit rester africain et international');
 assert(css.includes('background:#07111f!important'), 'Le menu mobile doit rester opaque');
 assert(css.includes('.legal-dialog::backdrop'), 'La modale légale doit avoir un backdrop accessible');
 assert(!html.includes('Conditions — bientôt') && !html.includes('Cookies — bientôt'), 'Le footer ne doit plus afficher de mentions légales provisoires');
