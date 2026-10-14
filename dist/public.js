@@ -105,18 +105,27 @@
 
   /* Public navigation: anchors stay on the landing, scroll smoothly and close
      the mobile menu. CTAs using data-view keep their existing academy handoff. */
+  const publicMenu = document.querySelector('.public-menu');
+  const closeMobileMenu = () => {
+    if (!publicMenu) return;
+    publicMenu.removeAttribute('open');
+    publicMenu.querySelector('summary')?.setAttribute('aria-expanded', 'false');
+  };
   document.querySelectorAll('a[href^="#landing"]').forEach(link => link.addEventListener('click', event => {
     const id = link.getAttribute('href').slice(1);
     const target = document.getElementById(id) || landing;
     event.preventDefault();
     history.replaceState(history.state, '', `#${id}`);
     target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: id === 'landing' ? 'start' : 'start' });
-    link.closest('details')?.removeAttribute('open');
+    closeMobileMenu();
     document.querySelectorAll('.public-header-nav a').forEach(item => item.classList.toggle('active', item.getAttribute('href') === `#${id}`));
   }));
-  document.querySelector('.public-menu')?.addEventListener('toggle', event => {
+  publicMenu?.addEventListener('toggle', event => {
     const summary = event.currentTarget.querySelector('summary');
     if (summary) summary.setAttribute('aria-expanded', String(event.currentTarget.open));
+  });
+  publicMenu?.querySelector('.public-menu-panel')?.addEventListener('click', event => {
+    if (event.target.closest('a, button')) closeMobileMenu();
   });
 
   const legalDialog = document.getElementById('legal-dialog');
