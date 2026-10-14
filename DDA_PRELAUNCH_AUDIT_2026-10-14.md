@@ -1,8 +1,8 @@
 # DDA — Audit pré-lancement
 
-**Date :** 14 octobre 2026  
-**Branche auditée :** `fix/landing-production-legal-menu`  
-**Commit audité :** `6363956d0afcd1518559fb16c53cf19daee9d378`  
+**Date :** 14 octobre 2026
+**Branche auditée :** `fix/landing-production-legal-menu`
+**Commit audité :** `6363956d0afcd1518559fb16c53cf19daee9d378`
 **Pull Request :** [#101](https://github.com/mbouaricha12/DDA-digital-acad-my-/pull/101)
 
 ## Conclusion exécutive

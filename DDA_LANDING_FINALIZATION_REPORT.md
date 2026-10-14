@@ -1,6 +1,6 @@
 # DDA — Rapport de finalisation de la landing
 
-**Date :** 13 octobre 2026  
+**Date :** 13 octobre 2026
 **Périmètre :** landing publique, navigation mobile, documents légaux, accessibilité et CI GitHub Pages.
 
 ## Corrections livrées
