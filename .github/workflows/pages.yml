@@ -70,6 +70,14 @@ jobs:
           playwright install --with-deps chromium
       - name: Run real browser regression harness
         run: node tests/run.js
+      - name: Upload PR preview artifact without public deployment
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dda-pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+          path: dist
+          if-no-files-found: error
+          retention-days: 7
 
   deploy:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
