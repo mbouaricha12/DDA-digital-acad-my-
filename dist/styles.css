@@ -2187,8 +2187,8 @@ body.public-shell{background:var(--dda-ivory);color:#15243a}
   .lesson-beat{padding:28px 0}
   .lesson-beat-decision_choice,
   .lesson-beat-quiz{
-    margin-inline:-18px;
-    padding-inline:18px;
+    margin-inline:-16px;
+    padding-inline:16px;
     border-radius:0;
   }
   .price-chart{min-height:180px}
