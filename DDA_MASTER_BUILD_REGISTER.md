@@ -392,6 +392,7 @@ La tranche est couverte par `tests/test_dashboard_metrics_contract.js` et docume
 
 **Validation :** contrats statiques PASS, contrats landing/légal et accessibilité PASS, syntaxe JS PASS, HTML sans doublon d’ID PASS, `git diff --check` PASS, Playwright `tests/run.js` **54/54**. Le workflow Pages exécute désormais les deux nouveaux contrats avant le déploiement. Aucun CodeQL n’est configuré dans le dépôt au moment de cette tranche; ce point est documenté dans `DDA_LANDING_FINALIZATION_REPORT.md`.
 
+
 ## Addendum — P3.4 durcissement de la préparation au déploiement BFF (28 septembre 2026)
 
 **Statut : corrigé et validé localement; aucun déploiement externe effectué.** Les manifests Render/Railway utilisent maintenant `/healthz`, endpoint sans effet secondaire qui ne crée pas de cookie. Le démarrage refuse une configuration incomplète, des cookies `__Host-` non `Secure`, une clé de chiffrement qui ne décode pas en 32 octets, des origines non exactes/non HTTPS (localhost HTTP toléré pour le développement), une URL Supabase non HTTPS ou un redirect e-mail hors allowlist. Les payloads JSON mal formés/non-objet et les contenus au mauvais `Content-Type` reçoivent une erreur client générique (400/415) au lieu d’un 500; les logs de requête n’incluent plus `error.message`. L’exemple local garde les cookies `Secure`.
