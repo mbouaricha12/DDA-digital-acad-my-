@@ -2309,3 +2309,15 @@ body.public-shell .prototype-banner{display:none}
 .legal-dialog-content p{margin:0 0 12px}
 .legal-dialog-note{margin:26px 0 0;padding-top:16px;border-top:1px solid rgba(174,191,213,.16);color:#aebdcd;font-size:.82rem;line-height:1.55}
 @media(max-width:639px){.legal-dialog{width:calc(100vw - 20px);max-height:88dvh}.legal-dialog-card{padding:24px 18px 28px}.public-menu-panel{right:12px;left:12px}}
+
+/* Public information surfaces: substantive, readable and separate from Academy routes. */
+.public-doc-link{display:block;width:100%;padding:0;border:0;background:none;color:var(--lp-body-soft);text-align:left;font:inherit;cursor:pointer}
+.public-doc-link:hover,.public-doc-link:focus-visible{color:var(--lp-heading)}
+.public-info-dialog .legal-dialog-content{max-width:66ch}
+.public-info-content .public-doc-lead{margin:0 0 20px;color:#f3f6fa;font-size:1.05rem;line-height:1.65}
+.public-doc-index{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px;padding:12px;border:1px solid rgba(174,191,213,.16);background:rgba(255,255,255,.035)}
+.public-doc-index a{padding:7px 9px;color:#f3c76c;font-size:.78rem;text-decoration:none}
+.public-doc-index a:hover,.public-doc-index a:focus-visible{color:#fff;background:rgba(240,199,108,.1)}
+.public-info-content h3{scroll-margin-top:20px}
+.public-info-content code{padding:2px 5px;border-radius:4px;background:rgba(255,255,255,.08);color:#f3c76c;font-size:.9em}
+@media(max-width:639px){.public-doc-index{display:grid;grid-template-columns:1fr 1fr;gap:4px}.public-doc-index a{min-height:40px;display:flex;align-items:center}.public-info-content .public-doc-lead{font-size:1rem}}
