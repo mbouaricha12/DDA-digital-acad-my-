@@ -93,3 +93,28 @@ Ce n'est pas une régression de la branche actuelle : c'est un **écart de dépl
 7. Refaire un parcours public : landing → access → inscription → onboarding → M0.1.
 
 > Tant que la PR n'est pas fusionnée, il ne faut pas présenter la landing actuellement publiée comme la version finale auditée.
+
+## Addendum — surfaces publiques enrichies
+
+À la suite de l’audit du footer, la branche a été enrichie avec :
+
+- **À propos de DDA** : mission, méthode, publics et limites actuelles ;
+- **Risques financiers et limites pédagogiques** : absence de conseil, risques de perte, effet de levier, absence de rendement garanti ;
+- **Aide, contact et partenariats** : absence assumée de coordonnées officielles tant qu’elles ne sont pas confirmées, et transparence sur les partenariats futurs ;
+- **Questions fréquentes** : fonctionnement réel du prototype, stockage local, absence de temps réel et absence de signaux ;
+- **Accessibilité** : engagements actuels, préférence de mouvement et limites de l’audit ;
+- documents légaux enrichis avec date de mise à jour et modalités de contact provisoires ;
+- contrat dédié `tests/test_public_information_contract.js` ;
+- test navigateur des 9 documents publics/légaux à 360 et 1440 px.
+
+Validation après cette tranche :
+
+```text
+24 smoke-boot checks passed
+54 passed, 0 failed
+9 documents publics/légaux testés sur mobile et desktop
+0 erreur console
+0 débordement horizontal
+```
+
+**Commit de la tranche :** `055d6cbf23d1cd8e5d36be4c87afbede02c1e089`
