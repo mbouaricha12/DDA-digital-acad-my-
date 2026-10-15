@@ -49,7 +49,7 @@
 
   /* DDA Visual Identity V2 — progressive reveals for the public editorial shell. */
   const revealSelector = [
-    '.landing-main-copy', '.landing-aperture', '.landing-method article', '.landing-experience',
+    '.landing-main-copy', '.landing-aperture', '.landing-method article', '.landing-trust-strip article', '.landing-market-strip',
     '.experience-flow li', '.landing-product > *', '.product-window', '.product-index article',
     '.landing-proof > *', '.proof-composition > *', '.proof-principles li', '.landing-ecosystem > *',
     '.domain-rail article', '.landing-institution > div', '.landing-demo-grid article',

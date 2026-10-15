@@ -1,0 +1,18 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const html=fs.readFileSync(path.join(root,'dist','index.html'),'utf8');
+const css=fs.readFileSync(path.join(root,'dist','alpha-polish.css'),'utf8');
+const js=fs.readFileSync(path.join(root,'dist','public.js'),'utf8');
+assert.match(html,/class="public-utility-bar"/);
+assert.match(html,/class="landing-trust-strip"/);
+assert.match(html,/class="landing-market-strip"/);
+assert.match(html,/BRVM COMPOSITE/);
+assert.match(css,/#landing \.landing-trust-strip/);
+assert.match(css,/#landing \.landing-market-strip/);
+assert.match(css,/\#landing \.public-start\{background:linear-gradient/);
+assert.match(css,/\#landing \.landing-3d-core\{border-color/);
+assert.doesNotMatch(js,/'.landing-experience',\s*'\.experience-flow/);
+console.log('RESULT: landing reference finish contract passed');
