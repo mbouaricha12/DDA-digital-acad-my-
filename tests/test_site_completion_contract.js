@@ -1,0 +1,15 @@
+'use strict';
+const assert=require('assert');
+const fs=require('fs');
+const academy=fs.readFileSync('dist/academy.html','utf8');
+const renderer=fs.readFileSync('dist/lesson-renderer.js','utf8');
+const css=fs.readFileSync('dist/alpha-polish.css','utf8');
+assert.match(academy,/support-official-channels/);
+assert.match(academy,/mailto:dariusdigitalacademy@gmail.com/);
+assert.ok(academy.includes('https://t.me/+Wny_VS9f-blmOWFk'));
+assert.ok(academy.includes('https://whatsapp.com/channel/0029VbCISPsI1rcb3sbxiI0A'));
+assert.doesNotMatch(academy,/prépare le support avant d’activer/);
+assert.match(renderer,/Séquence guidée disponible/);
+assert.match(css,/support-channel-grid/);
+assert.match(css,/guided-fallback/);
+console.log('RESULT: site completion surfaces contract passed');
