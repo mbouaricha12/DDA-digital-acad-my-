@@ -212,7 +212,7 @@
   function syncCta() {
     const mobile = window.matchMedia?.('(max-width: 639px)').matches || window.innerWidth <= 639;
     let covered = false;
-    if (mobile && window.scrollY > 520 && ctaElement) {
+    if (mobile && window.scrollY > 1100 && ctaElement) {
       const cta = ctaElement.getBoundingClientRect();
       for (const node of readableContent) {
         const style = window.getComputedStyle(node);
