@@ -339,8 +339,8 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       // Never copy exception messages into operational logs: they may contain
       // free-text Journal content, provider responses, or other user data.
       logger('request_failed', { requestId, status: error.status || 500, error_code: error.code || 'internal_error' });
-      const status = [400, 409, 413].includes(error.status) ? error.status : 500;
-      const code = [400, 413].includes(status) ? 'validation_error' : (error.code || (status === 409 ? 'conflict' : 'internal_error'));
+      const status = [400, 409, 413, 415].includes(error.status) ? error.status : 500;
+      const code = [400, 413, 415].includes(status) ? 'validation_error' : (error.code || (status === 409 ? 'conflict' : 'internal_error'));
       return sendError(res, status, code, status === 409 ? 'The mutation conflicts with an earlier request.' : 'Request could not be processed.', requestId);
     }
   };
