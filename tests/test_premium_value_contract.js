@@ -1,0 +1,16 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const html=fs.readFileSync('dist/academy.html','utf8');
+const css=fs.readFileSync('dist/alpha-polish.css','utf8');
+assert.match(html,/premium-value-grid/);
+assert.equal((html.match(/class=\"premium-value-card\"/g)||[]).length,6);
+for (const view of ['lesson-p21','premium-lab','premium-assessment','journal','progress','resources']) assert.match(html,new RegExp(`data-view=\"${view}\"`));
+assert.match(html,/Risk Plan/);
+assert.match(html,/Controlled Decision/);
+assert.match(html,/Revue hebdomadaire/);
+assert.match(html,/premium-deliverables/);
+assert.doesNotMatch(html,/Revue hebdomadaire <small>Futur<\/small>/);
+assert.match(css,/premium-value-cards/);
+assert.match(css,/premium-deliverable-grid/);
+console.log('Premium value contract: PASS');
