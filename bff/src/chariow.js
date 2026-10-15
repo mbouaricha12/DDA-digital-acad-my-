@@ -145,12 +145,16 @@ async function handleChariowPulse(req, { secret, idempotencyStore, applyEvent, c
   if (!verifyChariowPulse(rawBody, headers['x-chariow-signature'], secret)) return { status: 401, body: { error: 'invalid_signature' } };
   const deliveryId = safeText(headers['x-pulse-delivery-id'], 120);
   if (!deliveryId) return { status: 400, body: { error: 'missing_delivery_id' } };
-  if (await idempotencyStore?.has(deliveryId)) return { status: 204, duplicate: true };
+  if (idempotencyStore?.claim) {
+    const claimed = await idempotencyStore.claim(deliveryId, { event: headers['x-pulse-event'] || null });
+    if (!claimed) return { status: 204, duplicate: true };
+  } else if (await idempotencyStore?.has(deliveryId)) return { status: 204, duplicate: true };
   let payload;
   try { payload = JSON.parse(rawBody.toString('utf8')); } catch { return { status: 400, body: { error: 'invalid_json' } }; }
   const mapped = mapChariowPulse(payload, headers, config);
-  await idempotencyStore?.add(deliveryId, { event: mapped.event, receivedAt: new Date().toISOString() });
+  if (!idempotencyStore?.claim) await idempotencyStore?.add(deliveryId, { event: mapped.event, receivedAt: new Date().toISOString() });
   if (mapped.kind === 'membership_transition') await applyEvent?.(mapped);
+  else await idempotencyStore?.markProcessed?.(deliveryId, 'processed');
   return { status: 202, body: { accepted: true, kind: mapped.kind, event: mapped.event } };
 }
 
