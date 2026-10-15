@@ -108,3 +108,11 @@ Les dates des documents légaux affichés ont été actualisées au 15 octobre 2
 6. Implémenter d’abord les comptes et la synchronisation Free.
 7. Implémenter ensuite les entitlements Premium côté serveur.
 8. Tester le paiement en sandbox et les webhooks avant toute activation publique.
+
+## 10. Passe motion/design institutionnelle — 15 octobre 2026
+
+La landing a reçu une couche de motion légère et orientée conversion : entrée progressive du message principal, ligne de navigation institutionnelle, micro-interaction de balayage sur les CTA, respiration du visuel 3D CSS, animation douce des appareils et accentuation contrôlée des cartes interactives. Les mouvements ne portent aucune information essentielle et sont neutralisés avec `prefers-reduced-motion: reduce`.
+
+Le hero a aussi été resserré pour les très petites hauteurs et largeurs : le CTA principal reste visible à 280×653, 375×667, 717×512 et 1440×900, sans débordement horizontal. La vérification navigateur finale a confirmé la présence de la landing, du CTA et de la scène 3D à ces formats.
+
+Enfin, le libellé `Parcours M0–M9` a été remplacé par `Parcours DDA` et `Certification` par `Aperçu de certification`, afin de ne pas suggérer que les modules futurs ou une certification officielle sont déjà disponibles.
