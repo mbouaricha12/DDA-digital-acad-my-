@@ -2646,3 +2646,38 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
   .dashboard-proof-strip{grid-template-columns:auto minmax(0,1fr);gap:12px;padding:15px}
   .dashboard-proof-status{grid-column:2;justify-self:start}
 }
+
+
+/* Journal refinement recovered from the unmerged product-quality pass. */
+.journal-tab:hover,.journal-tab:focus-visible{color:#fff;background:rgba(255,255,255,.08)}
+.journal-tab:focus-visible{outline:2px solid var(--gold-soft);outline-offset:2px}
+.journal-tab.active{box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.journal-toolbar{gap:18px;padding:14px 16px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.035)}
+.journal-toolbar>div:first-child{display:grid;gap:3px;min-width:0}
+.journal-toolbar-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.journal-toolbar-actions .secondary-action,.journal-toolbar-actions .primary-action{width:auto;min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.journal-entry-card{border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.035);margin-bottom:12px;box-shadow:0 10px 28px -22px rgba(0,0,0,.5)}
+.journal-entry-card:last-child{margin-bottom:0}
+.journal-entry-card summary{padding:16px 16px 16px 0}
+.journal-entry-card summary:before{margin-left:14px}
+.journal-entry-index{background:var(--navy-950);box-shadow:0 0 0 5px var(--navy-900)}
+.journal-entry-detail{margin:0 16px 16px 26px;padding:14px 0 0;border-top:1px solid rgba(255,255,255,.1)}
+.journal-composer{max-width:680px;padding:20px;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.035)}
+.journal-composer .journal-step-label{display:flex;align-items:center;gap:10px}
+.journal-composer .journal-step-label:after{content:'— contexte, hypothèse et trace';color:rgba(244,247,252,.5);font-size:11px;font-weight:500;letter-spacing:0;text-transform:none}
+@media (max-width:700px){
+  #journal .journal-tabs{display:flex;width:100%;box-sizing:border-box;margin-bottom:18px}
+  #journal .journal-tab{flex:1;padding-left:10px;padding-right:10px}
+  #journal .journal-toolbar{align-items:stretch;flex-direction:column;gap:14px;padding:14px}
+  #journal .journal-toolbar-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  #journal .journal-toolbar-actions .secondary-action,#journal .journal-toolbar-actions .primary-action{width:100%;padding-left:10px;padding-right:10px}
+  #journal .journal-entry-card summary{padding-right:12px}
+  #journal .journal-entry-index{left:-25px}
+  #journal .journal-list{padding-left:25px}
+  #journal .journal-entry-detail{margin-left:16px}
+  #journal .journal-composer{padding:16px}
+  #journal .journal-composer .journal-step-label{display:block}
+  #journal .journal-composer .journal-step-label:after{display:block;margin-top:4px}
+  #journal .journal-composer-actions{align-items:stretch;flex-direction:column}
+  #journal .journal-composer-actions .primary-action,#journal .journal-composer-actions .secondary-action{width:100%}
+}

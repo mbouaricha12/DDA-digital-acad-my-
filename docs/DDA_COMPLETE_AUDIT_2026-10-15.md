@@ -116,3 +116,14 @@ La landing a reçu une couche de motion légère et orientée conversion : entr�
 Le hero a aussi été resserré pour les très petites hauteurs et largeurs : le CTA principal reste visible à 280×653, 375×667, 717×512 et 1440×900, sans débordement horizontal. La vérification navigateur finale a confirmé la présence de la landing, du CTA et de la scène 3D à ces formats.
 
 Enfin, le libellé `Parcours M0–M9` a été remplacé par `Parcours DDA` et `Certification` par `Aperçu de certification`, afin de ne pas suggérer que les modules futurs ou une certification officielle sont déjà disponibles.
+
+## 11. Intégration des travaux historiques retrouvés — 15 octobre 2026
+
+Deux tranches restées dans des branches ouvertes ont été réintégrées proprement :
+
+- **Pages publiques autonomes** : À propos, FAQ, contact, accessibilité, risques, conditions, confidentialité, cookies et mentions légales disposent maintenant chacune d’une vraie URL, d’un titre propre, d’un contenu partagé avec les modales de la landing, d’un footer et d’une navigation entre documents.
+- **Journal** : onglets reliés à leurs panneaux par ARIA, timeline plus lisible, toolbar structurée, composer mieux hiérarchisé et règles responsive dédiées.
+
+Les textes utilisés par les pages autonomes proviennent de la source actuelle de la landing, notamment les informations confirmées sur DDA Free, l’absence de paiement réel dans le prototype et les canaux officiels de support. Les anciens textes obsolètes qui prétendaient que le contact était encore à confirmer n’ont pas été réintroduits.
+
+La persistance Chariow/Supabase reste préparée dans sa branche technique mais n’est pas activée dans cette passe : elle nécessite la configuration serveur, la validation des variables secrètes, les migrations Supabase et un contrôle séparé avant tout paiement réel.
