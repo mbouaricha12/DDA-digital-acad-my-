@@ -49,7 +49,7 @@
 
   /* DDA Visual Identity V2 — progressive reveals for the public editorial shell. */
   const revealSelector = [
-    '.landing-main-copy', '.landing-aperture', '.landing-method article', '.landing-experience',
+    '.landing-main-copy', '.landing-aperture', '.landing-method article', '.landing-trust-strip article', '.landing-market-strip',
     '.experience-flow li', '.landing-product > *', '.product-window', '.product-index article',
     '.landing-proof > *', '.proof-composition > *', '.proof-principles li', '.landing-ecosystem > *',
     '.domain-rail article', '.landing-institution > div', '.landing-demo-grid article',
@@ -212,7 +212,7 @@
   function syncCta() {
     const mobile = window.matchMedia?.('(max-width: 639px)').matches || window.innerWidth <= 639;
     let covered = false;
-    if (mobile && window.scrollY > 520 && ctaElement) {
+    if (mobile && window.scrollY > 1100 && ctaElement) {
       const cta = ctaElement.getBoundingClientRect();
       for (const node of readableContent) {
         const style = window.getComputedStyle(node);

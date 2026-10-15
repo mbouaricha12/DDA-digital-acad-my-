@@ -2410,3 +2410,88 @@ body.public-shell .prototype-banner{display:none}
   #landing .landing-actions .primary-action{min-height:46px;padding:9px 14px}
   #landing .landing-trust{margin-top:9px}
 }
+
+/* DDA MARKET HOUSE — reference-inspired conversion layer.
+   Uses the reference's information rhythm without copying its brand, copy or imagery. */
+#landing .public-utility-bar{
+  display:flex;align-items:center;gap:22px;min-height:30px;padding:0 clamp(20px,5vw,72px);
+  border-bottom:1px solid rgba(174,191,213,.09);background:#040a12;color:#8291a3;
+  font-size:.62rem;letter-spacing:.04em;white-space:nowrap;overflow:hidden;
+}
+#landing .public-utility-bar>span{display:inline-flex;align-items:center;gap:6px}
+#landing .public-utility-bar .utility-market b{color:#c9d3de;font-weight:800}
+#landing .public-utility-bar .utility-market em{color:#80c99b;font-style:normal}
+#landing .public-utility-bar .utility-help{margin-left:auto;gap:15px}
+#landing .public-utility-bar a{color:#c4ced9;text-decoration:none}
+#landing .public-utility-bar a:hover{color:#9ce59d}
+#landing .utility-pulse{width:6px;height:6px;border-radius:50%;background:#80c99b;box-shadow:0 0 0 4px rgba(128,201,155,.12)}
+#landing .public-header{background:rgba(6,13,23,.72);backdrop-filter:blur(16px)}
+#landing .public-header-brand .public-header-mark{border-color:#83d18b;color:#9ce59d;box-shadow:inset 0 -8px 15px rgba(91,183,108,.08)}
+#landing .public-start{background:linear-gradient(135deg,#77c96e,#a4e48e)!important;color:#07130e!important;box-shadow:0 8px 24px rgba(88,183,91,.18)}
+#landing .public-start span{color:#183c22}
+#landing .landing-trust-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:0;max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,72px);border-bottom:1px solid var(--lp-line);background:#07111e}
+#landing .landing-trust-strip article{display:flex;align-items:flex-start;gap:12px;min-width:0;padding:20px 18px 20px 0;border-right:1px solid var(--lp-line)}
+#landing .landing-trust-strip article+article{padding-left:18px}
+#landing .landing-trust-strip article:last-child{border-right:0}
+#landing .trust-strip-icon{display:grid;place-items:center;flex:none;width:28px;height:28px;border:1px solid rgba(128,201,155,.48);border-radius:50%;color:#9ce59d;font-size:1rem;line-height:1}
+#landing .landing-trust-strip strong{display:block;color:#e9eef3;font-size:.78rem;line-height:1.25}
+#landing .landing-trust-strip small{display:block;margin-top:5px;color:#8999ab;font-size:.68rem;line-height:1.45}
+#landing .landing-market-strip{max-width:1200px;margin:0 auto;padding:22px clamp(20px,5vw,72px) 28px;border-bottom:1px solid var(--lp-line);background:#07111e}
+#landing .market-strip-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px;color:#c9b27b;font-size:.66rem;font-weight:800;letter-spacing:.13em}
+#landing .market-strip-heading a{color:#9ce59d;font-size:.68rem;letter-spacing:0;text-decoration:none}
+#landing .market-strip-heading b{padding-left:6px}
+#landing .market-strip-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+#landing .market-strip-grid article{position:relative;overflow:hidden;min-height:100px;padding:13px 12px 11px;border:1px solid rgba(174,191,213,.13);border-radius:7px;background:linear-gradient(150deg,#101d2d,#09131f);box-shadow:inset 0 1px rgba(255,255,255,.03)}
+#landing .market-strip-grid article>span{display:block;color:#9baabc;font-size:.56rem;letter-spacing:.09em;font-weight:800}
+#landing .market-strip-grid strong{display:block;margin-top:12px;color:#eef2f4;font-size:.78rem}
+#landing .market-strip-grid small{display:block;margin-top:8px;color:#7f92a6;font-size:.57rem}
+#landing .strip-spark{position:absolute;right:9px;bottom:13px;width:58px;height:20px;border-bottom:1px solid rgba(137,207,153,.62);transform:skewY(-18deg) rotate(-8deg);opacity:.7}
+#landing .strip-spark:before{content:"";position:absolute;left:0;right:0;bottom:3px;height:1px;background:linear-gradient(90deg,transparent,#8fd796 20%,#79bd85 52%,transparent 100%);box-shadow:12px -7px 0 -0.2px #9ce59d,25px -2px 0 -0.2px #9ce59d,39px -11px 0 -0.2px #9ce59d,53px -5px 0 -0.2px #9ce59d}
+#landing .spark-b,#landing .spark-d{border-color:rgba(203,121,132,.65)}
+#landing .spark-b:before,#landing .spark-d:before{background:linear-gradient(90deg,transparent,#d88591 30%,#bb6874 70%,transparent 100%);box-shadow:12px 4px 0 -0.2px #d88591,25px -6px 0 -0.2px #d88591,39px 2px 0 -0.2px #d88591,53px -9px 0 -0.2px #d88591}
+#landing .landing-aperture{border-color:rgba(128,201,155,.3);background:radial-gradient(ellipse at 76% 22%,rgba(92,192,111,.14),transparent 34%),linear-gradient(145deg,#06121d 0%,#0a1e2c 68%,#123521 145%)}
+#landing .landing-aperture:after{content:"";position:absolute;inset:auto 0 0;height:36%;background:linear-gradient(180deg,transparent,rgba(54,124,76,.16));pointer-events:none}
+#landing .landing-aperture .landing-device-stage{filter:drop-shadow(0 22px 26px rgba(0,0,0,.32))}
+#landing .landing-3d-core{border-color:rgba(156,229,157,.82);background:radial-gradient(circle at 34% 28%,rgba(128,201,155,.3),rgba(7,18,33,.94) 62%);box-shadow:0 0 0 12px rgba(128,201,155,.06),0 18px 55px rgba(0,0,0,.36),inset 0 0 28px rgba(255,255,255,.08)}
+#landing .landing-3d-orbit{border-color:rgba(128,201,155,.34)}
+#landing .landing-3d-orbit i{background:#9ce59d;box-shadow:0 0 0 5px rgba(156,229,157,.1),0 0 24px rgba(156,229,157,.72)}
+#landing .landing-3d-node{border-color:rgba(128,201,155,.42);color:#b7e8bb}
+#landing .landing-philosophy-band{background:linear-gradient(110deg,#0a1826,#07111e 60%,#0e281a)}
+#landing .landing-philosophy-band .differentiation-statement em{color:#9ce59d}
+#landing .landing-final-cta{background:radial-gradient(circle at 70% 0%,rgba(74,161,84,.2),transparent 38%),#07111e}
+@media(max-width:899px){
+  #landing .landing-trust-strip{grid-template-columns:1fr 1fr;gap:0}
+  #landing .landing-trust-strip article:nth-child(2){border-right:0}
+  #landing .landing-trust-strip article:nth-child(n+3){border-top:1px solid var(--lp-line)}
+  #landing .landing-market-strip{padding-top:18px}
+  #landing .market-strip-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #landing .market-strip-grid article:last-child{grid-column:1/-1}
+}
+@media(max-width:639px){
+  #landing .public-utility-bar{gap:15px;padding-inline:16px;font-size:.57rem}
+  #landing .public-utility-bar .utility-market:nth-of-type(3){display:none}
+  #landing .public-utility-bar .utility-help{display:none}
+  #landing .landing-trust-strip{grid-template-columns:1fr;padding-inline:16px}
+  #landing .landing-trust-strip article,#landing .landing-trust-strip article+article{padding:14px 0;border-right:0;border-top:1px solid var(--lp-line)}
+  #landing .landing-trust-strip article:first-child{border-top:0}
+  #landing .market-strip-grid{grid-template-columns:1fr 1fr}
+  #landing .market-strip-grid article{min-height:94px}
+}
+@media(prefers-reduced-motion:reduce){#landing .landing-3d-scene{animation:none}}
+
+/* Reveal hardening: section shells stay visible; only their child surfaces animate. */
+#landing .landing-experience,#landing .landing-product,#landing .landing-proof,#landing .landing-ecosystem,#landing .landing-future,#landing .landing-guardrails{opacity:1;transform:none}
+
+/* Mobile hero proportion — the first conversion decision must arrive before the sticky CTA interval. */
+@media(max-width:639px){
+  #landing .landing-editorial-shell{padding-top:22px;gap:18px}
+  #landing .landing-masthead{margin-bottom:18px}
+  #landing h1{font-size:clamp(2.55rem,11.2vw,3.35rem);line-height:.96;margin-bottom:14px}
+  #landing .landing-deck{font-size:.9rem;line-height:1.5;margin-bottom:10px}
+  #landing .landing-actions{margin-top:18px;margin-bottom:14px;gap:10px}
+  #landing .landing-trust{grid-template-columns:1fr 1fr;gap:7px;margin-top:14px}
+  #landing .landing-trust li{min-height:52px;padding:8px 9px;font-size:.68rem}
+  #landing .landing-aperture{min-height:280px;padding:18px}
+  #landing .landing-device-stage{inset:15% 4% 20%}
+  #landing .landing-phone-screen{min-height:132px;padding-top:16px}
+}
