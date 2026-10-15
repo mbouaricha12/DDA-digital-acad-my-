@@ -69,7 +69,7 @@
     const label = escapeAttr((video && (video.title || video.caption)) || 'Vidéo pédagogique DDA');
     const caption = video && video.caption ? `<p class="video-explainer-caption">${video.caption}</p>` : '';
     if (!embedUrl && !directSrc) {
-      return `<div class="video-explainer-block video-explainer-fallback" id="${escapeAttr(id)}-block" data-video-state="missing"><div class="video-fallback-panel" role="status"><svg class="icon"><use href="#icon-play"/></svg><strong>Vidéo bientôt disponible</strong><span>Le parcours reste entièrement accessible : lis la séquence puis réalise l’exercice.</span></div>${caption}</div>`;
+      return `<div class="video-explainer-block video-explainer-fallback" id="${escapeAttr(id)}-block" data-video-state="missing"><div class="video-fallback-panel guided-fallback" role="status"><svg class="icon"><use href="#icon-book"/></svg><strong>Séquence guidée disponible</strong><span>Le support vidéo est en préparation ; le contenu complet, les exemples et l’exercice sont déjà accessibles ci-dessous.</span></div>${caption}</div>`;
     }
     if (embedUrl) {
       return `<figure class="video-explainer-block" id="${escapeAttr(id)}-block" data-video-state="loading"><div class="video-frame"><iframe src="${escapeAttr(embedUrl)}" title="${label}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" data-video-frame></iframe><div class="video-fallback-panel" data-video-fallback hidden role="status"><svg class="icon"><use href="#icon-play"/></svg><strong>Vidéo momentanément indisponible</strong><span>Continue avec le texte et l’exercice ci-dessous. La vidéo pourra être réessayée plus tard.</span></div></div>${caption}</figure>`;

@@ -2542,3 +2542,24 @@ body.public-shell .prototype-banner{display:none}
   #landing .landing-editorial-shell{min-height:154px;padding-top:8px;padding-bottom:8px}
   #landing .landing-main-copy h1{font-size:clamp(1.7rem,4.7vw,2.25rem);margin-bottom:5px}
 }
+
+
+/* Site completion pass — official support channels and Journal focus. */
+#support .support-official-channels{margin-top:18px;padding:clamp(22px,4vw,34px);border:1px solid var(--dda-elite-line);border-radius:14px;background:linear-gradient(145deg,rgba(16,42,68,.92),rgba(8,19,34,.96));color:var(--dda-elite-ink);box-shadow:0 18px 44px rgba(0,0,0,.2)}
+#support .support-official-channels h2{margin:.35rem 0 .55rem;color:#f3f6f8;font-family:var(--dda-serif);font-size:clamp(1.7rem,3vw,2.5rem)}
+#support .support-official-channels p:not(.eyebrow){max-width:660px;color:#aeb9c6;line-height:1.65}
+.support-channel-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}
+.support-channel-card{display:grid;gap:7px;min-height:130px;padding:18px;border:1px solid var(--dda-elite-line);border-radius:12px;background:rgba(255,255,255,.035);color:inherit;text-decoration:none;transition:transform .2s ease,border-color .2s ease,background .2s ease}
+.support-channel-card:hover,.support-channel-card:focus-visible{transform:translateY(-2px);border-color:rgba(203,177,116,.55);background:rgba(203,177,116,.08)}
+.support-channel-card strong{color:var(--dda-elite-gold-soft);font-size:1.05rem}
+.support-channel-card span{color:#d4dde6;font-size:.85rem;line-height:1.45}
+.support-channel-card small{margin-top:auto;color:#9fadb9;font-size:.72rem}
+#journal .journal-toolbar{padding:14px 16px;border:1px solid var(--dda-elite-line);border-radius:14px;background:rgba(255,255,255,.035)}
+#journal .journal-entry-card{border:1px solid var(--dda-elite-line);border-radius:14px;background:linear-gradient(150deg,#101c2d,#0a1424);box-shadow:0 10px 28px -22px rgba(0,0,0,.5)}
+#journal .journal-composer{border:1px solid var(--dda-elite-line);border-radius:16px;background:linear-gradient(150deg,#101c2d,#0a1424);padding:20px}
+.guided-fallback{background:radial-gradient(circle at 50% 15%,#1c2f57,#070c17 68%)}
+@media(max-width:700px){
+  .support-channel-grid{grid-template-columns:1fr}
+  #support .support-official-channels{padding:20px 16px}
+  .support-channel-card{min-height:0}
+}
