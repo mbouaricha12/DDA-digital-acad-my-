@@ -28,6 +28,11 @@ jobs:
             node --check "$file"
           done
 
+      - name: Install Playwright Chromium for committed browser contracts
+        run: |
+          npm install --global playwright@1.55.0
+          npx playwright install --with-deps chromium
+
       - name: Run all committed contract checks
         run: |
           for test in tests/test_*.js; do
@@ -40,11 +45,6 @@ jobs:
 
       - name: Run full-app smoke test
         run: NODE_PATH="$(npm root -g)" node tests/smoke_app_boot.js
-
-      - name: Install Playwright Chromium
-        run: |
-          npm install --global playwright@1.55.0
-          npx playwright install --with-deps chromium
 
       - name: Run real browser regression harness
         run: node tests/run.js
