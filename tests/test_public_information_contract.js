@@ -11,6 +11,9 @@ for (const key of ['about', 'risks', 'contact', 'faq', 'accessibility']) {
   assert(html.includes(`data-public-doc="${key}"`), `Le footer doit exposer le document public ${key}`);
   assert(publicJs.includes(`${key}: {`), `Le contenu public ${key} doit être défini dans le runtime`);
 }
+assert(publicJs.includes('launch: {'), 'Le contenu public du lancement doit être défini dans le runtime');
+assert(html.includes('href="launch/">Pilote &amp; préparation</a>'), 'La landing doit relier la préparation du lancement');
+assert(academyHtml.includes('href="launch/">Pilote &amp; préparation</a>'), 'L’Academy doit relier la préparation du lancement');
 assert(html.includes('id="public-info-dialog"'), 'La surface d’information publique doit disposer d’une vraie modale accessible');
 assert(html.includes('id="public-info-dialog-content"'), 'La modale publique doit disposer d’une zone de contenu');
 assert(publicJs.includes('publicInfoDialog.showModal'), 'La modale publique doit utiliser showModal quand disponible');
