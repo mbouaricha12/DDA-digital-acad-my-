@@ -34,6 +34,9 @@
 #progress .mastery-list{display:grid;gap:10px}
 #progress .mastery-row{border:1px solid rgba(255,255,255,.1);border-radius:2px 14px 2px 14px;background:rgba(255,255,255,.025);transition:background .22s,border-color .22s,transform .22s}
 #progress .next-step-panel{border-left:2px solid var(--dda-cyan);border-radius:0 14px 14px 0;background:linear-gradient(90deg,rgba(84,197,232,.08),transparent 70%)}
+#progress .progress-next-action{width:auto;margin-top:12px}
+#membership .premium-local-status{margin:0 0 16px;padding:11px 13px;border-left:2px solid var(--dda-gold);color:#d9e3ed;font-size:.82rem;line-height:1.5;background:rgba(201,154,69,.08)}
+#membership .membership-preparation-link{display:inline-flex;margin-top:13px;color:#cbd8e6}
 #progress .modules-track{border:0;border-top:1px solid var(--dda-rule);border-radius:0;background:transparent;padding-inline:0}
 #progress .certificate-panel{background:linear-gradient(135deg,rgba(201,154,69,.12),rgba(255,255,255,.03) 70%)}
 
@@ -1445,6 +1448,15 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 #landing h1{color:#f1f3f5;letter-spacing:-.045em}
 #landing h1 em{color:var(--dda-elite-gold-soft);font-style:normal}
 #landing .landing-deck,#landing .landing-section-head>p:not(.eyebrow),#landing .ecosystem-copy>p:not(.eyebrow){color:#aab5c2;line-height:1.72}
+#landing .landing-free-proof{margin:20px 0 0;padding:14px 16px;border:1px solid rgba(174,191,213,.16);border-left:2px solid var(--dda-elite-gold);border-radius:12px;background:rgba(10,20,36,.52);max-width:620px}
+#landing .landing-free-proof-label{margin:0 0 8px;color:var(--dda-elite-gold-soft);font-size:.72rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+#landing .landing-free-proof ul{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0;padding:0;list-style:none;color:#c7d0db;font-size:.82rem;line-height:1.5}
+#landing .landing-free-proof li:before{content:'✓';margin-right:6px;color:var(--dda-elite-gold);font-weight:900}
+#landing .landing-free-proof strong{color:#f1f3f5}
+#landing .landing-free-proof small{display:block;margin-top:9px;color:#8f9dad;font-size:.72rem;line-height:1.45}
+#access .access-form-note{margin:10px 0 18px;color:#657486;font-size:.82rem;line-height:1.55}
+#access .onboarding-form-note{margin:10px 0 18px;color:#657486;font-size:.82rem;line-height:1.55}
+.lesson-main .feedback-next{display:block;margin-top:8px;color:#9eb0c2;font-size:.76rem;line-height:1.45}
 #landing .landing-actions .primary-action,#landing .landing-final-cta .primary-action{
   border:1px solid rgba(239,220,176,.34);
   background:linear-gradient(120deg,#b39a68,#d0bc8d);
@@ -1568,6 +1580,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 #dashboard .analysis-chart-meta,#dashboard .analysis-chart-footer{border-color:rgba(174,191,213,.1);background:#0a1424}
 
 @media(max-width:899px){
+  #landing .landing-free-proof ul{display:grid;grid-template-columns:1fr;gap:4px}
   #landing .landing-trust{grid-template-columns:repeat(2,minmax(0,1fr))}
   #landing .landing-trust li:last-child{grid-column:1/-1}
   #landing .landing-device-stage{inset:18% 3% 25%}
@@ -1603,6 +1616,8 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
   #landing .landing-aperture-copy em{font-size:clamp(1.1rem,5.5vw,1.5rem)}
 }
 @media(max-width:420px){
+  #landing .landing-free-proof{padding:12px 13px}
+  #landing .landing-free-proof small{font-size:.68rem}
   #landing .landing-trust{grid-template-columns:1fr;gap:6px}
   #landing .landing-trust li:last-child{grid-column:auto}
   #landing .landing-aperture{min-height:400px;padding:20px}
