@@ -140,7 +140,7 @@ function publicUser(user) {
   return { user_id: user.user_id, email: user.email, email_verified: Boolean(user.email_verified), display_name: user.display_name || '', status: user.status, entitlements: Array.isArray(user.entitlements) ? user.entitlements : [] };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, mutationStore = null, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   businessStore = businessStore || {
     exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
@@ -230,6 +230,14 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         return json(res, 204, undefined);
       }
       if (method === 'GET' && path === '/healthz') return json(res, 200, { status: 'ok' });
+      if (method === 'GET' && path === '/v1/publications/brvm') {
+        if (!brvmPublicationStore || typeof brvmPublicationStore.listPublished !== 'function') {
+          return sendError(res, 503, 'publications_unavailable', 'Verified publications are not available.', requestId);
+        }
+        const items = await brvmPublicationStore.listPublished();
+        if (!Array.isArray(items)) throw new Error('brvm_publications_store_invalid_shape');
+        return json(res, 200, { items });
+      }
       if (method === 'POST' && path === '/v1/auth/register') {
         const body = await readJson(req);
         const validation = validateRegistration(body);

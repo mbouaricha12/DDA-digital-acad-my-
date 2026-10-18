@@ -882,6 +882,40 @@ body.public-shell main{padding-bottom:0}
 #market-calendar-list li:last-child{border-bottom:0}
 #market-calendar-list strong{font-size:14px;display:block;color:#f4f7fc}
 #market-calendar-list small{color:rgba(244,247,252,.65)}
+.market-zone-publications{margin-top:18px;padding:24px;border:1px solid rgba(255,255,255,.14);border-radius:var(--r-md);background:rgba(255,255,255,.035)}
+.brvm-publications-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:18px}
+.brvm-publications-head h2{font-size:26px;color:#f4f7fc;margin-bottom:8px}
+.brvm-publications-head p{max-width:650px;color:rgba(244,247,252,.65);font-size:14px}
+.brvm-publications-empty{border:1px dashed rgba(244,247,252,.28);border-radius:var(--r-md);background:rgba(0,0,0,.12)}
+.brvm-publications-empty-copy{display:flex;align-items:flex-start;gap:16px;padding:22px}
+.brvm-empty-mark{display:grid;place-items:center;width:42px;height:42px;border:1px solid var(--gold);border-radius:14px;color:var(--gold-soft);font:700 24px Georgia,serif;flex:none}
+.brvm-publications-empty-copy strong{display:block;color:#f4f7fc;font-size:16px;margin-bottom:6px}
+.brvm-publications-empty-copy p{color:rgba(244,247,252,.65);font-size:14px;max-width:680px;margin-bottom:8px}
+.brvm-publications-empty-copy small{color:var(--gold-soft);font-size:12px}
+.brvm-publication-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.14)}
+.brvm-publication-row:last-child{border-bottom:0}
+.brvm-publication-row>div{min-width:0}
+.brvm-publication-row strong{display:block;color:#f4f7fc}
+.brvm-publication-row a{color:inherit;text-decoration-color:rgba(220,183,107,.5);text-underline-offset:3px;overflow-wrap:anywhere}
+.brvm-publication-row small{color:rgba(244,247,252,.65)}
+.brvm-publication-requirements{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin:18px 0 0;border:1px solid rgba(255,255,255,.14);border-radius:var(--r-md);overflow:hidden;background:rgba(255,255,255,.14)}
+.brvm-publication-requirements>div{padding:14px;background:rgba(0,0,0,.12)}
+.brvm-publication-requirements dt{color:var(--gold-soft);font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.brvm-publication-requirements dd{color:rgba(244,247,252,.68);font-size:13px}
+.brvm-publications-note{display:flex;align-items:flex-start;gap:8px;margin:16px 0 0;color:rgba(244,247,252,.6);font-size:13px}
+.brvm-publications-note .icon{color:var(--gold-soft);flex:none;margin-top:2px}
+.brvm-publications-head .data-badge{flex:none}
+@media(max-width:760px){
+  .market-zone-publications{padding:18px}
+  .brvm-publications-head{display:grid;gap:12px}
+  .brvm-publications-head .data-badge{justify-self:start}
+  .brvm-publication-requirements{grid-template-columns:1fr 1fr}
+}
+@media(max-width:460px){
+  .brvm-publication-requirements{grid-template-columns:1fr}
+  .brvm-publications-empty-copy{padding:18px;gap:12px}
+  .brvm-publication-row{display:grid;gap:8px;padding:14px}
+}
 .brief-step{display:grid;grid-template-columns:36px 1fr;gap:13px;padding:16px 0;border-top:1px solid rgba(255,255,255,.14)}
 .brief-step:first-of-type{border-top:0}
 .brief-step>span{color:var(--gold-soft);font-family:Georgia,serif;font-size:19px}
@@ -2680,4 +2714,33 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
   #journal .journal-composer .journal-step-label:after{display:block;margin-top:4px}
   #journal .journal-composer-actions{align-items:stretch;flex-direction:column}
   #journal .journal-composer-actions .primary-action,#journal .journal-composer-actions .secondary-action{width:100%}
+}
+
+/* BRVM pole structure — provenance first, roadmap second. The cards are
+   status communication, not a fake market dashboard. */
+.brvm-data-register,.brvm-pole-roadmap{margin-top:18px;padding:22px;border:1px solid rgba(255,255,255,.14);border-radius:var(--r-md);background:rgba(255,255,255,.035)}
+.brvm-data-register-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.brvm-data-register h2,.brvm-pole-roadmap h2{margin:4px 0 10px;color:#f4f7fc;font-size:clamp(1.35rem,2.6vw,2rem)}
+.brvm-data-register>p{max-width:70ch;color:rgba(244,247,252,.7);font-size:14px;line-height:1.65}
+.brvm-data-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin:20px 0 0;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.12)}
+.brvm-data-facts div{padding:14px;background:rgba(7,17,31,.72)}
+.brvm-data-facts dt{color:var(--gold-soft);font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.brvm-data-facts dd{margin:7px 0 0;color:#f4f7fc;font-size:13px;line-height:1.45}
+.brvm-pole-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:20px}
+.brvm-pole-item{display:flex;gap:12px;align-items:flex-start;min-height:76px;padding:14px;border:1px solid rgba(255,255,255,.12);background:rgba(7,17,31,.52)}
+.brvm-pole-item>span{color:var(--gold-soft);font:700 11px/1 ui-monospace,monospace;letter-spacing:.08em}
+.brvm-pole-item strong{display:block;color:#f4f7fc;font-size:13px}
+.brvm-pole-item small{display:block;margin-top:5px;color:rgba(244,247,252,.58);font-size:11px;line-height:1.4}
+.brvm-pole-item.is-active{border-color:rgba(79,190,133,.45);box-shadow:inset 3px 0 var(--green)}
+.brvm-pole-item.is-planned{border-style:dashed}
+.brvm-pole-item.is-locked{opacity:.78;border-color:rgba(217,164,65,.38);box-shadow:inset 3px 0 var(--gold)}
+.brvm-roadmap-note{display:flex;gap:9px;align-items:flex-start;margin:18px 0 0;padding-top:15px;border-top:1px solid rgba(255,255,255,.12);color:rgba(244,247,252,.65);font-size:12px;line-height:1.55}
+.brvm-roadmap-note .icon{flex:none;color:var(--gold-soft);width:17px;height:17px}
+@media(max-width:760px){
+  .brvm-data-register,.brvm-pole-roadmap{padding:18px}
+  .brvm-data-facts{grid-template-columns:1fr 1fr}
+  .brvm-pole-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:460px){
+  .brvm-data-facts,.brvm-pole-grid{grid-template-columns:1fr}
 }
