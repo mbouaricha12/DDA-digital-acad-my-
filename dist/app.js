@@ -390,6 +390,44 @@ const MODULE_STATUS_LABEL = { completed: 'Terminé', in_progress: 'En cours', av
 // safe value here so the Academy shell can boot without the optional module.
 const MARKET_DEMO = Object.freeze({ indices: [], calendar: [] });
 function marketDemo() { return window.DDAMarketIntelligence?.demo || MARKET_DEMO; }
+// No publication is shown until a source, redistribution right and editorial
+// verification are all recorded. An empty registry is intentional: it prevents
+// synthetic documents from acquiring the appearance of official BRVM material.
+const BRVM_PUBLICATION_REQUIRED_FIELDS = Object.freeze([
+  'id', 'title', 'source', 'sourceUrl', 'documentUrl', 'referenceDate', 'retrievedAt',
+  'verificationStatus', 'freshnessStatus', 'redistributionRights'
+]);
+let BRVM_PUBLICATIONS = Object.freeze([]);
+let brvmPublicationFetchState = 'idle';
+let brvmPublicationFetchStarted = false;
+function isVerifiedBrvmPublication(publication) {
+  if (!publication || typeof publication !== 'object') return false;
+  if (BRVM_PUBLICATION_REQUIRED_FIELDS.some(field => typeof publication[field] !== 'string' || !publication[field].trim())) return false;
+  if (publication.verificationStatus !== 'verified') return false;
+  if (publication.freshnessStatus !== 'current') return false;
+  if (publication.redistributionRights !== 'authorized') return false;
+  if (!/^https:\/\//i.test(publication.sourceUrl) || !/^https:\/\//i.test(publication.documentUrl)) return false;
+  const referenceTime = Date.parse(publication.referenceDate);
+  const retrievedTime = Date.parse(publication.retrievedAt);
+  return Number.isFinite(referenceTime) && Number.isFinite(retrievedTime) && retrievedTime >= referenceTime;
+}
+function verifiedBrvmPublications() { return BRVM_PUBLICATIONS.filter(isVerifiedBrvmPublication); }
+async function loadBrvmPublications() {
+  if (!window.DDABFF?.enabled?.() || typeof window.DDABFF.getBrvmPublications !== 'function' || brvmPublicationFetchStarted) return;
+  brvmPublicationFetchStarted = true;
+  brvmPublicationFetchState = 'loading';
+  renderMarketIntelligence();
+  try {
+    const items = await window.DDABFF.getBrvmPublications();
+    if (!Array.isArray(items)) throw new Error('brvm_publications_invalid_response');
+    BRVM_PUBLICATIONS = Object.freeze(items.filter(isVerifiedBrvmPublication));
+    brvmPublicationFetchState = 'loaded';
+  } catch {
+    brvmPublicationFetchState = 'error';
+    brvmPublicationFetchStarted = false;
+  }
+  renderMarketIntelligence();
+}
 const NEXT_STEP_PHRASE = { lesson: 'voir la leçon', exercise: 'réussir l’exercice', quiz: 'valider le quiz' };
 
 // Illustrative candlestick shape (never real price data — same "Mode pédagogique"
@@ -563,6 +601,7 @@ function setBffAuthMode(mode) {
   const consent = document.getElementById('consent');
   const title = document.getElementById('access-form-title');
   const step = document.getElementById('access-step-label');
+  const note = document.getElementById('access-form-note');
   const submit = document.querySelector('#signup-form button[type="submit"]');
   const forgot = document.getElementById('bff-forgot-password');
   if (firstNameLabel) firstNameLabel.hidden = login;
@@ -571,8 +610,11 @@ function setBffAuthMode(mode) {
   if (passwordField) { passwordField.required = true; passwordField.autocomplete = login ? 'current-password' : 'new-password'; }
   if (consentField) consentField.hidden = login;
   if (consent) consent.required = !login;
-  if (title) title.textContent = login ? 'Se connecter' : 'Créer mon compte';
-  if (step) step.textContent = login ? 'Accès sécurisé' : 'Créer un compte';
+  if (title) title.textContent = login ? 'Se connecter' : 'Commence ton parcours Free';
+  if (step) step.textContent = login ? 'Accès sécurisé' : 'Étape 1 sur 2 · commencer';
+  if (note) note.textContent = login
+    ? 'Retrouve ton parcours avec ton compte serveur sécurisé.'
+    : 'Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon. Cette version conserve ta progression sur cet appareil.';
   if (submit) submit.innerHTML = login ? 'Ouvrir ma session <span>→</span>' : 'Recevoir le lien de vérification <span>→</span>';
   if (forgot) forgot.hidden = !login;
   document.getElementById('signup-error').textContent = '';
@@ -817,6 +859,17 @@ function renderMarketIntelligence() {
       <li><div><strong>${row.company}</strong><small>${row.event}</small></div><span class="data-badge"><svg class="icon"><use href="#icon-clock"/></svg>Exemple</span></li>
     `).join('');
   }
+  const publications = document.getElementById('brvm-publications-list');
+  if (publications) {
+    const verifiedPublications = verifiedBrvmPublications();
+    publications.innerHTML = verifiedPublications.length
+      ? verifiedPublications.map(publication => `<article class="brvm-publication-row"><div><strong><a href="${escapeHtml(publication.documentUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(publication.title)}</a></strong><small><a href="${escapeHtml(publication.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(publication.source)}</a> · ${escapeHtml(publication.referenceDate)} · récupéré le ${escapeHtml(publication.retrievedAt)}</small></div><span class="data-badge">Vérifié · actuel</span></article>`).join('')
+      : brvmPublicationFetchState === 'loading'
+        ? '<div class="brvm-publications-empty-copy"><span class="brvm-empty-mark" aria-hidden="true">…</span><div><strong>Chargement des publications vérifiées</strong><p>Les documents ne seront affichés qu’après vérification de leur provenance, de leur fraîcheur et de leurs droits.</p></div></div>'
+        : brvmPublicationFetchState === 'error'
+          ? '<div class="brvm-publications-empty-copy"><span class="brvm-empty-mark" aria-hidden="true">!</span><div><strong>Publications temporairement indisponibles</strong><p>Aucun document n’est affiché. Réessaie ultérieurement ; une erreur de service n’est pas interprétée comme un registre vide.</p></div></div>'
+          : '<div class="brvm-publications-empty-copy"><span class="brvm-empty-mark" aria-hidden="true">—</span><div><strong>Aucune publication vérifiée disponible</strong><p>Le registre est prêt, mais DDA n’a pas encore connecté de source autorisée. Les documents en attente ne sont pas présentés comme consultables.</p><small>État actuel · collecte manuelle à cadrer · pas de dernière mise à jour disponible</small></div></div>';
+  }
 }
 
 // The real, curriculum-flattened list of lessons with actual authored content —
@@ -968,11 +1021,19 @@ document.getElementById('mastery-list')?.addEventListener('click', event => {
 // activity/reflection context (mandate §9) — it is never read into the level above.
 function renderProgressNextStep() {
   const el = document.getElementById('progress-next-step');
+  const action = document.getElementById('progress-next-action');
+  const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   if (el) {
-    const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
     el.textContent = next
       ? `Continuer ${next.lesson.title} (${next.lesson.id}) — ${NEXT_STEP_PHRASE[next.step] || 'continuer'}.`
       : 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.';
+  }
+  if (action) {
+    action.hidden = !next;
+    if (next) {
+      action.dataset.view = LESSON_VIEW_ID[next.lesson.id] || 'lesson';
+      action.innerHTML = `${next.step === 'lesson' ? 'Commencer' : 'Reprendre'} ${next.lesson.id} · ${next.lesson.title} <span>→</span>`;
+    }
   }
   const noteEl = document.getElementById('progress-journal-note');
   if (!noteEl) return;
@@ -2003,7 +2064,9 @@ function renderState() {
   document.getElementById('event-count').textContent = `${count} événement${count > 1 ? 's' : ''}`;
 
   document.getElementById('sidebar-plan').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
-  document.getElementById('membership-status').textContent = premium ? 'DDA Premium' : 'DDA Free';
+  document.getElementById('membership-status').textContent = premium ? 'DDA Premium · aperçu local' : 'DDA Free';
+  const membershipStatusNote = document.getElementById('membership-status-note');
+  if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Démonstration sur cet appareil · aucun achat actif' : 'Disponible maintenant · aucun achat actif';
   document.getElementById('free-plan-state').textContent = premium ? 'Inclus avec Premium' : 'Formule active';
   document.getElementById('preview-premium').hidden = premium;
   document.getElementById('revert-free').hidden = !premium;
@@ -2226,6 +2289,7 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
     storePreviousView(previousView);
     currentView = id;
   }
+  if (id === 'markets') loadBrvmPublications();
   if (recordEvent) trackEvent('view_opened', { view: id });
   if (recordEvent && id === 'premium-track') trackEvent('premium_track_viewed', { view: id });
   if (recordEvent && (id === 'lesson-p21' || id === 'lesson-p22')) trackEvent('premium_module_started', { module: 'P2', lesson: id });
@@ -2575,7 +2639,17 @@ document.getElementById('onboarding-form').addEventListener('submit', async even
   const time = timeField.value;
   const invalidFields = [!level && levelField, !goal && goalField, !time && timeField].filter(Boolean);
   [levelField, goalField, timeField].forEach(field => field.setAttribute('aria-invalid', String(invalidFields.includes(field))));
-  if (invalidFields.length) { document.getElementById('onboarding-error').textContent = 'Choisis les trois éléments du parcours.'; invalidFields[0].focus(); return; }
+  if (invalidFields.length) {
+    const firstMissing = invalidFields[0];
+    const fieldMessages = {
+      level: 'Choisis ton niveau pour construire ton parcours.',
+      goal: 'Choisis ton objectif pour construire ton parcours.',
+      time: 'Choisis ton rythme pour construire ton parcours.'
+    };
+    document.getElementById('onboarding-error').textContent = fieldMessages[firstMissing.id] || 'Complète les trois éléments du parcours.';
+    firstMissing.focus();
+    return;
+  }
   document.getElementById('onboarding-error').textContent = '';
   saveState({ onboarding: { level, goal, time, complete: true } });
   updateLessonState(activeLessonId, { lessonViewed: true });
@@ -2618,7 +2692,12 @@ function bindQuestion(lessonId, question, options) {
       const copy = document.createElement('span');
       copy.className = 'feedback-copy';
       copy.textContent = message || 'Relis le raisonnement présenté dans cette étape avant de répondre à nouveau.';
-      feedback.append(kicker, copy);
+      const next = document.createElement('small');
+      next.className = 'feedback-next';
+      next.textContent = correct
+        ? (role === 'exercise' ? 'Le quiz de vérification est maintenant accessible.' : role === 'quiz' ? 'Cette validation est conservée localement sur cet appareil.' : 'Tu peux continuer lorsque tu es prêt.')
+        : 'Relis le raisonnement présenté, puis choisis une autre réponse.';
+      feedback.append(kicker, copy, next);
       feedback.className = `feedback ${correct ? 'success' : 'error'}`;
     }
     if (opts.revealId) {

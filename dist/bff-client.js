@@ -89,6 +89,14 @@
     return result.body;
   }
 
+  async function getBrvmPublications() {
+    const result = await request('/v1/publications/brvm');
+    if (!result.enabled) return null;
+    if (!result.response.ok) throw resultError(result, 'brvm_publications_failed');
+    if (!Array.isArray(result.body?.items)) throw new Error('brvm_publications_invalid_response');
+    return result.body.items;
+  }
+
   async function updateMe(patch) {
     const result = await request('/v1/me', { method: 'PATCH', body: patch });
     if (!result.enabled || result.response.status === 401) return null;
@@ -104,7 +112,7 @@
   }
 
   window.DDABFF = Object.freeze({
-    enabled, register, verifyEmail, login, requestPasswordReset, getMe, updateMe, logout, issueCsrf,
+    enabled, register, verifyEmail, login, requestPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
     get baseUrl() { return configuredBase; }
   });
 })();

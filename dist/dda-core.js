@@ -118,9 +118,9 @@
     // flag (an 'exercise'-step quiz block completing exerciseComplete, etc.).
     const steps = Object.freeze([
       Object.freeze({ id: 'lesson', label: 'Comprendre' }),
-      Object.freeze({ id: 'exercise', label: 'Exercice' }),
-      Object.freeze({ id: 'quiz', label: 'Quiz' }),
-      Object.freeze({ id: 'review', label: 'Résultat' })
+      Object.freeze({ id: 'exercise', label: 'Essayer' }),
+      Object.freeze({ id: 'quiz', label: 'Vérifier' }),
+      Object.freeze({ id: 'review', label: 'Continuer' })
     ]);
     const blocks = Object.freeze([
       Object.freeze({ type: 'competency_check', id: 'competency-intro', step: 'lesson', mode: 'targets', competency }),

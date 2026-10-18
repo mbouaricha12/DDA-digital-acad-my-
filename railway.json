@@ -6,7 +6,7 @@
   },
   "deploy": {
     "startCommand": "cd bff && npm start",
-    "healthcheckPath": "/v1/security/csrf",
+    "healthcheckPath": "/healthz",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }

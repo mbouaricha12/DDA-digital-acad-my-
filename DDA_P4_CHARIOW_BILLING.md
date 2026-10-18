@@ -2,7 +2,7 @@
 
 ## Statut
 
-**Socle préparé, paiement réel non activé.**
+**BillingStore branché côté BFF, paiement réel non activé.**
 
 DDA utilise maintenant un adaptateur serveur prêt pour Chariow Checkout et les Pulses. Aucun secret, produit réel ou entitlement de production n’est livré dans le dépôt.
 
@@ -18,7 +18,7 @@ Academy → BFF DDA → Chariow Checkout
                   BFF DDA → membership serveur → entitlements
 ```
 
-La redirection après paiement sert uniquement à l’expérience utilisateur. L’accès Premium est accordé uniquement après un Pulse `successful.sale` accepté et persisté.
+La redirection après paiement sert uniquement à l’expérience utilisateur. L’accès Premium est accordé uniquement après un Pulse `successful.sale` accepté et persisté. Le BFF lit ensuite les memberships actifs depuis Supabase pour autoriser les routes Premium.
 
 ## Configuration serveur
 
@@ -50,7 +50,14 @@ POST https://api.example.com/webhooks/chariow
 - `license.expired` — expiration ;
 - `license.revoked` — révocation.
 
-L’adaptateur vérifie `x-chariow-signature` sur le corps brut, exige `x-pulse-delivery-id` et déduplique les livraisons.
+L’adaptateur vérifie `x-chariow-signature` sur le corps brut, exige `x-pulse-delivery-id` et déduplique les livraisons via la clé primaire `dda_billing_deliveries.delivery_id`.
+
+## Tables Supabase ajoutées
+
+- `public.dda_billing_deliveries` — journal minimal des livraisons Pulse, statut `accepted / processed / failed`, hash SHA-256 du payload et idempotence par `delivery_id` ;
+- `public.dda_billing_memberships` — état courant par compte DDA et référence Chariow, avec contrainte unique `(provider, external_id)` et snapshot JSON des entitlements actifs.
+
+Les deux tables sont protégées par RLS et n’accordent aucune écriture aux rôles `anon` ou `authenticated`. Seul le BFF utilisant la clé service role les écrit. Appliquer `bff/supabase/schema.sql` sur l’environnement Supabase avant de déployer le BFF.
 
 ## Modèle Membership DDA
 
@@ -77,16 +84,18 @@ Le modèle P4 est donc volontairement prudent : il représente l’accès comme 
 ## Fichiers
 
 - `bff/src/chariow.js` — vérification Pulse, déduplication, mapping et Checkout serveur ;
+- `bff/src/billing-store.js` — persistance PostgREST, lecture des entitlements actifs et suppression des memberships d’un compte ;
 - `contracts/p4-chariow-billing-v1.json` — contrat machine-readable ;
-- `tests/test_p4_chariow_billing.js` — tests de sécurité et de mapping.
+- `tests/test_p4_chariow_billing.js` — tests de sécurité et de mapping ;
+- `tests/test_billing_store.js` — test PostgREST simulé du stockage Supabase.
 
 ## Activation production — à faire plus tard
 
 1. Créer le produit Premium Chariow et relever ses IDs publics.
 2. Créer une clé API serveur dédiée.
 3. Créer le Pulse HTTPS et révéler son secret `whsec_...`.
-4. Implémenter le `billingStore` persistant dans Supabase avec idempotency unique sur `x-pulse-delivery-id`.
-5. Relier les transitions au membership/entitlement serveur.
+4. Appliquer le schéma Supabase puis vérifier l’audit RLS.
+5. Configurer le BFF avec `billingStore` et relier les transitions aux entitlements serveur.
 6. Tester les livraisons réelles en environnement de staging.
 7. Effectuer la revue juridique, remboursement et suppression avant mise en production.
 

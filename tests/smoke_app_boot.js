@@ -207,6 +207,7 @@ async function completeLesson({ viewId, markId, exerciseName, quizName, resultId
   });
 
   console.log(`\nRESULT: ${pass} smoke-boot checks passed`);
+  window.close();
 })().catch(error => {
   console.error('SMOKE BOOT FAILED:', error);
   process.exitCode = 1;

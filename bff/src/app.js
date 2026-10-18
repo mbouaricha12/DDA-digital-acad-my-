@@ -21,6 +21,48 @@ function configFromEnv(env = process.env) {
   };
 }
 
+function validateRuntimeConfig(config, env = process.env) {
+  const issues = [];
+  for (const key of ['SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SESSION_ENCRYPTION_KEY', 'ALLOWED_ORIGINS', 'EMAIL_REDIRECT_TO']) {
+    if (!String(env[key] || '').trim()) issues.push(`Missing ${key}`);
+  }
+  if (!Number.isInteger(config.port) || config.port < 1 || config.port > 65535) issues.push('PORT must be an integer from 1 to 65535');
+  if (!Number.isFinite(config.sessionIdleMs) || config.sessionIdleMs <= 0 || !Number.isFinite(config.sessionAbsoluteMs) || config.sessionAbsoluteMs < config.sessionIdleMs) {
+    issues.push('Session durations are invalid');
+  }
+  if (!config.secureCookies) issues.push('BFF_COOKIE_SECURE must be true for __Host- cookies');
+  if (Buffer.from(String(config.sessionEncryptionKey || ''), 'base64url').length !== 32) issues.push('SESSION_ENCRYPTION_KEY must decode to exactly 32 bytes');
+  if (!Array.isArray(config.allowedOrigins) || config.allowedOrigins.length === 0) issues.push('ALLOWED_ORIGINS must contain at least one exact origin');
+  for (const origin of config.allowedOrigins || []) {
+    if (origin === '*') {
+      issues.push('ALLOWED_ORIGINS must contain exact HTTPS origins (HTTP is allowed only for localhost development)');
+      break;
+    }
+    try {
+      const parsed = new URL(origin);
+      const localHttp = parsed.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname);
+      if (parsed.origin !== origin || parsed.username || parsed.password || (parsed.protocol !== 'https:' && !localHttp)) {
+        issues.push('ALLOWED_ORIGINS must contain exact HTTPS origins (HTTP is allowed only for localhost development)');
+        break;
+      }
+    } catch {
+      issues.push('ALLOWED_ORIGINS contains an invalid origin');
+      break;
+    }
+  }
+  try {
+    const supabase = new URL(String(env.SUPABASE_URL || ''));
+    if (supabase.protocol !== 'https:' || supabase.username || supabase.password || supabase.pathname !== '/' || supabase.search || supabase.hash) {
+      issues.push('SUPABASE_URL must be a root HTTPS URL without embedded credentials, path, query or fragment');
+    }
+  } catch { issues.push('SUPABASE_URL must be a valid HTTPS URL'); }
+  try {
+    const redirect = new URL(config.emailRedirectTo);
+    if (redirect.username || redirect.password || !config.allowedOrigins.includes(redirect.origin)) issues.push('EMAIL_REDIRECT_TO must be credential-free and use an origin listed in ALLOWED_ORIGINS');
+  } catch { issues.push('EMAIL_REDIRECT_TO must be a valid URL'); }
+  return issues;
+}
+
 function json(res, status, body, headers = {}) {
   const data = body === undefined ? '' : JSON.stringify(body);
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...headers });
@@ -44,7 +86,14 @@ async function readJson(req, maxBytes = 64 * 1024) {
     chunks.push(chunk);
   }
   if (!chunks.length) return {};
-  try { return JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { throw Object.assign(new Error('invalid json'), { status: 400 }); }
+  const contentType = String(req.headers['content-type'] || '').split(';', 1)[0].trim().toLowerCase();
+  if (contentType !== 'application/json' && !/^application\/[a-z0-9.+-]+\+json$/.test(contentType)) {
+    throw Object.assign(new Error('unsupported content type'), { status: 415, expose: true });
+  }
+  let body;
+  try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { throw Object.assign(new Error('invalid json'), { status: 400, expose: true }); }
+  if (!body || typeof body !== 'object' || Array.isArray(body)) throw Object.assign(new Error('invalid json body'), { status: 400, expose: true });
+  return body;
 }
 
 function cookieHeaders(config, sessionToken, csrfToken, clear = false) {
@@ -91,7 +140,7 @@ function publicUser(user) {
   return { user_id: user.user_id, email: user.email, email_verified: Boolean(user.email_verified), display_name: user.display_name || '', status: user.status, entitlements: Array.isArray(user.entitlements) ? user.entitlements : [] };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, businessStore, mutationStore = null, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   businessStore = businessStore || {
     exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
@@ -180,6 +229,15 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         setCookies(res, [serializeCookie(CSRF_COOKIE, csrf, { secure: config.secureCookies, sameSite: 'Lax', path: '/' })]);
         return json(res, 204, undefined);
       }
+      if (method === 'GET' && path === '/healthz') return json(res, 200, { status: 'ok' });
+      if (method === 'GET' && path === '/v1/publications/brvm') {
+        if (!brvmPublicationStore || typeof brvmPublicationStore.listPublished !== 'function') {
+          return sendError(res, 503, 'publications_unavailable', 'Verified publications are not available.', requestId);
+        }
+        const items = await brvmPublicationStore.listPublished();
+        if (!Array.isArray(items)) throw new Error('brvm_publications_store_invalid_shape');
+        return json(res, 200, { items });
+      }
       if (method === 'POST' && path === '/v1/auth/register') {
         const body = await readJson(req);
         const validation = validateRegistration(body);
@@ -248,6 +306,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         if (body.confirmation !== 'DELETE') return sendError(res, 400, 'confirmation_required', 'Type DELETE to confirm account deletion.', requestId);
         await businessStore.deleteUserData(current.user.user_id);
+        await billingStore?.deleteUserData?.(current.user.user_id);
         await sessions.revokeAll(current.user.user_id, clock());
         await auth.deleteUser(current.user.user_id);
         setCookies(res, cookieHeaders(config, '', '', true));
@@ -288,11 +347,11 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       // Never copy exception messages into operational logs: they may contain
       // free-text Journal content, provider responses, or other user data.
       logger('request_failed', { requestId, status: error.status || 500, error_code: error.code || 'internal_error' });
-      const status = [400, 409, 413].includes(error.status) ? error.status : 500;
-      const code = status === 413 ? 'validation_error' : (error.code || (status === 409 ? 'conflict' : 'internal_error'));
+      const status = [400, 409, 413, 415].includes(error.status) ? error.status : 500;
+      const code = [400, 413, 415].includes(status) ? 'validation_error' : (error.code || (status === 409 ? 'conflict' : 'internal_error'));
       return sendError(res, status, code, status === 409 ? 'The mutation conflicts with an earlier request.' : 'Request could not be processed.', requestId);
     }
   };
 }
 
-module.exports = { createBff, configFromEnv, SESSION_COOKIE, CSRF_COOKIE, readJson };
+module.exports = { createBff, configFromEnv, validateRuntimeConfig, SESSION_COOKIE, CSRF_COOKIE, readJson };
