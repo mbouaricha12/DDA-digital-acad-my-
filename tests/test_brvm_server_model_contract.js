@@ -19,6 +19,8 @@ for (const field of ['document_id', 'reference_date', 'retrieved_at', 'checksum_
 }
 assert.match(migration, /create table if not exists public\.dda_brvm_audit_events/, 'BRVM changes are auditable');
 assert.match(migration, /actor_id uuid not null/, 'mutations without an attributable actor are rejected');
+assert.match(migration, /if tg_op = 'UPDATE' and old\.source_id <> new\.source_id/, 'source identity checks must not dereference NEW during DELETE');
+assert.match(migration, /if tg_op = 'UPDATE' and \(old\.document_id <> new\.document_id or old\.source_id <> new\.source_id\)/, 'document identity checks must not dereference NEW during DELETE');
 assert.match(migration, /Invalid BRVM source status transition/, 'source lifecycle transitions are enforced');
 assert.match(migration, /Invalid BRVM document status transition/, 'document lifecycle transitions are enforced');
 assert.match(migration, /rights_reviewer_id <> editorial_reviewer_id/, 'rights and editorial review must be independent');

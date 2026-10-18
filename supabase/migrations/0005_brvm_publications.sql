@@ -92,7 +92,7 @@ declare
   raw_actor text;
 begin
   if tg_table_name = 'dda_brvm_sources' then
-    if tg_op <> 'INSERT' and old.source_id <> new.source_id then
+    if tg_op = 'UPDATE' and old.source_id <> new.source_id then
       raise exception 'BRVM source identity is immutable';
     end if;
     if tg_op = 'INSERT' then
@@ -122,7 +122,7 @@ begin
       row_id := old.source_id;
     end if;
   else
-    if tg_op <> 'INSERT' and (old.document_id <> new.document_id or old.source_id <> new.source_id) then
+    if tg_op = 'UPDATE' and (old.document_id <> new.document_id or old.source_id <> new.source_id) then
       raise exception 'BRVM document and source identities are immutable';
     end if;
     if tg_op <> 'DELETE' and new.document_status in ('approved', 'imported', 'published') and not exists (
