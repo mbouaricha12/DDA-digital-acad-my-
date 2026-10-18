@@ -15,7 +15,7 @@ assert(html.includes('id="public-info-dialog-content"'), 'La modale publique doi
 assert(publicJs.includes('publicInfoDialog.showModal'), 'La modale publique doit utiliser showModal quand disponible');
 assert(publicJs.includes("publicInfoDialog?.addEventListener('click'"), 'La modale publique doit pouvoir être fermée depuis son backdrop');
 assert(publicJs.includes("event.key === 'Escape' && publicInfoDialog?.open"), 'La modale publique doit être fermable au clavier');
-assert(publicJs.includes('adresse e-mail officielle'), 'Le contact doit rester honnête sans inventer d’adresse');
+assert(publicJs.includes('dariusdigitalacademy@gmail.com'), 'Le contact officiel doit être présent dans les surfaces publiques');
 assert(publicJs.includes('Aucun rendement'), 'Les risques financiers doivent être explicitement documentés');
 assert(publicJs.includes('Dernière mise à jour'), 'Les documents légaux doivent afficher une date de mise à jour');
 assert(publicJs.includes('préfère') || publicJs.includes('prefers-reduced-motion'), 'Les limites d’accessibilité doivent être documentées');
