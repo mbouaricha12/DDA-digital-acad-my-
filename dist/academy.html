@@ -178,11 +178,12 @@
             </div>
             <p class="form-error" id="bff-auth-status" role="status" aria-live="polite"></p>
             <form id="signup-form" data-js-submit method="dialog">
-              <p class="eyebrow" id="access-step-label">Étape 1 sur 2 · créer</p><h2 id="access-form-title">Créer mon compte</h2>
+              <p class="eyebrow" id="access-step-label">Étape 1 sur 2 · commencer</p><h2 id="access-form-title">Commence ton parcours Free</h2>
+              <p class="access-form-note" id="access-form-note">Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon. Cette version conserve ta progression sur cet appareil.</p>
               <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ex. Richard"></label>
               <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"></label>
               <label id="access-password-field" hidden>Mot de passe<input id="access-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128"></label>
-              <label class="consent" id="access-consent-field"><input id="consent" type="checkbox" required><span id="access-consent-label">J’accepte que ces informations restent uniquement sur mon appareil.</span></label>
+              <label class="consent" id="access-consent-field"><input id="consent" type="checkbox" required><span id="access-consent-label">Je comprends que cette version conserve ma progression sur cet appareil.</span></label>
               <p class="form-error" id="signup-error" role="alert"></p>
               <button class="primary-action" type="submit" disabled>Continuer <span>→</span></button>
             </form>
@@ -202,10 +203,11 @@
               <button class="text-action" id="recovery-back" type="button">Retour à la connexion</button>
             </form>
             <form id="onboarding-form" data-js-submit method="dialog" hidden>
-              <p class="eyebrow">Étape 2 sur 2 · calibrer</p><h2>Quel parcours te correspond ?</h2>
-              <label>Niveau<select id="level" required><option value="">Choisir</option><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select></label>
-              <label>Objectif pédagogique<select id="goal" required><option value="">Choisir</option><option>Comprendre les marchés</option><option>Améliorer ma gestion du risque</option><option>Structurer mes décisions</option></select></label>
-              <label>Temps disponible<select id="time" required><option value="">Choisir</option><option>10 minutes par jour</option><option>20 minutes par jour</option><option>45 minutes, 3 fois par semaine</option></select></label>
+              <p class="eyebrow">Étape 2 sur 2 · calibrer</p><h2>Construisons une première étape réaliste</h2>
+              <p class="onboarding-form-note" id="onboarding-form-note">Ces réponses servent à choisir ton point de départ pédagogique. Elles ne sont pas un test et ne constituent pas un profil financier.</p>
+              <label>Niveau<select id="level" aria-describedby="onboarding-form-note onboarding-error" required><option value="">Choisir</option><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select></label>
+              <label>Objectif pédagogique<select id="goal" aria-describedby="onboarding-form-note onboarding-error" required><option value="">Choisir</option><option>Comprendre les marchés</option><option>Améliorer ma gestion du risque</option><option>Structurer mes décisions</option></select></label>
+              <label>Temps disponible<select id="time" aria-describedby="onboarding-form-note onboarding-error" required><option value="">Choisir</option><option>10 minutes par jour</option><option>20 minutes par jour</option><option>45 minutes, 3 fois par semaine</option></select></label>
               <p class="form-error" id="onboarding-error" role="alert"></p>
               <button class="primary-action" type="submit" disabled>Construire mon parcours <span>→</span></button>
             </form>
@@ -502,6 +504,7 @@
         <section class="panel next-step-panel">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-compass"/></svg> Prochaine étape réelle</p></div></div>
           <p id="progress-next-step">—</p>
+          <button class="primary-action progress-next-action" id="progress-next-action" type="button" data-view="lesson" hidden>Reprendre ma prochaine leçon <span>→</span></button>
           <p class="progress-journal-note" id="progress-journal-note" hidden></p>
         </section>
 
@@ -711,11 +714,11 @@
       <section class="view" id="membership" aria-labelledby="membership-title">
         <div class="section-intro"><p class="eyebrow gold">Accès DDA</p><h1 id="membership-title">Grandir à ton rythme.</h1><p>DDA Free pose les fondations. Premium approfondira la pratique, l’évaluation et la preuve de progression. Aucun paiement n’est activé pour le moment.</p></div>
         <div class="page-mission" data-mission="membership"><div><p class="eyebrow">Mission de cette page</p><strong>Comprendre ce qui est disponible avant de choisir un accès.</strong><span>Cette page explique les niveaux ; elle ne remplace ni le Parcours ni les leçons.</span></div><button class="text-action" data-view="premium-track">Explorer la suite Premium <span>→</span></button></div>
-        <div class="membership-status-line"><span>Formule actuelle</span><strong id="membership-status">DDA Free</strong><small>Aucun achat actif</small></div>
+        <div class="membership-status-line"><span>Formule actuelle</span><strong id="membership-status">DDA Free</strong><small id="membership-status-note">Disponible maintenant · aucun achat actif</small></div>
 
         <div class="plan-grid">
           <article class="plan-card current-plan"><p class="eyebrow">Ce que tu as aujourd’hui</p><h2>DDA Free</h2><p class="plan-tagline">Pour démarrer sérieusement, sans rien débourser.</p><ul><li>Parcours M0 Fondations et ses leçons</li><li>Exercices, quiz et Fil de maîtrise réel</li><li>Journal &amp; Plan</li><li>Market Intelligence (aperçu)</li></ul><span class="plan-state" id="free-plan-state">Formule active</span></article>
-          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">Ce que Premium approfondira</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><ul><li>Leçons Premium P2 : risque avant entrée et trade contrôlé</li><li>Risk Plan Lab avec validation du scénario et conditions de non-trade</li><li>Assessment Controlled Decision et preuve locale de compétence</li><li>Revue hebdomadaire, ressources avancées et pont vers le Journal</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aperçu local — aucun achat, aucun abonnement actif</small></article>
+          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">DDA Premium · aperçu local</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><p class="premium-local-status">Tu explores une démonstration pédagogique sur cet appareil, pas un abonnement actif.</p><ul><li>Leçons Premium P2 : risque avant entrée et trade contrôlé</li><li>Risk Plan Lab avec validation du scénario et conditions de non-trade</li><li>Assessment Controlled Decision et preuve locale de compétence</li><li>Revue hebdomadaire, ressources avancées et pont vers le Journal</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aucun paiement · aucun renouvellement · aucun entitlement serveur</small><a class="text-action membership-preparation-link" href="launch/">Comprendre la préparation commerciale <span>→</span></a></article>
         </div>
 
         <section class="panel access-model-panel" aria-labelledby="access-model-title">

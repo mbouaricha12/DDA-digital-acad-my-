@@ -563,6 +563,7 @@ function setBffAuthMode(mode) {
   const consent = document.getElementById('consent');
   const title = document.getElementById('access-form-title');
   const step = document.getElementById('access-step-label');
+  const note = document.getElementById('access-form-note');
   const submit = document.querySelector('#signup-form button[type="submit"]');
   const forgot = document.getElementById('bff-forgot-password');
   if (firstNameLabel) firstNameLabel.hidden = login;
@@ -571,8 +572,11 @@ function setBffAuthMode(mode) {
   if (passwordField) { passwordField.required = true; passwordField.autocomplete = login ? 'current-password' : 'new-password'; }
   if (consentField) consentField.hidden = login;
   if (consent) consent.required = !login;
-  if (title) title.textContent = login ? 'Se connecter' : 'Créer mon compte';
-  if (step) step.textContent = login ? 'Accès sécurisé' : 'Créer un compte';
+  if (title) title.textContent = login ? 'Se connecter' : 'Commence ton parcours Free';
+  if (step) step.textContent = login ? 'Accès sécurisé' : 'Étape 1 sur 2 · commencer';
+  if (note) note.textContent = login
+    ? 'Retrouve ton parcours avec ton compte serveur sécurisé.'
+    : 'Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon. Cette version conserve ta progression sur cet appareil.';
   if (submit) submit.innerHTML = login ? 'Ouvrir ma session <span>→</span>' : 'Recevoir le lien de vérification <span>→</span>';
   if (forgot) forgot.hidden = !login;
   document.getElementById('signup-error').textContent = '';
@@ -968,11 +972,19 @@ document.getElementById('mastery-list')?.addEventListener('click', event => {
 // activity/reflection context (mandate §9) — it is never read into the level above.
 function renderProgressNextStep() {
   const el = document.getElementById('progress-next-step');
+  const action = document.getElementById('progress-next-action');
+  const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   if (el) {
-    const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
     el.textContent = next
       ? `Continuer ${next.lesson.title} (${next.lesson.id}) — ${NEXT_STEP_PHRASE[next.step] || 'continuer'}.`
       : 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.';
+  }
+  if (action) {
+    action.hidden = !next;
+    if (next) {
+      action.dataset.view = LESSON_VIEW_ID[next.lesson.id] || 'lesson';
+      action.innerHTML = `${next.step === 'lesson' ? 'Commencer' : 'Reprendre'} ${next.lesson.id} · ${next.lesson.title} <span>→</span>`;
+    }
   }
   const noteEl = document.getElementById('progress-journal-note');
   if (!noteEl) return;
@@ -2003,7 +2015,9 @@ function renderState() {
   document.getElementById('event-count').textContent = `${count} événement${count > 1 ? 's' : ''}`;
 
   document.getElementById('sidebar-plan').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
-  document.getElementById('membership-status').textContent = premium ? 'DDA Premium' : 'DDA Free';
+  document.getElementById('membership-status').textContent = premium ? 'DDA Premium · aperçu local' : 'DDA Free';
+  const membershipStatusNote = document.getElementById('membership-status-note');
+  if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Démonstration sur cet appareil · aucun achat actif' : 'Disponible maintenant · aucun achat actif';
   document.getElementById('free-plan-state').textContent = premium ? 'Inclus avec Premium' : 'Formule active';
   document.getElementById('preview-premium').hidden = premium;
   document.getElementById('revert-free').hidden = !premium;
@@ -2575,7 +2589,17 @@ document.getElementById('onboarding-form').addEventListener('submit', async even
   const time = timeField.value;
   const invalidFields = [!level && levelField, !goal && goalField, !time && timeField].filter(Boolean);
   [levelField, goalField, timeField].forEach(field => field.setAttribute('aria-invalid', String(invalidFields.includes(field))));
-  if (invalidFields.length) { document.getElementById('onboarding-error').textContent = 'Choisis les trois éléments du parcours.'; invalidFields[0].focus(); return; }
+  if (invalidFields.length) {
+    const firstMissing = invalidFields[0];
+    const fieldMessages = {
+      level: 'Choisis ton niveau pour construire ton parcours.',
+      goal: 'Choisis ton objectif pour construire ton parcours.',
+      time: 'Choisis ton rythme pour construire ton parcours.'
+    };
+    document.getElementById('onboarding-error').textContent = fieldMessages[firstMissing.id] || 'Complète les trois éléments du parcours.';
+    firstMissing.focus();
+    return;
+  }
   document.getElementById('onboarding-error').textContent = '';
   saveState({ onboarding: { level, goal, time, complete: true } });
   updateLessonState(activeLessonId, { lessonViewed: true });
@@ -2618,7 +2642,12 @@ function bindQuestion(lessonId, question, options) {
       const copy = document.createElement('span');
       copy.className = 'feedback-copy';
       copy.textContent = message || 'Relis le raisonnement présenté dans cette étape avant de répondre à nouveau.';
-      feedback.append(kicker, copy);
+      const next = document.createElement('small');
+      next.className = 'feedback-next';
+      next.textContent = correct
+        ? (role === 'exercise' ? 'Le quiz de vérification est maintenant accessible.' : role === 'quiz' ? 'Cette validation est conservée localement sur cet appareil.' : 'Tu peux continuer lorsque tu es prêt.')
+        : 'Relis le raisonnement présenté, puis choisis une autre réponse.';
+      feedback.append(kicker, copy, next);
       feedback.className = `feedback ${correct ? 'success' : 'error'}`;
     }
     if (opts.revealId) {
