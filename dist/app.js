@@ -393,7 +393,23 @@ function marketDemo() { return window.DDAMarketIntelligence?.demo || MARKET_DEMO
 // No publication is shown until a source, redistribution right and editorial
 // verification are all recorded. An empty registry is intentional: it prevents
 // synthetic documents from acquiring the appearance of official BRVM material.
+const BRVM_PUBLICATION_REQUIRED_FIELDS = Object.freeze([
+  'id', 'title', 'source', 'sourceUrl', 'referenceDate', 'retrievedAt',
+  'verificationStatus', 'freshnessStatus', 'redistributionRights'
+]);
 const BRVM_PUBLICATIONS = Object.freeze([]);
+function isVerifiedBrvmPublication(publication) {
+  if (!publication || typeof publication !== 'object') return false;
+  if (BRVM_PUBLICATION_REQUIRED_FIELDS.some(field => typeof publication[field] !== 'string' || !publication[field].trim())) return false;
+  if (publication.verificationStatus !== 'verified') return false;
+  if (publication.freshnessStatus !== 'current') return false;
+  if (publication.redistributionRights !== 'authorized') return false;
+  if (!/^https?:\/\//i.test(publication.sourceUrl)) return false;
+  const referenceTime = Date.parse(publication.referenceDate);
+  const retrievedTime = Date.parse(publication.retrievedAt);
+  return Number.isFinite(referenceTime) && Number.isFinite(retrievedTime) && retrievedTime >= referenceTime;
+}
+function verifiedBrvmPublications() { return BRVM_PUBLICATIONS.filter(isVerifiedBrvmPublication); }
 const NEXT_STEP_PHRASE = { lesson: 'voir la leçon', exercise: 'réussir l’exercice', quiz: 'valider le quiz' };
 
 // Illustrative candlestick shape (never real price data — same "Mode pédagogique"
@@ -827,8 +843,9 @@ function renderMarketIntelligence() {
   }
   const publications = document.getElementById('brvm-publications-list');
   if (publications) {
-    publications.innerHTML = BRVM_PUBLICATIONS.length
-      ? BRVM_PUBLICATIONS.map(publication => `<article class="brvm-publication-row"><div><strong>${escapeHtml(publication.title)}</strong><small>${escapeHtml(publication.source)} · ${escapeHtml(publication.referenceDate)}</small></div><span class="data-badge">${escapeHtml(publication.verificationStatus)}</span></article>`).join('')
+    const verifiedPublications = verifiedBrvmPublications();
+    publications.innerHTML = verifiedPublications.length
+      ? verifiedPublications.map(publication => `<article class="brvm-publication-row"><div><strong>${escapeHtml(publication.title)}</strong><small>${escapeHtml(publication.source)} · ${escapeHtml(publication.referenceDate)}</small></div><span class="data-badge">${escapeHtml(publication.verificationStatus)}</span></article>`).join('')
       : '<div class="brvm-publications-empty-copy"><span class="brvm-empty-mark" aria-hidden="true">—</span><div><strong>Aucune publication vérifiée disponible</strong><p>Le registre est prêt, mais DDA n’a pas encore connecté de source autorisée. Les documents en attente ne sont pas présentés comme consultables.</p><small>État actuel · collecte manuelle à cadrer · pas de dernière mise à jour disponible</small></div></div>';
   }
 }

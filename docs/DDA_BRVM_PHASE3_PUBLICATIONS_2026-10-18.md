@@ -66,3 +66,28 @@ La page reste accessible uniquement à travers la permission existante de Market
 3. **P1 — Publication UX :** afficher les documents vérifiés et les éléments en attente dans deux états distincts, avec lien d’origine et date.
 4. **P2 — Actions/indices :** uniquement après validation documentaire et sans afficher de cotation live par défaut.
 5. **P3 — Portefeuille virtuel et assistant IA :** rester différés jusqu’à satisfaction des prérequis techniques et commerciaux.
+
+## Addendum — contrôle fail-closed renforcé
+
+L’audit de la branche a confirmé que le registre `BRVM_PUBLICATIONS` reste vide et qu’aucun import réel, lien officiel, chiffre ou date de marché n’est livré.
+
+Un filtre explicite a été ajouté avant rendu : une entrée future doit fournir un identifiant, un titre, une source, une URL HTTP(S), une date de référence, une date de récupération, un statut `verified`, un statut de fraîcheur `current` et des droits `authorized`. Les entrées mal formées, non vérifiées, obsolètes, sans droits ou avec une URL invalide sont ignorées sans exception bloquante.
+
+Aucune permission Premium, administrateur ou éditeur n’est déduite du stockage local. La vue `#markets` conserve sa permission existante `market_room` et les états futurs restent soumis à une gouvernance serveur non implémentée.
+
+### Validation complémentaire
+
+- `tests/test_brvm_publications_safety_contract.js` : erreurs d’entrée, fraîcheur, droits, URL, absence de stockage local et responsive CSS.
+- E2E navigateur sur `#markets` à 360 px et 1440 px : visiteur redirigé vers Access ; état Free autorisé ; registre vide visible ; aucun document rendu ; aucun débordement ; aucune erreur console.
+- Suite complète : **24 smoke checks**, **54 scénarios E2E**, **0 échec**.
+
+### KEEP / MODIFY / ADD / DEFER actualisé
+
+| Décision | Élément | État après audit |
+|---|---|---|
+| KEEP | Terminal, Journal, M1.3, 18 routes | Préservés ; suite E2E au vert |
+| KEEP | Registre `BRVM_PUBLICATIONS` vide | Maintenu volontairement |
+| MODIFY | Projection de rendu | Seules les entrées complètes, vérifiées, fraîches et autorisées sont rendues |
+| ADD | Contrat de sécurité BRVM | Ajouté dans `tests/test_brvm_publications_safety_contract.js` |
+| DEFER | Import réel et publication de documents | Toujours différés jusqu’à validation source/droits/processus |
+| DEFER | Actions, indices, portefeuille, assistant IA | Toujours différés selon les prérequis P2/P3 |
