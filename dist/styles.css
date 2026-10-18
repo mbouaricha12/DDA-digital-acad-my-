@@ -2681,3 +2681,32 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
   #journal .journal-composer-actions{align-items:stretch;flex-direction:column}
   #journal .journal-composer-actions .primary-action,#journal .journal-composer-actions .secondary-action{width:100%}
 }
+
+/* BRVM pole structure — provenance first, roadmap second. The cards are
+   status communication, not a fake market dashboard. */
+.brvm-data-register,.brvm-pole-roadmap{margin-top:18px;padding:22px;border:1px solid rgba(255,255,255,.14);border-radius:var(--r-md);background:rgba(255,255,255,.035)}
+.brvm-data-register-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.brvm-data-register h2,.brvm-pole-roadmap h2{margin:4px 0 10px;color:#f4f7fc;font-size:clamp(1.35rem,2.6vw,2rem)}
+.brvm-data-register>p{max-width:70ch;color:rgba(244,247,252,.7);font-size:14px;line-height:1.65}
+.brvm-data-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin:20px 0 0;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.12)}
+.brvm-data-facts div{padding:14px;background:rgba(7,17,31,.72)}
+.brvm-data-facts dt{color:var(--gold-soft);font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.brvm-data-facts dd{margin:7px 0 0;color:#f4f7fc;font-size:13px;line-height:1.45}
+.brvm-pole-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:20px}
+.brvm-pole-item{display:flex;gap:12px;align-items:flex-start;min-height:76px;padding:14px;border:1px solid rgba(255,255,255,.12);background:rgba(7,17,31,.52)}
+.brvm-pole-item>span{color:var(--gold-soft);font:700 11px/1 ui-monospace,monospace;letter-spacing:.08em}
+.brvm-pole-item strong{display:block;color:#f4f7fc;font-size:13px}
+.brvm-pole-item small{display:block;margin-top:5px;color:rgba(244,247,252,.58);font-size:11px;line-height:1.4}
+.brvm-pole-item.is-active{border-color:rgba(79,190,133,.45);box-shadow:inset 3px 0 var(--green)}
+.brvm-pole-item.is-planned{border-style:dashed}
+.brvm-pole-item.is-locked{opacity:.78;border-color:rgba(217,164,65,.38);box-shadow:inset 3px 0 var(--gold)}
+.brvm-roadmap-note{display:flex;gap:9px;align-items:flex-start;margin:18px 0 0;padding-top:15px;border-top:1px solid rgba(255,255,255,.12);color:rgba(244,247,252,.65);font-size:12px;line-height:1.55}
+.brvm-roadmap-note .icon{flex:none;color:var(--gold-soft);width:17px;height:17px}
+@media(max-width:760px){
+  .brvm-data-register,.brvm-pole-roadmap{padding:18px}
+  .brvm-data-facts{grid-template-columns:1fr 1fr}
+  .brvm-pole-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:460px){
+  .brvm-data-facts,.brvm-pole-grid{grid-template-columns:1fr}
+}
