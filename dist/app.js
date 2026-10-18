@@ -390,6 +390,10 @@ const MODULE_STATUS_LABEL = { completed: 'Terminé', in_progress: 'En cours', av
 // safe value here so the Academy shell can boot without the optional module.
 const MARKET_DEMO = Object.freeze({ indices: [], calendar: [] });
 function marketDemo() { return window.DDAMarketIntelligence?.demo || MARKET_DEMO; }
+// No publication is shown until a source, redistribution right and editorial
+// verification are all recorded. An empty registry is intentional: it prevents
+// synthetic documents from acquiring the appearance of official BRVM material.
+const BRVM_PUBLICATIONS = Object.freeze([]);
 const NEXT_STEP_PHRASE = { lesson: 'voir la leçon', exercise: 'réussir l’exercice', quiz: 'valider le quiz' };
 
 // Illustrative candlestick shape (never real price data — same "Mode pédagogique"
@@ -820,6 +824,12 @@ function renderMarketIntelligence() {
     calendar.innerHTML = marketDemo().calendar.map(row => `
       <li><div><strong>${row.company}</strong><small>${row.event}</small></div><span class="data-badge"><svg class="icon"><use href="#icon-clock"/></svg>Exemple</span></li>
     `).join('');
+  }
+  const publications = document.getElementById('brvm-publications-list');
+  if (publications) {
+    publications.innerHTML = BRVM_PUBLICATIONS.length
+      ? BRVM_PUBLICATIONS.map(publication => `<article class="brvm-publication-row"><div><strong>${escapeHtml(publication.title)}</strong><small>${escapeHtml(publication.source)} · ${escapeHtml(publication.referenceDate)}</small></div><span class="data-badge">${escapeHtml(publication.verificationStatus)}</span></article>`).join('')
+      : '<div class="brvm-publications-empty-copy"><span class="brvm-empty-mark" aria-hidden="true">—</span><div><strong>Aucune publication vérifiée disponible</strong><p>Le registre est prêt, mais DDA n’a pas encore connecté de source autorisée. Les documents en attente ne sont pas présentés comme consultables.</p><small>État actuel · collecte manuelle à cadrer · pas de dernière mise à jour disponible</small></div></div>';
   }
 }
 
