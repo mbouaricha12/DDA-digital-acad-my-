@@ -31,6 +31,7 @@ jobs:
       - name: Run all committed contract checks
         run: |
           for test in tests/test_*.js; do
+            if [ "$test" = "tests/test_mobile_lesson_exercise_layout.js" ]; then continue; fi
             node "$test"
           done
           node tests/verify_route_register_consistency.js
@@ -41,13 +42,13 @@ jobs:
       - name: Run full-app smoke test
         run: NODE_PATH="$(npm root -g)" node tests/smoke_app_boot.js
 
-      - name: Run mobile lesson layout regression
-        run: node tests/test_mobile_lesson_exercise_layout.js
-
       - name: Install Playwright Chromium
         run: |
           npm install --global playwright@1.55.0
           npx playwright install --with-deps chromium
+
+      - name: Run mobile lesson layout regression
+        run: node tests/test_mobile_lesson_exercise_layout.js
 
       - name: Run real browser regression harness
         run: node tests/run.js
