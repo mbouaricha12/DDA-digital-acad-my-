@@ -91,3 +91,7 @@ Aucune permission Premium, administrateur ou éditeur n’est déduite du stocka
 | ADD | Contrat de sécurité BRVM | Ajouté dans `tests/test_brvm_publications_safety_contract.js` |
 | DEFER | Import réel et publication de documents | Toujours différés jusqu’à validation source/droits/processus |
 | DEFER | Actions, indices, portefeuille, assistant IA | Toujours différés selon les prérequis P2/P3 |
+
+## Tranche suivante — gouvernance P0
+
+La spécification préparatoire du registre de sources et du workflow d’import manuel contrôlé est documentée dans `docs/DDA_BRVM_SOURCE_GOVERNANCE_2026-10-18.md`. Elle ne connecte aucune source et n’active aucun import. Son contrat de non-régression est `tests/test_brvm_source_governance_contract.js`.
