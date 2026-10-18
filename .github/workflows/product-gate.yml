@@ -41,6 +41,9 @@ jobs:
       - name: Run full-app smoke test
         run: NODE_PATH="$(npm root -g)" node tests/smoke_app_boot.js
 
+      - name: Run mobile lesson layout regression
+        run: node tests/test_mobile_lesson_exercise_layout.js
+
       - name: Install Playwright Chromium
         run: |
           npm install --global playwright@1.55.0
