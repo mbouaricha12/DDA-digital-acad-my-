@@ -17,7 +17,7 @@ for (const field of ['Source &amp; URL', 'Date de référence', 'Vérification',
 }
 assert.match(markets, /Aucun document validé/, 'the current publication status is honest');
 assert.match(markets, /Aucun lien ou chiffre n’est affiché/, 'unverified sources cannot be presented as available documents');
-assert.match(app, /const BRVM_PUBLICATIONS = Object\.freeze\(\[\]\)/, 'empty publication registry fails closed until authorization and verification exist');
+assert.match(app, /let BRVM_PUBLICATIONS = Object\.freeze\(\[\]\)/, 'empty publication registry fails closed until the authorized server projection returns records');
 assert.match(app, /Aucune publication vérifiée disponible/, 'runtime empty state distinguishes verified publications from pending collection');
 assert.match(css, /\.brvm-publication-requirements\{[^}]*grid-template-columns:repeat\(4/, 'publication provenance has a desktop four-column composition');
 assert.match(css, /@media\(max-width:460px\)\{[\s\S]*\.brvm-publication-requirements\{grid-template-columns:1fr\}/, 'publication provenance collapses on narrow screens');

@@ -20,6 +20,6 @@ assert.match(governance, /jamais dans `localStorage`/i, 'source approval cannot 
 assert.match(governance, /document partiellement visible/i, 'failed imports must not leak partial documents');
 assert.match(governance, /seconde vérification éditoriale/i, 'publication requires an editorial second check');
 assert.match(governance, /aucune valeur de marché/i, 'governance must defer market values');
-assert.match(app, /const BRVM_PUBLICATIONS = Object\.freeze\(\[\]\)/, 'runtime registry is still empty');
+assert.match(app, /let BRVM_PUBLICATIONS = Object\.freeze\(\[\]\)/, 'runtime registry starts empty and is populated only by the verified server projection');
 assert.match(publications, /redistributionRights !== 'authorized'/, 'runtime safety contract rejects unauthorized redistribution');
 console.log('RESULT: BRVM source governance contract passed');

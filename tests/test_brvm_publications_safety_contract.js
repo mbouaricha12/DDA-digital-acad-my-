@@ -12,14 +12,14 @@ const policyStart = app.indexOf('const BRVM_PUBLICATION_REQUIRED_FIELDS');
 const policyEnd = app.indexOf('const NEXT_STEP_PHRASE', policyStart);
 assert.ok(policyStart >= 0 && policyEnd > policyStart, 'BRVM publication policy must remain an explicit isolated block');
 const policy = app.slice(policyStart, policyEnd);
-assert.match(policy, /const BRVM_PUBLICATIONS = Object\.freeze\(\[\]\)/, 'BRVM registry remains empty until controlled import approval');
-for (const field of ['sourceUrl', 'referenceDate', 'retrievedAt', 'verificationStatus', 'freshnessStatus', 'redistributionRights']) {
+assert.match(policy, /let BRVM_PUBLICATIONS = Object\.freeze\(\[\]\)/, 'BRVM registry remains empty until the controlled server projection is loaded');
+for (const field of ['sourceUrl', 'documentUrl', 'referenceDate', 'retrievedAt', 'verificationStatus', 'freshnessStatus', 'redistributionRights']) {
   assert.match(policy, new RegExp(`['"]${field}['"]`), `publication policy requires ${field}`);
 }
 assert.match(policy, /verificationStatus !== 'verified'/, 'unverified documents are rejected');
 assert.match(policy, /freshnessStatus !== 'current'/, 'stale documents are rejected');
 assert.match(policy, /redistributionRights !== 'authorized'/, 'documents without redistribution rights are rejected');
-assert.match(policy, /!\/\^https\?:\\\/\\\//i, 'source URLs must be explicit HTTP(S) URLs');
+assert.match(policy, /!\/\^https:\\\/\\\//i, 'source and document URLs must use HTTPS');
 assert.match(policy, /retrievedTime >= referenceTime/, 'retrieval cannot predate the document reference date');
 assert.match(policy, /typeof publication !== 'object'/, 'malformed import entries fail safely instead of throwing');
 assert.doesNotMatch(policy, /localStorage|sessionStorage/, 'BRVM publication policy cannot grant access through browser storage');

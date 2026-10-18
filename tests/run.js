@@ -1039,6 +1039,87 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('BRVM publication gallery stays honestly empty and responsive without a BFF at 360/390px', async () => {
+    for (const width of [360, 390]) {
+      const context = await freshContext(browser, { width, height: 900 });
+      await seedLocalLearner(context);
+      const page = await context.newPage();
+      await page.goto(`${ACADEMY_BASE}#markets`);
+      await page.waitForFunction(() => document.querySelector('#markets')?.classList.contains('active'));
+      await page.getByText('Aucune publication vérifiée disponible').waitFor();
+      const result = await page.evaluate(() => ({
+        viewport: document.documentElement.clientWidth,
+        document: document.documentElement.scrollWidth,
+        gallery: document.querySelector('#brvm-publications-list').scrollWidth,
+        records: document.querySelectorAll('.brvm-publication-row').length,
+        status: document.querySelector('#brvm-publications-list').getAttribute('aria-live')
+      }));
+      assert.equal(result.records, 0, 'no local or synthetic publication is rendered');
+      assert.equal(result.status, 'polite');
+      assert.ok(result.document <= result.viewport + 1, `document has no horizontal overflow at ${width}px (${result.document}/${result.viewport})`);
+      assert.ok(result.gallery <= result.viewport + 1, `publication gallery fits at ${width}px`);
+      await context.close();
+    }
+  });
+
+  await test('BRVM gallery shows the empty state when the configured server returns no verified records', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(context);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    const page = await context.newPage();
+    await page.route('https://bff.test/v1/publications/brvm', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [] }) }));
+    await page.goto(`${ACADEMY_BASE}#markets`);
+    await page.getByText('Aucune publication vérifiée disponible').waitFor();
+    assert.equal(await page.locator('.brvm-publication-row').count(), 0);
+    assert.equal(await page.locator('#brvm-publications-list a').count(), 0);
+    await context.close();
+  });
+
+  await test('BRVM gallery renders only server-returned verified rows and escapes their text', async () => {
+    const context = await freshContext(browser, { width: 390, height: 900 });
+    await seedLocalLearner(context);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    const page = await context.newPage();
+    let releaseResponse;
+    const pendingResponse = new Promise(resolve => { releaseResponse = resolve; });
+    await page.route('https://bff.test/v1/publications/brvm', async route => {
+      await pendingResponse;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [
+        { id: 'pw-doc', title: 'Fixture Playwright — publication non réelle <img src=x onerror=alert(1)>', source: 'Source de test', sourceUrl: 'https://source.test/', documentUrl: 'https://source.test/document-test.pdf', referenceDate: '2026-10-15', retrievedAt: '2026-10-17T12:00:00.000Z', verificationStatus: 'verified', freshnessStatus: 'current', redistributionRights: 'authorized' },
+        { id: 'pw-unverified', title: 'Fixture en attente — ne pas afficher', source: 'Source de test', sourceUrl: 'https://source.test/', documentUrl: 'https://source.test/pending.pdf', referenceDate: '2026-10-15', retrievedAt: '2026-10-17T12:00:00.000Z', verificationStatus: 'pending', freshnessStatus: 'current', redistributionRights: 'authorized' }
+        ] })
+      });
+    });
+    await page.goto(`${ACADEMY_BASE}#markets`);
+    await page.getByText('Chargement des publications vérifiées').waitFor();
+    releaseResponse();
+    await page.getByText('Fixture Playwright — publication non réelle <img src=x onerror=alert(1)>').waitFor();
+    assert.equal(await page.locator('.brvm-publication-row').count(), 1, 'pending row is excluded by client-side verification too');
+    assert.equal(await page.getByText('Fixture en attente — ne pas afficher').count(), 0);
+    assert.equal(await page.locator('.brvm-publication-row img').count(), 0, 'untrusted publication titles are rendered as text, not markup');
+    assert.equal(await page.locator('.brvm-publication-row a').first().getAttribute('href'), 'https://source.test/document-test.pdf');
+    assert.ok(await page.locator('.brvm-publication-row a[rel="noopener noreferrer"]').count() >= 2, 'document and source links open safely');
+    await context.close();
+  });
+
+  await test('BRVM gallery distinguishes BFF failure from an empty registry and shows no links', async () => {
+    const context = await freshContext(browser, { width: 360, height: 844 });
+    await seedLocalLearner(context);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    const page = await context.newPage();
+    await page.route('https://bff.test/v1/publications/brvm', route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ code: 'publications_unavailable' }) }));
+    await page.goto(`${ACADEMY_BASE}#markets`);
+    await page.getByText('Publications temporairement indisponibles').waitFor();
+    assert.equal(await page.locator('.brvm-publication-row a').count(), 0, 'service failure cannot expose stale/fallback links');
+    assert.equal(await page.getByText('Aucune publication vérifiée disponible').count(), 0, 'service failure is not misreported as an empty registry');
+    const dimensions = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
+    assert.ok(dimensions[0] <= dimensions[1] + 1, `error state does not overflow at 360px (${dimensions.join('/')})`);
+    await context.close();
+  });
+
   await test('the Elite theme covers every route and remaining product surface', async () => {
     const context = await freshContext(browser, { width: 1440, height: 1000 });
     await seedLocalLearner(context);

@@ -394,22 +394,40 @@ function marketDemo() { return window.DDAMarketIntelligence?.demo || MARKET_DEMO
 // verification are all recorded. An empty registry is intentional: it prevents
 // synthetic documents from acquiring the appearance of official BRVM material.
 const BRVM_PUBLICATION_REQUIRED_FIELDS = Object.freeze([
-  'id', 'title', 'source', 'sourceUrl', 'referenceDate', 'retrievedAt',
+  'id', 'title', 'source', 'sourceUrl', 'documentUrl', 'referenceDate', 'retrievedAt',
   'verificationStatus', 'freshnessStatus', 'redistributionRights'
 ]);
-const BRVM_PUBLICATIONS = Object.freeze([]);
+let BRVM_PUBLICATIONS = Object.freeze([]);
+let brvmPublicationFetchState = 'idle';
+let brvmPublicationFetchStarted = false;
 function isVerifiedBrvmPublication(publication) {
   if (!publication || typeof publication !== 'object') return false;
   if (BRVM_PUBLICATION_REQUIRED_FIELDS.some(field => typeof publication[field] !== 'string' || !publication[field].trim())) return false;
   if (publication.verificationStatus !== 'verified') return false;
   if (publication.freshnessStatus !== 'current') return false;
   if (publication.redistributionRights !== 'authorized') return false;
-  if (!/^https?:\/\//i.test(publication.sourceUrl)) return false;
+  if (!/^https:\/\//i.test(publication.sourceUrl) || !/^https:\/\//i.test(publication.documentUrl)) return false;
   const referenceTime = Date.parse(publication.referenceDate);
   const retrievedTime = Date.parse(publication.retrievedAt);
   return Number.isFinite(referenceTime) && Number.isFinite(retrievedTime) && retrievedTime >= referenceTime;
 }
 function verifiedBrvmPublications() { return BRVM_PUBLICATIONS.filter(isVerifiedBrvmPublication); }
+async function loadBrvmPublications() {
+  if (!window.DDABFF?.enabled?.() || typeof window.DDABFF.getBrvmPublications !== 'function' || brvmPublicationFetchStarted) return;
+  brvmPublicationFetchStarted = true;
+  brvmPublicationFetchState = 'loading';
+  renderMarketIntelligence();
+  try {
+    const items = await window.DDABFF.getBrvmPublications();
+    if (!Array.isArray(items)) throw new Error('brvm_publications_invalid_response');
+    BRVM_PUBLICATIONS = Object.freeze(items.filter(isVerifiedBrvmPublication));
+    brvmPublicationFetchState = 'loaded';
+  } catch {
+    brvmPublicationFetchState = 'error';
+    brvmPublicationFetchStarted = false;
+  }
+  renderMarketIntelligence();
+}
 const NEXT_STEP_PHRASE = { lesson: 'voir la leçon', exercise: 'réussir l’exercice', quiz: 'valider le quiz' };
 
 // Illustrative candlestick shape (never real price data — same "Mode pédagogique"
@@ -845,8 +863,12 @@ function renderMarketIntelligence() {
   if (publications) {
     const verifiedPublications = verifiedBrvmPublications();
     publications.innerHTML = verifiedPublications.length
-      ? verifiedPublications.map(publication => `<article class="brvm-publication-row"><div><strong>${escapeHtml(publication.title)}</strong><small>${escapeHtml(publication.source)} · ${escapeHtml(publication.referenceDate)}</small></div><span class="data-badge">${escapeHtml(publication.verificationStatus)}</span></article>`).join('')
-      : '<div class="brvm-publications-empty-copy"><span class="brvm-empty-mark" aria-hidden="true">—</span><div><strong>Aucune publication vérifiée disponible</strong><p>Le registre est prêt, mais DDA n’a pas encore connecté de source autorisée. Les documents en attente ne sont pas présentés comme consultables.</p><small>État actuel · collecte manuelle à cadrer · pas de dernière mise à jour disponible</small></div></div>';
+      ? verifiedPublications.map(publication => `<article class="brvm-publication-row"><div><strong><a href="${escapeHtml(publication.documentUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(publication.title)}</a></strong><small><a href="${escapeHtml(publication.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(publication.source)}</a> · ${escapeHtml(publication.referenceDate)} · récupéré le ${escapeHtml(publication.retrievedAt)}</small></div><span class="data-badge">Vérifié · actuel</span></article>`).join('')
+      : brvmPublicationFetchState === 'loading'
+        ? '<div class="brvm-publications-empty-copy"><span class="brvm-empty-mark" aria-hidden="true">…</span><div><strong>Chargement des publications vérifiées</strong><p>Les documents ne seront affichés qu’après vérification de leur provenance, de leur fraîcheur et de leurs droits.</p></div></div>'
+        : brvmPublicationFetchState === 'error'
+          ? '<div class="brvm-publications-empty-copy"><span class="brvm-empty-mark" aria-hidden="true">!</span><div><strong>Publications temporairement indisponibles</strong><p>Aucun document n’est affiché. Réessaie ultérieurement ; une erreur de service n’est pas interprétée comme un registre vide.</p></div></div>'
+          : '<div class="brvm-publications-empty-copy"><span class="brvm-empty-mark" aria-hidden="true">—</span><div><strong>Aucune publication vérifiée disponible</strong><p>Le registre est prêt, mais DDA n’a pas encore connecté de source autorisée. Les documents en attente ne sont pas présentés comme consultables.</p><small>État actuel · collecte manuelle à cadrer · pas de dernière mise à jour disponible</small></div></div>';
   }
 }
 
@@ -2267,6 +2289,7 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
     storePreviousView(previousView);
     currentView = id;
   }
+  if (id === 'markets') loadBrvmPublications();
   if (recordEvent) trackEvent('view_opened', { view: id });
   if (recordEvent && id === 'premium-track') trackEvent('premium_track_viewed', { view: id });
   if (recordEvent && (id === 'lesson-p21' || id === 'lesson-p22')) trackEvent('premium_module_started', { module: 'P2', lesson: id });

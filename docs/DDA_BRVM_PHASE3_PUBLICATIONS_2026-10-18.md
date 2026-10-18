@@ -95,3 +95,12 @@ Aucune permission Premium, administrateur ou éditeur n’est déduite du stocka
 ## Tranche suivante — gouvernance P0
 
 La spécification préparatoire du registre de sources et du workflow d’import manuel contrôlé est documentée dans `docs/DDA_BRVM_SOURCE_GOVERNANCE_2026-10-18.md`. Elle ne connecte aucune source et n’active aucun import. Son contrat de non-régression est `tests/test_brvm_source_governance_contract.js`.
+
+
+## Addendum — préparation serveur fail-closed (18 octobre 2026)
+
+La galerie `#markets` reste vide sans BFF configuré. Lorsqu’il est configuré, elle demande `GET /v1/publications/brvm`, annonce le chargement, distingue le registre vide d’une erreur de service et n’affiche que les entrées complètes renvoyées par la projection SQL et revalidées côté navigateur. Le endpoint est en lecture seule et échoue en `503` si le magasin n’est pas disponible.
+
+La migration `0005_brvm_publications.sql` prépare les métadonnées, transitions, rôles distincts de revue, journalisation et vue SQL des seules publications publiées, fraîches et autorisées. Elle n’est pas appliquée à la base distante. Aucun import réel, source connectée, document, lien officiel ou valeur de marché n’a été ajouté. La revue humaine de la source, de la licence et de la fraîcheur reste préalable à toute publication.
+
+Le rapport associé est `docs/DDA_BRVM_AUDIT_AND_SERVER_MODEL_2026-10-18.md`.

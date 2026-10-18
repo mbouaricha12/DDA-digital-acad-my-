@@ -112,3 +112,12 @@ Ces rôles devront être contrôlés côté serveur lorsque le pipeline sera dé
 ## Critère d’activation futur
 
 La prochaine implémentation ne pourra commencer qu’après obtention d’un dossier source complet, validation juridique de la redistribution, choix du stockage serveur, définition de la politique de fraîcheur et accord sur les rôles de revue. Tant que ces éléments ne sont pas réunis, l’interface doit conserver l’état vide actuel.
+
+
+## Addendum — préparation du modèle serveur (18 octobre 2026)
+
+La migration préparatoire `supabase/migrations/0005_brvm_publications.sql` formalise les tables source, document et journal d’audit, leurs transitions et une projection restreinte aux publications autorisées et non expirées. Le BFF possède maintenant un endpoint de lecture seule de cette projection. Cette migration n’a pas été appliquée à Supabase, le BFF n’est pas déployé et aucun endpoint d’écriture ou écran d’administration n’existe.
+
+Le registre client reste vide au démarrage ; il ne peut afficher que les entrées renvoyées par le BFF et revalidées côté navigateur. L’absence de BFF conserve l’état vide. Une erreur du service est maintenant un état d’indisponibilité distinct, jamais un succès vide. Aucune source BRVM, publication, valeur de marché ni date de document n’a été ajoutée.
+
+Le détail du modèle, des restrictions et des décisions humaines encore nécessaires est dans `docs/DDA_BRVM_AUDIT_AND_SERVER_MODEL_2026-10-18.md`.
