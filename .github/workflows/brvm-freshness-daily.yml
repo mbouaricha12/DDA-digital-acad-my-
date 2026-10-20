@@ -1,0 +1,43 @@
+name: BRVM freshness daily monitor
+
+on:
+  schedule:
+    # 03:17 UTC daily; the monitor is fail-closed and remains disabled until secrets are configured.
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: brvm-freshness-daily
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    name: Monitor BRVM freshness projection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BRVM_REVALIDATION_ENABLED: ${{ secrets.BRVM_REVALIDATION_ENABLED || 'false' }}
+      BRVM_PUBLICATIONS_URL: ${{ secrets.BRVM_PUBLICATIONS_URL || '' }}
+      BRVM_REVALIDATION_TIMEOUT_MS: '30000'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run BRVM freshness monitor
+        run: node bff/jobs/monitor-brvm-freshness.js | tee brvm-freshness-log.jsonl
+
+      - name: Upload structured log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: brvm-freshness-log-${{ github.run_id }}
+          path: brvm-freshness-log.jsonl
+          retention-days: 14
