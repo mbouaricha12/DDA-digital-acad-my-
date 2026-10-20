@@ -10,6 +10,8 @@ assert.match(core, /candidateId = String\(raw\.id \|\| ''\).*replace\(\/\[\^A-Za
 assert.match(app, /function escapeHtml\(value\)/, 'Journal has a context-aware HTML escaping helper');
 assert.match(app, /escapeHtml\(entry\.id\)/, 'Journal entry ids are escaped before entering data-id attributes');
 assert.match(app, /escapeHtml\(entry\[field\]\)/, 'Journal free-text fields are escaped before HTML rendering');
+assert.match(app, /escapeHtml\(practice\.feedback \|\| 'Mission tentée localement\.'\)/, 'Practice proof feedback is escaped before HTML rendering');
+assert.match(app, /escapeHtml\(proof\.id \|\| 'locale'\)/, 'Practice proof ids are escaped before HTML rendering');
 assert.match(app, /el\.innerHTML = ''[\s\S]*p\.textContent = `«/, 'Terminal Journal preview uses DOM textContent rather than interpolated HTML');
 assert.doesNotMatch(app, /data-id="\$\{entry\.id\}"/, 'No raw Journal id remains in an HTML attribute');
 
