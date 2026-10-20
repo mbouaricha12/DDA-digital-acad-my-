@@ -956,7 +956,7 @@ function renderPracticeProof() {
   const proof = practice.proof || {};
   const source = practice.sourceLessonTitle ? `Après la leçon ${practice.sourceLesson} · ${practice.sourceLessonTitle}` : 'Practice Terminal autonome';
   const proofType = proof.type === 'zone_identification' ? 'Identification de zone' : 'Mission Practice';
-  container.innerHTML = `<div class="practice-proof-row ${validated ? 'is-validated' : 'is-retry'}"><span class="practice-proof-icon">${validated ? '✓' : '↻'}</span><div><strong>${proofType} — Practice Terminal</strong><p>${source}</p><p>${practice.feedback || 'Mission tentée localement.'}</p><small>Preuve ${proof.id || 'locale'} · ${validated ? 'conservée sur cet appareil.' : 'à reprendre — elle ne compte pas comme compétence acquise.'}</small></div></div>`;
+  container.innerHTML = `<div class="practice-proof-row ${validated ? 'is-validated' : 'is-retry'}"><span class="practice-proof-icon">${validated ? '✓' : '↻'}</span><div><strong>${escapeHtml(proofType)} — Practice Terminal</strong><p>${escapeHtml(source)}</p><p>${escapeHtml(practice.feedback || 'Mission tentée localement.')}</p><small>Preuve ${escapeHtml(proof.id || 'locale')} · ${validated ? 'conservée sur cet appareil.' : 'à reprendre — elle ne compte pas comme compétence acquise.'}</small></div></div>`;
 }
 
 // Dashboard orientation layer: expose one recent, auditable proof without
