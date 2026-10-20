@@ -34,9 +34,9 @@
     }).join('');
   }
 
-  // Only Vimeo HTTPS player URLs are accepted for iframe embeds. This keeps
-  // the lesson metadata flexible (vimeoId, videoUrl or embedUrl) without
-  // allowing arbitrary origins to become executable markup.
+  // Only allowlisted Vimeo and YouTube HTTPS player URLs are accepted for
+  // iframe embeds. Shorts are normalized to the privacy-enhanced YouTube
+  // embed origin; arbitrary origins never become executable markup.
   function escapeAttr(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   }
@@ -63,18 +63,42 @@
     }
   }
 
+  function getYouTubeId(video) {
+    if (!video) return '';
+    if (video.youtubeId && /^[A-Za-z0-9_-]{6,20}$/.test(String(video.youtubeId))) return String(video.youtubeId);
+    const raw = String(video.youtubeUrl || video.videoUrl || video.embedUrl || '').trim();
+    if (!raw) return '';
+    try {
+      const url = new URL(raw);
+      const allowedHost = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtube-nocookie.com', 'www.youtube-nocookie.com', 'youtu.be'].includes(url.hostname);
+      if (url.protocol !== 'https:' || !allowedHost) return '';
+      const shorts = url.pathname.match(/^\/shorts\/([A-Za-z0-9_-]{6,20})/);
+      const embed = url.pathname.match(/^\/embed\/([A-Za-z0-9_-]{6,20})/);
+      const id = shorts?.[1] || embed?.[1] || url.searchParams.get('v') || (url.hostname === 'youtu.be' ? url.pathname.slice(1) : '');
+      return id && /^[A-Za-z0-9_-]{6,20}$/.test(id) ? id : '';
+    } catch (_) {
+      return '';
+    }
+  }
+
   function renderVideoSurface(video, id) {
     const embedUrl = getVimeoEmbedUrl(video);
+    const youtubeId = getYouTubeId(video);
+    const youtubeEmbedUrl = youtubeId ? `https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0&modestbranding=1&playsinline=1` : '';
     const directSrc = video && typeof video.src === 'string' && /^https:\/\//.test(video.src) ? video.src : '';
     const label = escapeAttr((video && (video.title || video.caption)) || 'Vidéo pédagogique DDA');
     const caption = video && video.caption ? `<p class="video-explainer-caption">${video.caption}</p>` : '';
-    if (!embedUrl && !directSrc) {
+    const portrait = video?.orientation === 'portrait' || video?.format === 'shorts';
+    const frameClass = portrait ? 'video-frame video-frame-portrait' : 'video-frame';
+    const blockClass = portrait ? 'video-explainer-block video-explainer-short' : 'video-explainer-block';
+    if (!embedUrl && !youtubeEmbedUrl && !directSrc) {
       return `<div class="video-explainer-block video-explainer-fallback" id="${escapeAttr(id)}-block" data-video-state="missing"><div class="video-fallback-panel guided-fallback" role="status"><svg class="icon"><use href="#icon-book"/></svg><strong>Séquence guidée disponible</strong><span>Le support vidéo est en préparation ; le contenu complet, les exemples et l’exercice sont déjà accessibles ci-dessous.</span></div>${caption}</div>`;
     }
-    if (embedUrl) {
-      return `<figure class="video-explainer-block" id="${escapeAttr(id)}-block" data-video-state="loading"><div class="video-frame"><iframe src="${escapeAttr(embedUrl)}" title="${label}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" data-video-frame></iframe><div class="video-fallback-panel" data-video-fallback hidden role="status"><svg class="icon"><use href="#icon-play"/></svg><strong>Vidéo momentanément indisponible</strong><span>Continue avec le texte et l’exercice ci-dessous. La vidéo pourra être réessayée plus tard.</span></div></div>${caption}</figure>`;
+    if (embedUrl || youtubeEmbedUrl) {
+      const source = youtubeEmbedUrl || embedUrl;
+      return `<figure class="${blockClass}" id="${escapeAttr(id)}-block" data-video-state="loading"><div class="${frameClass}"><iframe src="${escapeAttr(source)}" title="${label}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" data-video-frame></iframe><div class="video-fallback-panel" data-video-fallback hidden role="status"><svg class="icon"><use href="#icon-play"/></svg><strong>Vidéo momentanément indisponible</strong><span>Continue avec le texte et l’exercice ci-dessous. La vidéo pourra être réessayée plus tard.</span></div></div>${caption}</figure>`;
     }
-    return `<figure class="video-explainer-block" id="${escapeAttr(id)}-block" data-video-state="ready"><div class="video-frame"><video controls preload="metadata" src="${escapeAttr(directSrc)}"${video.poster ? ` poster="${escapeAttr(video.poster)}"` : ''} aria-label="${label}"></video><div class="video-fallback-panel" data-video-fallback hidden role="status"><strong>Vidéo momentanément indisponible</strong><span>Continue avec le texte et l’exercice ci-dessous.</span></div></div>${caption}</figure>`;
+    return `<figure class="${blockClass}" id="${escapeAttr(id)}-block" data-video-state="ready"><div class="${frameClass}"><video controls preload="metadata" src="${escapeAttr(directSrc)}"${video.poster ? ` poster="${escapeAttr(video.poster)}"` : ''} aria-label="${label}"></video><div class="video-fallback-panel" data-video-fallback hidden role="status"><strong>Vidéo momentanément indisponible</strong><span>Continue avec le texte et l’exercice ci-dessous.</span></div></div>${caption}</figure>`;
   }
 
   // Hand-authored synthetic pedagogical price geometry — never real market data.
@@ -323,7 +347,7 @@
       <p class="lesson-lead">${lesson.content.lead}</p>
       <ol class="lesson-loop" id="lesson-loop${suffix}" tabindex="0" aria-label="Progression dans la leçon — utilise les flèches pour faire défiler les étapes">${lesson.steps.map(s => `<li data-step="${s.id}"><i class="loop-bead" aria-hidden="true"></i><span>${s.label}</span></li>`).join('')}</ol>
 
-      ${lesson.video ? renderVideoSurface(lesson.video, `lesson-video${suffix}`) : ''}
+      ${(lesson.videos || (lesson.video ? [lesson.video] : [])).map((video, index) => renderVideoSurface(video, `lesson-video${suffix}-${index + 1}`)).join('')}
       ${lesson.blocks.map(renderBlock).join('\n')}
 
       <div class="lesson-actions">

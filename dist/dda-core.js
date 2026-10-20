@@ -158,6 +158,11 @@
       title: 'Le trading comme commerce',
       summary: 'Acheteurs, vendeurs et échange d’un actif.',
       estimatedMinutes: 12,
+      videos: Object.freeze([
+        Object.freeze({ youtubeId: 'HwlEuA39HpM', title: 'C’est quoi le trading ?', caption: 'Short DDA · Comprendre le trading comme un échange — contenu éducatif.', orientation: 'portrait', format: 'shorts' }),
+        Object.freeze({ youtubeId: 'bUHsQnIAFuc', title: 'Le marché des devises', caption: 'Short DDA · Situer le marché des devises sans confondre contexte et signal.', orientation: 'portrait', format: 'shorts' }),
+        Object.freeze({ youtubeId: 'bVJ9n-Etcpc', title: 'Les différents types de traders', caption: 'Short DDA · Découvrir des profils et horizons différents, sans étiquette de performance.', orientation: 'portrait', format: 'shorts' })
+      ]),
       competency,
       xp,
       content,
@@ -338,6 +343,9 @@
       title: 'Support & Résistance',
       summary: 'Observer, toucher et valider une zone de réaction — sans signal, sans position.',
       estimatedMinutes: 14,
+      videos: Object.freeze([
+        Object.freeze({ youtubeId: 'pRFqhk55bL4', title: 'Support et résistance', caption: 'Short DDA · Lire une zone de réaction sans en faire une ligne exacte.', orientation: 'portrait', format: 'shorts' })
+      ]),
       markUnderstoodLabel: 'Passer au défi final',
       competency,
       xp,
@@ -489,6 +497,9 @@
       title: 'Lire une tendance',
       summary: 'Reconnaître une direction générale sur un graphique — sans jamais prédire la suite.',
       estimatedMinutes: 12,
+      videos: Object.freeze([
+        Object.freeze({ youtubeId: 'WDifN6ZKnjY', title: 'La bougie japonaise', caption: 'Short DDA · Lire une bougie comme une information située, jamais comme un signal isolé.', orientation: 'portrait', format: 'shorts' })
+      ]),
       markUnderstoodLabel: 'Passer au défi final',
       competency,
       xp,
