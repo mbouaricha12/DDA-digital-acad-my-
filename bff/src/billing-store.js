@@ -42,7 +42,19 @@ class PostgrestBillingStore {
         received_at: metadata.receivedAt || new Date().toISOString()
       })
     });
-    return rows.length > 0;
+    if (rows.length > 0) return true;
+    const existing = await this.request('dda_billing_deliveries', `?delivery_id=eq.${encodeURIComponent(deliveryId)}&select=processed_status`, { method: 'GET' });
+    if (existing[0]?.processed_status !== 'failed') return false;
+    await this.request('dda_billing_deliveries', `?delivery_id=eq.${encodeURIComponent(deliveryId)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        event_name: metadata.event || null,
+        payload_sha256: metadata.payloadSha256 || null,
+        processed_status: 'accepted',
+        processed_at: null
+      })
+    });
+    return true;
   }
 
   async has(deliveryId) {

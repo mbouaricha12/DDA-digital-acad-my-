@@ -24,7 +24,8 @@ for (const event of ['successful.sale', 'failed.sale', 'abandoned.sale', 'licens
 }
 
 const secret = 'whsec_test_secret';
-const raw = Buffer.from('{"event":"successful.sale","product":{"id":"prd_premium"},"customer":{"email":"ada@example.com"},"sale":{"id":"sal_1","custom_metadata":{"dda_user_id":"user-1"}}}');
+const ddaUserId = '11111111-1111-4111-8111-111111111111';
+const raw = Buffer.from(`{"event":"successful.sale","product":{"id":"prd_premium"},"customer":{"email":"ada@example.com"},"sale":{"id":"sal_1","custom_metadata":{"dda_user_id":"${ddaUserId}"}}}`);
 const signature = `sha256=${crypto.createHmac('sha256', secret).update(raw).digest('hex')}`;
 assert.equal(verifyChariowPulse(raw, signature, secret), true);
 assert.equal(verifyChariowPulse(Buffer.from(`${raw.toString()}\n`), signature, secret), false, 'HMAC must use untouched raw bytes');
@@ -35,21 +36,28 @@ const active = mapChariowPulse(JSON.parse(raw.toString()), { 'x-pulse-delivery-i
 assert.equal(active.kind, 'membership_transition');
 assert.equal(active.status, 'active');
 assert.equal(active.entitlement, 'premium_track');
-assert.equal(active.userReference, 'user-1');
+assert.equal(active.userReference, ddaUserId);
+
+const emailOnly = mapChariowPulse({ event: 'successful.sale', product: { id: 'prd_premium' }, customer: { email: 'ada@example.com' }, sale: { id: 'sal-email-only' } }, {}, config);
+assert.equal(emailOnly.kind, 'ignored');
+assert.equal(emailOnly.reason, 'missing_dda_user_reference');
+const missingProviderReference = mapChariowPulse({ event: 'successful.sale', product: { id: 'prd_premium' }, customer: { email: 'ada@example.com' }, sale: { custom_metadata: { dda_user_id: ddaUserId } } }, {}, config);
+assert.equal(missingProviderReference.kind, 'ignored');
+assert.equal(missingProviderReference.reason, 'missing_provider_reference');
 
 const unknownProduct = mapChariowPulse({ event: 'successful.sale', product: { id: 'prd_other' }, customer: { email: 'ada@example.com' }, sale: { id: 'sal-2' } }, {}, config);
 assert.equal(unknownProduct.kind, 'ignored');
 assert.equal(unknownProduct.reason, 'product_not_mapped');
 
 for (const event of ['failed.sale', 'abandoned.sale']) {
-  const result = mapChariowPulse({ event, product: { id: 'prd_premium' }, customer: { email: 'ada@example.com' }, sale: { id: `sal-${event}` } }, {}, config);
+  const result = mapChariowPulse({ event, product: { id: 'prd_premium' }, customer: { email: 'ada@example.com' }, sale: { id: `sal-${event}`, custom_metadata: { dda_user_id: ddaUserId } } }, {}, config);
   assert.equal(result.kind, 'membership_transition');
   assert.equal(result.entitlement, null, `${event} must never grant Premium`);
   assert.equal(result.status, event === 'failed.sale' ? 'pending' : 'pending');
 }
 
 const calls = [];
-const checkoutInput = { productId: 'prd_premium', email: 'Ada@Example.com', firstName: 'Ada', lastName: 'Lovelace', phone: { number: '+33 6 12 34 56 78', countryCode: 'fr' }, customMetadata: { dda_user_id: 'user-1' } };
+const checkoutInput = { productId: 'prd_premium', email: 'Ada@Example.com', firstName: 'Ada', lastName: 'Lovelace', phone: { number: '+33 6 12 34 56 78', countryCode: 'fr' }, customMetadata: { dda_user_id: ddaUserId } };
 createChariowCheckout({ config: { ...config, apiKey: 'sk_test_server_only' }, input: checkoutInput, fetchImpl: async (url, options) => {
   calls.push({ url, options });
   return { ok: true, status: 200, async json() { return { data: { step: 'payment', purchase: { id: 'sal_checkout' }, payment: { checkout_url: 'https://pay.chariow.test/checkout' } } }; } };
@@ -63,6 +71,7 @@ createChariowCheckout({ config: { ...config, apiKey: 'sk_test_server_only' }, in
   assert.equal(body.phone.number, '33612345678');
   assert.equal(body.phone.country_code, 'FR');
   assert.equal(Object.hasOwn(body, 'apiKey'), false);
+  return assert.rejects(() => createChariowCheckout({ config: { ...config, apiKey: 'sk_test_server_only' }, input: { ...checkoutInput, productId: 'prd_not_allowlisted' }, fetchImpl: async () => { throw new Error('provider must not be called'); } }), /product_not_allowlisted/);
 }).then(async () => {
   const seen = new Set();
   const applied = [];
@@ -76,10 +85,10 @@ createChariowCheckout({ config: { ...config, apiKey: 'sk_test_server_only' }, in
       applyEvent: async event => applied.push(event)
     });
   };
-  const first = await req({ event: 'successful.sale', product: { id: 'prd_premium' }, customer: { email: 'ada@example.com' }, sale: { id: 'sal-1' } });
+  const first = await req({ event: 'successful.sale', product: { id: 'prd_premium' }, customer: { email: 'ada@example.com' }, sale: { id: 'sal-1', custom_metadata: { dda_user_id: ddaUserId } } });
   assert.equal(first.status, 202);
   assert.equal(applied.length, 1);
-  const duplicate = await req({ event: 'successful.sale', product: { id: 'prd_premium' }, customer: { email: 'ada@example.com' }, sale: { id: 'sal-1' } });
+  const duplicate = await req({ event: 'successful.sale', product: { id: 'prd_premium' }, customer: { email: 'ada@example.com' }, sale: { id: 'sal-1', custom_metadata: { dda_user_id: ddaUserId } } });
   assert.equal(duplicate.status, 204);
   assert.equal(applied.length, 1, 'duplicate delivery must not reapply entitlement transition');
   console.log('P4 Chariow billing contract: PASS');

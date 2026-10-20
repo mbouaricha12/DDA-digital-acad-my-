@@ -1,9 +1,10 @@
 'use strict';
 
 const crypto = require('node:crypto');
-const { normalizeEmail } = require('./security');
+const { normalizeEmail, sha256 } = require('./security');
 
 const CHARIOW_API_BASE_URL = 'https://api.chariow.com/v1';
+const DDA_USER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const SUPPORTED_PULSE_EVENTS = new Set([
   'successful.sale',
   'abandoned.sale',
@@ -60,8 +61,12 @@ function customerFromPayload(payload) {
 }
 
 function metadataFromPayload(payload) {
-  const metadata = payload.sale?.custom_metadata;
-  return metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata : {};
+  const saleMetadata = payload.sale?.custom_metadata;
+  const licenseMetadata = payload.license?.custom_metadata;
+  return {
+    ...(licenseMetadata && typeof licenseMetadata === 'object' && !Array.isArray(licenseMetadata) ? licenseMetadata : {}),
+    ...(saleMetadata && typeof saleMetadata === 'object' && !Array.isArray(saleMetadata) ? saleMetadata : {})
+  };
 }
 
 /**
@@ -81,7 +86,10 @@ function mapChariowPulse(payload, headers = {}, config = chariowConfigFromEnv())
   const externalId = licenseId || saleId;
 
   if (!isPremiumProduct) return { kind: 'ignored', reason: 'product_not_mapped', event, productId, externalId };
-  if (!customer.email && !metadata.dda_user_id) return { kind: 'ignored', reason: 'missing_customer_reference', event, productId, externalId };
+  if (!externalId) return { kind: 'ignored', reason: 'missing_provider_reference', event, productId, externalId };
+  if (!DDA_USER_ID.test(String(metadata.dda_user_id || ''))) {
+    return { kind: 'ignored', reason: 'missing_dda_user_reference', event, productId, externalId };
+  }
 
   let status = null;
   if (event === 'successful.sale' || event === 'license.activated') status = 'active';
@@ -99,7 +107,7 @@ function mapChariowPulse(payload, headers = {}, config = chariowConfigFromEnv())
     saleId,
     licenseId,
     customer,
-    userReference: safeText(metadata.dda_user_id, 100) || null,
+    userReference: metadata.dda_user_id,
     entitlement: status === 'active' ? 'premium_track' : null,
     occurredAt: safeText(payload.sale?.completed_at || payload.license?.activated_at || payload.license?.expired_at || payload.license?.revoked_at, 50) || null,
     deliveryId: safeText(headers['x-pulse-delivery-id'], 120) || null
@@ -109,8 +117,11 @@ function mapChariowPulse(payload, headers = {}, config = chariowConfigFromEnv())
 async function createChariowCheckout({ config = chariowConfigFromEnv(), fetchImpl = fetch, input }) {
   if (!config.apiKey) throw new Error('CHARIOW_API_KEY is required on the server');
   if (!input || typeof input !== 'object') throw new Error('checkout input is required');
+  const productId = safeText(input.productId, 100);
+  if (!productId || !config.premiumProductIds.includes(productId)) throw new Error('product_not_allowlisted');
+  if (!DDA_USER_ID.test(String(input.customMetadata?.dda_user_id || ''))) throw new Error('dda_user_id_required');
   const body = {
-    product_id: safeText(input.productId, 100),
+    product_id: productId,
     email: normalizeEmail(input.email),
     first_name: safeText(input.firstName, 50),
     last_name: safeText(input.lastName, 50),
@@ -146,16 +157,21 @@ async function handleChariowPulse(req, { secret, idempotencyStore, applyEvent, c
   const deliveryId = safeText(headers['x-pulse-delivery-id'], 120);
   if (!deliveryId) return { status: 400, body: { error: 'missing_delivery_id' } };
   if (idempotencyStore?.claim) {
-    const claimed = await idempotencyStore.claim(deliveryId, { event: headers['x-pulse-event'] || null });
+    const claimed = await idempotencyStore.claim(deliveryId, { event: headers['x-pulse-event'] || null, payloadSha256: sha256(rawBody) });
     if (!claimed) return { status: 204, duplicate: true };
   } else if (await idempotencyStore?.has(deliveryId)) return { status: 204, duplicate: true };
-  let payload;
-  try { payload = JSON.parse(rawBody.toString('utf8')); } catch { return { status: 400, body: { error: 'invalid_json' } }; }
-  const mapped = mapChariowPulse(payload, headers, config);
-  if (!idempotencyStore?.claim) await idempotencyStore?.add(deliveryId, { event: mapped.event, receivedAt: new Date().toISOString() });
-  if (mapped.kind === 'membership_transition') await applyEvent?.(mapped);
-  else await idempotencyStore?.markProcessed?.(deliveryId, 'processed');
-  return { status: 202, body: { accepted: true, kind: mapped.kind, event: mapped.event } };
+  try {
+    const payload = JSON.parse(rawBody.toString('utf8'));
+    const mapped = mapChariowPulse(payload, headers, config);
+    if (!idempotencyStore?.claim) await idempotencyStore?.add(deliveryId, { event: mapped.event, receivedAt: new Date().toISOString(), payloadSha256: sha256(rawBody) });
+    if (mapped.kind === 'membership_transition') await applyEvent?.(mapped);
+    await idempotencyStore?.markProcessed?.(deliveryId, 'processed');
+    return { status: 202, body: { accepted: true, kind: mapped.kind, event: mapped.event } };
+  } catch (error) {
+    await idempotencyStore?.markProcessed?.(deliveryId, 'failed');
+    if (error instanceof SyntaxError) return { status: 400, body: { error: 'invalid_json' } };
+    throw error;
+  }
 }
 
 module.exports = {

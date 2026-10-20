@@ -17,13 +17,14 @@
     "endpoint": "POST /v1/checkout",
     "sourceOfTruth": "successful.sale Pulse, not browser redirect",
     "requiredServerInputs": ["product_id", "email", "first_name", "last_name", "phone"],
-    "optionalDdaMetadata": ["dda_user_id", "checkout_intent_id"],
+    "requiredDdaMetadata": ["dda_user_id"],
+    "optionalDdaMetadata": ["checkout_intent_id"],
     "clientMustNeverReceive": ["CHARIOW_API_KEY", "CHARIOW_PULSE_SECRET"],
     "supportedSteps": ["payment", "completed", "already_purchased"]
   },
   "membershipModel": {
     "provider": "chariow",
-    "identityLink": "server-created checkout_intent or verified customer reference",
+    "identityLink": "server-created checkout intent carrying a valid DDA UUID",
     "productMapping": "explicit allowlist of Chariow product IDs; never product name matching",
     "statuses": ["pending", "active", "expired", "revoked"],
     "entitlementGrant": "active status from an allowlisted product only",
@@ -45,9 +46,9 @@
     "capture raw request bytes before JSON parsing",
     "reject invalid signatures with 401",
     "require x-pulse-delivery-id for real deliveries",
-    "deduplicate by delivery ID before applying a transition",
+    "deduplicate by delivery ID before applying a transition; failed deliveries may be retried",
     "persist the event before asynchronous entitlement processing",
-    "derive owner_id from the authenticated account or a server-created checkout intent",
+    "derive owner_id only from the server-created checkout intent metadata; customer email alone never grants access",
     "return 2xx only after the delivery is durably accepted"
   ],
   "notYetActivated": [

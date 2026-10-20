@@ -34,6 +34,23 @@ const fakeFetch = async (url, options) => {
 
   await store.markProcessed('pulse-delivery-1');
   assert.equal(calls[2].options.method, 'PATCH');
+  const retryCalls = [];
+  const retryStore = new PostgrestBillingStore({
+    supabaseUrl: 'https://project.supabase.co/',
+    serviceRoleKey: 'service-role-secret',
+    fetchImpl: async (url, options) => {
+      retryCalls.push({ url, options });
+      if (options.method === 'POST') return { ok: true, async text() { return '[]'; } };
+      if (options.method === 'GET') return { ok: true, async text() { return JSON.stringify([{ processed_status: 'failed' }]); } };
+      if (options.method === 'PATCH') return { ok: true, async text() { return '[]'; } };
+      throw new Error(`unexpected retry request: ${options.method} ${url}`);
+    }
+  });
+  assert.equal(await retryStore.claim('pulse-failed-1', { event: 'successful.sale', payloadSha256: 'a'.repeat(64) }), true);
+  assert.equal(retryCalls[0].options.method, 'POST');
+  assert.equal(retryCalls[1].options.method, 'GET');
+  assert.equal(retryCalls[2].options.method, 'PATCH');
+  assert.match(retryCalls[2].options.body, /"processed_status":"accepted"/);
   await assert.rejects(() => store.applyChariowTransition({ kind: 'membership_transition', status: 'active', userReference: 'not-a-uuid', productId: 'prd_premium', externalId: 'x' }), /server-owned DDA UUID/);
   console.log('Supabase Chariow billingStore contract: PASS');
 })().catch(error => { console.error(error); process.exitCode = 1; });
