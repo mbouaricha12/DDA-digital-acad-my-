@@ -35,7 +35,11 @@
       Object.freeze({ type: 'journal_link', id: 'p21-journal', step: 'review', prompt: 'Tu veux noter ce que tu retiens avant de construire ton premier Risk Plan ?', cta: 'Ouvrir Journal & Plan' })
     ]);
     const content = Object.freeze({ lead: 'Apprendre à contrôler le risque avant de chercher une opportunité.' });
-    return Object.freeze({ id: 'P2.1', title: 'Risk Before Entry', summary: 'Définir l’invalidation et le risque avant de chercher une entrée.', estimatedMinutes: 12, competency, xp, content, practice, evaluation, steps, blocks });
+    return Object.freeze({ id: 'P2.1', title: 'Risk Before Entry', summary: 'Définir l’invalidation et le risque avant de chercher une entrée.', estimatedMinutes: 12, videos: Object.freeze([
+      Object.freeze({ youtubeId: 'BTipx88k_U8', title: 'Les indicateurs en trading', caption: 'Short DDA Premium · Lire un indicateur comme un outil de contexte, jamais comme une certitude.', orientation: 'portrait', format: 'shorts' }),
+      Object.freeze({ youtubeId: 'rVd4dF6JaZ4', title: 'Les moyennes mobiles en trading', caption: 'Short DDA Premium · Utiliser une moyenne mobile avec une invalidation et un risque définis.', orientation: 'portrait', format: 'shorts' }),
+      Object.freeze({ youtubeId: 'HaP-Onie9Lc', title: 'La volatilité sur le forex trading', caption: 'Short DDA Premium · Encadrer une accélération de prix avant toute décision.', orientation: 'portrait', format: 'shorts' })
+    ]), competency, xp, content, practice, evaluation, steps, blocks });
   }
 
   function lessonP22() {
@@ -70,7 +74,10 @@
       Object.freeze({ type: 'journal_link', id: 'p22-journal', step: 'review', prompt: 'Après le Lab, tu pourras transférer ton Risk Plan dans le Journal & Plan.', cta: 'Ouvrir Journal & Plan' })
     ]);
     const content = Object.freeze({ lead: 'Une décision contrôlée se construit avant le clic et se termine par une revue.' });
-    return Object.freeze({ id: 'P2.2', title: 'The Anatomy of a Controlled Trade', summary: 'Relier contexte, setup, invalidation, risque, objectif et revue.', estimatedMinutes: 12, competency, xp, content, practice, evaluation, steps, blocks });
+    return Object.freeze({ id: 'P2.2', title: 'The Anatomy of a Controlled Trade', summary: 'Relier contexte, setup, invalidation, risque, objectif et revue.', estimatedMinutes: 12, videos: Object.freeze([
+      Object.freeze({ youtubeId: 'yBNc_eQbiow', title: 'C’est quoi les crypto-monnaies ?', caption: 'Short DDA Premium · Situer les crypto-actifs dans un cadre de risque et de recherche, sans conseil d’achat.', orientation: 'portrait', format: 'shorts' }),
+      Object.freeze({ youtubeId: 'VLdAqeJCllE', title: 'Les figures chartistes en trading', caption: 'Short DDA Premium · Examiner une structure chartiste avec contexte, invalidation et no-trade.', orientation: 'portrait', format: 'shorts' })
+    ]), competency, xp, content, practice, evaluation, steps, blocks });
   }
 
   window.DDAP2Lessons = Object.freeze({ p21: lessonP21(), p22: lessonP22() });
