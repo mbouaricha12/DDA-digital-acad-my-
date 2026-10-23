@@ -37,25 +37,41 @@ const BASE = `http://127.0.0.1:${PORT}`;
 const ACADEMY_BASE = `${BASE}/academy.html`;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webmanifest': 'application/manifest+json' };
 
+function loadStaticFiles(directory = DIST, relativeDirectory = '') {
+  const files = new Map();
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const relative = relativeDirectory ? `${relativeDirectory}/${entry.name}` : entry.name;
+    const absolute = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      for (const [urlPath, data] of loadStaticFiles(absolute, relative)) files.set(urlPath, data);
+    } else if (entry.isFile()) {
+      files.set(`/${relative}`, fs.readFileSync(absolute));
+    }
+  }
+  return files;
+}
+
+const STATIC_FILES = loadStaticFiles();
+
 function safeStaticPath(requestTarget) {
   let requestPath;
   try { requestPath = decodeURIComponent(requestTarget.split('?')[0].split('#')[0]); } catch { return null; }
   if (requestPath.includes('\0')) return null;
-  const root = path.resolve(DIST);
-  const relative = requestPath === '/' ? 'index.html' : requestPath.replace(/^\/+/, '');
-  const target = path.resolve(root, relative);
-  return target === root || target.startsWith(`${root}${path.sep}`) ? target : null;
+  let relative = requestPath.replace(/^\/+/, '');
+  if (!relative || relative.endsWith('/')) relative += 'index.html';
+  const filePath = `/${relative}`;
+  if (STATIC_FILES.has(filePath)) return filePath;
+  const directoryIndex = `${filePath}/index.html`;
+  return STATIC_FILES.has(directoryIndex) ? directoryIndex : null;
 }
 
 function startServer() {
   const server = http.createServer((req, res) => {
-    const full = safeStaticPath(req.url);
-    if (!full) { res.writeHead(404, { 'X-Content-Type-Options': 'nosniff' }); res.end('not found'); return; }
-    fs.readFile(full, (err, data) => {
-      if (err) { res.writeHead(404, { 'X-Content-Type-Options': 'nosniff' }); res.end('not found'); return; }
-      res.writeHead(200, { 'Content-Type': MIME[path.extname(full)] || 'application/octet-stream', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store' });
-      res.end(data);
-    });
+    const filePath = safeStaticPath(req.url);
+    const data = filePath ? STATIC_FILES.get(filePath) : null;
+    if (!data) { res.writeHead(404, { 'X-Content-Type-Options': 'nosniff' }); res.end('not found'); return; }
+    res.writeHead(200, { 'Content-Type': MIME[path.extname(filePath)] || 'application/octet-stream', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store' });
+    res.end(data);
   });
   return new Promise(resolve => server.listen(PORT, '127.0.0.1', () => resolve(server)));
 }

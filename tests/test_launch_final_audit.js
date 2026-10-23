@@ -12,26 +12,42 @@ const PORT = 8751;
 const BASE = `http://127.0.0.1:${PORT}`;
 const ACADEMY = `${BASE}/academy.html`;
 
+function loadStaticFiles(directory = DIST, relativeDirectory = '') {
+  const files = new Map();
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const relative = relativeDirectory ? `${relativeDirectory}/${entry.name}` : entry.name;
+    const absolute = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      for (const [urlPath, data] of loadStaticFiles(absolute, relative)) files.set(urlPath, data);
+    } else if (entry.isFile()) {
+      files.set(`/${relative}`, fs.readFileSync(absolute));
+    }
+  }
+  return files;
+}
+
+const STATIC_FILES = loadStaticFiles();
+
 function safeDistPath(requestTarget) {
   let requestPath;
   try { requestPath = decodeURIComponent(requestTarget.split('?')[0].split('#')[0]); } catch { return null; }
   if (requestPath.includes('\0')) return null;
-  const root = path.resolve(DIST);
-  const relative = requestPath === '/' ? 'index.html' : requestPath.replace(/^\/+/, '');
-  const target = path.resolve(root, relative);
-  return target === root || target.startsWith(`${root}${path.sep}`) ? target : null;
+  let relative = requestPath.replace(/^\/+/, '');
+  if (!relative || relative.endsWith('/')) relative += 'index.html';
+  const filePath = `/${relative}`;
+  if (STATIC_FILES.has(filePath)) return filePath;
+  const directoryIndex = `${filePath}/index.html`;
+  return STATIC_FILES.has(directoryIndex) ? directoryIndex : null;
 }
 
 function startServer() {
   const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json' };
   const server = http.createServer((req, res) => {
     const file = safeDistPath(req.url);
-    if (!file) { res.writeHead(404, { 'X-Content-Type-Options': 'nosniff' }); return res.end('not found'); }
-    fs.readFile(file, (error, data) => {
-      if (error) { res.writeHead(404, { 'X-Content-Type-Options': 'nosniff' }); return res.end('not found'); }
-      res.writeHead(200, { 'Content-Type': mime[path.extname(file)] || 'application/octet-stream', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store' });
-      res.end(data);
-    });
+    const data = file ? STATIC_FILES.get(file) : null;
+    if (!data) { res.writeHead(404, { 'X-Content-Type-Options': 'nosniff' }); return res.end('not found'); }
+    res.writeHead(200, { 'Content-Type': mime[path.extname(file)] || 'application/octet-stream', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store' });
+    res.end(data);
   });
   return new Promise(resolve => server.listen(PORT, '127.0.0.1', () => resolve(server)));
 }
