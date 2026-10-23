@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dda-academy.example/contracts/autotrader/quota-policy-v1.json",
+  "title": "DDA AutoTrader Usage Quota Policy",
+  "contractVersion": "dda.autotrader.quota-policy.v1",
+  "status": "provisional_staging_defaults_not_vendor_limits",
+  "windowsTimezone": "UTC",
+  "userAnalysisLimits": {
+    "perMinute": 10,
+    "perHour": 50,
+    "perDay": 200,
+    "chargedAfter": ["authenticated_session", "autotrader.analysis_entitlement"],
+    "enforcement": "atomic server-side reservation; denied or unavailable quota store fails closed"
+  },
+  "providerGlobalLimits": {
+    "perProviderAccount": true,
+    "requestsPerMinute": 10,
+    "requestsPerDay": 200,
+    "providerUsageUnitsPerMonth": 5000,
+    "providerIdEnvironmentVariable": "DDA_AUTOTRADER_PROVIDER_ID",
+    "providerIdDefault": null,
+    "usageUnitDefinition": "Provider-specific credits/cost units, supplied by the adapter from the selected vendor’s documented billing model; not currency unless explicitly mapped.",
+    "enforcementBoundary": "Reserve atomically before every outbound provider request; provider adapter is not yet connected, so no provider consumption occurs today."
+  },
+  "storage": {
+    "table": "public.dda_autotrader_quota_buckets",
+    "reservationRpc": "public.reserve_dda_autotrader_quota(jsonb)",
+    "clientAccess": "none",
+    "atomicity": "All bucket reservations in one call commit together or roll back together."
+  },
+  "responsePolicy": {
+    "exceeded": "HTTP 429 with Retry-After when a reset time is available.",
+    "quotaStoreUnavailable": "HTTP 503; do not analyze or call a provider without a reservation."
+  },
+  "notIncluded": [
+    "vendor contract or vendor-enforced rate limits",
+    "monetary spend cap until the provider’s credit-to-currency schedule is configured",
+    "provider concurrency cap",
+    "request caching or deduplication"
+  ]
+}

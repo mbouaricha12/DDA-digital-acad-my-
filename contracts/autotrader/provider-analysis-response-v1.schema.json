@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dda.example/contracts/autotrader/provider-analysis-response-v1.schema.json",
+  "title": "DDA AutoTrader provider analysis response v1",
+  "description": "Historical descriptive analysis of a configured market-data provider instrument. No signal, order, execution, or raw bar series is returned.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "analyzed_at", "series_summary", "analysis"],
+  "properties": {
+    "contract_version": { "const": "dda.autotrader.provider-analysis-response.v1" },
+    "analyzed_at": { "$ref": "#/$defs/utcTimestamp" },
+    "series_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["instrument", "timeframe", "data_mode", "bar_count", "latest_bar_at", "source"],
+      "properties": {
+        "instrument": { "$ref": "#/$defs/instrument" },
+        "timeframe": { "$ref": "#/$defs/timeframe" },
+        "data_mode": { "const": "historical" },
+        "bar_count": { "type": "integer", "minimum": 1, "maximum": 250 },
+        "latest_bar_at": { "$ref": "#/$defs/utcTimestamp" },
+        "source": { "$ref": "#/$defs/providerSource" }
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_version", "engine_id", "analysis_type", "interpretation", "data_mode", "source", "instrument", "timeframe", "data_as_of", "freshness", "validation_errors", "execution_enabled", "order_recommendation", "status", "metrics", "limitations"
+      ],
+      "properties": {
+        "contract_version": { "const": "dda.market-analysis.v2" },
+        "engine_id": { "const": "dda.technical-context.v1" },
+        "analysis_type": { "const": "technical_descriptive" },
+        "interpretation": { "const": "descriptive_only" },
+        "data_mode": { "const": "historical" },
+        "source": { "$ref": "#/$defs/providerSource" },
+        "instrument": { "$ref": "#/$defs/instrument" },
+        "timeframe": { "$ref": "#/$defs/timeframe" },
+        "data_as_of": { "$ref": "#/$defs/utcTimestamp" },
+        "freshness": { "const": "not_applicable" },
+        "validation_errors": { "type": "array", "maxItems": 0 },
+        "execution_enabled": { "const": false },
+        "order_recommendation": { "type": "null" },
+        "status": { "const": "analysis_complete" },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "trend_sma_20", "trend_sma_50", "trend_close_vs_sma_20", "trend_ema_20", "trend_ema_50", "trend_macd_line_12_26", "trend_macd_signal_9", "trend_macd_histogram", "volatility_atr_14", "volatility_atr_14_fraction", "volatility_bollinger_middle_20", "volatility_bollinger_upper_20_2", "volatility_bollinger_lower_20_2", "volatility_bollinger_bandwidth_20_2", "volatility_realized_20"
+          ],
+          "properties": {
+            "trend_sma_20": { "$ref": "#/$defs/metric" },
+            "trend_sma_50": { "$ref": "#/$defs/metric" },
+            "trend_close_vs_sma_20": { "$ref": "#/$defs/metric" },
+            "trend_ema_20": { "$ref": "#/$defs/metric" },
+            "trend_ema_50": { "$ref": "#/$defs/metric" },
+            "trend_macd_line_12_26": { "$ref": "#/$defs/metric" },
+            "trend_macd_signal_9": { "$ref": "#/$defs/metric" },
+            "trend_macd_histogram": { "$ref": "#/$defs/metric" },
+            "volatility_atr_14": { "$ref": "#/$defs/metric" },
+            "volatility_atr_14_fraction": { "$ref": "#/$defs/metric" },
+            "volatility_bollinger_middle_20": { "$ref": "#/$defs/metric" },
+            "volatility_bollinger_upper_20_2": { "$ref": "#/$defs/metric" },
+            "volatility_bollinger_lower_20_2": { "$ref": "#/$defs/metric" },
+            "volatility_bollinger_bandwidth_20_2": { "$ref": "#/$defs/metric" },
+            "volatility_realized_20": { "$ref": "#/$defs/metric" }
+          }
+        },
+        "limitations": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "type": "string", "minLength": 1 } }
+      }
+    }
+  },
+  "$defs": {
+    "utcTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    },
+    "timeframe": { "enum": ["1m", "5m", "15m", "30m", "1h", "4h"] },
+    "instrument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["symbol", "venue", "asset_class", "currency"],
+      "properties": {
+        "symbol": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "venue": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "asset_class": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "currency": { "type": "string", "minLength": 1, "maxLength": 32 }
+      }
+    },
+    "providerSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "provider_symbol", "license_ref"],
+      "properties": {
+        "id": { "const": "twelve-data" },
+        "kind": { "const": "provider" },
+        "provider_symbol": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "license_ref": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "provider_timestamp": { "$ref": "#/$defs/utcTimestamp" }
+      }
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit", "window", "method", "inputs", "status"],
+      "properties": {
+        "value": { "type": ["number", "null"] },
+        "unit": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "window": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "end", "frequency", "n_obs", "annualization_factor"],
+          "properties": {
+            "start": { "anyOf": [{ "$ref": "#/$defs/utcTimestamp" }, { "type": "null" }] },
+            "end": { "anyOf": [{ "$ref": "#/$defs/utcTimestamp" }, { "type": "null" }] },
+            "frequency": { "$ref": "#/$defs/timeframe" },
+            "n_obs": { "type": "integer", "minimum": 0 },
+            "annualization_factor": { "type": "null" }
+          }
+        },
+        "method": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "inputs": { "type": "array", "minItems": 1, "items": { "enum": ["open", "high", "low", "close"] } },
+        "status": { "enum": ["computed", "insufficient_data"] }
+      }
+    }
+  }
+}

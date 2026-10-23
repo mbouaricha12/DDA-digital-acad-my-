@@ -718,7 +718,7 @@
 
         <div class="plan-grid">
           <article class="plan-card current-plan"><p class="eyebrow">Ce que tu as aujourd’hui</p><h2>DDA Free</h2><p class="plan-tagline">Pour démarrer sérieusement, sans rien débourser.</p><ul><li>Parcours M0 Fondations et ses leçons</li><li>Exercices, quiz et Fil de maîtrise réel</li><li>Journal &amp; Plan</li><li>Market Intelligence (aperçu)</li></ul><span class="plan-state" id="free-plan-state">Formule active</span></article>
-          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">DDA Premium · aperçu local</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><p class="premium-local-status">Tu explores une démonstration pédagogique sur cet appareil, pas un abonnement actif.</p><ul><li>Leçons Premium P2 : risque avant entrée et trade contrôlé</li><li>Risk Plan Lab avec validation du scénario et conditions de non-trade</li><li>Assessment Controlled Decision et preuve locale de compétence</li><li>Revue hebdomadaire, ressources avancées et pont vers le Journal</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aucun paiement · aucun renouvellement · aucun entitlement serveur</small><a class="text-action membership-preparation-link" href="launch/">Comprendre la préparation commerciale <span>→</span></a></article>
+          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">DDA Premium · aperçu local</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><p class="premium-local-status">Tu explores une démonstration pédagogique sur cet appareil, pas un abonnement actif.</p><ul><li>Leçons Premium P2 : risque avant entrée et trade contrôlé</li><li>Risk Plan Lab avec validation du scénario et conditions de non-trade</li><li>Assessment Controlled Decision et preuve locale de compétence</li><li>Revue hebdomadaire, ressources avancées et pont vers le Journal</li></ul><div class="autotrader-membership-note"><strong>AutoTrader Premium — non commercialisé.</strong><span>Prototype en simulation uniquement ; aucun accès payant ni flux de marché n’est activé.</span><button type="button" class="text-action" data-view="intelligence">Consulter l’état AutoTrader <span>→</span></button></div><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aucun paiement · aucun renouvellement · aucun entitlement serveur</small><a class="text-action membership-preparation-link" href="launch/">Comprendre la préparation commerciale <span>→</span></a></article>
         </div>
 
         <section class="panel access-model-panel" aria-labelledby="access-model-title">
@@ -1125,16 +1125,56 @@
 
       <section class="view community-view" id="intelligence" aria-labelledby="intelligence-title">
         <div class="community-hero" role="img" aria-label="Intelligence DDA — aperçu">
-          <img class="photo-fill" src="images/photos/hero-market-woman.jpg" alt="" loading="eager" fetchpriority="high">
+          <img class="photo-fill" src="images/photos/hero-market-woman.jpg" alt="" loading="lazy">
           <div class="photo-scrim"></div>
           <div class="community-hero-copy">
-            <p class="eyebrow gold">Aperçu — bientôt disponible</p>
+            <p class="eyebrow gold">Intelligence DDA · état de pré-lancement</p>
             <h1 id="intelligence-title">Intelligence DDA</h1>
-            <p>Un accompagnement plus personnalisé, pensé pour s’appuyer sur ce que tu construis déjà — jamais pour le remplacer.</p>
+            <p>Darius AI reste à construire. AutoTrader est un prototype d’analyse et de simulation, distinct de l’IA pédagogique — sans flux de marché connecté ni exécution d’ordres.</p>
           </div>
         </div>
 
         <div class="page-mission" data-mission="intelligence"><div><p class="eyebrow">Mission de cette page</p><strong>Recevoir un jour une aide qui explique, jamais qui décide.</strong><span>Intelligence DDA prépare l’assistance pédagogique ; elle ne remplace pas tes validations.</span></div><button class="text-action" data-view="path">Voir le socle de personnalisation <span>→</span></button></div>
+        <section class="autotrader-readiness" aria-labelledby="autotrader-title">
+          <div class="autotrader-readiness-heading"><p class="eyebrow gold">AutoTrader · prototype serveur</p><h2 id="autotrader-title">Analyser, simuler, contrôler le risque.</h2><p>Le moteur d’analyse technique, le contrôle d’exposition et le backtest historique existent en version simulation. Aucun flux live n’est connecté ; un historique peut être importé pour une lecture descriptive.</p></div>
+          <dl class="autotrader-status-grid">
+            <div><dt>Droit spécifique</dt><dd id="autotrader-entitlement-status">Non vérifié côté serveur</dd></div>
+            <div><dt>Données</dt><dd>Aucun flux de marché connecté à cette interface</dd></div>
+            <div><dt>Exécution</dt><dd>Désactivée · aucun ordre ni connexion MT5</dd></div>
+          </dl>
+          <p class="autotrader-access-note" id="autotrader-access-status" role="status" aria-live="polite">Le droit <code>autotrader.analysis</code> ne peut être confirmé que par le serveur. Aucun accès local ne vaut abonnement.</p>
+          <div class="autotrader-signal-preview" aria-labelledby="autotrader-preview-title">
+            <div><p class="eyebrow">Aperçu de sortie</p><h3 id="autotrader-preview-title">Aucun signal calculé</h3><p>Aucun cours live, signal ou résultat de backtest n’est affiché ici. Un historique importé reste non vérifié indépendamment.</p></div>
+            <dl><div><dt>Entrée / invalidation</dt><dd>Non calculées</dd></div><div><dt>Objectifs</dt><dd>Non calculés</dd></div><div><dt>R/R brut / net</dt><dd>Non calculé</dd></div></dl>
+          </div>
+          <div class="autotrader-server-detail" id="autotrader-server-detail" hidden>
+            <p class="autotrader-access-note" id="autotrader-entitled-note">Accès confirmé par le serveur.</p>
+            <p>Le droit ne crée pas de données de marché. Aucun flux live n’est connecté ; tu peux importer un historique CSV pour obtenir un contexte descriptif uniquement. Aucune entrée, aucun stop, aucun objectif ni ordre ne sera généré par cette interface.</p>
+            <form class="autotrader-history-form" id="autotrader-history-form" aria-describedby="autotrader-history-help">
+              <h3>Importer un historique pour analyse descriptive</h3>
+              <p id="autotrader-history-help" class="autotrader-history-help">CSV UTF-8 séparé par des virgules, avec les en-têtes exacts <code>timestamp,open,high,low,close,volume</code>. Horodatages ISO 8601 avec fuseau horaire, prix décimaux avec point, 20 à 250 bougies, fichier de 24 Ko maximum. Chaque ligne représente une bougie clôturée.</p>
+              <div class="autotrader-history-fields">
+                <label>Fichier CSV historique<input id="autotrader-history-file" name="csv" type="file" accept=".csv,text/csv" required></label>
+                <label>Symbole<input id="autotrader-symbol" name="symbol" maxlength="32" autocomplete="off" required></label>
+                <label>Marché / place<input id="autotrader-venue" name="venue" maxlength="32" autocomplete="off" required></label>
+                <label>Classe d’actif<input id="autotrader-asset-class" name="assetClass" maxlength="32" autocomplete="off" required></label>
+                <label>Devise<input id="autotrader-currency" name="currency" maxlength="32" autocomplete="off" required></label>
+                <label>Unité de temps<select id="autotrader-timeframe" name="timeframe" required><option value="">Choisir…</option><option value="1m">1 minute</option><option value="5m">5 minutes</option><option value="15m">15 minutes</option><option value="30m">30 minutes</option><option value="1h">1 heure</option><option value="4h">4 heures</option><option value="1d">1 jour</option><option value="1w">1 semaine</option></select></label>
+                <label class="autotrader-history-source">Référence de source ou de licence (facultatif)<input id="autotrader-license-ref" name="licenseRef" maxlength="200" autocomplete="off"></label>
+              </div>
+              <label class="autotrader-history-attestation"><input id="autotrader-history-attestation" type="checkbox" required> Je confirme que ce fichier contient un historique (non un flux live), que les bougies sont clôturées et que je suis autorisé à utiliser ces données.</label>
+              <button class="primary-action" id="autotrader-history-submit" type="submit">Analyser l’historique</button>
+              <p class="autotrader-history-status" id="autotrader-history-status" role="status" aria-live="polite"></p>
+              <section class="autotrader-history-results" id="autotrader-history-results" aria-labelledby="autotrader-history-results-title" hidden>
+                <h4 id="autotrader-history-results-title">Contexte descriptif — données historiques importées</h4>
+                <p id="autotrader-history-meta"></p><p id="autotrader-history-context"></p>
+                <dl><div><dt>Dernière clôture observée</dt><dd id="autotrader-result-last-close">Non calculée</dd></div><div><dt>Variation de la dernière période</dt><dd id="autotrader-result-period-return">Non calculée</dd></div><div><dt>Moyenne mobile simple (20)</dt><dd id="autotrader-result-sma">Non calculée</dd></div><div><dt>Clôture vs SMA 20</dt><dd id="autotrader-result-sma-distance">Non calculée</dd></div><div><dt>Amplitude observée / dernière clôture</dt><dd id="autotrader-result-range">Non calculée</dd></div></dl>
+                <p class="autotrader-history-disclaimer">Lecture descriptive des données importées, non vérifiées indépendamment. Aucun signal, rendement futur ou gain n’est garanti.</p>
+              </section>
+            </form>
+          </div>
+          <p class="autotrader-safety-note"><strong>Limites explicites :</strong> aucune promesse de gain, aucun ordre réel, aucune connexion broker/MT5 et aucun signal exploitable dans cette démo.</p>
+        </section>
         <div class="community-tiles">
           <div class="community-tile"><svg class="icon"><use href="#icon-compass"/></svg><span>Darius AI</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-path"/></svg><span>Personnalisation</span></div>
@@ -1248,6 +1288,7 @@
   <script src="lesson-renderer.js"></script>
   <script src="dda-analytics.js"></script>
   <script src="bff-client.js"></script>
+  <script src="autotrader-history-import.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -28,7 +28,15 @@
     "statuses": ["pending", "active", "expired", "revoked"],
     "entitlementGrant": "active status from an allowlisted product only",
     "entitlementRevoke": ["expired", "revoked"],
-    "entitlements": ["premium_track", "resources_premium", "certificate_preview", "advanced_modules"],
+    "entitlements": ["premium_track", "resources_premium", "certificate_preview", "advanced_modules", "autotrader.analysis"],
+    "productEntitlementAllowlist": {
+      "academyEnvironmentVariable": "CHARIOW_PREMIUM_PRODUCT_IDS",
+      "autotraderEnvironmentVariable": "CHARIOW_AUTOTRADER_PRODUCT_IDS",
+      "autotraderDefaultProductIds": [],
+      "genericPremiumGrantsAutotraderAnalysis": false,
+      "overlapMeansExplicitBundle": true
+    },
+    "runtimeAuthorizationSource": "Supabase dda_billing_memberships active rows, aggregated server-side and filtered by starts_at/ends_at; never browser state",
     "proofCannotGrantAccess": true,
     "localPlanCannotGrantAccess": true,
     "refundPolicy": "revoke through provider event or an explicit server reconciliation job before access is removed"
@@ -38,15 +46,23 @@
     "abandoned.sale": "record pending/abandoned checkout; never grant access",
     "failed.sale": "record failed checkout; never grant access",
     "license.activated": "activate mapped license-backed membership",
-    "license.expired": "expire mapped membership",
-    "license.revoked": "revoke mapped membership"
+    "license.expired": "expire mapped membership, clear its entitlement snapshot and honor the provider effective timestamp",
+    "license.revoked": "revoke mapped membership immediately and clear its entitlement snapshot"
+  },
+  "sessionRevocationPolicy": {
+    "globalDdaAuthenticationSessions": "remain valid; they contain no entitlement and must not be revoked on AutoTrader expiry",
+    "autotraderScopedSessions": "revoke only sessions sourced from the ended license; revoke all feature sessions only when no active AutoTrader entitlement remains",
+    "currentAutotraderScopedSessionStore": "not implemented; no MT5 or broker session exists"
   },
   "processingRules": [
     "capture raw request bytes before JSON parsing",
     "reject invalid signatures with 401",
     "require x-pulse-delivery-id for real deliveries",
-    "deduplicate by delivery ID before applying a transition",
-    "persist the event before asynchronous entitlement processing",
+    "deduplicate by delivery ID with conditional claims; processed and recently accepted deliveries are not re-applied, failed deliveries may be reclaimed, and accepted claims may be recovered only after the 10-minute processing lease expires",
+    "require a valid provider occurred-at timestamp for active, expired, and revoked transitions; database trigger 0008 ignores older events and prevents equal-time terminal-to-active reversal",
+    "persist the membership status and empty entitlement snapshot before marking terminal transitions processed",
+    "revalidate AutoTrader entitlement before the analysis and before returning the analysis result",
+    "do not revoke global DDA login sessions when one feature entitlement ends",
     "derive owner_id from the authenticated account or a server-created checkout intent",
     "return 2xx only after the delivery is durably accepted"
   ],
@@ -55,7 +71,9 @@
     "no Pulse secret is committed",
     "no production product ID is committed",
     "no payment is made by this repository change",
-    "no recurring-subscription event is assumed unless Chariow enables and documents it for the store"
+    "no recurring-subscription or scheduled-cancellation event is assumed unless Chariow enables and documents it for the store",
+    "provider timestamp semantics and the 0008 event-ordering migration must be verified on staging before production",
+    "autotrader.analysis product allowlist is empty until the server-owned checkout identity link and subscription lifecycle are reviewed"
   ],
   "requiredSecurityTests": [
     "invalid Pulse signature rejected",

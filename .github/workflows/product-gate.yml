@@ -6,16 +6,25 @@ on:
     paths:
       - 'dist/**'
       - 'tests/**'
-      - '.github/workflows/product-gate.yml'
+      - 'bff/**'
+      - 'contracts/**'
+      - 'supabase/**'
+      - 'scripts/**'
+      - '.github/workflows/**'
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   product-gate:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v4

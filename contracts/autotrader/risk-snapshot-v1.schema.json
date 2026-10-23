@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dda.example/contracts/autotrader/risk-snapshot-v1.schema.json",
+  "title": "DDA AutoTrader Risk Snapshot v1",
+  "description": "Caller-supplied hypothetical exposure snapshot. Amounts are already in base_currency; this contract does not authorize trading.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "data_mode", "as_of", "base_currency", "equity", "positions_complete", "daily_pnl", "positions"],
+  "properties": {
+    "contract_version": { "const": "dda.risk-snapshot.v1" },
+    "data_mode": { "const": "simulation" },
+    "as_of": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    },
+    "base_currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "equity": { "type": "number", "exclusiveMinimum": 0 },
+    "positions_complete": { "const": true },
+    "daily_pnl": { "type": "number", "description": "Session-to-date P&L, signed, in base_currency." },
+    "positions": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["position_id", "instrument", "asset_class", "side", "notional", "assumed_risk_amount", "currency"],
+        "properties": {
+          "position_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "instrument": { "type": "string", "minLength": 1, "maxLength": 64, "description": "Canonical identifier; aliases are not normalized." },
+          "asset_class": { "type": "string", "minLength": 1, "maxLength": 32 },
+          "side": { "enum": ["long", "short"] },
+          "notional": { "type": "number", "exclusiveMinimum": 0, "description": "Gross notional amount already converted to base_currency." },
+          "assumed_risk_amount": { "type": "number", "exclusiveMinimum": 0, "description": "Caller-supplied positive loss assumption, not a guaranteed maximum loss." },
+          "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+        }
+      }
+    }
+  }
+}

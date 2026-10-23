@@ -49,7 +49,8 @@ assert.match(css, /#dashboard \.terminal-tool-label\{display:none\}/, 'mobile to
 assert.match(css, /#landing \.landing-market-cards\{display:grid/, 'market cards adapt to a responsive grid');
 assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/, 'reduced-motion preference is respected');
 assert.match(css, /body\.low-data #landing \.landing-3d-scene\{display:none\}/, 'the existing low-data guard for decorative 3D remains');
-assert.match(sw, /const CACHE = 'dda-shell-v24';/, 'PWA cache is bumped for the segmented offline strategy');
+assert.match(sw, /const CACHE = 'dda-shell-v26';/, 'PWA cache is bumped for the AutoTrader provider client update');
+assert.match(sw, /'\.\/autotrader-history-import\.js'/, 'historical AutoTrader parser is available offline with the app shell');
 assert.match(app, /window\.addEventListener\('popstate'/, 'browser Back/Forward is handled by the existing SPA router');
 assert.match(app, /window\.addEventListener\('hashchange'/, 'hash links remain synchronized with application navigation');
 assert.match(app, /history\.back\(\)/, 'in-app Retour uses the native route history when available');

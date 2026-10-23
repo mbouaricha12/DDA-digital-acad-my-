@@ -6,8 +6,11 @@ const { SupabaseAuthAdapter } = require('./supabase-auth');
 const { PostgrestSessionStore } = require('./session-store');
 const { PostgrestBusinessStore } = require('./business-store');
 const { PostgrestBillingStore } = require('./billing-store');
+const { PostgrestQuotaStore } = require('./quota-store');
+const { quotaPolicyFromEnv, validateProviderQuotaBinding } = require('./quota-policy');
 const { PostgrestBrvmPublicationStore } = require('./brvm-publication-store');
 const { chariowConfigFromEnv, handleChariowPulse } = require('./chariow');
+const { createTwelveDataMarketProviderFromEnv } = require('./autotrader/twelve-data-market-provider');
 
 const config = configFromEnv();
 const configIssues = validateRuntimeConfig(config);
@@ -24,9 +27,17 @@ const auth = new SupabaseAuthAdapter({
 const sessions = new PostgrestSessionStore({ supabaseUrl: process.env.SUPABASE_URL, serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY });
 const businessStore = new PostgrestBusinessStore({ supabaseUrl: process.env.SUPABASE_URL, serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY });
 const billingStore = new PostgrestBillingStore({ supabaseUrl: process.env.SUPABASE_URL, serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY });
+const quotaStore = new PostgrestQuotaStore({ supabaseUrl: process.env.SUPABASE_URL, serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY });
+const quotaPolicy = quotaPolicyFromEnv();
 const brvmPublicationStore = new PostgrestBrvmPublicationStore({ supabaseUrl: process.env.SUPABASE_URL, serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY });
 const chariowConfig = chariowConfigFromEnv();
-const academyHandler = createBff({ config, auth, sessions, businessStore, billingStore, brvmPublicationStore, entitlements: billingStore, logger: (event, fields) => console.info(JSON.stringify({ event, ...fields })) });
+const providerMarketData = createTwelveDataMarketProviderFromEnv();
+const providerQuotaIssues = validateProviderQuotaBinding(providerMarketData?.providerId, quotaPolicy);
+if (providerQuotaIssues.length) {
+  console.error(`BFF startup refused: ${providerQuotaIssues.join('; ')}.`);
+  process.exit(1);
+}
+const academyHandler = createBff({ config, auth, sessions, businessStore, billingStore, quotaStore, quotaPolicy, brvmPublicationStore, providerMarketData, entitlements: billingStore, logger: (event, fields) => console.info(JSON.stringify({ event, ...fields })) });
 const handler = async (req, res) => {
   if (req.method === 'POST' && new URL(req.url, 'http://bff.local').pathname === '/webhooks/chariow') {
     if (!chariowConfig.pulseSecret) {
@@ -39,7 +50,12 @@ const handler = async (req, res) => {
         config: chariowConfig,
         idempotencyStore: billingStore,
         applyEvent: async event => {
-          await billingStore.applyChariowTransition(event);
+          try { await billingStore.applyChariowTransition(event); }
+          catch (error) {
+            try { await billingStore.markProcessed(event.deliveryId, 'failed'); }
+            catch { /* Keep the accepted lease; a later duplicate can recover it after expiry. */ }
+            throw error;
+          }
           await billingStore.markProcessed(event.deliveryId, 'processed');
         }
       });

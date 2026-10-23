@@ -1,4 +1,4 @@
-const CACHE = 'dda-shell-v24';
+const CACHE = 'dda-shell-v26';
 
 // Critical shell only. Optional authored modules are cached at first use by the
 // runtime strategy, preserving the lazy-loading benefit on first installation.
@@ -6,7 +6,7 @@ const CORE = [
   './', './index.html', './academy.html', './404.html',
   './styles.css', './alpha-polish.css', './dda-lazy-modules.js',
   './dda-core.js', './learning-engine.js', './lesson-renderer.js',
-  './dda-analytics.js', './bff-client.js', './app.js', './public.js',
+  './dda-analytics.js', './bff-client.js', './autotrader-history-import.js', './app.js', './public.js',
   './manifest.webmanifest',
   './images/favicon-32.png', './images/apple-touch-icon.png',
   './images/icon-192.png', './images/dda-mark-512.png', './images/dda-og-image.jpg',

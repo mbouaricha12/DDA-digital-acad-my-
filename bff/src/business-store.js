@@ -1,10 +1,10 @@
 'use strict';
 
 const TABLES = Object.freeze({
-  lesson_progress: { table: 'dda_lesson_progress', owner: 'owner_id' },
-  journal_entries: { table: 'dda_journal_entries', owner: 'owner_id' },
-  journal_plans: { table: 'dda_journal_plans', owner: 'owner_id' },
-  preferences: { table: 'dda_preferences', owner: 'owner_id', order: 'updated_at.asc' }
+  lesson_progress: { table: 'lesson_progress', owner: 'owner_id' },
+  journal_entries: { table: 'journal_entries', owner: 'owner_id' },
+  journal_plans: { table: 'journal_plans', owner: 'owner_id' },
+  preferences: { table: 'preferences', owner: 'owner_id', order: 'updated_at.asc' }
 });
 
 class PostgrestBusinessStore {
