@@ -10,6 +10,7 @@ const migrationFiles = fs.readdirSync(migrationDir).sort().map(file => path.join
 const good = auditPaths(migrationFiles);
 assert.deepEqual(good.tables.sort(), [
   'public.audit_events',
+  'public.dda_autotrader_quota_buckets',
   'public.dda_billing_deliveries',
   'public.dda_billing_memberships',
   'public.dda_brvm_audit_events',

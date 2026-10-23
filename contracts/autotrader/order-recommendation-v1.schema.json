@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dda.example/contracts/autotrader/order-recommendation-v1.schema.json",
+  "title": "DDA AutoTrader Order Recommendation v1",
+  "description": "Analysis-only technical candidate, simulation risk gate, and proposed-unsubmitted non-order plan. This contract never authorizes execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "mode",
+    "status",
+    "rule_id",
+    "analysis_contract_version",
+    "signal_card",
+    "order_recommendation",
+    "order_plan",
+    "plan_checks",
+    "risk_check",
+    "simulation",
+    "manual_execution_notice",
+    "transaction_request_disposition",
+    "execution_enabled",
+    "is_trade_approval",
+    "validation_errors",
+    "limitations"
+  ],
+  "properties": {
+    "contract_version": { "const": "dda.order-recommendation.v1" },
+    "mode": { "const": "analysis" },
+    "status": { "enum": ["blocked", "insufficient_data", "no_setup", "candidate_generated"] },
+    "rule_id": { "const": "dda.trend-confirmation.v1" },
+    "analysis_contract_version": { "const": "dda.market-analysis.v2" },
+    "signal_card": { "$ref": "#/$defs/signalCard" },
+    "order_recommendation": { "oneOf": [{ "$ref": "#/$defs/orderRecommendation" }, { "type": "null" }] },
+    "order_plan": { "const": null },
+    "plan_checks": { "type": "array", "items": { "type": "object" } },
+    "risk_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseline", "projected"],
+      "properties": {
+        "baseline": { "oneOf": [{ "$ref": "#/$defs/riskSummary" }, { "type": "null" }] },
+        "projected": { "oneOf": [{ "$ref": "#/$defs/riskSummary" }, { "type": "null" }] }
+      }
+    },
+    "simulation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["data_mode", "status"],
+      "properties": {
+        "data_mode": { "const": "simulation" },
+        "status": { "enum": ["not_run", "projected_exposure_within_configured_limits"] },
+        "candidate_exposure_is_caller_supplied": { "type": "boolean" }
+      }
+    },
+    "manual_execution_notice": { "type": "string", "minLength": 1 },
+    "transaction_request_disposition": { "const": null },
+    "execution_enabled": { "const": false },
+    "is_trade_approval": { "const": false },
+    "validation_errors": { "type": "array", "items": { "$ref": "#/$defs/validationError" } },
+    "limitations": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+  },
+  "$defs": {
+    "validationError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "code", "message"],
+      "properties": {
+        "path": { "type": "string" },
+        "code": { "type": "string" },
+        "message": { "type": "string" }
+      }
+    },
+    "riskSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "policy_id", "snapshot_as_of", "breach_count", "breaches", "validation_errors"],
+      "properties": {
+        "status": { "enum": ["within_configured_limits", "limits_exceeded", "invalid_input", "stale_snapshot"] },
+        "policy_id": { "type": ["string", "null"] },
+        "snapshot_as_of": { "type": ["string", "null"] },
+        "breach_count": { "type": "integer", "minimum": 0 },
+        "breaches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["metric", "scope", "observed", "limit", "unit"],
+            "properties": {
+              "metric": { "type": "string" },
+              "scope": { "type": "string" },
+              "observed": { "type": "number" },
+              "limit": { "type": "number" },
+              "unit": { "type": "string" }
+            }
+          }
+        },
+        "validation_errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "code"],
+            "properties": { "path": { "type": "string" }, "code": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "value", "unit", "window_end"],
+      "properties": {
+        "metric": { "type": "string" },
+        "value": { "type": "number" },
+        "unit": { "type": "string" },
+        "window_end": { "type": ["string", "null"] },
+        "method": { "type": "string" }
+      }
+    },
+    "signalCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "recommendation", "direction", "rule_id", "instrument", "data_cutoff", "market_data", "entry_conditions", "invalidation_conditions", "stop_logic", "target_logic", "reward_to_risk", "confidence", "supporting_evidence", "reason"],
+      "properties": {
+        "status": { "enum": ["blocked", "insufficient_data", "no_setup", "long_candidate", "short_candidate"] },
+        "recommendation": { "enum": ["WAIT", "LONG_CANDIDATE", "SHORT_CANDIDATE"] },
+        "direction": { "enum": ["none", "long", "short"] },
+        "rule_id": { "const": "dda.trend-confirmation.v1" },
+        "instrument": { "type": ["string", "null"] },
+        "data_cutoff": { "type": ["string", "null"] },
+        "market_data": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["data_mode", "source_id", "source_kind", "timeframe"],
+              "properties": {
+                "data_mode": { "enum": ["historical", "synthetic"] },
+                "source_id": { "type": "string" },
+                "source_kind": { "enum": ["provider", "historical_import", "synthetic_fixture"] },
+                "timeframe": { "type": "string" }
+              }
+            }
+          ]
+        },
+        "entry_conditions": { "type": "array", "items": { "type": "string" } },
+        "invalidation_conditions": { "type": "array", "items": { "type": "string" } },
+        "stop_logic": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "reason"],
+          "properties": { "status": { "const": "not_computed" }, "reason": { "type": "string" } }
+        },
+        "target_logic": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "reason"],
+          "properties": { "status": { "const": "not_computed" }, "reason": { "type": "string" } }
+        },
+        "reward_to_risk": { "type": "null" },
+        "confidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "value"],
+          "properties": { "status": { "const": "not_scored" }, "value": { "type": "null" } }
+        },
+        "supporting_evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
+        "reason": { "type": ["string", "null"] }
+      }
+    },
+    "orderRecommendation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proposal_status", "order_ready", "instrument", "side", "data_mode", "rule_id", "data_cutoff", "reference_close", "caller_supplied_exposure", "order_fields", "risk_check_status", "required_manual_review"],
+      "properties": {
+        "proposal_status": { "const": "proposed_unsubmitted" },
+        "order_ready": { "const": false },
+        "instrument": { "type": "string" },
+        "side": { "enum": ["long", "short"] },
+        "data_mode": { "const": "simulation" },
+        "rule_id": { "const": "dda.trend-confirmation.v1" },
+        "data_cutoff": { "type": "string" },
+        "reference_close": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "currency", "timestamp", "executable", "basis"],
+          "properties": {
+            "value": { "type": "number", "exclusiveMinimum": 0 },
+            "currency": { "type": "string" },
+            "timestamp": { "type": "string" },
+            "executable": { "const": false },
+            "basis": { "const": "historical_or_synthetic_bar_close" }
+          }
+        },
+        "caller_supplied_exposure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["notional", "assumed_risk_amount", "currency", "source"],
+          "properties": {
+            "notional": { "type": "number", "exclusiveMinimum": 0 },
+            "assumed_risk_amount": { "type": "number", "exclusiveMinimum": 0 },
+            "currency": { "type": "string" },
+            "source": { "const": "caller_supplied_hypothetical" }
+          }
+        },
+        "order_fields": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["quantity", "order_type", "entry", "stop_loss", "target", "time_in_force", "estimated_costs", "maximum_modeled_loss"],
+          "properties": {
+            "quantity": { "type": "null" },
+            "order_type": { "type": "null" },
+            "entry": { "type": "null" },
+            "stop_loss": { "type": "null" },
+            "target": { "type": "null" },
+            "time_in_force": { "type": "null" },
+            "estimated_costs": { "type": "null" },
+            "maximum_modeled_loss": { "type": "null" }
+          }
+        },
+        "risk_check_status": { "const": "within_configured_limits" },
+        "required_manual_review": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      }
+    }
+  }
+}

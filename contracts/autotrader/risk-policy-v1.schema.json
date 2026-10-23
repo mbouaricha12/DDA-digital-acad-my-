@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dda.example/contracts/autotrader/risk-policy-v1.schema.json",
+  "title": "DDA AutoTrader Risk Policy v1",
+  "description": "Caller-configured portfolio exposure limits. Every limit is mandatory; no production defaults are implied.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "policy_id",
+    "max_snapshot_age_ms",
+    "max_gross_exposure_fraction",
+    "max_abs_net_exposure_fraction",
+    "max_instrument_exposure_fraction",
+    "max_asset_class_exposure_fraction",
+    "max_single_position_risk_fraction",
+    "max_total_open_risk_fraction",
+    "max_daily_loss_fraction"
+  ],
+  "properties": {
+    "contract_version": { "const": "dda.risk-policy.v1" },
+    "policy_id": { "type": "string", "minLength": 1, "maxLength": 100 },
+    "max_snapshot_age_ms": { "type": "integer", "minimum": 1, "maximum": 8640000000000000 },
+    "max_gross_exposure_fraction": { "type": "number", "minimum": 0 },
+    "max_abs_net_exposure_fraction": { "type": "number", "minimum": 0 },
+    "max_instrument_exposure_fraction": { "type": "number", "minimum": 0 },
+    "max_asset_class_exposure_fraction": { "type": "number", "minimum": 0 },
+    "max_single_position_risk_fraction": { "type": "number", "minimum": 0 },
+    "max_total_open_risk_fraction": { "type": "number", "minimum": 0 },
+    "max_daily_loss_fraction": { "type": "number", "minimum": 0 }
+  }
+}

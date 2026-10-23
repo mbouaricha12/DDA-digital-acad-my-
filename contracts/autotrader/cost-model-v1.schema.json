@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dda.example/contracts/autotrader/cost-model-v1.schema.json",
+  "title": "DDA AutoTrader Cost Model v1 Context",
+  "description": "Caller-supplied scenario assumptions for hypothetical net reward-to-risk calculations. Values are not independently verified; no missing cost, contract, currency, or holding horizon is inferred.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cost_model_id",
+    "reference",
+    "currency",
+    "position_unit",
+    "contract_multiplier",
+    "holding_period_bars",
+    "bars_per_year",
+    "costs"
+  ],
+  "properties": {
+    "cost_model_id": { "const": "dda.autotrader.cost-model.v1" },
+    "reference": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "position_unit": { "type": "string", "minLength": 1, "maxLength": 32 },
+    "contract_multiplier": { "type": "number", "exclusiveMinimum": 0, "maximum": 1000000000000 },
+    "holding_period_bars": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+    "bars_per_year": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+    "costs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commission_bps_per_side",
+        "spread_bps_per_side",
+        "slippage_bps_per_side",
+        "long_financing_bps_per_year",
+        "short_financing_bps_per_year",
+        "short_borrow_bps_per_year"
+      ],
+      "properties": {
+        "commission_bps_per_side": { "type": "number", "minimum": 0, "maximum": 1000000 },
+        "spread_bps_per_side": { "type": "number", "minimum": 0, "maximum": 1000000 },
+        "slippage_bps_per_side": { "type": "number", "minimum": 0, "maximum": 1000000 },
+        "long_financing_bps_per_year": { "type": "number", "minimum": 0, "maximum": 1000000 },
+        "short_financing_bps_per_year": { "type": "number", "minimum": 0, "maximum": 1000000 },
+        "short_borrow_bps_per_year": { "type": "number", "minimum": 0, "maximum": 1000000 }
+      }
+    }
+  }
+}

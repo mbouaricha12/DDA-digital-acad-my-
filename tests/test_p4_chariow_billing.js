@@ -19,6 +19,11 @@ assert.equal(contract.provider.signature.includes('HMAC-SHA256'), true);
 assert.equal(contract.provider.idempotencyHeader, 'x-pulse-delivery-id');
 assert.equal(contract.membershipModel.localPlanCannotGrantAccess, true);
 assert.equal(contract.membershipModel.proofCannotGrantAccess, true);
+assert.equal(contract.membershipModel.productEntitlementAllowlist.genericPremiumGrantsAutotraderAnalysis, false);
+assert.equal(contract.membershipModel.entitlements.includes('autotrader.analysis'), true);
+assert.match(contract.sessionRevocationPolicy.globalDdaAuthenticationSessions, /remain valid/);
+assert.match(contract.sessionRevocationPolicy.autotraderScopedSessions, /revoke only sessions sourced from the ended license/);
+assert.equal(contract.sessionRevocationPolicy.currentAutotraderScopedSessionStore, 'not implemented; no MT5 or broker session exists');
 for (const event of ['successful.sale', 'failed.sale', 'abandoned.sale', 'license.activated', 'license.expired', 'license.revoked']) {
   assert.ok(Object.hasOwn(contract.acceptedPulseEvents, event), `missing Pulse event ${event}`);
 }
@@ -30,12 +35,19 @@ assert.equal(verifyChariowPulse(raw, signature, secret), true);
 assert.equal(verifyChariowPulse(Buffer.from(`${raw.toString()}\n`), signature, secret), false, 'HMAC must use untouched raw bytes');
 assert.equal(verifyChariowPulse(raw, 'sha256=bad', secret), false);
 
-const config = chariowConfigFromEnv({ CHARIOW_PREMIUM_PRODUCT_IDS: 'prd_premium' });
+const config = chariowConfigFromEnv({ CHARIOW_PREMIUM_PRODUCT_IDS: 'prd_premium', CHARIOW_AUTOTRADER_PRODUCT_IDS: 'prd_autotrader' });
 const active = mapChariowPulse(JSON.parse(raw.toString()), { 'x-pulse-delivery-id': 'del-1' }, config);
 assert.equal(active.kind, 'membership_transition');
 assert.equal(active.status, 'active');
 assert.equal(active.entitlement, 'premium_track');
 assert.equal(active.userReference, 'user-1');
+assert.equal(active.entitlements.includes('autotrader.analysis'), false, 'generic Premium product must not grant AutoTrader');
+assert.equal(active.entitlements.length, 4);
+
+const autoTrader = mapChariowPulse({ event: 'successful.sale', product: { id: 'prd_autotrader' }, customer: { email: 'ada@example.com' }, sale: { id: 'sal-auto', custom_metadata: { dda_user_id: 'user-1' } } }, {}, config);
+assert.equal(autoTrader.kind, 'membership_transition');
+assert.deepEqual(autoTrader.entitlements, ['autotrader.analysis']);
+assert.equal(autoTrader.entitlement, 'autotrader.analysis');
 
 const unknownProduct = mapChariowPulse({ event: 'successful.sale', product: { id: 'prd_other' }, customer: { email: 'ada@example.com' }, sale: { id: 'sal-2' } }, {}, config);
 assert.equal(unknownProduct.kind, 'ignored');
@@ -47,6 +59,25 @@ for (const event of ['failed.sale', 'abandoned.sale']) {
   assert.equal(result.entitlement, null, `${event} must never grant Premium`);
   assert.equal(result.status, event === 'failed.sale' ? 'pending' : 'pending');
 }
+const failedAutoTrader = mapChariowPulse({ event: 'failed.sale', product: { id: 'prd_autotrader' }, customer: { email: 'ada@example.com' }, sale: { id: 'sal-auto-failed' } }, {}, config);
+assert.deepEqual(failedAutoTrader.entitlements, [], 'failed AutoTrader sale must never grant access');
+for (const [event, effectiveField, expectedStatus] of [
+  ['license.expired', 'expired_at', 'expired'],
+  ['license.revoked', 'revoked_at', 'revoked']
+]) {
+  const effectiveAt = '2026-10-18T19:00:00.000Z';
+  const transition = mapChariowPulse({
+    event,
+    customer: { email: 'ada@example.com' },
+    license: { id: 'lic-autotrader-1', product_id: 'prd_autotrader', [effectiveField]: effectiveAt }
+  }, {}, config);
+  assert.equal(transition.kind, 'membership_transition');
+  assert.equal(transition.status, expectedStatus);
+  assert.deepEqual(transition.entitlements, [], `${event} must remove the AutoTrader entitlement`);
+  assert.equal(transition.externalId, 'lic-autotrader-1');
+  assert.equal(transition.occurredAt, effectiveAt);
+}
+assert.equal(mapChariowPulse({ event: 'subscription.cancelled', product: { id: 'prd_autotrader' } }, {}, config).kind, 'ignored', 'unverified cancellation events remain disabled');
 
 const calls = [];
 const checkoutInput = { productId: 'prd_premium', email: 'Ada@Example.com', firstName: 'Ada', lastName: 'Lovelace', phone: { number: '+33 6 12 34 56 78', countryCode: 'fr' }, customMetadata: { dda_user_id: 'user-1' } };

@@ -2,6 +2,7 @@
 
 const crypto = require('node:crypto');
 const { normalizeEmail } = require('./security');
+const { ENTITLEMENTS, AUTOTRADER_ANALYSIS_ENTITLEMENT } = require('./entitlement-catalog');
 
 const CHARIOW_API_BASE_URL = 'https://api.chariow.com/v1';
 const SUPPORTED_PULSE_EVENTS = new Set([
@@ -19,6 +20,8 @@ function chariowConfigFromEnv(env = process.env) {
     apiKey: env.CHARIOW_API_KEY || null,
     pulseSecret: env.CHARIOW_PULSE_SECRET || null,
     premiumProductIds: String(env.CHARIOW_PREMIUM_PRODUCT_IDS || '')
+      .split(',').map(value => value.trim()).filter(Boolean),
+    autotraderProductIds: String(env.CHARIOW_AUTOTRADER_PRODUCT_IDS || '')
       .split(',').map(value => value.trim()).filter(Boolean),
     checkoutRedirectUrl: env.CHARIOW_CHECKOUT_REDIRECT_URL || null
   };
@@ -73,14 +76,16 @@ function mapChariowPulse(payload, headers = {}, config = chariowConfigFromEnv())
   if (!SUPPORTED_PULSE_EVENTS.has(event)) return { kind: 'ignored', reason: 'unsupported_event', event };
 
   const productId = productIdFromPayload(payload);
-  const isPremiumProduct = Boolean(productId && config.premiumProductIds.includes(productId));
+  const isAcademyProduct = Boolean(productId && config.premiumProductIds.includes(productId));
+  const isAutotraderProduct = Boolean(productId && config.autotraderProductIds?.includes(productId));
+  const isMappedProduct = isAcademyProduct || isAutotraderProduct;
   const customer = customerFromPayload(payload);
   const metadata = metadataFromPayload(payload);
   const saleId = safeText(payload.sale?.id, 100) || null;
   const licenseId = safeText(payload.license?.id, 100) || null;
   const externalId = licenseId || saleId;
 
-  if (!isPremiumProduct) return { kind: 'ignored', reason: 'product_not_mapped', event, productId, externalId };
+  if (!isMappedProduct) return { kind: 'ignored', reason: 'product_not_mapped', event, productId, externalId };
   if (!customer.email && !metadata.dda_user_id) return { kind: 'ignored', reason: 'missing_customer_reference', event, productId, externalId };
 
   let status = null;
@@ -88,6 +93,11 @@ function mapChariowPulse(payload, headers = {}, config = chariowConfigFromEnv())
   if (event === 'failed.sale' || event === 'abandoned.sale') status = 'pending';
   if (event === 'license.expired') status = 'expired';
   if (event === 'license.revoked') status = 'revoked';
+  const productEntitlements = [
+    ...(isAcademyProduct ? ENTITLEMENTS : []),
+    ...(isAutotraderProduct ? [AUTOTRADER_ANALYSIS_ENTITLEMENT] : [])
+  ];
+  const grantedEntitlements = status === 'active' ? productEntitlements : [];
 
   return {
     kind: 'membership_transition',
@@ -100,7 +110,8 @@ function mapChariowPulse(payload, headers = {}, config = chariowConfigFromEnv())
     licenseId,
     customer,
     userReference: safeText(metadata.dda_user_id, 100) || null,
-    entitlement: status === 'active' ? 'premium_track' : null,
+    entitlement: grantedEntitlements[0] || null,
+    entitlements: grantedEntitlements,
     occurredAt: safeText(payload.sale?.completed_at || payload.license?.activated_at || payload.license?.expired_at || payload.license?.revoked_at, 50) || null,
     deliveryId: safeText(headers['x-pulse-delivery-id'], 120) || null
   };

@@ -6,9 +6,10 @@ const root = path.join(__dirname, '..', 'dist');
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.webmanifest'), 'utf8'));
 
-assert.match(sw, /const CACHE = 'dda-shell-v24';/);
+assert.match(sw, /const CACHE = 'dda-shell-v26';/);
 assert.match(sw, /'\.\/academy\.html'/, 'Academy document must be in the critical offline shell');
 assert.match(sw, /'\.\/bff-client\.js'/, 'BFF client must be cached for the local auth UI');
+assert.match(sw, /'\.\/autotrader-history-import\.js'/, 'historical import parser must be available from the offline shell');
 assert.match(sw, /request\.mode === 'navigate'/, 'navigation requests must have a dedicated strategy');
 assert.match(sw, /url\.pathname\.endsWith\('\/academy\.html'\)/, 'Academy navigations need Academy fallback');
 assert.match(sw, /isApiRequest/);

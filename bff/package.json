@@ -6,7 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "start": "node src/server.js",
-    "test": "node ../tests/test_bff_implementation.js"
+    "test": "node ../tests/test_bff_implementation.js && node ../tests/test_bff_client_autotrader.js && node ../tests/test_bff_frontend_integration.js && node ../tests/test_autotrader_history_import.js && node ../tests/test_p4_chariow_billing.js && node ../tests/test_billing_store.js && node ../tests/test_autotrader_entitlement.js && node ../tests/test_autotrader_quota_policy.js && node ../tests/test_autotrader_quota_store.js && node ../tests/test_autotrader_market_analysis.js && node ../tests/test_autotrader_analysis_route.js && node ../tests/test_autotrader_market_data_v2.js && node ../tests/test_autotrader_market_analysis_v2.js && node ../tests/test_autotrader_twelve_data_provider.js && node ../tests/test_autotrader_twelve_data_route.js && node ../tests/test_autotrader_risk_management.js && node ../tests/test_autotrader_cost_model.js && node ../tests/test_autotrader_order_recommendations.js && node ../tests/test_autotrader_historical_backtest.js"
   },
   "engines": {
     "node": ">=20"

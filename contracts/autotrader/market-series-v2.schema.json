@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dda.example/contracts/autotrader/market-series-v2.schema.json",
+  "title": "DDA AutoTrader Market Series v2",
+  "description": "Normalized OHLCV series with explicit volume semantics. A bar timestamp is its UTC close time. This contract does not authorize trading.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "instrument", "timeframe", "data_mode", "source", "retrieved_at", "bars"],
+  "properties": {
+    "contract_version": { "const": "dda.market-series.v2" },
+    "instrument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["symbol", "venue", "asset_class", "currency"],
+      "properties": {
+        "symbol": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "venue": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "asset_class": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "currency": { "type": "string", "minLength": 1, "maxLength": 32 }
+      }
+    },
+    "timeframe": { "enum": ["1m", "5m", "15m", "30m", "1h", "4h", "1d", "1w"] },
+    "data_mode": { "enum": ["snapshot", "historical", "synthetic"] },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "kind": { "enum": ["provider", "historical_import", "synthetic_fixture"] },
+        "provider_symbol": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "license_ref": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "provider_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "provider" } }, "required": ["kind"] },
+          "then": { "required": ["provider_symbol"] }
+        }
+      ]
+    },
+    "retrieved_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    },
+    "bars": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["timestamp", "open", "high", "low", "close", "volume"],
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Canonical UTC time at which the candle closed.",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+          },
+          "open": { "type": "number", "exclusiveMinimum": 0 },
+          "high": { "type": "number", "exclusiveMinimum": 0 },
+          "low": { "type": "number", "exclusiveMinimum": 0 },
+          "close": { "type": "number", "exclusiveMinimum": 0 },
+          "volume": {
+            "description": "A typed measurement. Unavailable data has no value and cannot be represented as zero.",
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["semantic", "value", "unit", "definition_ref"],
+                "properties": {
+                  "semantic": { "const": "traded_volume" },
+                  "value": { "type": "number", "minimum": 0 },
+                  "unit": { "enum": ["instrument_units", "contracts", "lots", "shares", "troy_ounces"] },
+                  "definition_ref": { "type": "string", "minLength": 1, "maxLength": 200 }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["semantic", "value", "unit", "definition_ref"],
+                "properties": {
+                  "semantic": { "const": "transaction_count" },
+                  "value": { "type": "integer", "minimum": 0 },
+                  "unit": { "const": "transactions" },
+                  "definition_ref": { "type": "string", "minLength": 1, "maxLength": 200 }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["semantic", "value", "unit", "definition_ref"],
+                "properties": {
+                  "semantic": { "const": "tick_count" },
+                  "value": { "type": "integer", "minimum": 0 },
+                  "unit": { "const": "ticks" },
+                  "definition_ref": { "type": "string", "minLength": 1, "maxLength": 200 }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["semantic", "reason"],
+                "properties": {
+                  "semantic": { "const": "unavailable" },
+                  "reason": { "enum": ["not_reported", "not_supported", "not_verified", "not_applicable"] }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "data_mode": { "const": "snapshot" } }, "required": ["data_mode"] },
+      "then": { "properties": { "source": { "properties": { "kind": { "const": "provider" } } } } }
+    },
+    {
+      "if": { "properties": { "data_mode": { "const": "historical" } }, "required": ["data_mode"] },
+      "then": { "properties": { "source": { "properties": { "kind": { "enum": ["provider", "historical_import"] } } } } }
+    },
+    {
+      "if": { "properties": { "data_mode": { "const": "synthetic" } }, "required": ["data_mode"] },
+      "then": { "properties": { "source": { "properties": { "kind": { "const": "synthetic_fixture" } } } } }
+    }
+  ]
+}

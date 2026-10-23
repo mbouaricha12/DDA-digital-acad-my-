@@ -14,6 +14,8 @@ assert.match(html, /DDA Access/);
 assert.match(html, /Aucun paiement actif/);
 assert.match(html, /Non disponible aujourd’hui/);
 assert.match(html, /aucun prix, checkout, abonnement ou renouvellement automatique/);
+assert.match(html, /AutoTrader Premium — non commercialisé/);
+assert.match(html, /aucun accès payant ni flux de marché n’est activé/);
 assert.doesNotMatch(html, /[0-9]+\s*(FCFA|EUR|USD|€|\$)/i, 'no unapproved price may appear in the prototype offer');
 assert.match(strategy, /KEEP \/ MODIFY \/ ADD \/ DEFER/);
 assert.match(strategy, /entitlements.*côté serveur|Entitlements serveur/i);

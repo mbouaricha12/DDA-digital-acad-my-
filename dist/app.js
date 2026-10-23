@@ -2196,6 +2196,8 @@ function openGate(options = {}) {
     previewBtn.className = options.canUnlock ? 'secondary-action' : 'primary-action';
   }
   pendingGatedView = options.targetView || null;
+  const academyShell = document.getElementById('academy-shell');
+  if (academyShell) academyShell.inert = true;
   gate.hidden = false;
   document.getElementById('gate-close')?.focus();
 }
@@ -2204,8 +2206,156 @@ function closeGate() {
   const gate = document.getElementById('gate-layer');
   if (!gate || gate.hidden) return;
   gate.hidden = true;
+  const academyShell = document.getElementById('academy-shell');
+  if (academyShell) academyShell.inert = false;
   pendingGatedView = null;
   if (gateTrigger) { gateTrigger.focus(); gateTrigger = null; }
+}
+
+let autoTraderStatusRequest = 0;
+async function refreshAutoTraderStatus() {
+  const status = document.getElementById('autotrader-access-status');
+  const entitlement = document.getElementById('autotrader-entitlement-status');
+  const serverDetail = document.getElementById('autotrader-server-detail');
+  if (!status || !entitlement || !serverDetail) return;
+  const requestId = ++autoTraderStatusRequest;
+  serverDetail.hidden = true;
+  if (!window.DDABFF?.enabled?.() || typeof window.DDABFF.getMe !== 'function') {
+    entitlement.textContent = 'Non vérifié — BFF non configuré';
+    status.textContent = 'Le service serveur n’est pas configuré. Aucun droit Premium ne peut être déduit de l’aperçu local.';
+    return;
+  }
+  entitlement.textContent = 'Vérification serveur en cours';
+  status.textContent = 'Vérification du droit autotrader.analysis auprès du serveur…';
+  try {
+    const user = await window.DDABFF.getMe();
+    if (requestId !== autoTraderStatusRequest) return;
+    const hasAccess = Array.isArray(user?.entitlements) && user.entitlements.includes('autotrader.analysis');
+    if (hasAccess) {
+      entitlement.textContent = 'Confirmé par le serveur';
+      status.textContent = 'Droit confirmé par le serveur. Aucun flux live n’est connecté ; tu peux importer un historique CSV pour une lecture descriptive, sans signal ni ordre.';
+      serverDetail.hidden = false;
+    } else {
+      entitlement.textContent = user ? 'Absent du compte serveur' : 'Session serveur non authentifiée';
+      status.textContent = user
+        ? 'Le compte serveur ne confirme pas le droit autotrader.analysis. Le statut Premium local ne déverrouille pas AutoTrader.'
+        : 'Connecte-toi à un compte serveur pour vérifier le droit. La démonstration locale ne donne pas accès à AutoTrader.';
+    }
+  } catch {
+    if (requestId !== autoTraderStatusRequest) return;
+    entitlement.textContent = 'Vérification indisponible';
+    status.textContent = 'Impossible de vérifier le droit côté serveur. AutoTrader reste verrouillé jusqu’à confirmation.';
+  }
+}
+
+function autoTraderImportErrorMessage(code) {
+  const messages = {
+    csv_required: 'Choisis un fichier CSV historique.',
+    csv_too_large: 'Le fichier dépasse la limite de 24 Ko.',
+    csv_row_count: 'Le CSV doit contenir entre 20 et 250 bougies, hors en-tête.',
+    csv_header_invalid: 'En-têtes requis, dans cet ordre : timestamp,open,high,low,close,volume.',
+    metadata_invalid: 'Vérifie le symbole, le marché, la classe d’actif, la devise et la référence de source.',
+    timeframe_invalid: 'Choisis une unité de temps prise en charge.',
+    csv_payload_too_large: 'La série dépasse la taille d’envoi sûre. Réduis le nombre de bougies.',
+    entitlement_required: 'Le serveur ne confirme plus le droit AutoTrader. Aucun résultat n’a été retourné.',
+    quota_exceeded: 'Le quota d’analyse du compte est atteint.',
+    quota_unavailable: 'Le quota serveur est indisponible. Réessaie plus tard.',
+    invalid_market_series: 'Le serveur a rejeté la série. Vérifie les horodatages et les valeurs OHLCV.',
+    stale_market_data: 'Le serveur a refusé ces données comme trop anciennes pour le mode demandé.',
+    bff_unavailable: 'Le service d’analyse serveur est indisponible.'
+  };
+  if (messages[code]) return messages[code];
+  if (String(code).startsWith('csv_timestamp_')) return 'Chaque date doit être au format ISO 8601 et inclure un fuseau horaire.';
+  if (String(code).startsWith('csv_time_order_')) return 'Les bougies doivent être strictement triées par date, sans doublon.';
+  if (String(code).startsWith('csv_future_timestamp_')) return 'Une bougie est datée dans le futur; aucune analyse n’a été lancée.';
+  if (String(code).startsWith('csv_number_') || String(code).startsWith('csv_price_')) return 'Une valeur numérique ou un prix OHLCV est invalide.';
+  if (String(code).startsWith('csv_ohlc_')) return 'Une ligne ne respecte pas l’ordre logique des prix haut/bas et ouverture/clôture.';
+  if (String(code).startsWith('csv_row_')) return 'Une ligne CSV ne contient pas les six colonnes attendues.';
+  return 'L’analyse descriptive n’a pas abouti. Les détails internes du serveur ne sont pas affichés.';
+}
+
+function formatAutoTraderMetric(metric, currency) {
+  const value = metric?.value;
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 'Non calculable';
+  const formatted = value.toLocaleString('fr-FR', { maximumFractionDigits: 6 });
+  if (metric.unit === 'fraction') return `${(value * 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} %`;
+  return `${formatted} ${currency || metric.unit || ''}`.trim();
+}
+
+function bindAutoTraderHistoryImport() {
+  const form = document.getElementById('autotrader-history-form');
+  if (!form) return;
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+    const status = document.getElementById('autotrader-history-status');
+    const results = document.getElementById('autotrader-history-results');
+    const submit = document.getElementById('autotrader-history-submit');
+    const file = document.getElementById('autotrader-history-file')?.files?.[0];
+    results.hidden = true;
+    status.dataset.state = 'loading';
+    if (!file) {
+      status.dataset.state = 'error';
+      status.textContent = autoTraderImportErrorMessage('csv_required');
+      return;
+    }
+    if (!window.DDA_BFF_BASE_URL || !window.DDABFF?.enabled?.() || typeof window.DDABFF.analyzeAutoTrader !== 'function') {
+      status.dataset.state = 'error';
+      status.textContent = autoTraderImportErrorMessage('bff_unavailable');
+      return;
+    }
+    if (!window.DDAAutoTraderHistoryImport) {
+      status.dataset.state = 'error';
+      status.textContent = autoTraderImportErrorMessage('bff_unavailable');
+      return;
+    }
+    if (file.size > window.DDAAutoTraderHistoryImport.MAX_CSV_BYTES) {
+      status.dataset.state = 'error';
+      status.textContent = autoTraderImportErrorMessage('csv_too_large');
+      return;
+    }
+
+    submit.disabled = true;
+    try {
+      const csv = await file.text();
+      const series = window.DDAAutoTraderHistoryImport.parseHistoricalCsv(csv, {
+        symbol: document.getElementById('autotrader-symbol').value,
+        venue: document.getElementById('autotrader-venue').value,
+        assetClass: document.getElementById('autotrader-asset-class').value,
+        currency: document.getElementById('autotrader-currency').value,
+        timeframe: document.getElementById('autotrader-timeframe').value,
+        licenseRef: document.getElementById('autotrader-license-ref').value
+      });
+      status.textContent = `Transmission de ${series.bars.length} bougies historiques pour analyse descriptive…`;
+      const result = await window.DDABFF.analyzeAutoTrader(series);
+      const analysis = result?.analysis;
+      if (!analysis || analysis.status !== 'analysis_complete' || analysis.interpretation !== 'descriptive_only'
+        || analysis.data_mode !== 'historical' || analysis.source?.kind !== 'historical_import'
+        || analysis.execution_enabled !== false || analysis.order_recommendation !== null) {
+        throw Object.assign(new Error('autotrader_analysis_invalid_response'), { code: 'autotrader_analysis_invalid_response' });
+      }
+      const currency = analysis.instrument?.currency || series.instrument.currency;
+      document.getElementById('autotrader-result-last-close').textContent = formatAutoTraderMetric(analysis.metrics?.last_close, currency);
+      document.getElementById('autotrader-result-period-return').textContent = formatAutoTraderMetric(analysis.metrics?.latest_period_return, currency);
+      document.getElementById('autotrader-result-sma').textContent = formatAutoTraderMetric(analysis.metrics?.sma_20, currency);
+      document.getElementById('autotrader-result-sma-distance').textContent = formatAutoTraderMetric(analysis.metrics?.close_vs_sma_20, currency);
+      document.getElementById('autotrader-result-range').textContent = formatAutoTraderMetric(analysis.metrics?.observed_range_over_last_close, currency);
+      const asOf = analysis.data_as_of ? new Date(analysis.data_as_of) : null;
+      const dateLabel = asOf && Number.isFinite(asOf.getTime()) ? `${asOf.toLocaleString('fr-FR', { timeZone: 'UTC' })} UTC` : 'date non disponible';
+      document.getElementById('autotrader-history-meta').textContent = `${analysis.instrument?.symbol || series.instrument.symbol} · ${analysis.timeframe || series.timeframe} · dernière bougie : ${dateLabel} · source : ${analysis.source?.id || series.source.id}`;
+      const context = analysis.context?.close_relative_to_sma_20;
+      const contextLabels = { above_sma_20: 'Clôture au-dessus de la SMA 20 (descriptif)', below_sma_20: 'Clôture sous la SMA 20 (descriptif)', at_sma_20: 'Clôture égale à la SMA 20 (descriptif)', insufficient_data: 'Historique insuffisant pour situer la clôture face à la SMA 20.' };
+      document.getElementById('autotrader-history-context').textContent = contextLabels[context] || 'Contexte descriptif non calculé.';
+      results.hidden = false;
+      status.dataset.state = 'success';
+      status.textContent = 'Analyse descriptive terminée. Aucun signal, niveau d’ordre ou résultat de performance n’a été calculé.';
+    } catch (error) {
+      status.dataset.state = 'error';
+      status.textContent = autoTraderImportErrorMessage(error?.code || error?.message);
+    } finally {
+      submit.disabled = false;
+    }
+  });
 }
 
 function showView(id, recordEvent = true, historyMode = 'auto') {
@@ -2290,6 +2440,7 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
     currentView = id;
   }
   if (id === 'markets') loadBrvmPublications();
+  if (id === 'intelligence') void refreshAutoTraderStatus();
   if (recordEvent) trackEvent('view_opened', { view: id });
   if (recordEvent && id === 'premium-track') trackEvent('premium_track_viewed', { view: id });
   if (recordEvent && (id === 'lesson-p21' || id === 'lesson-p22')) trackEvent('premium_module_started', { module: 'P2', lesson: id });
@@ -2382,9 +2533,25 @@ document.getElementById('gate-layer')?.addEventListener('click', event => { if (
 document.getElementById('gate-preview')?.addEventListener('click', () => { closeGate(); showView('membership'); });
 
 document.addEventListener('keydown', event => {
+  const gate = document.getElementById('gate-layer');
+  if (gate && !gate.hidden) {
+    if (event.key === 'Escape') { closeGate(); return; }
+    if (event.key === 'Tab') {
+      const focusable = [...gate.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+        .filter(element => !element.hidden && element.getAttribute('aria-hidden') !== 'true' && element.getClientRects().length > 0);
+      if (!focusable.length) { event.preventDefault(); return; }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !gate.contains(document.activeElement))) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !gate.contains(document.activeElement))) {
+        event.preventDefault(); first.focus();
+      }
+    }
+    return;
+  }
   if (event.key !== 'Escape') return;
-  if (!document.getElementById('gate-layer').hidden) closeGate();
-  else if (!document.getElementById('resource-reader').hidden) closeReader();
+  if (!document.getElementById('resource-reader').hidden) closeReader();
   else if (!document.getElementById('journal-composer').hidden) closeJournalComposer();
 });
 document.getElementById('preview-premium').addEventListener('click', () => {
@@ -2548,6 +2715,7 @@ function bindNotifyButton(viewId, buttonId, prefKey, label) {
 bindNotifyButton('community', 'community-notify', 'communityNotify', 'la Communauté');
 bindNotifyButton('practice', 'practice-notify', 'practiceNotify', 'la Pratique avancée');
 bindNotifyButton('intelligence', 'intelligence-notify', 'intelligenceNotify', 'l’Intelligence DDA');
+bindAutoTraderHistoryImport();
 
 document.getElementById('play-demo').addEventListener('click', event => {
   const caption = document.getElementById('video-caption');

@@ -8,6 +8,7 @@ const { MemoryMutationStore } = require('../bff/src/idempotency');
 
 const encryptionKey = require('node:crypto').randomBytes(32).toString('base64url');
 const validEnv = {
+  BFF_ENVIRONMENT: 'development',
   SUPABASE_URL: 'https://project.supabase.co',
   SUPABASE_PUBLISHABLE_KEY: 'publishable-key',
   SUPABASE_SERVICE_ROLE_KEY: 'service-role-key',
@@ -17,11 +18,27 @@ const validEnv = {
   BFF_COOKIE_SECURE: 'true'
 };
 assert.deepEqual(validateRuntimeConfig(configFromEnv(validEnv), validEnv), []);
+const { BFF_ENVIRONMENT: _environment, ...environmentMissing } = validEnv;
+assert.ok(validateRuntimeConfig(configFromEnv(environmentMissing), environmentMissing).some(issue => /BFF_ENVIRONMENT must be explicitly set/.test(issue)));
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, ALLOWED_ORIGINS: '*' }), { ...validEnv, ALLOWED_ORIGINS: '*' }).some(issue => /exact HTTPS origins/.test(issue)));
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, BFF_COOKIE_SECURE: 'false' }), { ...validEnv, BFF_COOKIE_SECURE: 'false' }).some(issue => /__Host- cookies/.test(issue)));
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, SESSION_ENCRYPTION_KEY: 'short' }), { ...validEnv, SESSION_ENCRYPTION_KEY: 'short' }).some(issue => /32 bytes/.test(issue)));
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, EMAIL_REDIRECT_TO: 'https://other.example/#access' }), { ...validEnv, EMAIL_REDIRECT_TO: 'https://other.example/#access' }).some(issue => /origin listed/.test(issue)));
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, SUPABASE_URL: 'https://project.supabase.co/extra' }), { ...validEnv, SUPABASE_URL: 'https://project.supabase.co/extra' }).some(issue => /root HTTPS URL/.test(issue)));
+const validStagingEnv = {
+  ...validEnv,
+  BFF_ENVIRONMENT: 'staging',
+  SUPABASE_URL: 'https://staging-project.supabase.co',
+  ALLOWED_ORIGINS: 'https://staging.example.dda.academy',
+  EMAIL_REDIRECT_TO: 'https://staging.example.dda.academy/#access',
+  BFF_PRODUCTION_SUPABASE_URL: 'https://production-project.supabase.co',
+  BFF_PRODUCTION_ALLOWED_ORIGINS: 'https://app.example.dda.academy'
+};
+assert.deepEqual(validateRuntimeConfig(configFromEnv(validStagingEnv), validStagingEnv), []);
+assert.ok(validateRuntimeConfig(configFromEnv({ ...validStagingEnv, BFF_PRODUCTION_SUPABASE_URL: '' }), { ...validStagingEnv, BFF_PRODUCTION_SUPABASE_URL: '' }).some(issue => /required in staging/.test(issue)));
+assert.ok(validateRuntimeConfig(configFromEnv({ ...validStagingEnv, SUPABASE_URL: validStagingEnv.BFF_PRODUCTION_SUPABASE_URL }), { ...validStagingEnv, SUPABASE_URL: validStagingEnv.BFF_PRODUCTION_SUPABASE_URL }).some(issue => /must not match/.test(issue)));
+assert.ok(validateRuntimeConfig(configFromEnv({ ...validStagingEnv, ALLOWED_ORIGINS: 'https://app.example.dda.academy', EMAIL_REDIRECT_TO: 'https://app.example.dda.academy/#access' }), { ...validStagingEnv, ALLOWED_ORIGINS: 'https://app.example.dda.academy', EMAIL_REDIRECT_TO: 'https://app.example.dda.academy/#access' }).some(issue => /must not overlap/.test(issue)));
+assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, BFF_ENVIRONMENT: 'production', ALLOWED_ORIGINS: 'http://localhost:8744', EMAIL_REDIRECT_TO: 'http://localhost:8744/access' }), { ...validEnv, BFF_ENVIRONMENT: 'production', ALLOWED_ORIGINS: 'http://localhost:8744', EMAIL_REDIRECT_TO: 'http://localhost:8744/access' }).some(issue => /cannot contain localhost/.test(issue)));
 
 function makeAuth() {
   const users = new Map();

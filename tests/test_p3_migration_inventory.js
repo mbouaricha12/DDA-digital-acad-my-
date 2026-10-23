@@ -6,9 +6,9 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const migrationDir = path.join(root, 'supabase', 'migrations');
 const files = fs.readdirSync(migrationDir).filter(file => /^\d{4}_.+\.sql$/.test(file)).sort();
-assert.deepEqual(files, ['0001_identity_sessions.sql', '0002_business_entities.sql', '0003_rls_and_privileges.sql', '0004_chariow_billing.sql', '0005_brvm_publications.sql'], 'P3/P4/P5 migration order is explicit and deterministic');
+assert.deepEqual(files, ['0001_identity_sessions.sql', '0002_business_entities.sql', '0003_rls_and_privileges.sql', '0004_chariow_billing.sql', '0005_brvm_publications.sql', '0006_autotrader_analysis_entitlement.sql', '0007_autotrader_quota_buckets.sql', '0008_chariow_event_ordering.sql'], 'P3/P4/P5/AutoTrader migration order is explicit and deterministic');
 const combined = files.map(file => fs.readFileSync(path.join(migrationDir, file), 'utf8')).join('\n');
-for (const table of ['dda_profiles', 'dda_sessions', 'memberships', 'onboarding', 'lesson_progress', 'terminal_state', 'journal_entries', 'journal_plans', 'premium_progress', 'preferences', 'audit_events']) {
+for (const table of ['dda_profiles', 'dda_sessions', 'memberships', 'onboarding', 'lesson_progress', 'terminal_state', 'journal_entries', 'journal_plans', 'premium_progress', 'preferences', 'audit_events', 'dda_autotrader_quota_buckets']) {
   assert.match(combined, new RegExp(`public\\.${table}\\b`), `${table} is represented in versioned SQL`);
 }
 for (const table of ['dda_billing_deliveries', 'dda_billing_memberships']) {
@@ -19,6 +19,10 @@ for (const table of ['dda_brvm_sources', 'dda_brvm_documents', 'dda_brvm_audit_e
 }
 assert.match(combined, /dda_profiles_touch_updated_at/, 'profile timestamps use a trigger');
 assert.match(combined, /revoke all on table public\.audit_events from public, anon, authenticated/, 'audit events have no browser write grant');
+const billingOrdering = fs.readFileSync(path.join(migrationDir, '0008_chariow_event_ordering.sql'), 'utf8');
+assert.match(billingOrdering, /source_occurred_at timestamptz/, 'membership rows retain provider event ordering');
+assert.match(billingOrdering, /new\.source_occurred_at < old\.source_occurred_at/, 'older signed events cannot overwrite newer membership state');
+assert.match(billingOrdering, /old\.status in \('expired', 'revoked'\)[\s\S]*new\.status = 'active'/, 'terminal state wins an equal-timestamp activation');
 const replay = fs.readFileSync(path.join(root, 'scripts', 'replay_p3_migrations.sh'), 'utf8');
 assert.match(replay, /DATABASE_URL/, 'replay requires an explicit database URL');
 assert.match(replay, /Refusing to run against a Supabase-hosted URL/, 'replay refuses remote Supabase URLs');

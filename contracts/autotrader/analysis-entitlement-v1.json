@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dda-academy.example/contracts/autotrader/analysis-entitlement-v1.json",
+  "title": "DDA AutoTrader Analysis Entitlement Contract",
+  "contractVersion": "dda.autotrader.analysis-entitlement.v1",
+  "entitlement": {
+    "key": "autotrader.analysis",
+    "kind": "feature_access",
+    "description": "Autorise l’accès aux analyses AutoTrader non exécutables. Ne donne aucune capacité d’envoi d’ordre, de connexion broker ou de trading réel.",
+    "protectedRoutes": [
+      "POST /v1/autotrader/analyze"
+    ]
+  },
+  "sourcesOfTruth": {
+    "commercialState": "Chariow, via des événements Pulse signés et vérifiés côté BFF, ou une réconciliation serveur documentée.",
+    "authorizationState": "Supabase public.dda_billing_memberships, lu uniquement côté BFF. Chaque ligne active contient le snapshot de droits dérivé du produit Chariow allowlisté.",
+    "clientState": "Non autoritatif. Le plan local, le badge Premium, localStorage, les preuves pédagogiques, les redirections Checkout et les champs envoyés par le client ne peuvent ni créer ni prolonger ce droit."
+  },
+  "grantPolicy": {
+    "productAllowlistEnvironmentVariable": "CHARIOW_AUTOTRADER_PRODUCT_IDS",
+    "mapping": "Un produit explicitement inscrit dans cette allowlist accorde uniquement autotrader.analysis, sauf s’il est aussi inscrit explicitement dans CHARIOW_PREMIUM_PRODUCT_IDS (bundle intentionnel).",
+    "requiredEvent": "successful.sale ou license.activated, après validation de la signature Pulse, du produit allowlisté, du lien utilisateur serveur et de la persistance idempotente.",
+    "defaultProductIds": [],
+    "genericPremiumGrantsAutoTrader": false
+  },
+  "activeAccessConditions": [
+    "session DDA authentifiée et valide",
+    "au moins une adhésion serveur active portant autotrader.analysis",
+    "starts_at absent ou atteint",
+    "ends_at absent ou non atteint",
+    "aucune révocation ou expiration applicable"
+  ],
+  "revocationPolicy": {
+    "events": ["license.expired", "license.revoked"],
+    "otherControls": ["expiration serveur ends_at", "réconciliation serveur confirmée", "suppression de l’adhésion par opération administrative auditée"],
+    "effectiveAtRequestTime": true
+  },
+  "recurringBilling": {
+    "enabled": false,
+    "reason": "Les événements de renouvellement, de paiement échoué et d’annulation récurrente ne sont pas encore validés pour le produit Chariow choisi.",
+    "activationGate": "Ne pas inscrire un produit récurrent dans la allowlist AutoTrader avant vérification de ses événements, dates de période, délais de grâce, remboursements, résiliations et réconciliation."
+  },
+  "quotas": {
+    "partOfEntitlement": false,
+    "authority": "Compteurs serveur dédiés, distincts de la membership et de l’état du navigateur.",
+    "status": "DDA AutoTrader quota policy v1; provisional staging defaults, not a vendor contract limit.",
+    "contract": "contracts/autotrader/quota-policy-v1.json",
+    "userLimitWindowPolicy": "UTC minute/hour/day counters reserved atomically before analysis.",
+    "providerLimitPolicy": "Shared provider-account request and usage-unit counters reserved before each provider API call."
+  },
+  "notAuthorizedByThisRight": [
+    "création ou soumission d’un ordre",
+    "accès MT5 ou à un autre broker",
+    "backtest sur données fournisseur non autorisées",
+    "trading paper ou réel",
+    "garantie de performance financière"
+  ],
+  "activationStatus": "inactive_until_server_product_ids_and_checkout_identity_link_are_reviewed"
+}

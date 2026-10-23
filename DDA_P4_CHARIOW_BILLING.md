@@ -28,6 +28,7 @@ Ajouter uniquement dans l’environnement du BFF, jamais dans `dist/` :
 CHARIOW_API_KEY=sk_live_...
 CHARIOW_PULSE_SECRET=whsec_...
 CHARIOW_PREMIUM_PRODUCT_IDS=prd_premium_monthly,prd_premium_yearly
+CHARIOW_AUTOTRADER_PRODUCT_IDS=
 CHARIOW_CHECKOUT_REDIRECT_URL=https://app.example.com/academy.html#membership
 ```
 
@@ -50,14 +51,16 @@ POST https://api.example.com/webhooks/chariow
 - `license.expired` — expiration ;
 - `license.revoked` — révocation.
 
-L’adaptateur vérifie `x-chariow-signature` sur le corps brut, exige `x-pulse-delivery-id` et déduplique les livraisons via la clé primaire `dda_billing_deliveries.delivery_id`.
+L’adaptateur vérifie `x-chariow-signature` sur le corps brut, exige `x-pulse-delivery-id` et déduplique les livraisons via la clé primaire `dda_billing_deliveries.delivery_id`. La réclamation de livraison est conditionnelle : un doublon `accepted` récent n’est pas traité en parallèle, un état `failed` peut être repris atomiquement, et un worker interrompu est récupérable après expiration de son bail de dix minutes.
+
+Les transitions `active`, `expired` et `revoked` exigent une date d’événement fournisseur valide. La migration `0008_chariow_event_ordering.sql` conserve `source_occurred_at` et ignore les événements plus anciens; à horodatage égal, `expired`/`revoked` l’emporte sur `active`. Vérifier en staging le nom, le fuseau et la sémantique des timestamps réels Chariow avant d’activer le mapping commercial.
 
 ## Tables Supabase ajoutées
 
 - `public.dda_billing_deliveries` — journal minimal des livraisons Pulse, statut `accepted / processed / failed`, hash SHA-256 du payload et idempotence par `delivery_id` ;
 - `public.dda_billing_memberships` — état courant par compte DDA et référence Chariow, avec contrainte unique `(provider, external_id)` et snapshot JSON des entitlements actifs.
 
-Les deux tables sont protégées par RLS et n’accordent aucune écriture aux rôles `anon` ou `authenticated`. Seul le BFF utilisant la clé service role les écrit. Appliquer `bff/supabase/schema.sql` sur l’environnement Supabase avant de déployer le BFF.
+Les deux tables sont protégées par RLS et n’accordent aucune écriture aux rôles `anon` ou `authenticated`. Seul le BFF utilisant la clé service role les écrit. La source SQL canonique est la séquence `supabase/migrations/` (`0004` pour le billing, `0006`/`0007` pour l’entitlement AutoTrader et ses quotas, `0008` pour l’ordre des événements Chariow) ; l’ancien `bff/supabase/schema.sql` est conservé comme brouillon historique et ne doit pas être appliqué. Rejouer et vérifier les migrations sur un staging PostgreSQL avant tout déploiement réel.
 
 ## Modèle Membership DDA
 
@@ -74,6 +77,12 @@ Une adhésion serveur est calculée à partir d’un produit Chariow allowlisté
 | `owner_id` | Compte DDA dérivé côté serveur |
 
 Un `proof_id`, un `proof_level` ou un plan local ne peut jamais créer une autorisation.
+
+### Droit AutoTrader séparé
+
+`autotrader.analysis` est un droit distinct du Premium de l’académie. Seuls les IDs explicitement placés dans `CHARIOW_AUTOTRADER_PRODUCT_IDS` l’accordent; les produits de `CHARIOW_PREMIUM_PRODUCT_IDS` ne le donnent pas. Un produit listé dans les deux variables est un bundle intentionnel. La variable AutoTrader reste vide tant que l’offre, le checkout lié à une identité serveur et le cycle de renouvellement/révocation ne sont pas validés. Voir `DDA_AUTOTRADER_PREMIUM_ENTITLEMENT_V1.md` et le contrat `contracts/autotrader/analysis-entitlement-v1.json`.
+
+À l’exécution, le BFF lit et agrège les snapshots `entitlement_snapshot` de toutes les adhésions actives Supabase et vérifie les dates. Chariow demeure l’autorité commerciale; Supabase est la projection serveur d’autorisation. Aucun droit ne provient du navigateur.
 
 ## Limite importante sur les abonnements récurrents
 

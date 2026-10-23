@@ -1,0 +1,907 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dda.example/contracts/autotrader/historical-backtest-v1.schema.json",
+  "title": "DDA AutoTrader Historical Backtest v1",
+  "description": "Offline hypothetical daily-bar backtest using the shared versioned cost model. Results are not orders, approvals, or proof of future performance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "mode",
+    "status",
+    "strategy",
+    "data",
+    "cost_model",
+    "performance",
+    "benchmark",
+    "cost_sensitivity",
+    "validation",
+    "assumptions",
+    "validation_errors",
+    "execution_enabled",
+    "is_trade_approval",
+    "order_recommendation",
+    "order_plan"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "dda.autotrader.historical-backtest.v1"
+    },
+    "mode": {
+      "const": "simulation"
+    },
+    "status": {
+      "enum": [
+        "complete",
+        "provisional",
+        "blocked"
+      ]
+    },
+    "strategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule_id",
+        "strategy_id"
+      ],
+      "properties": {
+        "rule_id": {
+          "const": "dda.trend-confirmation.v1"
+        },
+        "strategy_id": {
+          "const": "dda.trend-confirmation.backtest.v1"
+        },
+        "specification": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "signal",
+            "entry",
+            "exit",
+            "sizing",
+            "terminal_liquidation",
+            "shorts"
+          ],
+          "properties": {
+            "signal": {
+              "type": "string",
+              "minLength": 1
+            },
+            "entry": {
+              "type": "string",
+              "minLength": 1
+            },
+            "exit": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sizing": {
+              "type": "string",
+              "minLength": 1
+            },
+            "terminal_liquidation": {
+              "type": "string",
+              "minLength": 1
+            },
+            "shorts": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "data_mode",
+            "source_id",
+            "source_kind",
+            "data_rights_reference",
+            "data_rights_status",
+            "instrument",
+            "asset_class",
+            "currency",
+            "timeframe",
+            "position_unit",
+            "contract_multiplier",
+            "first_bar_at",
+            "last_bar_at",
+            "requested_start",
+            "in_sample_end",
+            "requested_end",
+            "bars_available",
+            "warmup_bars_before_start",
+            "bars_in_sample",
+            "bars_out_of_sample",
+            "price_adjustment_basis",
+            "dividend_policy",
+            "suspected_gaps"
+          ],
+          "properties": {
+            "data_mode": {
+              "enum": [
+                "historical",
+                "synthetic"
+              ]
+            },
+            "source_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "source_kind": {
+              "enum": [
+                "historical_import",
+                "synthetic_fixture"
+              ]
+            },
+            "data_rights_reference": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "data_rights_status": {
+              "enum": [
+                "caller_reference_not_verified",
+                "synthetic_fixture_only"
+              ]
+            },
+            "instrument": {
+              "type": "string",
+              "minLength": 1
+            },
+            "asset_class": {
+              "type": "string",
+              "minLength": 1
+            },
+            "currency": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            },
+            "timeframe": {
+              "const": "1d"
+            },
+            "position_unit": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 32
+            },
+            "contract_multiplier": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "first_bar_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "last_bar_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "requested_start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "in_sample_end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "requested_end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "bars_available": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "warmup_bars_before_start": {
+              "type": "integer",
+              "minimum": 50
+            },
+            "bars_in_sample": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "bars_out_of_sample": {
+              "type": "integer",
+              "minimum": 2
+            },
+            "price_adjustment_basis": {
+              "enum": [
+                "raw",
+                "split_adjusted",
+                "total_return",
+                "not_applicable"
+              ]
+            },
+            "dividend_policy": {
+              "enum": [
+                "included",
+                "excluded",
+                "not_applicable"
+              ]
+            },
+            "suspected_gaps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "from",
+                  "to",
+                  "calendar_days"
+                ],
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "to": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "calendar_days": {
+                    "type": "number",
+                    "exclusiveMinimum": 10
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "cost_model": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cost_model_id",
+            "commission_bps_per_side",
+            "spread_bps_per_side",
+            "slippage_bps_per_side",
+            "long_financing_bps_per_year",
+            "short_financing_bps_per_year",
+            "short_borrow_bps_per_year"
+          ],
+          "properties": {
+            "cost_model_reference": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "commission_bps_per_side": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "spread_bps_per_side": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "slippage_bps_per_side": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "short_borrow_bps_per_year": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "convention": {
+              "type": "string",
+              "minLength": 1
+            },
+            "costs_are_hypothetical": {
+              "const": true
+            },
+            "cost_model_id": {
+              "const": "dda.autotrader.cost-model.v1"
+            },
+            "long_financing_bps_per_year": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "short_financing_bps_per_year": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000
+            }
+          }
+        }
+      ]
+    },
+    "performance": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "full",
+            "in_sample",
+            "out_of_sample"
+          ],
+          "properties": {
+            "full": {
+              "$ref": "#/$defs/run"
+            },
+            "in_sample": {
+              "$ref": "#/$defs/run"
+            },
+            "out_of_sample": {
+              "$ref": "#/$defs/run"
+            }
+          }
+        }
+      ]
+    },
+    "benchmark": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "performance",
+            "trade_log",
+            "equity_curve"
+          ],
+          "properties": {
+            "name": {
+              "const": "buy_and_hold_long_same_fraction"
+            },
+            "performance": {
+              "$ref": "#/$defs/performanceMetrics"
+            },
+            "trade_log": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/trade"
+              }
+            },
+            "equity_curve": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/equityPoint"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "cost_sensitivity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cost_multiplier",
+          "performance"
+        ],
+        "properties": {
+          "cost_multiplier": {
+            "enum": [
+              1,
+              1.5,
+              2
+            ]
+          },
+          "performance": {
+            "$ref": "#/$defs/performanceMetrics"
+          }
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "computational_status",
+        "strategy_validation_status",
+        "hard_gates"
+      ],
+      "properties": {
+        "computational_status": {
+          "enum": [
+            "blocked",
+            "complete"
+          ]
+        },
+        "strategy_validation_status": {
+          "const": "unverified"
+        },
+        "multi_year_span": {
+          "enum": [
+            "pass",
+            "provisional"
+          ]
+        },
+        "out_of_sample_span": {
+          "enum": [
+            "pass",
+            "provisional"
+          ]
+        },
+        "no_lookahead": {
+          "const": "pass"
+        },
+        "no_lookahead_method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "data_coverage": {
+          "enum": [
+            "no_large_gap_detected",
+            "suspected_gaps"
+          ]
+        },
+        "hard_gates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "status",
+              "evidence"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "pass",
+                  "fail",
+                  "unknown_gate"
+                ]
+              },
+              "evidence": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "limitation": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "validation_errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/error"
+      }
+    },
+    "execution_enabled": {
+      "const": false
+    },
+    "is_trade_approval": {
+      "const": false
+    },
+    "order_recommendation": {
+      "type": "null"
+    },
+    "order_plan": {
+      "type": "null"
+    }
+  },
+  "$defs": {
+    "nullableNumber": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "performanceMetrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "initial_equity",
+        "ending_equity",
+        "currency",
+        "period_total_return",
+        "cagr",
+        "annualized_volatility",
+        "sharpe_ratio",
+        "sortino_ratio",
+        "max_drawdown",
+        "calmar_ratio",
+        "trade_count",
+        "win_rate",
+        "break_even_trade_count",
+        "average_win",
+        "average_loss",
+        "profit_factor",
+        "expectancy_per_closed_trade",
+        "total_costs",
+        "total_costs_fraction_of_initial_equity",
+        "trading_turnover",
+        "trading_turnover_convention",
+        "market_exposure_fraction",
+        "market_exposure_convention",
+        "annualization_factor",
+        "observations"
+      ],
+      "properties": {
+        "initial_equity": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "ending_equity": {
+          "type": "number"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "period_total_return": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "cagr": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "value",
+                "status",
+                "calendar_days"
+              ],
+              "properties": {
+                "value": {
+                  "type": "number"
+                },
+                "status": {
+                  "enum": [
+                    "short_window",
+                    "computed"
+                  ]
+                },
+                "calendar_days": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            }
+          ]
+        },
+        "annualized_volatility": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "sharpe_ratio": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "sortino_ratio": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "max_drawdown": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "value",
+            "peak_timestamp",
+            "trough_timestamp",
+            "recovery_timestamp"
+          ],
+          "properties": {
+            "value": {
+              "type": "number"
+            },
+            "peak_timestamp": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "trough_timestamp": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "recovery_timestamp": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time"
+            }
+          }
+        },
+        "calmar_ratio": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "trade_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "win_rate": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "break_even_trade_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "average_win": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "average_loss": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "profit_factor": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "expectancy_per_closed_trade": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "total_costs": {
+          "type": "number",
+          "minimum": 0
+        },
+        "total_costs_fraction_of_initial_equity": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "trading_turnover": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "trading_turnover_convention": {
+          "type": "string",
+          "minLength": 1
+        },
+        "market_exposure_fraction": {
+          "$ref": "#/$defs/nullableNumber"
+        },
+        "market_exposure_convention": {
+          "type": "string",
+          "minLength": 1
+        },
+        "annualization_factor": {
+          "const": 252
+        },
+        "observations": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "performance",
+        "trade_log",
+        "equity_curve"
+      ],
+      "properties": {
+        "performance": {
+          "$ref": "#/$defs/performanceMetrics"
+        },
+        "trade_log": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/trade"
+          }
+        },
+        "equity_curve": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/equityPoint"
+          }
+        }
+      }
+    },
+    "trade": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "direction",
+        "position_unit",
+        "contract_multiplier",
+        "signal_at",
+        "entry_bar_timestamp",
+        "entry_price_reference",
+        "entry_price_fill",
+        "exit_signal_at",
+        "exit_bar_timestamp",
+        "exit_price_reference",
+        "exit_price_fill",
+        "units",
+        "entry_notional",
+        "exit_notional",
+        "gross_pnl",
+        "commission_cost",
+        "spread_slippage_cost",
+        "short_borrow_cost",
+        "long_financing_cost",
+        "short_financing_cost",
+        "total_financing_cost",
+        "total_costs",
+        "net_pnl",
+        "holding_daily_bars",
+        "exit_reason"
+      ],
+      "properties": {
+        "direction": {
+          "enum": [
+            "long",
+            "short"
+          ]
+        },
+        "position_unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "contract_multiplier": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "signal_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "entry_bar_timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "entry_price_reference": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "entry_price_fill": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "exit_signal_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "exit_bar_timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "exit_price_reference": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "exit_price_fill": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "units": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "entry_notional": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "exit_notional": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "gross_pnl": {
+          "type": "number"
+        },
+        "commission_cost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "spread_slippage_cost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "short_borrow_cost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "total_costs": {
+          "type": "number",
+          "minimum": 0
+        },
+        "net_pnl": {
+          "type": "number"
+        },
+        "holding_daily_bars": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "exit_reason": {
+          "enum": [
+            "signal_not_confirmed",
+            "opposite_signal",
+            "end_of_period",
+            "equity_depleted"
+          ]
+        },
+        "long_financing_cost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "short_financing_cost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "total_financing_cost": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "equityPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "timestamp",
+        "equity"
+      ],
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "equity": {
+          "type": "number"
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "code",
+        "message"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

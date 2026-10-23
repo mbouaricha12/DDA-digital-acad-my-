@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dda.example/contracts/autotrader/historical-backtest-spec-v1.schema.json",
+  "title": "DDA AutoTrader Historical Backtest Specification v1",
+  "description": "Explicit inputs for an offline daily historical simulation using the shared versioned cost model; no defaults for capital, dates, returns, or costs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "start",
+    "in_sample_end",
+    "end",
+    "initial_capital",
+    "currency",
+    "position_fraction",
+    "position_unit",
+    "contract_multiplier",
+    "cost_model",
+    "risk_free_rate_annual",
+    "minimum_acceptable_return_annual",
+    "price_adjustment_basis",
+    "dividend_policy",
+    "short_borrow_assumed_available",
+    "data_rights_reference",
+    "cost_model_reference"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "dda.autotrader.backtest-spec.v1"
+    },
+    "start": {
+      "$ref": "#/$defs/utcTimestamp"
+    },
+    "in_sample_end": {
+      "$ref": "#/$defs/utcTimestamp"
+    },
+    "end": {
+      "$ref": "#/$defs/utcTimestamp"
+    },
+    "initial_capital": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "position_fraction": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1
+    },
+    "position_unit": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32
+    },
+    "contract_multiplier": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "cost_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commission_bps_per_side",
+        "spread_bps_per_side",
+        "slippage_bps_per_side",
+        "long_financing_bps_per_year",
+        "short_financing_bps_per_year",
+        "short_borrow_bps_per_year"
+      ],
+      "properties": {
+        "commission_bps_per_side": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "spread_bps_per_side": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "slippage_bps_per_side": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "short_borrow_bps_per_year": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "long_financing_bps_per_year": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "short_financing_bps_per_year": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000
+        }
+      }
+    },
+    "risk_free_rate_annual": {
+      "type": "number",
+      "exclusiveMinimum": -1
+    },
+    "minimum_acceptable_return_annual": {
+      "type": "number",
+      "exclusiveMinimum": -1
+    },
+    "price_adjustment_basis": {
+      "enum": [
+        "raw",
+        "split_adjusted",
+        "total_return",
+        "not_applicable"
+      ]
+    },
+    "dividend_policy": {
+      "enum": [
+        "included",
+        "excluded",
+        "not_applicable"
+      ]
+    },
+    "short_borrow_assumed_available": {
+      "const": true
+    },
+    "data_rights_reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "cost_model_reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "price_adjustment_basis": {
+            "const": "total_return"
+          }
+        },
+        "required": [
+          "price_adjustment_basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "dividend_policy": {
+            "const": "included"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "utcTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    }
+  }
+}

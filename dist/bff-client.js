@@ -89,6 +89,43 @@
     return result.body;
   }
 
+  async function analyzeAutoTrader(series) {
+    if (!series || typeof series !== 'object' || Array.isArray(series)) {
+      throw new TypeError('autotrader_series_required');
+    }
+    const result = await request('/v1/autotrader/analyze', { method: 'POST', body: { series } });
+    if (!result.enabled) return null;
+    if (!result.response.ok) throw resultError(result, 'autotrader_analysis_failed');
+    if (result.body?.contract_version !== 'dda.autotrader.analysis-response.v1'
+      || !result.body.analysis || typeof result.body.analysis !== 'object') {
+      throw new Error('autotrader_analysis_invalid_response');
+    }
+    return result.body;
+  }
+
+  async function analyzeProviderInstrument(instrumentId) {
+    if (typeof instrumentId !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(instrumentId)) {
+      throw new TypeError('autotrader_instrument_required');
+    }
+    const result = await request('/v1/autotrader/provider-analysis', { method: 'POST', body: { instrument_id: instrumentId } });
+    if (!result.enabled) return null;
+    if (!result.response.ok) throw resultError(result, 'autotrader_provider_analysis_failed');
+    const analysis = result.body?.analysis;
+    const summary = result.body?.series_summary;
+    if (result.body?.contract_version !== 'dda.autotrader.provider-analysis-response.v1'
+      || analysis?.contract_version !== 'dda.market-analysis.v2'
+      || analysis?.status !== 'analysis_complete'
+      || analysis?.data_mode !== 'historical'
+      || analysis?.execution_enabled !== false
+      || analysis?.order_recommendation !== null
+      || !summary || summary.data_mode !== 'historical'
+      || !Number.isSafeInteger(summary.bar_count) || summary.bar_count < 1
+      || summary.source?.kind !== 'provider') {
+      throw new Error('autotrader_provider_analysis_invalid_response');
+    }
+    return result.body;
+  }
+
   async function getBrvmPublications() {
     const result = await request('/v1/publications/brvm');
     if (!result.enabled) return null;
@@ -112,7 +149,7 @@
   }
 
   window.DDABFF = Object.freeze({
-    enabled, register, verifyEmail, login, requestPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
+    enabled, register, verifyEmail, login, requestPasswordReset, getMe, analyzeAutoTrader, analyzeProviderInstrument, getBrvmPublications, updateMe, logout, issueCsrf,
     get baseUrl() { return configuredBase; }
   });
 })();

@@ -33,22 +33,31 @@ const { chromium } = require('playwright');
 
 const DIST = path.join(__dirname, '..', 'dist');
 const PORT = 8743;
-const BASE = `http://localhost:${PORT}`;
+const BASE = `http://127.0.0.1:${PORT}`;
 const ACADEMY_BASE = `${BASE}/academy.html`;
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webmanifest': 'application/manifest+json' };
 
+function safeStaticPath(requestTarget) {
+  let requestPath;
+  try { requestPath = decodeURIComponent(requestTarget.split('?')[0].split('#')[0]); } catch { return null; }
+  if (requestPath.includes('\0')) return null;
+  const root = path.resolve(DIST);
+  const relative = requestPath === '/' ? 'index.html' : requestPath.replace(/^\/+/, '');
+  const target = path.resolve(root, relative);
+  return target === root || target.startsWith(`${root}${path.sep}`) ? target : null;
+}
+
 function startServer() {
   const server = http.createServer((req, res) => {
-    let filePath = decodeURIComponent(req.url.split('?')[0].split('#')[0]);
-    if (filePath === '/') filePath = '/index.html';
-    const full = path.join(DIST, filePath);
+    const full = safeStaticPath(req.url);
+    if (!full) { res.writeHead(404, { 'X-Content-Type-Options': 'nosniff' }); res.end('not found'); return; }
     fs.readFile(full, (err, data) => {
-      if (err) { res.writeHead(404); res.end('not found'); return; }
-      res.writeHead(200, { 'Content-Type': MIME[path.extname(full)] || 'application/octet-stream' });
+      if (err) { res.writeHead(404, { 'X-Content-Type-Options': 'nosniff' }); res.end('not found'); return; }
+      res.writeHead(200, { 'Content-Type': MIME[path.extname(full)] || 'application/octet-stream', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store' });
       res.end(data);
     });
   });
-  return new Promise(resolve => server.listen(PORT, () => resolve(server)));
+  return new Promise(resolve => server.listen(PORT, '127.0.0.1', () => resolve(server)));
 }
 
 let passed = 0;
@@ -121,6 +130,20 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
   const browser = await chromium.launch();
 
   console.log('DDA — Acquisition V1 regression harness\n');
+  await test('local static test server rejects encoded path traversal', async () => {
+    const response = await new Promise((resolve, reject) => {
+      const request = http.request({ hostname: '127.0.0.1', port: PORT, path: '/%2e%2e/bff/.env.example' }, res => {
+        let body = '';
+        res.setEncoding('utf8');
+        res.on('data', chunk => { body += chunk; });
+        res.on('end', () => resolve({ status: res.statusCode, body }));
+      });
+      request.on('error', reject);
+      request.end();
+    });
+    assert.equal(response.status, 404);
+    assert.equal(response.body.includes('SUPABASE_SERVICE_ROLE_KEY'), false);
+  });
   console.log('-- A. État / migration --');
 
   await test('emptyState() has the current schema shape', async () => {

@@ -3,6 +3,10 @@
 const { randomUUID } = require('node:crypto');
 const { randomToken, sha256, timingSafeEqualText, parseCookies, serializeCookie, encrypt, decrypt, normalizeEmail } = require('./security');
 const { executeIdempotentMutation, validateClientMutationId } = require('./idempotency');
+const { analyzeMarketSeries } = require('./autotrader/market-analysis');
+const { analyzeMarketSeriesV2 } = require('./autotrader/market-analysis-v2');
+const { AUTOTRADER_ANALYSIS_ENTITLEMENT, normalizeEntitlements } = require('./entitlement-catalog');
+const { quotaPolicyFromEnv } = require('./quota-policy');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
@@ -10,9 +14,13 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 function configFromEnv(env = process.env) {
   const origins = String(env.ALLOWED_ORIGINS || 'http://localhost:8744').split(',').map(x => x.trim()).filter(Boolean);
+  const productionOrigins = String(env.BFF_PRODUCTION_ALLOWED_ORIGINS || '').split(',').map(x => x.trim()).filter(Boolean);
   return {
     port: Number(env.PORT || 8744),
+    runtimeEnvironment: String(env.BFF_ENVIRONMENT || '').trim().toLowerCase(),
     allowedOrigins: origins,
+    productionOrigins,
+    productionSupabaseUrl: String(env.BFF_PRODUCTION_SUPABASE_URL || '').trim(),
     secureCookies: env.BFF_COOKIE_SECURE !== 'false',
     sessionIdleMs: Number(env.SESSION_IDLE_MS || 12 * 60 * 60 * 1000),
     sessionAbsoluteMs: Number(env.SESSION_ABSOLUTE_MS || 30 * 24 * 60 * 60 * 1000),
@@ -23,6 +31,7 @@ function configFromEnv(env = process.env) {
 
 function validateRuntimeConfig(config, env = process.env) {
   const issues = [];
+  if (!['development', 'staging', 'production'].includes(config.runtimeEnvironment)) issues.push('BFF_ENVIRONMENT must be explicitly set to development, staging, or production');
   for (const key of ['SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SESSION_ENCRYPTION_KEY', 'ALLOWED_ORIGINS', 'EMAIL_REDIRECT_TO']) {
     if (!String(env[key] || '').trim()) issues.push(`Missing ${key}`);
   }
@@ -45,6 +54,10 @@ function validateRuntimeConfig(config, env = process.env) {
         issues.push('ALLOWED_ORIGINS must contain exact HTTPS origins (HTTP is allowed only for localhost development)');
         break;
       }
+      if (config.runtimeEnvironment === 'production' && localHttp) {
+        issues.push('Production ALLOWED_ORIGINS cannot contain localhost origins');
+        break;
+      }
     } catch {
       issues.push('ALLOWED_ORIGINS contains an invalid origin');
       break;
@@ -56,6 +69,33 @@ function validateRuntimeConfig(config, env = process.env) {
       issues.push('SUPABASE_URL must be a root HTTPS URL without embedded credentials, path, query or fragment');
     }
   } catch { issues.push('SUPABASE_URL must be a valid HTTPS URL'); }
+  if (config.runtimeEnvironment === 'staging') {
+    if (!config.productionSupabaseUrl) issues.push('BFF_PRODUCTION_SUPABASE_URL is required in staging to prevent production database reuse');
+    if (!Array.isArray(config.productionOrigins) || config.productionOrigins.length === 0) issues.push('BFF_PRODUCTION_ALLOWED_ORIGINS is required in staging to prevent production origin reuse');
+    try {
+      const stagingSupabase = new URL(String(env.SUPABASE_URL || ''));
+      const productionSupabase = new URL(config.productionSupabaseUrl);
+      if (productionSupabase.protocol !== 'https:' || productionSupabase.username || productionSupabase.password || productionSupabase.pathname !== '/' || productionSupabase.search || productionSupabase.hash) {
+        issues.push('BFF_PRODUCTION_SUPABASE_URL must be a root HTTPS URL without embedded credentials, path, query or fragment');
+      } else if (stagingSupabase.origin === productionSupabase.origin) {
+        issues.push('Staging SUPABASE_URL must not match BFF_PRODUCTION_SUPABASE_URL');
+      }
+    } catch { if (config.productionSupabaseUrl) issues.push('BFF_PRODUCTION_SUPABASE_URL must be a valid HTTPS URL'); }
+    const prodOrigins = new Set(config.productionOrigins || []);
+    for (const origin of prodOrigins) {
+      try {
+        const parsed = new URL(origin);
+        if (parsed.origin !== origin || parsed.protocol !== 'https:' || parsed.username || parsed.password) {
+          issues.push('BFF_PRODUCTION_ALLOWED_ORIGINS must contain exact credential-free HTTPS origins');
+          break;
+        }
+      } catch {
+        issues.push('BFF_PRODUCTION_ALLOWED_ORIGINS contains an invalid origin');
+        break;
+      }
+    }
+    if ((config.allowedOrigins || []).some(origin => prodOrigins.has(origin))) issues.push('Staging ALLOWED_ORIGINS must not overlap BFF_PRODUCTION_ALLOWED_ORIGINS');
+  }
   try {
     const redirect = new URL(config.emailRedirectTo);
     if (redirect.username || redirect.password || !config.allowedOrigins.includes(redirect.origin)) issues.push('EMAIL_REDIRECT_TO must be credential-free and use an origin listed in ALLOWED_ORIGINS');
@@ -140,7 +180,7 @@ function publicUser(user) {
   return { user_id: user.user_id, email: user.email, email_verified: Boolean(user.email_verified), display_name: user.display_name || '', status: user.status, entitlements: Array.isArray(user.entitlements) ? user.entitlements : [] };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, quotaStore = null, quotaPolicy = quotaPolicyFromEnv(), businessStore, brvmPublicationStore = null, mutationStore = null, clock = () => new Date(), logger = () => {}, marketAnalyzer = analyzeMarketSeries, marketAnalyzerV2 = analyzeMarketSeriesV2, providerMarketData = null, marketSnapshotMaxAgeMs = 5 * 60 * 1000 }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   businessStore = businessStore || {
     exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
@@ -148,19 +188,55 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
   };
 
   async function currentEntitlements(userId) {
-    if (!entitlements || typeof entitlements.getForUser !== 'function') return { membership: null, entitlements: [] };
-    const snapshot = await entitlements.getForUser(userId);
+    if (!entitlements || typeof entitlements.getForUser !== 'function') return { membership: null, memberships: [], entitlements: [] };
+    const snapshot = await entitlements.getForUser(userId, clock());
     return {
       membership: snapshot?.membership || null,
-      entitlements: Array.isArray(snapshot?.entitlements) ? snapshot.entitlements : []
+      memberships: Array.isArray(snapshot?.memberships) ? snapshot.memberships : [],
+      entitlements: normalizeEntitlements(snapshot?.entitlements)
     };
   }
 
+  async function publicUserWithEntitlements(user) {
+    try {
+      const snapshot = await currentEntitlements(user.user_id);
+      return publicUser({ ...user, entitlements: snapshot.entitlements });
+    } catch (error) {
+      logger('entitlement_lookup_failed', { status: error.status || 500 });
+      return publicUser({ ...user, entitlements: [] });
+    }
+  }
+
+  function hasEntitlement(snapshot, entitlement, now) {
+    if (!Array.isArray(snapshot?.entitlements) || !snapshot.entitlements.includes(entitlement)) return false;
+    const memberships = snapshot.memberships.length
+      ? snapshot.memberships
+      : (snapshot.membership ? [snapshot.membership] : []);
+    return memberships.some(membership => {
+      if (membership?.status !== 'active' || membership.revoked_at) return false;
+      const startsAt = membership.starts_at ? new Date(membership.starts_at).getTime() : null;
+      const endsAt = membership.ends_at ? new Date(membership.ends_at).getTime() : null;
+      if (startsAt !== null && (!Number.isFinite(startsAt) || startsAt > now.getTime())) return false;
+      if (endsAt !== null && (!Number.isFinite(endsAt) || endsAt <= now.getTime())) return false;
+      return Array.isArray(membership.entitlements)
+        ? membership.entitlements.includes(entitlement)
+        : true;
+    });
+  }
+
   function hasActivePremium(snapshot, now) {
-    const membership = snapshot.membership;
-    if (!membership || !['active', 'trial'].includes(membership.status) || membership.revoked_at) return false;
-    if (membership.ends_at && new Date(membership.ends_at).getTime() <= now.getTime()) return false;
-    return snapshot.entitlements.includes('premium_track');
+    if (!snapshot.entitlements.includes('premium_track')) return false;
+    const memberships = snapshot.memberships.length
+      ? snapshot.memberships
+      : (snapshot.membership ? [snapshot.membership] : []);
+    return memberships.some(membership => {
+      if (!membership || !['active', 'trial'].includes(membership.status) || membership.revoked_at) return false;
+      const startsAt = membership.starts_at ? new Date(membership.starts_at).getTime() : null;
+      const endsAt = membership.ends_at ? new Date(membership.ends_at).getTime() : null;
+      if (startsAt !== null && (!Number.isFinite(startsAt) || startsAt > now.getTime())) return false;
+      if (endsAt !== null && (!Number.isFinite(endsAt) || endsAt <= now.getTime())) return false;
+      return !Array.isArray(membership.entitlements) || membership.entitlements.includes('premium_track');
+    });
   }
 
   async function createSession(userId, provider, req) {
@@ -238,6 +314,144 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         if (!Array.isArray(items)) throw new Error('brvm_publications_store_invalid_shape');
         return json(res, 200, { items });
       }
+      if (method === 'POST' && path === '/v1/autotrader/provider-analysis') {
+        const body = await readJson(req, 1024);
+        if (Object.keys(body).length !== 1 || typeof body.instrument_id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(body.instrument_id)) {
+          return sendError(res, 400, 'validation_error', 'Request must contain only a valid instrument_id.', requestId);
+        }
+        const current = await withUser(req, res, requestId); if (!current) return;
+        const access = await currentEntitlements(current.user.user_id);
+        if (!hasEntitlement(access, AUTOTRADER_ANALYSIS_ENTITLEMENT, clock())) {
+          return sendError(res, 403, 'entitlement_required', 'An active AutoTrader analysis entitlement is required.', requestId);
+        }
+        if (!providerMarketData || typeof providerMarketData.hasInstrument !== 'function' || typeof providerMarketData.getSeries !== 'function') {
+          return sendError(res, 503, 'market_data_unavailable', 'Configured read-only market data is not available.', requestId);
+        }
+        if (!providerMarketData.hasInstrument(body.instrument_id)) {
+          return sendError(res, 404, 'instrument_unavailable', 'The requested AutoTrader instrument is not configured.', requestId);
+        }
+        const providerId = quotaPolicy.providerId;
+        if (!providerId || providerId !== providerMarketData.providerId || !quotaStore || typeof quotaStore.reserveUserProviderAnalysis !== 'function') {
+          return sendError(res, 503, 'quota_unavailable', 'AutoTrader usage limits are unavailable.', requestId);
+        }
+        let reservation;
+        try {
+          reservation = await quotaStore.reserveUserProviderAnalysis({
+            userId: current.user.user_id, providerId, units: 1, asOf: clock(), policy: quotaPolicy
+          });
+        } catch (error) {
+          logger('autotrader_provider_quota_failed', { requestId, status: error.status || 503, error_code: error.code || 'quota_unavailable' });
+          return sendError(res, 503, 'quota_unavailable', 'AutoTrader usage limits are unavailable.', requestId);
+        }
+        if (!reservation || typeof reservation.allowed !== 'boolean') {
+          logger('autotrader_provider_quota_invalid', { requestId });
+          return sendError(res, 503, 'quota_unavailable', 'AutoTrader usage limits are unavailable.', requestId);
+        }
+        if (!reservation.allowed) {
+          const retryAt = reservation.retry_at ? new Date(reservation.retry_at).getTime() : NaN;
+          const retryAfter = Number.isFinite(retryAt) ? Math.max(1, Math.ceil((retryAt - clock().getTime()) / 1000)) : 60;
+          const providerScope = reservation.scope_type === 'provider';
+          const code = providerScope ? 'provider_quota_exceeded' : 'quota_exceeded';
+          const message = providerScope ? 'Market data provider usage limits have been reached.' : 'AutoTrader analysis quota has been reached.';
+          return json(res, 429, errorBody(code, message, requestId), { 'Retry-After': String(retryAfter) });
+        }
+
+        const analyzedAt = clock();
+        let series;
+        try { series = await providerMarketData.getSeries(body.instrument_id, { asOf: analyzedAt }); }
+        catch (error) {
+          const code = error?.code;
+          logger('autotrader_provider_fetch_failed', { requestId, providerId, error_code: code || 'provider_unavailable', status: error?.status || 503 });
+          if (code === 'instrument_not_configured') return sendError(res, 404, 'instrument_unavailable', 'The requested AutoTrader instrument is not configured.', requestId);
+          if (code === 'provider_rate_limited') return json(res, 429, errorBody(code, 'Market data provider is temporarily rate limited.', requestId), { 'Retry-After': '60' });
+          const status = code === 'provider_request_rejected' ? 502 : (error?.status === 503 ? 503 : 502);
+          return sendError(res, status, 'market_data_unavailable', 'Market data could not be retrieved and validated.', requestId);
+        }
+
+        const analysis = marketAnalyzerV2(series, { asOf: analyzedAt });
+        if (!analysis || typeof analysis !== 'object') throw new Error('autotrader_v2_analysis_invalid_result');
+        if (analysis.status !== 'analysis_complete' || analysis.execution_enabled !== false || analysis.order_recommendation !== null) {
+          if (analysis.status === 'stale_data') return sendError(res, 422, 'stale_market_data', 'Market data is too old for this analysis.', requestId);
+          if (analysis.status === 'rejected') return sendError(res, 502, 'market_data_unavailable', 'Market data could not be validated and analyzed.', requestId);
+          throw new Error('autotrader_v2_analysis_safety_invariant_failed');
+        }
+        let latestAccess;
+        try { latestAccess = await currentEntitlements(current.user.user_id); }
+        catch (error) {
+          logger('autotrader_entitlement_recheck_failed', { requestId, status: error.status || 503 });
+          return sendError(res, 503, 'access_state_unavailable', 'AutoTrader access could not be verified.', requestId);
+        }
+        if (!hasEntitlement(latestAccess, AUTOTRADER_ANALYSIS_ENTITLEMENT, clock())) {
+          return sendError(res, 403, 'entitlement_required', 'An active AutoTrader analysis entitlement is required.', requestId);
+        }
+        const latestBar = series.bars.at(-1);
+        return json(res, 200, {
+          contract_version: 'dda.autotrader.provider-analysis-response.v1',
+          analyzed_at: analyzedAt.toISOString(),
+          series_summary: {
+            instrument: series.instrument, timeframe: series.timeframe, data_mode: series.data_mode,
+            bar_count: series.bars.length, latest_bar_at: latestBar?.timestamp || null,
+            source: series.source
+          },
+          analysis
+        });
+      }
+      if (method === 'POST' && path === '/v1/autotrader/analyze') {
+        const body = await readJson(req, 64 * 1024);
+        if (Object.keys(body).length !== 1 || !Object.hasOwn(body, 'series')) {
+          return sendError(res, 400, 'validation_error', 'Request must contain only a series property.', requestId);
+        }
+        const current = await withUser(req, res, requestId); if (!current) return;
+        const access = await currentEntitlements(current.user.user_id);
+        if (!hasEntitlement(access, AUTOTRADER_ANALYSIS_ENTITLEMENT, clock())) {
+          return sendError(res, 403, 'entitlement_required', 'An active AutoTrader analysis entitlement is required.', requestId);
+        }
+        if (!quotaStore || typeof quotaStore.reserveUserAnalysis !== 'function') {
+          return sendError(res, 503, 'quota_unavailable', 'AutoTrader usage limits are unavailable.', requestId);
+        }
+        let reservation;
+        try {
+          reservation = await quotaStore.reserveUserAnalysis({ userId: current.user.user_id, asOf: clock(), policy: quotaPolicy });
+        } catch (error) {
+          logger('autotrader_user_quota_failed', { requestId, status: error.status || 503 });
+          return sendError(res, 503, 'quota_unavailable', 'AutoTrader usage limits are unavailable.', requestId);
+        }
+        if (!reservation || typeof reservation.allowed !== 'boolean') {
+          logger('autotrader_user_quota_invalid', { requestId });
+          return sendError(res, 503, 'quota_unavailable', 'AutoTrader usage limits are unavailable.', requestId);
+        }
+        if (!reservation.allowed) {
+          const retryAt = reservation.retry_at ? new Date(reservation.retry_at).getTime() : NaN;
+          const retryAfter = Number.isFinite(retryAt) ? Math.max(1, Math.ceil((retryAt - clock().getTime()) / 1000)) : 60;
+          return json(res, 429, errorBody('quota_exceeded', 'AutoTrader analysis quota has been reached.', requestId), { 'Retry-After': String(retryAfter) });
+        }
+        const analyzedAt = clock();
+        const analysis = marketAnalyzer(body.series, { asOf: analyzedAt, maxAgeMs: marketSnapshotMaxAgeMs });
+        if (!analysis || typeof analysis !== 'object') throw new Error('autotrader_analysis_invalid_result');
+        let latestAccess;
+        try { latestAccess = await currentEntitlements(current.user.user_id); }
+        catch (error) {
+          logger('autotrader_entitlement_recheck_failed', { requestId, status: error.status || 503 });
+          return sendError(res, 503, 'access_state_unavailable', 'AutoTrader access could not be verified.', requestId);
+        }
+        if (!hasEntitlement(latestAccess, AUTOTRADER_ANALYSIS_ENTITLEMENT, clock())) {
+          return sendError(res, 403, 'entitlement_required', 'An active AutoTrader analysis entitlement is required.', requestId);
+        }
+        if (analysis.status === 'stale_data') {
+          return sendError(res, 422, 'stale_market_data', 'Market data is too old for this analysis.', requestId, { issues: analysis.validation_errors || [] });
+        }
+        if (analysis.status === 'rejected') {
+          return sendError(res, 400, 'invalid_market_series', 'Market series does not satisfy the analysis contract.', requestId, { issues: analysis.validation_errors || [] });
+        }
+        if (analysis.status !== 'analysis_complete' || analysis.execution_enabled !== false || analysis.order_recommendation !== null) {
+          throw new Error('autotrader_analysis_safety_invariant_failed');
+        }
+        return json(res, 200, {
+          contract_version: 'dda.autotrader.analysis-response.v1',
+          analyzed_at: analyzedAt.toISOString(),
+          analysis
+        });
+      }
       if (method === 'POST' && path === '/v1/auth/register') {
         const body = await readJson(req);
         const validation = validateRegistration(body);
@@ -272,7 +486,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       }
       if (method === 'GET' && path === '/v1/me') {
         const current = await withUser(req, res, requestId); if (!current) return;
-        return json(res, 200, publicUser(current.user));
+        return json(res, 200, await publicUserWithEntitlements(current.user));
       }
       if (method === 'GET' && path === '/v1/premium/preview') {
         const current = await withUser(req, res, requestId); if (!current) return;
@@ -285,8 +499,8 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         if (!validateCsrf(req, config, current.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
         const validation = validateProfile(await readJson(req));
         if (validation.error) return sendError(res, 400, 'validation_error', validation.error, requestId);
-        const execute = () => auth.updateUser(current.user.user_id, validation.patch).then(user => ({ status: 200, body: publicUser(user) }));
-        if (!validation.clientMutationId) return json(res, 200, publicUser(await auth.updateUser(current.user.user_id, validation.patch)));
+        const execute = async () => ({ status: 200, body: await publicUserWithEntitlements(await auth.updateUser(current.user.user_id, validation.patch)) });
+        if (!validation.clientMutationId) return json(res, 200, await publicUserWithEntitlements(await auth.updateUser(current.user.user_id, validation.patch)));
         const result = await executeIdempotentMutation({ store: mutationStore, ownerId: current.user.user_id, endpoint: '/v1/me', clientMutationId: validation.clientMutationId, payload: validation.patch, execute });
         return json(res, result.status, result.body);
       }
@@ -295,7 +509,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         return json(res, 200, {
           contract: 'p3-data-contract-v1',
           exported_at: clock().toISOString(),
-          account: publicUser(current.user),
+          account: await publicUserWithEntitlements(current.user),
           sessions: await sessions.list(current.user.user_id),
           data: await businessStore.exportUserData(current.user.user_id)
         });
