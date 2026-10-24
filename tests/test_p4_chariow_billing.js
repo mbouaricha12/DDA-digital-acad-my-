@@ -84,3 +84,133 @@ createChariowCheckout({ config: { ...config, apiKey: 'sk_test_server_only' }, in
   assert.equal(applied.length, 1, 'duplicate delivery must not reapply entitlement transition');
   console.log('P4 Chariow billing contract: PASS');
 }).catch(error => { console.error(error); process.exitCode = 1; });
+
+// Production wiring (bff/src/server.js) always passes a claim()/markProcessed() store, never the
+// simpler has()/add() one exercised above. The scenarios below mirror that real code path and the
+// explicit webhook-reliability invariants from the P0 audit: a failed transition must be recorded,
+// the same delivery_id must be retryable after the cause is fixed, a retry must not double-grant,
+// and two concurrent deliveries of the same event must not both win the claim.
+(async () => {
+  // A synchronous fake table: no internal `await` before the state mutation, so two claim() calls
+  // issued back-to-back (Promise.all) interleave exactly like two concurrent requests hitting the
+  // same Postgres row — only one can observe-and-flip the state first.
+  function makeFakeDeliveryStore() {
+    const table = new Map();
+    return {
+      table,
+      async claim(deliveryId, metadata = {}) {
+        const existing = table.get(deliveryId);
+        if (!existing) {
+          table.set(deliveryId, { processed_status: 'accepted', event_name: metadata.event || null, processed_at: null });
+          return true;
+        }
+        if (existing.processed_status !== 'failed') return false;
+        existing.processed_status = 'accepted';
+        existing.processed_at = null;
+        return true;
+      },
+      async markProcessed(deliveryId, status) {
+        const row = table.get(deliveryId);
+        if (row) { row.processed_status = status; row.processed_at = new Date().toISOString(); }
+      }
+    };
+  }
+
+  function sign(body) {
+    const payload = Buffer.from(JSON.stringify(body));
+    return { payload, signature: `sha256=${crypto.createHmac('sha256', secret).update(payload).digest('hex')}` };
+  }
+
+  function sendPulse(store, body, { deliveryId = 'delivery-reliability-1', applyEvent, badSignature = false } = {}) {
+    const { payload, signature } = sign(body);
+    return handleChariowPulse({
+      headers: {
+        'x-chariow-signature': badSignature ? 'sha256=deadbeef' : signature,
+        'x-pulse-event': body.event,
+        'x-pulse-delivery-id': deliveryId
+      },
+      async *[Symbol.asyncIterator]() { yield payload; }
+    }, { secret, config, idempotencyStore: store, applyEvent });
+  }
+
+  const salePayload = (overrides = {}) => ({
+    event: 'successful.sale', product: { id: 'prd_premium' }, customer: { email: 'ada@example.com' },
+    sale: { id: 'sal-reliability-1', custom_metadata: { dda_user_id: overrides.dda_user_id } }
+  });
+
+  // 1 + 8: an invalid signature is rejected before any claim/applyEvent is touched.
+  {
+    const store = makeFakeDeliveryStore();
+    let applyCalls = 0;
+    const res = await sendPulse(store, salePayload({ dda_user_id: '11111111-1111-4111-8111-111111111111' }), {
+      badSignature: true, applyEvent: async () => { applyCalls += 1; }
+    });
+    assert.equal(res.status, 401);
+    assert.equal(applyCalls, 0, 'an invalid signature must never reach applyEvent');
+    assert.equal(store.table.size, 0, 'an invalid signature must never claim a delivery row');
+  }
+
+  // 3 + 4: a transition failure (invalid/missing dda_user_id) must be recorded as 'failed', not left
+  // stuck at 'accepted', and the error must still propagate (so the caller answers Chariow with a 5xx).
+  {
+    const store = makeFakeDeliveryStore();
+    const granted = [];
+    const applyEventRealistic = async event => {
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(event.userReference || ''))) {
+        throw new Error('Chariow transition requires a server-owned DDA UUID');
+      }
+      granted.push(event);
+    };
+    const deliveryId = 'delivery-reliability-2';
+    await assert.rejects(
+      () => sendPulse(store, salePayload({ dda_user_id: 'not-a-uuid' }), { deliveryId, applyEvent: applyEventRealistic }),
+      /server-owned DDA UUID/,
+      'a transition failure must propagate, not be swallowed as a successful 2xx'
+    );
+    assert.equal(store.table.get(deliveryId).processed_status, 'failed', 'a failed transition must be recorded explicitly as failed');
+    assert.equal(granted.length, 0, 'no entitlement may be granted on a failed transition');
+
+    // 5 + 6: once the cause is fixed, the SAME delivery_id must be retryable and must grant exactly once.
+    const retry = await sendPulse(store, salePayload({ dda_user_id: '11111111-1111-4111-8111-111111111111' }), { deliveryId, applyEvent: applyEventRealistic });
+    assert.equal(retry.status, 202, 'a corrected retry of a previously-failed delivery must be accepted, not deduplicated');
+    assert.equal(granted.length, 1, 'the retry must grant the entitlement exactly once');
+    assert.equal(store.table.get(deliveryId).processed_status, 'accepted', 'applyEvent in production marks processed only after a successful transition is persisted');
+
+    // 2: a further repeat of the now-accepted delivery must still be deduplicated, never reapplied.
+    const repeat = await sendPulse(store, salePayload({ dda_user_id: '11111111-1111-4111-8111-111111111111' }), { deliveryId, applyEvent: applyEventRealistic });
+    assert.equal(repeat.status, 204);
+    assert.equal(granted.length, 1, 'a delivery already accepted/processed must never be reapplied');
+  }
+
+  // 9: an unexpected error distinct from the known invalid-metadata case (e.g. a store outage) must be
+  // caught the same way — marked failed, rethrown, no partial/implicit success.
+  {
+    const store = makeFakeDeliveryStore();
+    const deliveryId = 'delivery-reliability-3';
+    await assert.rejects(
+      () => sendPulse(store, salePayload({ dda_user_id: '22222222-2222-4222-8222-222222222222' }), {
+        deliveryId, applyEvent: async () => { throw new Error('temporary_store_unavailable'); }
+      }),
+      /temporary_store_unavailable/
+    );
+    assert.equal(store.table.get(deliveryId).processed_status, 'failed', 'an unexpected store error must also be recorded as failed, not silently dropped');
+  }
+
+  // 7: two concurrent deliveries of a brand-new event must not both win the claim (no double grant).
+  {
+    const store = makeFakeDeliveryStore();
+    const deliveryId = 'delivery-reliability-concurrent';
+    let grants = 0;
+    const applyEvent = async () => { grants += 1; };
+    const body = salePayload({ dda_user_id: '33333333-3333-4333-8333-333333333333' });
+    const [first, second] = await Promise.all([
+      sendPulse(store, body, { deliveryId, applyEvent }),
+      sendPulse(store, body, { deliveryId, applyEvent })
+    ]);
+    const statuses = [first.status, second.status].sort();
+    assert.deepEqual(statuses, [202, 204], 'exactly one concurrent delivery must be accepted, the other deduplicated');
+    assert.equal(grants, 1, 'concurrent deliveries of the same event must never grant entitlement twice');
+  }
+
+  console.log('P4 Chariow billing — webhook reliability (claim/markProcessed path): PASS');
+})().catch(error => { console.error(error); process.exitCode = 1; });

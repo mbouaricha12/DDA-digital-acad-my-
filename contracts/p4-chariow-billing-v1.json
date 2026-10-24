@@ -65,6 +65,9 @@
     "failed or abandoned sale cannot grant Premium",
     "expired or revoked license removes entitlement",
     "client cannot submit provider secrets",
-    "checkout redirect is not treated as payment confirmation"
+    "checkout redirect is not treated as payment confirmation",
+    "a delivery whose transition failed is recorded as failed, not left stuck as accepted",
+    "a failed delivery can be re-claimed and retried from the same delivery_id after the cause is fixed, without double-granting entitlement",
+    "two concurrent deliveries of the same event cannot both win the claim"
   ]
 }

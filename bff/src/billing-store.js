@@ -30,7 +30,7 @@ class PostgrestBillingStore {
   }
 
   async claim(deliveryId, metadata = {}) {
-    const rows = await this.request('dda_billing_deliveries', '', {
+    const insertedRows = await this.request('dda_billing_deliveries', '', {
       method: 'POST',
       headers: { Prefer: 'resolution=ignore-duplicates,return=representation' },
       body: JSON.stringify({
@@ -42,7 +42,26 @@ class PostgrestBillingStore {
         received_at: metadata.receivedAt || new Date().toISOString()
       })
     });
-    return rows.length > 0;
+    if (insertedRows.length > 0) return true;
+    // delivery_id already exists. Only a delivery whose previous attempt ended in 'failed' may be
+    // re-claimed and retried — one still 'accepted' (in flight, or a concurrent duplicate) or already
+    // 'processed' must stay deduplicated. The WHERE clause makes this a single atomic compare-and-set:
+    // Postgres serializes concurrent UPDATEs on the same row, so at most one retry can win it.
+    const retriedRows = await this.request(
+      'dda_billing_deliveries',
+      `?delivery_id=eq.${encodeURIComponent(deliveryId)}&processed_status=eq.failed`,
+      {
+        method: 'PATCH',
+        headers: { Prefer: 'return=representation' },
+        body: JSON.stringify({
+          processed_status: 'accepted',
+          event_name: metadata.event || null,
+          received_at: metadata.receivedAt || new Date().toISOString(),
+          processed_at: null
+        })
+      }
+    );
+    return retriedRows.length > 0;
   }
 
   async has(deliveryId) {
