@@ -82,6 +82,13 @@
     return result.body;
   }
 
+  async function confirmPasswordReset({ token, password }) {
+    const result = await request('/v1/auth/password-reset/confirm', { method: 'POST', body: { token, password } });
+    if (!result.enabled) return null;
+    if (!result.response.ok) throw resultError(result, 'password_reset_confirm_failed');
+    return true;
+  }
+
   async function getMe() {
     const result = await request('/v1/me');
     if (!result.enabled || result.response.status === 401) return null;
@@ -112,7 +119,7 @@
   }
 
   window.DDABFF = Object.freeze({
-    enabled, register, verifyEmail, login, requestPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
+    enabled, register, verifyEmail, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
     get baseUrl() { return configuredBase; }
   });
 })();

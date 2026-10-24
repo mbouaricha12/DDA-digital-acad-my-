@@ -32,6 +32,7 @@ function makeAuth() {
     async verifyEmail(token) { assert.equal(token, 'v'.repeat(32)); return {}; },
     async login({ email, password }) { calls.push(['login', email, password]); if (password === 'wrong' || password === 'wrong-password') throw Object.assign(new Error('invalid'), { status: 400 }); return { user: { id: 'user-1' }, access_token: 'access-token', refresh_token: 'refresh-token' }; },
     async requestPasswordReset(email) { calls.push(['recover', email]); },
+    async confirmPasswordReset(token, password) { calls.push(['recover-confirm', token]); if (token !== 'v'.repeat(32)) throw Object.assign(new Error('invalid'), { status: 401 }); return {}; },
     async getUser(userId) { assert.equal(userId, 'user-1'); return { user_id: userId, email: 'a@example.com', email_verified: true, display_name: 'A', status: 'active', entitlements: [] }; },
     async updateUser(userId, patch) { assert.equal(userId, 'user-1'); assert.equal(typeof patch.display_name, 'string'); return { user_id: userId, email: 'a@example.com', email_verified: true, display_name: patch.display_name, status: 'active', entitlements: [] }; },
     async revokeProviderSession(token) { calls.push(['provider-logout', token]); }
@@ -140,6 +141,19 @@ function request(server, method, path, { body, rawBody, headers = {}, cookies = 
     response = await request(server, 'POST', '/v1/auth/login', { body: { email: 'a@example.com', password: 'wrong-password' } });
     assert.equal(response.status, 401);
     assert.equal(response.body.code, 'authentication_failed');
+
+    response = await request(server, 'POST', '/v1/auth/password-reset/confirm', { body: { token: 'short', password: 'long-enough-password' } });
+    assert.equal(response.status, 400);
+    assert.equal(response.body.code, 'invalid_token');
+    response = await request(server, 'POST', '/v1/auth/password-reset/confirm', { body: { token: 'v'.repeat(32), password: 'short' } });
+    assert.equal(response.status, 400);
+    assert.equal(response.body.code, 'validation_error');
+    response = await request(server, 'POST', '/v1/auth/password-reset/confirm', { body: { token: 'w'.repeat(32), password: 'long-enough-password' } });
+    assert.equal(response.status, 400, 'an invalid/expired Supabase token must not leak as a 500');
+    assert.equal(response.body.code, 'invalid_token');
+    response = await request(server, 'POST', '/v1/auth/password-reset/confirm', { body: { token: 'v'.repeat(32), password: 'long-enough-password' } });
+    assert.equal(response.status, 204, 'a valid token completes the reset');
+    assert.ok(auth.calls.some(call => call[0] === 'recover-confirm'), 'confirmPasswordReset is actually called');
   } finally { server.close(); }
   console.log('BFF implementation contract: PASS');
 })();

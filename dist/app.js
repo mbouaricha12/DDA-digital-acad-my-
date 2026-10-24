@@ -473,7 +473,10 @@ const WHY_PHRASE = {
 // competencyLevel below) since the current schema keeps no durable "opened but
 // not yet understood" flag; this is a real, honest signal, just a narrower
 // window than the durable ones above it.
-const COMPETENCY_LEVEL_LABEL = { 0: 'Pas encore commencé', 1: 'Découvert', 2: 'Compris', 3: 'Appliqué', 4: 'Maîtrisé' };
+// Level 4 fires on a single correct quiz pass (see competencyLevel below) — it proves the
+// learner can answer a multiple-choice check, not that the skill is verified in practice.
+// "Maîtrisé" previously overclaimed that; label it for what it actually demonstrates.
+const COMPETENCY_LEVEL_LABEL = { 0: 'Pas encore commencé', 1: 'Découvert', 2: 'Compris', 3: 'Appliqué', 4: 'Quiz réussi' };
 
 // lessonProgress alone can only ever prove Comprendre/Appliquer/Maîtriser (durable
 // booleans). Découvrir additionally needs lessonId to check the lesson's own

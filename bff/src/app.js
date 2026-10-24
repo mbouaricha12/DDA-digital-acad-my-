@@ -270,6 +270,14 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         try { await auth.requestPasswordReset(email, config.emailRedirectTo); } catch (error) { logger('recovery_failed', { requestId, status: error.status || 500 }); }
         return json(res, 202, { message: 'If the account can be recovered, a message will be sent.' });
       }
+      if (method === 'POST' && path === '/v1/auth/password-reset/confirm') {
+        const body = await readJson(req);
+        if (typeof body.token !== 'string' || body.token.length < 20) return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId);
+        if (typeof body.password !== 'string' || body.password.length < 12) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, { password: 'too_short' });
+        try { await auth.confirmPasswordReset(body.token, body.password); }
+        catch (error) { logger('password_reset_confirm_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId); }
+        return json(res, 204);
+      }
       if (method === 'GET' && path === '/v1/me') {
         const current = await withUser(req, res, requestId); if (!current) return;
         return json(res, 200, publicUser(current.user));
