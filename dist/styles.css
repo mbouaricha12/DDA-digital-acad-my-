@@ -216,6 +216,22 @@ body.public-shell main{padding-bottom:0}
 .terminal-thread-beads i.now{width:11px;height:11px;background:var(--navy-950);border:2px solid var(--gold-soft)}
 .terminal-thread-next{margin-left:auto;font-size:11px;color:rgba(244,247,252,.6);max-width:100%}
 .terminal-thread-next b{color:var(--gold-soft);font-weight:700}
+/* No base rule existed for this child outside the <700px grid layout, so on
+   desktop its <span>/<strong> rendered with browser-default inline spacing —
+   "Preuve récenteÀ construire" glued together, no visible separation. */
+.terminal-thread-proof{display:flex;flex-direction:column;gap:2px;margin-left:auto;text-align:right}
+.terminal-thread-proof span{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:rgba(244,247,252,.55)}
+.terminal-thread-proof strong{font-family:Georgia,serif;font-size:13px;font-weight:700;color:#fff}
+
+/* The "DDA / LEARNING OPERATING SYSTEM · Observation guidée · Preuve locale ·
+   Sans signal" line had no CSS at all anywhere — plain default inline text
+   with no separation between its parts. Turned into a small kicker plus
+   distinct chips, reusing the existing .pill visual language (padding,
+   radius) instead of inventing a new one. */
+.dashboard-operating-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 18px}
+.dashboard-operating-kicker{font:700 10px/1 ui-monospace,"SFMono-Regular",Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-soft)}
+.dashboard-operating-separator{width:1px;height:12px;background:rgba(244,247,252,.18);flex:none}
+.dashboard-operating-line span:not(.dashboard-operating-kicker):not(.dashboard-operating-separator){padding:4px 11px;border:1px solid rgba(244,247,252,.14);border-radius:100px;font-size:11px;color:rgba(244,247,252,.72);background:rgba(255,255,255,.04)}
 
 .terminal-entry{display:flex;flex-direction:column;gap:10px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.14);margin-bottom:24px}
 .terminal-entry h1{font-size:clamp(22px,5vw,26px);color:#fff}
