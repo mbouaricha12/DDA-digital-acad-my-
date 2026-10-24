@@ -47,9 +47,14 @@
     window.location.assign(destination(view));
   }));
 
-  /* DDA Visual Identity V2 — progressive reveals for the public editorial shell. */
+  /* DDA Visual Identity V2 — progressive reveals for the public editorial shell.
+     .landing-main-copy (the hero promise) is deliberately NOT in this list: it
+     is the first thing a visitor should see, so it must render visible
+     immediately rather than wait on an IntersectionObserver callback plus a
+     550ms fade — on a slow connection/device that left it fully blank for the
+     first paint. Reveal stays for everything genuinely below the fold. */
   const revealSelector = [
-    '.landing-main-copy', '.landing-aperture', '.landing-method article', '.landing-trust-strip article', '.landing-market-strip',
+    '.landing-aperture', '.landing-method article', '.landing-trust-strip article', '.landing-market-strip',
     '.experience-flow li', '.landing-product > *', '.product-window', '.product-index article',
     '.landing-proof > *', '.proof-composition > *', '.proof-principles li', '.landing-ecosystem > *',
     '.domain-rail article', '.landing-institution > div', '.landing-demo-grid article',

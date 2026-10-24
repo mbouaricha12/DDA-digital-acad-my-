@@ -3137,13 +3137,20 @@ if (!appHistoryInitialized) {
 }
 
 
-/* DDA Visual Identity V2 — progressive reveals for Academy surfaces only. */
+/* DDA Visual Identity V2 — progressive reveals for Academy surfaces only.
+   .section-intro (every view's own title+intro, always the first thing under
+   the header) and the lesson header block (eyebrow/h1/lead/step rail) are
+   deliberately excluded: they sit above the fold the instant a view becomes
+   active, so hiding them behind an IntersectionObserver callback plus a
+   550ms fade — on top of the view's own .32s dda-enter transition — just
+   delays the one thing a learner needs to read first. Reveal stays for
+   content genuinely below the fold. */
 (function initAcademyVisualRhythm() {
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
   const selector = [
     '.terminal-entry', '.terminal-lead', '.terminal-mi', '.terminal-two > section', '.terminal-family',
-    '.terminal-aperture', '.terminal-tools', '.section-intro', '.journey-current', '.journey-node',
-    '.panel', '.lesson-main > *', '.library-entry', '.resource-feature', '.plan-card', '.broker-row',
+    '.terminal-aperture', '.terminal-tools', '.journey-current', '.journey-node',
+    '.panel', '.lesson-main > *:not(.eyebrow):not(h1):not(.lesson-lead):not(.lesson-loop)', '.library-entry', '.resource-feature', '.plan-card', '.broker-row',
     '.journal-entry-card'
   ].join(',');
   function prepare(root = document) {
