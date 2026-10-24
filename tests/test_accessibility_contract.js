@@ -7,7 +7,7 @@ const app = fs.readFileSync('dist/app.js', 'utf8');
 const polish = fs.readFileSync('dist/alpha-polish.css', 'utf8');
 
 const outlineCount = (academy.match(/class="lesson-outline"[^>]*tabindex="0"[^>]*role="region"/g) || []).length;
-assert.strictEqual(outlineCount, 8, 'Chaque vue de leçon doit exposer son outline au clavier');
+assert.strictEqual(outlineCount, 13, 'Chaque vue de leçon doit exposer son outline au clavier');
 assert(renderer.includes('class="lesson-loop" id="lesson-loop${suffix}" tabindex="0"'), 'Le rail de progression doit être focusable');
 assert(renderer.includes('aria-label="Progression dans la leçon — utilise les flèches'), 'Le rail doit expliquer son contrôle clavier');
 assert(app.includes("const rail = event.target.closest?.('.lesson-loop, .lesson-outline')"), 'Le pilotage clavier des rails doit rester délégué');

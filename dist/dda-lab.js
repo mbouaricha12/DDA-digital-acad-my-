@@ -44,7 +44,7 @@
       })
     });
     const practice = Object.freeze({
-      id: 'exercise', label: 'Exercice', heading: 'Repérer une information à vérifier',
+      id: 'lab1-exercise', label: 'Exercice', heading: 'Repérer une information à vérifier',
       prompt: 'Tu demandes à une IA le numéro officiel d’un service public pour un proche. Elle te donne un numéro précis, présenté avec assurance. Que fais-tu avant de le communiquer ?',
       successText: 'Exactement : un numéro, une adresse ou un prix a un coût réel s’il est faux. Tu le vérifies sur une source officielle avant de t’en servir.',
       choices: Object.freeze([
@@ -54,7 +54,7 @@
       ])
     });
     const evaluation = Object.freeze({
-      id: 'quiz', label: 'Quiz de validation', heading: 'Ce que l’IA fait bien, ce qu’elle fait mal',
+      id: 'lab1-quiz', label: 'Quiz de validation', heading: 'Ce que l’IA fait bien, ce qu’elle fait mal',
       prompt: 'Pour quel type de tâche une IA générative est-elle la MOINS fiable sans vérification ?',
       successText: 'Les faits précis et datés (chiffres, horaires, événements récents) sont exactement ce qu’une IA générative peut inventer avec le plus d’assurance — c’est là que la vérification compte le plus.',
       choices: Object.freeze([
@@ -115,7 +115,7 @@
       })
     });
     const practice = Object.freeze({
-      id: 'exercise', label: 'Exercice', heading: 'Choisir la meilleure version d’un prompt',
+      id: 'lab2-exercise', label: 'Exercice', heading: 'Choisir la meilleure version d’un prompt',
       prompt: 'Tu veux un plan de révision pour un examen dans 3 semaines. Quel prompt donnera le résultat le plus utile ?',
       successText: 'Exactement : préciser la matière, le temps disponible et le format demandé (un planning jour par jour) guide l’IA vers une réponse directement utilisable.',
       choices: Object.freeze([
@@ -125,7 +125,7 @@
       ])
     });
     const evaluation = Object.freeze({
-      id: 'quiz', label: 'Quiz de validation', heading: 'Que faire quand la réponse ne convient pas',
+      id: 'lab2-quiz', label: 'Quiz de validation', heading: 'Que faire quand la réponse ne convient pas',
       prompt: 'L’IA te donne un texte trop long et trop formel pour un message WhatsApp à un client. Quelle est la meilleure prochaine étape ?',
       successText: 'Redemander en précisant exactement ce qui ne va pas (longueur, ton) est toujours plus efficace que recommencer à zéro ou abandonner — c’est la bonne façon d’itérer.',
       choices: Object.freeze([
@@ -186,7 +186,7 @@
       })
     });
     const practice = Object.freeze({
-      id: 'exercise', label: 'Exercice', heading: 'Corriger au bon endroit',
+      id: 'lab3-exercise', label: 'Exercice', heading: 'Corriger au bon endroit',
       prompt: 'L’IA a rédigé un texte correct, mais il contient une date de rendez-vous qui ne correspond pas à celle que tu avais donnée dans ta demande. Quelle est la meilleure réaction ?',
       successText: 'Exactement : tu demandes une correction précise sur ce point exact, sans tout regénérer — c’est plus rapide et tu gardes le reste du texte qui était bon.',
       choices: Object.freeze([
@@ -196,7 +196,7 @@
       ])
     });
     const evaluation = Object.freeze({
-      id: 'quiz', label: 'Quiz de validation', heading: 'Les trois relectures',
+      id: 'lab3-quiz', label: 'Quiz de validation', heading: 'Les trois relectures',
       prompt: 'Tu relis un message professionnel écrit par l’IA et tu remarques qu’il est factuellement juste, mais beaucoup trop familier pour la personne qui va le recevoir. Quelle relecture a détecté ce problème ?',
       successText: 'C’est la relecture du ton : les faits peuvent être exacts tout en étant mal adaptés à la personne qui lit — c’est pour ça que les trois relectures sont complémentaires, pas interchangeables.',
       choices: Object.freeze([
@@ -262,7 +262,7 @@
       good: Object.freeze({ label: 'Bon candidat à l’automatisation', items: Object.freeze(['Enregistrer chaque nouvelle commande reçue par formulaire', 'Envoyer un message de confirmation identique à chaque inscription', 'Classer automatiquement les réponses d’un sondage par catégorie']) })
     });
     const practice = Object.freeze({
-      id: 'exercise', label: 'Exercice', heading: 'Repérer une bonne candidate à l’automatisation',
+      id: 'lab4-exercise', label: 'Exercice', heading: 'Repérer une bonne candidate à l’automatisation',
       prompt: 'Tu gères les inscriptions à un petit atelier de couture via un formulaire en ligne. Chaque semaine, tu recopies à la main les réponses dans un tableau. Est-ce une bonne tâche à automatiser ?',
       successText: 'Oui : c’est une tâche répétitive, sans jugement à exercer — exactement le type de tâche qu’une automatisation simple (formulaire → tableau) peut faire à ta place.',
       choices: Object.freeze([
@@ -271,7 +271,7 @@
       ])
     });
     const evaluation = Object.freeze({
-      id: 'quiz', label: 'Quiz de validation', heading: 'Produire et automatiser avec méthode',
+      id: 'lab4-quiz', label: 'Quiz de validation', heading: 'Produire et automatiser avec méthode',
       prompt: 'Quelle affirmation décrit le mieux une automatisation « simple » telle que vue dans cette leçon ?',
       successText: 'Une automatisation simple relie toujours un déclencheur à une action — rien de plus. Elle ne prend jamais de décision à ta place sur un cas particulier.',
       choices: Object.freeze([
@@ -321,7 +321,7 @@
       bad: Object.freeze({ label: 'Signes qu’il faut encore corriger', items: Object.freeze(['Un chiffre, un nom ou un prix non vérifié reste dans le texte', 'Le texte est trop long pour être lu d’un coup sur téléphone', 'Le ton ne ressemble pas à la façon dont tu parles vraiment à tes clients']) })
     });
     const evaluation = Object.freeze({
-      id: 'quiz', label: 'Vérification finale', heading: 'As-tu vérifié ces points avant de publier ?',
+      id: 'labcap-quiz', label: 'Vérification finale', heading: 'As-tu vérifié ces points avant de publier ?',
       prompt: 'Ce quiz vérifie que tu as bien appliqué la méthode — il ne lit pas ton texte : c’est à toi de comparer ton livrable à la grille ci-dessus avant de répondre honnêtement.',
       successText: 'C’est la bonne réponse : la méthode complète inclut toujours une relecture ciblée contre une grille explicite, jamais une publication directe du premier brouillon.',
       choices: Object.freeze([

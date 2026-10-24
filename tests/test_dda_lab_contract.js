@@ -109,4 +109,19 @@ test('LAB4 introduces automation without requiring a paid account or implying DD
   assert.ok(text.includes('google forms') || text.includes('google sheets'), 'the automation example must be a genuinely free, concrete tool');
 });
 
+test('every quiz block id matches its data.id, so [data-question] stays unique across all simultaneously-mounted lessons', () => {
+  // lesson-renderer.js's quiz() renders data-question="${block.data.id}", not
+  // block.id — if data.id collided across lessons (e.g. every lesson reusing
+  // the generic id "exercise"/"quiz"), app.js's bindQuestion would only ever
+  // bind the first DOM match and silently break every other lesson's exercise.
+  const ids = new Set();
+  all.forEach(lesson => {
+    lesson.blocks.filter(b => b.type === 'quiz').forEach(block => {
+      assert.strictEqual(block.data.id, block.id, `${lesson.id}/${block.id}: block.id must equal data.id (the renderer keys data-question off data.id)`);
+      assert.ok(!ids.has(block.id), `${lesson.id}/${block.id}: quiz id must be globally unique across the whole app, not just this lesson`);
+      ids.add(block.id);
+    });
+  });
+});
+
 console.log(`RESULT: ${passed} DDA Lab content contract checks passed`);
