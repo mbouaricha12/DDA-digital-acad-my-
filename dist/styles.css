@@ -172,10 +172,15 @@ body.public-shell main{padding-bottom:0}
    nothing here changes what drives it), a rail of real steps instead of a decorative bar. */
 .lesson-loop{display:flex;gap:0;flex-wrap:wrap;align-items:center;margin:18px 0 0;list-style:none;padding:0;font-size:11px;color:#8a7f6a;font-weight:700;letter-spacing:.03em}
 .lesson-loop li{display:flex;align-items:center;gap:7px}
-.lesson-loop li:not(:last-child):after{content:"";width:16px;height:1px;background:#DCD0AF;margin:0 10px;flex:none}
-.loop-bead{width:8px;height:8px;border-radius:50%;background:#DCD0AF;flex:none;box-sizing:border-box;display:block}
-.lesson-loop li.done .loop-bead{background:var(--teal)}
-.lesson-loop li.now .loop-bead{width:11px;height:11px;background:var(--ivory);border:2px solid var(--gold)}
+.lesson-loop li:not(:last-child):after{content:"";width:16px;height:1px;background:#DCD0AF;margin:0 10px;flex:none;transition:background-color .25s ease}
+.lesson-loop li.done:not(:last-child):after{background:var(--teal)}
+/* A real step marker (checkmark when done, filled ring when active) instead of a
+   plain dot — the learner should be able to read "where am I, what's finished"
+   from this rail alone, at a glance, the way a course-platform lesson tree does. */
+.loop-bead{position:relative;width:16px;height:16px;border-radius:50%;background:transparent;border:1.5px solid #DCD0AF;flex:none;box-sizing:border-box;display:block;transition:background-color .2s ease,border-color .2s ease,transform .2s ease}
+.lesson-loop li.done .loop-bead{background:var(--teal);border-color:var(--teal)}
+.lesson-loop li.done .loop-bead::after{content:"";position:absolute;left:4px;top:2px;width:4px;height:8px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(40deg)}
+.lesson-loop li.now .loop-bead{width:18px;height:18px;background:var(--ivory);border:2px solid var(--gold);transform:scale(1.05)}
 .lesson-loop li.now{color:var(--ink)}
 .lesson-loop li.done{color:#6b6250}
 .pill{background:var(--navy-950);color:var(--white);padding:6px 11px;border-radius:100px}
