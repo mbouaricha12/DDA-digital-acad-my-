@@ -56,6 +56,7 @@ class PostgrestBillingStore {
         body: JSON.stringify({
           processed_status: 'accepted',
           event_name: metadata.event || null,
+          payload_sha256: metadata.payloadSha256 || null,
           received_at: metadata.receivedAt || new Date().toISOString(),
           processed_at: null
         })

@@ -40,13 +40,12 @@ const handler = async (req, res) => {
         idempotencyStore: billingStore,
         applyEvent: async event => {
           await billingStore.applyChariowTransition(event);
-          await billingStore.markProcessed(event.deliveryId, 'processed');
         }
       });
       res.writeHead(result.status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
       return res.end(result.body ? JSON.stringify(result.body) : '');
     } catch (error) {
-      console.error(JSON.stringify({ event: 'chariow_webhook_failed', error: error.message }));
+      console.error(JSON.stringify({ event: 'chariow_webhook_failed' }));
       res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
       return res.end(JSON.stringify({ error: 'billing_webhook_failed' }));
     }
