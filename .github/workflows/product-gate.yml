@@ -6,6 +6,7 @@ on:
     paths:
       - 'dist/**'
       - 'tests/**'
+      - 'bff/**'
       - '.github/workflows/product-gate.yml'
   workflow_dispatch:
 
