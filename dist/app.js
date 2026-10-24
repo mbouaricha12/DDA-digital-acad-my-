@@ -855,9 +855,12 @@ function renderMarketIntelligence() {
   }
   const calendar = document.getElementById('market-calendar-list');
   if (calendar) {
-    calendar.innerHTML = marketDemo().calendar.map(row => `
-      <li><div><strong>${row.company}</strong><small>${row.event}</small></div><span class="data-badge"><svg class="icon"><use href="#icon-clock"/></svg>Exemple</span></li>
-    `).join('');
+    const sources = marketDemo().sources || [];
+    calendar.innerHTML = sources.length
+      ? sources.map(source => `
+        <li class="brvm-source-row"><div><strong>${source.label}</strong><small>${source.type} · ${source.description}</small></div><a class="data-badge brvm-source-link" href="${source.href}" target="_blank" rel="noopener noreferrer">Source officielle <span aria-hidden="true">↗</span></a></li>
+      `).join('')
+      : '<li class="brvm-source-empty"><div><strong>Sources en préparation</strong><small>Aucune source officielle n’est actuellement configurée.</small></div></li>';
   }
   const publications = document.getElementById('brvm-publications-list');
   if (publications) {
