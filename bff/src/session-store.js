@@ -43,6 +43,11 @@ class MemorySessionStore {
       current: false
     }));
   }
+
+  async countActive(now = new Date()) {
+    const current = now.toISOString();
+    return [...this.sessions.values()].filter(row => !row.revoked_at && row.expires_at > current).length;
+  }
 }
 
 class PostgrestSessionStore {
@@ -94,6 +99,17 @@ class PostgrestSessionStore {
 
   async list(userId) {
     return this.request(`?user_id=eq.${encodeURIComponent(userId)}&revoked_at=is.null&select=session_id,created_at,last_seen_at,approximate_device:user_agent`, { method: 'GET' });
+  }
+
+  async countActive(now = new Date()) {
+    const response = await this.fetch(`${this.base}?revoked_at=is.null&expires_at=gt.${encodeURIComponent(now.toISOString())}&select=session_id&limit=1`, {
+      method: 'GET',
+      headers: { apikey: this.key, Authorization: `Bearer ${this.key}`, Prefer: 'count=exact' }
+    });
+    if (!response.ok) return null;
+    const range = response.headers?.get?.('content-range') || '';
+    const match = /\/(\d+)$/.exec(range);
+    return match ? Number(match[1]) : null;
   }
 }
 
