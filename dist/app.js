@@ -2842,7 +2842,12 @@ const LAB_REGISTRY = window.DDALab ? Object.freeze([
 ]) : [];
 const LAB_PREREQUISITE = Object.freeze(Object.fromEntries(LAB_REGISTRY.filter(entry => entry.meta.lesson.prerequisite).map(entry => [entry.viewId, entry.meta.lesson.prerequisite])));
 if (window.DDALab) {
-  LAB_REGISTRY.filter(entry => entry.permission !== 'premium_track').forEach(entry => {
+  LAB_REGISTRY.forEach(entry => {
+    // Same rule boot-time LESSON_REGISTRY mounting already uses (line ~158):
+    // a premium entry mounts at boot too when the already-loaded state is
+    // already premium (e.g. after a reload) — "not premium_track" alone
+    // would wrongly skip LAB4/capstone for an already-premium learner.
+    if (entry.permission === 'premium_track' && !DDA.can(prototypeState, 'premium_track')) return;
     mountLesson(entry);
     bindRegistryQuestions(entry);
   });
