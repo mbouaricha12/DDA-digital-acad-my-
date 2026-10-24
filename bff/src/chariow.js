@@ -153,8 +153,19 @@ async function handleChariowPulse(req, { secret, idempotencyStore, applyEvent, c
   try { payload = JSON.parse(rawBody.toString('utf8')); } catch { return { status: 400, body: { error: 'invalid_json' } }; }
   const mapped = mapChariowPulse(payload, headers, config);
   if (!idempotencyStore?.claim) await idempotencyStore?.add(deliveryId, { event: mapped.event, receivedAt: new Date().toISOString() });
-  if (mapped.kind === 'membership_transition') await applyEvent?.(mapped);
-  else await idempotencyStore?.markProcessed?.(deliveryId, 'processed');
+  if (mapped.kind === 'membership_transition') {
+    // A thrown error here (invalid metadata, a store outage, anything unexpected) must not leave the
+    // delivery stuck at 'accepted' forever: mark it 'failed' so the same delivery_id can be re-claimed
+    // and retried once the cause is fixed, then rethrow so the caller still answers Chariow with a 5xx.
+    try {
+      await applyEvent?.(mapped);
+    } catch (error) {
+      await idempotencyStore?.markProcessed?.(deliveryId, 'failed');
+      throw error;
+    }
+  } else {
+    await idempotencyStore?.markProcessed?.(deliveryId, 'processed');
+  }
   return { status: 202, body: { accepted: true, kind: mapped.kind, event: mapped.event } };
 }
 
