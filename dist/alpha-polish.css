@@ -1396,6 +1396,30 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 @media(max-width:639px){.premium-track-status{display:grid;gap:10px}.premium-track-status small{margin-left:0}.premium-progress-strip{grid-template-columns:1fr;margin-bottom:22px}.premium-progress-strip li{min-height:0;border-right:0;border-bottom:1px solid rgba(10,20,36,.1);padding:13px 14px}.premium-progress-strip li:last-child{border-bottom:0}.premium-progress-strip li:not(:last-child)::after{top:auto;right:auto;bottom:-1px;left:29px;width:1px;height:10px}.premium-module-rail li{grid-template-columns:32px 1fr;gap:10px}.premium-module-rail li .secondary-action{grid-column:2;justify-self:start}.lab-facts{grid-template-columns:1fr}.premium-assessment-form fieldset{padding:15px}.premium-proof-receipt dl div{display:block}.premium-proof-receipt dd{text-align:left;margin-top:4px}.premium-lab-form,.premium-assessment-form{padding:16px}}
 @media(prefers-reduced-motion:reduce){.premium-view *{scroll-behavior:auto!important;transition:none!important}}
 
+/* DDA Lab catalog — dark override for the reused .premium-progress-strip.
+   That component is deliberately a light/cream card strip everywhere it was
+   designed for (Premium Track, P2 forms) — intentional there, not touched.
+   The Lab reuses the same class for its 5-step strip but every other Lab
+   surface is Deep Navy, so the unscoped light cards read as a broken theme
+   leak against it. Scoped to #lab only: never changes Premium Track's own
+   look. Also fixes the 5-item desktop grid, previously hardcoded to 4
+   columns (repeat(4,...)), which left the 5th step wrapping alone into an
+   orphaned, visually empty row. */
+#lab .premium-progress-strip{grid-template-columns:repeat(5,minmax(0,1fr));border-color:rgba(174,191,213,.18);background:transparent}
+#lab .premium-progress-strip li{background:linear-gradient(145deg,rgba(17,42,68,.78),rgba(7,18,31,.92));border-right-color:rgba(174,191,213,.14)}
+#lab .premium-progress-strip li:not(:last-child)::after{background:rgba(216,174,97,.35)}
+#lab .premium-progress-index{border-color:rgba(174,191,213,.28);color:#9fb0c4;background:rgba(255,255,255,.04)}
+#lab .premium-progress-strip strong{color:#edf1f6}
+#lab .premium-progress-strip small{color:#9fb0c4}
+#lab .premium-progress-strip li[data-state="active"]{background:linear-gradient(145deg,rgba(203,163,74,.22),rgba(17,42,68,.88));box-shadow:inset 0 -3px 0 #cba34a}
+#lab .premium-progress-strip li[data-state="active"] .premium-progress-index{border-color:#cba34a;color:#f0cf8a;background:rgba(203,163,74,.16)}
+#lab .premium-progress-strip li[data-state="complete"]{background:linear-gradient(145deg,rgba(78,159,140,.2),rgba(17,42,68,.88));box-shadow:inset 0 -3px 0 #4e9f8c}
+#lab .premium-progress-strip li[data-state="complete"] .premium-progress-index{border-color:#4e9f8c;color:#8fd9c4;background:rgba(78,159,140,.16)}
+#lab .premium-progress-strip li[data-state="complete"] small{color:#8fd9c4}
+#lab .premium-progress-strip li[data-state="locked"]{opacity:.68}
+#lab .premium-progress-strip li[data-state="locked"] .premium-progress-index{background:rgba(255,255,255,.03);color:#8390a0}
+@media(max-width:639px){#lab .premium-progress-strip li{border-bottom-color:rgba(174,191,213,.14)}}
+
 /* P2 visual correction — rail labels must remain legible on Deep Navy. */
 .premium-module-rail strong{color:#f8fafc}
 @media(max-width:639px){#premium-track .section-intro{padding-top:24px}.premium-module-rail small{color:#cbd5e1}}
