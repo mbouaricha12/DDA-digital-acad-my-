@@ -2269,7 +2269,18 @@ body.public-shell{background:var(--dda-ivory);color:#15243a}
   }
   .price-chart{min-height:180px}
   .lesson-actions{
+    position:static;
+    bottom:auto;
+    z-index:auto;
     grid-template-columns:1fr;
+    margin:24px 0 0;
+    padding:12px 0 calc(20px + var(--safe-b));
+    border-right:0;
+    border-left:0;
+    border-radius:0;
+    background:transparent;
+    backdrop-filter:none;
+    box-shadow:none;
   }
   .lesson-actions .secondary-action{width:100%}
 }
