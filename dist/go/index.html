@@ -13,7 +13,7 @@
   :root{--navy-950:#060d17;--navy-900:#081426;--navy-800:#0B1B30;--navy-700:#0F2440;--gold:#D9A441;--gold-soft:#E8C685;--white:#F8FAFC;--muted:#9fb0c4}
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
-  body{background:var(--navy-950);color:var(--white);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+  body{background:var(--navy-950) radial-gradient(ellipse 900px 480px at 50% -120px,rgba(217,164,65,.10),transparent 70%);color:var(--white);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
   main{max-width:560px;margin:0 auto;padding:0 20px 48px}
   section{padding:40px 0;border-bottom:1px solid rgba(255,255,255,.08)}
   section:last-of-type{border-bottom:0}
@@ -21,20 +21,34 @@
   h2{font-size:1.2rem;margin:0 0 16px;color:var(--white)}
   p{color:#cbd5e1;margin:0 0 12px}
   .eyebrow{display:inline-block;font:11px ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:10px}
-  .cta{display:inline-block;width:100%;text-align:center;background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:var(--navy-950);font-weight:800;padding:16px 20px;border-radius:10px;text-decoration:none;font-size:1.05rem;border:0;cursor:pointer}
+  .cta{display:inline-block;width:100%;text-align:center;background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:var(--navy-950);font-weight:800;padding:16px 20px;border-radius:10px;text-decoration:none;font-size:1.05rem;border:0;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease;box-shadow:0 8px 22px -10px rgba(217,164,65,.5)}
+  .cta:hover{transform:translateY(-2px);box-shadow:0 12px 26px -8px rgba(217,164,65,.6)}
+  .cta:active{transform:translateY(0);box-shadow:0 6px 14px -8px rgba(217,164,65,.5)}
   .cta:focus-visible{outline:3px solid var(--gold-soft);outline-offset:3px}
   .disclaimer{font-size:.8rem;color:var(--muted);margin-top:10px;text-align:center}
   .hero{padding-top:28px}
+  @keyframes dda-fade-up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .hero>*{animation:dda-fade-up .5s ease both}
+  .hero .eyebrow{animation-delay:0s}
+  .hero h1{animation-delay:.05s}
+  .hero p{animation-delay:.12s}
+  .hero .cta{animation-delay:.18s}
+  .hero .disclaimer{animation-delay:.24s}
   .steps{list-style:none;margin:0;padding:0;display:grid;gap:16px}
-  .steps li{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px 16px}
+  .steps li{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px 16px;transition:background .18s ease,border-color .18s ease,transform .18s ease}
+  .steps li:hover{background:rgba(255,255,255,.055);border-color:rgba(217,164,65,.3);transform:translateY(-1px)}
   .steps span{flex:none;width:28px;height:28px;border-radius:50%;background:rgba(217,164,65,.16);color:var(--gold-soft);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem}
   .diff-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
-  .diff-list li{padding:12px 14px;border-left:3px solid var(--gold);background:rgba(255,255,255,.03);border-radius:4px;font-weight:600}
+  .diff-list li{display:flex;align-items:center;gap:12px;padding:12px 14px;border-left:3px solid var(--gold);background:rgba(255,255,255,.03);border-radius:4px;font-weight:600;transition:background .18s ease,transform .18s ease}
+  .diff-list li:hover{background:rgba(255,255,255,.055);transform:translateX(2px)}
+  .diff-list svg{flex:none;width:20px;height:20px;color:var(--gold-soft)}
   .preview-card{background:linear-gradient(145deg,var(--navy-800),var(--navy-900));border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px}
+  .preview-card img{display:block;width:100%;height:auto;border-radius:8px;margin-bottom:14px;border:1px solid rgba(255,255,255,.08)}
   .preview-card strong{display:block;color:var(--white);margin-bottom:6px}
   .preview-card small{color:var(--muted)}
   .offers{display:grid;gap:14px}
-  .offer-card{border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:18px}
+  .offer-card{border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:18px;transition:border-color .18s ease,transform .18s ease}
+  .offer-card.highlight:hover{border-color:var(--gold-soft);transform:translateY(-2px)}
   .offer-card.highlight{border-color:var(--gold);background:rgba(217,164,65,.07)}
   .offer-card h3{margin:0 0 6px;font-size:1rem;color:var(--white)}
   .offer-card p{margin:0;font-size:.88rem}
@@ -45,7 +59,7 @@
   .faq-item p{margin:0;font-size:.92rem}
   footer{padding:28px 0 8px;text-align:center}
   footer p{font-size:.78rem;color:var(--muted)}
-  @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+  @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;animation-duration:.001s!important;animation-delay:0s!important;transition-duration:.001s!important}}
 </style>
 </head>
 <body>
@@ -62,9 +76,10 @@
   <section aria-labelledby="lp-m01-title">
     <h2 id="lp-m01-title">Découvre la première leçon</h2>
     <div class="preview-card">
-      <strong>M0.1 — Comprendre le marché comme un échange</strong>
+      <img src="images/m01-preview.jpg" alt="Capture d'écran réelle de la leçon M0.1 — Le trading comme commerce" width="390" height="540" loading="lazy">
+      <strong>M0.1 — Le trading comme commerce</strong>
       <p>Une leçon courte, un mini-quiz, ta progression enregistrée.</p>
-      <small>Aperçu texte — aucune vidéo en lecture automatique.</small>
+      <small>Capture d'écran réelle de l'application — aucune vidéo en lecture automatique.</small>
     </div>
   </section>
 
@@ -80,9 +95,9 @@
   <section aria-labelledby="lp-diff-title">
     <h2 id="lp-diff-title">Pourquoi DDA est différent</h2>
     <ul class="diff-list">
-      <li>Le risque d'abord, le gain ensuite</li>
-      <li>Aucun signal de trading, aucune promesse de rendement</li>
-      <li>Une méthode claire, pensée pour les débutants francophones</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg> Le risque d'abord, le gain ensuite</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg> Aucun signal de trading, aucune promesse de rendement</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2 2 0 0 1 6 4h14v15H6a2 2 0 0 0-2 2z"/><path d="M4 19.5A2 2 0 0 1 6 18h14"/></svg> Une méthode claire, pensée pour les débutants francophones</li>
     </ul>
   </section>
 
