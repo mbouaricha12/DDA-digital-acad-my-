@@ -465,7 +465,9 @@ body.public-shell main{padding-bottom:0}
 .comparison-col.bad span{color:#b64a4a}
 .comparison-col.good{background:rgba(24,155,146,.1)}
 .comparison-col.good span{color:#0f6e64}
-.learning-check{scroll-margin-top:80px;margin-top:26px;padding:22px;border:1px solid var(--line);border-left:3px solid var(--blue-2);border-radius:var(--r-md);background:var(--navy-800);transition:opacity .3s;box-shadow:0 10px 30px -18px rgba(5,11,20,.5)}
+.learning-check{scroll-margin-top:80px;margin-top:26px;padding:22px;border:1px solid var(--line);border-left:3px solid var(--blue-2);border-radius:var(--r-md);background:var(--navy-800);transition:opacity .3s,border-left-color .3s,box-shadow .3s;box-shadow:0 10px 30px -18px rgba(5,11,20,.5)}
+.learning-check.just-unlocked{animation:dda-unlock-flash .7s var(--ease)}
+@keyframes dda-unlock-flash{0%{border-left-color:var(--gold);box-shadow:0 0 0 3px rgba(217,164,65,.22),0 10px 30px -18px rgba(5,11,20,.5)}100%{border-left-color:var(--blue-2);box-shadow:0 10px 30px -18px rgba(5,11,20,.5)}}
 .learning-check.locked-check{border-left-color:var(--line)}
 .learning-check h2{font-size:22px}
 .learning-check .eyebrow.gold{color:var(--gold-soft)!important}

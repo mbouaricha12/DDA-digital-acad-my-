@@ -2731,6 +2731,12 @@ function bindQuestion(lessonId, question, options) {
         gate.classList.remove('locked-check');
         gate.setAttribute('aria-disabled', 'false');
         gate.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // The one moment in the app a learner actually watches something
+        // unlock live, in place, instead of returning to it later — give it
+        // a visible "just opened" beat, same short-lived-class pattern as
+        // result-card.just-completed just below.
+        gate.classList.add('just-unlocked');
+        setTimeout(() => gate.classList.remove('just-unlocked'), 700);
       }
     }
     if (correct && role === 'quiz') {
