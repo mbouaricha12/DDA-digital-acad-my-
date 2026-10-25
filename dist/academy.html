@@ -124,7 +124,7 @@
       </nav>
       <div class="sidebar-foot">
         <span class="plan-label" id="sidebar-plan">DDA Free</span>
-        <button class="profile-chip" data-view="profile"><span class="avatar" id="profile-avatar">RD</span><span><b id="profile-name">Richard</b><br><small>Mon compte</small></span></button>
+        <button class="profile-chip" data-view="profile"><span class="avatar" id="profile-avatar">RD</span><span><b id="profile-name">Richard</b><br><small>Mon profil (local)</small></span></button>
       </div>
     </aside>
 
@@ -182,7 +182,7 @@
               <p class="eyebrow" id="access-step-label">Étape 1 sur 2 · commencer</p><h2 id="access-form-title">Commence ton parcours Free</h2>
               <p class="access-form-note" id="access-form-note">Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon. Cette version conserve ta progression sur cet appareil.</p>
               <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ex. Richard"></label>
-              <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"></label>
+              <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"><small class="field-help">Reste uniquement sur cet appareil tant qu'aucun compte serveur n'est activé — jamais envoyée ailleurs.</small></label>
               <label id="access-password-field" hidden>Mot de passe<input id="access-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128"></label>
               <label class="consent" id="access-consent-field"><input id="consent" type="checkbox" required><span id="access-consent-label">Je comprends que cette version conserve ma progression sur cet appareil.</span></label>
               <p class="form-error" id="signup-error" role="alert"></p>
@@ -1240,7 +1240,10 @@
         <div class="page-mission" data-mission="profile"><div><p class="eyebrow">Mission de cette page</p><strong>Ajuster ton environnement, pas refaire ton parcours.</strong><span>Le Profil garde tes préférences locales ; ta progression détaillée vit dans Progression.</span></div><button class="text-action" data-view="progress">Voir mes preuves <span>→</span></button></div>
         <div class="profile-layout">
           <form class="profile-panel" id="profile-form" data-js-submit method="dialog">
-            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">RD</span><div><p class="eyebrow">Mon compte</p><h2 id="profile-heading-name">Richard</h2><p id="profile-heading-email">Aucune donnée serveur</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
+            <!-- "local" here is accurate for the current default (no BFF/server auth enabled). If a future
+                 pass activates real BFF accounts, this copy needs a dynamic check (window.DDABFF?.enabled())
+                 rather than being hardcoded to "local" for every visitor. -->
+            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">RD</span><div><p class="eyebrow">Mon profil (local)</p><h2 id="profile-heading-name">Richard</h2><p id="profile-heading-email">Aucune donnée serveur</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
             <div class="profile-progress-strip">
               <div><span>XP total</span><strong id="profile-total-xp">0</strong></div>
               <div><span>Modules amorcés</span><strong id="profile-modules-started">0/10</strong></div>
