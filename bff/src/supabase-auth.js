@@ -55,6 +55,27 @@ class SupabaseAuthAdapter {
     return this.request('/auth/v1/user', { method: 'PUT', key: accessToken, body: JSON.stringify({ password }) });
   }
 
+  async listUsers({ page = 1, perPage = 50 } = {}) {
+    const result = await this.adminRequest(`/auth/v1/admin/users?page=${encodeURIComponent(page)}&per_page=${encodeURIComponent(perPage)}`, { method: 'GET' });
+    const rawUsers = Array.isArray(result?.users) ? result.users : [];
+    // GoTrue's admin list endpoint does not reliably return a cross-version
+    // total user count in its response body. We never invent one: total is
+    // only ever reported when the adapter can actually see it.
+    const total = typeof result?.total === 'number' ? result.total : null;
+    return {
+      total,
+      users: rawUsers.map(user => ({
+        user_id: user.id,
+        email: user.email,
+        email_verified: Boolean(user.email_confirmed_at),
+        display_name: user.user_metadata?.display_name || '',
+        status: user.banned_until ? 'locked' : 'active',
+        created_at: user.created_at || null,
+        last_sign_in_at: user.last_sign_in_at || null
+      }))
+    };
+  }
+
   async getUser(userId) {
     const user = await this.adminRequest(`/auth/v1/admin/users/${encodeURIComponent(userId)}`, { method: 'GET' });
     return {

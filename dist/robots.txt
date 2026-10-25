@@ -1,0 +1,15 @@
+# DDA is served as a GitHub Pages PROJECT site, under
+# https://mbouaricha12.github.io/DDA-digital-acad-my-/ — this file therefore
+# lives at /DDA-digital-acad-my-/robots.txt, not at the host root
+# (https://mbouaricha12.github.io/robots.txt). Per Google's own robots.txt
+# spec (https://developers.google.com/crawling/docs/robots-txt/robots-txt-spec),
+# a robots.txt file not served from the host root is NOT honored by standard
+# crawlers. This file does not change that: it documents the limitation and
+# gives a sitemap reference for the crawlers that do fetch it directly, but it
+# cannot substitute for a robots.txt at the real host root or a dedicated
+# domain. That requires hosting/domain work outside this repository.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://mbouaricha12.github.io/DDA-digital-acad-my-/sitemap.xml

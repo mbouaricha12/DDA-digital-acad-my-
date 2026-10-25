@@ -96,7 +96,7 @@ async function completeSignupFlow(page, opts) {
 async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = 'free') {
   await context.addInitScript(({ lessons, plan }) => {
     if (localStorage.getItem('dda-prototype-state-v4')) return;
-    const lessonIds = ['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3'];
+    const lessonIds = ['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3', 'LAB1', 'LAB2', 'LAB3', 'LAB4', 'LABCAP'];
     const progress = Object.fromEntries(lessonIds.map(id => [id, {
       lessonViewed: false, exerciseComplete: false, quizComplete: false, ...(lessons[id] || {})
     }]));
@@ -1576,6 +1576,64 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       }
       await context.close();
     }
+  });
+
+  console.log('\n-- N. DDA Lab — catalogue, parcours et verrou Premium --');
+
+  await test('DDA Lab catalog opens for Free, LAB1 completes end to end, and LAB2 unlocks', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lab`);
+    assert.equal(await page.locator('#lab').isVisible(), true);
+    assert.equal((await page.locator('#lab-LAB1-status').textContent()).trim(), 'À commencer');
+    assert.equal((await page.locator('#lab-LAB4-status').textContent()).trim(), 'DDA Premium', 'Free never sees LAB4 as a plain sequential lock');
+    assert.equal((await page.locator('#lab-LABCAP-status').textContent()).trim(), 'DDA Premium');
+
+    await page.click('[data-view="lesson-lab1"]');
+    await page.waitForSelector('#lesson-lab1.view.active');
+    await page.locator('[data-question="lab1-exercise"] button[data-correct="true"]').first().click();
+    let state = await page.evaluate(() => window.DDA.load());
+    assert.equal(state.lessons['LAB1'].exerciseComplete, true);
+    await page.locator('[data-question="lab1-quiz"] button[data-correct="true"]').first().click();
+    state = await page.evaluate(() => window.DDA.load());
+    assert.equal(state.lessons['LAB1'].quizComplete, true);
+
+    await page.goto(`${ACADEMY_BASE}#lab`);
+    await page.waitForSelector('#lab.view.active');
+    assert.equal((await page.locator('#lab-LAB1-status').textContent()).trim(), 'Terminé');
+    assert.equal((await page.locator('#lab-LAB2-status').textContent()).trim(), 'À commencer', 'LAB2 unlocks the moment LAB1 is quiz-complete');
+    await context.close();
+  });
+
+  await test('a Free learner is gated to the Premium preview when opening LAB4 directly, never shown the authored content', async () => {
+    const context = await freshContext(browser, { width: 1024, height: 900 });
+    await seedLocalLearner(context, { LAB1: { quizComplete: true }, LAB2: { quizComplete: true }, LAB3: { quizComplete: true } }, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-lab4`);
+    assert.notEqual(await page.evaluate(() => location.hash), '#lesson-lab4', 'Free is redirected away before the authored LAB4 view is shown');
+    const main = await page.locator('#lesson-lab4-main').innerHTML();
+    assert.equal(main.includes('lab4-exercise'), false, 'the authored LAB4 blocks must never be mounted for Free, gate or no gate');
+    await page.click('#gate-unlock');
+    await page.waitForTimeout(50);
+    assert.equal(await page.evaluate(() => location.hash), '#lesson-lab4', 'the local Premium preview simulation lands back on the exact lesson that was requested');
+    assert.equal((await page.locator('#lesson-lab4-main').innerText()).length > 0, true, 'after activating the preview, LAB4 actually mounts real content');
+    await context.close();
+  });
+
+  await test('with LAB1-3 done and a Premium membership, LAB4 shows a plain sequential status, never the Premium lock label', async () => {
+    const context = await freshContext(browser, { width: 1024, height: 900 });
+    await seedLocalLearner(context, { LAB1: { quizComplete: true }, LAB2: { quizComplete: true }, LAB3: { quizComplete: true } }, 'premium');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lab`);
+    assert.equal((await page.locator('#lab-LAB4-status').textContent()).trim(), 'À commencer', 'Premium + prerequisite satisfied makes LAB4 available, not Premium-locked');
+    await page.click('[data-view="lesson-lab4"]');
+    await page.waitForSelector('#lesson-lab4.view.active');
+    await page.locator('[data-question="lab4-exercise"] button[data-correct="true"]').first().click();
+    await page.locator('[data-question="lab4-quiz"] button[data-correct="true"]').first().click();
+    const state = await page.evaluate(() => window.DDA.load());
+    assert.equal(state.lessons['LAB4'].quizComplete, true);
+    await context.close();
   });
 
   await browser.close();

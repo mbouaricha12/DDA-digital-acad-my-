@@ -140,7 +140,13 @@ function publicUser(user) {
   return { user_id: user.user_id, email: user.email, email_verified: Boolean(user.email_verified), display_name: user.display_name || '', status: user.status, entitlements: Array.isArray(user.entitlements) ? user.entitlements : [] };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, clock = () => new Date(), logger = () => {} }) {
+function parsePageParams(url, { maxPerPage = 200 } = {}) {
+  const page = Math.max(1, Number.parseInt(url.searchParams.get('page'), 10) || 1);
+  const perPage = Math.min(maxPerPage, Math.max(1, Number.parseInt(url.searchParams.get('per_page'), 10) || 50));
+  return { page, perPage };
+}
+
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   businessStore = businessStore || {
     exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
@@ -200,6 +206,32 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
     if (!state.session) { sendError(res, 401, 'unauthenticated', 'Authentication required.', requestId); return null; }
     try { return { ...state, user: await auth.getUser(state.session.user_id) }; }
     catch (error) { logger('get_user_failed', { requestId, status: error.status || 500 }); sendError(res, 401, 'unauthenticated', 'Authentication required.', requestId); return null; }
+  }
+
+  // Admin authorization is never taken from the client: the caller's role
+  // is re-derived server-side from dda_admin_roles, keyed by the user_id
+  // the session cookie already proved. A role header, body field, or
+  // anything from localStorage is never consulted — there is nothing for
+  // the browser to send that would change this outcome.
+  async function withAdmin(req, res, requestId) {
+    const current = await withUser(req, res, requestId);
+    if (!current) return null;
+    if (!adminRoles || typeof adminRoles.getRole !== 'function') {
+      sendError(res, 503, 'admin_not_configured', 'The admin role store is not configured.', requestId);
+      return null;
+    }
+    let role;
+    try { role = await adminRoles.getRole(current.user.user_id); }
+    catch (error) {
+      logger('admin_role_lookup_failed', { requestId, status: error.status || 500 });
+      sendError(res, 500, 'internal_error', 'Request could not be processed.', requestId);
+      return null;
+    }
+    if (role !== 'owner' && role !== 'admin') {
+      sendError(res, 403, 'admin_role_required', 'An owner or admin role is required.', requestId);
+      return null;
+    }
+    return { ...current, role };
   }
 
   return async function handle(req, res) {
@@ -269,6 +301,14 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         if (!/^\S+@\S+\.\S+$/.test(email)) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId);
         try { await auth.requestPasswordReset(email, config.emailRedirectTo); } catch (error) { logger('recovery_failed', { requestId, status: error.status || 500 }); }
         return json(res, 202, { message: 'If the account can be recovered, a message will be sent.' });
+      }
+      if (method === 'POST' && path === '/v1/auth/password-reset/confirm') {
+        const body = await readJson(req);
+        if (typeof body.token !== 'string' || body.token.length < 20) return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId);
+        if (typeof body.password !== 'string' || body.password.length < 12) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, { password: 'too_short' });
+        try { await auth.confirmPasswordReset(body.token, body.password); }
+        catch (error) { logger('password_reset_confirm_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId); }
+        return json(res, 204);
       }
       if (method === 'GET' && path === '/v1/me') {
         const current = await withUser(req, res, requestId); if (!current) return;
@@ -341,6 +381,46 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         if (!items.some(item => item.session_id === id)) return sendError(res, 404, 'not_found', 'Resource not found.', requestId);
         await sessions.revoke(id, clock());
         return json(res, 204);
+      }
+      if (method === 'GET' && path === '/v1/admin/overview') {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        const metrics = {};
+        try {
+          const value = await sessions.countActive?.(clock());
+          metrics.active_sessions = typeof value === 'number' ? { available: true, value, source: 'dda_sessions' } : { available: false, value: null, reason: 'Session store does not expose a count.' };
+        } catch (error) {
+          logger('admin_overview_metric_failed', { requestId, metric: 'active_sessions' });
+          metrics.active_sessions = { available: false, value: null, reason: 'Count query failed.' };
+        }
+        try {
+          const value = await billingStore?.countMembershipsByStatus?.();
+          metrics.memberships_by_status = value ? { available: true, value, source: 'dda_billing_memberships' } : { available: false, value: null, reason: 'Billing store is not configured.' };
+        } catch (error) {
+          logger('admin_overview_metric_failed', { requestId, metric: 'memberships_by_status' });
+          metrics.memberships_by_status = { available: false, value: null, reason: 'Count query failed.' };
+        }
+        // Deliberately not computed: Supabase's Admin Auth API list endpoint
+        // does not reliably return a cross-version total user count, and a
+        // full paginated scan on every overview load would be expensive and
+        // itself a new failure mode. Reported as unavailable rather than
+        // guessed, per the explicit instruction to never invent an indicator.
+        metrics.registered_users_total = { available: false, value: null, reason: 'Not computed: the Admin Auth API does not expose a reliable total without a full paginated scan.' };
+        return json(res, 200, { contract: 'dda-admin-overview-v1', generated_at: clock().toISOString(), caller: { user_id: admin.user.user_id, role: admin.role }, metrics });
+      }
+      if (method === 'GET' && path === '/v1/admin/users') {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (typeof auth.listUsers !== 'function') return sendError(res, 503, 'admin_not_configured', 'User listing is not available.', requestId);
+        const { page, perPage } = parsePageParams(url);
+        const { users, total } = await auth.listUsers({ page, perPage });
+        const withRoles = await Promise.all(users.map(async user => ({ ...user, role: (await adminRoles.getRole(user.user_id)) || null })));
+        return json(res, 200, { contract: 'dda-admin-users-v1', page, per_page: perPage, total, users: withRoles });
+      }
+      if (method === 'GET' && path === '/v1/admin/memberships') {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!billingStore || typeof billingStore.listMemberships !== 'function') return sendError(res, 503, 'admin_not_configured', 'Membership listing is not available.', requestId);
+        const { page, perPage } = parsePageParams(url);
+        const items = await billingStore.listMemberships({ page, perPage });
+        return json(res, 200, { contract: 'dda-admin-memberships-v1', page, per_page: perPage, items });
       }
       return sendError(res, 404, 'not_found', 'Resource not found.', requestId);
     } catch (error) {

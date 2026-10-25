@@ -9,7 +9,13 @@ const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'dist', 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'dist', 'alpha-polish.css'), 'utf8');
 
-assert.match(html, /class="future-label-link"[^>]*>Comprendre le rôle des experts/, 'landing must expose the DDA Experts editorial link');
+// 2026-10-24 audit: this used to be <a href="#landing-future"> — a link to the
+// very section already on screen, promising a destination that doesn't exist.
+// It's a non-interactive status tag now (.future-label-tag), not a link.
+assert.match(html, /class="future-label-tag"[^>]*>Comprendre le rôle des experts/, 'landing must expose the DDA Experts editorial tag, honestly non-interactive');
+assert.doesNotMatch(html, /href="#landing-future">Comprendre le rôle des experts/, 'must not promise a dedicated destination that does not exist');
+assert.doesNotMatch(html, /href="#landing-future">Voir les principes de communauté/, 'must not promise a dedicated destination that does not exist');
+assert.doesNotMatch(html, /href="#landing-future">Lire le cadre d.usage IA/, 'must not promise a dedicated destination that does not exist');
 assert.match(html, />Communauté DDA<\/h3>/, 'landing must expose the Community domain');
 assert.match(html, />DDA AI<\/h3>/, 'landing must expose the AI assistance domain');
 assert.doesNotMatch(html, /bientôt/i, 'landing must not retain unfinished “bientôt” labels');
