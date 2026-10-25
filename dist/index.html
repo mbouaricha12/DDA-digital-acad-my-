@@ -35,7 +35,8 @@
       var allowed = {
         source: new Set(['newsletter', 'youtube', 'facebook', 'instagram', 'linkedin', 'tiktok', 'google', 'bing', 'direct', 'partner', 'whatsapp', 'telegram', 'community', 'x']),
         medium: new Set(['email', 'video', 'social', 'cpc', 'paid', 'organic', 'referral', 'newsletter', 'paid-social', 'paid_search']),
-        campaign: new Set(['launch', 'launch-2026', 'launch-2026-09-27', 'm0-launch', 'retarget', 'private-alpha', 'private-alpha-launch', 'private-alpha-2026'])
+        campaign: new Set(['launch', 'launch-2026', 'launch-2026-09-27', 'm0-launch', 'retarget', 'private-alpha', 'private-alpha-launch', 'private-alpha-2026', 'landing-test-2026-10']),
+        content: new Set(['echange', 'risque', 'progression'])
       };
       function safeTag(key) {
         var value = (params.get('utm_' + key) || '').trim().toLowerCase();
@@ -44,7 +45,8 @@
       window.DDA_INITIAL_ATTRIBUTION = {
         source: safeTag('source'),
         medium: safeTag('medium'),
-        campaign: safeTag('campaign')
+        campaign: safeTag('campaign'),
+        content: safeTag('content')
       };
       var verificationToken = params.get('token_hash') || params.get('token');
       if (verificationToken && verificationToken.length >= 32) window.DDA_VERIFY_TOKEN = verificationToken;

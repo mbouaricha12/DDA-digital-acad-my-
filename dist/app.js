@@ -564,6 +564,7 @@ prototypeState = DDA.captureAcquisition(prototypeState, {
   source: initialAttribution.source,
   medium: initialAttribution.medium,
   campaign: initialAttribution.campaign,
+  content: initialAttribution.content,
   referrer: document.referrer,
   landingPath: location.hash
 });
@@ -2316,12 +2317,14 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
     trackEvent('landing_viewed', {
       source: prototypeState.acquisition?.source,
       medium: prototypeState.acquisition?.medium,
-      campaign: prototypeState.acquisition?.campaign
+      campaign: prototypeState.acquisition?.campaign,
+      content: prototypeState.acquisition?.content
     });
     trackEvent('landing_visit', {
       source: prototypeState.acquisition?.source,
       medium: prototypeState.acquisition?.medium,
-      campaign: prototypeState.acquisition?.campaign
+      campaign: prototypeState.acquisition?.campaign,
+      content: prototypeState.acquisition?.content
     });
   }
   // Funnel measurability (mandate §18): #access is the real start of both the
