@@ -112,7 +112,8 @@ createChariowCheckout({ config: { ...config, apiKey: 'sk_test_server_only' }, in
   console.log('P4 Chariow billing contract: PASS');
 }).catch(error => { console.error(error); process.exitCode = 1; });
 
-// Production wiring (bff/src/server.js) always passes a claim()/markProcessed() store, never the
+// Production wiring (bff/src/handler.js, shared by the local server and the Vercel
+// entry point) always passes a claim()/markProcessed() store, never the
 // simpler has()/add() one exercised above. The scenarios below mirror that real code path and the
 // explicit webhook-reliability invariants from the P0 audit: a failed transition must be recorded,
 // the same delivery_id must be retryable after the cause is fixed, a retry must not double-grant,
