@@ -821,6 +821,10 @@ body.access-mode .prototype-banner{
   border-radius:0 13px 13px 0;
   background:linear-gradient(135deg,rgba(217,164,65,.10),rgba(23,105,209,.08));
   color:#f8fafc;
+  /* Was popping into existence instantly on quiz answer — the one moment a
+     learner most needs a visible, intentional response. Reuses the same
+     dda-pop keyframe as the result card for one consistent motion language. */
+  animation:dda-pop .4s var(--ease);
 }
 .feedback.error:not(:empty){border-left-color:#d97777;border-color:rgba(217,115,115,.28);background:rgba(122,39,52,.13)}
 .feedback-kicker{color:#d9a441;font-size:11px;letter-spacing:.1em;text-transform:uppercase}

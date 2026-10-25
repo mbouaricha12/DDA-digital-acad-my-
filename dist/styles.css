@@ -474,9 +474,10 @@ body.public-shell main{padding-bottom:0}
 .answer-grid button:hover{border-color:var(--gold)}
 .answer-grid button:disabled{cursor:not-allowed}
 .answer-grid button:active{transform:scale(.99)}
-.answer-grid button.correct{border-color:var(--green);background:rgba(79,190,133,.14)}
+.answer-grid button.correct{border-color:var(--green);background:rgba(79,190,133,.14);animation:dda-correct-pop .3s ease}
 .answer-grid button.incorrect{border-color:var(--red);background:rgba(217,115,115,.12);animation:dda-shake .3s}
 @keyframes dda-shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@keyframes dda-correct-pop{0%{transform:scale(1)}40%{transform:scale(1.025)}100%{transform:scale(1)}}
 .feedback{min-height:22px;margin:14px 0 0;font-weight:700;font-size:14px}
 .feedback.success{color:var(--green)}
 .feedback.error{color:#e3a1a1}
