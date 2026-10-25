@@ -7,6 +7,8 @@ on:
       - 'dist/**'
       - 'tests/**'
       - 'bff/**'
+      - 'docs/**'
+      - 'supabase/**'
       - '.github/workflows/product-gate.yml'
   workflow_dispatch:
 
