@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="theme-color" content="#081426">
   <title>DDA Academy — Apprendre, pratiquer, prouver</title>
   <meta name="description" content="Darius Digital Academy transforme l'apprentissage des marchés financiers en un vrai parcours : comprendre, pratiquer, prouver ta progression — pas une liste de vidéos à consommer.">
@@ -47,7 +48,7 @@
       };
       var verificationToken = params.get('token_hash') || params.get('token');
       if (verificationToken && verificationToken.length >= 32) window.DDA_VERIFY_TOKEN = verificationToken;
-      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile']);
+      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone']);
       var route = location.hash.slice(1);
       var safeHash = knownRoutes.has(route) ? '#' + route : '';
       if (location.search || location.hash !== safeHash) history.replaceState(history.state, '', location.pathname + safeHash);
@@ -111,6 +112,7 @@
         <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
         <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal</button>
         <p class="nav-section-label">Explorer</p>
+        <button class="nav-item" data-view="lab"><svg class="icon"><use href="#icon-award"/></svg> DDA Lab</button>
         <button class="nav-item" data-view="community"><svg class="icon"><use href="#icon-users"/></svg> Communauté</button>
         <button class="nav-item" data-view="intelligence"><svg class="icon"><use href="#icon-compass"/></svg> Intelligence DDA</button>
         <button class="nav-item" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
@@ -123,7 +125,7 @@
       </nav>
       <div class="sidebar-foot">
         <span class="plan-label" id="sidebar-plan">DDA Free</span>
-        <button class="profile-chip" data-view="profile"><span class="avatar" id="profile-avatar">RD</span><span><b id="profile-name">Richard</b><br><small>Mon compte</small></span></button>
+        <button class="profile-chip" data-view="profile"><span class="avatar" id="profile-avatar">RD</span><span><b id="profile-name">Richard</b><br><small>Mon profil (local)</small></span></button>
       </div>
     </aside>
 
@@ -181,7 +183,7 @@
               <p class="eyebrow" id="access-step-label">Étape 1 sur 2 · commencer</p><h2 id="access-form-title">Commence ton parcours Free</h2>
               <p class="access-form-note" id="access-form-note">Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon. Cette version conserve ta progression sur cet appareil.</p>
               <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ex. Richard"></label>
-              <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"></label>
+              <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"><small class="field-help">Reste uniquement sur cet appareil tant qu'aucun compte serveur n'est activé — jamais envoyée ailleurs.</small></label>
               <label id="access-password-field" hidden>Mot de passe<input id="access-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128"></label>
               <label class="consent" id="access-consent-field"><input id="consent" type="checkbox" required><span id="access-consent-label">Je comprends que cette version conserve ma progression sur cet appareil.</span></label>
               <p class="form-error" id="signup-error" role="alert"></p>
@@ -474,6 +476,70 @@
         </div>
       </section>
 
+      <section class="view" id="lab" aria-labelledby="lab-title">
+        <div class="section-intro"><p class="eyebrow gold">DDA Lab · Pilote</p><h1 id="lab-title">IA pour agir.</h1><p>Utiliser l’IA pour produire, organiser et construire un petit projet numérique concret — sans jargon, sans outil payant obligatoire. Les 3 premières leçons sont gratuites ; le livrable complet et le projet final appartiennent à DDA Premium.</p></div>
+        <ol class="premium-progress-strip" id="lab-progress-strip" aria-label="Progression du parcours DDA Lab">
+          <li data-lab-step="LAB1" data-state="locked"><span class="premium-progress-index">01</span><div><strong>Ce que l’IA sait faire</strong><small id="lab-progress-LAB1-status">À commencer</small></div></li>
+          <li data-lab-step="LAB2" data-state="locked"><span class="premium-progress-index">02</span><div><strong>Formuler une demande claire</strong><small id="lab-progress-LAB2-status">Après la leçon 1</small></div></li>
+          <li data-lab-step="LAB3" data-state="locked"><span class="premium-progress-index">03</span><div><strong>Vérifier et corriger</strong><small id="lab-progress-LAB3-status">Après la leçon 2</small></div></li>
+          <li data-lab-step="LAB4" data-state="locked"><span class="premium-progress-index">04</span><div><strong>Produire un livrable</strong><small id="lab-progress-LAB4-status">Premium · après la leçon 3</small></div></li>
+          <li data-lab-step="LABCAP" data-state="locked"><span class="premium-progress-index">05</span><div><strong>Projet final</strong><small id="lab-progress-LABCAP-status">Premium · après la leçon 4</small></div></li>
+        </ol>
+        <section class="panel premium-track-panel"><div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> Parcours pilote</p><h2>IA pour agir</h2></div></div><p>Un parcours court et concret : repérer une erreur d’IA, bien formuler une demande, relire avant d’utiliser un résultat, puis produire un vrai livrable.</p><ol class="premium-module-rail">
+          <li><span>01</span><div><strong>Ce que l’IA sait faire, et où elle se trompe</strong><small id="lab-LAB1-status">À commencer</small></div><button class="secondary-action" data-view="lesson-lab1">Ouvrir</button></li>
+          <li><span>02</span><div><strong>Formuler une demande claire</strong><small id="lab-LAB2-status">Après la leçon 1</small></div><button class="secondary-action" data-view="lesson-lab2">Ouvrir</button></li>
+          <li><span>03</span><div><strong>Vérifier et corriger un résultat IA</strong><small id="lab-LAB3-status">Après la leçon 2</small></div><button class="secondary-action" data-view="lesson-lab3">Ouvrir</button></li>
+          <li><span>04</span><div><strong>Produire un livrable complet</strong><small id="lab-LAB4-status">DDA Premium</small></div><button class="secondary-action" data-view="lesson-lab4">Ouvrir</button></li>
+          <li><span>05</span><div><strong>Projet final</strong><small id="lab-LABCAP-status">DDA Premium</small></div><button class="secondary-action" data-view="lesson-lab-capstone">Ouvrir</button></li>
+        </ol></section>
+        <section class="panel premium-locked-note"><p class="eyebrow gold">État honnête</p><h3>Parcours pilote</h3><p>Les leçons 4 et le projet final appartiennent à DDA Premium. Aucun appel IA n’est fait par DDA : chaque leçon t’apprend à utiliser un outil IA gratuit par toi-même. Le projet final n’est jamais noté automatiquement — tu le vérifies contre une grille explicite.</p></section>
+      </section>
+
+      <section class="view" id="lesson-lab1" aria-labelledby="lesson-title-lab1">
+        <div class="lesson-layout">
+          <article class="lesson-main" id="lesson-lab1-main">
+            <button class="back-link" data-view="back">← Retour</button>
+          </article>
+          <aside class="lesson-outline" id="lesson-lab1-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
+        </div>
+      </section>
+
+      <section class="view" id="lesson-lab2" aria-labelledby="lesson-title-lab2">
+        <div class="lesson-layout">
+          <article class="lesson-main" id="lesson-lab2-main">
+            <button class="back-link" data-view="back">← Retour</button>
+          </article>
+          <aside class="lesson-outline" id="lesson-lab2-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
+        </div>
+      </section>
+
+      <section class="view" id="lesson-lab3" aria-labelledby="lesson-title-lab3">
+        <div class="lesson-layout">
+          <article class="lesson-main" id="lesson-lab3-main">
+            <button class="back-link" data-view="back">← Retour</button>
+          </article>
+          <aside class="lesson-outline" id="lesson-lab3-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
+        </div>
+      </section>
+
+      <section class="view premium-view" id="lesson-lab4" aria-labelledby="lesson-title-lab4">
+        <div class="lesson-layout">
+          <article class="lesson-main" id="lesson-lab4-main">
+            <button class="back-link" data-view="lab">← Retour au DDA Lab</button>
+          </article>
+          <aside class="lesson-outline" id="lesson-lab4-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
+        </div>
+      </section>
+
+      <section class="view premium-view" id="lesson-lab-capstone" aria-labelledby="lesson-title-labcap">
+        <div class="lesson-layout">
+          <article class="lesson-main" id="lesson-lab-capstone-main">
+            <button class="back-link" data-view="lab">← Retour au DDA Lab</button>
+          </article>
+          <aside class="lesson-outline" id="lesson-lab-capstone-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
+        </div>
+      </section>
+
       <section class="view" id="progress" aria-labelledby="progress-title">
         <div class="view-photo-band" role="img" aria-label="Ta progression DDA">
           <img class="photo-fill" src="images/photos/progress-trader-poster.jpg" alt="" loading="lazy">
@@ -484,8 +550,11 @@
         <div class="page-mission" data-mission="progress"><div><p class="eyebrow">Mission de cette page</p><strong>Vérifier les preuves, pas collectionner des chiffres.</strong><span>Cette page mesure les validations réelles ; elle ne rédige pas ton travail à ta place.</span></div><button class="text-action" data-view="journal">Transformer une observation en trace <span>→</span></button></div>
 
         <div class="progress-hero">
-          <div class="progress-stat featured"><span>XP total</span><strong id="progress-total-xp">0</strong></div>
-          <div class="progress-stat"><span>Modules amorcés</span><strong id="progress-modules-started">0/10</strong></div>
+          <div class="progress-stat featured progress-stat-ring">
+            <div class="progress-ring" id="progress-modules-ring" role="img" aria-label="Modules amorcés sur l’ensemble du curriculum"><strong id="progress-modules-started">0/10</strong></div>
+            <span>Modules amorcés</span>
+          </div>
+          <div class="progress-stat"><span>XP total</span><strong id="progress-total-xp">0</strong></div>
           <div class="progress-stat"><span>Jours actifs (7 j)</span><strong id="progress-active-days">0</strong></div>
         </div>
 
@@ -1175,7 +1244,10 @@
         <div class="page-mission" data-mission="profile"><div><p class="eyebrow">Mission de cette page</p><strong>Ajuster ton environnement, pas refaire ton parcours.</strong><span>Le Profil garde tes préférences locales ; ta progression détaillée vit dans Progression.</span></div><button class="text-action" data-view="progress">Voir mes preuves <span>→</span></button></div>
         <div class="profile-layout">
           <form class="profile-panel" id="profile-form" data-js-submit method="dialog">
-            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">RD</span><div><p class="eyebrow">Mon compte</p><h2 id="profile-heading-name">Richard</h2><p id="profile-heading-email">Aucune donnée serveur</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
+            <!-- "local" here is accurate for the current default (no BFF/server auth enabled). If a future
+                 pass activates real BFF accounts, this copy needs a dynamic check (window.DDABFF?.enabled())
+                 rather than being hardcoded to "local" for every visitor. -->
+            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">RD</span><div><p class="eyebrow">Mon profil (local)</p><h2 id="profile-heading-name">Richard</h2><p id="profile-heading-email">Aucune donnée serveur</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
             <div class="profile-progress-strip">
               <div><span>XP total</span><strong id="profile-total-xp">0</strong></div>
               <div><span>Modules amorcés</span><strong id="profile-modules-started">0/10</strong></div>
@@ -1245,6 +1317,7 @@
     window.DDA_BFF_BASE_URL = window.DDA_BFF_BASE_URL || '';
   </script>
   <script src="dda-core.js"></script>
+  <script src="dda-lab.js"></script>
   <script src="learning-engine.js"></script>
   <script src="lesson-renderer.js"></script>
   <script src="dda-analytics.js"></script>

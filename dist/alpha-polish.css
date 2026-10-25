@@ -25,11 +25,20 @@
 /* Progression = read-only evidence board, not a stack of generic panels. */
 #progress .progress-hero{border:0;background:transparent;gap:12px;overflow:visible}
 #progress .progress-stat{border:1px solid rgba(255,255,255,.12);border-radius:2px 14px 2px 14px;background:rgba(255,255,255,.035)}
-#progress .progress-stat.featured{min-height:156px;align-content:end;position:relative;overflow:hidden}
-#progress .progress-stat.featured:after{
-  content:"";position:absolute;right:20px;top:20px;width:92px;height:92px;border:1px solid rgba(201,154,69,.34);border-radius:50%;box-shadow:0 0 0 12px rgba(201,154,69,.05),0 0 0 25px rgba(201,154,69,.025)
-}
+#progress .progress-stat.featured{min-height:156px;position:relative;overflow:hidden;display:flex;align-items:center;gap:18px}
 #progress .progress-stat strong{font-size:clamp(2.4rem,5vw,4.3rem);line-height:.9}
+/* Real progress ring, replacing what used to be a purely decorative static
+   circle drawn behind the number (:after, no connection to actual data) —
+   the same .progress-ring component already used on the Dashboard photo
+   badge, re-themed here for the dark Deep Navy panel instead of its default
+   light/ivory center. --progress is set in app.js's renderProgressHero(). */
+#progress .progress-ring{
+  flex:none;width:96px;aspect-ratio:1;
+  background:radial-gradient(circle closest-side,#0a1424 76%,transparent 79% 99%),conic-gradient(var(--dda-elite-gold-soft,var(--gold-soft)) calc(var(--progress)*1%),rgba(255,255,255,.1) 0);
+  box-shadow:0 0 0 1px rgba(201,154,69,.22);
+}
+#progress .progress-ring strong{font-size:1.3rem;color:#f8fafc;font-family:var(--dda-serif,Georgia,serif)}
+#progress .progress-stat-ring span{color:var(--dda-elite-gold-soft,var(--gold-soft))}
 #progress .mastery-panel{border:0;border-top:1px solid var(--dda-rule);border-radius:0;padding-inline:0;background:transparent}
 #progress .mastery-list{display:grid;gap:10px}
 #progress .mastery-row{border:1px solid rgba(255,255,255,.1);border-radius:2px 14px 2px 14px;background:rgba(255,255,255,.025);transition:background .22s,border-color .22s,transform .22s}
@@ -132,7 +141,7 @@
   .view>.section-intro:before{margin-bottom:12px}
   .view>.section-intro h1{font-size:clamp(2.35rem,11vw,3.6rem)}
   #progress .progress-stat.featured{min-height:128px}
-  #progress .progress-stat.featured:after{width:70px;height:70px;right:15px;top:15px}
+  #progress .progress-ring{width:72px}
   #journal .journal-toolbar{align-items:start;flex-direction:column}
   #journal .journal-toolbar .primary-action{width:100%}
   #journal .journal-toolbar-actions{width:100%;flex-direction:column}
@@ -821,6 +830,10 @@ body.access-mode .prototype-banner{
   border-radius:0 13px 13px 0;
   background:linear-gradient(135deg,rgba(217,164,65,.10),rgba(23,105,209,.08));
   color:#f8fafc;
+  /* Was popping into existence instantly on quiz answer — the one moment a
+     learner most needs a visible, intentional response. Reuses the same
+     dda-pop keyframe as the result card for one consistent motion language. */
+  animation:dda-pop .4s var(--ease);
 }
 .feedback.error:not(:empty){border-left-color:#d97777;border-color:rgba(217,115,115,.28);background:rgba(122,39,52,.13)}
 .feedback-kicker{color:#d9a441;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
@@ -1314,7 +1327,8 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 
 /* MOBILE LANDING FINISH — future labels and safe scroll clearance. */
 #landing .future-label,
-#landing .future-label-link{
+#landing .future-label-link,
+#landing .future-label-tag{
   border:1px solid rgba(201,154,69,.34);
   border-radius:2px 10px 2px 10px;
   background:linear-gradient(135deg,rgba(10,20,36,.96),rgba(7,17,31,.9));
@@ -1327,6 +1341,14 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 #landing .future-label:focus-visible,
 #landing .future-label-link:hover,
 #landing .future-label-link:focus-visible{border-color:rgba(201,154,69,.62);color:#f8fafc;background:rgba(10,20,36,.98)}
+/* .future-label-tag: these three DDA Experts/Communauté/AI cards used to be
+   <a href="#landing-future"> — a link to the very section already on screen,
+   with a label implying a dedicated destination that doesn't exist yet (flagged
+   by the 2026-10-24 external audit). They are plain, non-interactive status
+   tags now (no cursor:pointer, no focus ring) — unlike .future-label-link
+   above, which stays a real button elsewhere (academy.html's Community
+   preview) and keeps its clickable affordance. */
+#landing .future-label-tag{display:inline-block;padding:10px 14px;font:inherit;width:auto}
 @media(max-width:639px){
   #landing{padding-bottom:calc(220px + var(--safe-b));scroll-padding-bottom:220px}
   #landing .landing-future-grid .future-label{padding:13px 12px;margin-top:18px}
@@ -1391,10 +1413,43 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 .premium-progress-strip li[data-state="active"]{background:linear-gradient(135deg,#fffaf0,#f8f2df);box-shadow:inset 0 -3px 0 #cba34a}.premium-progress-strip li[data-state="active"] .premium-progress-index{border-color:#cba34a;color:#8b6418;background:#fff8e8}
 .premium-progress-strip li[data-state="complete"]{background:linear-gradient(135deg,#f2fbf8,#eaf6f1);box-shadow:inset 0 -3px 0 #4e9f8c}.premium-progress-strip li[data-state="complete"] .premium-progress-index{border-color:#4e9f8c;color:#267866;background:#e8f7f2}.premium-progress-strip li[data-state="complete"] small{color:#267866;font-weight:700}
 .premium-progress-strip li[data-state="locked"]{opacity:.72}.premium-progress-strip li[data-state="locked"] .premium-progress-index{background:#f5f5f2}
-.premium-module-rail{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:0}.premium-module-rail li{display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:16px;padding:18px 0;border-top:1px solid rgba(10,20,36,.12)}.premium-module-rail li>span{font-family:ui-monospace,monospace;color:#a77b22;font-size:.8rem}.premium-module-rail strong{display:block;color:#0a1424}.premium-module-rail small{display:block;color:#64748b;margin-top:4px}.premium-module-rail .secondary-action{min-height:44px}
+.premium-module-rail{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:0}.premium-module-rail li{display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:16px;padding:18px 0;border-top:1px solid rgba(10,20,36,.12);transition:background-color .15s ease}.premium-module-rail li>span{font-family:ui-monospace,monospace;color:#a77b22;font-size:.8rem}.premium-module-rail strong{display:block;color:#0a1424}.premium-module-rail small{display:block;color:#64748b;margin-top:4px}.premium-module-rail .secondary-action{min-height:44px}
+/* Each row is a real destination (its "Ouvrir" button), so a light hover on the
+   whole row is an honest affordance, not decoration without function. */
+.premium-module-rail li:hover{background-color:rgba(10,20,36,.03)}
+#lab .premium-module-rail li:hover{background-color:rgba(255,255,255,.025)}
+/* small's #64748b was calibrated for the light Premium Track card — on the
+   Lab's dark background that's ~4.1:1 contrast, under WCAG AA's 4.5:1 for
+   body text. #premium-track already gets this exact fix (see the
+   #premium-track .premium-module-rail small rule below); #lab never did. */
+#lab .premium-module-rail small{color:#b8c6d5}
 .lesson-layout-premium .lesson-main{max-width:820px}.premium-handoff{margin-top:28px}.premium-handoff h3{margin:8px 0}.premium-view .section-intro{max-width:820px}.lab-brief{background:#0a1424;color:#f8fafc;border-color:rgba(255,255,255,.08)}.lab-brief h2{color:#f8fafc}.lab-brief p,.lab-brief dd{color:#cbd5e1}.lab-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:24px 0}.lab-facts dt{font:11px ui-monospace,monospace;letter-spacing:.12em;color:#d8b66a}.lab-facts dd{margin:5px 0 0}.premium-lab-form,.premium-assessment-form{display:grid;gap:18px;margin-top:24px}.premium-lab-form label,.premium-assessment-form label{display:grid;gap:8px;font-weight:650;color:#0a1424}.premium-lab-form textarea,.premium-lab-form input,.premium-lab-form select{width:100%;min-height:48px;border:1px solid rgba(10,20,36,.18);padding:12px 14px;background:#fff;color:#0a1424;border-radius:2px;font:inherit}.premium-lab-form textarea{min-height:94px;resize:vertical}.field-help{display:block;color:#64748b;font-size:.82rem;font-weight:400}.premium-assessment-form fieldset{border:1px solid rgba(10,20,36,.14);padding:18px 20px;display:grid;gap:12px}.premium-assessment-form legend{font-weight:700;color:#0a1424;padding:0 5px}.premium-assessment-form label{display:flex;grid-template-columns:none;align-items:flex-start;font-weight:500}.premium-assessment-form input{width:20px;height:20px;min-width:20px;accent-color:#a77b22}.premium-proof-receipt{margin-top:24px;border-color:rgba(203,163,74,.4)}.premium-proof-receipt dl{display:grid;gap:12px}.premium-proof-receipt dl div{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid rgba(10,20,36,.1);padding:10px 0}.premium-proof-receipt dt{color:#64748b}.premium-proof-receipt dd{margin:0;font-weight:700;color:#0a1424;text-align:right}.premium-proof-row{display:grid;grid-template-columns:1fr auto;gap:5px 16px;padding:16px;border-left:3px solid #cba34a;background:#0a1424;color:#f8fafc}.premium-proof-row span{color:#d8b66a}.premium-proof-row p,.premium-proof-row small{grid-column:1/-1;color:#cbd5e1;margin:0}.premium-proof-row small{color:#94a3b8}.premium-locked-note{border-style:dashed}.premium-track-entry{margin-top:12px}
 @media(max-width:639px){.premium-track-status{display:grid;gap:10px}.premium-track-status small{margin-left:0}.premium-progress-strip{grid-template-columns:1fr;margin-bottom:22px}.premium-progress-strip li{min-height:0;border-right:0;border-bottom:1px solid rgba(10,20,36,.1);padding:13px 14px}.premium-progress-strip li:last-child{border-bottom:0}.premium-progress-strip li:not(:last-child)::after{top:auto;right:auto;bottom:-1px;left:29px;width:1px;height:10px}.premium-module-rail li{grid-template-columns:32px 1fr;gap:10px}.premium-module-rail li .secondary-action{grid-column:2;justify-self:start}.lab-facts{grid-template-columns:1fr}.premium-assessment-form fieldset{padding:15px}.premium-proof-receipt dl div{display:block}.premium-proof-receipt dd{text-align:left;margin-top:4px}.premium-lab-form,.premium-assessment-form{padding:16px}}
 @media(prefers-reduced-motion:reduce){.premium-view *{scroll-behavior:auto!important;transition:none!important}}
+
+/* DDA Lab catalog — dark override for the reused .premium-progress-strip.
+   That component is deliberately a light/cream card strip everywhere it was
+   designed for (Premium Track, P2 forms) — intentional there, not touched.
+   The Lab reuses the same class for its 5-step strip but every other Lab
+   surface is Deep Navy, so the unscoped light cards read as a broken theme
+   leak against it. Scoped to #lab only: never changes Premium Track's own
+   look. Also fixes the 5-item desktop grid, previously hardcoded to 4
+   columns (repeat(4,...)), which left the 5th step wrapping alone into an
+   orphaned, visually empty row. */
+#lab .premium-progress-strip{grid-template-columns:repeat(5,minmax(0,1fr));border-color:rgba(174,191,213,.18);background:transparent}
+#lab .premium-progress-strip li{background:linear-gradient(145deg,rgba(17,42,68,.78),rgba(7,18,31,.92));border-right-color:rgba(174,191,213,.14)}
+#lab .premium-progress-strip li:not(:last-child)::after{background:rgba(216,174,97,.35)}
+#lab .premium-progress-index{border-color:rgba(174,191,213,.28);color:#9fb0c4;background:rgba(255,255,255,.04)}
+#lab .premium-progress-strip strong{color:#edf1f6}
+#lab .premium-progress-strip small{color:#9fb0c4}
+#lab .premium-progress-strip li[data-state="active"]{background:linear-gradient(145deg,rgba(203,163,74,.22),rgba(17,42,68,.88));box-shadow:inset 0 -3px 0 #cba34a}
+#lab .premium-progress-strip li[data-state="active"] .premium-progress-index{border-color:#cba34a;color:#f0cf8a;background:rgba(203,163,74,.16)}
+#lab .premium-progress-strip li[data-state="complete"]{background:linear-gradient(145deg,rgba(78,159,140,.2),rgba(17,42,68,.88));box-shadow:inset 0 -3px 0 #4e9f8c}
+#lab .premium-progress-strip li[data-state="complete"] .premium-progress-index{border-color:#4e9f8c;color:#8fd9c4;background:rgba(78,159,140,.16)}
+#lab .premium-progress-strip li[data-state="complete"] small{color:#8fd9c4}
+#lab .premium-progress-strip li[data-state="locked"]{opacity:.68}
+#lab .premium-progress-strip li[data-state="locked"] .premium-progress-index{background:rgba(255,255,255,.03);color:#8390a0}
+@media(max-width:639px){#lab .premium-progress-strip li{border-bottom-color:rgba(174,191,213,.14)}}
 
 /* P2 visual correction — rail labels must remain legible on Deep Navy. */
 .premium-module-rail strong{color:#f8fafc}
@@ -1682,7 +1737,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 }
 body,body.public-shell{background:var(--dda-elite-canvas);color:var(--dda-elite-ink)}
 .app-shell,main{background:transparent}
-#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#profile.view{background:var(--dda-elite-canvas)!important;color:var(--dda-elite-ink)}
+#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{background:var(--dda-elite-canvas)!important;color:var(--dda-elite-ink)}
 
 /* Product chrome and global navigation. */
 .prototype-banner{border-bottom:1px solid var(--dda-elite-line);background:linear-gradient(90deg,#0a1424,#0d1929);color:#aab6c4}
@@ -1747,8 +1802,10 @@ body,body.public-shell{background:var(--dda-elite-canvas);color:var(--dda-elite-
 :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22) .lesson-main :is(.principle,.example-callout,.competency-check-block,.targets,.result-card,.result-stats,.certificate-mock,.play-button){border-color:var(--dda-elite-line);background:linear-gradient(155deg,#101c2d,#0a1424);color:var(--dda-elite-ink)}
 :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22) .lesson-main :is(.principle,.example-callout,.competency-check-block,.targets,.result-card,.result-stats,.certificate-mock,.play-button) :is(h2,h3,h4,p,strong,span,li,dt,dd,small,label){color:inherit}
 :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22) .lesson-main .play-button{border:1px solid var(--dda-elite-line-strong)}
-:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22) .lesson-loop li:not(:last-child):after{background:rgba(174,191,213,.22)}
-:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22) .lesson-loop li.now .loop-bead{background:var(--dda-elite-gold-soft);box-shadow:0 0 0 4px rgba(203,177,116,.14)}
+:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone) .lesson-loop li:not(:last-child):after{background:rgba(174,191,213,.22)}
+:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone) .lesson-loop li.done:not(:last-child):after{background:#2e8cff}
+:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone) .lesson-loop li.done .loop-bead{background:#2e8cff;border-color:#2e8cff}
+:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone) .lesson-loop li.now .loop-bead{background:var(--dda-elite-gold-soft);box-shadow:0 0 0 4px rgba(203,177,116,.14)}
 #progress .certificate-mock{border-color:rgba(203,177,116,.32);background:linear-gradient(155deg,#122035,#0a1424);color:var(--dda-elite-ink)}
 #progress .certificate-mock :is(h4,p,strong,span){color:inherit}
 #progress .progress-stat{border:1px solid var(--dda-elite-line);background:linear-gradient(155deg,#101c2d,#0a1424);color:var(--dda-elite-ink)}
@@ -1875,7 +1932,7 @@ button:disabled{cursor:not-allowed}
 }
 
 /* Static optical depth across every route; background-color remains #060d17. */
-:is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile).view{
+:is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{
   background-image:
     radial-gradient(ellipse 54% 26% at 96% 2%,rgba(37,136,255,.22),transparent 74%),
     radial-gradient(ellipse 44% 25% at 0% 44%,rgba(39,188,198,.12),transparent 76%),
@@ -1990,7 +2047,7 @@ button:disabled{cursor:not-allowed}
 
 /* Keep the glass readable and inexpensive on phones, data-saver, and transparency-sensitive setups. */
 @media(max-width:700px){
-  :is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile).view{background-attachment:scroll}
+  :is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{background-attachment:scroll}
   .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form){background-color:rgba(9,21,36,.91)}
   #path .journey-current{background-color:rgba(9,21,36,.93)}
   #landing .landing-device-stage{animation-duration:12s}
@@ -2069,7 +2126,7 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 }
 
 /* A quiet paper-like grain replaces the flat SaaS canvas without adding assets. */
-:is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile).view{
+:is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{
   background-color:var(--dda-material-ink)!important;
   background-image:
     radial-gradient(ellipse 58% 34% at 92% 0%,rgba(46,140,255,.15),transparent 72%),
@@ -2134,7 +2191,7 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 .public-footer-bottom{border-top-color:rgba(216,174,97,.18)}
 
 @media(max-width:700px){
-  :is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile).view{background-attachment:scroll!important}
+  :is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{background-attachment:scroll!important}
   .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form){box-shadow:0 14px 32px rgba(0,0,0,.2),0 0 0 1px rgba(216,174,97,.025) inset}
 }
 @media(prefers-reduced-transparency:reduce){
@@ -2142,7 +2199,7 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 }
 
 /* Contract-safe base: the optical texture sits above the canonical Deep Navy canvas. */
-#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#profile.view{
+#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{
   background-color:#060d17!important;
 }
 

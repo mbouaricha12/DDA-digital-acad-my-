@@ -104,7 +104,7 @@
       ])
     });
     const result = Object.freeze({
-      heading: 'Première compétence confirmée.',
+      heading: 'Premier quiz réussi.',
       body: 'Tu as compris que le processus de décision passe avant le résultat.'
     });
     // The stepper (.lesson-loop) and its "done"/"now" highlighting are driven entirely

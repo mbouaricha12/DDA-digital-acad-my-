@@ -14,7 +14,14 @@ class PostgrestBillingStore {
   }
 
   async request(table, query = '', options = {}) {
-    const response = await this.fetch(`${this.base}/${table}${query}`, {
+    const response = await this.rawRequest(table, query, options);
+    if (!response.ok) throw new Error(`billing store error ${response.status}`);
+    const text = await response.text();
+    return text ? JSON.parse(text) : [];
+  }
+
+  async rawRequest(table, query = '', options = {}) {
+    return this.fetch(`${this.base}/${table}${query}`, {
       ...options,
       headers: {
         apikey: this.key,
@@ -24,9 +31,6 @@ class PostgrestBillingStore {
         ...(options.headers || {})
       }
     });
-    if (!response.ok) throw new Error(`billing store error ${response.status}`);
-    const text = await response.text();
-    return text ? JSON.parse(text) : [];
   }
 
   async claim(deliveryId, metadata = {}) {
@@ -135,6 +139,32 @@ class PostgrestBillingStore {
   async deleteUserData(userId) {
     if (!USER_ID.test(String(userId || ''))) throw new Error('billing deletion requires a valid DDA UUID');
     await this.request('dda_billing_memberships', `?user_id=eq.${encodeURIComponent(userId)}`, { method: 'DELETE' });
+  }
+
+  // Real, per-status counts for the admin overview — one exact COUNT per
+  // status via PostgREST's Content-Range, never a client-side scan of every
+  // row. A status this query cannot reach is reported as unavailable rather
+  // than silently shown as zero.
+  async countMembershipsByStatus() {
+    const statuses = ['active', 'trial', 'expired', 'revoked'];
+    const counts = {};
+    for (const status of statuses) {
+      const response = await this.rawRequest('dda_billing_memberships', `?status=eq.${encodeURIComponent(status)}&select=user_id&limit=1`, {
+        method: 'GET',
+        headers: { Prefer: 'count=exact' }
+      });
+      if (!response.ok) { counts[status] = null; continue; }
+      const range = response.headers?.get?.('content-range') || '';
+      const match = /\/(\d+)$/.exec(range);
+      counts[status] = match ? Number(match[1]) : null;
+    }
+    return counts;
+  }
+
+  async listMemberships({ page = 1, perPage = 50 } = {}) {
+    const offset = (Math.max(1, page) - 1) * perPage;
+    const rows = await this.request('dda_billing_memberships', `?select=user_id,provider,status,product_id,starts_at,ends_at,updated_at&order=updated_at.desc&limit=${perPage}&offset=${offset}`, { method: 'GET' });
+    return rows;
   }
 }
 

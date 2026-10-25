@@ -339,13 +339,18 @@ document.addEventListener('keydown', event => {
 });
 
 const titles = {
-  landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon compte', path: 'Mon parcours',
+  landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon profil', path: 'Mon parcours',
   progress: 'Progression', journal: 'Journal', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub',
   membership: 'DDA Premium', 'premium-track': 'Premium Track · P2', 'premium-lab': 'Premium Lab · Risk Plan', 'premium-assessment': 'Premium Assessment · Controlled Decision', support: 'Aide & support', profile: 'Mon profil', community: 'Communauté',
-  practice: 'Pratique avancée', intelligence: 'Intelligence DDA',
+  practice: 'Pratique avancée', intelligence: 'Intelligence DDA', lab: 'DDA Lab',
   // Lesson screen titles are declared once, in LESSON_REGISTRY — never a
   // second hand-maintained list to keep in sync.
-  ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.title]))
+  ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.title])),
+  // DDA Lab lesson titles come from window.DDALab's own data, not a second
+  // hand-maintained list — same principle as LESSON_REGISTRY above. LAB_REGISTRY
+  // itself is declared later in this file, so the id→viewId map is repeated
+  // here in the one place it is needed before that point.
+  ...(window.DDALab ? { 'lesson-lab1': window.DDALab.lessons[0].title, 'lesson-lab2': window.DDALab.lessons[1].title, 'lesson-lab3': window.DDALab.lessons[2].title, 'lesson-lab4': window.DDALab.lessons[3].title, 'lesson-lab-capstone': window.DDALab.capstone.title } : {})
 };
 // V1.1 correction: 'dashboard' was never gated here even though DDA.curriculum's
 // own entitlements model (dda-core.js ENTITLEMENTS) already lists 'dashboard' as a
@@ -357,12 +362,16 @@ const titles = {
 const viewPermissions = {
   dashboard: 'dashboard', path: 'path', progress: 'progress', journal: 'journal', resources: 'resources_free',
   markets: 'market_room', brokers: 'broker_hub', membership: 'membership', support: 'support', profile: 'profile',
-  community: 'community', practice: 'practice', intelligence: 'intelligence',
+  community: 'community', practice: 'practice', intelligence: 'intelligence', lab: 'lesson_m01',
   'premium-track': 'premium_track', 'premium-lab': 'premium_track', 'premium-assessment': 'premium_track',
   // Matrice des droits CDCP-OS §4.2 (arbitrage D1 validé, Option B) : M0 en
   // Free (lesson_m01), M1+ réservé à l'offre Standard/Pro (advanced_modules) —
   // dérivé du registre, jamais une liste parallèle écrite à la main.
-  ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.permission || 'lesson_m01']))
+  ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.permission || 'lesson_m01'])),
+  // DDA Lab: LAB1-3 Free (lesson_m01), LAB4 + le projet final appartiennent à
+  // DDA Premium (premium_track, réutilisé — aucun nouveau palier commercial).
+  'lesson-lab1': 'lesson_m01', 'lesson-lab2': 'lesson_m01', 'lesson-lab3': 'lesson_m01',
+  'lesson-lab4': 'premium_track', 'lesson-lab-capstone': 'premium_track'
 };
 // Maps a lesson id to the view that actually renders it — the Terminal cockpit's
 // "continue" button follows DDALearning.nextActionable, which will point at the
@@ -473,7 +482,10 @@ const WHY_PHRASE = {
 // competencyLevel below) since the current schema keeps no durable "opened but
 // not yet understood" flag; this is a real, honest signal, just a narrower
 // window than the durable ones above it.
-const COMPETENCY_LEVEL_LABEL = { 0: 'Pas encore commencé', 1: 'Découvert', 2: 'Compris', 3: 'Appliqué', 4: 'Maîtrisé' };
+// Level 4 fires on a single correct quiz pass (see competencyLevel below) — it proves the
+// learner can answer a multiple-choice check, not that the skill is verified in practice.
+// "Maîtrisé" previously overclaimed that; label it for what it actually demonstrates.
+const COMPETENCY_LEVEL_LABEL = { 0: 'Pas encore commencé', 1: 'Découvert', 2: 'Compris', 3: 'Appliqué', 4: 'Quiz réussi' };
 
 // lessonProgress alone can only ever prove Comprendre/Appliquer/Maîtriser (durable
 // booleans). Découvrir additionally needs lessonId to check the lesson's own
@@ -1052,12 +1064,15 @@ function renderProgressHero() {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
     return status === DDALearning.MODULE_STATUS.IN_PROGRESS || status === DDALearning.MODULE_STATUS.COMPLETED;
   }).length;
-  const startedLabel = `${started}/${DDA.curriculum.modules.length}`;
+  const totalModules = DDA.curriculum.modules.length;
+  const startedLabel = `${started}/${totalModules}`;
   const totalXp = DDALearning.totalXp(DDA.curriculum, prototypeState);
   const activeDays = countActiveDays(prototypeState.events);
   startedEl.textContent = startedLabel;
   document.getElementById('progress-total-xp').textContent = String(totalXp);
   document.getElementById('progress-active-days').textContent = String(activeDays);
+  const ring = document.getElementById('progress-modules-ring');
+  if (ring) ring.style.setProperty('--progress', String(totalModules ? Math.round((started / totalModules) * 100) : 0));
   // Profil mirrors the exact same real values as Progression — never a second,
   // diverging computation of "how far has this learner gotten".
   document.getElementById('profile-modules-started').textContent = startedLabel;
@@ -2083,6 +2098,7 @@ function renderState() {
 
   renderPathJourney();
   renderModulesRecap();
+  renderLabCatalog();
 
   document.getElementById('storage-warning').hidden = DDA.storageAvailable();
 }
@@ -2235,10 +2251,10 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
     id = smartBackTarget();
     if (historyMode === 'auto') historyMode = 'replace';
   }
-  const prerequisiteLessonId = LESSON_PREREQUISITE[id];
+  const prerequisiteLessonId = LESSON_PREREQUISITE[id] || LAB_PREREQUISITE[id];
   if (prerequisiteLessonId && !DDALearning.getLessonProgress(prototypeState, prerequisiteLessonId).quizComplete) {
     showToast('Cette leçon se débloque après la validation de l’étape précédente.');
-    id = 'path';
+    id = LAB_PREREQUISITE[id] ? 'lab' : 'path';
   }
   const permission = viewPermissions[id];
   if (permission && !DDA.can(prototypeState, permission)) {
@@ -2375,6 +2391,7 @@ document.getElementById('gate-unlock')?.addEventListener('click', () => {
   prototypeState = DDA.setPlan(prototypeState, 'premium');
   prototypeState = DDA.track(prototypeState, 'plan_preview', { plan: 'premium' });
   mountPremiumLessons();
+  mountPremiumLabLessons();
   renderState();
   closeGate();
   showToast('Accès Premium débloqué en aperçu.');
@@ -2394,6 +2411,7 @@ document.getElementById('preview-premium').addEventListener('click', () => {
   prototypeState = DDA.setPlan(prototypeState, 'premium');
   prototypeState = DDA.track(prototypeState, 'plan_preview', { plan: 'premium' });
   mountPremiumLessons();
+  mountPremiumLabLessons();
   renderState();
   showToast('Accès Premium simulé sur cet appareil.');
 });
@@ -2716,6 +2734,12 @@ function bindQuestion(lessonId, question, options) {
         gate.classList.remove('locked-check');
         gate.setAttribute('aria-disabled', 'false');
         gate.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // The one moment in the app a learner actually watches something
+        // unlock live, in place, instead of returning to it later — give it
+        // a visible "just opened" beat, same short-lived-class pattern as
+        // result-card.just-completed just below.
+        gate.classList.add('just-unlocked');
+        setTimeout(() => gate.classList.remove('just-unlocked'), 700);
       }
     }
     if (correct && role === 'quiz') {
@@ -2777,6 +2801,108 @@ function mountPremiumLessons() {
       bindRegistryQuestions(entry);
       main.querySelectorAll('[data-view]').forEach(bindViewButton);
     }
+  });
+}
+
+/* -------------------------------------------------------------------------
+   DDA Lab — pilot track "IA pour agir". Deliberately a separate, small
+   registry, not a merge into LESSON_REGISTRY: its lessons are not inside
+   DDA.curriculum, so they never enter DDALearning.nextActionable()'s single
+   trading-track sequence — opening the Lab must never change what the
+   Terminal/Parcours/Progression recommend as the next trading step.
+   Every mounting/binding/persistence function below (mountLesson,
+   bindRegistryQuestions, bindMarkUnderstood, lessonUiIds, updateLessonState)
+   is the exact same one LESSON_REGISTRY uses — reused unmodified by giving
+   each entry the same { meta: { module, lesson } } shape findLesson() would
+   have produced. Progress persists through the existing DDA.updateLesson()
+   (a flat `state.lessons[id]` map, already lesson-id-agnostic) — no new
+   storage key, no schema change. ------------------------------------------- */
+const labModule = window.DDALab ? Object.freeze({ title: window.DDALab.track.title, lessons: [...window.DDALab.lessons, window.DDALab.capstone] }) : null;
+const LAB_REGISTRY = window.DDALab ? Object.freeze([
+  { id: 'LAB1', viewId: 'lesson-lab1', suffix: 'lab1', permission: 'lesson_m01', quizBlock: 'lab1-quiz', understoodScrollTo: 'lab1-exercise-block',
+    meta: { module: labModule, lesson: window.DDALab.lessons[0] },
+    questions: [
+      { role: 'exercise', block: 'lab1-exercise', success: '@practice', gate: true },
+      { role: 'quiz', block: 'lab1-quiz', success: '@data', result: true }
+    ] },
+  { id: 'LAB2', viewId: 'lesson-lab2', suffix: 'lab2', permission: 'lesson_m01', quizBlock: 'lab2-quiz', understoodScrollTo: 'lab2-exercise-block',
+    meta: { module: labModule, lesson: window.DDALab.lessons[1] },
+    questions: [
+      { role: 'exercise', block: 'lab2-exercise', success: '@practice', gate: true },
+      { role: 'quiz', block: 'lab2-quiz', success: '@data', result: true }
+    ] },
+  { id: 'LAB3', viewId: 'lesson-lab3', suffix: 'lab3', permission: 'lesson_m01', quizBlock: 'lab3-quiz', understoodScrollTo: 'lab3-exercise-block',
+    meta: { module: labModule, lesson: window.DDALab.lessons[2] },
+    questions: [
+      { role: 'exercise', block: 'lab3-exercise', success: '@practice', gate: true },
+      { role: 'quiz', block: 'lab3-quiz', success: '@data', result: true }
+    ] },
+  { id: 'LAB4', viewId: 'lesson-lab4', suffix: 'lab4', permission: 'premium_track', quizBlock: 'lab4-quiz', understoodScrollTo: 'lab4-exercise-block',
+    meta: { module: labModule, lesson: window.DDALab.lessons[3] },
+    questions: [
+      { role: 'exercise', block: 'lab4-exercise', success: '@practice', gate: true },
+      { role: 'quiz', block: 'lab4-quiz', success: '@data', result: true }
+    ] },
+  { id: 'LABCAP', viewId: 'lesson-lab-capstone', suffix: 'labcap', permission: 'premium_track', quizBlock: 'labcap-quiz', understoodScrollTo: 'labcap-checklist-block',
+    meta: { module: labModule, lesson: window.DDALab.capstone },
+    questions: [
+      { role: 'quiz', block: 'labcap-quiz', success: '@data', result: true }
+    ] }
+]) : [];
+const LAB_PREREQUISITE = Object.freeze(Object.fromEntries(LAB_REGISTRY.filter(entry => entry.meta.lesson.prerequisite).map(entry => [entry.viewId, entry.meta.lesson.prerequisite])));
+if (window.DDALab) {
+  LAB_REGISTRY.forEach(entry => {
+    // Same rule boot-time LESSON_REGISTRY mounting already uses (line ~158):
+    // a premium entry mounts at boot too when the already-loaded state is
+    // already premium (e.g. after a reload) — "not premium_track" alone
+    // would wrongly skip LAB4/capstone for an already-premium learner.
+    if (entry.permission === 'premium_track' && !DDA.can(prototypeState, 'premium_track')) return;
+    mountLesson(entry);
+    bindRegistryQuestions(entry);
+  });
+  LAB_REGISTRY.forEach(entry => {
+    const ui = lessonUiIds(entry);
+    bindMarkUnderstood(entry.id, { buttonId: ui.markUnderstoodId, savedStateId: ui.savedStateId, scrollToId: entry.understoodScrollTo });
+  });
+}
+function mountPremiumLabLessons() {
+  if (!window.DDALab || !DDA.can(prototypeState, 'premium_track')) return;
+  LAB_REGISTRY.filter(entry => entry.permission === 'premium_track').forEach(entry => {
+    const main = document.getElementById(`${entry.viewId}-main`);
+    const wasMounted = main?.dataset.ddaLessonMounted === 'true';
+    mountLesson(entry);
+    if (!wasMounted && main) {
+      bindRegistryQuestions(entry);
+      main.querySelectorAll('[data-view]').forEach(bindViewButton);
+    }
+  });
+}
+// A lesson's own three durable flags collapse here to one honest status word —
+// never a fabricated "Maîtrisé" from a single quiz pass (the exact conflation
+// the P0 audit flagged in the main curriculum's competencyLevel()).
+function labLessonStatus(entry) {
+  if (entry.permission === 'premium_track' && !DDA.can(prototypeState, 'premium_track')) return 'locked';
+  const progress = DDALearning.getLessonProgress(prototypeState, entry.id);
+  if (progress.quizComplete) return 'done';
+  if (progress.exerciseComplete || progress.lessonViewed) return 'started';
+  const prereq = LAB_REGISTRY.find(item => item.id === entry.meta.lesson.prerequisite);
+  if (prereq && !DDALearning.getLessonProgress(prototypeState, prereq.id).quizComplete) return 'locked';
+  return 'available';
+}
+const LAB_STATUS_LABEL = { locked: 'Verrouillé', available: 'À commencer', started: 'En cours', done: 'Terminé' };
+function renderLabCatalog() {
+  if (!window.DDALab) return;
+  LAB_REGISTRY.forEach(entry => {
+    const status = labLessonStatus(entry);
+    const label = status === 'locked' && entry.permission === 'premium_track' && DDA.can(prototypeState, 'premium_track') === false
+      ? 'DDA Premium'
+      : LAB_STATUS_LABEL[status];
+    [`lab-${entry.id}-status`, `lab-progress-${entry.id}-status`].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = label;
+    });
+    const strip = document.querySelector(`[data-lab-step="${entry.id}"]`);
+    if (strip) strip.dataset.state = status;
   });
 }
 
@@ -3020,13 +3146,20 @@ if (!appHistoryInitialized) {
 }
 
 
-/* DDA Visual Identity V2 — progressive reveals for Academy surfaces only. */
+/* DDA Visual Identity V2 — progressive reveals for Academy surfaces only.
+   .section-intro (every view's own title+intro, always the first thing under
+   the header) and the lesson header block (eyebrow/h1/lead/step rail) are
+   deliberately excluded: they sit above the fold the instant a view becomes
+   active, so hiding them behind an IntersectionObserver callback plus a
+   550ms fade — on top of the view's own .32s dda-enter transition — just
+   delays the one thing a learner needs to read first. Reveal stays for
+   content genuinely below the fold. */
 (function initAcademyVisualRhythm() {
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
   const selector = [
     '.terminal-entry', '.terminal-lead', '.terminal-mi', '.terminal-two > section', '.terminal-family',
-    '.terminal-aperture', '.terminal-tools', '.section-intro', '.journey-current', '.journey-node',
-    '.panel', '.lesson-main > *', '.library-entry', '.resource-feature', '.plan-card', '.broker-row',
+    '.terminal-aperture', '.terminal-tools', '.journey-current', '.journey-node',
+    '.panel', '.lesson-main > *:not(.eyebrow):not(h1):not(.lesson-lead):not(.lesson-loop)', '.library-entry', '.resource-feature', '.plan-card', '.broker-row',
     '.journal-entry-card'
   ].join(',');
   function prepare(root = document) {
