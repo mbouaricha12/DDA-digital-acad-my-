@@ -15,28 +15,21 @@ end $$;
 -- Authenticated users may read only their own user-owned learning records.
 -- All writes remain BFF/service-role operations so owner and server timestamps
 -- cannot be supplied by an untrusted browser.
-do $$
-declare
-  table_name text;
-begin
-  foreach table_name in array array['onboarding','lesson_progress','terminal_state','journal_entries','journal_plans','premium_progress','preferences'] loop
-    execute format('drop policy if exists %I on public.%I', table_name || '_select_own', table_name);
-    execute format('create policy %I on public.%I for select to authenticated using (owner_id = (select auth.uid()))', table_name || '_select_own', table_name);
-  end loop;
-end $$;
-
-drop policy if exists memberships_select_own on public.memberships;
-create policy memberships_select_own on public.memberships
-  for select to authenticated using (user_id = (select auth.uid()));
-
+--
+-- Audit finding (2026-10-25, Supabase database linter against a real project):
+-- this migration used to also create a first, loop-generated set of policies
+-- here (`<table>_select_own`, plus standalone `memberships_select_own` and
+-- `audit_events_select_none`), on top of the named `_select_own_explicit`
+-- policies below — both sets had the identical `USING` clause and both
+-- persisted as separate live policies on the same table/role/action. Postgres
+-- must evaluate every permissive policy on a query, so this was a real,
+-- measurable performance defect (not a security one — both policies allowed
+-- exactly the same rows), flagged by Supabase's own `multiple_permissive_policies`
+-- advisor on 9 tables. Removed; the explicit block below is the single source
+-- of truth for these policies, as the file already said it should be.
+--
 -- Audit events are server-owned and append-only. No authenticated or anonymous
 -- grants are present; the service role is the only writer.
-drop policy if exists audit_events_select_none on public.audit_events;
-create policy audit_events_select_none on public.audit_events
-  for select to authenticated using (false);
-
-revoke update, delete on table public.audit_events from public, anon, authenticated;
-revoke insert on table public.audit_events from public, anon, authenticated;
 
 -- Explicit declarations are intentionally repeated below: they keep the migration
 -- reviewable by simple static tooling as well as executable by PostgreSQL.
