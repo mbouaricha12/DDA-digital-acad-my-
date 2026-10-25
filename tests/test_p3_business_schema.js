@@ -26,8 +26,16 @@ for (const [table, fragments] of Object.entries(tables)) {
   assert.match(schema, new RegExp(`alter table ${table.replace('.', '\\.')} enable row level security`), `${table} must enable RLS`);
   assert.match(schema, new RegExp(`revoke all on table ${table.replace('.', '\\.')} from anon, authenticated`), `${table} must have no direct browser privileges`);
   for (const fragment of fragments) assert.ok(schema.includes(fragment), `${table} missing: ${fragment}`);
-  for (const action of ['select', 'insert', 'update', 'delete']) {
-    assert.match(schema, new RegExp(`create policy [a-z_]+_${action}_own on ${table.replace('.', '\\.')}`), `${table} missing ${action} ownership policy`);
+  // All writes to these tables go through the BFF's service-role key, which
+  // bypasses RLS entirely — the browser only ever gets a select-own policy,
+  // matching supabase/migrations/0003_rls_and_privileges.sql exactly. There
+  // must be no insert/update/delete policy or grant inventing a direct
+  // browser write path that was never built.
+  assert.match(schema, new RegExp(`create policy [a-z_]+_select_own on ${table.replace('.', '\\.')}`), `${table} missing select ownership policy`);
+  assert.match(schema, new RegExp(`grant select on table ${table.replace('.', '\\.')} to authenticated`), `${table} missing the GRANT that makes its select policy effective`);
+  for (const action of ['insert', 'update', 'delete']) {
+    assert.doesNotMatch(schema, new RegExp(`create policy [a-z_]+_${action}_own on ${table.replace('.', '\\.')}`), `${table} must not invent a direct browser ${action} path`);
+    assert.doesNotMatch(schema, new RegExp(`grant ${action}[^;]* on table ${table.replace('.', '\\.')} to authenticated`), `${table} must not grant ${action} to authenticated`);
   }
   assert.match(schema, new RegExp(`owner_id = \\(select auth\\.uid\\(\\)\\)`), `${table} must bind access to auth.uid()`);
 }

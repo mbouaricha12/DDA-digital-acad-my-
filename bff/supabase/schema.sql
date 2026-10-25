@@ -75,26 +75,30 @@ revoke all on table public.preferences from anon, authenticated;
 revoke all on table public.dda_billing_deliveries from anon, authenticated;
 revoke all on table public.dda_billing_memberships from anon, authenticated;
 
+-- Audit finding (2026-10-25): this file used to grant insert/update/delete to
+-- authenticated on these 4 tables (plus an insert/delete it invented for
+-- dda_profiles), while the real, already-tested migrations
+-- (0001/0003/0006) only ever grant select — all writes go through the BFF's
+-- service-role key, which bypasses RLS entirely and needs no browser policy.
+-- It also never issued the matching GRANT for its own select policies, which
+-- in Postgres makes a policy inert regardless of REVOKE ALL (see
+-- 0006_select_own_grants.sql's own comment on this). Both are fixed here to
+-- mirror the versioned migrations exactly.
+grant select on table public.dda_profiles to authenticated;
+grant update (display_name) on table public.dda_profiles to authenticated;
+grant select on table public.dda_sessions to authenticated;
+grant select on table public.lesson_progress to authenticated;
+grant select on table public.journal_entries to authenticated;
+grant select on table public.journal_plans to authenticated;
+grant select on table public.preferences to authenticated;
+grant select on table public.dda_billing_memberships to authenticated;
+
 create policy dda_profiles_select_own on public.dda_profiles for select to authenticated using (user_id = (select auth.uid()));
-create policy dda_profiles_insert_own on public.dda_profiles for insert to authenticated with check (user_id = (select auth.uid()));
 create policy dda_profiles_update_own on public.dda_profiles for update to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
-create policy dda_profiles_delete_own on public.dda_profiles for delete to authenticated using (user_id = (select auth.uid()));
 create policy dda_sessions_select_own on public.dda_sessions for select to authenticated using (user_id = (select auth.uid()));
 create policy dda_lesson_progress_select_own on public.lesson_progress for select to authenticated using (owner_id = (select auth.uid()));
-create policy dda_lesson_progress_insert_own on public.lesson_progress for insert to authenticated with check (owner_id = (select auth.uid()));
-create policy dda_lesson_progress_update_own on public.lesson_progress for update to authenticated using (owner_id = (select auth.uid())) with check (owner_id = (select auth.uid()));
-create policy dda_lesson_progress_delete_own on public.lesson_progress for delete to authenticated using (owner_id = (select auth.uid()));
 create policy dda_journal_entries_select_own on public.journal_entries for select to authenticated using (owner_id = (select auth.uid()));
-create policy dda_journal_entries_insert_own on public.journal_entries for insert to authenticated with check (owner_id = (select auth.uid()));
-create policy dda_journal_entries_update_own on public.journal_entries for update to authenticated using (owner_id = (select auth.uid())) with check (owner_id = (select auth.uid()));
-create policy dda_journal_entries_delete_own on public.journal_entries for delete to authenticated using (owner_id = (select auth.uid()));
 create policy dda_journal_plans_select_own on public.journal_plans for select to authenticated using (owner_id = (select auth.uid()));
-create policy dda_journal_plans_insert_own on public.journal_plans for insert to authenticated with check (owner_id = (select auth.uid()));
-create policy dda_journal_plans_update_own on public.journal_plans for update to authenticated using (owner_id = (select auth.uid())) with check (owner_id = (select auth.uid()));
-create policy dda_journal_plans_delete_own on public.journal_plans for delete to authenticated using (owner_id = (select auth.uid()));
 create policy dda_preferences_select_own on public.preferences for select to authenticated using (owner_id = (select auth.uid()));
-create policy dda_preferences_insert_own on public.preferences for insert to authenticated with check (owner_id = (select auth.uid()));
-create policy dda_preferences_update_own on public.preferences for update to authenticated using (owner_id = (select auth.uid())) with check (owner_id = (select auth.uid()));
-create policy dda_preferences_delete_own on public.preferences for delete to authenticated using (owner_id = (select auth.uid()));
 create policy dda_billing_deliveries_no_browser_access on public.dda_billing_deliveries for all to authenticated using (false) with check (false);
 create policy dda_billing_memberships_select_own on public.dda_billing_memberships for select to authenticated using (user_id = (select auth.uid()));
