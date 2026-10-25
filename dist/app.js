@@ -1064,12 +1064,15 @@ function renderProgressHero() {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
     return status === DDALearning.MODULE_STATUS.IN_PROGRESS || status === DDALearning.MODULE_STATUS.COMPLETED;
   }).length;
-  const startedLabel = `${started}/${DDA.curriculum.modules.length}`;
+  const totalModules = DDA.curriculum.modules.length;
+  const startedLabel = `${started}/${totalModules}`;
   const totalXp = DDALearning.totalXp(DDA.curriculum, prototypeState);
   const activeDays = countActiveDays(prototypeState.events);
   startedEl.textContent = startedLabel;
   document.getElementById('progress-total-xp').textContent = String(totalXp);
   document.getElementById('progress-active-days').textContent = String(activeDays);
+  const ring = document.getElementById('progress-modules-ring');
+  if (ring) ring.style.setProperty('--progress', String(totalModules ? Math.round((started / totalModules) * 100) : 0));
   // Profil mirrors the exact same real values as Progression — never a second,
   // diverging computation of "how far has this learner gotten".
   document.getElementById('profile-modules-started').textContent = startedLabel;

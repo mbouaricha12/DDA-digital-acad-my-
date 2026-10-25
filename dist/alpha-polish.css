@@ -25,11 +25,20 @@
 /* Progression = read-only evidence board, not a stack of generic panels. */
 #progress .progress-hero{border:0;background:transparent;gap:12px;overflow:visible}
 #progress .progress-stat{border:1px solid rgba(255,255,255,.12);border-radius:2px 14px 2px 14px;background:rgba(255,255,255,.035)}
-#progress .progress-stat.featured{min-height:156px;align-content:end;position:relative;overflow:hidden}
-#progress .progress-stat.featured:after{
-  content:"";position:absolute;right:20px;top:20px;width:92px;height:92px;border:1px solid rgba(201,154,69,.34);border-radius:50%;box-shadow:0 0 0 12px rgba(201,154,69,.05),0 0 0 25px rgba(201,154,69,.025)
-}
+#progress .progress-stat.featured{min-height:156px;position:relative;overflow:hidden;display:flex;align-items:center;gap:18px}
 #progress .progress-stat strong{font-size:clamp(2.4rem,5vw,4.3rem);line-height:.9}
+/* Real progress ring, replacing what used to be a purely decorative static
+   circle drawn behind the number (:after, no connection to actual data) —
+   the same .progress-ring component already used on the Dashboard photo
+   badge, re-themed here for the dark Deep Navy panel instead of its default
+   light/ivory center. --progress is set in app.js's renderProgressHero(). */
+#progress .progress-ring{
+  flex:none;width:96px;aspect-ratio:1;
+  background:radial-gradient(circle closest-side,#0a1424 76%,transparent 79% 99%),conic-gradient(var(--dda-elite-gold-soft,var(--gold-soft)) calc(var(--progress)*1%),rgba(255,255,255,.1) 0);
+  box-shadow:0 0 0 1px rgba(201,154,69,.22);
+}
+#progress .progress-ring strong{font-size:1.3rem;color:#f8fafc;font-family:var(--dda-serif,Georgia,serif)}
+#progress .progress-stat-ring span{color:var(--dda-elite-gold-soft,var(--gold-soft))}
 #progress .mastery-panel{border:0;border-top:1px solid var(--dda-rule);border-radius:0;padding-inline:0;background:transparent}
 #progress .mastery-list{display:grid;gap:10px}
 #progress .mastery-row{border:1px solid rgba(255,255,255,.1);border-radius:2px 14px 2px 14px;background:rgba(255,255,255,.025);transition:background .22s,border-color .22s,transform .22s}
@@ -132,7 +141,7 @@
   .view>.section-intro:before{margin-bottom:12px}
   .view>.section-intro h1{font-size:clamp(2.35rem,11vw,3.6rem)}
   #progress .progress-stat.featured{min-height:128px}
-  #progress .progress-stat.featured:after{width:70px;height:70px;right:15px;top:15px}
+  #progress .progress-ring{width:72px}
   #journal .journal-toolbar{align-items:start;flex-direction:column}
   #journal .journal-toolbar .primary-action{width:100%}
   #journal .journal-toolbar-actions{width:100%;flex-direction:column}
