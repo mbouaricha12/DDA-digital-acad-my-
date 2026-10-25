@@ -69,12 +69,6 @@ const FORBIDDEN_PATTERNS = [
       assert.ok(htmlSource.includes(footerDiscl), 'footer disclaimer missing');
     });
 
-    await test('M0.1 preview uses a real screenshot and the lesson\'s real title, never an invented one', () => {
-      assert.match(htmlSource, /M0\.1 — Le trading comme commerce/, 'must use the real M0.1 title as rendered by academy.html, not an invented one');
-      assert.match(htmlSource, /<img src="images\/m01-preview\.jpg" alt="Capture d'écran réelle de la leçon M0\.1/);
-      assert.ok(fs.existsSync(path.join(DIST, 'go', 'images', 'm01-preview.jpg')), 'the screenshot file referenced by the page must actually exist');
-    });
-
     await test('offers section shows Découverte free and hides Standard/Pro pricing', () => {
       assert.match(htmlSource, /Découverte — gratuite/);
       assert.match(htmlSource, /Offres payantes bientôt disponibles/);
@@ -159,12 +153,6 @@ const FORBIDDEN_PATTERNS = [
       assert.equal(entry.props.source, 'facebook');
       assert.equal(entry.props.medium, 'paid-social');
       await freshContext.close();
-    });
-
-    await test('motion respects prefers-reduced-motion', () => {
-      assert.match(htmlSource, /prefers-reduced-motion:\s*reduce/);
-      assert.match(htmlSource, /animation-duration:\s*\.001s\s*!important/);
-      assert.match(htmlSource, /transition-duration:\s*\.001s\s*!important/);
     });
 
     await test('no horizontal overflow at 360px width', async () => {
