@@ -143,7 +143,8 @@ body.public-shell main{padding-bottom:0}
 .primary-action:hover span{transform:translateX(3px)}
 .primary-action:active{transform:scale(.98)}
 .secondary-action{background:transparent;color:var(--white);border:1px solid var(--line);width:100%}
-.secondary-action:hover{border-color:var(--blue-2);color:var(--blue-2)}
+.secondary-action:hover{border-color:var(--blue-2);color:var(--blue-2);transform:translateY(-1px)}
+.secondary-action:active{transform:translateY(0)}
 .text-action{border:0;background:transparent;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:6px 0}
 #access .dark-action{color:var(--ink);border-color:#8b8579}
 
