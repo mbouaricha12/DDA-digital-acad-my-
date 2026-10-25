@@ -8,7 +8,12 @@
   const ATTRIBUTION_VALUES = {
     source: new Set(['newsletter', 'youtube', 'facebook', 'instagram', 'linkedin', 'tiktok', 'google', 'bing', 'direct', 'partner', 'whatsapp', 'telegram', 'community', 'x']),
     medium: new Set(['email', 'video', 'social', 'cpc', 'paid', 'organic', 'referral', 'newsletter', 'paid-social', 'paid_search']),
-    campaign: new Set(['launch', 'launch-2026', 'launch-2026-09-27', 'm0-launch', 'retarget', 'private-alpha', 'private-alpha-launch', 'private-alpha-2026'])
+    campaign: new Set(['launch', 'launch-2026', 'launch-2026-09-27', 'm0-launch', 'retarget', 'private-alpha', 'private-alpha-launch', 'private-alpha-2026', 'landing-test-2026-10']),
+    // Hero title variant served by the acquisition test landing page
+    // (dist/go/index.html), carried through utm_content so it stays on the
+    // visitor's first-touch acquisition record alongside source/medium/campaign —
+    // not a new concept, same allowlist-and-scrub pattern as the three above.
+    content: new Set(['echange', 'risque', 'progression'])
   };
   // Acquisition V1 (CEO-validated) adds four event names to the existing local
   // allowlist: landing_visit, broker_selected, affiliate_link_click (defined but
@@ -17,7 +22,7 @@
   // can be added alongside it without reinterpreting what activation_v1 events
   // already meant when they were recorded.
   const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'practice_attempted', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved', 'landing_visit', 'landing_viewed', 'landing_section_reached', 'landing_cta_hero', 'landing_cta_differentiation', 'landing_cta_free', 'landing_cta_final', 'landing_cta_mobile_sticky', 'broker_selected', 'affiliate_link_click', 'activation_v1', 'hero_cta_click', 'signup_started', 'signup_completed', 'qualification_started', 'qualification_completed', 'premium_track_viewed', 'premium_module_started', 'premium_lab_attempted', 'premium_lab_validated', 'premium_assessment_completed', 'premium_proof_created', 'premium_review_opened', 'premium_weekly_review_completed']);
-  const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan', 'source', 'medium', 'campaign', 'broker', 'section', 'position', 'lab', 'assessment', 'proof', 'skill', 'nextAction', 'practice', 'status']);
+  const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan', 'source', 'medium', 'campaign', 'content', 'broker', 'section', 'position', 'lab', 'assessment', 'proof', 'skill', 'nextAction', 'practice', 'status']);
   const ENTITLEMENTS = Object.freeze({
     visitor: ['dashboard_preview', 'access'],
     free: ['dashboard', 'path', 'lesson_m01', 'progress', 'profile', 'resources_free', 'membership', 'market_room', 'broker_hub', 'support', 'journal', 'community', 'practice', 'intelligence'],
@@ -586,7 +591,7 @@
   }
 
   function emptyAcquisition() {
-    return { visitorId: null, source: null, medium: null, campaign: null, referrer: null, landingPath: null, firstSeenAt: null };
+    return { visitorId: null, source: null, medium: null, campaign: null, content: null, referrer: null, landingPath: null, firstSeenAt: null };
   }
 
   function emptyTerminalState() {
@@ -726,6 +731,7 @@
     acquisition.source = sanitizeAttributionValue('source', raw.source);
     acquisition.medium = sanitizeAttributionValue('medium', raw.medium);
     acquisition.campaign = sanitizeAttributionValue('campaign', raw.campaign);
+    acquisition.content = sanitizeAttributionValue('content', raw.content);
     acquisition.referrer = sanitizeReferrer(raw.referrer);
     acquisition.landingPath = sanitizeLandingPath(raw.landingPath);
     acquisition.firstSeenAt = raw.firstSeenAt ? sanitizeText(raw.firstSeenAt, 40) : null;
