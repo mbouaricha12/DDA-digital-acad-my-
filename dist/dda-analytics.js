@@ -14,19 +14,32 @@
     onboarding_complete: 'dda_signup',
     broker_selected: 'broker_selected',
     affiliate_link_click: 'affiliate_link_click',
-    activation_v1: 'activation_v1'
+    activation_v1: 'activation_v1',
+    // DDA_Directive_Landing_Test_350USD_V1 §2/§6 — the primary and quality
+    // conversions it asks to measure before any ad spend. signup_started and
+    // signup_completed already fired locally (app.js) but were never in this
+    // map, so they never left the local debug queue; quiz_complete is the
+    // app's real lesson-completion signal (fired with metadata.lesson), kept
+    // under its own internal name but forwarded externally as
+    // lesson_completed since that is the name the directive's measurement
+    // plan and any dashboard built from it will look for.
+    signup_started: 'signup_started',
+    signup_completed: 'signup_completed',
+    quiz_complete: 'lesson_completed'
   };
-  const SAFE_PROP_KEYS = ['source', 'medium', 'campaign', 'referrer', 'broker', 'section', 'position', 'view'];
+  const SAFE_PROP_KEYS = ['source', 'medium', 'campaign', 'content', 'referrer', 'broker', 'section', 'position', 'view', 'lesson'];
   const SAFE_PROP_VALUES = {
     broker: new Set(['Deriv', 'HFM', 'Weltrade', 'XM']),
     section: new Set(['differentiation', 'free']),
     position: new Set(['differentiation', 'final', 'free', 'hero', 'mobile_sticky']),
-    view: new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'back'])
+    view: new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'back']),
+    lesson: new Set(['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3', 'P2.1', 'P2.2', 'LAB1', 'LAB2', 'LAB3', 'LAB4', 'LABCAP'])
   };
   const SAFE_ATTRIBUTION_VALUES = {
     source: new Set(['newsletter', 'youtube', 'facebook', 'instagram', 'linkedin', 'tiktok', 'google', 'bing', 'direct', 'partner', 'whatsapp', 'telegram', 'community', 'x']),
     medium: new Set(['email', 'video', 'social', 'cpc', 'paid', 'organic', 'referral', 'newsletter', 'paid-social', 'paid_search']),
-    campaign: new Set(['launch', 'launch-2026', 'launch-2026-09-27', 'm0-launch', 'retarget', 'private-alpha', 'private-alpha-launch', 'private-alpha-2026'])
+    campaign: new Set(['launch', 'launch-2026', 'launch-2026-09-27', 'm0-launch', 'retarget', 'private-alpha', 'private-alpha-launch', 'private-alpha-2026', 'landing-test-2026-10']),
+    content: new Set(['echange', 'risque', 'progression'])
   };
   const DEBUG_QUEUE_LIMIT = 200;
   const DEBUG_QUEUE_KEY = 'dda-analytics-debug-v1';
@@ -66,7 +79,7 @@
     const out = {};
     Object.entries(props || {}).forEach(([key, value]) => {
       if (!SAFE_PROP_KEYS.includes(key) || value === undefined || value === null || value === '') return;
-      const safeValue = ['source', 'medium', 'campaign', 'referrer'].includes(key)
+      const safeValue = ['source', 'medium', 'campaign', 'content', 'referrer'].includes(key)
         ? safeAttributionValue(key, value)
         : SAFE_PROP_VALUES[key]?.has(String(value).trim()) ? String(value).trim() : null;
       if (safeValue) out[key] = safeValue;
