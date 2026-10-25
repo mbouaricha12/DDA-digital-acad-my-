@@ -1,10 +1,19 @@
 'use strict';
 
+// Table names must match supabase/migrations/0002_business_entities.sql exactly
+// (lesson_progress, journal_entries, journal_plans, preferences — none of them
+// carry a dda_ prefix, unlike dda_profiles/dda_sessions/dda_admin_roles from
+// migrations 0001/0007). This store previously queried dda_lesson_progress,
+// dda_journal_entries, dda_journal_plans and dda_preferences, none of which
+// exist — every real Supabase call would have 404'd, silently breaking
+// account export and account deletion the first time either ran against a
+// live project. Caught during the admin-routes audit, never exercised
+// against a real Supabase instance before now.
 const TABLES = Object.freeze({
-  lesson_progress: { table: 'dda_lesson_progress', owner: 'owner_id' },
-  journal_entries: { table: 'dda_journal_entries', owner: 'owner_id' },
-  journal_plans: { table: 'dda_journal_plans', owner: 'owner_id' },
-  preferences: { table: 'dda_preferences', owner: 'owner_id', order: 'updated_at.asc' }
+  lesson_progress: { table: 'lesson_progress', owner: 'owner_id' },
+  journal_entries: { table: 'journal_entries', owner: 'owner_id' },
+  journal_plans: { table: 'journal_plans', owner: 'owner_id' },
+  preferences: { table: 'preferences', owner: 'owner_id', order: 'updated_at.asc' }
 });
 
 class PostgrestBusinessStore {

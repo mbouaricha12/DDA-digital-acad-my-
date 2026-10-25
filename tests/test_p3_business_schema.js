@@ -5,11 +5,20 @@ const fs = require('node:fs');
 const path = require('node:path');
 const schema = fs.readFileSync(path.join(__dirname, '..', 'bff', 'supabase', 'schema.sql'), 'utf8').toLowerCase();
 
+// Table names here must match supabase/migrations/0002_business_entities.sql
+// exactly: lesson_progress/journal_entries/journal_plans/preferences carry NO
+// dda_ prefix there, unlike dda_profiles/dda_sessions/dda_billing_* which do.
+// This file used to assert the dda_-prefixed names (a stale leftover from
+// before the versioned migrations existed), which bff/src/business-store.js
+// was then written to match — so the only two things "confirming" the wrong
+// names were confirming each other. Neither table was ever queried against a
+// real Supabase project. See test_business_store_table_names_contract.js for
+// the cross-file check that now prevents this specific class of drift.
 const tables = {
-  'public.dda_lesson_progress': ['progress_id uuid', 'owner_id uuid not null references auth.users(id)', 'lesson_id text not null', 'unique (owner_id, lesson_id)'],
-  'public.dda_journal_entries': ['entry_id uuid', 'owner_id uuid not null references auth.users(id)', 'market text not null', 'note text not null', 'terminal_source boolean not null'],
-  'public.dda_journal_plans': ['plan_id uuid', 'owner_id uuid not null unique references auth.users(id)', 'discipline_rules text not null', 'points_to_verify text not null'],
-  'public.dda_preferences': ['owner_id uuid primary key references auth.users(id)', 'low_data boolean not null default false', 'reminders boolean not null default false']
+  'public.lesson_progress': ['progress_id uuid', 'owner_id uuid not null references auth.users(id)', 'lesson_id text not null', 'unique (owner_id, lesson_id)'],
+  'public.journal_entries': ['entry_id uuid', 'owner_id uuid not null references auth.users(id)', 'market text not null', 'note text not null', 'terminal_source boolean not null'],
+  'public.journal_plans': ['plan_id uuid', 'owner_id uuid not null unique references auth.users(id)', 'discipline_rules text not null', 'points_to_verify text not null'],
+  'public.preferences': ['owner_id uuid primary key references auth.users(id)', 'low_data boolean not null default false', 'reminders boolean not null default false']
 };
 
 for (const [table, fragments] of Object.entries(tables)) {
