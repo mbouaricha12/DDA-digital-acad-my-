@@ -97,7 +97,7 @@ async function readJson(req, maxBytes = 64 * 1024) {
 }
 
 function cookieHeaders(config, sessionToken, csrfToken, clear = false) {
-  const base = { secure: config.secureCookies, sameSite: 'Lax', path: '/' };
+  const base = { secure: config.secureCookies, sameSite: 'None', path: '/' };
   if (clear) return [
     serializeCookie(SESSION_COOKIE, '', { ...base, httpOnly: true, maxAge: 0 }),
     serializeCookie(CSRF_COOKIE, '', { ...base, maxAge: 0 })
@@ -258,7 +258,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
     try {
       if (method === 'GET' && path === '/v1/security/csrf') {
         const csrf = randomToken(32);
-        setCookies(res, [serializeCookie(CSRF_COOKIE, csrf, { secure: config.secureCookies, sameSite: 'Lax', path: '/' })]);
+        setCookies(res, [serializeCookie(CSRF_COOKIE, csrf, { secure: config.secureCookies, sameSite: 'None', path: '/' })]);
         return json(res, 204, undefined);
       }
       if (method === 'GET' && path === '/healthz') return json(res, 200, { status: 'ok' });

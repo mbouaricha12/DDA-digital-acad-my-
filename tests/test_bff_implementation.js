@@ -85,7 +85,7 @@ function request(server, method, path, { body, rawBody, headers = {}, cookies = 
     const csrfCookie = setCookies.find(value => value.startsWith(`${CSRF_COOKIE}=`)).split(';')[0].split('=')[1];
     assert.match(setCookies.find(value => value.startsWith(`${SESSION_COOKIE}=`)), /HttpOnly/);
     assert.match(setCookies.find(value => value.startsWith(`${SESSION_COOKIE}=`)), /Secure/);
-    assert.match(setCookies.find(value => value.startsWith(`${SESSION_COOKIE}=`)), /SameSite=Lax/);
+    assert.match(setCookies.find(value => value.startsWith(`${SESSION_COOKIE}=`)), /SameSite=None/);
 
     response = await request(server, 'GET', '/v1/me', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
     assert.equal(response.status, 200);
