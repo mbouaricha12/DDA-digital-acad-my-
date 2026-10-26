@@ -156,6 +156,8 @@ body.public-shell main{padding-bottom:0}
 .nav-item.active{box-shadow:inset 3px 0 var(--gold)}
 .nav-item:active{background:var(--navy-800,var(--navy-700))}
 @media(prefers-reduced-motion:reduce){.nav-item{transition:none}}
+.nav-item:has(.nav-status-tag){flex-wrap:wrap;row-gap:4px}
+.nav-status-tag{margin-left:34px;padding:2px 8px;border-radius:999px;border:1px solid rgba(217,164,65,.35);background:rgba(217,164,65,.1);color:var(--gold);font-size:10px;font-weight:700;letter-spacing:.02em;white-space:nowrap;flex:none}
 .plan-label{display:inline-block;color:var(--gold);font-size:12px;margin:0 8px 15px}
 .profile-chip{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:8px;background:none;border:0;font:inherit;color:inherit;cursor:pointer}
 .profile-chip b{font-weight:800}
