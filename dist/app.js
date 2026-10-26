@@ -330,7 +330,7 @@ function closeDdaSelect(wrapper) {
   const trigger = wrapper.querySelector('.dda-select-trigger');
   trigger?.setAttribute('aria-expanded', 'false');
 }
-['level', 'goal', 'time', 'terminal-instrument', 'terminal-timeframe', 'p2-direction', 'broker-market', 'broker-use', 'support-subject', 'profile-level', 'profile-goal', 'profile-time'].forEach(id => initDdaSelect(document.getElementById(id)));
+['level', 'goal', 'time'].forEach(id => initDdaSelect(document.getElementById(id)));
 document.addEventListener('click', event => {
   if (!event.target.closest('.dda-select')) document.querySelectorAll('.dda-select.is-open').forEach(closeDdaSelect);
 });
@@ -402,13 +402,24 @@ function marketDemo() { return window.DDAMarketIntelligence?.demo || MARKET_DEMO
 // No publication is shown until a source, redistribution right and editorial
 // verification are all recorded. An empty registry is intentional: it prevents
 // synthetic documents from acquiring the appearance of official BRVM material.
-// The contract itself lives in brvm-publications.js (shared with the landing
-// ticker) so this page never maintains its own copy of the validation rule.
-const BRVM_PUBLICATION_REQUIRED_FIELDS = window.DDABrvmPublications.REQUIRED_FIELDS;
+const BRVM_PUBLICATION_REQUIRED_FIELDS = Object.freeze([
+  'id', 'title', 'source', 'sourceUrl', 'documentUrl', 'referenceDate', 'retrievedAt',
+  'verificationStatus', 'freshnessStatus', 'redistributionRights'
+]);
 let BRVM_PUBLICATIONS = Object.freeze([]);
 let brvmPublicationFetchState = 'idle';
 let brvmPublicationFetchStarted = false;
-function isVerifiedBrvmPublication(publication) { return window.DDABrvmPublications.isVerified(publication); }
+function isVerifiedBrvmPublication(publication) {
+  if (!publication || typeof publication !== 'object') return false;
+  if (BRVM_PUBLICATION_REQUIRED_FIELDS.some(field => typeof publication[field] !== 'string' || !publication[field].trim())) return false;
+  if (publication.verificationStatus !== 'verified') return false;
+  if (publication.freshnessStatus !== 'current') return false;
+  if (publication.redistributionRights !== 'authorized') return false;
+  if (!/^https:\/\//i.test(publication.sourceUrl) || !/^https:\/\//i.test(publication.documentUrl)) return false;
+  const referenceTime = Date.parse(publication.referenceDate);
+  const retrievedTime = Date.parse(publication.retrievedAt);
+  return Number.isFinite(referenceTime) && Number.isFinite(retrievedTime) && retrievedTime >= referenceTime;
+}
 function verifiedBrvmPublications() { return BRVM_PUBLICATIONS.filter(isVerifiedBrvmPublication); }
 async function loadBrvmPublications() {
   if (!window.DDABFF?.enabled?.() || typeof window.DDABFF.getBrvmPublications !== 'function' || brvmPublicationFetchStarted) return;
@@ -2561,9 +2572,6 @@ function bindNotifyButton(viewId, buttonId, prefKey, label) {
 bindNotifyButton('community', 'community-notify', 'communityNotify', 'la Communauté');
 bindNotifyButton('practice', 'practice-notify', 'practiceNotify', 'la Pratique avancée');
 bindNotifyButton('intelligence', 'intelligence-notify', 'intelligenceNotify', 'l’Intelligence DDA');
-bindNotifyButton('experts', 'experts-notify', 'expertsNotify', 'DDA Experts');
-bindNotifyButton('live', 'live-notify', 'liveNotify', 'DDA Live');
-bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business');
 
 document.getElementById('play-demo').addEventListener('click', event => {
   const caption = document.getElementById('video-caption');

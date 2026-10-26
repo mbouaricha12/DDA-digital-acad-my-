@@ -40,7 +40,7 @@ const path = require('path');
 
 const root = path.join(__dirname, '..');
 const dist = (...segments) => path.join(root, 'dist', ...segments);
-const SCRIPTS = ['m1-1-lesson.js', 'm1-2-lesson.js', 'm1-3-lesson.js', 'dda-core.js', 'learning-engine.js', 'lesson-renderer.js', 'dda-analytics.js', 'brvm-publications.js', 'app.js'];
+const SCRIPTS = ['m1-1-lesson.js', 'm1-2-lesson.js', 'm1-3-lesson.js', 'dda-core.js', 'learning-engine.js', 'lesson-renderer.js', 'dda-analytics.js', 'app.js'];
 
 const dom = new JSDOM(fs.readFileSync(dist('academy.html'), 'utf8'), {
   url: 'http://localhost/',

@@ -659,9 +659,9 @@ body.access-mode .prototype-banner{
 
 
 /* DDA custom select — surface Learning OS, sans menu natif du navigateur. */
-.dda-select{position:relative;z-index:2}
-.dda-native-select{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;border:0!important}
-.dda-select-trigger{
+#access .dda-select{position:relative;z-index:2}
+#access .dda-native-select{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;border:0!important}
+#access .dda-select-trigger{
   width:100%;
   min-height:48px;
   display:flex;
@@ -678,14 +678,14 @@ body.access-mode .prototype-banner{
   cursor:pointer;
   transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;
 }
-.dda-select-trigger span:first-child.has-value{color:#f8fafc}
-.dda-select-trigger:hover,
-.dda-select.is-open .dda-select-trigger,
-.dda-select-trigger:focus-visible{border-color:#6cb8ff;box-shadow:0 0 0 3px rgba(108,184,255,.14);outline:0}
-.dda-select-trigger[aria-invalid="true"]{border-color:var(--red)}
-.dda-select-chevron{color:#d9a441;font-size:18px;line-height:1;transform:translateY(-2px);transition:transform .18s ease}
-.dda-select.is-open .dda-select-chevron{transform:rotate(180deg) translateY(2px)}
-.dda-select-menu{
+#access .dda-select-trigger span:first-child.has-value{color:#f8fafc}
+#access .dda-select-trigger:hover,
+#access .dda-select.is-open .dda-select-trigger,
+#access .dda-select-trigger:focus-visible{border-color:#6cb8ff;box-shadow:0 0 0 3px rgba(108,184,255,.14);outline:0}
+#access .dda-select-trigger[aria-invalid="true"]{border-color:var(--red)}
+#access .dda-select-chevron{color:#d9a441;font-size:18px;line-height:1;transform:translateY(-2px);transition:transform .18s ease}
+#access .dda-select.is-open .dda-select-chevron{transform:rotate(180deg) translateY(2px)}
+#access .dda-select-menu{
   position:absolute;
   left:0;
   right:0;
@@ -701,11 +701,9 @@ body.access-mode .prototype-banner{
   visibility:hidden;
   transform:translateY(-6px);
   transition:opacity .18s ease,transform .18s ease,visibility .18s ease;
-  max-height:min(62vh,420px);
-  overflow:auto;
 }
-.dda-select.is-open .dda-select-menu{opacity:1;visibility:visible;transform:none}
-.dda-select-option{
+#access .dda-select.is-open .dda-select-menu{opacity:1;visibility:visible;transform:none}
+#access .dda-select-option{
   min-height:48px;
   padding:13px 14px;
   border:1px solid transparent;
@@ -717,12 +715,12 @@ body.access-mode .prototype-banner{
   cursor:pointer;
   transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease;
 }
-.dda-select-option:hover,
-.dda-select-option:focus-visible,
-.dda-select-option.is-selected{background:rgba(23,105,209,.18);border-color:rgba(108,184,255,.62);color:#f8fafc;outline:0}
-.dda-select-option.is-selected{box-shadow:inset 3px 0 #d9a441}
+#access .dda-select-option:hover,
+#access .dda-select-option:focus-visible,
+#access .dda-select-option.is-selected{background:rgba(23,105,209,.18);border-color:rgba(108,184,255,.62);color:#f8fafc;outline:0}
+#access .dda-select-option.is-selected{box-shadow:inset 3px 0 #d9a441}
 @media(max-width:639px){
-  .dda-select-menu{
+  #access .dda-select-menu{
     position:fixed;
     z-index:100;
     left:12px;
@@ -734,8 +732,8 @@ body.access-mode .prototype-banner{
     border-radius:18px;
     transform:translateY(22px);
   }
-  .dda-select.is-open .dda-select-menu{transform:none}
-  .dda-select.is-open .dda-select-menu::before{
+  #access .dda-select.is-open .dda-select-menu{transform:none}
+  #access .dda-select.is-open .dda-select-menu::before{
     content:'Choisir une option';
     display:block;
     padding:4px 4px 10px;
@@ -744,7 +742,7 @@ body.access-mode .prototype-banner{
     font-family:var(--dda-serif);
     font-size:1.05rem;
   }
-  .dda-select-option{min-height:52px;padding:15px 14px}
+  #access .dda-select-option{min-height:52px;padding:15px 14px}
 }
 
 
@@ -752,7 +750,7 @@ body.access-mode .prototype-banner{
 #access.view.active{animation:dda-access-enter .32s ease both}
 @keyframes dda-access-enter{from{opacity:0}to{opacity:1}}
 @media(max-width:639px){
-  .dda-select-menu{bottom:calc(80px + var(--safe-b));max-height:min(62vh,420px);overflow:auto}
+  #access .dda-select-menu{bottom:calc(80px + var(--safe-b));max-height:min(62vh,420px);overflow:auto}
 }
 
 
@@ -1343,20 +1341,14 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 #landing .future-label:focus-visible,
 #landing .future-label-link:hover,
 #landing .future-label-link:focus-visible{border-color:rgba(201,154,69,.62);color:#f8fafc;background:rgba(10,20,36,.98)}
-/* .future-label-tag: these five DDA Live/Business/Experts/Communauté/AI cards
-   used to be <a href="#landing-future"> — a link to the very section already
-   on screen, with a label implying a dedicated destination that didn't exist
-   (flagged by the 2026-10-24 external audit, downgraded to inert spans).
-   Each now links to its own honest "pas encore ouvert" page under dist/, so
-   the affordance is real again. */
-#landing .future-label-tag{display:inline-block;padding:10px 14px;font:inherit;width:auto;cursor:pointer;text-decoration:none;transition:border-color .15s ease,color .15s ease,background .15s ease,transform .1s ease}
-#landing .future-label-tag:hover,
-#landing .future-label-tag:focus-visible{border-color:rgba(201,154,69,.62);color:#f8fafc;background:rgba(10,20,36,.98)}
-#landing .future-label-tag:focus-visible{outline:2px solid rgba(201,154,69,.8);outline-offset:2px}
-#landing .future-label-tag:active{transform:scale(.98)}
-@media(prefers-reduced-motion:reduce){
-  #landing .future-label-tag{transition:none!important;transform:none!important}
-}
+/* .future-label-tag: these three DDA Experts/Communauté/AI cards used to be
+   <a href="#landing-future"> — a link to the very section already on screen,
+   with a label implying a dedicated destination that doesn't exist yet (flagged
+   by the 2026-10-24 external audit). They are plain, non-interactive status
+   tags now (no cursor:pointer, no focus ring) — unlike .future-label-link
+   above, which stays a real button elsewhere (academy.html's Community
+   preview) and keeps its clickable affordance. */
+#landing .future-label-tag{display:inline-block;padding:10px 14px;font:inherit;width:auto}
 @media(max-width:639px){
   #landing{padding-bottom:calc(220px + var(--safe-b));scroll-padding-bottom:220px}
   #landing .landing-future-grid .future-label{padding:13px 12px;margin-top:18px}
@@ -1745,7 +1737,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 }
 body,body.public-shell{background:var(--dda-elite-canvas);color:var(--dda-elite-ink)}
 .app-shell,main{background:transparent}
-#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{background:var(--dda-elite-canvas)!important;color:var(--dda-elite-ink)}
+#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{background:var(--dda-elite-canvas)!important;color:var(--dda-elite-ink)}
 
 /* Product chrome and global navigation. */
 .prototype-banner{border-bottom:1px solid var(--dda-elite-line);background:linear-gradient(90deg,#0a1424,#0d1929);color:#aab6c4}
@@ -2207,7 +2199,7 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 }
 
 /* Contract-safe base: the optical texture sits above the canonical Deep Navy canvas. */
-#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{
+#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{
   background-color:#060d17!important;
 }
 
@@ -2505,33 +2497,6 @@ body.public-shell .prototype-banner{display:none}
 #landing .public-utility-bar .utility-help{margin-left:auto;gap:15px}
 #landing .public-utility-bar a{color:#c4ced9;text-decoration:none}
 #landing .public-utility-bar a:hover{color:#9ce59d}
-
-/* BRVM publications ticker — hidden by default (set in markup); JS only ever
-   reveals it once at least one verified, non-expired publication exists.
-   Deliberately not styled as part of .public-utility-bar: an empty-registry
-   or BFF-outage state must never flash borrowed chrome before disappearing. */
-.brvm-ticker{
-  overflow:hidden;min-height:30px;display:flex;align-items:center;
-  border-bottom:1px solid rgba(201,154,69,.14);background:#040a12;
-}
-.brvm-ticker-track{display:flex;align-items:center;gap:28px;padding:0 clamp(20px,5vw,72px);white-space:nowrap;will-change:transform}
-.brvm-ticker.brvm-ticker-animated .brvm-ticker-track{animation:dda-ticker-scroll 38s linear infinite}
-.brvm-ticker.brvm-ticker-animated:hover .brvm-ticker-track,
-.brvm-ticker.brvm-ticker-animated:focus-within .brvm-ticker-track{animation-play-state:paused}
-.brvm-ticker:not(.brvm-ticker-animated){overflow-x:auto}
-@keyframes dda-ticker-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@media(prefers-reduced-motion:reduce){
-  .brvm-ticker.brvm-ticker-animated .brvm-ticker-track{animation:none}
-}
-.brvm-ticker-item{display:inline-flex;align-items:center;gap:8px;color:#c4ced9;text-decoration:none;font-size:.64rem;letter-spacing:.02em}
-.brvm-ticker-item:hover,.brvm-ticker-item:focus-visible{color:#f8fafc}
-.brvm-ticker-badge{flex:none;padding:2px 7px;border:1px solid rgba(201,154,69,.4);border-radius:999px;color:#d9a441;font-size:.56rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-.brvm-ticker-title{color:#c9d3de;font-weight:700}
-.brvm-ticker-meta{color:#8291a3}
-@media(max-width:639px){
-  .brvm-ticker-track{padding:0 16px;gap:18px}
-  .brvm-ticker-item{font-size:.6rem}
-}
 #landing .utility-pulse{width:6px;height:6px;border-radius:50%;background:#80c99b;box-shadow:0 0 0 4px rgba(128,201,155,.12)}
 #landing .public-header{background:rgba(6,13,23,.72);backdrop-filter:blur(16px)}
 #landing .public-header-brand .public-header-mark{border-color:#83d18b;color:#9ce59d;box-shadow:inset 0 -8px 15px rgba(91,183,108,.08)}
