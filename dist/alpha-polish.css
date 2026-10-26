@@ -1349,8 +1349,14 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
    (flagged by the 2026-10-24 external audit, downgraded to inert spans).
    Each now links to its own honest "pas encore ouvert" page under dist/, so
    the affordance is real again. */
-#landing .future-label-tag{display:inline-block;padding:10px 14px;font:inherit;width:auto;cursor:pointer;text-decoration:none}
+#landing .future-label-tag{display:inline-block;padding:10px 14px;font:inherit;width:auto;cursor:pointer;text-decoration:none;transition:border-color .15s ease,color .15s ease,background .15s ease,transform .1s ease}
+#landing .future-label-tag:hover,
+#landing .future-label-tag:focus-visible{border-color:rgba(201,154,69,.62);color:#f8fafc;background:rgba(10,20,36,.98)}
 #landing .future-label-tag:focus-visible{outline:2px solid rgba(201,154,69,.8);outline-offset:2px}
+#landing .future-label-tag:active{transform:scale(.98)}
+@media(prefers-reduced-motion:reduce){
+  #landing .future-label-tag{transition:none!important;transform:none!important}
+}
 @media(max-width:639px){
   #landing{padding-bottom:calc(220px + var(--safe-b));scroll-padding-bottom:220px}
   #landing .landing-future-grid .future-label{padding:13px 12px;margin-top:18px}
