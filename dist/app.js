@@ -402,24 +402,13 @@ function marketDemo() { return window.DDAMarketIntelligence?.demo || MARKET_DEMO
 // No publication is shown until a source, redistribution right and editorial
 // verification are all recorded. An empty registry is intentional: it prevents
 // synthetic documents from acquiring the appearance of official BRVM material.
-const BRVM_PUBLICATION_REQUIRED_FIELDS = Object.freeze([
-  'id', 'title', 'source', 'sourceUrl', 'documentUrl', 'referenceDate', 'retrievedAt',
-  'verificationStatus', 'freshnessStatus', 'redistributionRights'
-]);
+// The contract itself lives in brvm-publications.js (shared with the landing
+// ticker) so this page never maintains its own copy of the validation rule.
+const BRVM_PUBLICATION_REQUIRED_FIELDS = window.DDABrvmPublications.REQUIRED_FIELDS;
 let BRVM_PUBLICATIONS = Object.freeze([]);
 let brvmPublicationFetchState = 'idle';
 let brvmPublicationFetchStarted = false;
-function isVerifiedBrvmPublication(publication) {
-  if (!publication || typeof publication !== 'object') return false;
-  if (BRVM_PUBLICATION_REQUIRED_FIELDS.some(field => typeof publication[field] !== 'string' || !publication[field].trim())) return false;
-  if (publication.verificationStatus !== 'verified') return false;
-  if (publication.freshnessStatus !== 'current') return false;
-  if (publication.redistributionRights !== 'authorized') return false;
-  if (!/^https:\/\//i.test(publication.sourceUrl) || !/^https:\/\//i.test(publication.documentUrl)) return false;
-  const referenceTime = Date.parse(publication.referenceDate);
-  const retrievedTime = Date.parse(publication.retrievedAt);
-  return Number.isFinite(referenceTime) && Number.isFinite(retrievedTime) && retrievedTime >= referenceTime;
-}
+function isVerifiedBrvmPublication(publication) { return window.DDABrvmPublications.isVerified(publication); }
 function verifiedBrvmPublications() { return BRVM_PUBLICATIONS.filter(isVerifiedBrvmPublication); }
 async function loadBrvmPublications() {
   if (!window.DDABFF?.enabled?.() || typeof window.DDABFF.getBrvmPublications !== 'function' || brvmPublicationFetchStarted) return;
