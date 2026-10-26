@@ -1343,14 +1343,14 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 #landing .future-label:focus-visible,
 #landing .future-label-link:hover,
 #landing .future-label-link:focus-visible{border-color:rgba(201,154,69,.62);color:#f8fafc;background:rgba(10,20,36,.98)}
-/* .future-label-tag: these three DDA Experts/Communauté/AI cards used to be
-   <a href="#landing-future"> — a link to the very section already on screen,
-   with a label implying a dedicated destination that doesn't exist yet (flagged
-   by the 2026-10-24 external audit). They are plain, non-interactive status
-   tags now (no cursor:pointer, no focus ring) — unlike .future-label-link
-   above, which stays a real button elsewhere (academy.html's Community
-   preview) and keeps its clickable affordance. */
-#landing .future-label-tag{display:inline-block;padding:10px 14px;font:inherit;width:auto}
+/* .future-label-tag: these five DDA Live/Business/Experts/Communauté/AI cards
+   used to be <a href="#landing-future"> — a link to the very section already
+   on screen, with a label implying a dedicated destination that didn't exist
+   (flagged by the 2026-10-24 external audit, downgraded to inert spans).
+   Each now links to its own honest "pas encore ouvert" page under dist/, so
+   the affordance is real again. */
+#landing .future-label-tag{display:inline-block;padding:10px 14px;font:inherit;width:auto;cursor:pointer;text-decoration:none}
+#landing .future-label-tag:focus-visible{outline:2px solid rgba(201,154,69,.8);outline-offset:2px}
 @media(max-width:639px){
   #landing{padding-bottom:calc(220px + var(--safe-b));scroll-padding-bottom:220px}
   #landing .landing-future-grid .future-label{padding:13px 12px;margin-top:18px}
