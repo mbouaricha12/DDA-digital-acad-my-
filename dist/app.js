@@ -330,7 +330,7 @@ function closeDdaSelect(wrapper) {
   const trigger = wrapper.querySelector('.dda-select-trigger');
   trigger?.setAttribute('aria-expanded', 'false');
 }
-['level', 'goal', 'time'].forEach(id => initDdaSelect(document.getElementById(id)));
+['level', 'goal', 'time', 'terminal-instrument', 'terminal-timeframe', 'p2-direction', 'broker-market', 'broker-use', 'support-subject', 'profile-level', 'profile-goal', 'profile-time'].forEach(id => initDdaSelect(document.getElementById(id)));
 document.addEventListener('click', event => {
   if (!event.target.closest('.dda-select')) document.querySelectorAll('.dda-select.is-open').forEach(closeDdaSelect);
 });

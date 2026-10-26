@@ -659,9 +659,9 @@ body.access-mode .prototype-banner{
 
 
 /* DDA custom select — surface Learning OS, sans menu natif du navigateur. */
-#access .dda-select{position:relative;z-index:2}
-#access .dda-native-select{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;border:0!important}
-#access .dda-select-trigger{
+.dda-select{position:relative;z-index:2}
+.dda-native-select{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;border:0!important}
+.dda-select-trigger{
   width:100%;
   min-height:48px;
   display:flex;
@@ -678,14 +678,14 @@ body.access-mode .prototype-banner{
   cursor:pointer;
   transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;
 }
-#access .dda-select-trigger span:first-child.has-value{color:#f8fafc}
-#access .dda-select-trigger:hover,
-#access .dda-select.is-open .dda-select-trigger,
-#access .dda-select-trigger:focus-visible{border-color:#6cb8ff;box-shadow:0 0 0 3px rgba(108,184,255,.14);outline:0}
-#access .dda-select-trigger[aria-invalid="true"]{border-color:var(--red)}
-#access .dda-select-chevron{color:#d9a441;font-size:18px;line-height:1;transform:translateY(-2px);transition:transform .18s ease}
-#access .dda-select.is-open .dda-select-chevron{transform:rotate(180deg) translateY(2px)}
-#access .dda-select-menu{
+.dda-select-trigger span:first-child.has-value{color:#f8fafc}
+.dda-select-trigger:hover,
+.dda-select.is-open .dda-select-trigger,
+.dda-select-trigger:focus-visible{border-color:#6cb8ff;box-shadow:0 0 0 3px rgba(108,184,255,.14);outline:0}
+.dda-select-trigger[aria-invalid="true"]{border-color:var(--red)}
+.dda-select-chevron{color:#d9a441;font-size:18px;line-height:1;transform:translateY(-2px);transition:transform .18s ease}
+.dda-select.is-open .dda-select-chevron{transform:rotate(180deg) translateY(2px)}
+.dda-select-menu{
   position:absolute;
   left:0;
   right:0;
@@ -701,9 +701,11 @@ body.access-mode .prototype-banner{
   visibility:hidden;
   transform:translateY(-6px);
   transition:opacity .18s ease,transform .18s ease,visibility .18s ease;
+  max-height:min(62vh,420px);
+  overflow:auto;
 }
-#access .dda-select.is-open .dda-select-menu{opacity:1;visibility:visible;transform:none}
-#access .dda-select-option{
+.dda-select.is-open .dda-select-menu{opacity:1;visibility:visible;transform:none}
+.dda-select-option{
   min-height:48px;
   padding:13px 14px;
   border:1px solid transparent;
@@ -715,12 +717,12 @@ body.access-mode .prototype-banner{
   cursor:pointer;
   transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease;
 }
-#access .dda-select-option:hover,
-#access .dda-select-option:focus-visible,
-#access .dda-select-option.is-selected{background:rgba(23,105,209,.18);border-color:rgba(108,184,255,.62);color:#f8fafc;outline:0}
-#access .dda-select-option.is-selected{box-shadow:inset 3px 0 #d9a441}
+.dda-select-option:hover,
+.dda-select-option:focus-visible,
+.dda-select-option.is-selected{background:rgba(23,105,209,.18);border-color:rgba(108,184,255,.62);color:#f8fafc;outline:0}
+.dda-select-option.is-selected{box-shadow:inset 3px 0 #d9a441}
 @media(max-width:639px){
-  #access .dda-select-menu{
+  .dda-select-menu{
     position:fixed;
     z-index:100;
     left:12px;
@@ -732,8 +734,8 @@ body.access-mode .prototype-banner{
     border-radius:18px;
     transform:translateY(22px);
   }
-  #access .dda-select.is-open .dda-select-menu{transform:none}
-  #access .dda-select.is-open .dda-select-menu::before{
+  .dda-select.is-open .dda-select-menu{transform:none}
+  .dda-select.is-open .dda-select-menu::before{
     content:'Choisir une option';
     display:block;
     padding:4px 4px 10px;
@@ -742,7 +744,7 @@ body.access-mode .prototype-banner{
     font-family:var(--dda-serif);
     font-size:1.05rem;
   }
-  #access .dda-select-option{min-height:52px;padding:15px 14px}
+  .dda-select-option{min-height:52px;padding:15px 14px}
 }
 
 
@@ -750,7 +752,7 @@ body.access-mode .prototype-banner{
 #access.view.active{animation:dda-access-enter .32s ease both}
 @keyframes dda-access-enter{from{opacity:0}to{opacity:1}}
 @media(max-width:639px){
-  #access .dda-select-menu{bottom:calc(80px + var(--safe-b));max-height:min(62vh,420px);overflow:auto}
+  .dda-select-menu{bottom:calc(80px + var(--safe-b));max-height:min(62vh,420px);overflow:auto}
 }
 
 
