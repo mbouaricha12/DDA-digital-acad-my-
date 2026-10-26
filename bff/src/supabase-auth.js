@@ -35,8 +35,8 @@ class SupabaseAuthAdapter {
     return body;
   }
 
-  async register({ email, password, display_name }) {
-    return this.publicRequest('/auth/v1/signup', { method: 'POST', body: JSON.stringify({ email: normalizeEmail(email), password, data: { display_name: display_name || '' } }) });
+  async register({ email, password, display_name, redirectTo }) {
+    return this.publicRequest('/auth/v1/signup', { method: 'POST', body: JSON.stringify({ email: normalizeEmail(email), password, data: { display_name: display_name || '' }, redirect_to: redirectTo }) });
   }
 
   async verifyEmail(token) {

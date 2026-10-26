@@ -274,7 +274,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         const validation = validateRegistration(body);
         if (Object.keys(validation.fields).length) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, validation.fields);
-        await auth.register({ email: validation.email, password: body.password, display_name: body.display_name });
+        await auth.register({ email: validation.email, password: body.password, display_name: body.display_name, redirectTo: config.emailRedirectTo });
         return json(res, 202, { message: 'If the registration can be completed, a verification message will be sent.' });
       }
       if (method === 'POST' && path === '/v1/auth/verify-email') {
