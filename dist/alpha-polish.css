@@ -2247,17 +2247,7 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 .dda-public-surface,.dda-auth-surface{width:100%}
 .dda-app-surface{width:100%;background:var(--navy-950);min-height:calc(100vh - 84px)}
 body.dda-app-shell main{background:var(--navy-950)}
-body.dda-auth-shell main{background:var(--ivory)}
-body.dda-auth-shell .topbar{background:rgba(247,245,240,.92);border-bottom-color:rgba(10,17,40,.12);color:var(--ink)}
-body.dda-auth-shell .context{color:var(--ink)}
-body.dda-auth-shell .network-state{color:var(--muted-2)}
-body.dda-auth-shell .network-state i{background:var(--teal)}
-body.dda-auth-shell .icon-button{color:var(--ink);border-color:rgba(10,17,40,.15)}
-body.dda-auth-shell .prototype-banner{background:var(--ivory);color:var(--muted-2);border-bottom-color:rgba(10,17,40,.12)}
-body.dda-auth-shell .mobile-nav{background:rgba(247,245,240,.96);border-top-color:rgba(10,17,40,.14)}
-body.dda-auth-shell .mobile-nav button{color:var(--muted-2)}
-body.dda-auth-shell .mobile-nav button.active{color:var(--blue)}
-body.dda-auth-shell .dda-auth-surface{background:var(--ivory)}
+body.dda-auth-shell main{background:var(--navy-950)}
 body.dda-auth-shell #access{max-width:1280px;margin-inline:auto}
 body.dda-app-shell .dda-public-surface,
 body.dda-app-shell .dda-auth-surface{display:none!important}
