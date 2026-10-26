@@ -1,6 +1,10 @@
-/* Landing BRVM publications ticker. Reuses the BFF client (bff-client.js) and
-   the shared verification contract (brvm-publications.js) — this file only
-   renders; it never re-decides what counts as a valid publication.
+/* Landing BRVM publications ticker. The public shell never loads the
+   authenticated app client (bff-client.js, with its session/CSRF
+   machinery) — per the public/Academy shell contract, that stays
+   Academy-only. "/v1/publications/brvm" is an unauthenticated public GET,
+   so this file talks to it directly with a plain fetch and reuses the
+   shared verification contract (brvm-publications.js) for what counts as
+   a valid publication; it never re-decides that itself.
    Visibility rule: shown only when at least one verified, non-expired
    publication is available. A BFF outage and an empty registry both result
    in the banner staying hidden (never a permanent "coming soon" placeholder
@@ -45,9 +49,13 @@
   }
 
   async function init() {
-    if (!window.DDABFF?.enabled?.() || typeof window.DDABFF.getBrvmPublications !== 'function') return;
+    const base = String(window.DDA_BFF_BASE_URL || '').trim().replace(/\/+$/, '');
+    if (!base) return;
     try {
-      const items = await window.DDABFF.getBrvmPublications();
+      const response = await fetch(`${base}/v1/publications/brvm`, { headers: { Accept: 'application/json' } });
+      if (!response.ok) throw new Error('brvm_publications_failed');
+      const body = await response.json();
+      const items = body?.items;
       if (!Array.isArray(items)) throw new Error('brvm_publications_invalid_response');
       const verified = items.filter(window.DDABrvmPublications.isVerified);
       if (!verified.length) {
