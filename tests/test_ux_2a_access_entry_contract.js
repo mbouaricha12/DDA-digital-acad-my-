@@ -16,7 +16,7 @@ assert.match(landing, /Progression &amp; Journal/, 'landing names local progress
 assert.match(landing, /Pas de carte bancaire/, 'landing removes payment anxiety near the CTA');
 assert.match(academy, /id="access-form-title">Commence ton parcours Free/, 'access form names the Free journey');
 assert.match(academy, /id="access-form-note"/, 'access form explains the local journey');
-assert.match(academy, /Je comprends que cette version conserve ma progression/, 'local storage consent is explicit');
+assert.match(academy, /Je comprends que ma progression est stockée uniquement sur cet appareil/, 'local storage consent is explicit');
 assert.match(academy, /id="onboarding-form-note"/, 'onboarding explains why calibration fields are requested');
 assert.match(academy, /aria-describedby="onboarding-form-note onboarding-error"/, 'onboarding fields expose accessible context and errors');
 assert.match(academy, /id="progress-next-action"/, 'progression exposes a dedicated next-action control');
