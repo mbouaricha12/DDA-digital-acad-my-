@@ -6,7 +6,7 @@ const path = require('node:path');
 
 const root = path.join(__dirname, '..');
 const dist = path.join(root, 'dist');
-const BASE = 'https://mbouaricha12.github.io/DDA-digital-acad-my-/';
+const BASE = 'https://dariusdigitalacademy.com/';
 
 const sitemap = fs.readFileSync(path.join(dist, 'sitemap.xml'), 'utf8');
 const robots = fs.readFileSync(path.join(dist, 'robots.txt'), 'utf8');
@@ -33,11 +33,16 @@ for (const key of ['launch', 'about', 'terms', 'privacy', 'cookies', 'imprint', 
 assert.ok(locs.includes(BASE), 'the landing page itself must be in the sitemap');
 assert.ok(locs.includes(`${BASE}academy.html`), 'the Academy entry point must be in the sitemap');
 
-// robots.txt: honest about what it can and cannot do for a GitHub Pages
-// PROJECT site (served under a subpath, not the host root).
+// robots.txt: DDA is served on its own custom domain (dist/CNAME), so this
+// file is delivered from the real host root and is authoritative for crawlers.
 assert.match(robots, /User-agent:\s*\*/i);
 assert.match(robots, new RegExp(`Sitemap:\\s*${BASE}sitemap\\.xml`));
-assert.match(robots, /host root/i, 'robots.txt must document that it is not served from the real host root');
-assert.match(robots, /robots-txt-spec|not honored/i, 'robots.txt must reference why a project-path robots.txt is not authoritative for crawlers');
+assert.match(robots, /host root/i, 'robots.txt must document that it is served from the real host root');
+assert.match(robots, /robots-txt-spec/i, 'robots.txt must reference the spec establishing it is authoritative from the host root');
+
+// The custom domain must actually be configured (dist/CNAME), otherwise this
+// robots.txt's "served from the host root" claim would be false.
+const cname = fs.readFileSync(path.join(dist, 'CNAME'), 'utf8').trim();
+assert.equal(cname, 'dariusdigitalacademy.com', 'dist/CNAME must match the domain robots.txt and sitemap.xml claim to be served from');
 
 console.log('SEO sitemap/robots contract: PASS');
