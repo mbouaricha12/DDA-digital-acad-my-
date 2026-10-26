@@ -1456,8 +1456,14 @@
   </div>
   <script src="dda-lazy-modules.js"></script>
   <script>
-    // Optional deployment flag. Leave empty to preserve the local prototype.
-    window.DDA_BFF_BASE_URL = window.DDA_BFF_BASE_URL || '';
+    // Optional deployment flag. Empty on localhost/CI/previews preserves the
+    // local prototype; only the real production domain talks to the live BFF,
+    // so tests and local dev never depend on network access.
+    window.DDA_BFF_BASE_URL = window.DDA_BFF_BASE_URL || (
+      ['dariusdigitalacademy.com', 'www.dariusdigitalacademy.com'].includes(location.hostname)
+        ? 'https://dda-digital-acad-my.vercel.app'
+        : ''
+    );
   </script>
   <script src="dda-core.js"></script>
   <script src="dda-lab.js"></script>
