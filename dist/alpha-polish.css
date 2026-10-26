@@ -1763,7 +1763,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 }
 body,body.public-shell{background:var(--dda-elite-canvas);color:var(--dda-elite-ink)}
 .app-shell,main{background:transparent}
-#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{background:var(--dda-elite-canvas)!important;color:var(--dda-elite-ink)}
+#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#forex.view,#stocks.view,#indices.view,#crypto.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{background:var(--dda-elite-canvas)!important;color:var(--dda-elite-ink)}
 
 /* Product chrome and global navigation. */
 .prototype-banner{border-bottom:1px solid var(--dda-elite-line);background:linear-gradient(90deg,#0a1424,#0d1929);color:#aab6c4}
@@ -1958,7 +1958,7 @@ button:disabled{cursor:not-allowed}
 }
 
 /* Static optical depth across every route; background-color remains #060d17. */
-:is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{
+:is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#forex,#stocks,#indices,#crypto,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{
   background-image:
     radial-gradient(ellipse 54% 26% at 96% 2%,rgba(37,136,255,.22),transparent 74%),
     radial-gradient(ellipse 44% 25% at 0% 44%,rgba(39,188,198,.12),transparent 76%),
@@ -2073,7 +2073,7 @@ button:disabled{cursor:not-allowed}
 
 /* Keep the glass readable and inexpensive on phones, data-saver, and transparency-sensitive setups. */
 @media(max-width:700px){
-  :is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{background-attachment:scroll}
+  :is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#forex,#stocks,#indices,#crypto,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{background-attachment:scroll}
   .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form){background-color:rgba(9,21,36,.91)}
   #path .journey-current{background-color:rgba(9,21,36,.93)}
   #landing .landing-device-stage{animation-duration:12s}
@@ -2152,7 +2152,7 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 }
 
 /* A quiet paper-like grain replaces the flat SaaS canvas without adding assets. */
-:is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{
+:is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#forex,#stocks,#indices,#crypto,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{
   background-color:var(--dda-material-ink)!important;
   background-image:
     radial-gradient(ellipse 58% 34% at 92% 0%,rgba(46,140,255,.15),transparent 72%),
@@ -2217,7 +2217,7 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 .public-footer-bottom{border-top-color:rgba(216,174,97,.18)}
 
 @media(max-width:700px){
-  :is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{background-attachment:scroll!important}
+  :is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#forex,#stocks,#indices,#crypto,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{background-attachment:scroll!important}
   .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form){box-shadow:0 14px 32px rgba(0,0,0,.2),0 0 0 1px rgba(216,174,97,.025) inset}
 }
 @media(prefers-reduced-transparency:reduce){
@@ -2225,7 +2225,7 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 }
 
 /* Contract-safe base: the optical texture sits above the canonical Deep Navy canvas. */
-#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{
+#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#forex.view,#stocks.view,#indices.view,#crypto.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{
   background-color:#060d17!important;
 }
 
