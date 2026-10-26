@@ -51,6 +51,24 @@
 
 /* Parcours = timeline / chapter rail. */
 #path .view-photo-band{margin-bottom:clamp(24px,4vw,48px);border-radius:2px 22px 2px 22px;box-shadow:14px 16px 0 rgba(201,154,69,.07)}
+
+/* Lesson photo bands share Parcours' editorial framing (asymmetric corner +
+   gold drop-shadow) instead of the plain default, and gain a restrained
+   hover zoom on the photo itself — pointer/no-reduced-motion only, same
+   gating pattern as the card-lift rules above. */
+:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone,#lesson-p21,#lesson-p22) .view-photo-band{
+  margin-bottom:clamp(20px,3.4vw,32px);
+  border-radius:2px 22px 2px 22px;
+  box-shadow:14px 16px 0 rgba(201,154,69,.07);
+}
+:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone,#lesson-p21,#lesson-p22) .view-photo-band .photo-fill{
+  transition:transform .5s ease;
+}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone,#lesson-p21,#lesson-p22) .view-photo-band:hover .photo-fill{
+    transform:scale(1.04);
+  }
+}
 #path .journey{max-width:980px;margin-inline:auto}
 #path .journey-current{box-shadow:0 24px 70px rgba(0,0,0,.28),12px 12px 0 rgba(201,154,69,.07)}
 #path .journey-rail{margin-top:30px;padding-left:38px}
