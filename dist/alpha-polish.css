@@ -1739,7 +1739,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 }
 body,body.public-shell{background:var(--dda-elite-canvas);color:var(--dda-elite-ink)}
 .app-shell,main{background:transparent}
-#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{background:var(--dda-elite-canvas)!important;color:var(--dda-elite-ink)}
+#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{background:var(--dda-elite-canvas)!important;color:var(--dda-elite-ink)}
 
 /* Product chrome and global navigation. */
 .prototype-banner{border-bottom:1px solid var(--dda-elite-line);background:linear-gradient(90deg,#0a1424,#0d1929);color:#aab6c4}
@@ -2201,7 +2201,7 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 }
 
 /* Contract-safe base: the optical texture sits above the canonical Deep Navy canvas. */
-#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{
+#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{
   background-color:#060d17!important;
 }
 

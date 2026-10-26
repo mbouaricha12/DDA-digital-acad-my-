@@ -2572,6 +2572,9 @@ function bindNotifyButton(viewId, buttonId, prefKey, label) {
 bindNotifyButton('community', 'community-notify', 'communityNotify', 'la Communauté');
 bindNotifyButton('practice', 'practice-notify', 'practiceNotify', 'la Pratique avancée');
 bindNotifyButton('intelligence', 'intelligence-notify', 'intelligenceNotify', 'l’Intelligence DDA');
+bindNotifyButton('experts', 'experts-notify', 'expertsNotify', 'DDA Experts');
+bindNotifyButton('live', 'live-notify', 'liveNotify', 'DDA Live');
+bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business');
 
 document.getElementById('play-demo').addEventListener('click', event => {
   const caption = document.getElementById('video-caption');
