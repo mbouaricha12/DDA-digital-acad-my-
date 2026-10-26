@@ -3,6 +3,7 @@
 const { randomUUID } = require('node:crypto');
 const { randomToken, sha256, timingSafeEqualText, parseCookies, serializeCookie, encrypt, decrypt, normalizeEmail } = require('./security');
 const { executeIdempotentMutation, validateClientMutationId } = require('./idempotency');
+const { checkAuthRateLimit } = require('./rate-limiter');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
@@ -77,6 +78,10 @@ function sendError(res, status, code, message, requestId, fieldErrors) {
   return json(res, status, errorBody(code, message, requestId, fieldErrors));
 }
 
+function clientIp(req) {
+  return String(req.socket?.remoteAddress || '');
+}
+
 async function readJson(req, maxBytes = 64 * 1024) {
   let total = 0;
   const chunks = [];
@@ -146,7 +151,7 @@ function parsePageParams(url, { maxPerPage = 200 } = {}) {
   return { page, perPage };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, rateLimiter = null, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   businessStore = businessStore || {
     exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
@@ -274,12 +279,14 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         const validation = validateRegistration(body);
         if (Object.keys(validation.fields).length) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, validation.fields);
+        if (!await checkAuthRateLimit(rateLimiter, 'register', { ip: clientIp(req), email: validation.email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
         await auth.register({ email: validation.email, password: body.password, display_name: body.display_name, redirectTo: config.emailRedirectTo });
         return json(res, 202, { message: 'If the registration can be completed, a verification message will be sent.' });
       }
       if (method === 'POST' && path === '/v1/auth/verify-email') {
         const body = await readJson(req);
         if (typeof body.token !== 'string' || body.token.length < 32) return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'verify-email', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
         await auth.verifyEmail(body.token);
         return json(res, 204);
       }
@@ -287,6 +294,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         const validation = validateRegistration({ email: body.email, password: body.password });
         if (Object.keys(validation.fields).length) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'login', { ip: clientIp(req), email: validation.email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
         let provider;
         try { provider = await auth.login({ email: validation.email, password: body.password }); }
         catch (error) { logger('login_failed', { requestId, status: error.status || 401 }); return sendError(res, 401, 'authentication_failed', 'Authentication failed.', requestId); }
@@ -299,6 +307,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         const email = normalizeEmail(body.email);
         if (!/^\S+@\S+\.\S+$/.test(email)) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-request', { ip: clientIp(req), email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
         try { await auth.requestPasswordReset(email, config.emailRedirectTo); } catch (error) { logger('recovery_failed', { requestId, status: error.status || 500 }); }
         return json(res, 202, { message: 'If the account can be recovered, a message will be sent.' });
       }
@@ -306,6 +315,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         if (typeof body.token !== 'string' || body.token.length < 20) return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId);
         if (typeof body.password !== 'string' || body.password.length < 12) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, { password: 'too_short' });
+        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-confirm', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
         try { await auth.confirmPasswordReset(body.token, body.password); }
         catch (error) { logger('password_reset_confirm_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId); }
         return json(res, 204);
