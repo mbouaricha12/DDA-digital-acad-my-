@@ -194,7 +194,7 @@
               <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ex. Richard"></label>
               <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"><small class="field-help">Reste uniquement sur cet appareil tant qu'aucun compte serveur n'est activé — jamais envoyée ailleurs.</small></label>
               <label id="access-password-field" hidden>Mot de passe<input id="access-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128"></label>
-              <label class="consent" id="access-consent-field"><input id="consent" type="checkbox" required><span id="access-consent-label">Je comprends que cette version conserve ma progression sur cet appareil.</span></label>
+              <label class="consent" id="access-consent-field"><input id="consent" type="checkbox" required><span id="access-consent-label">Je comprends que ma progression est stockée uniquement sur cet appareil pendant ce pilote, et qu'elle peut être perdue définitivement (changement d'appareil, cache vidé, incident technique) — il n'existe pas de sauvegarde serveur.</span></label>
               <p class="form-error" id="signup-error" role="alert"></p>
               <button class="primary-action" type="submit" disabled>Continuer <span>→</span></button>
             </form>
@@ -1097,7 +1097,7 @@
         <div class="page-mission" data-mission="support"><div><p class="eyebrow">Mission de cette page</p><strong>Résoudre un blocage précis avant de reprendre.</strong><span>L’Aide répond aux questions de fonctionnement ; elle ne devient pas une nouvelle page de contenu.</span></div><button class="text-action" data-view="path">Reprendre mon parcours <span>→</span></button></div>
         <section class="panel support-faq-panel">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-help"/></svg> Questions fréquentes</p></div></div>
-          <details><summary>Ma progression est-elle enregistrée ?</summary><p>Pour l’instant, elle reste uniquement sur cet appareil.</p></details>
+          <details><summary>Ma progression est-elle enregistrée ?</summary><p>Uniquement sur cet appareil et ce navigateur — il n’existe pas encore de sauvegarde serveur. Un changement d’appareil, un cache vidé ou un incident de stockage effacera cette progression sans recours.</p></details>
           <details><summary>Puis-je déjà payer Premium ?</summary><p>Non. Aucun paiement réel n’est activé.</p></details>
           <details><summary>DDA donne-t-elle des signaux ?</summary><p>Non. DDA enseigne le processus, le risque et la compréhension des marchés.</p></details>
           <details><summary>Ma progression suit-elle mon compte sur un autre appareil ?</summary><p>Pas encore. Sans compte serveur, chaque appareil garde sa propre progression locale.</p></details>
