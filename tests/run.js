@@ -1039,6 +1039,116 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('landing BRVM ticker stays hidden with no BFF configured', async () => {
+    const context = await freshContext(browser, { width: 1440, height: 900 });
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+    await page.waitForLoadState('networkidle');
+    assert.equal(await page.locator('#brvm-ticker').isHidden(), true, 'no DDA_BFF_BASE_URL on this host means the ticker never activates');
+    await context.close();
+  });
+
+  await test('landing BRVM ticker stays hidden on an empty registry, distinctly from a service failure', async () => {
+    const context = await freshContext(browser, { width: 1440, height: 900 });
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    const page = await context.newPage();
+    const infoLogs = [];
+    page.on('console', message => { if (message.type() === 'info') infoLogs.push(message.text()); });
+    await page.route('https://bff.test/v1/publications/brvm', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [] }) }));
+    await page.goto(`${BASE}/#landing`);
+    await page.waitForLoadState('networkidle');
+    assert.equal(await page.locator('#brvm-ticker').isHidden(), true, 'empty registry never shows a placeholder banner');
+    assert.ok(infoLogs.some(line => /no verified publication/.test(line)), 'empty registry is logged as reachable-but-empty, for diagnostics only');
+    await context.close();
+  });
+
+  await test('landing BRVM ticker stays hidden and logs distinctly when the service fails', async () => {
+    const context = await freshContext(browser, { width: 1440, height: 900 });
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    const page = await context.newPage();
+    const infoLogs = [];
+    page.on('console', message => { if (message.type() === 'info') infoLogs.push(message.text()); });
+    await page.route('https://bff.test/v1/publications/brvm', route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ code: 'publications_unavailable' }) }));
+    await page.goto(`${BASE}/#landing`);
+    await page.waitForLoadState('networkidle');
+    assert.equal(await page.locator('#brvm-ticker').isHidden(), true, 'a service failure must never surface as a visible banner');
+    assert.ok(infoLogs.some(line => /unavailable/.test(line)), 'service failure is logged distinctly from an empty registry');
+    assert.ok(!infoLogs.some(line => /no verified publication/.test(line)), 'a failure is never misreported as an empty registry');
+    await context.close();
+  });
+
+  await test('landing BRVM ticker only shows verified, non-expired publications and links to the real document', async () => {
+    const context = await freshContext(browser, { width: 1440, height: 900 });
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    const page = await context.newPage();
+    await page.route('https://bff.test/v1/publications/brvm', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ items: [
+        { id: 'pw-valid', title: 'Avis BRVM — fixture Playwright', source: 'Source de test', sourceUrl: 'https://source.test/', documentUrl: 'https://source.test/avis.pdf', referenceDate: '2026-10-20', retrievedAt: '2026-10-21T09:00:00.000Z', verificationStatus: 'verified', freshnessStatus: 'current', redistributionRights: 'authorized' },
+        { id: 'pw-pending', title: 'Ne doit jamais apparaître — en attente', source: 'Source de test', sourceUrl: 'https://source.test/', documentUrl: 'https://source.test/pending.pdf', referenceDate: '2026-10-20', retrievedAt: '2026-10-21T09:00:00.000Z', verificationStatus: 'pending', freshnessStatus: 'current', redistributionRights: 'authorized' },
+        { id: 'pw-stale', title: 'Ne doit jamais apparaître — expirée', source: 'Source de test', sourceUrl: 'https://source.test/', documentUrl: 'https://source.test/stale.pdf', referenceDate: '2026-10-20', retrievedAt: '2026-10-21T09:00:00.000Z', verificationStatus: 'verified', freshnessStatus: 'expired', redistributionRights: 'authorized' },
+        { id: 'pw-insecure', title: 'Ne doit jamais apparaître — URL non HTTPS', source: 'Source de test', sourceUrl: 'https://source.test/', documentUrl: 'http://source.test/insecure.pdf', referenceDate: '2026-10-20', retrievedAt: '2026-10-21T09:00:00.000Z', verificationStatus: 'verified', freshnessStatus: 'current', redistributionRights: 'authorized' }
+      ] })
+    }));
+    await page.goto(`${BASE}/#landing`);
+    await page.waitForLoadState('networkidle');
+    await page.getByText('Avis BRVM — fixture Playwright').waitFor();
+    assert.equal(await page.locator('#brvm-ticker').isHidden(), false, 'at least one verified publication reveals the banner');
+    assert.equal(await page.locator('.brvm-ticker-item').count(), 1, 'pending, expired and non-HTTPS rows are all rejected client-side');
+    assert.equal(await page.locator('.brvm-ticker-item').first().getAttribute('href'), 'https://source.test/avis.pdf');
+    assert.ok((await page.locator('.brvm-ticker-meta').first().textContent()).includes('2026-10-20'), 'reference date is shown');
+    await context.close();
+  });
+
+  await test('landing BRVM ticker fits without horizontal overflow at 360/390/720/1440px', async () => {
+    for (const width of [360, 390, 720, 1440]) {
+      const context = await freshContext(browser, { width, height: 900 });
+      await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+      const page = await context.newPage();
+      await page.route('https://bff.test/v1/publications/brvm', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [
+          { id: 'pw-valid', title: 'Avis BRVM — fixture Playwright pour la largeur ' + width, source: 'Source de test', sourceUrl: 'https://source.test/', documentUrl: 'https://source.test/avis.pdf', referenceDate: '2026-10-20', retrievedAt: '2026-10-21T09:00:00.000Z', verificationStatus: 'verified', freshnessStatus: 'current', redistributionRights: 'authorized' }
+        ] })
+      }));
+      await page.goto(`${BASE}/#landing`);
+      await page.waitForLoadState('networkidle');
+      await page.locator('.brvm-ticker-item').first().waitFor();
+      const dimensions = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
+      assert.ok(dimensions[0] <= dimensions[1] + 1, `ticker does not cause horizontal overflow at ${width}px (${dimensions.join('/')})`);
+      await context.close();
+    }
+  });
+
+  await test('landing BRVM ticker never animates under prefers-reduced-motion, and never animates for a single item', async () => {
+    const singleItem = { id: 'pw-valid', title: 'Avis BRVM — fixture unique', source: 'Source de test', sourceUrl: 'https://source.test/', documentUrl: 'https://source.test/avis.pdf', referenceDate: '2026-10-20', retrievedAt: '2026-10-21T09:00:00.000Z', verificationStatus: 'verified', freshnessStatus: 'current', redistributionRights: 'authorized' };
+    const secondItem = { ...singleItem, id: 'pw-valid-2', title: 'Avis BRVM — fixture secondaire', documentUrl: 'https://source.test/avis-2.pdf' };
+
+    const reducedMotionContext = await freshContext(browser, { width: 1440, height: 900 });
+    await reducedMotionContext.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    const reducedMotionPage = await reducedMotionContext.newPage();
+    await reducedMotionPage.emulateMedia({ reducedMotion: 'reduce' });
+    await reducedMotionPage.route('https://bff.test/v1/publications/brvm', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [singleItem, secondItem] }) }));
+    await reducedMotionPage.goto(`${BASE}/#landing`);
+    await reducedMotionPage.waitForLoadState('networkidle');
+    await reducedMotionPage.locator('.brvm-ticker-item').first().waitFor();
+    assert.equal(await reducedMotionPage.locator('#brvm-ticker.brvm-ticker-animated').count(), 0, 'prefers-reduced-motion disables the scroll animation even with multiple publications');
+    await reducedMotionContext.close();
+
+    const singleItemContext = await freshContext(browser, { width: 1440, height: 900 });
+    await singleItemContext.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    const singleItemPage = await singleItemContext.newPage();
+    await singleItemPage.route('https://bff.test/v1/publications/brvm', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [singleItem] }) }));
+    await singleItemPage.goto(`${BASE}/#landing`);
+    await singleItemPage.waitForLoadState('networkidle');
+    await singleItemPage.locator('.brvm-ticker-item').first().waitFor();
+    assert.equal(await singleItemPage.locator('#brvm-ticker.brvm-ticker-animated').count(), 0, 'a single publication never needs to loop');
+    assert.equal(await singleItemPage.locator('.brvm-ticker-item').count(), 1, 'the single item is still reachable without animation');
+    await singleItemContext.close();
+  });
+
   await test('BRVM publication gallery stays honestly empty and responsive without a BFF at 360/390px', async () => {
     for (const width of [360, 390]) {
       const context = await freshContext(browser, { width, height: 900 });

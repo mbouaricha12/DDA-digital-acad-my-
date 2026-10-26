@@ -146,13 +146,16 @@ body.public-shell main{padding-bottom:0}
 .secondary-action:hover{border-color:var(--blue-2);color:var(--blue-2);transform:translateY(-1px)}
 .secondary-action:active{transform:translateY(0)}
 .text-action{border:0;background:transparent;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:6px 0}
+.text-action:active{opacity:.7}
 #access .dark-action{color:var(--ink);border-color:#8b8579}
 
 /* ---------- Sidebar nav item / mobile nav shared look ---------- */
-.nav-item{display:flex;align-items:center;gap:14px;padding:13px 15px;border-radius:13px;color:var(--muted);text-align:left;background:none;border:0;font:inherit;cursor:pointer;width:100%}
+.nav-item{display:flex;align-items:center;gap:14px;padding:13px 15px;border-radius:13px;color:var(--muted);text-align:left;background:none;border:0;font:inherit;cursor:pointer;width:100%;transition:background .15s ease,color .15s ease}
 .nav-item .icon{width:20px;height:20px}
 .nav-item:hover,.nav-item.active{background:var(--navy-700);color:var(--white)}
 .nav-item.active{box-shadow:inset 3px 0 var(--gold)}
+.nav-item:active{background:var(--navy-800,var(--navy-700))}
+@media(prefers-reduced-motion:reduce){.nav-item{transition:none}}
 .plan-label{display:inline-block;color:var(--gold);font-size:12px;margin:0 8px 15px}
 .profile-chip{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:8px;background:none;border:0;font:inherit;color:inherit;cursor:pointer}
 .profile-chip b{font-weight:800}
@@ -334,6 +337,7 @@ body.public-shell main{padding-bottom:0}
 
 .chevron-row{display:flex;align-items:center;gap:14px;transition:border-color .15s,transform .15s}
 .chevron-row:hover{border-color:var(--cta-blue-2);transform:translateX(2px)}
+.chevron-row:active{transform:translateX(2px) scale(.99)}
 .chevron-row-icon{flex:none;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:rgba(13,79,176,.06);border:1.5px solid rgba(13,79,176,.35);color:var(--cta-blue)}
 .chevron-row-icon .icon{width:19px;height:19px}
 .chevron-row-body{flex:1;min-width:0;display:grid;gap:2px}
@@ -2269,9 +2273,12 @@ body.public-shell{background:var(--dda-ivory);color:#15243a}
   }
   .price-chart{min-height:180px}
   .lesson-actions{
-    grid-template-columns:1fr;
+    grid-template-columns:auto minmax(0,1fr);
+    padding:10px;
+    gap:8px;
   }
-  .lesson-actions .secondary-action{width:100%}
+  .lesson-actions .secondary-action{width:auto;padding:10px 14px;min-height:44px}
+  .lesson-actions .primary-action{min-height:44px}
 }
 body.low-data .decision-option,
 body.low-data .answer-grid button,
