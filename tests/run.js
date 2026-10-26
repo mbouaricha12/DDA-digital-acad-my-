@@ -1352,13 +1352,26 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
-  await test('#landing renders with no horizontal overflow at 360px, 390px and 1440px', async () => {
-    for (const width of [360, 390, 1440]) {
+  await test('#landing renders with no horizontal overflow at 360/390/720/1024/1440px', async () => {
+    for (const width of [360, 390, 720, 1024, 1440]) {
       const context = await freshContext(browser, { width, height: 900 });
       const page = await context.newPage();
       await page.goto(`${BASE}/#landing`);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       assert.ok(overflow <= 1, `#landing must not overflow horizontally at ${width}px (got ${overflow}px)`);
+      await context.close();
+    }
+  });
+
+  await test('#dashboard renders with no horizontal overflow at 360/390/720/1024/1440px', async () => {
+    for (const width of [360, 390, 720, 1024, 1440]) {
+      const context = await freshContext(browser, { width, height: 900 });
+      await seedLocalLearner(context);
+      const page = await context.newPage();
+      await page.goto(`${ACADEMY_BASE}#dashboard`);
+      await page.waitForFunction(() => document.querySelector('#dashboard')?.classList.contains('active'));
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      assert.ok(overflow <= 1, `#dashboard must not overflow horizontally at ${width}px (got ${overflow}px)`);
       await context.close();
     }
   });
