@@ -2731,3 +2731,75 @@ body.public-shell .prototype-banner{display:none}
   #markets .brvm-source-row{align-items:flex-start;flex-direction:column}
   #markets .brvm-source-link{width:fit-content}
 }
+
+/* ======================================================================
+   Dashboard KPI row — institutional admin-console treatment for the
+   "Aujourd'hui" cockpit stat line. Same real data as before (dashboard
+   bindings are unchanged, only the markup/visual wrapper changed), just
+   presented as a proper stat-card grid instead of a plain inline list.
+   ====================================================================== */
+.dashboard-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0 22px}
+.dashboard-kpi-card{
+  display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;
+  border:1px solid rgba(217,164,65,.16);
+  background:linear-gradient(155deg,rgba(18,30,48,.9),rgba(8,15,26,.95));
+  box-shadow:0 14px 30px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.04);
+  transition:transform .18s var(--ease,ease),border-color .18s ease,box-shadow .18s ease;
+}
+.dashboard-kpi-icon{
+  display:grid;place-items:center;width:42px;height:42px;flex:none;border-radius:12px;
+  background:rgba(217,164,65,.12);color:var(--gold);
+}
+.dashboard-kpi-icon .icon{width:20px;height:20px}
+.dashboard-kpi-card>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.dashboard-kpi-card strong{font-size:19px;font-weight:800;color:#f4f7fc;letter-spacing:-.01em}
+.dashboard-kpi-card span{font-size:11px;color:rgba(222,232,245,.56);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.dashboard-kpi-gold{
+  border-color:rgba(217,164,65,.42);
+  background:linear-gradient(155deg,rgba(217,164,65,.16),rgba(18,30,48,.95));
+  box-shadow:0 16px 34px rgba(217,164,65,.14),inset 0 1px rgba(255,255,255,.06);
+}
+.dashboard-kpi-gold .dashboard-kpi-icon{background:rgba(217,164,65,.28);color:#fff}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  .dashboard-kpi-card:hover{transform:translateY(-3px);border-color:rgba(217,164,65,.4);box-shadow:0 20px 42px rgba(0,0,0,.3)}
+}
+@media(max-width:720px){
+  .dashboard-kpi-row{grid-template-columns:repeat(2,1fr);gap:10px}
+  .dashboard-kpi-card{padding:13px 14px;border-radius:13px}
+  .dashboard-kpi-icon{width:36px;height:36px;border-radius:10px}
+  .dashboard-kpi-card strong{font-size:16px}
+}
+
+/* ======================================================================
+   Dashboard ecosystem strip — an honest scrolling marquee of DDA's real
+   spaces and their real status (Actif / Aperçu local / En préparation),
+   the same labels already used as nav badges elsewhere. No invented
+   numbers, no market ticker dressed up as live data: every chip links to
+   a real view. Reuses the BRVM ticker's exact marquee technique
+   (dda-ticker-scroll, pause on hover/focus, disabled under
+   prefers-reduced-motion) so the site has one consistent "things move"
+   language instead of two different implementations.
+   ====================================================================== */
+.dda-ecosystem-strip{
+  overflow:hidden;margin:0 0 18px;border-radius:14px;
+  border:1px solid rgba(217,164,65,.16);background:#070e18;
+}
+.dda-ecosystem-track{display:flex;align-items:center;gap:10px;padding:10px 16px;white-space:nowrap;width:max-content;animation:dda-ticker-scroll 42s linear infinite}
+.dda-ecosystem-strip:hover .dda-ecosystem-track,
+.dda-ecosystem-strip:focus-within .dda-ecosystem-track{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.dda-ecosystem-track{animation:none;overflow-x:auto}}
+.dda-ecosystem-chip{
+  flex:none;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;
+  border:1px solid rgba(217,164,65,.18);background:rgba(217,164,65,.05);
+  color:rgba(222,232,245,.75);font:600 12px/1 inherit;cursor:pointer;transition:border-color .16s,background .16s;
+}
+.dda-ecosystem-chip:hover,.dda-ecosystem-chip:focus-visible{border-color:rgba(217,164,65,.42);background:rgba(217,164,65,.1)}
+.dda-ecosystem-chip .icon{width:14px;height:14px;flex:none;color:var(--gold)}
+.dda-ecosystem-chip span{font-weight:700;color:#f4f7fc}
+.dda-ecosystem-chip em{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:rgba(222,232,245,.5)}
+.dda-ecosystem-chip.is-active{border-color:rgba(65,217,140,.3);background:rgba(65,217,140,.07)}
+.dda-ecosystem-chip.is-active em{color:#58d99b}
+@media(max-width:720px){
+  .dda-ecosystem-track{padding:9px 12px;gap:8px}
+  .dda-ecosystem-chip{padding:6px 10px;font-size:11px}
+}
