@@ -1097,6 +1097,7 @@ body.public-shell main{padding-bottom:0}
 #access .trust-list{color:var(--ink)}
 #access .text-action{color:var(--muted-2)}
 .access-shell{display:grid;grid-template-columns:1fr;gap:28px}
+.access-card{order:-1}
 .access-illustration{display:none}
 .access-photo{height:clamp(150px,32vw,220px);aspect-ratio:auto;margin-bottom:22px}
 #access-title{color:var(--ink)}
@@ -1235,6 +1236,7 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
 
   .access-shell{grid-template-columns:1fr minmax(340px,460px);gap:clamp(36px,5vw,80px);align-items:center;min-height:600px}
   .access-illustration{display:block;margin-bottom:24px;max-width:380px;color:var(--gold-soft)}
+  .access-card{order:0}
 }
 
 /* =========================================================
