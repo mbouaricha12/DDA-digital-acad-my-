@@ -1245,6 +1245,20 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   h1{font-size:clamp(44px,4.4vw,64px)}
   .lesson-layout{gap:48px}
 }
+/* The 1280px cap below reads fine on a laptop but leaves a wide, empty
+   margin on either side of the content on a real desktop monitor — the
+   app looked "centered/narrow" rather than using the screen. Widen the
+   cap progressively on dashboard/journal/progress/market-style views,
+   which benefit from the extra width for their card grids. Lesson views
+   are deliberately excluded: their prose column has no independent
+   max-width of its own, so widening .view there would stretch reading
+   lines well past a comfortable measure. */
+@media(min-width:1440px){
+  .view:not(:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone)){max-width:1520px}
+}
+@media(min-width:1800px){
+  .view:not(:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone)){max-width:1760px}
+}
 
 
 /* ======================================================================
