@@ -91,6 +91,12 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
+      - name: Stamp service worker cache with the deploy commit
+        # The SW cache key (dist/sw.js) must change on every deploy that touches
+        # cached assets (CSS/JS), or stale-while-revalidate keeps serving last
+        # visit's stylesheet/scripts on first paint after a release. Stamping it
+        # with the commit SHA here removes the need to remember a manual bump.
+        run: sed -i "s/const CACHE = '[^']*';/const CACHE = 'dda-shell-${{ github.sha }}';/" dist/sw.js
       - name: Upload dist/ as Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
