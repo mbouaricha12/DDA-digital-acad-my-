@@ -6,7 +6,7 @@ const root = path.join(__dirname, '..', 'dist');
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.webmanifest'), 'utf8'));
 
-assert.match(sw, /const CACHE = 'dda-shell-v24';/);
+assert.match(sw, /const CACHE = 'dda-shell-v25';/);
 assert.match(sw, /'\.\/academy\.html'/, 'Academy document must be in the critical offline shell');
 assert.match(sw, /'\.\/bff-client\.js'/, 'BFF client must be cached for the local auth UI');
 assert.match(sw, /request\.mode === 'navigate'/, 'navigation requests must have a dedicated strategy');
