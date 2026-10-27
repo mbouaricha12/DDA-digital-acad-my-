@@ -2570,10 +2570,8 @@ body.public-shell .prototype-banner{display:none}
 #landing .market-strip-grid article>span{display:block;color:#9baabc;font-size:.56rem;letter-spacing:.09em;font-weight:800}
 #landing .market-strip-grid strong{display:block;margin-top:12px;color:#eef2f4;font-size:.78rem}
 #landing .market-strip-grid small{display:block;margin-top:8px;color:#7f92a6;font-size:.57rem}
-#landing .strip-spark{position:absolute;right:9px;bottom:13px;width:58px;height:20px;border-bottom:1px solid rgba(137,207,153,.62);transform:skewY(-18deg) rotate(-8deg);opacity:.7}
-#landing .strip-spark:before{content:"";position:absolute;left:0;right:0;bottom:3px;height:1px;background:linear-gradient(90deg,transparent,#8fd796 20%,#79bd85 52%,transparent 100%);box-shadow:12px -7px 0 -0.2px #9ce59d,25px -2px 0 -0.2px #9ce59d,39px -11px 0 -0.2px #9ce59d,53px -5px 0 -0.2px #9ce59d}
-#landing .spark-b,#landing .spark-d{border-color:rgba(203,121,132,.65)}
-#landing .spark-b:before,#landing .spark-d:before{background:linear-gradient(90deg,transparent,#d88591 30%,#bb6874 70%,transparent 100%);box-shadow:12px 4px 0 -0.2px #d88591,25px -6px 0 -0.2px #d88591,39px 2px 0 -0.2px #d88591,53px -9px 0 -0.2px #d88591}
+#landing .market-strip-chart{position:absolute;right:9px;bottom:13px;width:58px;height:20px;overflow:visible;fill:none;stroke:#8fd796;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.78}
+#landing .market-strip-chart.is-future{stroke:#8a97a8;opacity:.45}
 #landing .landing-aperture{border-color:rgba(128,201,155,.3);background:radial-gradient(ellipse at 76% 22%,rgba(92,192,111,.14),transparent 34%),linear-gradient(145deg,#06121d 0%,#0a1e2c 68%,#123521 145%)}
 #landing .landing-aperture:after{content:"";position:absolute;inset:auto 0 0;height:36%;background:linear-gradient(180deg,transparent,rgba(54,124,76,.16));pointer-events:none}
 #landing .landing-aperture .landing-device-stage{filter:drop-shadow(0 22px 26px rgba(0,0,0,.32))}
