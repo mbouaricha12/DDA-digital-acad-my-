@@ -2738,9 +2738,9 @@ body.public-shell .prototype-banner{display:none}
    bindings are unchanged, only the markup/visual wrapper changed), just
    presented as a proper stat-card grid instead of a plain inline list.
    ====================================================================== */
-.dashboard-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0 22px}
+.dashboard-kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0 22px}
 .dashboard-kpi-card{
-  display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;
+  display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:16px;min-width:0;
   border:1px solid rgba(217,164,65,.16);
   background:linear-gradient(155deg,rgba(18,30,48,.9),rgba(8,15,26,.95));
   box-shadow:0 14px 30px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.04);
@@ -2752,7 +2752,7 @@ body.public-shell .prototype-banner{display:none}
 }
 .dashboard-kpi-icon .icon{width:20px;height:20px}
 .dashboard-kpi-card>div{display:flex;flex-direction:column;gap:2px;min-width:0}
-.dashboard-kpi-card strong{font-size:19px;font-weight:800;color:#f4f7fc;letter-spacing:-.01em}
+.dashboard-kpi-card strong{font-size:19px;font-weight:800;color:#f4f7fc;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .dashboard-kpi-card span{font-size:11px;color:rgba(222,232,245,.56);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
 .dashboard-kpi-gold{
   border-color:rgba(217,164,65,.42);
