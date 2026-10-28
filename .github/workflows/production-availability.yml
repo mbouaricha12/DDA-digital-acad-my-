@@ -1,0 +1,29 @@
+name: Production availability monitor
+
+on:
+  schedule:
+    # Every 15 minutes, UTC.
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-availability
+  cancel-in-progress: true
+
+jobs:
+  availability:
+    name: Check public site and BFF
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout monitoring script
+        uses: actions/checkout@v4
+
+      - name: Check production availability
+        env:
+          DDA_SITE_URL: https://dariusdigitalacademy.com
+          DDA_BFF_URL: https://api.dariusdigitalacademy.com
+        run: bash scripts/check_production_availability.sh
