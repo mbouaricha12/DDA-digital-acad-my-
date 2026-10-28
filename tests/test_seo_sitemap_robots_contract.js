@@ -31,12 +31,24 @@ for (const key of ['launch', 'about', 'terms', 'privacy', 'cookies', 'imprint', 
   assert.ok(locs.includes(`${BASE}${key}/`), `${key}/ is missing from the sitemap`);
 }
 assert.ok(locs.includes(BASE), 'the landing page itself must be in the sitemap');
-assert.ok(locs.includes(`${BASE}academy.html`), 'the Academy entry point must be in the sitemap');
+assert.ok(!locs.includes(`${BASE}academy.html`), 'the private Academy entry point must not be in the public sitemap');
+
+const landing = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
+assert.match(landing, /<link rel="canonical" href="https:\/\/dariusdigitalacademy\.com\/">/);
+assert.match(landing, /<meta property="og:url" content="https:\/\/dariusdigitalacademy\.com\/">/);
+assert.match(landing, /<script type="application\/ld\+json">/);
+assert.match(landing, /"@type": "Organization"/);
+assert.match(landing, /"@type": "WebSite"/);
+
+const academy = fs.readFileSync(path.join(dist, 'academy.html'), 'utf8');
+assert.match(academy, /<meta name="robots" content="noindex, nofollow">/);
 
 // robots.txt: DDA is served on its own custom domain (dist/CNAME), so this
 // file is delivered from the real host root and is authoritative for crawlers.
 assert.match(robots, /User-agent:\s*\*/i);
-assert.match(robots, new RegExp(`Sitemap:\\s*${BASE}sitemap\\.xml`));
+assert.match(robots, new RegExp(String.raw`Sitemap:\s*${BASE}sitemap\.xml`));
+assert.match(robots, /Disallow:\s*\/academy\.html/);
+assert.match(robots, /Disallow:\s*\/go\//);
 assert.match(robots, /host root/i, 'robots.txt must document that it is served from the real host root');
 assert.match(robots, /robots-txt-spec/i, 'robots.txt must reference the spec establishing it is authoritative from the host root');
 
