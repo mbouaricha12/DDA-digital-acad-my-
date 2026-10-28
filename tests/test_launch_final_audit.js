@@ -42,7 +42,7 @@ function state(plan = 'premium') {
 
 (async () => {
   const server = await startServer();
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium', args: ['--no-sandbox', '--disable-gpu'] });
   try {
     const widths = [{ width: 280, height: 653 }, { width: 375, height: 667 }, { width: 717, height: 512 }, { width: 1440, height: 900 }];
     const context = await browser.newContext({ viewport: widths[0] });
@@ -91,9 +91,26 @@ function state(plan = 'premium') {
     await page.click('#weekly-review-save');
     assert.match(await page.locator('#weekly-review-status').innerText(), /Enregistrée/);
 
-    const videoInventory = await page.evaluate(() => window.DDA.curriculum.modules.flatMap(module => module.lessons.map(lesson => ({ id: lesson.id, video: lesson.video || null }))));
-    assert.equal(videoInventory.every(item => !item.video || !item.video.videoUrl && !item.video.embedUrl && !item.video.vimeoId), true, 'no unpublished video is presented as published');
-    console.log('RESULT: launch final audit passed — widths, Free registry, six Premium doors, handoffs and video honesty');
+    const videoInventory = await page.evaluate(() => window.DDA.curriculum.modules.flatMap(module => module.lessons.flatMap(lesson => (lesson.videos || (lesson.video ? [lesson.video] : [])).map(video => ({ lesson: lesson.id, video })) )));
+    assert.equal(videoInventory.length, 10, 'all ten official Shorts must be present in the curriculum');
+    assert.equal(videoInventory.every(item => /^[A-Za-z0-9_-]{6,20}$/.test(item.video.youtubeId) && item.video.orientation === 'portrait' && item.video.format === 'shorts'), true, 'every official Short has safe vertical metadata');
+    assert.deepEqual(videoInventory.filter(item => item.lesson.startsWith('M0.')).map(item => item.video.youtubeId), ['HwlEuA39HpM', 'bUHsQnIAFuc', 'bVJ9n-Etcpc', 'pRFqhk55bL4', 'WDifN6ZKnjY'], 'Free exposes exactly five foundational Shorts');
+    assert.deepEqual(videoInventory.filter(item => item.lesson.startsWith('P2.')).map(item => item.video.youtubeId), ['BTipx88k_U8', 'rVd4dF6JaZ4', 'HaP-Onie9Lc', 'yBNc_eQbiow', 'VLdAqeJCllE'], 'Premium exposes exactly five advanced Shorts');
+    assert.equal(videoInventory.filter(item => item.lesson.startsWith('M1.')).length, 0, 'advanced Shorts must not leak into the Standard M1 curriculum');
+    await page.goto(`${ACADEMY}#lesson`);
+    const shortFrame = page.locator('iframe[data-video-frame]').first();
+    assert.equal(await shortFrame.getAttribute('src'), 'https://www.youtube-nocookie.com/embed/HwlEuA39HpM?rel=0&modestbranding=1&playsinline=1', 'Shorts are normalized to the privacy-enhanced embed host');
+    assert.equal(await page.locator('.video-frame-portrait').count() > 0, true, 'Shorts use the vertical responsive frame');
+    await page.goto(`${ACADEMY}#lesson-p21`);
+    assert.equal(await page.locator('#lesson-p21 iframe[data-video-frame]').count(), 3, 'Premium P2.1 renders its three advanced Shorts');
+    assert.equal(await page.locator('#lesson-p21 iframe[data-video-frame]').first().getAttribute('src'), 'https://www.youtube-nocookie.com/embed/BTipx88k_U8?rel=0&modestbranding=1&playsinline=1');
+    const freeContext = await browser.newContext({ viewport: { width: 375, height: 667 } });
+    await freeContext.addInitScript(value => localStorage.setItem('dda-prototype-state-v4', JSON.stringify(value)), state('free'));
+    const freePage = await freeContext.newPage();
+    await freePage.goto(`${ACADEMY}#lesson-p21`);
+    assert.equal(await freePage.locator('#lesson-p21 iframe[data-video-frame]').count(), 0, 'Free cannot mount Premium Shorts behind the entitlement gate');
+    await freeContext.close();
+    console.log('RESULT: launch final audit passed — widths, Free registry, six Premium doors, handoffs and ten official Shorts');
   } finally {
     await browser.close();
     await new Promise(resolve => server.close(resolve));
