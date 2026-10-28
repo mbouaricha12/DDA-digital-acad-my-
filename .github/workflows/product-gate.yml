@@ -9,6 +9,8 @@ on:
       - 'bff/**'
       - 'docs/**'
       - 'supabase/**'
+      - 'scripts/check_production_availability.sh'
+      - '.github/workflows/production-availability.yml'
       - '.github/workflows/product-gate.yml'
   workflow_dispatch:
 
