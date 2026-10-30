@@ -134,6 +134,25 @@ function validateRegistration(body) {
   return { email, fields };
 }
 
+const LESSON_ID = /^[A-Z0-9][A-Z0-9.]{0,38}[A-Z0-9]$/i;
+
+function validateLessonProgress(body) {
+  if (typeof body.lessonId !== 'string' || !LESSON_ID.test(body.lessonId)) return { error: 'lessonId is required and must be a short lesson identifier.' };
+  return {
+    lessonId: body.lessonId,
+    lessonViewed: Boolean(body.lessonViewed),
+    exerciseComplete: Boolean(body.exerciseComplete),
+    quizComplete: Boolean(body.quizComplete)
+  };
+}
+
+function validateOnboardingProgress(body) {
+  if (body.level !== undefined && (typeof body.level !== 'string' || body.level.length > 40)) return { error: 'level is invalid.' };
+  if (body.goal !== undefined && (typeof body.goal !== 'string' || body.goal.length > 80)) return { error: 'goal is invalid.' };
+  if (body.time !== undefined && (typeof body.time !== 'string' || body.time.length > 80)) return { error: 'time is invalid.' };
+  return { level: body.level || '', goal: body.goal || '', time: body.time || '', complete: Boolean(body.complete) };
+}
+
 function validateProfile(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body) || Object.keys(body).some(key => !['display_name', 'clientMutationId'].includes(key))) return { error: 'Only display_name and clientMutationId can be updated.' };
   if (typeof body.display_name !== 'string' || body.display_name.length > 60) return { error: 'Display name is invalid.' };
@@ -151,7 +170,7 @@ function parsePageParams(url, { maxPerPage = 200 } = {}) {
   return { page, perPage };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, rateLimiter = null, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, rateLimiter = null, progressStore = null, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   businessStore = businessStore || {
     exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
@@ -329,6 +348,36 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const snapshot = await currentEntitlements(current.user.user_id);
         if (!hasActivePremium(snapshot, clock())) return sendError(res, 403, 'premium_required', 'An active Premium entitlement is required.', requestId);
         return json(res, 200, { resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true });
+      }
+      if (method === 'GET' && path === '/v1/progress') {
+        const current = await withUser(req, res, requestId); if (!current) return;
+        if (!progressStore) return sendError(res, 503, 'progress_not_configured', 'Progress sync is not available.', requestId);
+        const [lessons, onboarding] = await Promise.all([
+          progressStore.listLessons(current.user.user_id),
+          progressStore.getOnboarding(current.user.user_id)
+        ]);
+        return json(res, 200, {
+          lessons: Object.fromEntries(lessons.map(row => [row.lesson_id, { lessonViewed: row.lesson_viewed, exerciseComplete: row.exercise_complete, quizComplete: row.quiz_complete }])),
+          onboarding: onboarding ? { level: onboarding.level, goal: onboarding.goal, time: onboarding.time, complete: onboarding.complete } : null
+        });
+      }
+      if (method === 'PUT' && path === '/v1/progress/lesson') {
+        const current = await withUser(req, res, requestId); if (!current) return;
+        if (!validateCsrf(req, config, current.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (!progressStore) return sendError(res, 503, 'progress_not_configured', 'Progress sync is not available.', requestId);
+        const validation = validateLessonProgress(await readJson(req));
+        if (validation.error) return sendError(res, 400, 'validation_error', validation.error, requestId);
+        const row = await progressStore.upsertLesson(current.user.user_id, validation);
+        return json(res, 200, { lessonId: row.lesson_id, lessonViewed: row.lesson_viewed, exerciseComplete: row.exercise_complete, quizComplete: row.quiz_complete });
+      }
+      if (method === 'PUT' && path === '/v1/progress/onboarding') {
+        const current = await withUser(req, res, requestId); if (!current) return;
+        if (!validateCsrf(req, config, current.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (!progressStore) return sendError(res, 503, 'progress_not_configured', 'Progress sync is not available.', requestId);
+        const validation = validateOnboardingProgress(await readJson(req));
+        if (validation.error) return sendError(res, 400, 'validation_error', validation.error, requestId);
+        const row = await progressStore.upsertOnboarding(current.user.user_id, validation);
+        return json(res, 200, { level: row.level, goal: row.goal, time: row.time, complete: row.complete });
       }
       if (method === 'PATCH' && path === '/v1/me') {
         const current = await withUser(req, res, requestId); if (!current) return;

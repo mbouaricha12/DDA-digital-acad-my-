@@ -571,6 +571,29 @@ function saveState(update) {
 
 // P3 BFF bridge — deliberately opt-in. With no deployment URL, the existing
 // localStorage prototype remains the only source of truth and this is a no-op.
+// Lot J — never let a pulled server value downgrade a local one: once a step
+// is true on either side, it stays true. This is the only merge rule, so a
+// stale server read can never erase progress a learner just made locally,
+// and a stale local device can never erase what a learner already proved
+// elsewhere.
+function mergeProgressNeverDowngrade(localState, remoteProgress) {
+  if (!remoteProgress) return localState;
+  const mergedLessons = { ...localState.lessons };
+  Object.entries(remoteProgress.lessons || {}).forEach(([lessonId, remote]) => {
+    const current = mergedLessons[lessonId] || { lessonViewed: false, exerciseComplete: false, quizComplete: false };
+    mergedLessons[lessonId] = {
+      lessonViewed: current.lessonViewed || Boolean(remote.lessonViewed),
+      exerciseComplete: current.exerciseComplete || Boolean(remote.exerciseComplete),
+      quizComplete: current.quizComplete || Boolean(remote.quizComplete)
+    };
+  });
+  const remoteOnboarding = remoteProgress.onboarding;
+  const onboarding = remoteOnboarding?.complete && !localState.onboarding?.complete
+    ? { level: remoteOnboarding.level, goal: remoteOnboarding.goal, time: remoteOnboarding.time, complete: true }
+    : localState.onboarding;
+  return { ...localState, lessons: mergedLessons, onboarding };
+}
+
 async function hydrateRemoteSession() {
   if (!window.DDABFF?.enabled()) return null;
   try {
@@ -578,14 +601,21 @@ async function hydrateRemoteSession() {
     if (!user) return null;
     remoteUser = user;
     const localUser = prototypeState.user || {};
-    prototypeState = DDA.save({
+    let nextState = {
       ...prototypeState,
       user: {
         ...localUser,
         name: user.display_name || localUser.name || 'Apprenant',
         email: user.email || localUser.email || ''
       }
-    });
+    };
+    try {
+      const remoteProgress = await window.DDABFF.getProgress();
+      nextState = mergeProgressNeverDowngrade(nextState, remoteProgress);
+    } catch {
+      // Progress sync is best-effort: a failed pull leaves local progress untouched.
+    }
+    prototypeState = DDA.save(nextState);
     renderState();
     return user;
   } catch {
@@ -706,6 +736,13 @@ function initBffAuthUi() {
 
 function updateLessonState(lessonId, patch) {
   prototypeState = DDA.updateLesson(prototypeState, lessonId, patch);
+  // Lot J — push the already-merged row (never a partial patch), so a slow
+  // or failed request can never leave the server holding less than it did
+  // before; a failure here is silent and never blocks the local update.
+  if (remoteUser && window.DDABFF?.enabled()) {
+    const row = prototypeState.lessons?.[lessonId];
+    if (row) window.DDABFF.saveLessonProgress(lessonId, row).catch(() => {});
+  }
   renderState();
 }
 
@@ -2672,6 +2709,7 @@ document.getElementById('onboarding-form').addEventListener('submit', async even
   }
   document.getElementById('onboarding-error').textContent = '';
   saveState({ onboarding: { level, goal, time, complete: true } });
+  if (remoteUser && window.DDABFF?.enabled()) window.DDABFF.saveOnboardingProgress({ level, goal, time, complete: true }).catch(() => {});
   updateLessonState(activeLessonId, { lessonViewed: true });
   trackEvent('onboarding_complete', { level, goal });
   trackEvent('qualification_completed', { level, goal });
@@ -3094,6 +3132,7 @@ document.getElementById('profile-form').addEventListener('submit', async event =
     user: { ...prototypeState.user, name },
     onboarding: { level, goal, time, complete: true }
   });
+  if (remoteUser && window.DDABFF?.enabled()) window.DDABFF.saveOnboardingProgress({ level, goal, time, complete: true }).catch(() => {});
   trackEvent('profile_updated', { level, goal });
   document.getElementById('profile-error').textContent = '';
   showToast('Profil mis à jour.');
