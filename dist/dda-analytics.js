@@ -11,7 +11,11 @@
     landing_cta_free: 'landing_cta_clicked',
     landing_cta_final: 'landing_cta_clicked',
     landing_cta_mobile_sticky: 'landing_cta_clicked',
-    onboarding_complete: 'dda_signup',
+    // Renamed from the legacy external name 'dda_signup' (Lot H) to match
+    // the DDA Product & Conversion Alignment Audit's event dictionary —
+    // same local event, same data, only the name sent to PostHog changes.
+    onboarding_complete: 'onboarding_completed',
+    lesson_started: 'lesson_started',
     broker_selected: 'broker_selected',
     affiliate_link_click: 'affiliate_link_click',
     activation_v1: 'activation_v1',
