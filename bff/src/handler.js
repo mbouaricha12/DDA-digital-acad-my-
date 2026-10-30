@@ -13,6 +13,7 @@ const { PostgrestBusinessStore } = require('./business-store');
 const { PostgrestBillingStore } = require('./billing-store');
 const { PostgrestBrvmPublicationStore } = require('./brvm-publication-store');
 const { PostgrestAdminRolesStore } = require('./admin-roles-store');
+const { PostgrestProgressStore } = require('./progress-store');
 const { PostgrestRateLimiter } = require('./rate-limiter');
 const { chariowConfigFromEnv, handleChariowPulse } = require('./chariow');
 const { trackServerEvent } = require('./analytics');
@@ -34,10 +35,11 @@ function buildHandler(env = process.env) {
   const billingStore = new PostgrestBillingStore({ supabaseUrl: env.SUPABASE_URL, serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY });
   const brvmPublicationStore = new PostgrestBrvmPublicationStore({ supabaseUrl: env.SUPABASE_URL, serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY });
   const adminRoles = new PostgrestAdminRolesStore({ supabaseUrl: env.SUPABASE_URL, serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY });
+  const progressStore = new PostgrestProgressStore({ supabaseUrl: env.SUPABASE_URL, serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY });
   const logger = (event, fields) => console.info(JSON.stringify({ event, ...fields }));
   const rateLimiter = new PostgrestRateLimiter({ supabaseUrl: env.SUPABASE_URL, serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY, logger });
   const chariowConfig = chariowConfigFromEnv(env);
-  const academyHandler = createBff({ config, auth, sessions, businessStore, billingStore, brvmPublicationStore, adminRoles, rateLimiter, entitlements: billingStore, logger });
+  const academyHandler = createBff({ config, auth, sessions, businessStore, billingStore, brvmPublicationStore, adminRoles, rateLimiter, progressStore, entitlements: billingStore, logger });
 
   return async function handler(req, res) {
     if (req.method === 'POST' && new URL(req.url, 'http://bff.local').pathname === '/webhooks/chariow') {

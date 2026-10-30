@@ -111,6 +111,27 @@
     return result.body;
   }
 
+  async function getProgress() {
+    const result = await request('/v1/progress');
+    if (!result.enabled || result.response.status === 401) return null;
+    if (!result.response.ok) throw resultError(result, 'bff_progress_failed');
+    return result.body;
+  }
+
+  async function saveLessonProgress(lessonId, progress) {
+    const result = await request('/v1/progress/lesson', { method: 'PUT', body: { lessonId, ...progress } });
+    if (!result.enabled || result.response.status === 401) return null;
+    if (!result.response.ok) throw resultError(result, 'bff_progress_failed');
+    return result.body;
+  }
+
+  async function saveOnboardingProgress(onboarding) {
+    const result = await request('/v1/progress/onboarding', { method: 'PUT', body: onboarding });
+    if (!result.enabled || result.response.status === 401) return null;
+    if (!result.response.ok) throw resultError(result, 'bff_onboarding_failed');
+    return result.body;
+  }
+
   async function logout() {
     const result = await request('/v1/auth/logout', { method: 'POST' });
     if (!result.enabled || result.response.status === 401) return null;
@@ -120,6 +141,7 @@
 
   window.DDABFF = Object.freeze({
     enabled, register, verifyEmail, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
+    getProgress, saveLessonProgress, saveOnboardingProgress,
     get baseUrl() { return configuredBase; }
   });
 })();
