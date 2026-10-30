@@ -25,7 +25,9 @@ concurrency:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    # Pinned: playwright@1.55.0 doesn't yet support the Ubuntu 26.04 image
+    # that "ubuntu-latest" now resolves to on GitHub-hosted runners.
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,6 +52,10 @@ jobs:
         run: |
           node tests/test_landing_launch_contract.js
           node tests/test_accessibility_contract.js
+      - name: Verify public SEO metadata and sitemap
+        run: |
+          node tests/test_commencer_route_contract.js
+          node tests/test_seo_sitemap_robots_contract.js
       - name: Verify route register and deployment fallback
         run: |
           node tests/verify_route_register_consistency.js
