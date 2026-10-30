@@ -1182,6 +1182,15 @@ body.public-shell main{min-height:100vh;background:#060d17}
 @media(max-width:820px){
   #landing .ai-preview-composition{grid-template-columns:1fr}
 }
+#landing .landing-faq{max-width:900px;margin:0 auto;padding:64px clamp(20px,5vw,72px)}
+#landing .landing-faq-list{margin-top:28px;border-top:1px solid var(--lp-line)}
+#landing .landing-faq-list details{border-bottom:1px solid var(--lp-line);padding:18px 0}
+#landing .landing-faq-list summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px;min-height:44px;color:var(--lp-heading);font-weight:700}
+#landing .landing-faq-list summary::-webkit-details-marker{display:none}
+#landing .landing-faq-list summary:before{content:"+";display:inline-block;width:16px;color:var(--dda-gold-soft);font-weight:900}
+#landing .landing-faq-list details[open] summary:before{content:"–"}
+#landing .landing-faq-list details p{margin:10px 0 0;padding-left:28px;color:var(--lp-body);line-height:1.6}
+#landing .landing-faq-more{margin-top:20px}
 #landing .product-window-evidence strong{color:#8ee0ce;font-size:.95rem}
 #landing .product-caption{padding-bottom:8px}
 #landing .product-caption-index{display:block;margin-bottom:18px;color:var(--dda-gold-soft);font-size:.68rem;letter-spacing:.14em;font-weight:800}
