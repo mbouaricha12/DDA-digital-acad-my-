@@ -766,14 +766,16 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
-  await test('signup forwards to the adapter as dda_signup without level/goal/name/email', async () => {
+  await test('signup forwards to the adapter as onboarding_completed without level/goal/name/email', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
     await completeSignupFlow(page, { firstName: 'Ada', email: 'ada@example.com' });
     const queue = await page.evaluate(() => window.DDAAnalytics.getDebugQueue());
     const entry = queue.find(e => e.localName === 'onboarding_complete');
     assert.ok(entry, 'onboarding_complete should reach the adapter');
-    assert.equal(entry.externalName, 'dda_signup');
+    // Renamed from the legacy external name 'dda_signup' (Lot H) to match the
+    // DDA Product & Conversion Alignment Audit's event dictionary.
+    assert.equal(entry.externalName, 'onboarding_completed');
     assert.equal('level' in entry.props, false);
     assert.equal('goal' in entry.props, false);
     assert.equal(JSON.stringify(entry).includes('ada@example.com'), false);
@@ -914,7 +916,9 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
     const forwardedNames = queue.filter(e => e.externalName).map(e => e.externalName);
     assert.ok(forwardedNames.includes('landing_visit'));
-    assert.ok(forwardedNames.includes('dda_signup'));
+    // Renamed from the legacy external name 'dda_signup' (Lot H) to match the
+    // DDA Product & Conversion Alignment Audit's event dictionary.
+    assert.ok(forwardedNames.includes('onboarding_completed'));
     assert.ok(forwardedNames.includes('broker_selected'));
     assert.ok(forwardedNames.includes('activation_v1'));
     assert.equal(forwardedNames.includes('affiliate_link_click'), false);
@@ -923,8 +927,8 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.ok(funnelEvents.every(e => e.distinctId === visitorId), 'every funnel event must carry the same visitorId');
     assert.ok(funnelEvents.every(e => !JSON.stringify(e).includes('fatou@example.com') && !JSON.stringify(e).includes('Fatou')), 'no PII may ever reach the adapter');
 
-    const order = forwardedNames.filter(n => ['landing_visit', 'dda_signup', 'broker_selected', 'activation_v1'].includes(n));
-    assert.deepEqual(order, ['landing_visit', 'dda_signup', 'broker_selected', 'activation_v1'], 'funnel steps must be recorded in the real order they happened');
+    const order = forwardedNames.filter(n => ['landing_visit', 'onboarding_completed', 'broker_selected', 'activation_v1'].includes(n));
+    assert.deepEqual(order, ['landing_visit', 'onboarding_completed', 'broker_selected', 'activation_v1'], 'funnel steps must be recorded in the real order they happened');
 
     await context.close();
   });

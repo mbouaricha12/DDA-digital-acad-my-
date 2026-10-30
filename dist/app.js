@@ -379,6 +379,9 @@ const viewPermissions = {
 // without this map it would still say "Reprendre la leçon" but navigate to the
 // wrong view instead. Derived from the registry — one declaration per lesson.
 const LESSON_VIEW_ID = Object.freeze(Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.id, entry.viewId])));
+// Reverse of the map above — lets showView fire a single lesson_started event
+// by view id without a second per-lesson registry (Lot H, activation funnel).
+const VIEW_TO_LESSON_ID = Object.freeze(Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.id])));
 // Les identifiants d'UI d'une leçon découlent de son suffixe de registre —
 // plus aucune table d'ids recopiée à la main (source passée d'incohérences).
 function lessonUiIds(entry) {
@@ -2300,6 +2303,7 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
   }
   if (id === 'markets') loadBrvmPublications();
   if (recordEvent) trackEvent('view_opened', { view: id });
+  if (recordEvent && VIEW_TO_LESSON_ID[id]) trackEvent('lesson_started', { lesson: VIEW_TO_LESSON_ID[id] });
   if (recordEvent && id === 'premium-track') trackEvent('premium_track_viewed', { view: id });
   if (recordEvent && (id === 'lesson-p21' || id === 'lesson-p22')) trackEvent('premium_module_started', { module: 'P2', lesson: id });
   if (id === 'landing') {
