@@ -17,7 +17,9 @@ concurrency:
 jobs:
   e2e:
     name: Full browser regression
-    runs-on: ubuntu-latest
+    # Pinned: playwright@1.55.0 doesn't yet support the Ubuntu 26.04 image
+    # that "ubuntu-latest" now resolves to on GitHub-hosted runners.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     steps:
