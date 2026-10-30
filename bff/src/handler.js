@@ -15,6 +15,7 @@ const { PostgrestBrvmPublicationStore } = require('./brvm-publication-store');
 const { PostgrestAdminRolesStore } = require('./admin-roles-store');
 const { PostgrestRateLimiter } = require('./rate-limiter');
 const { chariowConfigFromEnv, handleChariowPulse } = require('./chariow');
+const { trackServerEvent } = require('./analytics');
 
 function buildHandler(env = process.env) {
   const config = configFromEnv(env);
@@ -51,7 +52,8 @@ function buildHandler(env = process.env) {
           idempotencyStore: billingStore,
           applyEvent: async event => {
             await billingStore.applyChariowTransition(event);
-          }
+          },
+          trackEvent: (name, distinctId, properties) => trackServerEvent(name, distinctId, properties)
         });
         res.writeHead(result.status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
         return res.end(result.body ? JSON.stringify(result.body) : '');

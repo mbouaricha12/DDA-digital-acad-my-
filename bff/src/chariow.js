@@ -4,6 +4,22 @@ const crypto = require('node:crypto');
 const { normalizeEmail, sha256 } = require('./security');
 
 const CHARIOW_API_BASE_URL = 'https://api.chariow.com/v1';
+// Lot I (DDA Product & Conversion Alignment Audit, §8) — maps each supported
+// Chariow Pulse event to the monetization event name the audit's dictionary
+// expects. 'successful.sale' is the money event (payment_succeeded);
+// 'license.activated' is the entitlement event (subscription_activated).
+// There is no distinct Chariow renewal event in SUPPORTED_PULSE_EVENTS below,
+// so subscription_renewed is intentionally not fired here — fabricating it
+// from 'successful.sale' would conflate a first purchase with a renewal.
+// Both 'license.expired' (lapse) and 'license.revoked' (explicit removal)
+// end access, so both map to subscription_cancelled, distinguished by a
+// `reason` property rather than inventing two different event names.
+const MONETIZATION_EVENT_BY_PULSE = Object.freeze({
+  'successful.sale': 'payment_succeeded',
+  'license.activated': 'subscription_activated',
+  'license.expired': 'subscription_cancelled',
+  'license.revoked': 'subscription_cancelled'
+});
 const DDA_USER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const SUPPORTED_PULSE_EVENTS = new Set([
   'successful.sale',
@@ -146,7 +162,7 @@ async function createChariowCheckout({ config = chariowConfigFromEnv(), fetchImp
   };
 }
 
-async function handleChariowPulse(req, { secret, idempotencyStore, applyEvent, config } = {}) {
+async function handleChariowPulse(req, { secret, idempotencyStore, applyEvent, config, trackEvent } = {}) {
   const rawBody = await readRawBody(req);
   const headers = {
     'x-chariow-signature': req.headers['x-chariow-signature'],
@@ -168,7 +184,21 @@ async function handleChariowPulse(req, { secret, idempotencyStore, applyEvent, c
     const payload = JSON.parse(rawBody.toString('utf8'));
     const mapped = mapChariowPulse(payload, headers, config);
     if (!idempotencyStore?.claim) await idempotencyStore?.add(deliveryId, { event: mapped.event, receivedAt: new Date().toISOString(), payloadSha256 });
-    if (mapped.kind === 'membership_transition') await applyEvent?.(mapped);
+    if (mapped.kind === 'membership_transition') {
+      await applyEvent?.(mapped);
+      const monetizationEvent = MONETIZATION_EVENT_BY_PULSE[mapped.event];
+      // Analytics is observational only — it must never affect the delivery's
+      // outcome, so a failure here is swallowed rather than retried/alerted.
+      if (monetizationEvent && trackEvent) {
+        try {
+          await trackEvent(monetizationEvent, mapped.userReference, {
+            productId: mapped.productId,
+            ...(mapped.event === 'license.expired' ? { reason: 'expired' } : {}),
+            ...(mapped.event === 'license.revoked' ? { reason: 'revoked' } : {})
+          });
+        } catch { /* analytics must never affect billing */ }
+      }
+    }
     await idempotencyStore?.markProcessed?.(deliveryId, 'processed');
     return { status: 202, body: { accepted: true, kind: mapped.kind, event: mapped.event } };
   } catch (error) {
@@ -181,6 +211,7 @@ async function handleChariowPulse(req, { secret, idempotencyStore, applyEvent, c
 module.exports = {
   CHARIOW_API_BASE_URL,
   SUPPORTED_PULSE_EVENTS,
+  MONETIZATION_EVENT_BY_PULSE,
   chariowConfigFromEnv,
   verifyChariowPulse,
   readRawBody,
