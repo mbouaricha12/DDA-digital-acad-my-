@@ -1241,7 +1241,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.goto(`${ACADEMY_BASE}#progress`);
     await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
     const theme = await page.evaluate(() => {
-      const deepNavy = [6, 13, 23];
+      const deepNavy = [11, 37, 84];
       const views = [...document.querySelectorAll('.view')].map(node => ({
         id: node.id,
         color: getComputedStyle(node).backgroundColor
@@ -1259,7 +1259,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     });
     assert.ok(theme.views.length >= 24, `all app views must be audited (got ${theme.views.length})`);
     for (const view of theme.views) {
-      assert.equal(view.color, 'rgb(6, 13, 23)', `${view.id} must use the resting Deep Navy canvas`);
+      assert.equal(view.color, 'rgb(11, 37, 84)', `${view.id} must use the resting Deep Sky Blue canvas`);
     }
     assert.ok(theme.surfaces.length >= 20, `expected to inspect common page surfaces (got ${theme.surfaces.length})`);
     for (const surface of theme.surfaces) {
@@ -1402,7 +1402,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       };
     });
     assert.equal(shell.width, shell.viewportWidth, 'landing must occupy the full mobile viewport width');
-    assert.equal(shell.background, 'rgb(6, 13, 23)', 'landing must use Deep Navy #060d17');
+    assert.equal(shell.background, 'rgb(11, 37, 84)', 'landing must use Deep Sky Blue #0b2554');
     assert.ok(shell.paddingBottom >= 120, `landing needs substantial bottom clearance (got ${shell.paddingBottom}px)`);
     assert.equal(shell.visibleDialogs, 0, 'no closeable modal/dialog should appear over the idle landing');
     assert.equal(shell.visibleCloseButtons, 0, 'no modal close button should appear over the idle landing');
@@ -1455,7 +1455,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
         .filter(node => getComputedStyle(node).display !== 'none' && getComputedStyle(node).visibility !== 'hidden' && node.getBoundingClientRect().width > 0).length
     }));
     assert.equal(learnerHome.activeView, 'dashboard', 'a local learner should see the actual learning home');
-    assert.equal(learnerHome.background, 'rgb(6, 13, 23)', 'learning home should use the same Deep Navy canvas');
+    assert.equal(learnerHome.background, 'rgb(11, 37, 84)', 'learning home should use the same Deep Sky Blue canvas');
     assert.equal(learnerHome.dialogs, 0, 'learning home should not be enclosed by a fake white dialog');
     assert.equal(learnerHome.closeButtons, 0, 'learning home should not show an unrelated dialog close button');
     await learnerContext.close();

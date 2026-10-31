@@ -606,12 +606,12 @@
 /* Access / onboarding — registre institutionnel Deep Navy.
    La vue doit rester immersive et ne pas basculer vers le canevas ivoire. */
 body.access-mode .prototype-banner{
-  background:#060d17;
+  background:#0b2554;
   color:#94a3b8;
   border-bottom:1px solid rgba(255,255,255,.08);
 }
 #access{
-  background:#060d17;
+  background:#0b2554;
   color:#94a3b8;
 }
 #access .access-copy>p,
@@ -633,7 +633,7 @@ body.access-mode .prototype-banner{
 }
 #access .step-indicator{color:#94a3b8}
 #access .step-indicator span{border-color:rgba(255,255,255,.2);background:#0a1424;color:#94a3b8}
-#access .step-indicator span.active{border-color:#f8fafc;background:#f8fafc;color:#060d17}
+#access .step-indicator span.active{border-color:#f8fafc;background:#f8fafc;color:#0b2554}
 #access .step-indicator i{background:rgba(255,255,255,.16)}
 #access .access-card label{color:#f8fafc}
 #access .access-card input,
@@ -1083,12 +1083,12 @@ body.access-mode .prototype-banner{
 
 
 /* Mobile viewport repair — a continuous full-bleed learning surface, not a floating white sheet. */
-body.public-shell{background:#060d17;color:var(--lp-heading)}
+body.public-shell{background:#0b2554;color:var(--lp-heading)}
 body.public-shell .app-shell,
-body.public-shell main{min-height:100vh;background:#060d17}
+body.public-shell main{min-height:100vh;background:#0b2554}
 #landing{
-  --lp-bg:#060d17;
-  background-color:#060d17;
+  --lp-bg:#0b2554;
+  background-color:#0b2554;
 }
 #landing.view.active{width:100%;max-width:none;margin:0;transform:none}
 
@@ -1263,6 +1263,9 @@ body.public-shell main{min-height:100vh;background:#060d17}
 #landing .future-editorial-grid article{border-radius:0;background:transparent;border:0;border-top:1px solid var(--lp-line);padding:22px 0}
 #landing .future-editorial-grid article+article{border-left:1px solid var(--lp-line);padding-left:24px}
 #landing .future-editorial-grid article>span{color:var(--dda-gold-soft);font-size:.7rem;letter-spacing:.1em}
+#landing .future-editorial-grid .future-card-photo{position:relative;width:52px;height:52px;margin-bottom:14px;border-radius:50%;overflow:hidden;border:1px solid rgba(217,164,65,.35)}
+#landing .future-editorial-grid .future-card-photo img{width:100%;height:100%;object-fit:cover;filter:saturate(.85) contrast(1.05) brightness(.95)}
+#landing .future-editorial-grid .future-card-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(11,37,84,.12),rgba(11,37,84,.58));mix-blend-mode:multiply}
 #landing .future-editorial-grid h3{font-family:var(--dda-serif);font-size:2rem}
 #landing .future-editorial-grid p{max-width:34ch;color:var(--lp-body);line-height:1.55}
 #landing .public-footer-brand .footer-socials{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;color:var(--dda-gold-soft);font-size:.62rem;letter-spacing:.1em}
@@ -1560,6 +1563,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 #landing .landing-free-proof li{display:flex;flex-direction:column;gap:3px;min-width:0}
 #landing .landing-free-proof-icon{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;margin-bottom:2px;border-radius:50%;background:rgba(217,164,65,.12);color:var(--dda-gold-soft)}
 #landing .landing-free-proof-icon .icon{width:14px;height:14px}
+#landing .landing-free-proof li:nth-child(2) .landing-free-proof-icon{background:rgba(65,217,140,.14);color:#58d99b}
 #landing .landing-free-proof strong{color:#f1f3f5;font-size:.86rem;line-height:1.25}
 #landing .landing-free-proof li>span:last-child{color:#8f9dad;font-size:.72rem}
 #landing .landing-free-proof small{display:block;margin-top:9px;color:#8f9dad;font-size:.72rem;line-height:1.45}
@@ -1593,6 +1597,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 #landing .landing-trust{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:26px;list-style:none;padding:0}
 #landing .landing-trust li{display:flex;align-items:flex-start;gap:9px;min-width:0;padding:10px 12px;border:1px solid rgba(174,191,213,.12);border-radius:12px;background:rgba(10,20,36,.46);color:#aab5c2;font-size:.78rem;line-height:1.45}
 #landing .landing-trust .icon{flex:none;width:16px;height:16px;margin-top:1px;color:var(--dda-elite-gold)}
+#landing .landing-trust li:nth-child(2) .icon{color:#58d99b}
 #landing .landing-trust strong{color:var(--dda-elite-gold-soft);font-size:.86rem;font-variant-numeric:tabular-nums}
 
 /* Low-poly device mockups: CSS/SVG only, no WebGL, external feed, or remote image. */
@@ -1685,7 +1690,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 #dashboard .terminal-icon-button{width:38px;height:38px;min-width:38px;min-height:38px;border-color:rgba(174,191,213,.13);border-radius:10px;background:#0a1424;color:#aeb9c6;font-size:0;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
 #dashboard .terminal-icon-button:hover:not(:disabled),#dashboard .terminal-icon-button:focus-visible{border-color:rgba(203,177,116,.42);background:rgba(203,177,116,.08);color:#e1cd9e;transform:translateY(-1px)}
 #dashboard .terminal-icon-button:disabled{opacity:.38}
-#dashboard .analysis-chart-shell{border-color:rgba(174,191,213,.13);border-radius:14px;background:#060d17}
+#dashboard .analysis-chart-shell{border-color:rgba(174,191,213,.13);border-radius:14px;background:#0b2554}
 #dashboard .analysis-chart-meta,#dashboard .analysis-chart-footer{border-color:rgba(174,191,213,.1);background:#0a1424}
 
 @media(max-width:899px){
@@ -1776,10 +1781,10 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
    Strictly presentational cascade: IDs, routes, data, and state classes stay intact.
    ====================================================================== */
 :root{
-  --dda-elite-canvas:#060d17;
-  --dda-elite-surface:#0a1424;
-  --dda-elite-surface-raised:#101c2d;
-  --dda-elite-surface-soft:#0d1929;
+  --dda-elite-canvas:#0b2554;
+  --dda-elite-surface:#0f2f66;
+  --dda-elite-surface-raised:#163f82;
+  --dda-elite-surface-soft:#123874;
   --dda-elite-line:rgba(81,157,226,.22);
   --dda-elite-line-strong:rgba(95,182,255,.36);
   --dda-elite-ink:#edf1f6;
@@ -1985,7 +1990,7 @@ button:disabled{cursor:not-allowed}
   --cta-blue-2:#22b8d2;
 }
 
-/* Static optical depth across every route; background-color remains #060d17. */
+/* Static optical depth across every route; background-color remains #0b2554. */
 :is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#forex,#stocks,#indices,#crypto,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{
   background-image:
     radial-gradient(ellipse 54% 26% at 96% 2%,rgba(37,136,255,.22),transparent 74%),
@@ -2254,7 +2259,7 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 
 /* Contract-safe base: the optical texture sits above the canonical Deep Navy canvas. */
 #landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#forex.view,#stocks.view,#indices.view,#crypto.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{
-  background-color:#060d17!important;
+  background-color:#0b2554!important;
 }
 
 /* Mission rails keep page purpose visible and reduce destination repetition. */

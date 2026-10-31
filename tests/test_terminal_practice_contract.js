@@ -21,6 +21,6 @@ assert.ok(app.includes("proof: { id: 'm02-zone-identification'"), 'incorrect and
 assert.ok(app.includes('Preuve conservée localement'), 'feedback never claims market performance');
 assert.ok(app.includes('completedAt: new Date().toISOString()'), 'successful proof has a local timestamp');
 assert.ok(css.includes('.terminal-practice-mission'), 'mission has dedicated responsive styling');
-assert.ok(css.includes('#060d17'), 'chart canvas uses the Deep Navy brand surface');
+assert.ok(css.includes('#0b2554'), 'chart canvas uses the Deep Sky Blue brand surface');
 assert.ok(css.includes('.analysis-terminal-tools'), 'pro floating chart toolbar has dedicated styling');
 console.log('RESULT: Practice Terminal guided mission contract passed');
