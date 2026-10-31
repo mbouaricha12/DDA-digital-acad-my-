@@ -219,6 +219,32 @@ const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
 
+// Mobile drawer — the sidebar's full navigation, reachable on mobile where
+// .sidebar itself stays display:none. Routing is already handled by the
+// generic [data-view] binding above; this only opens/closes the panel.
+(function initMobileDrawer() {
+  const toggle = document.getElementById('mobile-menu-toggle');
+  const drawer = document.getElementById('mobile-drawer');
+  const backdrop = document.getElementById('mobile-drawer-backdrop');
+  const closeButton = document.getElementById('mobile-drawer-close');
+  if (!toggle || !drawer || !backdrop) return;
+  function close() {
+    drawer.hidden = true;
+    backdrop.hidden = true;
+    toggle.setAttribute('aria-expanded', 'false');
+  }
+  function open() {
+    drawer.hidden = false;
+    backdrop.hidden = false;
+    toggle.setAttribute('aria-expanded', 'true');
+  }
+  toggle.addEventListener('click', () => (drawer.hidden ? open() : close()));
+  closeButton?.addEventListener('click', close);
+  backdrop.addEventListener('click', close);
+  drawer.addEventListener('click', event => { if (event.target.closest('[data-view]')) close(); });
+  document.addEventListener('keydown', event => { if (event.key === 'Escape' && !drawer.hidden) close(); });
+})();
+
 // Access onboarding selects — native controls remain in the form as the
 // source of truth, while the visible interaction uses DDA's own Learning OS
 // surface. This preserves validation, keyboard semantics and existing submit
@@ -1384,10 +1410,15 @@ function renderResultStats(lesson, lessonProgress, statsId) {
   const xp = DDALearning.lessonXp(lesson, lessonProgress);
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   const nextLabel = next ? `${next.lesson.title} — ${NEXT_STEP_PHRASE[next.step] || 'continuer'}` : 'Prochain module bientôt disponible.';
+  const nextViewId = next ? LESSON_VIEW_ID[next.lesson.id] : null;
+  const nextCell = nextViewId
+    ? `<dd><button class="text-action" type="button" data-view="${nextViewId}">${nextLabel} <span>→</span></button></dd>`
+    : `<dd>${nextLabel}</dd>`;
   stats.innerHTML = `
     <div><dt>Compétence</dt><dd>${lesson.competency.label} — niveau confirmé</dd></div>
     <div><dt>XP obtenu sur cette leçon</dt><dd>+${xp} XP</dd></div>
-    <div><dt>Prochaine étape</dt><dd>${nextLabel}</dd></div>`;
+    <div><dt>Prochaine étape</dt>${nextCell}</div>`;
+  stats.querySelectorAll('[data-view]').forEach(bindViewButton);
 }
 
 // One reusable "lesson view" driver: stepper, outline highlighting, the

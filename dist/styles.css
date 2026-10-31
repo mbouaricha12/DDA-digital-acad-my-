@@ -84,6 +84,30 @@ button,input,select,textarea{font:inherit;color:inherit}
 .app-shell{min-height:100vh;display:block}
 .sidebar{display:none}
 main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
+
+/* Mobile drawer — the sidebar's own nav, duplicated for mobile where the
+   sidebar itself is display:none. Same .nav-item class, so showView's
+   existing active-state loop (desktopItems/mobileItems) picks it up for
+   free; no new JS routing concept, only open/close. */
+.mobile-menu-toggle{display:inline-flex}
+.mobile-drawer-backdrop{position:fixed;inset:0;z-index:60;background:rgba(6,13,23,.6);opacity:0;pointer-events:none;transition:opacity .25s ease}
+.mobile-drawer-backdrop:not([hidden]){opacity:1;pointer-events:auto}
+.mobile-drawer{
+  position:fixed;top:0;left:0;bottom:0;z-index:61;width:min(84vw,320px);
+  display:flex;flex-direction:column;gap:6px;overflow-y:auto;
+  padding:20px 16px calc(24px + var(--safe-b));background:var(--navy-900);
+  border-right:1px solid var(--line-soft);
+  transform:translateX(-100%);transition:transform .28s var(--ease);
+}
+.mobile-drawer:not([hidden]){transform:translateX(0)}
+.mobile-drawer[hidden]{display:flex}
+.mobile-drawer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.mobile-drawer-head .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+.mobile-drawer-head .brand-mark{font-family:Georgia,serif;font-weight:800;font-size:20px;color:var(--gold-soft)}
+.mobile-drawer-head .brand-name{font-size:9px;line-height:1.2;max-width:84px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.mobile-drawer .nav-section-label{margin:14px 0 2px;padding:0 8px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.mobile-drawer .nav-section-label:first-of-type{margin-top:0}
+@media (prefers-reduced-motion:reduce){.mobile-drawer,.mobile-drawer-backdrop{transition:none}}
 .academy-footer{display:flex;align-items:center;justify-content:space-between;gap:18px;max-width:1280px;margin:0 auto;padding:24px 18px calc(92px + var(--safe-b));border-top:1px solid var(--line-soft);color:var(--muted);font-size:12px}
 .academy-footer-brand{display:grid;gap:3px;min-width:0}
 .academy-footer-brand strong{color:var(--gold-soft);font-family:Georgia,serif;font-size:20px;letter-spacing:-.05em}
@@ -427,7 +451,9 @@ body.public-shell main{padding-bottom:0}
 #lesson,#lesson-m02{background:linear-gradient(180deg,var(--navy-900),var(--navy-950) 70%);color:#f4f7fc}
 #lesson .eyebrow.gold,#lesson-m02 .eyebrow.gold{color:var(--gold-soft)}
 .lesson-layout{display:grid;grid-template-columns:1fr;gap:0}
-.back-link{color:rgba(244,247,252,.6);margin-bottom:22px;padding:8px 0;background:none;border:0;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.back-link{color:rgba(244,247,252,.6);padding:8px 0;background:none;border:0;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:44px}
+.lesson-quick-nav{display:flex;flex-wrap:wrap;align-items:center;gap:4px 18px;margin-bottom:22px}
+.lesson-quick-nav .text-action{min-height:44px;padding:8px 0}
 .lesson-lead{font-size:16px;color:rgba(244,247,252,.68)}
 .video-stage{
   aspect-ratio:16/11;border:1px solid var(--line);border-radius:var(--r-lg);
@@ -1184,6 +1210,7 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .context strong{font-size:17px}
   .network-state span{display:inline}
   .mobile-nav{display:none}
+  .mobile-menu-toggle,.mobile-drawer,.mobile-drawer-backdrop{display:none}
   .view{padding:44px clamp(24px,4vw,56px) 90px}
   h1{margin-bottom:15px}
   .section-intro{margin-bottom:40px}

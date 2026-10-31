@@ -64,6 +64,10 @@
   <svg hidden aria-hidden="true" focusable="false">
     <defs>
       <symbol id="icon-home" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9"/></symbol>
+      <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></symbol>
+      <symbol id="icon-chevron-left" viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></symbol>
+      <symbol id="icon-chevron-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
       <symbol id="icon-path" viewBox="0 0 24 24"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8v3a4 4 0 0 0 4 4h6a4 4 0 0 1 4 4"/></symbol>
       <symbol id="icon-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5-6-3.5Z"/></symbol>
       <symbol id="icon-progress" viewBox="0 0 24 24"><path d="M4 15a8 8 0 1 1 16 0"/><path d="M12 15V9"/><path d="M12 15l4-3"/></symbol>
@@ -139,9 +143,49 @@
       </div>
     </aside>
 
+    <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop" hidden></div>
+    <nav class="mobile-drawer" id="mobile-drawer" aria-label="Navigation complète" hidden>
+      <div class="mobile-drawer-head">
+        <a class="brand" href="#dashboard" aria-label="DDA — Accueil">
+          <span class="brand-mark">DDA</span>
+          <span class="brand-name">Darius Digital Academy</span>
+        </a>
+        <button class="icon-button" type="button" id="mobile-drawer-close" aria-label="Fermer le menu"><svg class="icon"><use href="#icon-close"/></svg></button>
+      </div>
+      <p class="nav-section-label">Apprendre</p>
+      <button class="nav-item" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Aujourd’hui</button>
+      <button class="nav-item" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mon parcours</button>
+      <button class="nav-item" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Leçon &amp; validation</button>
+      <p class="nav-section-label">Pratiquer</p>
+      <button class="nav-item" data-view="dashboard" data-scroll-to="analysis-terminal"><svg class="icon"><use href="#icon-chart"/></svg> Terminal d’analyse</button>
+      <button class="nav-item" data-view="practice"><svg class="icon"><use href="#icon-target"/></svg> Pratique avancée</button>
+      <p class="nav-section-label">Mon travail</p>
+      <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
+      <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal</button>
+      <p class="nav-section-label">Explorer</p>
+      <button class="nav-item" data-view="lab"><svg class="icon"><use href="#icon-award"/></svg> DDA Lab</button>
+      <button class="nav-item" data-view="community"><svg class="icon"><use href="#icon-users"/></svg> Communauté<span class="nav-status-tag">En préparation</span></button>
+      <button class="nav-item" data-view="intelligence"><svg class="icon"><use href="#icon-compass"/></svg> Intelligence DDA<span class="nav-status-tag">En préparation</span></button>
+      <button class="nav-item" data-view="experts"><svg class="icon"><use href="#icon-award"/></svg> DDA Experts<span class="nav-status-tag">En préparation</span></button>
+      <button class="nav-item" data-view="live"><svg class="icon"><use href="#icon-play"/></svg> DDA Live<span class="nav-status-tag">En préparation</span></button>
+      <button class="nav-item" data-view="business"><svg class="icon"><use href="#icon-buyer"/></svg> DDA Business<span class="nav-status-tag">En préparation</span></button>
+      <button class="nav-item" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
+      <button class="nav-item" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg> Marchés &amp; BRVM</button>
+      <button class="nav-item" data-view="forex"><svg class="icon"><use href="#icon-chart"/></svg> Forex<span class="nav-status-tag">En préparation</span></button>
+      <button class="nav-item" data-view="stocks"><svg class="icon"><use href="#icon-chart"/></svg> Actions<span class="nav-status-tag">En préparation</span></button>
+      <button class="nav-item" data-view="indices"><svg class="icon"><use href="#icon-chart"/></svg> Indices<span class="nav-status-tag">En préparation</span></button>
+      <button class="nav-item" data-view="crypto"><svg class="icon"><use href="#icon-chart"/></svg> Crypto<span class="nav-status-tag">En préparation</span></button>
+      <button class="nav-item" data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg> Broker Hub</button>
+      <p class="nav-section-label">Compte</p>
+      <button class="nav-item" data-view="membership"><svg class="icon"><use href="#icon-spark"/></svg> DDA Premium</button>
+      <button class="nav-item" data-view="support"><svg class="icon"><use href="#icon-help"/></svg> Aide &amp; support</button>
+      <button class="nav-item" data-view="profile"><svg class="icon"><use href="#icon-user"/></svg> Profil</button>
+    </nav>
+
     <main>
       <!-- Academy shell: public marketing content is intentionally outside this document. -->
       <header class="topbar">
+        <button class="icon-button mobile-menu-toggle" type="button" id="mobile-menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-drawer"><svg class="icon"><use href="#icon-menu"/></svg></button>
         <button class="mobile-brand" data-view="dashboard" aria-label="Accueil DDA"><b>DDA</b><small>DIGITAL ACADEMY</small></button>
         <div class="context"><strong id="context-title">Aujourd’hui</strong></div>
         <div class="network-state" id="network-state" role="status"><i></i><span>Vérification réseau</span></div>
@@ -462,7 +506,7 @@
         <div class="view-photo-band" role="img" aria-label="Fondations DDA"><img class="photo-fill" src="images/photos/m0-foundations-observe.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><p class="view-photo-band-copy">Observer avant d'agir — la première compétence qui compte.</p></div>
         <div class="lesson-layout">
           <article class="lesson-main" id="lesson-main">
-            <button class="back-link" data-view="back">← Retour</button>
+            <div class="lesson-quick-nav"><button class="back-link" data-view="back">← Retour</button><button class="text-action" data-view="path">Mon parcours</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div>
           </article>
           <aside class="lesson-outline" id="lesson-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
         </div>
@@ -472,7 +516,7 @@
         <div class="view-photo-band" role="img" aria-label="Support et résistance"><img class="photo-fill" src="images/photos/m0-foundations-observe.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><p class="view-photo-band-copy">Repérer une zone, pas deviner un prix.</p></div>
         <div class="lesson-layout">
           <article class="lesson-main" id="lesson-m02-main">
-            <button class="back-link" data-view="back">← Retour</button>
+            <div class="lesson-quick-nav"><button class="back-link" data-view="back">← Retour</button><button class="text-action" data-view="path">Mon parcours</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div>
           </article>
           <aside class="lesson-outline" id="lesson-m02-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
         </div>
@@ -482,7 +526,7 @@
         <div class="view-photo-band" role="img" aria-label="Tendance de marché"><img class="photo-fill" src="images/photos/m0-foundations-observe.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><p class="view-photo-band-copy">Lire une direction, sans certitude absolue.</p></div>
         <div class="lesson-layout">
           <article class="lesson-main" id="lesson-m03-main">
-            <button class="back-link" data-view="back">← Retour</button>
+            <div class="lesson-quick-nav"><button class="back-link" data-view="back">← Retour</button><button class="text-action" data-view="path">Mon parcours</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div>
           </article>
           <aside class="lesson-outline" id="lesson-m03-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
         </div>
@@ -492,7 +536,7 @@
         <div class="view-photo-band" role="img" aria-label="Contreparties et liquidité"><img class="photo-fill" src="images/photos/m1-terminal-analysis.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><p class="view-photo-band-copy">Chaque échange a deux côtés — comprendre qui est en face.</p></div>
         <div class="lesson-layout lesson-layout-m1">
           <article class="lesson-main" id="lesson-m11-main">
-            <button class="back-link" data-view="back">← Retour</button>
+            <div class="lesson-quick-nav"><button class="back-link" data-view="back">← Retour</button><button class="text-action" data-view="path">Mon parcours</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div>
           </article>
           <aside class="lesson-outline" id="lesson-m11-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
         </div>
@@ -502,7 +546,7 @@
         <div class="view-photo-band" role="img" aria-label="Exécution d'ordres"><img class="photo-fill" src="images/photos/m1-terminal-analysis.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><p class="view-photo-band-copy">L'exécution compte autant que l'analyse.</p></div>
         <div class="lesson-layout lesson-layout-m1 lesson-layout-m12">
           <article class="lesson-main" id="lesson-m12-main">
-            <button class="back-link" data-view="back">← Retour</button>
+            <div class="lesson-quick-nav"><button class="back-link" data-view="back">← Retour</button><button class="text-action" data-view="path">Mon parcours</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div>
           </article>
           <aside class="lesson-outline" id="lesson-m12-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
         </div>
@@ -512,7 +556,7 @@
         <div class="view-photo-band" role="img" aria-label="Organisation du marché"><img class="photo-fill" src="images/photos/m1-terminal-analysis.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><p class="view-photo-band-copy">Du marché primaire au marché secondaire.</p></div>
         <div class="lesson-layout lesson-layout-m1 lesson-layout-m13">
           <article class="lesson-main" id="lesson-m13-main">
-            <button class="back-link" data-view="back">← Retour</button>
+            <div class="lesson-quick-nav"><button class="back-link" data-view="back">← Retour</button><button class="text-action" data-view="path">Mon parcours</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div>
           </article>
           <aside class="lesson-outline" id="lesson-m13-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
         </div>
@@ -541,7 +585,7 @@
         <div class="view-photo-band" role="img" aria-label="Ce que l'IA sait faire"><img class="photo-fill" src="images/photos/lab-ai-collaboration.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><p class="view-photo-band-copy">Savoir ce que l'IA sait faire — et où elle se trompe.</p></div>
         <div class="lesson-layout">
           <article class="lesson-main" id="lesson-lab1-main">
-            <button class="back-link" data-view="back">← Retour</button>
+            <div class="lesson-quick-nav"><button class="back-link" data-view="back">← Retour</button><button class="text-action" data-view="path">Mon parcours</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div>
           </article>
           <aside class="lesson-outline" id="lesson-lab1-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
         </div>
@@ -551,7 +595,7 @@
         <div class="view-photo-band" role="img" aria-label="Formuler une demande claire"><img class="photo-fill" src="images/photos/lab-ai-collaboration.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><p class="view-photo-band-copy">Une demande claire change tout le résultat.</p></div>
         <div class="lesson-layout">
           <article class="lesson-main" id="lesson-lab2-main">
-            <button class="back-link" data-view="back">← Retour</button>
+            <div class="lesson-quick-nav"><button class="back-link" data-view="back">← Retour</button><button class="text-action" data-view="path">Mon parcours</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div>
           </article>
           <aside class="lesson-outline" id="lesson-lab2-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
         </div>
@@ -561,7 +605,7 @@
         <div class="view-photo-band" role="img" aria-label="Vérifier et corriger"><img class="photo-fill" src="images/photos/lab-ai-collaboration.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><p class="view-photo-band-copy">Vérifier avant d'utiliser, toujours.</p></div>
         <div class="lesson-layout">
           <article class="lesson-main" id="lesson-lab3-main">
-            <button class="back-link" data-view="back">← Retour</button>
+            <div class="lesson-quick-nav"><button class="back-link" data-view="back">← Retour</button><button class="text-action" data-view="path">Mon parcours</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div>
           </article>
           <aside class="lesson-outline" id="lesson-lab3-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
         </div>
@@ -658,7 +702,7 @@
       </section>
 
       <section class="view" id="journal" aria-labelledby="journal-title">
-        <button class="back-link" data-view="back">← Retour</button>
+        <div class="lesson-quick-nav"><button class="back-link" data-view="back">← Retour</button><button class="text-action" data-view="path">Mon parcours</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div>
         <div class="section-intro"><p class="eyebrow gold">Journal de bord</p><h1 id="journal-title">Qu’avais-tu prévu ? Qu’as-tu fait ? Qu’en retiens-tu ?</h1><p>Un espace pour documenter ton processus de décision — jamais un signal, jamais un conseil d’achat ou de vente, jamais un chiffre de gain inventé. Conservé uniquement sur cet appareil.</p></div>
         <div class="page-mission" data-mission="journal"><div><p class="eyebrow">Mission de cette page</p><strong>Conserver le raisonnement pendant qu’il est encore frais.</strong><span>Le Journal reçoit tes observations depuis le Terminal et les transforme en trace relisible.</span></div><button class="text-action" id="journal-mission-new" type="button">Commencer une entrée <span>→</span></button></div>
 
