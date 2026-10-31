@@ -218,6 +218,7 @@ const views = document.querySelectorAll('.view');
 const desktopItems = document.querySelectorAll('.nav-item');
 const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
+const contextSection = document.getElementById('context-section');
 
 // Mobile drawer — the sidebar's full navigation, reachable on mobile where
 // .sidebar itself stays display:none. Routing is already handled by the
@@ -398,6 +399,23 @@ const viewPermissions = {
   // DDA Premium (premium_track, réutilisé — aucun nouveau palier commercial).
   'lesson-lab1': 'lesson_m01', 'lesson-lab2': 'lesson_m01', 'lesson-lab3': 'lesson_m01',
   'lesson-lab4': 'premium_track', 'lesson-lab-capstone': 'premium_track'
+};
+// "Where am I" landmark (navigation audit): mirrors the sidebar's own
+// section groupings (nav-section-label in academy.html) so the topbar never
+// claims a location the sidebar doesn't already show. access/landing are
+// deliberately absent — those are entry shells, not a space inside the app.
+const VIEW_SECTION = {
+  dashboard: 'Apprendre', path: 'Apprendre',
+  ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, 'Apprendre'])),
+  practice: 'Pratiquer',
+  progress: 'Mon travail', journal: 'Mon travail',
+  lab: 'Explorer', community: 'Explorer', intelligence: 'Explorer', experts: 'Explorer',
+  live: 'Explorer', business: 'Explorer', resources: 'Explorer', markets: 'Explorer',
+  forex: 'Explorer', stocks: 'Explorer', indices: 'Explorer', crypto: 'Explorer', brokers: 'Explorer',
+  'lesson-lab1': 'Explorer', 'lesson-lab2': 'Explorer', 'lesson-lab3': 'Explorer',
+  'lesson-lab4': 'Explorer', 'lesson-lab-capstone': 'Explorer',
+  'premium-track': 'Explorer', 'premium-lab': 'Explorer', 'premium-assessment': 'Explorer',
+  membership: 'Compte', support: 'Compte', profile: 'Compte'
 };
 // Maps a lesson id to the view that actually renders it — the Terminal cockpit's
 // "continue" button follows DDALearning.nextActionable, which will point at the
@@ -2201,6 +2219,29 @@ const LESSON_VIEW_IDS = new Set(Object.values(LESSON_VIEW_ID));
 // de chaque leçon), jamais une carte parallèle écrite à la main.
 const LESSON_PREREQUISITE = Object.freeze(Object.fromEntries(LESSON_REGISTRY.filter(entry => entry.prerequisite).map(entry => [entry.viewId, entry.prerequisite])));
 
+// Navigation audit: a lesson could only go "← Retour" — no way back to the
+// specific lesson just before it. Reuses the same prerequisite chain as the
+// sequential lock above, so this never claims a "previous lesson" that isn't
+// actually the one the lock would send you back to.
+(function initLessonPrevLinks() {
+  LESSON_VIEW_IDS.forEach(viewId => {
+    const prerequisiteLessonId = LESSON_PREREQUISITE[viewId];
+    const prevViewId = prerequisiteLessonId && LESSON_VIEW_ID[prerequisiteLessonId];
+    if (!prevViewId) return;
+    const quickNav = document.getElementById(viewId)?.querySelector('.lesson-quick-nav');
+    if (!quickNav || quickNav.querySelector('[data-lesson-prev]')) return;
+    const prevButton = document.createElement('button');
+    prevButton.type = 'button';
+    prevButton.className = 'text-action';
+    prevButton.dataset.view = prevViewId;
+    prevButton.dataset.lessonPrev = 'true';
+    prevButton.textContent = '← Leçon précédente';
+    const backLink = quickNav.querySelector('.back-link');
+    if (backLink) backLink.after(prevButton); else quickNav.appendChild(prevButton);
+    bindViewButton(prevButton);
+  });
+})();
+
 function smartBackTarget() {
   if (previousView && titles[previousView] && !LESSON_VIEW_IDS.has(previousView) && previousView !== 'access') return previousView;
   return 'dashboard';
@@ -2361,6 +2402,9 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
   document.body.classList.toggle('public-shell', id === 'landing');
   document.body.classList.toggle('access-mode', id === 'access');
   contextTitle.textContent = titles[id] || 'DDA';
+  const sectionLabel = VIEW_SECTION[id];
+  contextSection.textContent = sectionLabel || '';
+  contextSection.hidden = !sectionLabel;
   const navigationMode = historyMode === 'auto' ? (recordEvent ? 'push' : 'replace') : historyMode;
   writeDdaHistory(id, navigationMode);
   window.scrollTo({ top: 0, behavior: 'smooth' });
