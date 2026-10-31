@@ -38,7 +38,7 @@ assert.match(toolbar, /id="terminal-pan-left"[\s\S]*id="terminal-pan-right"/, 'b
 assert.match(toolbar, /id="terminal-undo-drawing"[\s\S]*id="terminal-clear-drawings"/, 'drawing undo and clear controls are preserved');
 assert.match(toolbar, /<svg viewBox="0 0 24 24" aria-hidden="true"><path/, 'toolbar actions use vector icons');
 
-assert.match(css, /--dda-elite-canvas:#060d17/, 'the resting Deep Navy canvas is part of the shared visual layer');
+assert.match(css, /--dda-elite-canvas:#0b2554/, 'the resting Deep Sky Blue canvas is part of the shared visual layer');
 assert.match(css, /--dda-aurora-electric:#2588ff/, 'the DDA Aurora cobalt signature is vivid and branded');
 assert.match(css, /--dda-aurora-cyan:#39d6cf/, 'the mineral-cyan accent differentiates the palette from generic SaaS blue');
 assert.match(css, /--dda-elite-gold-soft:#f3c76c/, 'the DDA gold proof accent is warm and legible');
