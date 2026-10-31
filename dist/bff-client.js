@@ -139,9 +139,38 @@
     return true;
   }
 
+  // Admin reads — unlike the calls above, the back-office needs to tell a
+  // staff member exactly *why* a screen is empty (not configured here vs.
+  // not logged in vs. logged in but not an admin), so these return a
+  // {enabled, status} shape instead of collapsing every non-success case to
+  // null. The server (bff/src/app.js withAdmin) re-derives the role from the
+  // session cookie itself — nothing admin-related is ever decided here.
+  async function adminRequest(path) {
+    const result = await request(path);
+    if (!result.enabled) return { enabled: false };
+    if (result.response.status === 401) return { enabled: true, status: 401 };
+    if (result.response.status === 403) return { enabled: true, status: 403 };
+    if (result.response.status === 503) return { enabled: true, status: 503 };
+    if (!result.response.ok) throw resultError(result, 'admin_request_failed');
+    return { enabled: true, status: 200, data: result.body };
+  }
+
+  async function getAdminOverview() {
+    return adminRequest('/v1/admin/overview');
+  }
+
+  async function getAdminUsers({ page = 1, perPage = 20 } = {}) {
+    return adminRequest(`/v1/admin/users?page=${encodeURIComponent(page)}&per_page=${encodeURIComponent(perPage)}`);
+  }
+
+  async function getAdminMemberships({ page = 1, perPage = 20 } = {}) {
+    return adminRequest(`/v1/admin/memberships?page=${encodeURIComponent(page)}&per_page=${encodeURIComponent(perPage)}`);
+  }
+
   window.DDABFF = Object.freeze({
     enabled, register, verifyEmail, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
     getProgress, saveLessonProgress, saveOnboardingProgress,
+    getAdminOverview, getAdminUsers, getAdminMemberships,
     get baseUrl() { return configuredBase; }
   });
 })();
