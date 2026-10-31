@@ -38,10 +38,10 @@ assert.match(toolbar, /id="terminal-pan-left"[\s\S]*id="terminal-pan-right"/, 'b
 assert.match(toolbar, /id="terminal-undo-drawing"[\s\S]*id="terminal-clear-drawings"/, 'drawing undo and clear controls are preserved');
 assert.match(toolbar, /<svg viewBox="0 0 24 24" aria-hidden="true"><path/, 'toolbar actions use vector icons');
 
-assert.match(css, /--dda-elite-canvas:#0b2554/, 'the resting Deep Sky Blue canvas is part of the shared visual layer');
+assert.match(css, /--dda-elite-canvas:#081b3c/, 'the resting Deep Navy canvas is part of the shared visual layer');
 assert.match(css, /--dda-aurora-electric:#2588ff/, 'the DDA Aurora cobalt signature is vivid and branded');
 assert.match(css, /--dda-aurora-cyan:#39d6cf/, 'the mineral-cyan accent differentiates the palette from generic SaaS blue');
-assert.match(css, /--dda-elite-gold-soft:#f3c76c/, 'the DDA gold proof accent is warm and legible');
+assert.match(css, /--dda-elite-gold-soft:#f6c860/, 'the DDA gold proof accent is warm and legible');
 assert.match(css, /#journal \.journal-toolbar\{[^}]*padding-inline:18px/, 'Journal count and actions have deliberate breathing room inside the glass panel');
 assert.match(css, /radial-gradient\(ellipse 54% 26% at 96% 2%/, 'every route receives a restrained DDA light field');
 assert.match(css, /#dashboard \.analysis-terminal-tools\{position:sticky/, 'the Terminal tools use a compact floating dock');
