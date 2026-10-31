@@ -2325,8 +2325,6 @@ body.public-shell .prototype-banner{display:none}
 #landing .public-menu-panel a:focus-visible { color: var(--lp-heading); background: rgba(255,255,255,.05); }
 #landing .public-footer-col a:hover,
 #landing .public-footer-col a:focus-visible { color: var(--lp-heading); }
-#landing .footer-linkedin-link { display: inline-flex; align-items: center; gap: 8px; }
-#landing .footer-linkedin-link .icon { width: 1.05em; height: 1.05em; color: var(--dda-gold-soft); }
 #landing .landing-secondary { display: inline-flex; align-items: center; }
 #landing [id^="landing-"] { scroll-margin-top: 88px; }
 #landing .future-label { cursor: default; }
