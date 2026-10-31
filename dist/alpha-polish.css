@@ -610,12 +610,12 @@
 /* Access / onboarding — registre institutionnel Deep Navy.
    La vue doit rester immersive et ne pas basculer vers le canevas ivoire. */
 body.access-mode .prototype-banner{
-  background:#081b3c;
+  background:#061b47;
   color:#94a3b8;
   border-bottom:1px solid rgba(255,255,255,.08);
 }
 #access{
-  background:#081b3c;
+  background:#061b47;
   color:#94a3b8;
 }
 #access .access-copy>p,
@@ -637,7 +637,7 @@ body.access-mode .prototype-banner{
 }
 #access .step-indicator{color:#94a3b8}
 #access .step-indicator span{border-color:rgba(255,255,255,.2);background:#0a1424;color:#94a3b8}
-#access .step-indicator span.active{border-color:#f8fafc;background:#f8fafc;color:#081b3c}
+#access .step-indicator span.active{border-color:#f8fafc;background:#f8fafc;color:#061b47}
 #access .step-indicator i{background:rgba(255,255,255,.16)}
 #access .access-card label{color:#f8fafc}
 #access .access-card input,
@@ -1087,12 +1087,12 @@ body.access-mode .prototype-banner{
 
 
 /* Mobile viewport repair — a continuous full-bleed learning surface, not a floating white sheet. */
-body.public-shell{background:#081b3c;color:var(--lp-heading)}
+body.public-shell{background:#061b47;color:var(--lp-heading)}
 body.public-shell .app-shell,
-body.public-shell main{min-height:100vh;background:#081b3c}
+body.public-shell main{min-height:100vh;background:#061b47}
 #landing{
-  --lp-bg:#081b3c;
-  background-color:#081b3c;
+  --lp-bg:#061b47;
+  background-color:#061b47;
 }
 #landing.view.active{width:100%;max-width:none;margin:0;transform:none}
 
@@ -1694,7 +1694,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 #dashboard .terminal-icon-button{width:38px;height:38px;min-width:38px;min-height:38px;border-color:rgba(174,191,213,.13);border-radius:10px;background:#0a1424;color:#aeb9c6;font-size:0;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
 #dashboard .terminal-icon-button:hover:not(:disabled),#dashboard .terminal-icon-button:focus-visible{border-color:rgba(203,177,116,.42);background:rgba(203,177,116,.08);color:#e1cd9e;transform:translateY(-1px)}
 #dashboard .terminal-icon-button:disabled{opacity:.38}
-#dashboard .analysis-chart-shell{border-color:rgba(174,191,213,.13);border-radius:14px;background:#081b3c}
+#dashboard .analysis-chart-shell{border-color:rgba(174,191,213,.13);border-radius:14px;background:#061b47}
 #dashboard .analysis-chart-meta,#dashboard .analysis-chart-footer{border-color:rgba(174,191,213,.1);background:#0a1424}
 
 @media(max-width:899px){
@@ -1785,10 +1785,10 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
    Strictly presentational cascade: IDs, routes, data, and state classes stay intact.
    ====================================================================== */
 :root{
-  --dda-elite-canvas:#081b3c;
-  --dda-elite-surface:#0b2249;
-  --dda-elite-surface-raised:#102d5e;
-  --dda-elite-surface-soft:#0d2854;
+  --dda-elite-canvas:#061b47;
+  --dda-elite-surface:#07235b;
+  --dda-elite-surface-raised:#0a307c;
+  --dda-elite-surface-soft:#09296b;
   --dda-elite-line:rgba(81,157,226,.22);
   --dda-elite-line-strong:rgba(95,182,255,.36);
   --dda-elite-ink:#edf1f6;
@@ -1994,7 +1994,7 @@ button:disabled{cursor:not-allowed}
   --cta-blue-2:#22b8d2;
 }
 
-/* Static optical depth across every route; background-color remains #081b3c. */
+/* Static optical depth across every route; background-color remains #061b47. */
 :is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#forex,#stocks,#indices,#crypto,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{
   background-image:
     radial-gradient(ellipse 54% 26% at 96% 2%,rgba(37,136,255,.22),transparent 74%),
@@ -2263,7 +2263,7 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 
 /* Contract-safe base: the optical texture sits above the canonical Deep Navy canvas. */
 #landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#forex.view,#stocks.view,#indices.view,#crypto.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{
-  background-color:#081b3c!important;
+  background-color:#061b47!important;
 }
 
 /* Mission rails keep page purpose visible and reduce destination repetition. */
