@@ -4,6 +4,7 @@ const { randomUUID } = require('node:crypto');
 const { randomToken, sha256, timingSafeEqualText, parseCookies, serializeCookie, encrypt, decrypt, normalizeEmail } = require('./security');
 const { executeIdempotentMutation, validateClientMutationId } = require('./idempotency');
 const { checkAuthRateLimit } = require('./rate-limiter');
+const { VALID_ROLES: VALID_ADMIN_ROLES } = require('./admin-roles-store');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
@@ -480,6 +481,42 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const { page, perPage } = parsePageParams(url);
         const items = await billingStore.listMemberships({ page, perPage });
         return json(res, 200, { contract: 'dda-admin-memberships-v1', page, per_page: perPage, items });
+      }
+      // Role assignment/revocation — the invariants (only an owner may grant
+      // or revoke, self-elevation impossible, last owner protected) live in
+      // adminRoles itself (admin-roles-store.js) and are already tested
+      // there; this route only translates its errors to HTTP status codes.
+      if (method === 'POST' && path === '/v1/admin/roles') {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!validateCsrf(req, config, admin.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (!adminRoles || typeof adminRoles.assignRole !== 'function') return sendError(res, 503, 'admin_not_configured', 'Role assignment is not available.', requestId);
+        const body = await readJson(req);
+        const targetUserId = typeof body.user_id === 'string' ? body.user_id.trim() : '';
+        if (!targetUserId) return sendError(res, 400, 'validation_error', 'user_id is required.', requestId, { user_id: 'Required.' });
+        if (!VALID_ADMIN_ROLES.includes(body.role)) return sendError(res, 400, 'validation_error', 'role must be owner or admin.', requestId, { role: 'Must be owner or admin.' });
+        try {
+          const result = await adminRoles.assignRole(targetUserId, body.role, admin.user.user_id);
+          return json(res, 200, { contract: 'dda-admin-roles-v1', ...result });
+        } catch (error) {
+          if (error.code === 'owner_required') return sendError(res, 403, 'owner_required', error.message, requestId);
+          if (error.code === 'invalid_role') return sendError(res, 400, 'validation_error', error.message, requestId, { role: error.message });
+          throw error;
+        }
+      }
+      const revokeRoleMatch = path.match(/^\/v1\/admin\/roles\/([^/]+)$/);
+      if (method === 'DELETE' && revokeRoleMatch) {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!validateCsrf(req, config, admin.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (!adminRoles || typeof adminRoles.revokeRole !== 'function') return sendError(res, 503, 'admin_not_configured', 'Role revocation is not available.', requestId);
+        const targetUserId = decodeURIComponent(revokeRoleMatch[1]);
+        try {
+          await adminRoles.revokeRole(targetUserId, admin.user.user_id);
+          return json(res, 204);
+        } catch (error) {
+          if (error.code === 'owner_required') return sendError(res, 403, 'owner_required', error.message, requestId);
+          if (error.code === 'last_owner_protected') return sendError(res, 409, 'last_owner_protected', error.message, requestId);
+          throw error;
+        }
       }
       return sendError(res, 404, 'not_found', 'Resource not found.', requestId);
     } catch (error) {
