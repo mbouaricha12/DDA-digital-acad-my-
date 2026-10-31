@@ -98,22 +98,69 @@
   }
 
   // ---------- Users ----------
+  // Role mutation is owner-only server-side (bff/src/app.js withAdmin + the
+  // owner check inside admin-roles-store.js) — callerRole mirrors that, so
+  // an admin (not an owner) never even sees controls that would just 403.
+  let callerRole = null;
   const usersState = { page: 1, perPage: 20, loaded: false };
+  const roleFeedback = document.getElementById('admin-role-feedback');
+
+  function showRoleFeedback(message, kind) {
+    roleFeedback.textContent = message;
+    roleFeedback.dataset.kind = kind;
+    roleFeedback.hidden = false;
+  }
+
+  const ROLE_OPTIONS = [['', 'Aucun'], ['admin', 'admin'], ['owner', 'owner']];
+  function roleCell(user) {
+    if (callerRole !== 'owner') {
+      return user.role ? `<span class="admin-role-tag" data-role="${escapeHtml(user.role)}">${escapeHtml(user.role)}</span>` : '—';
+    }
+    const options = ROLE_OPTIONS.map(([value, label]) => `<option value="${value}" ${((user.role || '') === value) ? 'selected' : ''}>${label}</option>`).join('');
+    return `<select class="admin-role-select" data-user-id="${escapeHtml(user.user_id)}" data-previous="${escapeHtml(user.role || '')}">${options}</select>`;
+  }
+
+  async function onRoleChange(event) {
+    const select = event.target;
+    const userId = select.dataset.userId;
+    const previous = select.dataset.previous;
+    const nextRole = select.value;
+    roleFeedback.hidden = true;
+    const result = nextRole
+      ? await window.DDABFF.assignAdminRole(userId, nextRole)
+      : await window.DDABFF.revokeAdminRole(userId);
+    if (!result.enabled) return;
+    if (result.status === 200 || result.status === 204) {
+      select.dataset.previous = nextRole;
+      showRoleFeedback(nextRole ? `Rôle "${nextRole}" attribué.` : 'Rôle retiré.', 'success');
+      return;
+    }
+    select.value = previous; // server refused — the dropdown must not show a role that was never actually granted
+    const messages = {
+      403: 'Seul un owner peut modifier les rôles.',
+      409: 'Impossible de retirer le dernier owner restant.',
+      400: 'Rôle invalide.'
+    };
+    showRoleFeedback(messages[result.status] || 'La modification a échoué.', 'error');
+  }
+
   async function loadUsers(page) {
     usersState.page = page;
     const result = await window.DDABFF.getAdminUsers({ page, perPage: usersState.perPage });
     usersState.loaded = true;
     if (result.status !== 200) return; // gate already shown at boot; nothing more to render
     const { users, total } = result.data;
-    document.getElementById('admin-users-body').innerHTML = users.map(user => `
+    const body = document.getElementById('admin-users-body');
+    body.innerHTML = users.map(user => `
       <tr>
         <td>${escapeHtml(user.email)}</td>
         <td>${escapeHtml(user.display_name) || '—'}</td>
         <td><span class="admin-status-tag" data-status="${escapeHtml(user.status)}">${escapeHtml(user.status)}</span></td>
-        <td>${user.role ? `<span class="admin-role-tag" data-role="${escapeHtml(user.role)}">${escapeHtml(user.role)}</span>` : '—'}</td>
+        <td>${roleCell(user)}</td>
         <td>${formatDate(user.created_at)}</td>
         <td>${formatDate(user.last_sign_in_at)}</td>
       </tr>`).join('') || `<tr><td colspan="6">Aucun utilisateur.</td></tr>`;
+    body.querySelectorAll('.admin-role-select').forEach(select => select.addEventListener('change', onRoleChange));
     document.getElementById('admin-users-page-label').textContent = total != null ? `Page ${page} · ${total} au total` : `Page ${page}`;
     document.getElementById('admin-users-prev').disabled = page <= 1;
     document.getElementById('admin-users-next').disabled = users.length < usersState.perPage;
@@ -184,6 +231,7 @@
       return;
     }
     networkState.querySelector('span').textContent = `Connecté · ${result.data.caller.role}`;
+    callerRole = result.data.caller.role;
     renderMetrics(result.data.metrics);
     showAdminView('overview');
   })();

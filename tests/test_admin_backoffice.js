@@ -138,9 +138,46 @@ async function withBffContext(browser) {
     assert.equal(await page.isDisabled('#admin-users-prev'), true, 'page 1 has no previous page');
     assert.equal(await page.isDisabled('#admin-users-next'), true, 'a page shorter than per_page has no next page');
 
+    // The caller is an owner, so the role cell is an editable control, not just a tag.
+    assert.equal(await page.locator('.admin-role-select').count(), 1);
+    await context.route('https://bff.test/v1/security/csrf', route => route.fulfill({ status: 204 }));
+    let roleRequestBody = null;
+    await page.route('https://bff.test/v1/admin/roles', route => {
+      roleRequestBody = route.request().postDataJSON();
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ contract: 'dda-admin-roles-v1', user_id: 'u1', role: 'admin' }) });
+    });
+    await page.selectOption('.admin-role-select', 'admin');
+    await page.waitForSelector('#admin-role-feedback[data-kind="success"]');
+    assert.deepEqual(roleRequestBody, { user_id: 'u1', role: 'admin' });
+
+    await page.route('https://bff.test/v1/admin/roles/u1', route => route.fulfill({ status: 409, contentType: 'application/json', body: JSON.stringify({ code: 'last_owner_protected' }) }));
+    await page.selectOption('.admin-role-select', '');
+    await page.waitForSelector('#admin-role-feedback[data-kind="error"]');
+    assert.equal(await page.inputValue('.admin-role-select'), 'admin', 'a refused change reverts the dropdown rather than showing a role that was never granted');
+
     await page.click('.sidebar .nav-item[data-admin-view="memberships"]');
     await page.waitForSelector('#admin-memberships-body tr');
     assert.match(await page.textContent('#admin-memberships-body'), /chariow/);
+    await context.close();
+  });
+
+  await test('an admin (not an owner) sees roles as read-only tags, never an editable control', async () => {
+    const context = await withBffContext(browser);
+    await context.route('https://bff.test/v1/admin/overview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-overview-v1', generated_at: new Date().toISOString(), caller: { user_id: 'admin-1', role: 'admin' }, metrics: {} })
+    }));
+    await context.route(/https:\/\/bff\.test\/v1\/admin\/users.*page=1/, route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-users-v1', page: 1, per_page: 20, total: 1, users: [{ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', status: 'active', role: 'owner', created_at: '2026-01-01T00:00:00Z', last_sign_in_at: null }] })
+    }));
+    const page = await context.newPage();
+    await page.goto(ADMIN_BASE);
+    await page.waitForSelector('.admin-metrics');
+    await page.click('.sidebar .nav-item[data-admin-view="users"]');
+    await page.waitForSelector('#admin-users-body tr');
+    assert.equal(await page.locator('.admin-role-select').count(), 0, 'a non-owner must never see a control the server would 403 anyway');
+    assert.match(await page.textContent('#admin-users-body'), /owner/);
     await context.close();
   });
 

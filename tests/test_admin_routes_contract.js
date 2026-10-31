@@ -2,19 +2,28 @@
 
 const assert = require('node:assert/strict');
 const http = require('node:http');
-const { createBff } = require('../bff/src/app');
+const { createBff, CSRF_COOKIE } = require('../bff/src/app');
 const { MemorySessionStore } = require('../bff/src/session-store');
 const { MemoryAdminRolesStore } = require('../bff/src/admin-roles-store');
 const { sha256, randomToken } = require('../bff/src/security');
 
-function request(server, method, path, { headers = {}, cookies = {} } = {}) {
+function request(server, method, path, { body, headers = {}, cookies = {} } = {}) {
   return new Promise((resolve, reject) => {
     const cookie = Object.entries(cookies).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('; ');
-    const req = http.request({ ...server.address(), method, path, headers: { Origin: 'http://localhost:8744', ...(cookie ? { Cookie: cookie } : {}), ...headers } }, res => {
+    const payload = body ? JSON.stringify(body) : '';
+    const req = http.request({ ...server.address(), method, path, headers: { Origin: 'http://localhost:8744', ...(body ? { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) } : {}), ...(cookie ? { Cookie: cookie } : {}), ...headers } }, res => {
       let text = ''; res.on('data', chunk => { text += chunk; }); res.on('end', () => resolve({ status: res.statusCode, body: text ? JSON.parse(text) : null }));
     });
-    req.on('error', reject); req.end();
+    req.on('error', reject); if (payload) req.write(payload); req.end();
   });
+}
+
+// Double-submit CSRF: validateCsrf only checks the cookie and header match
+// (plus Origin) — it is never tied to the session, so any token works here
+// as long as it is sent both ways, exactly like a real browser would.
+function withCsrf(sessionToken, extraCookies = {}) {
+  const csrf = randomToken(16);
+  return { cookies: { '__Host-dda_session': sessionToken, [CSRF_COOKIE]: csrf, ...extraCookies }, headers: { 'X-CSRF-Token': csrf } };
 }
 
 async function loginAs(sessions, userId) {
@@ -124,6 +133,35 @@ function makeAuth(users) {
 
       response = await request(server, 'GET', '/v1/admin/memberships', { cookies: { '__Host-dda_session': plainToken } });
       assert.equal(response.status, 403);
+
+      // --- Role assignment/revocation: owner-only, CSRF-protected, server-derived ---
+      response = await request(server, 'POST', '/v1/admin/roles', { ...withCsrf(adminToken), body: { user_id: PLAIN, role: 'admin' } });
+      assert.equal(response.status, 403, 'an admin (not an owner) cannot grant a role, even with valid CSRF');
+      assert.equal(response.body.code, 'owner_required');
+
+      response = await request(server, 'POST', '/v1/admin/roles', { cookies: { '__Host-dda_session': ownerToken }, body: { user_id: PLAIN, role: 'admin' } });
+      assert.equal(response.status, 403, 'no CSRF token at all is refused even for the real owner');
+      assert.equal(response.body.code, 'csrf_failed');
+
+      response = await request(server, 'POST', '/v1/admin/roles', { ...withCsrf(ownerToken), body: { user_id: PLAIN, role: 'superadmin' } });
+      assert.equal(response.status, 400, 'an invented role is rejected, never silently coerced');
+      assert.equal(response.body.code, 'validation_error');
+
+      response = await request(server, 'POST', '/v1/admin/roles', { ...withCsrf(ownerToken), body: { user_id: PLAIN, role: 'admin' } });
+      assert.equal(response.status, 200, 'the owner can grant admin to a plain user');
+      assert.equal(response.body.role, 'admin');
+      assert.equal(await adminRoles.getRole(PLAIN), 'admin');
+
+      response = await request(server, 'DELETE', `/v1/admin/roles/${encodeURIComponent(ADMIN)}`, { ...withCsrf(adminToken) });
+      assert.equal(response.status, 403, 'an admin cannot revoke anyone, including themselves');
+
+      response = await request(server, 'DELETE', `/v1/admin/roles/${encodeURIComponent(PLAIN)}`, { ...withCsrf(ownerToken) });
+      assert.equal(response.status, 204, 'the owner can revoke the role they just granted');
+      assert.equal(await adminRoles.getRole(PLAIN), null);
+
+      response = await request(server, 'DELETE', `/v1/admin/roles/${encodeURIComponent(OWNER)}`, { ...withCsrf(ownerToken) });
+      assert.equal(response.status, 409, 'the last remaining owner cannot revoke themselves via this route either');
+      assert.equal(response.body.code, 'last_owner_protected');
     } finally { server.close(); }
   }
 

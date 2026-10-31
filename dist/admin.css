@@ -28,6 +28,12 @@
 .admin-pager{display:flex;align-items:center;gap:12px;margin-top:16px;color:var(--muted);font-size:13px}
 .admin-pager button:disabled{opacity:.4;cursor:default}
 
+.admin-role-select{background:var(--navy-900);color:var(--white);border:1px solid var(--line);border-radius:var(--r-sm);padding:6px 8px;font:inherit;font-size:12px}
+.admin-role-feedback{margin:0 0 14px;padding:10px 14px;border-radius:var(--r-sm);font-size:13px;border:1px solid var(--line)}
+.admin-role-feedback[data-kind="success"]{color:var(--green);border-color:rgba(79,190,133,.35)}
+.admin-role-feedback[data-kind="error"]{color:#e08a8a;border-color:rgba(224,138,138,.35)}
+.admin-role-feedback[hidden]{display:none}
+
 .admin-empty-state{padding:40px 20px;text-align:center;color:var(--muted);max-width:52ch;margin:0 auto}
 .admin-empty-state h2{color:var(--ivory);margin-bottom:8px}
 .admin-empty-state .primary-action{margin-top:16px}
