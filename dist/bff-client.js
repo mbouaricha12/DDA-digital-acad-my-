@@ -167,10 +167,29 @@
     return adminRequest(`/v1/admin/memberships?page=${encodeURIComponent(page)}&per_page=${encodeURIComponent(perPage)}`);
   }
 
+  // Role mutation — owner-only server-side (bff/src/app.js), never decided
+  // here. Returns {enabled, status, data|body} the same way adminRequest
+  // does, rather than throwing on 403/409: the UI needs to show *why* a
+  // specific grant/revoke failed (not an owner, last owner protected), not
+  // just that it did.
+  async function mutateAdminRole(path, options) {
+    const result = await request(path, options);
+    if (!result.enabled) return { enabled: false };
+    return { enabled: true, status: result.response.status, data: result.body };
+  }
+
+  async function assignAdminRole(userId, role) {
+    return mutateAdminRole('/v1/admin/roles', { method: 'POST', body: { user_id: userId, role } });
+  }
+
+  async function revokeAdminRole(userId) {
+    return mutateAdminRole(`/v1/admin/roles/${encodeURIComponent(userId)}`, { method: 'DELETE' });
+  }
+
   window.DDABFF = Object.freeze({
     enabled, register, verifyEmail, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
     getProgress, saveLessonProgress, saveOnboardingProgress,
-    getAdminOverview, getAdminUsers, getAdminMemberships,
+    getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }
   });
 })();
