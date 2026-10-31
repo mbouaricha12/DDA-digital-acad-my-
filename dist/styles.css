@@ -127,7 +127,14 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .mobile-brand{display:flex;text-align:left;line-height:1;gap:2px;flex-direction:column;border:0;background:none;padding:0;cursor:pointer;appearance:none}
 .mobile-brand b{font-family:Georgia,serif;font-size:21px;letter-spacing:-.05em;background:linear-gradient(135deg,var(--cta-blue-2),var(--cta-blue) 55%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
 .mobile-brand small{font-size:7px;letter-spacing:.22em;color:var(--muted)}
-.context{display:none}
+/* "Where am I" landmark: hidden on mobile until now (desktop sidebar was the
+   only indicator of current location) — flagged in the navigation audit as a
+   cause of feeling lost/locked in on small screens. Kept compact + truncated
+   so it never forces the topbar to overflow at 360px. */
+.context{display:flex;flex-direction:column;justify-content:center;min-width:0;flex:1;overflow:hidden}
+.context-section{display:block;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.context-section[hidden]{display:none}
+.context strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
 .network-state{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;margin-left:auto}
 .network-state i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(79,190,133,.14)}
 .network-state.offline i{background:var(--gold);box-shadow:0 0 0 4px rgba(217,164,65,.14)}
@@ -1206,7 +1213,8 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   main{padding-bottom:0}
   .topbar{top:0;height:84px;padding:0 clamp(24px,4vw,56px);background:rgba(5,11,20,.85)}
   .mobile-brand{display:none}
-  .context{display:grid}
+  .context{display:grid;flex:initial}
+  .context-section{font-size:10px}
   .context strong{font-size:17px}
   .network-state span{display:inline}
   .mobile-nav{display:none}
