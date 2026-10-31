@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="theme-color" content="#081426">
+  <title>DDA — Back-office</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="images/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="alpha-polish.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <svg hidden>
+    <symbol id="admin-icon-home" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9"/></symbol>
+    <symbol id="admin-icon-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="admin-icon-close" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></symbol>
+    <symbol id="admin-icon-progress" viewBox="0 0 24 24"><path d="M4 15a8 8 0 1 1 16 0"/><path d="M12 15V9"/><path d="M12 15l4-3"/></symbol>
+    <symbol id="admin-icon-users" viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3"/><circle cx="16" cy="9" r="2.5"/><path d="M3 20a5.5 5.5 0 0 1 11 0"/><path d="M14 20a4.5 4.5 0 0 1 7-3.7"/></symbol>
+    <symbol id="admin-icon-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></symbol>
+    <symbol id="admin-icon-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6Z"/><path d="M9 12l2 2 4-4"/></symbol>
+  </svg>
+
+  <div class="app-shell" id="admin-shell" data-layer="admin">
+    <aside class="sidebar" aria-label="Navigation du back-office">
+      <a class="brand" href="academy.html" aria-label="DDA — Retour à l’Academy">
+        <span class="brand-mark">DDA</span>
+        <span class="brand-name">Back-office</span>
+      </a>
+      <nav>
+        <p class="nav-section-label">Vue d’ensemble</p>
+        <button class="nav-item active" data-admin-view="overview" type="button"><svg class="icon"><use href="#admin-icon-progress"/></svg> Aperçu</button>
+        <p class="nav-section-label">Comptes</p>
+        <button class="nav-item" data-admin-view="users" type="button"><svg class="icon"><use href="#admin-icon-users"/></svg> Utilisateurs</button>
+        <button class="nav-item" data-admin-view="memberships" type="button"><svg class="icon"><use href="#admin-icon-spark"/></svg> Abonnements</button>
+      </nav>
+      <div class="admin-exit-row">
+        <a class="secondary-action" href="academy.html"><svg class="icon"><use href="#admin-icon-home"/></svg> Retour à l’Academy</a>
+        <button class="text-action" id="admin-logout" type="button">Se déconnecter</button>
+      </div>
+    </aside>
+
+    <div class="mobile-drawer-backdrop" id="admin-drawer-backdrop" hidden></div>
+    <nav class="mobile-drawer" id="admin-drawer" aria-label="Navigation du back-office" hidden>
+      <div class="mobile-drawer-head">
+        <a class="brand" href="academy.html" aria-label="DDA — Retour à l’Academy">
+          <span class="brand-mark">DDA</span>
+          <span class="brand-name">Back-office</span>
+        </a>
+        <button class="icon-button" type="button" id="admin-drawer-close" aria-label="Fermer le menu"><svg class="icon"><use href="#admin-icon-close"/></svg></button>
+      </div>
+      <p class="nav-section-label">Vue d’ensemble</p>
+      <button class="nav-item" data-admin-view="overview" type="button"><svg class="icon"><use href="#admin-icon-progress"/></svg> Aperçu</button>
+      <p class="nav-section-label">Comptes</p>
+      <button class="nav-item" data-admin-view="users" type="button"><svg class="icon"><use href="#admin-icon-users"/></svg> Utilisateurs</button>
+      <button class="nav-item" data-admin-view="memberships" type="button"><svg class="icon"><use href="#admin-icon-spark"/></svg> Abonnements</button>
+      <div class="admin-exit-row">
+        <a class="secondary-action" href="academy.html"><svg class="icon"><use href="#admin-icon-home"/></svg> Retour à l’Academy</a>
+      </div>
+    </nav>
+
+    <main>
+      <header class="topbar">
+        <button class="icon-button mobile-menu-toggle" type="button" id="admin-menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="admin-drawer"><svg class="icon"><use href="#admin-icon-menu"/></svg></button>
+        <button class="mobile-brand" type="button" onclick="location.href='academy.html'" aria-label="Retour à l’Academy"><b>DDA</b><small>BACK-OFFICE</small></button>
+        <div class="context"><span class="context-section">Back-office</span><strong id="admin-context-title">Aperçu</strong></div>
+        <div class="network-state" id="admin-network-state" role="status"><i></i><span>Vérification</span></div>
+      </header>
+
+      <div id="admin-gate" class="admin-empty-state" hidden>
+        <h2 id="admin-gate-title">—</h2>
+        <p id="admin-gate-description">—</p>
+        <a class="primary-action" id="admin-gate-action" href="academy.html">Retour à l’Academy</a>
+      </div>
+
+      <section class="view active" id="admin-view-overview" aria-labelledby="admin-overview-title">
+        <h1 id="admin-overview-title" class="eyebrow gold">Aperçu</h1>
+        <div class="admin-metrics" id="admin-metrics"></div>
+      </section>
+
+      <section class="view" id="admin-view-users" aria-labelledby="admin-users-title">
+        <h1 id="admin-users-title" class="eyebrow gold">Utilisateurs</h1>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>E-mail</th><th>Nom</th><th>Statut</th><th>Rôle</th><th>Créé le</th><th>Dernière connexion</th></tr></thead>
+            <tbody id="admin-users-body"></tbody>
+          </table>
+        </div>
+        <div class="admin-pager">
+          <button class="text-action" id="admin-users-prev" type="button">← Précédent</button>
+          <span id="admin-users-page-label">Page 1</span>
+          <button class="text-action" id="admin-users-next" type="button">Suivant →</button>
+        </div>
+      </section>
+
+      <section class="view" id="admin-view-memberships" aria-labelledby="admin-memberships-title">
+        <h1 id="admin-memberships-title" class="eyebrow gold">Abonnements</h1>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Utilisateur</th><th>Fournisseur</th><th>Statut</th><th>Produit</th><th>Débute le</th><th>Se termine le</th><th>Mis à jour</th></tr></thead>
+            <tbody id="admin-memberships-body"></tbody>
+          </table>
+        </div>
+        <div class="admin-pager">
+          <button class="text-action" id="admin-memberships-prev" type="button">← Précédent</button>
+          <span id="admin-memberships-page-label">Page 1</span>
+          <button class="text-action" id="admin-memberships-next" type="button">Suivant →</button>
+        </div>
+      </section>
+    </main>
+
+    <nav class="mobile-nav admin-mobile-nav" aria-label="Navigation du back-office">
+      <button class="active" data-admin-view="overview" type="button"><svg class="icon"><use href="#admin-icon-progress"/></svg>Aperçu</button>
+      <button data-admin-view="users" type="button"><svg class="icon"><use href="#admin-icon-users"/></svg>Comptes</button>
+      <button data-admin-view="memberships" type="button"><svg class="icon"><use href="#admin-icon-spark"/></svg>Abonnements</button>
+      <button type="button" onclick="location.href='academy.html'"><svg class="icon"><use href="#admin-icon-home"/></svg>Academy</button>
+    </nav>
+  </div>
+
+  <script>
+    window.DDA_BFF_BASE_URL = window.DDA_BFF_BASE_URL || (
+      ['dariusdigitalacademy.com', 'www.dariusdigitalacademy.com'].includes(location.hostname)
+        ? 'https://api.dariusdigitalacademy.com'
+        : ''
+    );
+  </script>
+  <script src="bff-client.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
