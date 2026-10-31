@@ -1521,21 +1521,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 @media(max-width:639px){#premium-track .section-intro{padding-top:24px}.premium-module-rail small{color:#cbd5e1}}
 
 
-/* ======================================================================
-   DDA ELITE UI — institutionnel, technologique, calme.
-   Présentation uniquement : aucune logique applicative ni donnée métier.
-   ====================================================================== */
-:root{
-  --dda-elite-canvas:#060d17;
-  --dda-elite-surface:#0a1424;
-  --dda-elite-surface-raised:#101c2d;
-  --dda-elite-line:rgba(174,191,213,.14);
-  --dda-elite-ink:#edf1f6;
-  --dda-elite-muted:#9ba8b8;
-  --dda-elite-gold:#cbb174;
-  --dda-elite-gold-soft:#e0cb9b;
-  --dda-elite-blue:#718ba6;
-}
+/* --dda-elite-*: defined once, below, in the "DDA ELITE — whole-platform surface system" block. */
 
 /* Consistent, low-glare product surfaces; the guided Path palette is intentionally untouched. */
 #dashboard.view,#journal.view,#progress.view,#profile.view,#markets.view{background-color:var(--dda-elite-canvas);color:var(--dda-elite-ink)}
