@@ -823,7 +823,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     // The app only re-routes via showView() calls (nav clicks), not via hash
     // changes without a full reload (documented navigation debt, DDA_ROUTE_MAP.md)
     // — so reaching #brokers here means clicking the real nav item, like a user.
-    await page.click('.nav-item[data-view="brokers"]');
+    await page.click('.sidebar .nav-item[data-view="brokers"]');
     assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'brokers');
     const rows = await page.evaluate(() => Array.from(document.querySelectorAll('.broker-row')).map(row => ({
       broker: row.dataset.broker,
@@ -841,7 +841,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const context = await freshContext(browser);
     const page = await context.newPage();
     await completeSignupFlow(page);
-    await page.click('.nav-item[data-view="brokers"]');
+    await page.click('.sidebar .nav-item[data-view="brokers"]');
     await page.locator('.broker-row[data-broker="XM"] .broker-detail').click();
     const state = await page.evaluate(() => window.DDA.load());
     const selected = state.events.find(e => e.name === 'broker_selected');
@@ -901,9 +901,9 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await fillSignup(page, { firstName: 'Fatou', email: 'fatou@example.com' });
     await fillOnboarding(page);
     await page.waitForSelector('.view.active#lesson');
-    await page.click('.nav-item[data-view="brokers"]');
+    await page.click('.sidebar .nav-item[data-view="brokers"]');
     await page.locator('.broker-row[data-broker="Deriv"] .broker-detail').click();
-    await page.click('.nav-item[data-view="lesson"]');
+    await page.click('.sidebar .nav-item[data-view="lesson"]');
     await page.locator('[data-question="exercise"] button[data-correct="true"]').first().click();
     const quizButton = page.locator('#quiz-block [data-question] button[data-correct="true"]').first();
     await quizButton.scrollIntoViewIfNeeded();
@@ -985,7 +985,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(productState.primaryView, 'journal', 'with an empty journal, the honest daily action is Journal — not a phantom lesson');
     assert.equal(productState.progressNext, 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.');
 
-    await page.click('.nav-item[data-view="path"]');
+    await page.click('.sidebar .nav-item[data-view="path"]');
     const pathState = await page.evaluate(() => ({
       active: document.querySelector('.view.active')?.id,
       module: document.querySelector('.journey-current-tag')?.textContent?.trim(),
@@ -1266,7 +1266,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       assert.ok(surface.luminanceCeiling < 150, `${surface.selector} must not regress to a light/cream surface (${surface.color})`);
     }
     assert.match(theme.progressPhotoFilter, /saturate\(0\.68\)/, 'the Progress poster keeps an atmospheric feel while DDA color remains visible');
-    await page.locator('.nav-item[data-scroll-to="analysis-terminal"]').click();
+    await page.locator('.sidebar .nav-item[data-scroll-to="analysis-terminal"]').click();
     await page.waitForFunction(() => {
       const chart = document.querySelector('#terminal-chart')?.getBoundingClientRect();
       return document.querySelector('.view.active')?.id === 'dashboard' && chart && chart.top >= 0 && chart.top < innerHeight;
@@ -1340,7 +1340,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
     await page.locator('.mobile-nav button[data-view="journal"]').click();
     await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'journal');
-    await page.locator('#journal > .back-link[data-view="back"]').click();
+    await page.locator('#journal .back-link[data-view="back"]').click();
     await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
     assert.equal(await page.evaluate(() => location.hash), '#progress', 'the in-app back button returns to the previous route');
     await page.goForward();
@@ -1670,7 +1670,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(savedEntry.proofType, 'zone_identification');
     assert.equal(savedEntry.decision, 'Je documente la zone observée sans en déduire un signal.');
 
-    await page.click('.nav-item[data-view="progress"]');
+    await page.click('.sidebar .nav-item[data-view="progress"]');
     const progressProof = await page.locator('#progress-practice-proof').textContent();
     assert.ok(progressProof.includes('m02-zone-identification'), 'Progression surfaces the same stable practice proof');
     assert.ok(progressProof.includes('Identification de zone'), 'Progression classifies the artifact as practice, not as a quiz result');
@@ -1678,7 +1678,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const lessonProgress = await page.evaluate(() => window.DDA.load().lessons['M0.2']);
     assert.equal(lessonProgress.quizComplete, false, 'a valid Practice Terminal proof does not fabricate lesson mastery');
 
-    await page.click('.nav-item[data-view="journal"]');
+    await page.click('.sidebar .nav-item[data-view="journal"]');
     await page.locator('#journal-list details summary').click();
     await page.locator('#journal-list .journal-proof-source').click();
     assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'lesson-m02', 'Journal source link reaches its real M0.2 lesson');
