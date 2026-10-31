@@ -581,6 +581,10 @@
 .landing-future-grid h3{margin:22px 0 8px;color:var(--lp-heading);font-size:1.55rem;line-height:1.1}
 .landing-future-grid p{max-width:38ch;margin:0;color:var(--lp-body);font-size:.9rem;line-height:1.65}
 .landing-future-grid .future-label{margin-top:auto;width:100%;padding:16px 0 0;border-top:1px solid var(--lp-line);color:var(--gold-soft);font-size:.78rem;line-height:1.4}
+.landing-mission-grid .landing-mission-photo{position:relative;overflow:hidden;padding:0!important}
+.landing-mission-grid .landing-mission-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.8) contrast(1.05) brightness(.92)}
+.landing-mission-grid .landing-mission-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(170deg,rgba(11,37,84,.2),rgba(11,37,84,.9));mix-blend-mode:multiply}
+.landing-mission-grid .landing-mission-photo span{position:relative;z-index:1;margin-top:auto;color:#fff;font-size:.82rem;font-weight:600;line-height:1.3;text-transform:none;letter-spacing:normal}
 
 @media(max-width:699px){
   .landing-domains,.landing-future{padding-inline:20px}
@@ -606,12 +610,12 @@
 /* Access / onboarding — registre institutionnel Deep Navy.
    La vue doit rester immersive et ne pas basculer vers le canevas ivoire. */
 body.access-mode .prototype-banner{
-  background:#0b2554;
+  background:#081b3c;
   color:#94a3b8;
   border-bottom:1px solid rgba(255,255,255,.08);
 }
 #access{
-  background:#0b2554;
+  background:#081b3c;
   color:#94a3b8;
 }
 #access .access-copy>p,
@@ -633,7 +637,7 @@ body.access-mode .prototype-banner{
 }
 #access .step-indicator{color:#94a3b8}
 #access .step-indicator span{border-color:rgba(255,255,255,.2);background:#0a1424;color:#94a3b8}
-#access .step-indicator span.active{border-color:#f8fafc;background:#f8fafc;color:#0b2554}
+#access .step-indicator span.active{border-color:#f8fafc;background:#f8fafc;color:#081b3c}
 #access .step-indicator i{background:rgba(255,255,255,.16)}
 #access .access-card label{color:#f8fafc}
 #access .access-card input,
@@ -1083,12 +1087,12 @@ body.access-mode .prototype-banner{
 
 
 /* Mobile viewport repair — a continuous full-bleed learning surface, not a floating white sheet. */
-body.public-shell{background:#0b2554;color:var(--lp-heading)}
+body.public-shell{background:#081b3c;color:var(--lp-heading)}
 body.public-shell .app-shell,
-body.public-shell main{min-height:100vh;background:#0b2554}
+body.public-shell main{min-height:100vh;background:#081b3c}
 #landing{
-  --lp-bg:#0b2554;
-  background-color:#0b2554;
+  --lp-bg:#081b3c;
+  background-color:#081b3c;
 }
 #landing.view.active{width:100%;max-width:none;margin:0;transform:none}
 
@@ -1690,7 +1694,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 #dashboard .terminal-icon-button{width:38px;height:38px;min-width:38px;min-height:38px;border-color:rgba(174,191,213,.13);border-radius:10px;background:#0a1424;color:#aeb9c6;font-size:0;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
 #dashboard .terminal-icon-button:hover:not(:disabled),#dashboard .terminal-icon-button:focus-visible{border-color:rgba(203,177,116,.42);background:rgba(203,177,116,.08);color:#e1cd9e;transform:translateY(-1px)}
 #dashboard .terminal-icon-button:disabled{opacity:.38}
-#dashboard .analysis-chart-shell{border-color:rgba(174,191,213,.13);border-radius:14px;background:#0b2554}
+#dashboard .analysis-chart-shell{border-color:rgba(174,191,213,.13);border-radius:14px;background:#081b3c}
 #dashboard .analysis-chart-meta,#dashboard .analysis-chart-footer{border-color:rgba(174,191,213,.1);background:#0a1424}
 
 @media(max-width:899px){
@@ -1781,16 +1785,16 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
    Strictly presentational cascade: IDs, routes, data, and state classes stay intact.
    ====================================================================== */
 :root{
-  --dda-elite-canvas:#0b2554;
-  --dda-elite-surface:#0f2f66;
-  --dda-elite-surface-raised:#163f82;
-  --dda-elite-surface-soft:#123874;
+  --dda-elite-canvas:#081b3c;
+  --dda-elite-surface:#0b2249;
+  --dda-elite-surface-raised:#102d5e;
+  --dda-elite-surface-soft:#0d2854;
   --dda-elite-line:rgba(81,157,226,.22);
   --dda-elite-line-strong:rgba(95,182,255,.36);
   --dda-elite-ink:#edf1f6;
   --dda-elite-muted:#b2c0d0;
-  --dda-elite-gold:#e6ad3f;
-  --dda-elite-gold-soft:#f3c76c;
+  --dda-elite-gold:#f0a934;
+  --dda-elite-gold-soft:#f6c860;
   --dda-elite-blue:#62b8ed;
   --dda-elite-teal:#42d4c5;
 }
@@ -1984,13 +1988,13 @@ button:disabled{cursor:not-allowed}
   --blue:#1673d1;
   --blue-2:#29c5cf;
   --teal:#20b2a2;
-  --gold:#e6ad3f;
-  --gold-soft:#f3c76c;
+  --gold:#f0a934;
+  --gold-soft:#f6c860;
   --cta-blue:#155fde;
   --cta-blue-2:#22b8d2;
 }
 
-/* Static optical depth across every route; background-color remains #0b2554. */
+/* Static optical depth across every route; background-color remains #081b3c. */
 :is(#landing,#access,#dashboard,#path,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#premium-track,#premium-lab,#premium-assessment,#progress,#journal,#resources,#membership,#markets,#forex,#stocks,#indices,#crypto,#brokers,#support,#community,#practice,#intelligence,#profile,#lab,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone).view{
   background-image:
     radial-gradient(ellipse 54% 26% at 96% 2%,rgba(37,136,255,.22),transparent 74%),
@@ -2259,7 +2263,7 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 
 /* Contract-safe base: the optical texture sits above the canonical Deep Navy canvas. */
 #landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#forex.view,#stocks.view,#indices.view,#crypto.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{
-  background-color:#0b2554!important;
+  background-color:#081b3c!important;
 }
 
 /* Mission rails keep page purpose visible and reduce destination repetition. */
@@ -2381,7 +2385,7 @@ body.public-shell .prototype-banner{display:none}
 }
 .lesson-loop[tabindex="0"]:focus-visible,
 .lesson-outline[tabindex="0"]:focus-visible{
-  outline:2px solid #f3c76c;
+  outline:2px solid #f6c860;
   outline-offset:4px;
   box-shadow:0 0 0 5px rgba(243,199,108,.16);
 }
@@ -2420,14 +2424,14 @@ body.public-shell .prototype-banner{display:none}
 .public-menu-panel a,.public-menu-panel .public-menu-cta{letter-spacing:.01em}
 .public-menu summary[aria-expanded="true"] span{display:inline-block;transform:rotate(45deg)}
 .legal-link{display:block;width:100%;padding:5px 0;border:0;background:transparent;color:#cbd5e1;text-align:left;font:inherit;cursor:pointer}
-.legal-link:hover,.legal-link:focus-visible{color:#f3c76c}
+.legal-link:hover,.legal-link:focus-visible{color:#f6c860}
 .legal-dialog{width:min(720px,calc(100vw - 28px));max-height:min(84dvh,760px);padding:0;border:1px solid rgba(95,182,255,.36);border-radius:16px;background:#091523;color:#edf1f6;box-shadow:0 28px 90px rgba(0,0,0,.56)}
 .legal-dialog::backdrop{background:rgba(3,8,15,.78);backdrop-filter:blur(4px)}
 .legal-dialog-card{position:relative;padding:clamp(24px,5vw,42px);overflow:auto;max-height:min(84dvh,760px)}
 .legal-dialog-close{position:absolute;top:14px;right:14px;width:40px;height:40px;border:1px solid rgba(174,191,213,.24);border-radius:10px;background:#101c2d;color:#edf1f6;font-size:25px;line-height:1;cursor:pointer}
 .legal-dialog h2{max-width:16ch;margin:8px 44px 24px 0;color:#f3f6fa;font-size:clamp(1.8rem,4vw,2.8rem)}
 .legal-dialog-content{color:#cbd5e1;line-height:1.72}
-.legal-dialog-content h3{margin:24px 0 6px;color:#f3c76c;font-size:1rem}
+.legal-dialog-content h3{margin:24px 0 6px;color:#f6c860;font-size:1rem}
 .legal-dialog-content p{margin:0 0 12px}
 .legal-dialog-note{margin:26px 0 0;padding-top:16px;border-top:1px solid rgba(174,191,213,.16);color:#aebdcd;font-size:.82rem;line-height:1.55}
 @media(max-width:639px){.legal-dialog{width:calc(100vw - 20px);max-height:88dvh}.legal-dialog-card{padding:24px 18px 28px}.public-menu-panel{right:12px;left:12px}}
@@ -2438,10 +2442,10 @@ body.public-shell .prototype-banner{display:none}
 .public-info-dialog .legal-dialog-content{max-width:66ch}
 .public-info-content .public-doc-lead{margin:0 0 20px;color:#f3f6fa;font-size:1.05rem;line-height:1.65}
 .public-doc-index{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px;padding:12px;border:1px solid rgba(174,191,213,.16);background:rgba(255,255,255,.035)}
-.public-doc-index a{padding:7px 9px;color:#f3c76c;font-size:.78rem;text-decoration:none}
+.public-doc-index a{padding:7px 9px;color:#f6c860;font-size:.78rem;text-decoration:none}
 .public-doc-index a:hover,.public-doc-index a:focus-visible{color:#fff;background:rgba(240,199,108,.1)}
 .public-info-content h3{scroll-margin-top:20px}
-.public-info-content code{padding:2px 5px;border-radius:4px;background:rgba(255,255,255,.08);color:#f3c76c;font-size:.9em}
+.public-info-content code{padding:2px 5px;border-radius:4px;background:rgba(255,255,255,.08);color:#f6c860;font-size:.9em}
 @media(max-width:639px){.public-doc-index{display:grid;grid-template-columns:1fr 1fr;gap:4px}.public-doc-index a{min-height:40px;display:flex;align-items:center}.public-info-content .public-doc-lead{font-size:1rem}}
 
 /* DDA MOTION SYSTEM — institutional conversion layer.
