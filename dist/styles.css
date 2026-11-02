@@ -181,6 +181,8 @@ body.public-shell main{padding-bottom:0}
 
 /* ---------- Sidebar nav item / mobile nav shared look ---------- */
 .nav-item{display:flex;align-items:center;gap:14px;padding:13px 15px;border-radius:13px;color:var(--muted);text-align:left;background:none;border:0;font:inherit;cursor:pointer;width:100%;transition:background .15s ease,color .15s ease}
+a.nav-item{text-decoration:none}
+a.nav-item[hidden]{display:none}
 .nav-item .icon{width:20px;height:20px}
 .nav-item:hover,.nav-item.active{background:var(--navy-700);color:var(--white)}
 .nav-item.active{box-shadow:inset 3px 0 var(--gold)}
@@ -461,6 +463,21 @@ body.public-shell main{padding-bottom:0}
 .back-link{color:rgba(244,247,252,.6);padding:8px 0;background:none;border:0;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:44px}
 .lesson-quick-nav{display:flex;flex-wrap:wrap;align-items:center;gap:4px 18px;margin-bottom:22px}
 .lesson-quick-nav .text-action{min-height:44px;padding:8px 0}
+/* Navigation audit follow-up: a module's lesson list, from inside any one
+   of its lessons — distinct from .lesson-outline (that lesson's own section
+   anchors) and from #path (the full curriculum, a whole screen away). */
+.module-toc{margin:0 0 26px;padding:16px 18px;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 var(--r-md) var(--r-md) 0;background:var(--navy-800)}
+.module-toc-heading{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:10px}
+.module-toc-list{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.module-toc-item{display:flex;align-items:center;justify-content:space-between;gap:12px;border-radius:10px}
+.module-toc-item.is-current{background:rgba(255,255,255,.04)}
+.module-toc-link{flex:1;text-align:left;background:none;border:0;color:inherit;font:inherit;padding:8px 6px;min-height:44px;cursor:pointer;border-radius:8px}
+.module-toc-link:hover:not(:disabled),.module-toc-link:focus-visible{background:rgba(255,255,255,.05)}
+.module-toc-link:disabled{color:var(--muted-2);cursor:default}
+.module-toc-item.is-current .module-toc-link{color:var(--gold-soft);font-weight:800}
+.module-toc-status{flex:none;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);padding-right:6px}
+.module-toc-status[data-status="done"]{color:var(--green)}
+.module-toc-status[data-status="locked"]{color:var(--muted-2)}
 .lesson-lead{font-size:16px;color:rgba(244,247,252,.68)}
 .video-stage{
   aspect-ratio:16/11;border:1px solid var(--line);border-radius:var(--r-lg);
