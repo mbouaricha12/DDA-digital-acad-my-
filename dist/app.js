@@ -638,6 +638,23 @@ function mergeProgressNeverDowngrade(localState, remoteProgress) {
   return { ...localState, lessons: mergedLessons, onboarding };
 }
 
+// Navigation audit follow-up: the back-office existed with no way to find
+// it short of knowing admin.html's URL. Reveals the (otherwise-hidden)
+// sidebar/drawer links only once the server itself confirms an admin role —
+// never from anything stored client-side, matching the same server-derived
+// gate admin.html itself enforces (bff/src/app.js withAdmin). Failures
+// (not configured, network) just leave the link hidden, never surfaced as
+// an error — most learners simply aren't admins, which is the expected case.
+async function revealAdminLinkIfAdmin() {
+  if (!window.DDABFF?.enabled()) return;
+  try {
+    const result = await window.DDABFF.getAdminOverview();
+    if (result.status !== 200) return;
+    document.getElementById('sidebar-admin-link')?.removeAttribute('hidden');
+    document.getElementById('drawer-admin-link')?.removeAttribute('hidden');
+  } catch { /* stays hidden */ }
+}
+
 async function hydrateRemoteSession() {
   if (!window.DDABFF?.enabled()) return null;
   try {
@@ -1466,6 +1483,12 @@ function renderLessonProgressUI(lessonId, lessonDef, ids) {
     if (saved) saved.textContent = 'Exercice et quiz validés localement — aucune donnée envoyée';
     renderResultStats(lessonDef, lessonProgress, ids.resultStatsId);
   }
+  // Keeps the module summary's status labels live (e.g. "À commencer" →
+  // "Terminée" the moment this lesson's quiz passes) without waiting for a
+  // full showView re-entry. LAB_REGISTRY lessons call this same function but
+  // aren't in LESSON_VIEW_ID, so this is a no-op for them (no module-toc
+  // container exists on their views either).
+  if (LESSON_VIEW_ID[lessonId]) renderModuleToc(LESSON_VIEW_ID[lessonId]);
   return { lessonProgress, step, complete };
 }
 
@@ -2242,6 +2265,44 @@ const LESSON_PREREQUISITE = Object.freeze(Object.fromEntries(LESSON_REGISTRY.fil
   });
 })();
 
+// Navigation audit follow-up: from inside a lesson, the only way to see the
+// module's other lessons was to leave the lesson entirely (Mon parcours).
+// Renders into the static .module-toc container each LESSON_REGISTRY lesson
+// view already has (see academy.html) — grouped by the id prefix before the
+// dot ('M0.2' → 'M0', 'P2.1' → 'P2'), the same grouping DDA.curriculum.modules
+// uses for M0/M1; P2 has no curriculum module of its own (the premium track
+// lives outside DDA.curriculum by design), so its heading is named directly
+// rather than invented from a non-existent module record.
+function moduleGroupLabel(moduleKey) {
+  if (moduleKey === 'P2') return 'Premium Track';
+  return DDA.curriculum.modules.find(module => module.id === moduleKey)?.title || moduleKey;
+}
+function moduleTocLessonStatus(entry) {
+  if (entry.prerequisite && !DDALearning.getLessonProgress(prototypeState, entry.prerequisite).quizComplete) return { label: 'Verrouillée', key: 'locked' };
+  const progress = DDALearning.getLessonProgress(prototypeState, entry.id);
+  if (progress.quizComplete) return { label: 'Terminée', key: 'done' };
+  if (progress.exerciseComplete || progress.lessonViewed) return { label: 'En cours', key: 'in_progress' };
+  return { label: 'À commencer', key: 'available' };
+}
+function renderModuleToc(viewId) {
+  const root = document.getElementById(viewId);
+  const list = root?.querySelector('.module-toc-list');
+  const heading = root?.querySelector('.module-toc-heading');
+  if (!list || !heading) return;
+  const lessonId = VIEW_TO_LESSON_ID[viewId];
+  const moduleKey = lessonId?.split('.')[0];
+  const siblings = LESSON_REGISTRY.filter(entry => entry.id.split('.')[0] === moduleKey);
+  if (siblings.length < 2) { heading.textContent = ''; list.innerHTML = ''; return; }
+  heading.textContent = moduleGroupLabel(moduleKey);
+  list.innerHTML = siblings.map(sibling => {
+    const status = moduleTocLessonStatus(sibling);
+    const isCurrent = sibling.viewId === viewId;
+    const disabled = status.key === 'locked' && !isCurrent;
+    return `<li class="module-toc-item${isCurrent ? ' is-current' : ''}"><button type="button" class="module-toc-link" data-view="${sibling.viewId}"${disabled ? ' disabled aria-disabled="true"' : ''}${isCurrent ? ' aria-current="page"' : ''}>${escapeHtml(sibling.title)}</button><span class="module-toc-status" data-status="${status.key}">${status.label}</span></li>`;
+  }).join('');
+  list.querySelectorAll('[data-view]:not([disabled])').forEach(bindViewButton);
+}
+
 function smartBackTarget() {
   if (previousView && titles[previousView] && !LESSON_VIEW_IDS.has(previousView) && previousView !== 'access') return previousView;
   return 'dashboard';
@@ -2416,6 +2477,7 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
   if (id === 'markets') loadBrvmPublications();
   if (recordEvent) trackEvent('view_opened', { view: id });
   if (recordEvent && VIEW_TO_LESSON_ID[id]) trackEvent('lesson_started', { lesson: VIEW_TO_LESSON_ID[id] });
+  if (LESSON_VIEW_IDS.has(id)) renderModuleToc(id);
   if (recordEvent && id === 'premium-track') trackEvent('premium_track_viewed', { view: id });
   if (recordEvent && (id === 'lesson-p21' || id === 'lesson-p22')) trackEvent('premium_module_started', { module: 'P2', lesson: id });
   if (id === 'landing') {
@@ -2745,6 +2807,7 @@ document.getElementById('signup-form').addEventListener('submit', async event =>
         const user = await hydrateRemoteSession();
         if (!user) throw new Error('session_missing');
         document.getElementById('bff-auth-status').textContent = '';
+        revealAdminLinkIfAdmin();
         showOnboardingAfterRemoteAuth(user);
       }
     } catch (authError) {
@@ -2962,6 +3025,32 @@ const LAB_REGISTRY = window.DDALab ? Object.freeze([
     ] }
 ]) : [];
 const LAB_PREREQUISITE = Object.freeze(Object.fromEntries(LAB_REGISTRY.filter(entry => entry.meta.lesson.prerequisite).map(entry => [entry.viewId, entry.meta.lesson.prerequisite])));
+// Reverse of the map above — same role LESSON_VIEW_ID plays for the main
+// curriculum, needed so the "previous lesson" link below can turn a
+// prerequisite id back into a navigable view.
+const LAB_VIEW_ID = Object.freeze(Object.fromEntries(LAB_REGISTRY.map(entry => [entry.id, entry.viewId])));
+// Navigation audit follow-up: initLessonPrevLinks (further up this file)
+// only covers LESSON_REGISTRY — DDA Lab is a deliberately separate registry
+// (see the block comment above LAB_REGISTRY) with its own prerequisite
+// chain, so it needs its own, identically-shaped injector rather than
+// reusing LESSON_PREREQUISITE/LESSON_VIEW_ID for lessons that aren't in them.
+(function initLabPrevLinks() {
+  LAB_REGISTRY.forEach(entry => {
+    const prevViewId = LAB_VIEW_ID[LAB_PREREQUISITE[entry.viewId]];
+    if (!prevViewId) return;
+    const quickNav = document.getElementById(entry.viewId)?.querySelector('.lesson-quick-nav');
+    if (!quickNav || quickNav.querySelector('[data-lesson-prev]')) return;
+    const prevButton = document.createElement('button');
+    prevButton.type = 'button';
+    prevButton.className = 'text-action';
+    prevButton.dataset.view = prevViewId;
+    prevButton.dataset.lessonPrev = 'true';
+    prevButton.textContent = '← Leçon précédente';
+    const backLink = quickNav.querySelector('.back-link');
+    if (backLink) backLink.after(prevButton); else quickNav.appendChild(prevButton);
+    bindViewButton(prevButton);
+  });
+})();
 if (window.DDALab) {
   LAB_REGISTRY.forEach(entry => {
     // Same rule boot-time LESSON_REGISTRY mounting already uses (line ~158):
@@ -3236,6 +3325,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 renderState();
 initBffAuthUi();
 hydrateRemoteSession();
+revealAdminLinkIfAdmin();
 handleBffVerificationToken();
 renderMarketIntelligence();
 

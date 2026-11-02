@@ -96,7 +96,7 @@ async function completeSignupFlow(page, opts) {
 async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = 'free') {
   await context.addInitScript(({ lessons, plan }) => {
     if (localStorage.getItem('dda-prototype-state-v4')) return;
-    const lessonIds = ['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3', 'LAB1', 'LAB2', 'LAB3', 'LAB4', 'LABCAP'];
+    const lessonIds = ['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3', 'P2.1', 'P2.2', 'LAB1', 'LAB2', 'LAB3', 'LAB4', 'LABCAP'];
     const progress = Object.fromEntries(lessonIds.map(id => [id, {
       lessonViewed: false, exerciseComplete: false, quizComplete: false, ...(lessons[id] || {})
     }]));
@@ -1761,6 +1761,86 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const state = await page.evaluate(() => window.DDA.load());
     assert.equal(state.lessons['LAB4'].quizComplete, true);
     await context.close();
+  });
+
+  console.log('\n-- O. Navigation — sommaire de module, sorties Lab/Premium, lien back-office --');
+
+  await test('a lesson\'s module summary lists its sibling lessons with live status, and clicking a sibling navigates there', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'M0.1': { quizComplete: true }, 'M0.2': { quizComplete: true } }, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-m02`);
+    await page.waitForSelector('#lesson-m02.view.active');
+    const items = await page.locator('#lesson-m02 .module-toc-item').allTextContents();
+    assert.equal(items.length, 3, 'M0 has three lessons (M0.1, M0.2, M0.3)');
+    assert.match(await page.textContent('#lesson-m02 .module-toc-heading'), /Fondations des marchés/);
+    const m01Status = await page.locator('#lesson-m02 .module-toc-item', { hasText: 'Leçon en cours' }).locator('.module-toc-status').textContent();
+    assert.equal(m01Status.trim(), 'Terminée', 'M0.1 already completed shows as done from inside M0.2');
+    assert.equal(await page.locator('#lesson-m02 .module-toc-item.is-current .module-toc-link').isDisabled(), false);
+
+    await page.locator('#lesson-m02 .module-toc-link', { hasText: 'Lire une tendance' }).click();
+    await page.waitForSelector('#lesson-m03.view.active');
+    await context.close();
+  });
+
+  await test('DDA Lab lessons get the same quick-nav and previous-lesson link as the main curriculum', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { LAB1: { quizComplete: true } }, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-lab2`);
+    await page.waitForSelector('#lesson-lab2.view.active');
+    assert.equal(await page.locator('#lesson-lab2 .lesson-quick-nav [data-view="path"]').isVisible(), true, 'Lab lessons get Mon parcours like main-curriculum lessons');
+    assert.equal(await page.locator('#lesson-lab2 .lesson-quick-nav [data-view="dashboard"]').isVisible(), true);
+    const prevLink = page.locator('#lesson-lab2 [data-lesson-prev]');
+    assert.equal(await prevLink.isVisible(), true, 'LAB2 shows a previous-lesson link back to LAB1');
+    await prevLink.click();
+    await page.waitForSelector('#lesson-lab1.view.active');
+    await context.close();
+  });
+
+  await test('Premium P2 lessons get the quick-nav, module summary and previous-lesson link too — no longer a single isolated back button', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'P2.1': { quizComplete: true } }, 'premium');
+    const page = await context.newPage();
+    // Premium Demo lessons mount only after the Premium Track hub activates
+    // the local preview (same flow the existing P2 funnel test uses) — a
+    // cold direct deep-link to #lesson-p22 renders before that mount runs.
+    await page.goto(`${ACADEMY_BASE}#premium-track`);
+    await page.click('#premium-track [data-view="lesson-p22"]');
+    await page.reload();
+    await page.waitForSelector('#lesson-p22.view.active');
+    assert.equal(await page.locator('#lesson-p22 .lesson-quick-nav [data-view="path"]').isVisible(), true);
+    assert.equal(await page.locator('#lesson-p22 .lesson-quick-nav [data-view="dashboard"]').isVisible(), true);
+    assert.match(await page.textContent('#lesson-p22 .module-toc-heading'), /Premium Track/);
+    assert.equal(await page.locator('#lesson-p22 .module-toc-item').count(), 2, 'the Premium Track module summary lists P2.1 and P2.2');
+    const prevLink = page.locator('#lesson-p22 [data-lesson-prev]');
+    await prevLink.click();
+    await page.waitForSelector('#lesson-p21.view.active');
+    await context.close();
+  });
+
+  await test('the back-office link stays hidden for an ordinary local session, and appears only once the server confirms an admin role', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(await page.locator('#sidebar-admin-link').isVisible(), false, 'no BFF configured — no server to confirm an admin role, so the link never shows');
+    await context.close();
+
+    const bffContext = await freshContext(browser);
+    await bffContext.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await bffContext.route('https://bff.test/v1/admin/overview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-overview-v1', generated_at: new Date().toISOString(), caller: { user_id: 'owner-1', role: 'owner' }, metrics: {} })
+    }));
+    await seedLocalLearner(bffContext, {}, 'free');
+    const bffPage = await bffContext.newPage();
+    await bffPage.goto(`${ACADEMY_BASE}#dashboard`);
+    await bffPage.waitForSelector('#dashboard.view.active');
+    await bffPage.waitForSelector('#sidebar-admin-link:not([hidden])');
+    assert.equal(await bffPage.getAttribute('#sidebar-admin-link', 'href'), 'admin.html');
+    await bffContext.close();
   });
 
   await browser.close();
