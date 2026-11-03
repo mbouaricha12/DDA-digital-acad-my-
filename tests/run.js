@@ -1959,6 +1959,78 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  console.log('\n-- S. Attribution partenaire (ref) + export CSV admin --');
+
+  await test('a valid ref= param is captured once into state.acquisition.partnerRef, lowercased, and survives a later visit with a different ref', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/?ref=Partner-01#landing`);
+    const first = await page.evaluate(() => window.DDA.load().acquisition.partnerRef);
+    assert.equal(first, 'partner-01');
+    await page.goto(`${BASE}/?ref=someone-else#landing`);
+    const second = await page.evaluate(() => window.DDA.load().acquisition.partnerRef);
+    assert.equal(second, 'partner-01', 'partner attribution is first-touch and immutable, exactly like UTM source/medium/campaign');
+    await context.close();
+  });
+
+  await test('an invalid ref= param (bad characters, too long) is rejected and never stored', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/?ref=not%20a%20valid%20ref!!#landing`);
+    assert.equal(await page.evaluate(() => window.DDA.load().acquisition.partnerRef), null);
+    await context.close();
+  });
+
+  await test('signing up through the BFF forwards the captured partner ref to /v1/auth/register', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/security/csrf', route => route.fulfill({ status: 204 }));
+    let capturedBody = null;
+    await context.route('https://bff.test/v1/auth/register', route => {
+      capturedBody = JSON.parse(route.request().postData());
+      return route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ message: 'If the registration can be completed, a verification message will be sent.' }) });
+    });
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}?ref=ambassador-7#access`);
+    await page.fill('#first-name', 'Ada');
+    await page.fill('#email', 'ada-ref-test@example.com');
+    await page.fill('#access-password', 'a-long-enough-password');
+    await page.check('#consent');
+    await page.click('#signup-form button[type=submit]');
+    await page.waitForFunction(() => document.getElementById('bff-auth-status')?.textContent.includes('vérification'));
+    assert.equal(capturedBody?.ref, 'ambassador-7', 'the BFF registration request carries the partner ref captured at first visit');
+    await context.close();
+  });
+
+  await test('the admin Utilisateurs table shows a Partenaire column and can export the loaded page as CSV', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/admin/overview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-overview-v1', generated_at: new Date().toISOString(), caller: { user_id: 'owner-1', role: 'owner' }, metrics: {} })
+    }));
+    await context.route('https://bff.test/v1/admin/users*', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-users-v1', page: 1, per_page: 20, total: 1, users: [
+        { user_id: 'u1', email: 'learner@example.com', display_name: 'Learner', status: 'active', role: null, ref: 'ambassador-7', created_at: '2026-09-01T00:00:00.000Z', last_sign_in_at: null }
+      ] })
+    }));
+    const page = await context.newPage();
+    const downloadPromise = page.waitForEvent('download');
+    await page.goto(`${BASE}/admin.html`);
+    await page.click('[data-admin-view="users"]');
+    await page.waitForSelector('#admin-users-body tr');
+    assert.match(await page.textContent('#admin-view-users thead'), /Partenaire/);
+    assert.match(await page.textContent('#admin-users-body'), /ambassador-7/);
+    await page.click('#admin-users-export');
+    const download = await downloadPromise;
+    const csvPath = await download.path();
+    const csv = require('fs').readFileSync(csvPath, 'utf8');
+    assert.match(csv, /ambassador-7/);
+    assert.match(csv, /^email,display_name,status,role,ref,created_at,last_sign_in_at/);
+    await context.close();
+  });
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 

@@ -614,7 +614,8 @@ prototypeState = DDA.captureAcquisition(prototypeState, {
   campaign: initialAttribution.campaign,
   content: initialAttribution.content,
   referrer: document.referrer,
-  landingPath: location.hash
+  landingPath: location.hash,
+  partnerRef: initialAttribution.partnerRef
 });
 // Attribution is captured locally once; do not leave potentially identifying
 // query parameters in the address bar, copied links, or subsequent history.
@@ -2967,7 +2968,7 @@ document.getElementById('signup-form').addEventListener('submit', async event =>
   if (bffMode) {
     try {
       if (bffAuthMode === 'signup') {
-        await window.DDABFF.register({ email, password, display_name: name });
+        await window.DDABFF.register({ email, password, display_name: name, ref: prototypeState.acquisition?.partnerRef });
         document.getElementById('bff-auth-status').textContent = 'Si l’inscription peut être finalisée, un lien de vérification vient d’être envoyé. Vérifie ta boîte mail puis connecte-toi.';
         setBffAuthMode('login');
         document.getElementById('email').value = email;
