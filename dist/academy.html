@@ -659,6 +659,7 @@
           <div class="progress-stat"><span>XP total</span><strong id="progress-total-xp">0</strong></div>
           <div class="progress-stat"><span>Jours actifs (7 j)</span><strong id="progress-active-days">0</strong></div>
         </div>
+        <button class="text-action" id="progress-share-open" type="button"><svg class="icon"><use href="#icon-spark"/></svg> Partager ma progression <span>→</span></button>
 
         <section class="panel mastery-panel">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-progress"/></svg> Fil de maîtrise</p><h3>Ce que tu as réellement démontré, compétence par compétence</h3></div></div>
@@ -1554,6 +1555,25 @@
       <button class="primary-action" id="gate-unlock" hidden>Activer l’aperçu Standard (simulation) <span>→</span></button>
       <button class="primary-action" id="gate-preview">Voir la formule Premium <span>→</span></button>
       <button class="text-action" id="gate-continue-free">Continuer gratuitement <span>→</span></button>
+    </div>
+  </div>
+  <div class="share-card-layer" id="share-card-layer" hidden role="dialog" aria-modal="true" aria-labelledby="share-card-title">
+    <div class="share-card-dialog">
+      <button class="reader-close" id="share-card-close" aria-label="Fermer">×</button>
+      <p class="eyebrow gold" id="share-card-title">Ta progression DDA</p>
+      <div class="progress-share-card">
+        <p class="progress-share-brand">DDA · Darius Digital Academy</p>
+        <strong class="progress-share-xp" id="share-card-xp">0 XP</strong>
+        <div class="progress-share-stats">
+          <span id="share-card-modules">0/0 modules</span>
+          <span id="share-card-days">0 jours actifs</span>
+        </div>
+        <p class="progress-share-tagline">Apprendre les marchés. Construire des compétences. Prouver sa progression.</p>
+      </div>
+      <p class="progress-share-note">Aucune donnée personnelle dans ce résumé — seulement ta progression réelle.</p>
+      <button class="primary-action" id="share-card-action">Partager <span>→</span></button>
+      <button class="text-action" id="share-card-copy">Copier le texte</button>
+      <p class="progress-share-confirmation" id="share-card-confirmation" role="status" aria-live="polite" hidden></p>
     </div>
   </div>
   <script src="dda-lazy-modules.js"></script>
