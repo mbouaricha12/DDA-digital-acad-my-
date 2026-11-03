@@ -1913,6 +1913,52 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  console.log('\n-- R. Paywall Premium honnête, aperçu gratuit et liste d\'attente --');
+
+  await test('P2.1 is marked preview=true and stays open for a Free learner despite its premium_track permission', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-p21`);
+    await page.waitForTimeout(50);
+    assert.equal(await page.evaluate(() => location.hash), '#lesson-p21', 'the preview lesson is never redirected for a Free learner');
+    assert.equal(await page.locator('#gate-layer').isVisible(), false, 'no paywall is shown over a preview lesson');
+    await context.close();
+  });
+
+  await test('P2.2 (not a preview) shows an honest paywall for Free with the real lesson title, duration and objectives, and "Continuer gratuitement" exits with no dead end', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'P2.1': { quizComplete: true } }, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-p22`);
+    await page.waitForSelector('#gate-layer:not([hidden])');
+    assert.match(await page.textContent('#gate-title'), /The Anatomy of a Controlled Trade/, 'the real lesson title is shown, not a generic label');
+    assert.match(await page.textContent('#gate-meta'), /18 min/, 'the real duration is shown');
+    assert.equal(await page.locator('#gate-objectives li').count(), 2, 'the lesson\'s real objectives are listed');
+    await page.click('#gate-continue-free');
+    await page.waitForSelector('#gate-layer', { state: 'hidden' });
+    assert.notEqual(await page.evaluate(() => location.hash), '#lesson-p22', 'closing the paywall never leaves the learner on the locked lesson');
+    await context.close();
+  });
+
+  await test('the Premium waitlist requires an explicit consent tick before it can be joined, and the joined state survives a reload', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#membership`);
+    await page.waitForSelector('#membership.view.active');
+    assert.equal(await page.isDisabled('#premium-waitlist-join'), true, 'joining is blocked until consent is given');
+    await page.check('#premium-waitlist-consent');
+    assert.equal(await page.isDisabled('#premium-waitlist-join'), false);
+    await page.click('#premium-waitlist-join');
+    await page.waitForSelector('#premium-waitlist-confirmation:not([hidden])');
+    assert.equal(await page.locator('#premium-waitlist-form').isVisible(), false, 'the form is replaced by a confirmation, not stacked alongside it');
+    await page.reload();
+    await page.waitForSelector('#membership.view.active');
+    assert.equal(await page.locator('#premium-waitlist-confirmation').isVisible(), true, 'the consent is a real local record, not a one-time UI flag');
+    await context.close();
+  });
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 

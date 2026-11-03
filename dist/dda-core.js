@@ -21,7 +21,7 @@
   // activation_v1 — deliberately versioned so a future activation_v2 definition
   // can be added alongside it without reinterpreting what activation_v1 events
   // already meant when they were recorded.
-  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'practice_attempted', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved', 'landing_visit', 'landing_viewed', 'landing_section_reached', 'landing_cta_hero', 'landing_cta_differentiation', 'landing_cta_free', 'landing_cta_final', 'landing_cta_mobile_sticky', 'broker_selected', 'affiliate_link_click', 'activation_v1', 'hero_cta_click', 'signup_started', 'signup_completed', 'qualification_started', 'qualification_completed', 'lesson_started', 'premium_track_viewed', 'premium_module_started', 'premium_lab_attempted', 'premium_lab_validated', 'premium_assessment_completed', 'premium_proof_created', 'premium_review_opened', 'premium_weekly_review_completed']);
+  const EVENT_NAMES = new Set(['view_opened', 'onboarding_complete', 'lesson_understood', 'exercise_attempt', 'exercise_complete', 'quiz_attempt', 'quiz_complete', 'practice_attempted', 'preference_updated', 'profile_updated', 'session_reset', 'access_denied', 'plan_preview', 'journal_entry_created', 'journal_entry_updated', 'journal_entry_deleted', 'journal_plan_saved', 'landing_visit', 'landing_viewed', 'landing_section_reached', 'landing_cta_hero', 'landing_cta_differentiation', 'landing_cta_free', 'landing_cta_final', 'landing_cta_mobile_sticky', 'broker_selected', 'affiliate_link_click', 'activation_v1', 'hero_cta_click', 'signup_started', 'signup_completed', 'qualification_started', 'qualification_completed', 'lesson_started', 'premium_track_viewed', 'premium_module_started', 'premium_lab_attempted', 'premium_lab_validated', 'premium_assessment_completed', 'premium_proof_created', 'premium_review_opened', 'premium_weekly_review_completed', 'premium_waitlist_joined']);
   const EVENT_METADATA_KEYS = new Set(['view', 'level', 'goal', 'lesson', 'module', 'correct', 'preference', 'enabled', 'permission', 'plan', 'source', 'medium', 'campaign', 'content', 'broker', 'section', 'position', 'lab', 'assessment', 'proof', 'skill', 'nextAction', 'practice', 'status']);
   const ENTITLEMENTS = Object.freeze({
     visitor: ['dashboard_preview', 'access'],
@@ -586,8 +586,18 @@
       // by DDA.captureAcquisition(). No PII: a locally generated pseudonymous
       // visitorId plus the UTM/referrer context of the first real visit.
       acquisition: emptyAcquisition(),
+      // Premium waitlist V1 — explicit consent only, no payment, no server
+      // write (Chariow checkout isn't activated yet). Honest intent signal:
+      // distinct from the local Premium preview toggle (setPlan), which only
+      // simulates the demo content and carries no commercial meaning.
+      premiumWaitlist: null,
       updatedAt: null
     };
+  }
+
+  function sanitizePremiumWaitlist(raw) {
+    if (!raw || raw.joined !== true) return null;
+    return { joined: true, consentedAt: typeof raw.consentedAt === 'string' ? raw.consentedAt : new Date().toISOString() };
   }
 
   function emptyAcquisition() {
@@ -809,7 +819,8 @@
         journal: sanitizeJournal(raw.journal),
         premium: sanitizePremium(raw.premium),
         events: Array.isArray(raw.events) ? raw.events.slice(-50) : [],
-        acquisition: sanitizeAcquisition(raw.acquisition)
+        acquisition: sanitizeAcquisition(raw.acquisition),
+        premiumWaitlist: sanitizePremiumWaitlist(raw.premiumWaitlist)
       });
     }
 
@@ -902,6 +913,13 @@
     sanitizePremium,
     emptyPremiumState,
     updatePremium(state, patch) { return save({ ...state, premium: sanitizePremium({ ...(state.premium || {}), ...(patch || {}) }) }); },
+    // Explicit-consent waitlist — no payment, no server write. `consent`
+    // must be true (a ticked checkbox); anything else is a no-op so a
+    // waitlist entry can never be created on the learner's behalf.
+    joinPremiumWaitlist(state, consent) {
+      if (consent !== true || state.premiumWaitlist?.joined) return state;
+      return save({ ...state, premiumWaitlist: { joined: true, consentedAt: new Date().toISOString() } });
+    },
     updateLesson(state, lessonId, patch) {
       const current = state.lessons?.[lessonId] || emptyLessonProgress();
       return save({ ...state, lessons: { ...state.lessons, [lessonId]: { ...current, ...patch } } });

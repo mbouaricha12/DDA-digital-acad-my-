@@ -97,6 +97,11 @@ const LESSON_REGISTRY = Object.freeze([
   {
     id: 'P2.1', viewId: 'lesson-p21', suffix: 'p21', title: 'Risk Before Entry',
     permission: 'premium_track', quizBlock: 'p21-quiz', understoodScrollTo: 'p21-decision-block',
+    // Aperçu gratuit du module Premium Track (mandat §5) : cette leçon reste
+    // lisible sans Premium — showView() laisse passer un apprenant Free ici
+    // malgré le `permission: 'premium_track'` ci-dessus.
+    preview: true, duration: 15, objectives: ['Identifier le risque avant d’entrer en position', 'Distinguer une entrée réfléchie d’une entrée impulsive'],
+    premiumReason: 'Premium donne accès au Risk Plan Lab et à l’assessment Controlled Decision qui prolongent cette leçon par la pratique guidée.',
     questions: [
       { role: 'exercise', block: 'p21-decision', success: '@practice' },
       { role: 'quiz', block: 'p21-quiz', success: '@data', result: true }
@@ -105,6 +110,8 @@ const LESSON_REGISTRY = Object.freeze([
   {
     id: 'P2.2', viewId: 'lesson-p22', suffix: 'p22', title: 'The Anatomy of a Controlled Trade', prerequisite: 'P2.1',
     permission: 'premium_track', quizBlock: 'p22-quiz', understoodScrollTo: 'p22-sequence-block',
+    duration: 18, objectives: ['Décomposer un trade contrôlé en ses étapes', 'Relier chaque étape à une condition de non-trade'],
+    premiumReason: 'Premium donne accès au Risk Plan Lab et à l’assessment Controlled Decision qui prolongent cette leçon par la pratique guidée.',
     questions: [
       { role: 'exercise', block: 'p22-sequence', success: '@practice' },
       { role: 'quiz', block: 'p22-quiz', success: '@data', result: true }
@@ -400,6 +407,11 @@ const viewPermissions = {
   'lesson-lab1': 'lesson_m01', 'lesson-lab2': 'lesson_m01', 'lesson-lab3': 'lesson_m01',
   'lesson-lab4': 'premium_track', 'lesson-lab-capstone': 'premium_track'
 };
+// Aperçu gratuit par module Premium (mandat §5) : une leçon marquée
+// `preview: true` dans son registre reste lisible sans Premium malgré sa
+// permission `premium_track` — derived from LESSON_REGISTRY, jamais une
+// seconde liste à tenir à la main.
+const LESSON_PREVIEW_VIEW_IDS = new Set(LESSON_REGISTRY.filter(entry => entry.preview).map(entry => entry.viewId));
 // "Where am I" landmark (navigation audit): mirrors the sidebar's own
 // section groupings (nav-section-label in academy.html) so the topbar never
 // claims a location the sidebar doesn't already show. access/landing are
@@ -2195,6 +2207,11 @@ function renderState() {
   document.querySelectorAll('.premium-gate').forEach(button => {
     button.textContent = premium ? 'Ouvrir l’atelier' : 'Voir l’aperçu Premium';
   });
+  const waitlistJoined = Boolean(prototypeState.premiumWaitlist?.joined);
+  const waitlistForm = document.getElementById('premium-waitlist-form');
+  const waitlistConfirmation = document.getElementById('premium-waitlist-confirmation');
+  if (waitlistForm) waitlistForm.hidden = waitlistJoined;
+  if (waitlistConfirmation) waitlistConfirmation.hidden = !waitlistJoined;
   renderMembershipNextStep(premium);
   renderPremiumState();
 
@@ -2365,10 +2382,23 @@ function openGate(options = {}) {
   const descEl = document.getElementById('gate-description');
   const unlockBtn = document.getElementById('gate-unlock');
   const previewBtn = document.getElementById('gate-preview');
+  const metaEl = document.getElementById('gate-meta');
+  const objectivesEl = document.getElementById('gate-objectives');
 
   if (eyebrowEl) eyebrowEl.textContent = options.eyebrow || 'DDA Premium';
   if (titleEl) titleEl.textContent = options.title || 'Cette expérience sera disponible avec Premium.';
   if (descEl) descEl.textContent = options.description || 'Aucun achat ni paiement réel n’est proposé ici.';
+  // Paywall honnête (mandat §5) : une leçon Premium verrouillée identifiée
+  // montre sa durée et ses objectifs réels — jamais juste "réservé à Premium".
+  if (metaEl) {
+    metaEl.hidden = !options.duration;
+    metaEl.textContent = options.duration ? `${options.duration} min` : '';
+  }
+  if (objectivesEl) {
+    const objectives = Array.isArray(options.objectives) ? options.objectives : [];
+    objectivesEl.hidden = objectives.length === 0;
+    objectivesEl.innerHTML = objectives.map(item => `<li>${item}</li>`).join('');
+  }
   if (unlockBtn) {
     unlockBtn.hidden = !options.canUnlock;
     if (options.unlockText) unlockBtn.innerHTML = `${options.unlockText} <span>→</span>`;
@@ -2380,6 +2410,28 @@ function openGate(options = {}) {
   pendingGatedView = options.targetView || null;
   gate.hidden = false;
   document.getElementById('gate-close')?.focus();
+}
+
+// Paywall honnête (mandat §5) : titre, durée et objectifs réels d'une
+// leçon Premium verrouillée — jamais juste "réservé à Premium". Lit
+// LESSON_REGISTRY (P2.1/P2.2) puis LAB_REGISTRY (LAB4/LABCAP, dont les
+// métadonnées vivent dans window.DDALab — jamais recopiées ici).
+function lessonGateInfo(viewId) {
+  const lesson = LESSON_REGISTRY.find(entry => entry.viewId === viewId && entry.permission === 'premium_track');
+  if (lesson) {
+    return { title: lesson.title, duration: lesson.duration || null, objectives: lesson.objectives || [], premiumReason: lesson.premiumReason || '' };
+  }
+  const lab = LAB_REGISTRY.find(entry => entry.viewId === viewId && entry.permission === 'premium_track');
+  if (lab) {
+    const labLesson = lab.meta?.lesson;
+    return {
+      title: labLesson?.title || titles[viewId] || '',
+      duration: labLesson?.estimatedMinutes || null,
+      objectives: labLesson?.summary ? [labLesson.summary] : [],
+      premiumReason: 'Premium donne accès au projet final évalué et à la suite du parcours DDA Lab.'
+    };
+  }
+  return null;
 }
 
 function closeGate() {
@@ -2420,7 +2472,10 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
     id = LAB_PREREQUISITE[id] ? 'lab' : 'path';
   }
   const permission = viewPermissions[id];
-  if (permission && !DDA.can(prototypeState, permission)) {
+  if (permission && LESSON_PREVIEW_VIEW_IDS.has(id) && !DDA.can(prototypeState, permission)) {
+    // Preview lesson: a Free learner reads it exactly like any Free lesson —
+    // the permission is intentionally not enforced here.
+  } else if (permission && !DDA.can(prototypeState, permission)) {
     prototypeState = DDA.track(prototypeState, 'access_denied', { view: id, permission, plan: prototypeState.membership?.plan || 'visitor' });
     if (!prototypeState.user) {
       showToast('Termine ton inscription pour accéder à cette section.');
@@ -2429,12 +2484,17 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
       const fallbackView = currentView && currentView !== id && titles[currentView] ? currentView : 'path';
       showView(fallbackView, false);
       const isPremiumTrack = permission === 'premium_track';
+      const lessonInfo = lessonGateInfo(id);
       openGate({
         eyebrow: isPremiumTrack ? 'DDA Premium · P2' : 'Offre Standard · M1+',
-        title: isPremiumTrack ? 'Cette expérience est réservée à Premium.' : 'Ce module est réservé à l’offre Standard.',
-        description: isPremiumTrack
-          ? 'DDA Free (Découverte) peut voir l’aperçu, mais le contenu P2 complet est disponible uniquement dans la démonstration Premium locale. Aucun paiement réel — active l’aperçu pour explorer ce module.'
-          : 'DDA Free (Découverte) donne accès au module M0 Fondations. Les modules M1 et suivants sont réservés aux offres Standard et Pro (CDCP-OS §4.2). Aucun paiement réel — active l’aperçu pour explorer ce module.',
+        title: lessonInfo ? `« ${lessonInfo.title} » est une leçon Premium.` : (isPremiumTrack ? 'Cette expérience est réservée à Premium.' : 'Ce module est réservé à l’offre Standard.'),
+        description: lessonInfo
+          ? lessonInfo.premiumReason
+          : (isPremiumTrack
+            ? 'DDA Free (Découverte) peut voir l’aperçu, mais le contenu P2 complet est disponible uniquement dans la démonstration Premium locale. Aucun paiement réel — active l’aperçu pour explorer ce module.'
+            : 'DDA Free (Découverte) donne accès au module M0 Fondations. Les modules M1 et suivants sont réservés aux offres Standard et Pro (CDCP-OS §4.2). Aucun paiement réel — active l’aperçu pour explorer ce module.'),
+        duration: lessonInfo?.duration || null,
+        objectives: lessonInfo?.objectives || [],
         canUnlock: true,
         unlockText: isPremiumTrack ? 'Activer l’aperçu Premium (simulation)' : 'Activer l’aperçu Standard (simulation)',
         previewText: 'Voir la formule Premium',
@@ -2658,6 +2718,27 @@ document.getElementById('gate-unlock')?.addEventListener('click', () => {
 document.getElementById('gate-close')?.addEventListener('click', closeGate);
 document.getElementById('gate-layer')?.addEventListener('click', event => { if (event.target.id === 'gate-layer') closeGate(); });
 document.getElementById('gate-preview')?.addEventListener('click', () => { closeGate(); showView('membership'); });
+// Jamais un blocage sans sortie (mandat §5) : revient explicitement à la
+// vue Free déjà affichée sous la fenêtre (showView(fallbackView) a déjà
+// tourné avant l'ouverture de cette fenêtre) plutôt que de laisser
+// l'apprenant deviner comment en sortir.
+document.getElementById('gate-continue-free')?.addEventListener('click', closeGate);
+
+// Liste d'attente Premium (mandat §6) : consentement explicite requis avant
+// toute écriture — le bouton reste désactivé jusqu'à la case cochée, et
+// rejoindre n'active ni n'implique aucun paiement.
+document.getElementById('premium-waitlist-consent')?.addEventListener('change', event => {
+  const joinBtn = document.getElementById('premium-waitlist-join');
+  if (joinBtn) joinBtn.disabled = !event.target.checked;
+});
+document.getElementById('premium-waitlist-join')?.addEventListener('click', () => {
+  const consent = document.getElementById('premium-waitlist-consent')?.checked === true;
+  if (!consent) return;
+  prototypeState = DDA.joinPremiumWaitlist(prototypeState, true);
+  prototypeState = DDA.track(prototypeState, 'premium_waitlist_joined', { plan: prototypeState.membership?.plan || 'visitor' });
+  document.getElementById('premium-waitlist-form').hidden = true;
+  document.getElementById('premium-waitlist-confirmation').hidden = false;
+});
 
 document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;

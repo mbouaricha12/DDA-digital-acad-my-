@@ -914,6 +914,15 @@ a.nav-item[hidden]{display:none}
 .gate-card h2{font-size:26px}
 .gate-card>p:not(.eyebrow){color:var(--muted)}
 .gate-card .primary-action{margin-top:14px}
+.gate-meta{color:var(--gold-soft);font-size:13px;font-weight:600;margin:0 0 4px}
+.gate-objectives{list-style:none;margin:14px 0;padding:0;display:grid;gap:8px;text-align:left}
+.gate-objectives li{display:flex;gap:8px;align-items:flex-start;color:var(--ivory);font-size:13.5px;line-height:1.5}
+.gate-objectives li::before{content:'✓';color:var(--gold);flex-shrink:0}
+.gate-card #gate-continue-free{margin-top:10px;width:auto}
+.premium-waitlist-consent{display:flex;gap:10px;align-items:flex-start;margin:14px 0;font-size:13.5px;line-height:1.5;color:var(--ivory);cursor:pointer}
+.premium-waitlist-consent input{margin-top:3px;flex-shrink:0}
+#premium-waitlist-confirmation{display:flex;gap:8px;align-items:center;color:var(--gold-soft);font-weight:600}
+#premium-waitlist-confirmation .icon{width:18px;height:18px;flex-shrink:0}
 .membership-roadmap,.membership-guardrails,.next-step-panel,.family-panel{margin-top:16px}
 .membership-roadmap p{color:rgba(244,247,252,.65);font-size:14px;max-width:680px}
 .roadmap-track{list-style:none;padding:0;margin:18px 0 16px;display:flex;flex-wrap:wrap;gap:8px}
