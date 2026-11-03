@@ -63,6 +63,51 @@
     }
   }
 
+  // Extracts a YouTube video id from the handful of URL shapes DDA actually
+  // receives (Shorts links, watch links, youtu.be links). Returns '' for
+  // anything else — callers must treat '' as "no video", never guess an id.
+  function getYouTubeId(rawUrl) {
+    const raw = String(rawUrl || '').trim();
+    if (!raw) return '';
+    try {
+      const url = new URL(raw);
+      const allowedHost = /(^|\.)youtube\.com$/.test(url.hostname) || url.hostname === 'youtu.be' || url.hostname === 'youtube-nocookie.com';
+      if (url.protocol !== 'https:' || !allowedHost) return '';
+      if (url.hostname === 'youtu.be') {
+        const id = url.pathname.replace(/^\//, '').split('/')[0];
+        return /^[\w-]{6,}$/.test(id) ? id : '';
+      }
+      const shortsMatch = url.pathname.match(/^\/shorts\/([\w-]{6,})/);
+      if (shortsMatch) return shortsMatch[1];
+      const embedMatch = url.pathname.match(/^\/embed\/([\w-]{6,})/);
+      if (embedMatch) return embedMatch[1];
+      const v = url.searchParams.get('v');
+      return v && /^[\w-]{6,}$/.test(v) ? v : '';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  // Lightweight YouTube surface: ships only a static thumbnail <img> and a
+  // play button — no iframe, no YouTube script, until the learner clicks.
+  // app.js owns the click handler (this file renders markup only); it swaps
+  // this block for an iframe pointed at youtube-nocookie.com, with no
+  // autoplay parameter, per the mandate's "no autoplay" rule.
+  function renderYouTubeLite(video, id) {
+    const ytId = getYouTubeId(video && video.url);
+    const label = escapeAttr((video && video.title) || 'Vidéo pédagogique DDA');
+    if (!ytId) {
+      return `<div class="video-explainer-block video-explainer-fallback" id="${escapeAttr(id)}-block" data-video-state="missing"><div class="video-fallback-panel guided-fallback" role="status"><svg class="icon"><use href="#icon-book"/></svg><strong>Vidéo en préparation</strong><span>Le lien de cette vidéo n’est pas encore disponible.</span></div></div>`;
+    }
+    return `<figure class="video-explainer-block video-lite-block" id="${escapeAttr(id)}-block" data-video-state="idle">
+      <div class="video-frame video-lite-frame" data-youtube-id="${escapeAttr(ytId)}" data-youtube-title="${label}">
+        <img class="video-lite-thumb" src="https://i.ytimg.com/vi/${escapeAttr(ytId)}/hqdefault.jpg" alt="" loading="lazy">
+        <button type="button" class="video-lite-play" aria-label="Lire : ${label}"><svg class="icon"><use href="#icon-play"/></svg></button>
+      </div>
+      <figcaption class="video-explainer-caption">${label}</figcaption>
+    </figure>`;
+  }
+
   function renderVideoSurface(video, id) {
     const embedUrl = getVimeoEmbedUrl(video);
     const directSrc = video && typeof video.src === 'string' && /^https:\/\//.test(video.src) ? video.src : '';
@@ -341,5 +386,5 @@
       <div class="saved-state" id="saved-state${suffix}" role="status" aria-live="polite" aria-atomic="true">Progression enregistrée sur cet appareil — jamais envoyée à un serveur</div>`;
   }
 
-  window.DDALessonRenderer = Object.freeze({ renderLessonMain, renderLessonOutline, renderBlock, BLOCK_RENDERERS });
+  window.DDALessonRenderer = Object.freeze({ renderLessonMain, renderLessonOutline, renderBlock, BLOCK_RENDERERS, renderYouTubeLite, getYouTubeId });
 })();

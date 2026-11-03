@@ -22,6 +22,7 @@ const assert = require('assert/strict');
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
+const vm = require('vm');
 const { execSync } = require('child_process');
 
 try {
@@ -1873,6 +1874,43 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       assert.equal(await page.evaluate(() => document.activeElement.id), targetId, `${url}: activating the skip link must move focus to its declared target`);
       await context.close();
     }
+  });
+
+  console.log('\n-- Q. Bibliothèque vidéo — registre et lecteur YouTube léger --');
+
+  await test('every VIDEO_REGISTRY entry declares a valid video_visibility and a real https://youtube.com(/...) or youtu.be URL, never invented', async () => {
+    const appJs = fs.readFileSync(path.join(DIST, 'app.js'), 'utf8');
+    const match = appJs.match(/const VIDEO_REGISTRY = Object\.freeze\((\[[\s\S]*?\])\);/);
+    assert.ok(match, 'VIDEO_REGISTRY literal must exist in dist/app.js');
+    const registry = vm.runInNewContext(match[1]);
+    assert.ok(registry.length >= 1, 'at least one video is registered');
+    const allowedVisibility = new Set(['public_youtube', 'unlisted_youtube', 'protected_host']);
+    for (const video of registry) {
+      assert.ok(video.id && video.title && video.url, `${video.id || '(no id)'}: id, title and url are required`);
+      assert.ok(allowedVisibility.has(video.video_visibility), `${video.id}: video_visibility must be one of ${[...allowedVisibility]}`);
+      assert.match(video.url, /^https:\/\/(youtube\.com|www\.youtube\.com|youtu\.be)\//, `${video.id}: url must be a real YouTube link`);
+      assert.equal(typeof video.preview, 'boolean', `${video.id}: preview must be an explicit boolean`);
+    }
+  });
+
+  await test('the resources view lists every registered video, and opening one shows a thumbnail with no iframe until the play button is clicked', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#resources`);
+    await page.waitForSelector('#resources.view.active');
+    const videoEntries = page.locator('#video-shelf-list .library-entry');
+    const count = await videoEntries.count();
+    assert.ok(count >= 1, 'the video shelf lists at least one video');
+    await page.locator('#video-shelf-list .resource-open').first().click();
+    await page.waitForSelector('#resource-reader:not([hidden])');
+    assert.equal(await page.locator('#reader-content .video-lite-thumb').isVisible(), true, 'a static thumbnail is shown before any click');
+    assert.equal(await page.locator('#reader-content iframe').count(), 0, 'no iframe — and so no YouTube request — is created before the learner clicks play');
+    await page.locator('#reader-content .video-lite-play').click();
+    const iframeSrc = await page.locator('#reader-content iframe').getAttribute('src');
+    assert.match(iframeSrc, /^https:\/\/www\.youtube-nocookie\.com\/embed\//, 'the loaded player must use the privacy-enhanced nocookie domain');
+    assert.ok(!/autoplay/.test(iframeSrc), 'no autoplay parameter — the mandate requires no autoplay');
+    await context.close();
   });
 
   await browser.close();
