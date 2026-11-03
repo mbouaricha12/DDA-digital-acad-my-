@@ -1965,7 +1965,7 @@ body.public-shell{background:var(--dda-ivory);color:#15243a}
 .landing-institution-photo{position:relative;overflow:hidden;border-radius:18px;min-height:220px;border:1px solid var(--lp-line)}
 
 .landing-section-head{max-width:1440px;margin:0 auto;padding:0 clamp(20px,5vw,72px)}
-.landing-section-head h2{max-width:26ch;margin-top:8px;color:var(--lp-heading);font-family:var(--dda-sans);font-size:clamp(1.6rem,3.6vw,2.5rem);line-height:1.12;font-weight:800}
+.landing-section-head h2{max-width:26ch;margin-top:10px;color:var(--lp-heading);font-family:var(--dda-sans);font-size:clamp(1.75rem,3.9vw,2.75rem);line-height:1.1;font-weight:800;letter-spacing:-.012em}
 
 .landing-demo,
 .landing-problem,
