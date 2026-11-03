@@ -895,6 +895,16 @@
           <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">DDA Premium · aperçu local</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><p class="premium-local-status">Tu explores une démonstration pédagogique sur cet appareil, pas un abonnement actif.</p><ul><li>Leçons Premium P2 : risque avant entrée et trade contrôlé</li><li>Risk Plan Lab avec validation du scénario et conditions de non-trade</li><li>Assessment Controlled Decision et preuve locale de compétence</li><li>Revue hebdomadaire, ressources avancées et pont vers le Journal</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aucun paiement · aucun renouvellement · aucun entitlement serveur</small><a class="text-action membership-preparation-link" href="launch/">Comprendre la préparation commerciale <span>→</span></a></article>
         </div>
 
+        <section class="panel premium-waitlist-panel" id="premium-waitlist-panel" aria-labelledby="premium-waitlist-title">
+          <div class="panel-heading"><div><p class="eyebrow gold">Avant l’activation du paiement</p><h2 id="premium-waitlist-title">Liste d’attente Premium</h2></div></div>
+          <p>Le paiement Premium (Chariow) n’est pas encore activé. Si tu veux être informé(e) dès son ouverture, inscris-toi ici — aucune carte bancaire, aucun engagement.</p>
+          <div id="premium-waitlist-form">
+            <label class="premium-waitlist-consent"><input type="checkbox" id="premium-waitlist-consent"> Je comprends qu’aucun paiement n’est activé et je souhaite être informé(e) quand l’abonnement Premium (12 000 FCFA/mois) sera disponible.</label>
+            <button class="secondary-action" id="premium-waitlist-join" disabled>Rejoindre la liste d’attente</button>
+          </div>
+          <p id="premium-waitlist-confirmation" role="status" aria-live="polite" hidden><svg class="icon"><use href="#icon-check-circle"/></svg> Tu es sur la liste d’attente Premium — nous ne t’enverrons rien d’autre pour l’instant.</p>
+        </section>
+
         <section class="panel access-model-panel" aria-labelledby="access-model-title">
           <div class="panel-heading"><div><p class="eyebrow gold">Premium First · Accessible by Design</p><h2 id="access-model-title">Trois niveaux, trois responsabilités.</h2></div></div>
           <p class="access-model-intro">Free doit rester utile. Premium doit apporter une profondeur réellement construite. Access préparera plus tard des bourses ou accès sponsorisés — rien n’est encore ouvert ni financé.</p>
@@ -1573,9 +1583,12 @@
       <span class="gate-symbol"><svg class="icon"><use href="#icon-spark"/></svg></span>
       <p class="eyebrow gold" id="gate-eyebrow">DDA Premium</p>
       <h2 id="gate-title">Cette expérience sera disponible avec Premium.</h2>
+      <p id="gate-meta" class="gate-meta" hidden></p>
       <p id="gate-description">Aucun achat ni paiement réel n’est proposé ici.</p>
+      <ul id="gate-objectives" class="gate-objectives" hidden></ul>
       <button class="primary-action" id="gate-unlock" hidden>Activer l’aperçu Standard (simulation) <span>→</span></button>
       <button class="primary-action" id="gate-preview">Voir la formule Premium <span>→</span></button>
+      <button class="text-action" id="gate-continue-free">Continuer gratuitement <span>→</span></button>
     </div>
   </div>
   <script src="dda-lazy-modules.js"></script>
