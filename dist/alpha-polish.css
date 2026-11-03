@@ -442,7 +442,7 @@
 .public-footer-brand p{margin:18px 0 8px;color:var(--lp-heading);font-family:var(--dda-serif);font-size:1.25rem}
 .public-footer-brand small{display:block;max-width:28ch;color:var(--lp-body-soft);font-size:.78rem;line-height:1.6}
 .public-footer-col{display:grid;align-content:start;gap:10px}
-.public-footer-col strong{margin-bottom:6px;color:#8a6a2f;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase}
+.public-footer-col strong{margin-bottom:6px;color:var(--gold-soft);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase}
 .public-footer-col button{padding:0;text-align:left;color:var(--lp-body-soft);font-size:.78rem}
 .public-footer-col button:hover{color:var(--lp-heading)}
 .public-footer-bottom{grid-column:1/-1;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:20px;border-top:1px solid var(--lp-line);color:var(--lp-body-soft);font-size:.68rem}
@@ -1087,18 +1087,12 @@ body.access-mode .prototype-banner{
 
 
 /* Mobile viewport repair — a continuous full-bleed learning surface, not a floating white sheet. */
-body.public-shell{background:#F7F9FC;color:var(--lp-heading)}
+body.public-shell{background:#061b47;color:var(--lp-heading)}
 body.public-shell .app-shell,
-body.public-shell main{min-height:100vh;background:#F7F9FC}
-/* DDA LIGHT — homepage pilot (mandat §11). --lp-bg is defined once, here —
-   the only value the cascade ever renders (#landing.view is excluded from
-   the Elite Deep-Navy !important list above, so this id-selector background
-   is what actually paints). Every --lp-* consumer across styles.css and
-   this file inherits the light values below; the Academy keeps its own
-   Elite Deep-Navy canvas untouched. */
+body.public-shell main{min-height:100vh;background:#061b47}
 #landing{
-  --lp-bg:#F7F9FC;
-  background-color:#F7F9FC;
+  --lp-bg:#061b47;
+  background-color:#061b47;
 }
 #landing.view.active{width:100%;max-width:none;margin:0;transform:none}
 
@@ -1253,7 +1247,7 @@ body.public-shell main{min-height:100vh;background:#F7F9FC}
 #landing .plan-rail .landing-plan-card{border-radius:0;padding:22px;background:transparent;border:1px solid var(--lp-line)}
 #landing .plan-rail .landing-plan-card-gold{border-color:rgba(201,154,69,.42);background:rgba(201,154,69,.05)}
 #landing .plan-rail .landing-plan-card h3{font-family:var(--dda-serif);font-size:1.7rem}
-#landing .landing-ecosystem{display:grid;grid-template-columns:1fr .8fr;grid-template-areas:"copy photo" "domains domains";gap:46px;background:linear-gradient(165deg,#eef2f8,#f7f9fc)}
+#landing .landing-ecosystem{display:grid;grid-template-columns:1fr .8fr;grid-template-areas:"copy photo" "domains domains";gap:46px;background:linear-gradient(165deg,#0f1c30,#07111f)}
 #landing .ecosystem-copy{grid-area:copy;align-self:end}
 #landing .ecosystem-copy h2{max-width:17ch;margin:12px 0;color:var(--lp-heading);font-family:var(--dda-serif);font-size:clamp(2rem,4.4vw,4rem);line-height:1}
 #landing .ecosystem-copy>p:not(.eyebrow){max-width:48ch;color:var(--lp-body);line-height:1.6}
@@ -1278,7 +1272,7 @@ body.public-shell main{min-height:100vh;background:#F7F9FC}
 #landing .future-editorial-grid .future-card-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(11,37,84,.12),rgba(11,37,84,.58));mix-blend-mode:multiply}
 #landing .future-editorial-grid h3{font-family:var(--dda-serif);font-size:2rem}
 #landing .future-editorial-grid p{max-width:34ch;color:var(--lp-body);line-height:1.55}
-#landing .public-footer-brand .footer-socials{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;color:#8a6a2f;font-size:.62rem;letter-spacing:.1em}
+#landing .public-footer-brand .footer-socials{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;color:var(--dda-gold-soft);font-size:.62rem;letter-spacing:.1em}
 @media (max-width:899px){
  #landing .landing-philosophy-band{grid-template-columns:1fr;gap:18px} #landing .landing-philosophy-band .landing-inline-cta{justify-self:start}
  #landing .experience-heading{display:block} #landing .experience-heading>p:last-child{margin-top:16px}
@@ -1565,10 +1559,10 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 #landing .landing-main-copy .eyebrow.gold,#landing .landing-section-head .eyebrow.gold{color:var(--dda-elite-gold-soft)}
 #landing h1,#landing h2,#landing h3{ text-wrap:balance }
 #landing h1{color:#f1f3f5;letter-spacing:-.045em}
-#landing h1 em{color:#8a6a2f;font-style:normal}
+#landing h1 em{color:var(--dda-elite-gold-soft);font-style:normal}
 #landing .landing-deck,#landing .landing-section-head>p:not(.eyebrow),#landing .ecosystem-copy>p:not(.eyebrow){color:#aab5c2;line-height:1.72}
 #landing .landing-free-proof{margin:20px 0 0;padding:14px 16px;border:1px solid rgba(174,191,213,.16);border-left:2px solid var(--dda-elite-gold);border-radius:12px;background:rgba(10,20,36,.52);max-width:620px}
-#landing .landing-free-proof-label{margin:0 0 8px;color:#8a6a2f;font-size:.72rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+#landing .landing-free-proof-label{margin:0 0 8px;color:var(--dda-elite-gold-soft);font-size:.72rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
 #landing .landing-free-proof ul{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 14px;margin:0;padding:0;list-style:none;color:#c7d0db;font-size:.82rem;line-height:1.3}
 #landing .landing-free-proof li{display:flex;flex-direction:column;gap:3px;min-width:0}
 #landing .landing-free-proof-icon{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;margin-bottom:2px;border-radius:50%;background:rgba(217,164,65,.12);color:var(--dda-gold-soft)}
@@ -1648,13 +1642,13 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 #landing .landing-aperture-top,#landing .landing-aperture-copy{z-index:4}
 
 /* Editorial, non-live market cards reuse the existing Market Intelligence destination. */
-#landing .domain-rail .landing-section-head h3{max-width:30ch;color:#101b2d}
-#landing .domain-rail .landing-market-intro{max-width:68ch;margin:14px 0 22px;color:#64748b;font-size:.9rem;line-height:1.65}
+#landing .domain-rail .landing-section-head h3{max-width:30ch;color:#e7ebef}
+#landing .domain-rail .landing-market-intro{max-width:68ch;margin:14px 0 22px;color:#9eabba;font-size:.9rem;line-height:1.65}
 #landing .domain-rail .landing-domain-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 28px}
 #landing .domain-rail .landing-domain-groups article{min-width:0;padding:18px 0 0;border:0;border-top:1px solid var(--dda-elite-line);border-radius:0;background:transparent}
 #landing .domain-rail .landing-domain-groups article+article{padding-left:0;border-left:0}
 #landing .domain-rail .landing-market-group{grid-column:1/-1}
-#landing .domain-rail .domain-label{margin:0 0 14px;color:#8a6a2f;font-size:.67rem;letter-spacing:.13em}
+#landing .domain-rail .domain-label{margin:0 0 14px;color:#c9b27b;font-size:.67rem;letter-spacing:.13em}
 #landing .landing-market-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
 #landing .landing-market-card{display:flex;flex-direction:column;justify-content:space-between;min-width:0;min-height:124px;padding:13px 12px 10px;border:1px solid rgba(174,191,213,.14);border-radius:12px;background:linear-gradient(160deg,rgba(16,29,46,.92),rgba(9,19,32,.96));color:#e7ebef;text-align:left;cursor:pointer;transition:transform .2s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease}
 #landing .landing-market-card:hover,#landing .landing-market-card:focus-visible{transform:translateY(-2px);border-color:rgba(203,177,116,.4);background:#101e30;box-shadow:0 12px 26px rgba(0,0,0,.18)}
@@ -1806,11 +1800,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 }
 body,body.public-shell{background:var(--dda-elite-canvas);color:var(--dda-elite-ink)}
 .app-shell,main{background:transparent}
-/* #landing is deliberately excluded from this Elite Deep-Navy forcing list —
-   it is the public marketing surface, not the Academy, and carries its own
-   light-palette rule (see "DDA LIGHT — homepage pilot" below). Every other
-   route here is the authenticated learner app and must keep the Elite canvas. */
-#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#forex.view,#stocks.view,#indices.view,#crypto.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{background:var(--dda-elite-canvas)!important;color:var(--dda-elite-ink)}
+#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#forex.view,#stocks.view,#indices.view,#crypto.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{background:var(--dda-elite-canvas)!important;color:var(--dda-elite-ink)}
 
 /* Product chrome and global navigation. */
 .prototype-banner{border-bottom:1px solid var(--dda-elite-line);background:linear-gradient(90deg,#0a1424,#0d1929);color:#aab6c4}
@@ -2271,99 +2261,10 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
   .view:not(#path) :is(.panel,.access-card,.profile-panel,.preference-panel,.analysis-terminal,.terminal-lead,.journal-panel,.journal-composer,.journal-entry-card,.resource-feature,.plan-card,.market-zone,.market-brief,.brvm-panel,.market-calendar,.broker-row,.support-contact,.community-featured-card,.community-tile,.premium-track-status,.premium-lab-form,.premium-assessment-form){background-image:linear-gradient(145deg,#112a44,#07121f)!important}
 }
 
-/* Contract-safe base: the optical texture sits above the canonical Deep Navy canvas.
-   #landing excluded — see the DDA LIGHT comment near its --lp-* definitions. */
-#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#forex.view,#stocks.view,#indices.view,#crypto.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{
+/* Contract-safe base: the optical texture sits above the canonical Deep Navy canvas. */
+#landing.view,#access.view,#dashboard.view,#path.view,#lesson.view,#lesson-m02.view,#lesson-m03.view,#lesson-m11.view,#lesson-m12.view,#lesson-m13.view,#lesson-p21.view,#lesson-p22.view,#premium-track.view,#premium-lab.view,#premium-assessment.view,#progress.view,#journal.view,#resources.view,#membership.view,#markets.view,#forex.view,#stocks.view,#indices.view,#crypto.view,#brokers.view,#support.view,#community.view,#practice.view,#intelligence.view,#experts.view,#live.view,#business.view,#lab.view,#lesson-lab1.view,#lesson-lab2.view,#lesson-lab3.view,#lesson-lab4.view,#lesson-lab-capstone.view,#profile.view{
   background-color:#061b47!important;
 }
-#landing.view{background-color:var(--lp-bg)!important}
-
-/* DDA LIGHT follow-up — a handful of landing components stay deliberately
-   dark (the product/AI preview windows, the step rail, the proof-measure
-   demo): they are self-contained "product screenshot" surfaces, not canvas
-   text, and were only ever light-on-dark by coincidence because the whole
-   page used to share one dark palette. Their internal text is decoupled
-   here from --lp-heading/--lp-body/--lp-body-soft (now dark navy for the
-   canvas) back to the literal light values those vars used to hold, so the
-   windows keep reading as a dark dashboard mockup embedded in a light page. */
-#landing .experience-flow h3,
-#landing .product-window-lead h3,
-#landing .product-window-action,
-#landing .proof-practice-demo h3,
-#landing .proof-measure h3,
-#landing .product-index h3{color:#f4f7fc}
-#landing .experience-flow p,
-#landing .product-window-lead p,
-#landing .rail-label,
-#landing .ai-bubble p,
-#landing .proof-measure p{color:rgba(226,233,245,.68)}
-#landing .product-window-bar,
-#landing .ai-preview-bar,
-#landing .window-state-inactive,
-#landing .product-window-chart .chart-caption,
-#landing .rail-caption,#landing .product-window-evidence small,
-#landing .ai-bubble span,
-#landing .ai-guardrail-badge,
-#landing .product-index p{color:rgba(226,233,245,.5)}
-#landing .window-state-inactive i{background:rgba(226,233,245,.5)}
-
-/* .landing-future's own band background was still the pre-pilot dark
-   gradient while its heading/intro copy read --lp-heading/--lp-body
-   (now dark navy) — flip the band to light so that copy stays legible;
-   its article cards were already handled above. */
-#landing .landing-future{background-image:none;background-color:#f7f9fc}
-
-/* .landing-free's own section background was the raw #0f1c30 (--lp-card-2)
-   fill. .landing-plan-card is also swept into the Academy's shared
-   "glass surface" :is() lists (it reuses .plan-card's decorative texture),
-   which paint it a dark mineral-glass gradient regardless of the
-   transparent/pale-gold background set for it above — both need an
-   explicit light override here, with !important where the Academy rule's
-   higher-specificity :not(#path) selector would otherwise win. */
-#landing .landing-free{background-color:#f7f9fc}
-#landing .plan-rail .landing-plan-card{background-image:none!important;backdrop-filter:none!important}
-
-/* .landing-problem-list li (reused by both .ai-guardrail-list and
-   .proof-principles) and .landing-proof carried their own var(--lp-card)/
-   literal dark fills while their strong/p text reads --lp-heading/--lp-body
-   — flip both to light. */
-#landing .landing-problem-list li{background-color:#eef2f8}
-#landing .landing-proof{background:#f7f9fc}
-
-/* Header, utility bar, BRVM ticker and footer are the public chrome that
-   wraps the whole page top-to-bottom — flipped light for real end-to-end
-   "plus lumineux" coverage, not just the mid-page sections. All of
-   .public-header/.public-footer/.public-menu-panel/.public-utility-bar/
-   .brvm-ticker* are index.html-exclusive classes (confirmed: never used in
-   academy.html), so this cannot leak into the Academy. */
-.public-header-nav button,.public-login,.public-menu summary{color:#3c4a5e}
-.public-menu-panel,.public-footer{border-color:var(--lp-line);background:#eef2f8;color:#101b2d}
-.public-menu-panel a{color:#101b2d}
-.public-footer{background-image:linear-gradient(145deg,#f7f9fc,#eef2f8),repeating-linear-gradient(135deg,transparent 0 18px,rgba(16,27,45,.012) 19px,transparent 20px 40px)!important}
-#landing .public-utility-bar .utility-market b{color:#2f4157}
-#landing .public-utility-bar a{color:#3c4a5e}
-#landing .public-utility-bar a:hover{color:#1f7a53}
-.brvm-ticker-item{color:#3c4a5e}
-.brvm-ticker-item:hover,.brvm-ticker-item:focus-visible{color:#101b2d}
-.brvm-ticker-title{color:#2f4157}
-.brvm-ticker-meta{color:#64748b}
-/* h1, masthead, free-proof labels and the secondary CTA still read literal
-   near-white hex (not --lp-heading/--lp-body) from the pre-pilot dark theme. */
-#landing h1{color:#101b2d!important}
-#landing .landing-masthead{color:rgba(16,27,45,.6)!important}
-#landing .landing-free-proof strong{color:#101b2d!important}
-#landing .landing-secondary{color:#1b2a3f!important}
-/* .eyebrow.gold used the same bright accent gold designed for the old dark
-   canvas (≈2:1 contrast on white); darkened here to the brand Gold
-   (#C6A15B family) for real legibility on the new off-white background. */
-#landing .eyebrow.gold{color:#8a6a2f!important}
-#landing .public-footer-brand .public-header-mark{border-color:#9ce59d;color:#1f7a53;background:rgba(36,132,91,.08)}
-#landing .landing-deck,#landing .landing-section-head>p:not(.eyebrow),#landing .ecosystem-copy>p:not(.eyebrow){color:#64748b!important}
-#landing .landing-masthead span{color:#8a6a2f!important}
-#landing .free-number,
-#landing .value-rail .free-number,
-#landing .landing-future-grid article>span:first-child,
-#landing .future-editorial-grid article>span{color:#8a6a2f!important}
 
 /* Mission rails keep page purpose visible and reduce destination repetition. */
 .page-mission{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:0 0 26px;padding:16px 18px;border:1px solid rgba(216,174,97,.2);border-radius:14px;background:linear-gradient(120deg,rgba(18,43,68,.78),rgba(7,17,29,.9));box-shadow:0 16px 34px rgba(0,0,0,.16),inset 0 1px rgba(255,255,255,.05)}
@@ -2677,8 +2578,8 @@ body.public-shell .prototype-banner{display:none}
   .brvm-ticker-item{font-size:.6rem}
 }
 #landing .utility-pulse{width:6px;height:6px;border-radius:50%;background:#80c99b;box-shadow:0 0 0 4px rgba(128,201,155,.12)}
-#landing .public-header{background:rgba(247,249,252,.86);backdrop-filter:blur(16px)}
-#landing .public-header-brand .public-header-mark{border-color:#9ce59d;color:#1f7a53;box-shadow:inset 0 -8px 15px rgba(91,183,108,.1)}
+#landing .public-header{background:rgba(6,13,23,.72);backdrop-filter:blur(16px)}
+#landing .public-header-brand .public-header-mark{border-color:#83d18b;color:#9ce59d;box-shadow:inset 0 -8px 15px rgba(91,183,108,.08)}
 #landing .public-start{background:linear-gradient(135deg,#77c96e,#a4e48e)!important;color:#07130e!important;box-shadow:0 8px 24px rgba(88,183,91,.18)}
 #landing .public-start span{color:#183c22}
 #landing .landing-trust-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:0;max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,72px);border-bottom:1px solid var(--lp-line);background:#07111e}
@@ -2706,16 +2607,9 @@ body.public-shell .prototype-banner{display:none}
 #landing .landing-3d-orbit{border-color:rgba(128,201,155,.34)}
 #landing .landing-3d-orbit i{background:#9ce59d;box-shadow:0 0 0 5px rgba(156,229,157,.1),0 0 24px rgba(156,229,157,.72)}
 #landing .landing-3d-node{border-color:rgba(128,201,155,.42);color:#b7e8bb}
-#landing .landing-philosophy-band{background:linear-gradient(110deg,#eef2f8,#f7f9fc 60%,#eef7f0)}
-#landing .landing-philosophy-band .differentiation-statement em{color:#1f7a53}
-#landing .landing-final-cta{background:radial-gradient(circle at 70% 0%,rgba(36,132,91,.1),transparent 38%),#f7f9fc}
-/* The two bands above (and .landing-free-grid/.landing-future-grid article cards
-   just below) had their own literal dark fills while their headings/body still
-   read var(--lp-heading)/var(--lp-body) — now dark navy text. Flipped to light
-   so that text stays legible; see the DDA LIGHT comment in styles.css's #landing
-   block for the full rationale. */
-#landing .landing-free-grid article{background-image:linear-gradient(145deg,#f3f6fb,#eef2f8);background-color:#eef2f8}
-#landing .landing-future-grid article{background:#eef2f8!important}
+#landing .landing-philosophy-band{background:linear-gradient(110deg,#0a1826,#07111e 60%,#0e281a)}
+#landing .landing-philosophy-band .differentiation-statement em{color:#9ce59d}
+#landing .landing-final-cta{background:radial-gradient(circle at 70% 0%,rgba(74,161,84,.2),transparent 38%),#07111e}
 @media(max-width:899px){
   #landing .landing-trust-strip{grid-template-columns:1fr 1fr;gap:0}
   #landing .landing-trust-strip article:nth-child(2){border-right:0}
@@ -2940,18 +2834,6 @@ body.public-shell .prototype-banner{display:none}
 .dda-ecosystem-chip em{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:rgba(222,232,245,.5)}
 .dda-ecosystem-chip.is-active{border-color:rgba(65,217,140,.3);background:rgba(65,217,140,.07)}
 .dda-ecosystem-chip.is-active em{color:#58d99b}
-/* #landing scoped overrides — this exact strip/chip component is reused
-   unscoped inside the Academy (academy.html), which must keep its dark
-   styling; only the public homepage gets the light palette. */
-#landing .dda-ecosystem-strip{border-color:rgba(16,27,45,.12);background:#eef2f8}
-#landing .dda-ecosystem-chip{border-color:rgba(16,27,45,.14);background:rgba(16,27,45,.04);color:rgba(16,27,45,.72)}
-#landing .dda-ecosystem-chip:hover,#landing .dda-ecosystem-chip:focus-visible{border-color:rgba(201,154,69,.55);background:rgba(201,154,69,.14)}
-#landing .dda-ecosystem-chip .icon{color:var(--gold)}
-#landing .dda-ecosystem-chip span{color:#101B2D}
-#landing .dda-ecosystem-chip em{color:rgba(16,27,45,.52)}
-#landing .dda-ecosystem-chip.is-active{border-color:rgba(36,132,91,.34);background:rgba(36,132,91,.1)}
-#landing .dda-ecosystem-chip.is-active em{color:#1f7a53}
-
 @media(max-width:720px){
   .dda-ecosystem-track{padding:9px 12px;gap:8px}
   .dda-ecosystem-chip{padding:6px 10px;font-size:11px}
