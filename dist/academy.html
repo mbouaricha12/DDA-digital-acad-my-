@@ -59,7 +59,7 @@
       var verificationToken = params.get('token_hash') || params.get('token') || hashParams.get('token_hash');
       if (verificationToken && verificationToken.length >= 32) window.DDA_VERIFY_TOKEN = verificationToken;
       if (recoveryType) window.DDA_AUTH_RECOVERY = true;
-      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone']);
+      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone']);
       var route = location.hash.slice(1);
       var safeHash = knownRoutes.has(route) ? '#' + route : '';
       if (location.search || location.hash !== safeHash) history.replaceState(history.state, '', location.pathname + safeHash);
@@ -558,6 +558,17 @@
         </div>
       </section>
 
+      <section class="view" id="lesson-mbrvm1" aria-labelledby="lesson-title-mbrvm1">
+        <div class="view-photo-band" role="img" aria-label="BRVM — marché régional d’Afrique de l’Ouest"><img class="photo-fill" src="images/photos/brvm-market-fruits.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><p class="view-photo-band-copy">La bourse régionale UEMOA, en deux familles de titres.</p></div>
+        <div class="lesson-layout">
+          <article class="lesson-main" id="lesson-mbrvm1-main">
+            <div class="lesson-quick-nav"><button class="back-link" data-view="back">← Retour</button><button class="text-action" data-view="markets">BRVM</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div>
+            <nav class="module-toc" aria-label="Sommaire du module"><strong class="module-toc-heading"></strong><ol class="module-toc-list"></ol></nav>
+          </article>
+          <aside class="lesson-outline" id="lesson-mbrvm1-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"></aside>
+        </div>
+      </section>
+
       <section class="view" id="lab" aria-labelledby="lab-title">
         <div class="section-intro"><p class="eyebrow gold">DDA Lab · Pilote</p><h1 id="lab-title">IA pour agir.</h1><p>Utiliser l’IA pour produire, organiser et construire un petit projet numérique concret — sans jargon, sans outil payant obligatoire. Les 3 premières leçons sont gratuites ; le livrable complet et le projet final appartiennent à DDA Premium.</p></div>
         <ol class="premium-progress-strip" id="lab-progress-strip" aria-label="Progression du parcours DDA Lab">
@@ -1042,6 +1053,7 @@
               <h2>Un pôle d’information régional</h2>
               <p>La BRVM est la bourse régionale commune aux huit pays de l’UEMOA. DDA accompagne la lecture des sociétés cotées, indices, publications et notions d’investissement régional, sans remplacer la source officielle ni un intermédiaire agréé.</p>
               <ul><li><svg class="icon"><use href="#icon-book"/></svg> Repères pédagogiques UEMOA</li><li><svg class="icon"><use href="#icon-help"/></svg> Glossaire et méthode de lecture</li><li><svg class="icon"><use href="#icon-calendar"/></svg> Publications à vérifier sur BRVM</li><li><svg class="icon"><use href="#icon-shield"/></svg> Provenance et date toujours visibles</li></ul>
+              <button class="primary-action" type="button" data-view="lesson-mbrvm1">Commencer la leçon « Introduction à la BRVM » <span>→</span></button>
             </div>
           </div>
           <article class="market-calendar brvm-information-desk" id="market-sources">
