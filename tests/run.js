@@ -2119,6 +2119,68 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  console.log('\n-- V. Protection Premium côté serveur (P1.1) --');
+
+  await test('in local/pilot mode (no BFF), a learner who sets plan to premium locally still sees Premium content exactly as before (no regression)', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'P2.1': { quizComplete: true } }, 'premium');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-p22`);
+    await page.waitForSelector('#lesson-p22.view.active');
+    assert.equal(await page.locator('#gate-layer').isVisible(), false, 'local-only mode keeps today\'s honest local-plan behavior untouched');
+    await context.close();
+  });
+
+  await test('in BFF mode, a locally-forced premium plan does NOT unlock real Premium content without a positive server check', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
+      status: 403, contentType: 'application/json',
+      body: JSON.stringify({ code: 'premium_required', message: 'An active Premium entitlement is required.' })
+    }));
+    // The console-tamper scenario the mandate names explicitly: the local
+    // state already claims plan=premium (e.g. a learner editing it directly,
+    // or a stale copy from before the account's entitlement changed).
+    await seedLocalLearner(context, { 'P2.1': { quizComplete: true } }, 'premium');
+    const page = await context.newPage();
+    // A deep-link straight to the Premium lesson: the initial render must
+    // fail closed (the server check hasn't resolved yet) and stay closed
+    // once it resolves to "not entitled" — never a flash of real content.
+    await page.goto(`${ACADEMY_BASE}#lesson-p22`);
+    await page.waitForSelector('#gate-layer:not([hidden])');
+    assert.notEqual(await page.evaluate(() => location.hash), '#lesson-p22', 'a locally-forced premium plan is rejected: the Premium lesson never activates without server confirmation');
+    assert.match(await page.textContent('#gate-title'), /The Anatomy of a Controlled Trade/, 'the honest paywall is shown instead, same as a genuine Free learner');
+    await page.waitForTimeout(200);
+    assert.equal(await page.locator('#gate-layer').isVisible(), true, 'the gate stays shown once the server confirms there is no entitlement');
+    await context.close();
+  });
+
+  await test('in BFF mode, a server-confirmed Premium entitlement unlocks the real lesson', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true })
+    }));
+    await seedLocalLearner(context, { 'P2.1': { quizComplete: true } }, 'premium');
+    const page = await context.newPage();
+    // Same deep-link, same initial fail-closed gate — but this time the
+    // server genuinely confirms the entitlement, so the app must finish the
+    // navigation the learner actually asked for, not leave them on the gate.
+    await page.goto(`${ACADEMY_BASE}#lesson-p22`);
+    await page.waitForSelector('#lesson-p22.view.active');
+    assert.equal(await page.locator('#gate-layer').isVisible(), false, 'a genuine server-confirmed entitlement unlocks the real lesson');
+    await context.close();
+  });
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 
