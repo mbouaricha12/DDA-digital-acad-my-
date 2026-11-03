@@ -2518,23 +2518,111 @@ window.addEventListener('hashchange', () => {
   showView(viewId, true, 'anchor');
 });
 
+/* ==========================================================================
+   VIDEO REGISTRY — bibliothèque vidéo DDA. Ajouter une vidéo = une entrée
+   ici, rien d'autre : la Bibliothèque DDA (#resources) se construit à partir
+   de ce tableau (renderVideoShelf), aucune modification de academy.html
+   n'est nécessaire pour publier une nouvelle vidéo.
+   `video_visibility` distingue une vidéo YouTube publique ou non répertoriée
+   (acquisition / apprentissage Free — jamais du contenu Premium protégé)
+   d'un contenu hébergé et protégé côté serveur (`protected_host`, pas encore
+   utilisé). `preview: true` marque un aperçu gratuit d'un module Premium.
+   Durées non communiquées par le fondateur : volontairement omises plutôt
+   qu'inventées.
+   ========================================================================== */
+const VIDEO_REGISTRY = Object.freeze([
+  {
+    id: 'VID-INDICATEURS', title: 'Les indicateurs en trading', module: null,
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/BTipx88k_U8',
+    description: 'Un premier repère pour comprendre à quoi servent les indicateurs techniques.'
+  },
+  {
+    id: 'VID-MOYENNES-MOBILES', title: 'Les moyennes mobiles en trading', module: null,
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/rVd4dF6JaZ4',
+    description: 'Ce que mesure une moyenne mobile, et pourquoi elle lisse le prix plutôt que de le prédire.'
+  },
+  {
+    id: 'VID-VOLATILITE-FOREX', title: 'La volatilité sur le Forex', module: null,
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/HaP-Onie9Lc',
+    description: 'Comprendre pourquoi certaines paires de devises bougent plus vite que d’autres.'
+  },
+  {
+    id: 'VID-CRYPTOMONNAIES', title: 'Comprendre les cryptomonnaies', module: null,
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/yBNc_eQbiow',
+    description: 'Les bases pour situer les cryptomonnaies parmi les actifs étudiés dans DDA.'
+  }
+]);
+
+function renderVideoShelf() {
+  const list = document.getElementById('video-shelf-list');
+  if (!list) return;
+  list.innerHTML = VIDEO_REGISTRY.map(video => `
+    <li class="library-entry">
+      <div class="resource-icon"><svg class="icon"><use href="#icon-play"/></svg></div>
+      <div class="library-entry-body">
+        <span class="resource-type">Vidéo · YouTube</span>
+        <h2>${video.title}</h2>
+        <p>${video.description}</p>
+        <ul class="resource-meta" aria-label="Métadonnées de la vidéo"><li>Vidéo courte</li><li>${video.level}</li><li>DDA Free</li></ul>
+        <button class="secondary-action dark-action resource-open" data-video="${video.id}">Regarder</button>
+      </div>
+    </li>`).join('');
+}
+
 const resources = {
   checklist: { title: 'Checklist avant une décision', label: 'Guide · DDA Free', body: '<ol><li>Ai-je compris le contexte du marché ?</li><li>Mon scénario est-il écrit clairement ?</li><li>Où mon idée devient-elle invalide ?</li><li>Quel risque suis-je prêt à accepter ?</li><li>Est-ce une décision prévue ou impulsive ?</li><li>Puis-je justifier mon choix sans parler de gain ?</li></ol>' },
   glossary: { title: 'Les mots essentiels du marché', label: 'Glossaire · DDA Free', body: '<dl><dt>Actif</dt><dd>Ce qui est échangé sur un marché.</dd><dt>Acheteur</dt><dd>Participant qui cherche à acquérir un actif.</dd><dt>Vendeur</dt><dd>Participant qui accepte de céder un actif.</dd><dt>Liquidité</dt><dd>Facilité avec laquelle un actif peut être échangé sans déplacer fortement le prix.</dd><dt>Volatilité</dt><dd>Amplitude et rythme des variations observées, sans garantie sur leur direction future.</dd><dt>Spread</dt><dd>Écart entre le prix auquel un acheteur se positionne et celui auquel un vendeur accepte d’échanger.</dd><dt>Invalidation</dt><dd>Condition prévue à l’avance qui indique qu’une hypothèse n’est plus cohérente.</dd><dt>Risque</dt><dd>Part d’incertitude et de perte potentielle à maîtriser avant d’agir.</dd></dl>' }
 };
 
 let readerTrigger = null;
-document.querySelectorAll('.resource-open').forEach(button => button.addEventListener('click', () => {
-  const resource = resources[button.dataset.resource];
-  document.getElementById('reader-label').textContent = resource.label;
-  document.getElementById('reader-title').textContent = resource.title;
-  document.getElementById('reader-content').innerHTML = resource.body;
+renderVideoShelf();
+document.getElementById('resources')?.addEventListener('click', event => {
+  const button = event.target.closest('.resource-open');
+  if (!button) return;
+  const label = document.getElementById('reader-label');
+  const title = document.getElementById('reader-title');
+  const content = document.getElementById('reader-content');
+  if (button.dataset.video) {
+    const video = VIDEO_REGISTRY.find(v => v.id === button.dataset.video);
+    if (!video) return;
+    label.textContent = 'Vidéo · DDA Free';
+    title.textContent = video.title;
+    content.innerHTML = window.DDALessonRenderer.renderYouTubeLite(video, `resource-video-${video.id}`);
+  } else {
+    const resource = resources[button.dataset.resource];
+    if (!resource) return;
+    label.textContent = resource.label;
+    title.textContent = resource.title;
+    content.innerHTML = resource.body;
+  }
   readerTrigger = button;
   const reader = document.getElementById('resource-reader');
   reader.hidden = false;
   reader.scrollIntoView({ behavior: prototypeState.preferences.lowData ? 'auto' : 'smooth', block: 'start' });
   document.getElementById('reader-close').focus();
-}));
+});
+
+// Click-to-load YouTube: the lite block ships only a thumbnail + button
+// (lesson-renderer.js). Clicking swaps it for a nocookie iframe — no
+// autoplay parameter, so playback only starts once the learner presses
+// play a second time, inside the YouTube player itself.
+document.addEventListener('click', event => {
+  const playButton = event.target.closest('.video-lite-play');
+  if (!playButton) return;
+  const frame = playButton.closest('.video-lite-frame');
+  const ytId = frame?.dataset.youtubeId;
+  if (!ytId) return;
+  const label = frame.dataset.youtubeTitle || 'Vidéo pédagogique DDA';
+  frame.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${ytId}" title="${label}" loading="lazy" allow="fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+});
 function closeReader() {
   const reader = document.getElementById('resource-reader');
   if (reader.hidden) return;
