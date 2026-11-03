@@ -96,6 +96,21 @@
     return result.body;
   }
 
+  // Server-side Premium entitlement check (P1.1 — mandat §7.3). Returns a
+  // plain boolean, never throws on the expected "not entitled" case: the BFF
+  // answers 200 with server_authorized:true for an active Premium account,
+  // 403 premium_required otherwise. A network/5xx failure or a disabled BFF
+  // also resolves false — fail closed, never silently grant Premium.
+  async function hasServerPremiumEntitlement() {
+    try {
+      const result = await request('/v1/premium/preview');
+      if (!result.enabled || result.response.status === 401) return false;
+      return result.response.ok && result.body?.server_authorized === true;
+    } catch {
+      return false;
+    }
+  }
+
   async function getBrvmPublications() {
     const result = await request('/v1/publications/brvm');
     if (!result.enabled) return null;
@@ -188,7 +203,7 @@
 
   window.DDABFF = Object.freeze({
     enabled, register, verifyEmail, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
-    getProgress, saveLessonProgress, saveOnboardingProgress,
+    getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement,
     getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }
   });

@@ -125,6 +125,38 @@ let prototypeState = DDA.load();
 let remoteUser = null;
 let bffAuthMode = 'signup';
 
+// Protection Premium côté serveur (mandat §7.3, P1.1). `prototypeState.
+// membership.plan` is a local, learner-editable value — it must stay the
+// only gate in the local pilot (no BFF configured), exactly as before. Once
+// a real BFF session exists, the server's own entitlement check
+// (/v1/premium/preview, already real and already enforced server-side)
+// becomes the ADDITIONAL authority for 'premium_track': null = not yet
+// checked (fails closed, same as false), true = server confirmed an active
+// Premium entitlement. Never persisted — always re-derived at boot/login.
+let serverPremiumConfirmed = null;
+function canUnlock(permission) {
+  if (permission === 'premium_track' && window.DDABFF?.enabled() && remoteUser) {
+    return serverPremiumConfirmed === true;
+  }
+  return DDA.can(prototypeState, permission);
+}
+async function refreshServerPremiumEntitlement() {
+  if (!window.DDABFF?.enabled() || !remoteUser) { serverPremiumConfirmed = null; return; }
+  serverPremiumConfirmed = await window.DDABFF.hasServerPremiumEntitlement();
+  mountPremiumLessons();
+  mountPremiumLabLessons();
+  renderState();
+  // A deep-link opened the honest paywall before this server check resolved
+  // (canUnlock fails closed on the initial null). If the server just
+  // confirmed a real entitlement, finish what the learner actually asked
+  // for instead of leaving them stuck on the gate they never chose.
+  if (serverPremiumConfirmed === true && pendingGatedView) {
+    const target = pendingGatedView;
+    closeGate();
+    showView(target);
+  }
+}
+
 // Résolution runtime du registre contre le curriculum réel : une leçon
 // déclarée mais absente du curriculum (fichier authored non chargé) n'est pas
 // montée — les boucles ci-dessous ne consomment que mountedLessons.
@@ -162,7 +194,7 @@ function mountLesson(entry) {
   main.dataset.ddaLessonMounted = 'true';
 }
 mountedLessons.forEach(entry => {
-  if (entry.permission === 'premium_track' && !DDA.can(prototypeState, 'premium_track')) return;
+  if (entry.permission === 'premium_track' && !canUnlock('premium_track')) return;
   mountLesson(entry);
 });
 function refreshMountedLessons() {
@@ -170,7 +202,7 @@ function refreshMountedLessons() {
     .map(entry => ({ ...entry, meta: DDALearning.findLesson(DDA.curriculum, entry.id) }))
     .filter(entry => entry.meta);
   mountedLessons.forEach(entry => {
-    if (entry.permission === 'premium_track' && !DDA.can(prototypeState, 'premium_track')) return;
+    if (entry.permission === 'premium_track' && !canUnlock('premium_track')) return;
     const main = document.getElementById(`${entry.viewId}-main`);
     const wasMounted = main?.dataset.ddaLessonMounted === 'true';
     mountLesson(entry);
@@ -1337,7 +1369,7 @@ function renderWeeklyReview() {
   if (!panel) return;
   const locked = document.getElementById('weekly-review-locked');
   const content = document.getElementById('weekly-review-content');
-  const premium = DDA.can(prototypeState, 'premium_track');
+  const premium = canUnlock('premium_track');
   locked.hidden = premium;
   content.hidden = !premium;
   const windowData = weeklyReviewWindow();
@@ -1445,7 +1477,7 @@ function openWeeklyReview() {
   panel.hidden = false;
   renderWeeklyReview();
   document.getElementById('weekly-review-title')?.focus();
-  if (DDA.can(prototypeState, 'premium_track')) trackEvent('premium_review_opened', { proof: 'weekly-review' });
+  if (canUnlock('premium_track')) trackEvent('premium_review_opened', { proof: 'weekly-review' });
 }
 
 function closeWeeklyReview() {
@@ -2522,10 +2554,10 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
     id = LAB_PREREQUISITE[id] ? 'lab' : 'path';
   }
   const permission = viewPermissions[id];
-  if (permission && LESSON_PREVIEW_VIEW_IDS.has(id) && !DDA.can(prototypeState, permission)) {
+  if (permission && LESSON_PREVIEW_VIEW_IDS.has(id) && !canUnlock(permission)) {
     // Preview lesson: a Free learner reads it exactly like any Free lesson —
     // the permission is intentionally not enforced here.
-  } else if (permission && !DDA.can(prototypeState, permission)) {
+  } else if (permission && !canUnlock(permission)) {
     prototypeState = DDA.track(prototypeState, 'access_denied', { view: id, permission, plan: prototypeState.membership?.plan || 'visitor' });
     if (!prototypeState.user) {
       showToast('Termine ton inscription pour accéder à cette section.');
@@ -2742,7 +2774,7 @@ function closeReader() {
 document.getElementById('reader-close').addEventListener('click', closeReader);
 
 document.querySelectorAll('.premium-gate').forEach(button => button.addEventListener('click', () => {
-  if (DDA.can(prototypeState, button.dataset.permission)) { showToast('Atelier Premium débloqué en aperçu.'); return; }
+  if (canUnlock(button.dataset.permission)) { showToast('Atelier Premium débloqué en aperçu.'); return; }
   gateTrigger = button;
   prototypeState = DDA.track(prototypeState, 'access_denied', { permission: button.dataset.permission, plan: 'free' });
   openGate({
@@ -2899,7 +2931,7 @@ document.getElementById('weekly-review-preview').addEventListener('click', () =>
 document.getElementById('weekly-review-cancel').addEventListener('click', closeWeeklyReview);
 document.getElementById('weekly-review-form').addEventListener('submit', event => {
   event.preventDefault();
-  if (!DDA.can(prototypeState, 'premium_track')) return;
+  if (!canUnlock('premium_track')) return;
   const fields = {
     reflection: document.getElementById('weekly-review-strength').value.trim(),
     pattern: document.getElementById('weekly-review-pattern').value.trim(),
@@ -3081,6 +3113,7 @@ document.getElementById('signup-form').addEventListener('submit', async event =>
         if (!user) throw new Error('session_missing');
         document.getElementById('bff-auth-status').textContent = '';
         revealAdminLinkIfAdmin();
+        refreshServerPremiumEntitlement();
         showOnboardingAfterRemoteAuth(user);
       }
     } catch (authError) {
@@ -3240,7 +3273,7 @@ function bindRegistryQuestions(entry) {
 mountedLessons.forEach(bindRegistryQuestions);
 
 function mountPremiumLessons() {
-  if (!DDA.can(prototypeState, 'premium_track')) return;
+  if (!canUnlock('premium_track')) return;
   mountedLessons.filter(entry => entry.permission === 'premium_track').forEach(entry => {
     const main = document.getElementById(`${entry.viewId}-main`);
     const wasMounted = main?.dataset.ddaLessonMounted === 'true';
@@ -3330,7 +3363,7 @@ if (window.DDALab) {
     // a premium entry mounts at boot too when the already-loaded state is
     // already premium (e.g. after a reload) — "not premium_track" alone
     // would wrongly skip LAB4/capstone for an already-premium learner.
-    if (entry.permission === 'premium_track' && !DDA.can(prototypeState, 'premium_track')) return;
+    if (entry.permission === 'premium_track' && !canUnlock('premium_track')) return;
     mountLesson(entry);
     bindRegistryQuestions(entry);
   });
@@ -3340,7 +3373,7 @@ if (window.DDALab) {
   });
 }
 function mountPremiumLabLessons() {
-  if (!window.DDALab || !DDA.can(prototypeState, 'premium_track')) return;
+  if (!window.DDALab || !canUnlock('premium_track')) return;
   LAB_REGISTRY.filter(entry => entry.permission === 'premium_track').forEach(entry => {
     const main = document.getElementById(`${entry.viewId}-main`);
     const wasMounted = main?.dataset.ddaLessonMounted === 'true';
@@ -3355,7 +3388,7 @@ function mountPremiumLabLessons() {
 // never a fabricated "Maîtrisé" from a single quiz pass (the exact conflation
 // the P0 audit flagged in the main curriculum's competencyLevel()).
 function labLessonStatus(entry) {
-  if (entry.permission === 'premium_track' && !DDA.can(prototypeState, 'premium_track')) return 'locked';
+  if (entry.permission === 'premium_track' && !canUnlock('premium_track')) return 'locked';
   const progress = DDALearning.getLessonProgress(prototypeState, entry.id);
   if (progress.quizComplete) return 'done';
   if (progress.exerciseComplete || progress.lessonViewed) return 'started';
@@ -3368,7 +3401,7 @@ function renderLabCatalog() {
   if (!window.DDALab) return;
   LAB_REGISTRY.forEach(entry => {
     const status = labLessonStatus(entry);
-    const label = status === 'locked' && entry.permission === 'premium_track' && DDA.can(prototypeState, 'premium_track') === false
+    const label = status === 'locked' && entry.permission === 'premium_track' && canUnlock('premium_track') === false
       ? 'DDA Premium'
       : LAB_STATUS_LABEL[status];
     [`lab-${entry.id}-status`, `lab-progress-${entry.id}-status`].forEach(id => {
@@ -3597,7 +3630,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 
 renderState();
 initBffAuthUi();
-hydrateRemoteSession();
+hydrateRemoteSession().then(refreshServerPremiumEntitlement);
 revealAdminLinkIfAdmin();
 handleBffVerificationToken();
 renderMarketIntelligence();
