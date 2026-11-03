@@ -28,6 +28,9 @@ const LESSON_REGISTRY = Object.freeze([
   {
     id: 'M0.2', viewId: 'lesson-m02', suffix: 'm2', title: 'Support & Résistance', prerequisite: 'M0.1',
     permission: 'lesson_m01',
+    // Vidéo réelle du VIDEO_REGISTRY (mandat §5, P1.3) : correspondance directe
+    // avec le sujet de cette leçon.
+    video: 'VID-SUPPORTS-RESISTANCES',
     quizBlock: 'm2-quiz', understoodScrollTo: 'm2-observe-4-block',
     questions: [
       { role: 'practice', block: 'm2-identify-1', success: '@block', reveal: true },
@@ -41,6 +44,9 @@ const LESSON_REGISTRY = Object.freeze([
   {
     id: 'M0.3', viewId: 'lesson-m03', suffix: 'm3', title: 'Lire une tendance', prerequisite: 'M0.2',
     permission: 'lesson_m01',
+    // Vidéo réelle du VIDEO_REGISTRY (mandat §5, P1.3) : les moyennes mobiles
+    // sont un outil courant de lecture de tendance, cohérent avec cette leçon.
+    video: 'VID-MOYENNES-MOBILES',
     quizBlock: 'm3-quiz', understoodScrollTo: 'm3-observe-4-block',
     questions: [
       { role: 'practice', block: 'm3-classify-1', success: 'Bonne lecture.' },
@@ -119,6 +125,80 @@ const LESSON_REGISTRY = Object.freeze([
   }
 ]);
 
+/* ==========================================================================
+   VIDEO REGISTRY — bibliothèque vidéo DDA. Ajouter une vidéo = une entrée
+   ici, rien d'autre : la Bibliothèque DDA (#resources) se construit à partir
+   de ce tableau (renderVideoShelf), aucune modification de academy.html
+   n'est nécessaire pour publier une nouvelle vidéo. Une entrée LESSON_REGISTRY
+   peut aussi référencer un id de ce registre via son champ `video` (P1.3) :
+   mountLesson() l'injecte alors dans la leçon via le lecteur léger existant
+   (lesson-renderer.js, renderYouTubeLite — jamais modifié pour ça).
+   `video_visibility` distingue une vidéo YouTube publique ou non répertoriée
+   (acquisition / apprentissage Free — jamais du contenu Premium protégé)
+   d'un contenu hébergé et protégé côté serveur (`protected_host`, pas encore
+   utilisé). `preview: true` marque un aperçu gratuit d'un module Premium.
+   Durées non communiquées par le fondateur : volontairement omises plutôt
+   qu'inventées.
+   ========================================================================== */
+const VIDEO_REGISTRY = Object.freeze([
+  {
+    id: 'VID-INDICATEURS', title: 'Les indicateurs en trading', module: null,
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/BTipx88k_U8',
+    description: 'Un premier repère pour comprendre à quoi servent les indicateurs techniques.'
+  },
+  {
+    id: 'VID-MOYENNES-MOBILES', title: 'Les moyennes mobiles en trading', module: null,
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/rVd4dF6JaZ4',
+    description: 'Ce que mesure une moyenne mobile, et pourquoi elle lisse le prix plutôt que de le prédire.'
+  },
+  {
+    id: 'VID-VOLATILITE-FOREX', title: 'La volatilité sur le Forex', module: null,
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/HaP-Onie9Lc',
+    description: 'Comprendre pourquoi certaines paires de devises bougent plus vite que d’autres.'
+  },
+  {
+    id: 'VID-CRYPTOMONNAIES', title: 'Comprendre les cryptomonnaies', module: null,
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/yBNc_eQbiow',
+    description: 'Les bases pour situer les cryptomonnaies parmi les actifs étudiés dans DDA.'
+  },
+  {
+    id: 'VID-TYPES-DE-TRADERS', title: 'Les types de traders', module: null,
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/bVJ9n-Etcpc',
+    description: 'Les grandes familles de traders selon leur horizon de temps, pour situer ses propres repères.'
+  },
+  {
+    id: 'VID-SUPPORTS-RESISTANCES', title: 'Supports et résistances', module: 'M0.2',
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/pRFqhk55bL4',
+    description: 'Ce qu’est un niveau de support ou de résistance, et pourquoi le prix y réagit souvent.'
+  },
+  {
+    id: 'VID-BOUGIES-JAPONAISES', title: 'Les bougies japonaises', module: null,
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/WDifN6ZKnjY',
+    description: 'Comment lire une bougie japonaise — ouverture, clôture, plus haut et plus bas d’une période.'
+  },
+  {
+    id: 'VID-MARCHE-DES-DEVISES', title: 'Le marché des devises', module: null,
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/bUHsQnIAFuc',
+    description: 'Comment fonctionne le marché des devises (Forex) et qui y échange.'
+  }
+]);
+
 // L’état est chargé avant le montage afin que les leçons Premium authored ne
 // soient jamais injectées dans le DOM d’un utilisateur Free.
 let prototypeState = DDA.load();
@@ -187,6 +267,17 @@ function mountLesson(entry) {
   const suffix = entry.suffix || undefined;
   main.insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(entry.meta.module, entry.meta.lesson, suffix));
   outline.innerHTML = DDALessonRenderer.renderLessonOutline(entry.meta.lesson, suffix);
+  // P1.3 : une leçon peut référencer une vidéo réelle du VIDEO_REGISTRY par
+  // son id (champ `video`). Rendue avec le lecteur léger déjà utilisé par la
+  // Bibliothèque (#resources) — miniature, clic pour charger, pas d'autoplay
+  // — sans aucune modification de lesson-renderer.js.
+  if (entry.video) {
+    const video = VIDEO_REGISTRY.find(v => v.id === entry.video);
+    const loop = main.querySelector('.lesson-loop');
+    if (video && loop) {
+      loop.insertAdjacentHTML('afterend', DDALessonRenderer.renderYouTubeLite(video, `lesson-video-${entry.id}`));
+    }
+  }
   main.querySelectorAll('[data-video-frame], .video-frame video').forEach(media => {
     media.addEventListener('error', () => {
       const surface = media.closest('.video-explainer-block');
@@ -2667,49 +2758,6 @@ window.addEventListener('hashchange', () => {
   if (!isKnownAppView(viewId) || viewId === currentView) return;
   showView(viewId, true, 'anchor');
 });
-
-/* ==========================================================================
-   VIDEO REGISTRY — bibliothèque vidéo DDA. Ajouter une vidéo = une entrée
-   ici, rien d'autre : la Bibliothèque DDA (#resources) se construit à partir
-   de ce tableau (renderVideoShelf), aucune modification de academy.html
-   n'est nécessaire pour publier une nouvelle vidéo.
-   `video_visibility` distingue une vidéo YouTube publique ou non répertoriée
-   (acquisition / apprentissage Free — jamais du contenu Premium protégé)
-   d'un contenu hébergé et protégé côté serveur (`protected_host`, pas encore
-   utilisé). `preview: true` marque un aperçu gratuit d'un module Premium.
-   Durées non communiquées par le fondateur : volontairement omises plutôt
-   qu'inventées.
-   ========================================================================== */
-const VIDEO_REGISTRY = Object.freeze([
-  {
-    id: 'VID-INDICATEURS', title: 'Les indicateurs en trading', module: null,
-    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
-    video_visibility: 'public_youtube', preview: false,
-    url: 'https://youtube.com/shorts/BTipx88k_U8',
-    description: 'Un premier repère pour comprendre à quoi servent les indicateurs techniques.'
-  },
-  {
-    id: 'VID-MOYENNES-MOBILES', title: 'Les moyennes mobiles en trading', module: null,
-    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
-    video_visibility: 'public_youtube', preview: false,
-    url: 'https://youtube.com/shorts/rVd4dF6JaZ4',
-    description: 'Ce que mesure une moyenne mobile, et pourquoi elle lisse le prix plutôt que de le prédire.'
-  },
-  {
-    id: 'VID-VOLATILITE-FOREX', title: 'La volatilité sur le Forex', module: null,
-    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
-    video_visibility: 'public_youtube', preview: false,
-    url: 'https://youtube.com/shorts/HaP-Onie9Lc',
-    description: 'Comprendre pourquoi certaines paires de devises bougent plus vite que d’autres.'
-  },
-  {
-    id: 'VID-CRYPTOMONNAIES', title: 'Comprendre les cryptomonnaies', module: null,
-    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
-    video_visibility: 'public_youtube', preview: false,
-    url: 'https://youtube.com/shorts/yBNc_eQbiow',
-    description: 'Les bases pour situer les cryptomonnaies parmi les actifs étudiés dans DDA.'
-  }
-]);
 
 function renderVideoShelf() {
   const list = document.getElementById('video-shelf-list');
