@@ -127,15 +127,23 @@ let bffAuthMode = 'signup';
 
 // Protection Premium côté serveur (mandat §7.3, P1.1). `prototypeState.
 // membership.plan` is a local, learner-editable value — it must stay the
-// only gate in the local pilot (no BFF configured), exactly as before. Once
-// a real BFF session exists, the server's own entitlement check
+// only gate in the local pilot (no BFF configured), exactly as before. As
+// soon as a BFF is configured, the server's own entitlement check
 // (/v1/premium/preview, already real and already enforced server-side)
-// becomes the ADDITIONAL authority for 'premium_track': null = not yet
-// checked (fails closed, same as false), true = server confirmed an active
-// Premium entitlement. Never persisted — always re-derived at boot/login.
+// becomes the ONLY authority for 'premium_track': null = not yet checked
+// (fails closed, same as false), true = server confirmed an active Premium
+// entitlement. Never persisted — always re-derived at boot/login.
+// Deliberately NOT conditioned on `remoteUser`: the very first showView()
+// call for a deep-linked view runs synchronously, before
+// hydrateRemoteSession() has had a chance to resolve and set it — gating on
+// `remoteUser` here would silently fall back to the local, learner-editable
+// plan for exactly that first render, reopening the exploit this exists to
+// close. Before any session is confirmed, BFF-configured mode simply has no
+// Premium content to show (serverPremiumConfirmed starts null → false),
+// which is correct: nothing server-authorized has been seen yet either way.
 let serverPremiumConfirmed = null;
 function canUnlock(permission) {
-  if (permission === 'premium_track' && window.DDABFF?.enabled() && remoteUser) {
+  if (permission === 'premium_track' && window.DDABFF?.enabled()) {
     return serverPremiumConfirmed === true;
   }
   return DDA.can(prototypeState, permission);

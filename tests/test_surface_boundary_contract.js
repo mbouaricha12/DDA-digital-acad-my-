@@ -32,7 +32,7 @@ assert.match(app, /if \(permission && !canUnlock\(permission\)\)/, 'unauthorized
 // positive server check for premium_track once a BFF session exists, never
 // fall back to the learner-editable local plan alone.
 assert.match(app, /function canUnlock\(permission\) \{/, 'the permission choke point must be a single named function, not re-implemented per call site');
-assert.match(app, /if \(permission === 'premium_track' && window\.DDABFF\?\.enabled\(\) && remoteUser\)/, 'canUnlock must special-case premium_track once a BFF session exists');
+assert.match(app, /if \(permission === 'premium_track' && window\.DDABFF\?\.enabled\(\)\)/, 'canUnlock must special-case premium_track as soon as a BFF is configured — never conditioned on remoteUser, which is only set after an async resolve');
 assert.match(app, /return serverPremiumConfirmed === true;/, 'premium_track must require a positive server confirmation in BFF mode, never the local plan alone');
 assert.match(app, /document\.body\.classList\.toggle\('public-shell', id === 'landing'\)/, 'landing must have an explicit public shell');
 assert.match(app, /document\.body\.classList\.toggle\('access-mode', id === 'access'\)/, 'authentication must have an explicit access shell');
