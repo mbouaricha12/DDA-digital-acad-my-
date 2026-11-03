@@ -1913,7 +1913,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
-  await test('an authored lesson referencing a VIDEO_REGISTRY entry (M0.3) shows the real click-to-load video, and a lesson without one shows no video block', async () => {
+  await test('authored lessons referencing a VIDEO_REGISTRY entry (M0.2, M0.3) show the real click-to-load video, and a lesson without one shows no video block', async () => {
     const context = await freshContext(browser);
     await seedLocalLearner(context, { 'M0.1': { quizComplete: true }, 'M0.2': { quizComplete: true } }, 'free');
     const page = await context.newPage();
@@ -1928,7 +1928,10 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.ok(!/autoplay/.test(iframeSrc), 'no autoplay parameter on a lesson video either');
     await page.goto(`${ACADEMY_BASE}#lesson-m02`);
     await page.waitForSelector('#lesson-m02.view.active');
-    assert.equal(await page.locator('#lesson-m02-main .video-lite-frame').count(), 0, 'a lesson with no video field never shows a video block');
+    assert.equal(await page.locator('#lesson-m02-main .video-lite-frame').isVisible(), true, 'M0.2 shows its own referenced video (Supports et résistances)');
+    await page.goto(`${ACADEMY_BASE}#lesson`);
+    await page.waitForSelector('#lesson.view.active');
+    assert.equal(await page.locator('#lesson-main .video-lite-frame').count(), 0, 'a lesson with no video field (M0.1) never shows a video block');
     await context.close();
   });
 

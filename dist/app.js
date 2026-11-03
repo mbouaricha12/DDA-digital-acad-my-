@@ -28,6 +28,9 @@ const LESSON_REGISTRY = Object.freeze([
   {
     id: 'M0.2', viewId: 'lesson-m02', suffix: 'm2', title: 'Support & Résistance', prerequisite: 'M0.1',
     permission: 'lesson_m01',
+    // Vidéo réelle du VIDEO_REGISTRY (mandat §5, P1.3) : correspondance directe
+    // avec le sujet de cette leçon.
+    video: 'VID-SUPPORTS-RESISTANCES',
     quizBlock: 'm2-quiz', understoodScrollTo: 'm2-observe-4-block',
     questions: [
       { role: 'practice', block: 'm2-identify-1', success: '@block', reveal: true },
@@ -165,6 +168,34 @@ const VIDEO_REGISTRY = Object.freeze([
     video_visibility: 'public_youtube', preview: false,
     url: 'https://youtube.com/shorts/yBNc_eQbiow',
     description: 'Les bases pour situer les cryptomonnaies parmi les actifs étudiés dans DDA.'
+  },
+  {
+    id: 'VID-TYPES-DE-TRADERS', title: 'Les types de traders', module: null,
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/bVJ9n-Etcpc',
+    description: 'Les grandes familles de traders selon leur horizon de temps, pour situer ses propres repères.'
+  },
+  {
+    id: 'VID-SUPPORTS-RESISTANCES', title: 'Supports et résistances', module: 'M0.2',
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/pRFqhk55bL4',
+    description: 'Ce qu’est un niveau de support ou de résistance, et pourquoi le prix y réagit souvent.'
+  },
+  {
+    id: 'VID-BOUGIES-JAPONAISES', title: 'Les bougies japonaises', module: null,
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/WDifN6ZKnjY',
+    description: 'Comment lire une bougie japonaise — ouverture, clôture, plus haut et plus bas d’une période.'
+  },
+  {
+    id: 'VID-MARCHE-DES-DEVISES', title: 'Le marché des devises', module: null,
+    level: 'débutant', type: 'video', access: 'free', duration: null, status: 'publié',
+    video_visibility: 'public_youtube', preview: false,
+    url: 'https://youtube.com/shorts/bUHsQnIAFuc',
+    description: 'Comment fonctionne le marché des devises (Forex) et qui y échange.'
   }
 ]);
 
