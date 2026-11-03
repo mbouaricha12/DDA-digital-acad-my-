@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="admin.css">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Aller au contenu</a>
   <svg hidden>
     <symbol id="admin-icon-home" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9"/></symbol>
     <symbol id="admin-icon-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
@@ -63,7 +64,7 @@
       </div>
     </nav>
 
-    <main>
+    <main id="main-content" tabindex="-1">
       <header class="topbar">
         <button class="icon-button mobile-menu-toggle" type="button" id="admin-menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="admin-drawer"><svg class="icon"><use href="#admin-icon-menu"/></svg></button>
         <button class="mobile-brand" type="button" onclick="location.href='academy.html'" aria-label="Retour à l’Academy"><b>DDA</b><small>BACK-OFFICE</small></button>
