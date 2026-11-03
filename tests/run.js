@@ -1913,6 +1913,25 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('an authored lesson referencing a VIDEO_REGISTRY entry (M0.3) shows the real click-to-load video, and a lesson without one shows no video block', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'M0.1': { quizComplete: true }, 'M0.2': { quizComplete: true } }, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-m03`);
+    await page.waitForSelector('#lesson-m03.view.active');
+    const frame = page.locator('#lesson-m03-main .video-lite-frame');
+    assert.equal(await frame.isVisible(), true, 'M0.3 shows the lite video block for its referenced VIDEO_REGISTRY entry');
+    assert.equal(await page.locator('#lesson-m03-main iframe').count(), 0, 'no iframe before the learner clicks play');
+    await page.locator('#lesson-m03-main .video-lite-play').click();
+    const iframeSrc = await page.locator('#lesson-m03-main iframe').getAttribute('src');
+    assert.match(iframeSrc, /^https:\/\/www\.youtube-nocookie\.com\/embed\//, 'the lesson video loads through the same privacy-enhanced nocookie player');
+    assert.ok(!/autoplay/.test(iframeSrc), 'no autoplay parameter on a lesson video either');
+    await page.goto(`${ACADEMY_BASE}#lesson-m02`);
+    await page.waitForSelector('#lesson-m02.view.active');
+    assert.equal(await page.locator('#lesson-m02-main .video-lite-frame').count(), 0, 'a lesson with no video field never shows a video block');
+    await context.close();
+  });
+
   console.log('\n-- R. Paywall Premium honnête, aperçu gratuit et liste d\'attente --');
 
   await test('P2.1 is marked preview=true and stays open for a Free learner despite its premium_track permission', async () => {
