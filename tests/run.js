@@ -97,7 +97,7 @@ async function completeSignupFlow(page, opts) {
 async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = 'free') {
   await context.addInitScript(({ lessons, plan }) => {
     if (localStorage.getItem('dda-prototype-state-v4')) return;
-    const lessonIds = ['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3', 'P2.1', 'P2.2', 'LAB1', 'LAB2', 'LAB3', 'LAB4', 'LABCAP'];
+    const lessonIds = ['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3', 'MBRVM.1', 'P2.1', 'P2.2', 'LAB1', 'LAB2', 'LAB3', 'LAB4', 'LABCAP'];
     const progress = Object.fromEntries(lessonIds.map(id => [id, {
       lessonViewed: false, exerciseComplete: false, quizComplete: false, ...(lessons[id] || {})
     }]));
@@ -2178,6 +2178,33 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.goto(`${ACADEMY_BASE}#lesson-p22`);
     await page.waitForSelector('#lesson-p22.view.active');
     assert.equal(await page.locator('#gate-layer').isVisible(), false, 'a genuine server-confirmed entitlement unlocks the real lesson');
+    await context.close();
+  });
+
+
+  await test('MBRVM.1 is reachable from #markets without completing M0/M1, independent of Premium, and survives exercise + quiz', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#markets`);
+    await page.waitForSelector('#markets.view.active');
+    const cta = page.locator('[data-view="lesson-mbrvm1"]');
+    assert.equal(await cta.isVisible(), true, 'the BRVM panel links to the introductory lesson');
+    await cta.click();
+    await page.waitForSelector('#lesson-mbrvm1.view.active');
+    assert.match(await page.textContent('#lesson-title-mbrvm1'), /Introduction à la BRVM/);
+    assert.equal(await page.evaluate(() => window.DDALearning.moduleStatus(window.DDA.curriculum, 'M2', window.DDA.load())), 'coming_soon', 'BRVM remains independent from Premium');
+    const exercise = page.locator('[data-question="mbrvm1-exercise"] button[data-correct="true"]').first();
+    await exercise.scrollIntoViewIfNeeded();
+    await exercise.click();
+    assert.equal(await page.evaluate(() => window.DDA.load().lessons['MBRVM.1']?.exerciseComplete), true, 'the exercise gates the quiz');
+    const quiz = page.locator('#mbrvm1-quiz-block [data-question] button[data-correct="true"]').first();
+    await quiz.scrollIntoViewIfNeeded();
+    await quiz.click();
+    assert.equal(await page.isHidden('#result-card-mbrvm1'), false, 'the BRVM result card opens');
+    assert.equal(await page.evaluate(() => window.DDA.load().lessons['MBRVM.1']?.quizComplete), true, 'BRVM progress is recorded');
+    await page.reload();
+    assert.equal(await page.evaluate(() => window.DDA.load().lessons['MBRVM.1']?.quizComplete), true, 'BRVM progress survives reload');
     await context.close();
   });
 

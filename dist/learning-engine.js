@@ -80,11 +80,20 @@
     if (!module.lessons || module.lessons.length === 0) return MODULE_STATUS.COMING_SOON;
     if (module.premiumOnly && state?.membership?.plan !== 'premium') return MODULE_STATUS.COMING_SOON;
 
-    let prevAuthored = null;
-    for (let i = index - 1; i >= 0; i--) {
-      if (modules[i].lessons && modules[i].lessons.length > 0) { prevAuthored = modules[i]; break; }
+    // A module flagged `independent` is its own pedagogical domain (e.g. BRVM,
+    // alongside the main Trading curriculum): it never waits on an earlier
+    // module's completion, and — symmetrically — it is skipped when a LATER
+    // module looks backward for its own nearest authored prerequisite, so
+    // inserting an independent module never silently changes what unlocks
+    // the modules around it.
+    if (!module.independent) {
+      let prevAuthored = null;
+      for (let i = index - 1; i >= 0; i--) {
+        if (modules[i].independent) continue;
+        if (modules[i].lessons && modules[i].lessons.length > 0) { prevAuthored = modules[i]; break; }
+      }
+      if (prevAuthored && moduleStatus(curriculum, prevAuthored.id, state) !== MODULE_STATUS.COMPLETED) return MODULE_STATUS.LOCKED;
     }
-    if (prevAuthored && moduleStatus(curriculum, prevAuthored.id, state) !== MODULE_STATUS.COMPLETED) return MODULE_STATUS.LOCKED;
 
     const statuses = module.lessons.map(lesson => lessonStatus(getLessonProgress(state, lesson.id)));
     if (statuses.every(s => s === STATUS.COMPLETED)) return MODULE_STATUS.COMPLETED;
