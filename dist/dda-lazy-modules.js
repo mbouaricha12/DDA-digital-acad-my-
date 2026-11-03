@@ -6,7 +6,8 @@
   const groups = {
     lessons: ['m1-1-lesson.js', 'm1-2-lesson.js', 'm1-3-lesson.js'],
     premium: ['p2-lessons.js'],
-    markets: ['market-intelligence.js']
+    markets: ['market-intelligence.js'],
+    brvm: ['mbrvm-1-lesson.js']
   };
   function loadScript(src) {
     if (loaded.has(src)) return loaded.get(src);
@@ -25,7 +26,10 @@
   function groupForView(view) {
     if (['lesson-m11', 'lesson-m12', 'lesson-m13'].includes(view)) return ['lessons'];
     if (['lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment'].includes(view)) return ['premium'];
-    if (view === 'markets') return ['markets'];
+    // #markets preloads the BRVM lesson too, so its "Introduction à la BRVM"
+    // link never pays a second, visible lazy-load delay on click.
+    if (view === 'markets') return ['markets', 'brvm'];
+    if (view === 'lesson-mbrvm1') return ['brvm'];
     return [];
   }
   // A deep-link is a deliberate request for a feature. During the parser
@@ -36,6 +40,8 @@
     const saved = JSON.parse(localStorage.getItem('dda-prototype-state-v4') || 'null');
     const hasM1Progress = Object.keys(saved?.lessons || {}).some(id => /^M1\./.test(id));
     if (hasM1Progress && !initialGroups.includes('lessons')) initialGroups.push('lessons');
+    const hasBrvmProgress = Object.keys(saved?.lessons || {}).some(id => /^MBRVM\./.test(id));
+    if (hasBrvmProgress && !initialGroups.includes('brvm')) initialGroups.push('brvm');
   } catch { /* malformed or unavailable storage must never block the shell */ }
   if (initialGroups.length && document.readyState === 'loading') {
     const tags = initialGroups.flatMap(group => groups[group]).map(src => `<script src="${src}" data-dda-lazy="bootstrap"><\/script>`).join('');
@@ -47,7 +53,7 @@
     for (const group of groupsToLoad) {
       for (const src of groups[group]) await loadScript(src);
     }
-    if (groupsToLoad.includes('lessons') || groupsToLoad.includes('premium')) {
+    if (groupsToLoad.includes('lessons') || groupsToLoad.includes('premium') || groupsToLoad.includes('brvm')) {
       window.DDA?.refreshCurriculum?.();
     }
     window.DDA_LAZY_REFRESH?.();
