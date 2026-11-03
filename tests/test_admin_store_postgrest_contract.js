@@ -83,12 +83,18 @@ function fakeResponse({ ok = true, body = [], contentRange } = {}) {
     const fetchImpl = async (url, options) => {
       assert.match(url, /\/auth\/v1\/admin\/users\?page=2&per_page=10$/);
       assert.equal(options.headers.Authorization, 'Bearer service-role-secret', 'listUsers must use the service role key, never the publishable key');
-      return fakeResponse({ body: { users: [{ id: 'u1', email: 'a@example.com', email_confirmed_at: '2026-10-01T00:00:00.000Z', user_metadata: { display_name: 'A' }, banned_until: null, created_at: '2026-09-01T00:00:00.000Z', last_sign_in_at: '2026-10-20T00:00:00.000Z' }] } });
+      return fakeResponse({ body: { users: [
+        { id: 'u1', email: 'a@example.com', email_confirmed_at: '2026-10-01T00:00:00.000Z', user_metadata: { display_name: 'A' }, banned_until: null, created_at: '2026-09-01T00:00:00.000Z', last_sign_in_at: '2026-10-20T00:00:00.000Z' },
+        { id: 'u2', email: 'b@example.com', email_confirmed_at: '2026-10-01T00:00:00.000Z', user_metadata: { display_name: 'B', ref: 'youtube-ama' }, banned_until: null, created_at: '2026-09-02T00:00:00.000Z', last_sign_in_at: null }
+      ] } });
     };
     const auth = new SupabaseAuthAdapter({ supabaseUrl: 'https://project.supabase.co', publishableKey: 'publishable', serviceRoleKey: 'service-role-secret', fetchImpl });
     const result = await auth.listUsers({ page: 2, perPage: 10 });
     assert.equal(result.total, null, 'no total field in the raw response means unavailable, never a fabricated count');
-    assert.deepEqual(result.users, [{ user_id: 'u1', email: 'a@example.com', email_verified: true, display_name: 'A', status: 'active', created_at: '2026-09-01T00:00:00.000Z', last_sign_in_at: '2026-10-20T00:00:00.000Z' }]);
+    assert.deepEqual(result.users, [
+      { user_id: 'u1', email: 'a@example.com', email_verified: true, display_name: 'A', status: 'active', ref: null, created_at: '2026-09-01T00:00:00.000Z', last_sign_in_at: '2026-10-20T00:00:00.000Z' },
+      { user_id: 'u2', email: 'b@example.com', email_verified: true, display_name: 'B', status: 'active', ref: 'youtube-ama', created_at: '2026-09-02T00:00:00.000Z', last_sign_in_at: null }
+    ]);
     assert.equal(Object.hasOwn(result.users[0], 'password'), false);
     assert.equal(Object.hasOwn(result.users[0], 'encrypted_password'), false);
   }

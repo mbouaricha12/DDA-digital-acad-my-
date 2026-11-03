@@ -43,11 +43,13 @@
         var value = (params.get('utm_' + key) || '').trim().toLowerCase();
         return allowed[key].has(value) ? value : null;
       }
+      var refParam = (params.get('ref') || '').trim().toLowerCase();
       window.DDA_INITIAL_ATTRIBUTION = {
         source: safeTag('source'),
         medium: safeTag('medium'),
         campaign: safeTag('campaign'),
-        content: safeTag('content')
+        content: safeTag('content'),
+        partnerRef: /^[a-z0-9_-]{2,40}$/.test(refParam) ? refParam : null
       };
       var verificationToken = params.get('token_hash') || params.get('token');
       if (verificationToken && verificationToken.length >= 32) window.DDA_VERIFY_TOKEN = verificationToken;

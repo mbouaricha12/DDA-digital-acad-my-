@@ -35,8 +35,11 @@ class SupabaseAuthAdapter {
     return body;
   }
 
-  async register({ email, password, display_name, redirectTo }) {
-    return this.publicRequest('/auth/v1/signup', { method: 'POST', body: JSON.stringify({ email: normalizeEmail(email), password, data: { display_name: display_name || '' }, redirect_to: redirectTo }) });
+  async register({ email, password, display_name, ref, redirectTo }) {
+    // Partner attribution is written once, at account creation, and never
+    // touched again — updateUser() below merges around it precisely so a
+    // later profile edit can never overwrite or erase it.
+    return this.publicRequest('/auth/v1/signup', { method: 'POST', body: JSON.stringify({ email: normalizeEmail(email), password, data: { display_name: display_name || '', ref: ref || null }, redirect_to: redirectTo }) });
   }
 
   async verifyEmail(token) {
@@ -70,6 +73,7 @@ class SupabaseAuthAdapter {
         email_verified: Boolean(user.email_confirmed_at),
         display_name: user.user_metadata?.display_name || '',
         status: user.banned_until ? 'locked' : 'active',
+        ref: user.user_metadata?.ref || null,
         created_at: user.created_at || null,
         last_sign_in_at: user.last_sign_in_at || null
       }))
@@ -84,13 +88,18 @@ class SupabaseAuthAdapter {
       email_verified: Boolean(user.email_confirmed_at),
       display_name: user.user_metadata?.display_name || '',
       status: user.banned_until ? 'locked' : 'active',
+      ref: user.user_metadata?.ref || null,
       entitlements: []
     };
   }
 
   async updateUser(userId, patch) {
-    const user = await this.adminRequest(`/auth/v1/admin/users/${encodeURIComponent(userId)}`, { method: 'PUT', body: JSON.stringify({ user_metadata: { display_name: patch.display_name } }) });
-    return { user_id: user.id, email: user.email, email_verified: Boolean(user.email_confirmed_at), display_name: user.user_metadata?.display_name || '', status: user.banned_until ? 'locked' : 'active', entitlements: [] };
+    // GoTrue's admin update replaces user_metadata wholesale rather than
+    // merging it — fetch the current object first so a display_name edit
+    // can never silently erase the immutable partner ref set at signup.
+    const current = await this.adminRequest(`/auth/v1/admin/users/${encodeURIComponent(userId)}`, { method: 'GET' });
+    const user = await this.adminRequest(`/auth/v1/admin/users/${encodeURIComponent(userId)}`, { method: 'PUT', body: JSON.stringify({ user_metadata: { ...current.user_metadata, display_name: patch.display_name } }) });
+    return { user_id: user.id, email: user.email, email_verified: Boolean(user.email_confirmed_at), display_name: user.user_metadata?.display_name || '', status: user.banned_until ? 'locked' : 'active', ref: user.user_metadata?.ref || null, entitlements: [] };
   }
 
   async deleteUser(userId) {

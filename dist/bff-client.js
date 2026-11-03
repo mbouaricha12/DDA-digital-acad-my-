@@ -54,8 +54,8 @@
     return error;
   }
 
-  async function register({ email, password, display_name }) {
-    const result = await request('/v1/auth/register', { method: 'POST', body: { email, password, display_name } });
+  async function register({ email, password, display_name, ref }) {
+    const result = await request('/v1/auth/register', { method: 'POST', body: { email, password, display_name, ref } });
     if (!result.enabled) return null;
     if (!result.response.ok) throw resultError(result, 'registration_failed');
     return result.body;

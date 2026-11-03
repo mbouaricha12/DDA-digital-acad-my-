@@ -76,6 +76,15 @@ function request(server, method, path, { body, rawBody, headers = {}, cookies = 
     response = await request(server, 'POST', '/v1/auth/register', { body: { email: 'a@example.com', password: 'long-enough-password', display_name: 'A' } });
     assert.equal(response.status, 202);
     assert.match(response.body.message, /verification/i);
+    assert.equal(auth.calls.find(c => c[0] === 'register')[1].ref, null, 'no referral param means no ref is forwarded');
+
+    response = await request(server, 'POST', '/v1/auth/register', { body: { email: 'b@example.com', password: 'long-enough-password', ref: 'Partner-01' } });
+    assert.equal(response.status, 202);
+    assert.equal(auth.calls.filter(c => c[0] === 'register').pop()[1].ref, 'partner-01', 'a valid ref is forwarded, lowercased');
+
+    response = await request(server, 'POST', '/v1/auth/register', { body: { email: 'c@example.com', password: 'long-enough-password', ref: 'not a valid ref!!' } });
+    assert.equal(response.status, 202, 'an invalid ref never blocks account creation');
+    assert.equal(auth.calls.filter(c => c[0] === 'register').pop()[1].ref, null, 'an invalid ref is dropped, never forwarded as-is');
 
     response = await request(server, 'POST', '/v1/auth/login', { body: { email: 'a@example.com', password: 'long-enough-password' } });
     assert.equal(response.status, 204);

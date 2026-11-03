@@ -17,7 +17,8 @@
       medium: initialAttribution.medium,
       campaign: initialAttribution.campaign,
       referrer: document.referrer,
-      landingPath: route
+      landingPath: route,
+      partnerRef: initialAttribution.partnerRef
     }).acquisition });
   } catch (_) { /* public communication remains available in private mode */ }
   if (location.search) history.replaceState(history.state, '', location.pathname + location.hash);

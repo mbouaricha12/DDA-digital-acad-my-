@@ -60,7 +60,7 @@ function makeAuth(users) {
   const users = [
     { user_id: OWNER, email: 'owner@dda.academy', email_verified: true, display_name: 'Owner', status: 'active', entitlements: [] },
     { user_id: ADMIN, email: 'admin@dda.academy', email_verified: true, display_name: 'Admin', status: 'active', entitlements: [] },
-    { user_id: PLAIN, email: 'learner@example.com', email_verified: true, display_name: 'Learner', status: 'active', entitlements: [] }
+    { user_id: PLAIN, email: 'learner@example.com', email_verified: true, display_name: 'Learner', status: 'active', ref: 'youtube-ama', entitlements: [] }
   ];
   const auth = makeAuth(users);
   const sessions = new MemorySessionStore();
@@ -117,6 +117,8 @@ function makeAuth(users) {
       assert.equal(ownerRow.role, 'owner');
       const plainRow = response.body.users.find(u => u.user_id === PLAIN);
       assert.equal(plainRow.role, null, 'a user with no admin row reports role: null, not a guessed default');
+      assert.equal(plainRow.ref, 'youtube-ama', 'partner attribution reaches the admin listing unchanged');
+      assert.equal(ownerRow.ref, undefined, 'a user with no recorded referral carries no fabricated ref');
       for (const row of response.body.users) {
         assert.equal(Object.hasOwn(row, 'password'), false);
         assert.equal(Object.hasOwn(row, 'access_token'), false);

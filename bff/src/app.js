@@ -126,13 +126,18 @@ function validateCsrf(req, config, cookies) {
   return Boolean(cookies[CSRF_COOKIE] && req.headers['x-csrf-token'] && timingSafeEqualText(cookies[CSRF_COOKIE], req.headers['x-csrf-token']) && validateOrigin(req, config));
 }
 
+const PARTNER_REF = /^[a-z0-9_-]{2,40}$/;
+
 function validateRegistration(body) {
   const email = normalizeEmail(body.email);
   const fields = {};
   if (!/^\S+@\S+\.\S+$/.test(email) || email.length > 254) fields.email = 'Enter a valid email address.';
   if (typeof body.password !== 'string' || body.password.length < 12 || body.password.length > 128) fields.password = 'Password must be between 12 and 128 characters.';
   if (body.display_name !== undefined && (typeof body.display_name !== 'string' || body.display_name.length > 60)) fields.display_name = 'Display name is too long.';
-  return { email, fields };
+  // Partner attribution ("ref") never blocks account creation — an invalid
+  // or missing value is just treated as no referral, not a validation error.
+  const ref = typeof body.ref === 'string' && PARTNER_REF.test(body.ref.toLowerCase()) ? body.ref.toLowerCase() : null;
+  return { email, ref, fields };
 }
 
 const LESSON_ID = /^[A-Z0-9][A-Z0-9.]{0,38}[A-Z0-9]$/i;
@@ -300,7 +305,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const validation = validateRegistration(body);
         if (Object.keys(validation.fields).length) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, validation.fields);
         if (!await checkAuthRateLimit(rateLimiter, 'register', { ip: clientIp(req), email: validation.email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
-        await auth.register({ email: validation.email, password: body.password, display_name: body.display_name, redirectTo: config.emailRedirectTo });
+        await auth.register({ email: validation.email, password: body.password, display_name: body.display_name, ref: validation.ref, redirectTo: config.emailRedirectTo });
         return json(res, 202, { message: 'If the registration can be completed, a verification message will be sent.' });
       }
       if (method === 'POST' && path === '/v1/auth/verify-email') {

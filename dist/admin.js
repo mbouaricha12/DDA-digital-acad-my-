@@ -102,7 +102,7 @@
   // owner check inside admin-roles-store.js) — callerRole mirrors that, so
   // an admin (not an owner) never even sees controls that would just 403.
   let callerRole = null;
-  const usersState = { page: 1, perPage: 20, loaded: false };
+  const usersState = { page: 1, perPage: 20, loaded: false, lastUsers: [] };
   const roleFeedback = document.getElementById('admin-role-feedback');
 
   function showRoleFeedback(message, kind) {
@@ -150,6 +150,7 @@
     usersState.loaded = true;
     if (result.status !== 200) return; // gate already shown at boot; nothing more to render
     const { users, total } = result.data;
+    usersState.lastUsers = users;
     const body = document.getElementById('admin-users-body');
     body.innerHTML = users.map(user => `
       <tr>
@@ -157,9 +158,10 @@
         <td>${escapeHtml(user.display_name) || '—'}</td>
         <td><span class="admin-status-tag" data-status="${escapeHtml(user.status)}">${escapeHtml(user.status)}</span></td>
         <td>${roleCell(user)}</td>
+        <td>${escapeHtml(user.ref) || '—'}</td>
         <td>${formatDate(user.created_at)}</td>
         <td>${formatDate(user.last_sign_in_at)}</td>
-      </tr>`).join('') || `<tr><td colspan="6">Aucun utilisateur.</td></tr>`;
+      </tr>`).join('') || `<tr><td colspan="7">Aucun utilisateur.</td></tr>`;
     body.querySelectorAll('.admin-role-select').forEach(select => select.addEventListener('change', onRoleChange));
     document.getElementById('admin-users-page-label').textContent = total != null ? `Page ${page} · ${total} au total` : `Page ${page}`;
     document.getElementById('admin-users-prev').disabled = page <= 1;
@@ -167,6 +169,25 @@
   }
   document.getElementById('admin-users-prev').addEventListener('click', () => { if (usersState.page > 1) loadUsers(usersState.page - 1); });
   document.getElementById('admin-users-next').addEventListener('click', () => loadUsers(usersState.page + 1));
+
+  // CSV export of the currently loaded page only — the admin API is paged
+  // and this stays a client-side convenience, not a new server endpoint.
+  function csvCell(value) {
+    const text = String(value == null ? '' : value);
+    return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  }
+  document.getElementById('admin-users-export')?.addEventListener('click', () => {
+    const rows = usersState.lastUsers || [];
+    const header = ['email', 'display_name', 'status', 'role', 'ref', 'created_at', 'last_sign_in_at'];
+    const lines = [header.join(',')].concat(rows.map(user => header.map(key => csvCell(user[key])).join(',')));
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `dda-utilisateurs-page-${usersState.page}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  });
 
   // ---------- Memberships ----------
   const membershipsState = { page: 1, perPage: 20, loaded: false };

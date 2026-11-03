@@ -601,7 +601,7 @@
   }
 
   function emptyAcquisition() {
-    return { visitorId: null, source: null, medium: null, campaign: null, content: null, referrer: null, landingPath: null, firstSeenAt: null };
+    return { visitorId: null, source: null, medium: null, campaign: null, content: null, referrer: null, landingPath: null, partnerRef: null, firstSeenAt: null };
   }
 
   function emptyTerminalState() {
@@ -734,6 +734,16 @@
     return match && LANDING_ROUTES.has(match[1]) ? `#${match[1]}` : null;
   }
 
+  // Partner attribution V1 ("ref"). Unlike UTM source/medium/campaign (a
+  // fixed, pre-approved enum), partner codes are created on demand, so this
+  // validates shape only — a short alphanumeric token, never free text —
+  // plus the same PII guard the rest of acquisition already uses.
+  function sanitizePartnerRef(value) {
+    if (value == null) return null;
+    const text = sanitizeText(value, 40).toLowerCase();
+    return /^[a-z0-9_-]{2,40}$/.test(text) && !containsPersonalAttribution(text) ? text : null;
+  }
+
   function sanitizeAcquisition(raw) {
     const acquisition = emptyAcquisition();
     if (!raw || typeof raw !== 'object') return acquisition;
@@ -744,6 +754,7 @@
     acquisition.content = sanitizeAttributionValue('content', raw.content);
     acquisition.referrer = sanitizeReferrer(raw.referrer);
     acquisition.landingPath = sanitizeLandingPath(raw.landingPath);
+    acquisition.partnerRef = sanitizePartnerRef(raw.partnerRef);
     acquisition.firstSeenAt = raw.firstSeenAt ? sanitizeText(raw.firstSeenAt, 40) : null;
     return acquisition;
   }
@@ -966,6 +977,7 @@
         campaign: params?.campaign,
         referrer: params?.referrer,
         landingPath: params?.landingPath,
+        partnerRef: params?.partnerRef,
         firstSeenAt: new Date().toISOString()
       });
       return save({ ...state, acquisition });
