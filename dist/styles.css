@@ -1795,15 +1795,22 @@ body{font-family:var(--dda-sans)}
 h1,h2{font-family:var(--dda-serif)}
 body.public-shell{background:var(--dda-ivory);color:#15243a}
 #landing{
-  --lp-blue:#0d4fb0;
-  --lp-blue-2:#2f74d6;
+  /* DDA LIGHT — homepage pilot (mandat §11): Navy #101B2D / Off-white #F7F9FC /
+     Gold #C6A15B / Blue #3978C6 / Green #24845B / Gray #64748B. --lp-heading,
+     --lp-body and --lp-body-soft drive every piece of text that sits directly
+     on the #landing canvas; --lp-card/--lp-card-2 stay dark on purpose — they
+     back the self-contained "glass" component cards (device mockups, product
+     preview windows, the gold plan card) that keep their own light text,
+     unaffected by this canvas-level flip. */
+  --lp-blue:#3978c6;
+  --lp-blue-2:#5b94d6;
   /* --lp-bg: defined once, in alpha-polish.css's #landing rule — the only value the cascade ever renders. */
   --lp-card:#0c1524;
   --lp-card-2:#0f1c30;
-  --lp-line:rgba(255,255,255,.09);
-  --lp-heading:#f4f7fc;
-  --lp-body:rgba(226,233,245,.68);
-  --lp-body-soft:rgba(226,233,245,.5);
+  --lp-line:rgba(16,27,45,.12);
+  --lp-heading:#101b2d;
+  --lp-body:rgba(16,27,45,.72);
+  --lp-body-soft:rgba(16,27,45,.55);
   max-width:none;
   min-height:100vh;
   padding:0;
