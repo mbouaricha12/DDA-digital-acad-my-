@@ -2762,6 +2762,57 @@ document.getElementById('revert-free').addEventListener('click', () => {
   showToast('Retour à DDA Free.');
 });
 
+/* ==========================================================================
+   BROKER REGISTRY — préparatoire (mandat Addendum Broker Affiliation).
+   `affiliate_status`/`affiliate_url`/`commission_model` existent pour que
+   l'architecture soit prête, mais aucun `affiliate_url` n'est renseigné et
+   aucun lien réel n'est câblé ici : seule une validation explicite du
+   fondateur (hors de ce dépôt) peut faire passer une fiche à `active`.
+   `regulation_status`/`min_deposit` restent `to_verify` tant que ce n'est
+   pas confirmé — jamais une valeur inventée.
+   ========================================================================== */
+const BROKER_REGISTRY = Object.freeze([
+  {
+    id: 'Deriv', market: ['forex', 'synthetic'], use: ['learning', 'advanced'], monogram: 'D',
+    description: 'Profil pour marchés dérivés et indices synthétiques.',
+    affiliate_status: 'not_configured', affiliate_url: null, commission_model: null,
+    disclosure_required: true, regulation_status: 'to_verify', min_deposit: 'to_verify'
+  },
+  {
+    id: 'HFM', market: ['forex'], use: ['learning', 'advanced'], monogram: 'H',
+    description: 'Profil pour Forex et CFD, sous réserve d’éligibilité locale.',
+    affiliate_status: 'not_configured', affiliate_url: null, commission_model: null,
+    disclosure_required: true, regulation_status: 'to_verify', min_deposit: 'to_verify'
+  },
+  {
+    id: 'XM', market: ['forex'], use: ['learning', 'advanced'], monogram: 'X',
+    description: 'Profil pour Forex et CFD, sous réserve d’éligibilité locale.',
+    affiliate_status: 'not_configured', affiliate_url: null, commission_model: null,
+    disclosure_required: true, regulation_status: 'to_verify', min_deposit: 'to_verify'
+  },
+  {
+    id: 'Weltrade', market: ['forex', 'synthetic'], use: ['learning', 'advanced'], monogram: 'W',
+    description: 'Profil pour Forex et instruments dérivés, sous réserve d’éligibilité locale.',
+    affiliate_status: 'not_configured', affiliate_url: null, commission_model: null,
+    disclosure_required: true, regulation_status: 'to_verify', min_deposit: 'to_verify'
+  }
+]);
+
+function renderBrokerRows() {
+  const grid = document.getElementById('broker-grid');
+  if (!grid) return;
+  grid.innerHTML = BROKER_REGISTRY.map(broker => `
+    <article class="broker-row" data-broker="${broker.id}" data-market="${broker.market.join(' ')}" data-use="${broker.use.join(' ')}">
+      <div class="broker-row-head">
+        <span class="broker-monogram">${broker.monogram}</span>
+        <div class="broker-row-heading"><h2>${broker.id}</h2><p>${broker.description}</p></div>
+      </div>
+      <dl><div><dt>Disponibilité</dt><dd>Selon le pays</dd></div><div><dt>Transparence</dt><dd>Relation partenaire à déclarer</dd></div><div><dt>Régulation</dt><dd>${broker.regulation_status === 'to_verify' ? 'À vérifier avant publication' : broker.regulation_status}</dd></div><div><dt>Dépôt minimum</dt><dd>${broker.min_deposit === 'to_verify' ? 'À vérifier avant publication' : broker.min_deposit}</dd></div></dl>
+      <div class="broker-row-foot"><span class="verification"><svg class="icon"><use href="#icon-clock"/></svg> À vérifier avant publication</span><button class="secondary-action dark-action broker-detail">Voir les critères</button></div>
+    </article>`).join('');
+}
+renderBrokerRows();
+
 function filterBrokers() {
   const marketSelect = document.getElementById('broker-market');
   const useSelect = document.getElementById('broker-use');
@@ -2780,14 +2831,16 @@ function filterBrokers() {
 }
 document.getElementById('broker-market').addEventListener('change', filterBrokers);
 document.getElementById('broker-use').addEventListener('change', filterBrokers);
-document.querySelectorAll('.broker-detail').forEach(button => button.addEventListener('click', () => {
+document.getElementById('broker-grid')?.addEventListener('click', event => {
+  const button = event.target.closest('.broker-detail');
+  if (!button) return;
   const broker = button.closest('.broker-row')?.dataset.broker;
   // Measures interest in a broker profile only. No real link exists yet and
   // affiliate_link_click is never fired here — a separate CEO validation is
   // required before any real broker link/click is wired (see EVENT_NAMES).
   if (broker) trackEvent('broker_selected', { broker });
   showToast('Fiche complète différée jusqu’à vérification réglementaire.');
-}));
+});
 
 document.getElementById('journal-tab-entries').addEventListener('click', () => switchJournalTab('entries'));
 document.getElementById('journal-tab-plan').addEventListener('click', () => switchJournalTab('plan'));
