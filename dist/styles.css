@@ -919,6 +919,16 @@ a.nav-item[hidden]{display:none}
 .gate-objectives li{display:flex;gap:8px;align-items:flex-start;color:var(--ivory);font-size:13.5px;line-height:1.5}
 .gate-objectives li::before{content:'✓';color:var(--gold);flex-shrink:0}
 .gate-card #gate-continue-free{margin-top:10px;width:auto}
+.share-card-layer{position:fixed;inset:0;z-index:120;background:rgba(4,7,14,.9);backdrop-filter:blur(10px);display:grid;place-items:center;padding:20px}
+.share-card-dialog{position:relative;max-width:460px;width:100%;padding:30px 24px;border:1px solid var(--gold);border-radius:var(--r-lg);background:var(--navy-800);box-shadow:var(--shadow-lg);text-align:center;animation:dda-pop .3s var(--ease)}
+.progress-share-card{margin:18px 0;padding:24px;border-radius:var(--r-lg);background:linear-gradient(160deg,var(--navy-950),var(--navy-700));border:1px solid var(--gold-soft)}
+.progress-share-brand{color:var(--gold-soft);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:0 0 10px}
+.progress-share-xp{display:block;font-size:40px;color:var(--gold);line-height:1}
+.progress-share-stats{display:flex;justify-content:center;gap:16px;margin:10px 0;color:var(--ivory);font-size:13.5px;font-weight:600}
+.progress-share-tagline{color:rgba(244,247,252,.65);font-size:12.5px;margin:10px 0 0}
+.progress-share-note{color:var(--muted);font-size:12px;margin:0 0 14px}
+#share-card-action{margin-top:4px}
+.progress-share-confirmation{color:var(--gold-soft);font-weight:600;margin-top:10px}
 .premium-waitlist-consent{display:flex;gap:10px;align-items:flex-start;margin:14px 0;font-size:13.5px;line-height:1.5;color:var(--ivory);cursor:pointer}
 .premium-waitlist-consent input{margin-top:3px;flex-shrink:0}
 #premium-waitlist-confirmation{display:flex;gap:8px;align-items:center;color:var(--gold-soft);font-weight:600}

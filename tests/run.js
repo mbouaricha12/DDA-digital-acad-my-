@@ -2067,6 +2067,36 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  console.log('\n-- U. Carte de progression partageable --');
+
+  await test('the share card shows the real XP/modules/days already computed for Progression, with no personal data, and copying it records progress_card_shared', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'M0.1': { quizComplete: true } }, 'free');
+    await context.addInitScript(() => {
+      navigator.clipboard.writeText = text => { window.__copiedText = text; return Promise.resolve(); };
+      Object.defineProperty(navigator, 'share', { value: undefined, configurable: true });
+    });
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#progress`);
+    await page.waitForSelector('#progress.view.active');
+    const realXp = await page.textContent('#progress-total-xp');
+    const realModules = await page.textContent('#progress-modules-started');
+    await page.click('#progress-share-open');
+    await page.waitForSelector('#share-card-layer:not([hidden])');
+    assert.equal(await page.textContent('#share-card-xp'), `${realXp} XP`, 'the card shows the exact same XP Progression already computed, never a second figure');
+    assert.match(await page.textContent('#share-card-modules'), new RegExp(realModules.replace('/', '\\/')));
+    await page.click('#share-card-copy');
+    const copied = await page.evaluate(() => window.__copiedText);
+    assert.match(copied, /DDA/);
+    assert.doesNotMatch(copied, /ada@example\.com|Ada\b/i, 'no name or e-mail ever enters the shared text');
+    assert.equal(await page.locator('#share-card-confirmation').isVisible(), true);
+    const events = await page.evaluate(() => window.DDA.load().events.map(e => e.name));
+    assert.ok(events.includes('progress_card_shared'));
+    await page.click('#share-card-close');
+    await page.waitForSelector('#share-card-layer', { state: 'hidden' });
+    await context.close();
+  });
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 

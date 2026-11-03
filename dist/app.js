@@ -1182,7 +1182,56 @@ function renderProgressHero() {
   document.getElementById('profile-modules-started').textContent = startedLabel;
   document.getElementById('profile-total-xp').textContent = String(totalXp);
   document.getElementById('profile-active-days').textContent = String(activeDays);
+  // Carte de progression partageable (mandat §8) : mêmes chiffres réels que
+  // ci-dessus, jamais une seconde source — aucune donnée personnelle (pas de
+  // nom, pas d'e-mail) n'entre dans ce résumé.
+  const shareXp = document.getElementById('share-card-xp');
+  if (shareXp) shareXp.textContent = `${totalXp} XP`;
+  const shareModules = document.getElementById('share-card-modules');
+  if (shareModules) shareModules.textContent = `${startedLabel} modules`;
+  const shareDays = document.getElementById('share-card-days');
+  if (shareDays) shareDays.textContent = `${activeDays} jour${activeDays === 1 ? '' : 's'} actif${activeDays === 1 ? '' : 's'}`;
 }
+
+function shareCardText() {
+  const xp = document.getElementById('share-card-xp')?.textContent || '0 XP';
+  const modules = document.getElementById('share-card-modules')?.textContent || '';
+  const link = new URL('index.html', location.href).href;
+  return `${xp} sur DDA (Darius Digital Academy) — ${modules} amorcés. Apprendre les marchés, construire des compétences, prouver sa progression : ${link}`;
+}
+document.getElementById('progress-share-open')?.addEventListener('click', () => {
+  document.getElementById('share-card-confirmation').hidden = true;
+  document.getElementById('share-card-layer').hidden = false;
+  document.getElementById('share-card-close')?.focus();
+});
+document.getElementById('share-card-close')?.addEventListener('click', () => {
+  document.getElementById('share-card-layer').hidden = true;
+  document.getElementById('progress-share-open')?.focus();
+});
+document.getElementById('share-card-layer')?.addEventListener('click', event => { if (event.target.id === 'share-card-layer') document.getElementById('share-card-close').click(); });
+document.getElementById('share-card-action')?.addEventListener('click', async () => {
+  const text = shareCardText();
+  const confirmation = document.getElementById('share-card-confirmation');
+  try {
+    if (navigator.share) {
+      await navigator.share({ text });
+    } else {
+      await navigator.clipboard.writeText(text);
+      confirmation.textContent = 'Texte copié — colle-le où tu veux le partager.';
+      confirmation.hidden = false;
+    }
+    prototypeState = DDA.track(prototypeState, 'progress_card_shared', {});
+  } catch (_) { /* partage annulé ou indisponible — pas d'erreur bloquante */ }
+});
+document.getElementById('share-card-copy')?.addEventListener('click', async () => {
+  const confirmation = document.getElementById('share-card-confirmation');
+  try {
+    await navigator.clipboard.writeText(shareCardText());
+    confirmation.textContent = 'Texte copié — colle-le où tu veux le partager.';
+    confirmation.hidden = false;
+    prototypeState = DDA.track(prototypeState, 'progress_card_shared', {});
+  } catch (_) { /* clipboard indisponible sur cet appareil */ }
+});
 
 // Real data only: learner's own name, the real completed lesson, and the real
 // event timestamp. Unmistakably a preview — never anything resembling a real,
@@ -2746,6 +2795,7 @@ document.addEventListener('keydown', event => {
   if (!document.getElementById('gate-layer').hidden) closeGate();
   else if (!document.getElementById('resource-reader').hidden) closeReader();
   else if (!document.getElementById('journal-composer').hidden) closeJournalComposer();
+  else if (!document.getElementById('share-card-layer').hidden) document.getElementById('share-card-close').click();
 });
 document.getElementById('preview-premium').addEventListener('click', () => {
   prototypeState = DDA.setPlan(prototypeState, 'premium');
