@@ -2031,6 +2031,42 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  console.log('\n-- T. Broker Hub — registre préparatoire --');
+
+  await test('every BROKER_REGISTRY entry is not_configured with no affiliate_url, and no fiche can be active without a confirmed disclosure and regulation status', async () => {
+    const appJs = fs.readFileSync(path.join(DIST, 'app.js'), 'utf8');
+    const match = appJs.match(/const BROKER_REGISTRY = Object\.freeze\((\[[\s\S]*?\])\);/);
+    assert.ok(match, 'BROKER_REGISTRY literal must exist in dist/app.js');
+    const registry = vm.runInNewContext(match[1]);
+    assert.equal(registry.length, 4, 'the 4 known broker candidates are registered');
+    for (const broker of registry) {
+      assert.equal(broker.affiliate_status, 'not_configured', `${broker.id}: no program has been validated yet — never invent one`);
+      assert.equal(broker.affiliate_url, null, `${broker.id}: no real affiliate link may exist without founder validation`);
+      // The one rule this registry exists to enforce: a fiche can only ever
+      // go active once disclosure is required AND regulation is confirmed —
+      // never on affiliate_status alone.
+      if (broker.affiliate_status === 'active') {
+        assert.equal(broker.disclosure_required, true, `${broker.id}: an active fiche must carry the disclosure requirement`);
+        assert.notEqual(broker.regulation_status, 'to_verify', `${broker.id}: an active fiche must have a confirmed regulation status, never "to_verify"`);
+      }
+    }
+  });
+
+  await test('the Broker Hub renders all 4 registered brokers from BROKER_REGISTRY, and clicking a card still only fires broker_selected, never affiliate_link_click', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#brokers`);
+    await page.waitForSelector('#brokers.view.active');
+    const rows = await page.locator('#broker-grid .broker-row').count();
+    assert.equal(rows, 4, 'the 4 registry entries are rendered, none hardcoded twice');
+    await page.click('#broker-grid .broker-row[data-broker="Deriv"] .broker-detail');
+    const events = await page.evaluate(() => window.DDA.load().events.map(e => e.name));
+    assert.ok(events.includes('broker_selected'), 'the click is measured as interest');
+    assert.equal(events.includes('affiliate_link_click'), false, 'no real link exists yet — this event must never fire from the registry-rendered cards');
+    await context.close();
+  });
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 
