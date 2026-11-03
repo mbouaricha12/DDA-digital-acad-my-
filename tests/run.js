@@ -1381,7 +1381,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     }
   });
 
-  await test('mobile landing is full-bleed Off-white with inset cards and no sticky-CTA overlap', async () => {
+  await test('mobile landing is full-bleed Deep Navy with inset cards and no sticky-CTA overlap', async () => {
     const context = await freshContext(browser, { width: 390, height: 844 });
     const page = await context.newPage();
     await page.goto(`${BASE}/#landing`);
@@ -1403,7 +1403,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       };
     });
     assert.equal(shell.width, shell.viewportWidth, 'landing must occupy the full mobile viewport width');
-    assert.equal(shell.background, 'rgb(247, 249, 252)', 'landing must use Off-white #F7F9FC (mandat §11 — homepage light-theme pilot)');
+    assert.equal(shell.background, 'rgb(6, 27, 71)', 'landing must use Deep Navy #061b47');
     assert.ok(shell.paddingBottom >= 120, `landing needs substantial bottom clearance (got ${shell.paddingBottom}px)`);
     assert.equal(shell.visibleDialogs, 0, 'no closeable modal/dialog should appear over the idle landing');
     assert.equal(shell.visibleCloseButtons, 0, 'no modal close button should appear over the idle landing');
