@@ -101,6 +101,23 @@ const LESSON_REGISTRY = Object.freeze([
     ]
   },
   {
+    // MBRVM.1 est authored dans son propre fichier (mbrvm-1-lesson.js) et
+    // promue dans le curriculum par dda-core.js quand ce fichier est chargé.
+    // Domaine indépendant (mandat §6) : aucun `prerequisite` — accessible dès
+    // qu'un apprenant Free ouvre #markets, sans dépendre de M0/M1 ni de
+    // Premium.
+    id: 'MBRVM.1', viewId: 'lesson-mbrvm1', suffix: 'mbrvm1', title: 'Introduction à la BRVM',
+    permission: 'lesson_m01', independent: true,
+    quizBlock: 'mbrvm1-quiz', understoodScrollTo: 'mbrvm1-exercise-case-block',
+    questions: [
+      { role: 'practice', block: 'mbrvm1-identify-action', success: 'Bonne distinction : une action est une part de propriété.' },
+      { role: 'practice', block: 'mbrvm1-identify-bond', success: 'Bonne distinction : une obligation est un prêt avec échéance.' },
+      { role: 'practice', block: 'mbrvm1-cap-check', success: 'Bonne lecture de la formule de capitalisation.' },
+      { role: 'exercise', block: 'mbrvm1-exercise', success: '@practice', gate: true },
+      { role: 'quiz', block: 'mbrvm1-quiz', success: '@data', result: true }
+    ]
+  },
+  {
     id: 'P2.1', viewId: 'lesson-p21', suffix: 'p21', title: 'Risk Before Entry',
     permission: 'premium_track', quizBlock: 'p21-quiz', understoodScrollTo: 'p21-decision-block',
     // Aperçu gratuit du module Premium Track (mandat §5) : cette leçon reste
