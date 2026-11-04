@@ -1,7 +1,7 @@
 # DDA — Audit BRVM et modèle serveur des publications
 
 **Date :** 18 octobre 2026  
-**Branche auditée :** `feat/brvm-phase1-traceable` / PR #116, non fusionnée  
+**Version auditée :** `main` après fusion de la PR #116 (`f1888e2`)
 **Périmètre :** vue `#markets`, gouvernance des sources et préparation à une galerie de publications vérifiées
 
 ## Constat technique
@@ -10,7 +10,7 @@ La vue `#markets` contient déjà une galerie « Publications financières BRVM 
 
 Dans `dist/app.js`, le registre `BRVM_PUBLICATIONS` est explicitement vide. Le filtre de rendu refuse les publications incomplètes, non vérifiées, obsolètes, sans droits ou dont les dates et l’URL sont incohérentes. C’est un bon garde-fou de présentation, mais le registre et son filtre vivent dans le navigateur : ils ne constituent pas un registre serveur ni une autorisation de publication.
 
-Le BFF contient les services de compte et de facturation, mais aucun endpoint ni adaptateur BRVM. Les migrations existantes protègent les données d’apprentissage et la facturation ; elles ne définissent ni sources BRVM, ni documents, ni rôles de revue BRVM. La variable d’URL BFF de la SPA est vide par défaut, le BFF n’est pas déployé et aucune source officielle n’est connectée. Aucun document, prix, calendrier réel ou date de publication financière n’est donc livré.
+Le BFF contient les services de compte et de facturation ainsi qu’un endpoint BRVM en lecture seule et son adaptateur de projection. Les migrations existantes protègent les données d’apprentissage et la facturation ; la migration BRVM décrit les sources, documents et événements d’audit, mais n’a pas été appliquée à une base distante. La variable d’URL BFF de la SPA est vide par défaut, le BFF n’est pas déployé et aucune source officielle n’est connectée. Aucun document, prix, calendrier réel ou date de publication financière n’est donc livré.
 
 ## Modèle serveur proposé
 
@@ -51,4 +51,4 @@ Avant d’activer la migration ou de fournir une première publication, DDA doit
 
 Les six contrats BRVM passent, ainsi que les **60 contrats Node** du dépôt et les **24 checks du smoke test Academy**. Le harness Playwright complet termine à **58 scénarios réussis, 0 échec** ; les états vide, chargement, erreur, liens HTTPS et l’absence de débordement à 360/390 px sont couverts. La syntaxe des scripts JavaScript passe, l’auditeur RLS confirme les privilèges deny-by-default, `git diff --check` est propre et le parseur PostgreSQL accepte les 33 instructions de la migration.
 
-Ces résultats valident le code et la grammaire SQL uniquement. La migration n’a pas été appliquée à une base distante, le BFF n’a pas été déployé, aucune source ni publication n’a été ajoutée, et la PR #116 demeure ouverte et non fusionnée.
+Ces résultats valident le code et la grammaire SQL uniquement. La migration n’a pas été appliquée à une base distante, le BFF n’a pas été déployé, aucune source ni publication n’a été ajoutée. La PR #116 est fusionnée dans `main`, mais le pôle BRVM reste volontairement en état de registre vide sécurisé jusqu’aux décisions humaines requises.
