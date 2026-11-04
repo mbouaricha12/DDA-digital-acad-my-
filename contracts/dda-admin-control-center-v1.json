@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dda-academy.example/contracts/dda-admin-control-center-v1.json",
+  "title": "DDA Owner Control Center Contract",
+  "description": "Design contract for a future server-authorized DDA administration plane. This contract is not a deployed admin API and does not grant browser permissions.",
+  "contractVersion": "dda-admin-control-center-v1",
+  "status": "design_only_not_deployed",
+  "securityBoundary": {
+    "adminClientIsUntrusted": true,
+    "serverOwnsRoleAssignment": true,
+    "serverOwnsPermissions": true,
+    "serverOwnsAuditEvents": true,
+    "learnerRoutesCannotGrantAdmin": true,
+    "ownerRecoveryMustBeOutOfBand": true,
+    "secretsNeverReachBrowser": true
+  },
+  "roles": {
+    "owner": {
+      "description": "Platform owner with authority over configuration, access, content, commercial settings and recovery procedures.",
+      "assignableBy": ["owner"],
+      "requiresMfa": true,
+      "permissions": ["platform.read", "platform.configure", "users.read", "users.manage", "roles.manage", "content.read", "content.manage", "billing.read", "billing.manage", "audit.read", "services.read", "backups.read", "backups.restore"]
+    },
+    "admin": {
+      "description": "Operational administrator without ownership transfer or irreversible recovery authority.",
+      "assignableBy": ["owner"],
+      "requiresMfa": true,
+      "permissions": ["platform.read", "users.read", "users.manage", "content.read", "content.manage", "billing.read", "audit.read", "services.read", "backups.read"]
+    },
+    "editor": {
+      "description": "Curriculum editor with versioned content permissions only.",
+      "assignableBy": ["owner", "admin"],
+      "requiresMfa": true,
+      "permissions": ["platform.read", "content.read", "content.manage"]
+    },
+    "support": {
+      "description": "Support operator restricted to account assistance and non-sensitive operational views.",
+      "assignableBy": ["owner", "admin"],
+      "requiresMfa": true,
+      "permissions": ["platform.read", "users.read", "services.read", "audit.read_limited"]
+    },
+    "analyst": {
+      "description": "Read-only operational and pedagogical analyst.",
+      "assignableBy": ["owner", "admin"],
+      "requiresMfa": true,
+      "permissions": ["platform.read", "content.read", "billing.read", "audit.read_limited", "services.read"]
+    }
+  },
+  "permissionRules": [
+    "Every admin request requires an authenticated server session with an active admin role.",
+    "The client cannot provide or elevate its own role.",
+    "Owner-only actions require a fresh privileged session and MFA assurance.",
+    "Role assignment, entitlement changes, content publication, backup restoration and configuration changes create append-only audit events.",
+    "Audit events never contain passwords, tokens, cookies, full email addresses, journal text or raw request bodies.",
+    "Destructive or irreversible actions require explicit confirmation and an idempotency key.",
+    "Admin endpoints are separate from learner endpoints and never reuse learner ownership checks as an admin permission check."
+  ],
+  "resourceScopes": {
+    "users": ["read", "manage_status", "revoke_sessions", "export_owned_data"],
+    "roles": ["read", "assign_non_owner_roles", "revoke_non_owner_roles"],
+    "content": ["read", "create_draft", "edit_draft", "publish_version", "archive_version", "restore_version"],
+    "evaluations": ["read", "manage_draft", "publish_version"],
+    "memberships": ["read", "review", "reconcile_provider_event"],
+    "payments": ["read_metadata_only", "review_webhook", "never_read_card_data"],
+    "services": ["read_health", "read_configuration_status", "read_recent_errors"],
+    "audit": ["read", "filter", "export_redacted"],
+    "backups": ["read_status", "create_request", "restore_owner_only"]
+  },
+  "adminApi": {
+    "basePath": "/v1/admin",
+    "deploymentRequirement": "deployed_https_bff_only",
+    "requiredMiddleware": ["session_authentication", "role_authorization", "csrf_for_mutations", "origin_check", "rate_limit", "request_id", "audit_event"],
+    "routes": [
+      { "method": "GET", "path": "/overview", "permission": "platform.read" },
+      { "method": "GET", "path": "/services", "permission": "services.read" },
+      { "method": "GET", "path": "/users", "permission": "users.read" },
+      { "method": "POST", "path": "/users/{userId}/status", "permission": "users.manage" },
+      { "method": "GET", "path": "/content", "permission": "content.read" },
+      { "method": "POST", "path": "/content/{contentId}/versions", "permission": "content.manage" },
+      { "method": "POST", "path": "/content/{contentId}/publish", "permission": "content.manage" },
+      { "method": "GET", "path": "/memberships", "permission": "billing.read" },
+      { "method": "GET", "path": "/audit", "permission": "audit.read" },
+      { "method": "GET", "path": "/backups", "permission": "backups.read" }
+    ]
+  },
+  "auditEvent": {
+    "appendOnly": true,
+    "serverFields": ["event_id", "actor_user_id", "actor_role", "event_name", "resource_type", "resource_id", "request_id", "created_at", "outcome"],
+    "allowedEventNames": ["admin_login", "admin_logout", "role_changed", "user_status_changed", "content_version_created", "content_published", "content_archived", "membership_reviewed", "provider_event_reconciled", "configuration_changed", "backup_requested", "backup_restored", "service_incident_viewed"],
+    "retentionPolicy": "to_be_defined_with_legal_and_operational_requirements"
+  },
+  "infrastructureStates": ["connected", "degraded", "unavailable", "not_configured", "not_verified"],
+  "productionGates": [
+    "owner identity and MFA verified",
+    "role storage and server authorization deployed",
+    "audit storage append-only and queryable",
+    "central database connected in a non-production environment",
+    "backup and restore test passed",
+    "admin API security tests passed",
+    "redacted observability enabled",
+    "independent operational handover documented"
+  ]
+}
