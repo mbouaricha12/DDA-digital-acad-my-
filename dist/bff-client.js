@@ -111,6 +111,21 @@
     }
   }
 
+  // DDA AI — real pedagogical assistant (mandat §DDA-AI). Returns
+  // {available:false} when the BFF is disabled or the server hasn't been
+  // configured with a provider key yet (503 ai_not_configured) — the UI must
+  // show its honest "pas encore configuré" state in that case, never a fake
+  // reply. A provider failure or rate limit also resolves to {available:true,
+  // error:<code>} rather than throwing, so a transient outage never crashes
+  // the chat UI.
+  async function askAI(message, history) {
+    const result = await request('/v1/ai/ask', { method: 'POST', body: { message, history } });
+    if (!result.enabled || result.response.status === 401) return { available: false };
+    if (result.response.status === 503) return { available: false };
+    if (!result.response.ok) return { available: true, error: result.body?.code || 'ai_provider_failed' };
+    return { available: true, reply: result.body?.reply || '' };
+  }
+
   async function getBrvmPublications() {
     const result = await request('/v1/publications/brvm');
     if (!result.enabled) return null;
@@ -203,7 +218,7 @@
 
   window.DDABFF = Object.freeze({
     enabled, register, verifyEmail, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
-    getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement,
+    getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, askAI,
     getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }
   });

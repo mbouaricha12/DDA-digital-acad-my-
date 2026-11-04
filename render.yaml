@@ -26,3 +26,7 @@ services:
         value: "43200000"
       - key: SESSION_ABSOLUTE_MS
         value: "2592000000"
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: "claude-haiku-5-5"

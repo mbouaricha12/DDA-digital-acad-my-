@@ -5,6 +5,7 @@ const { randomToken, sha256, timingSafeEqualText, parseCookies, serializeCookie,
 const { executeIdempotentMutation, validateClientMutationId } = require('./idempotency');
 const { checkAuthRateLimit } = require('./rate-limiter');
 const { VALID_ROLES: VALID_ADMIN_ROLES } = require('./admin-roles-store');
+const { validateAskRequest } = require('./ai-assistant');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
@@ -176,7 +177,7 @@ function parsePageParams(url, { maxPerPage = 200 } = {}) {
   return { page, perPage };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, rateLimiter = null, progressStore = null, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, rateLimiter = null, progressStore = null, aiAssistant = null, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   businessStore = businessStore || {
     exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
@@ -354,6 +355,23 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const snapshot = await currentEntitlements(current.user.user_id);
         if (!hasActivePremium(snapshot, clock())) return sendError(res, 403, 'premium_required', 'An active Premium entitlement is required.', requestId);
         return json(res, 200, { resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true });
+      }
+      if (method === 'POST' && path === '/v1/ai/ask') {
+        const current = await withUser(req, res, requestId); if (!current) return;
+        if (!validateCsrf(req, config, current.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (!aiAssistant) return sendError(res, 503, 'ai_not_configured', 'DDA AI is not available yet.', requestId);
+        if (rateLimiter && !await rateLimiter.allow(`ai_ask:user:${current.user.user_id}`, { windowSeconds: 3600, limit: 20 })) {
+          return sendError(res, 429, 'rate_limited', 'Too many questions in a short time. Please try again later.', requestId);
+        }
+        const validation = validateAskRequest(await readJson(req));
+        if (validation.error) return sendError(res, 400, 'validation_error', validation.error, requestId);
+        try {
+          const result = await aiAssistant.ask(validation.message, { history: validation.history });
+          return json(res, 200, { reply: result.reply });
+        } catch (error) {
+          logger('ai_ask_failed', { requestId, error: error.message });
+          return sendError(res, 502, 'ai_provider_failed', 'DDA AI could not answer right now. Please try again shortly.', requestId);
+        }
       }
       if (method === 'GET' && path === '/v1/progress') {
         const current = await withUser(req, res, requestId); if (!current) return;
