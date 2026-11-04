@@ -1199,7 +1199,7 @@ function renderPracticeProof() {
   if (!container) return;
   const practice = prototypeState.terminal?.practice;
   if (!practice?.attempts) {
-    container.innerHTML = '<p class="practice-proof-empty">Aucune mission validée pour le moment. Le Terminal te proposera une première lecture guidée.</p>';
+    container.innerHTML = '<p class="practice-proof-empty">Ta première mission t’attend dans le Terminal — une lecture guidée pour démarrer.</p>';
     return;
   }
   const validated = practice.status === 'validated';
@@ -1221,8 +1221,8 @@ function renderDashboardProof(continueTarget, curriculumComplete) {
   const actionEl = document.getElementById('dashboard-action-label');
   if (!titleEl || !metaEl || !statusEl || !stateEl || !inlineEl || !actionEl) return;
 
-  let title = 'Aucune preuve enregistrée pour le moment.';
-  let meta = 'Une leçon, un exercice ou une mission validée apparaîtra ici.';
+  let title = 'Ta première preuve apparaîtra ici après ta prochaine validation.';
+  let meta = 'Valide une leçon, un exercice ou une mission pour commencer à construire ta trace.';
   let status = 'À construire';
   const practice = prototypeState.terminal?.practice;
   if (practice?.attempts) {
@@ -3498,14 +3498,14 @@ function renderPremiumState() {
   syncStep('p22', p22.quizComplete ? 'complete' : p22.exerciseComplete ? 'active' : p21.quizComplete ? 'ready' : 'locked', p22Status);
   syncStep('lab', lab.status === 'validated' ? 'complete' : lab.status === 'retry' ? 'active' : p22.quizComplete ? 'ready' : 'locked', labStatus);
   syncStep('assessment', assessment.passed ? 'complete' : lab.status === 'validated' ? 'ready' : 'locked', assessmentStatus);
-  set('premium-track-progress', assessment.passed ? 'Preuve créée · prochaine action : Journal' : lab.status === 'validated' ? 'Lab validé · assessment disponible' : p22.quizComplete ? 'Leçons validées · Lab disponible' : p21.quizComplete ? 'P2.1 validée · P2.2 disponible' : 'Parcours non commencé');
+  set('premium-track-progress', assessment.passed ? 'Preuve créée · prochaine action : Journal' : lab.status === 'validated' ? 'Lab validé · assessment disponible' : p22.quizComplete ? 'Leçons validées · Lab disponible' : p21.quizComplete ? 'P2.1 validée · P2.2 disponible' : 'Prêt à commencer ? Ta première étape t’attend.');
   const receipt = document.getElementById('premium-proof-receipt');
   if (receipt) receipt.hidden = !proof;
   if (proof) set('p2-proof-date', proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Local timestamp');
   const progress = document.getElementById('premium-proof-progress');
   if (progress) progress.innerHTML = proof
     ? `<article class="premium-proof-row"><strong>${proof.skill || 'Risk Foundations'}</strong><span>${proof.level || 'Level 3 — Apply'}</span><p>${proof.source || 'P2 Guided Risk Lab + Assessment'}</p><small>${proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Local timestamp'} · ${proof.nextAction || 'Continue to the next Premium Practice.'}</small></article>`
-    : '<p>Aucune preuve Premium validée pour le moment.</p>';
+    : '<p>Ta première preuve Premium apparaîtra ici après ta prochaine validation.</p>';
 }
 
 function savePremiumPatch(patch) {
