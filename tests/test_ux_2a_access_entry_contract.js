@@ -13,7 +13,7 @@ assert.match(landing, /class="landing-free-proof"/, 'landing exposes a concrete 
 assert.match(landing, /6 leçons/, 'landing names the six Free foundation lessons');
 assert.match(landing, /Exercices &amp; quiz/, 'landing names exercises and quizzes');
 assert.match(landing, /Progression &amp; Journal/, 'landing names local progression and Journal');
-assert.match(landing, /Pas de carte bancaire/, 'landing removes payment anxiety near the CTA');
+assert.match(landing, /sans carte bancaire/, 'landing removes payment anxiety near the CTA');
 assert.match(academy, /id="access-form-title">Commence ton parcours Free/, 'access form names the Free journey');
 assert.match(academy, /id="access-form-note"/, 'access form explains the local journey');
 assert.match(academy, /Je comprends que ma progression est stockée uniquement sur cet appareil/, 'local storage consent is explicit');
