@@ -61,6 +61,13 @@
     return result.body;
   }
 
+  async function verifyRecoveryToken(token) {
+    const result = await request('/v1/auth/password-reset/verify', { method: 'POST', body: { token } });
+    if (!result.enabled) return null;
+    if (!result.response.ok) throw resultError(result, 'recovery_token_invalid');
+    return true;
+  }
+
   async function verifyEmail(token) {
     const result = await request('/v1/auth/verify-email', { method: 'POST', body: { token } });
     if (!result.enabled) return null;
@@ -217,7 +224,7 @@
   }
 
   window.DDABFF = Object.freeze({
-    enabled, register, verifyEmail, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
+    enabled, register, verifyEmail, verifyRecoveryToken, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
     getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, askAI,
     getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }

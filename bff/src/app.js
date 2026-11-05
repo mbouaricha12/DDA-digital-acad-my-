@@ -316,6 +316,18 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         await auth.verifyEmail(body.token);
         return json(res, 204);
       }
+      if (method === 'POST' && path === '/v1/auth/password-reset/verify') {
+        const body = await readJson(req);
+        if (typeof body.token !== 'string' || body.token.length < 20) return sendError(res, 400, 'invalid_token', 'The recovery link is invalid or expired.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-verify', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please request a new link later.', requestId);
+        let provider;
+        try { provider = await auth.verifyRecoveryToken(body.token); }
+        catch (error) { logger('password_reset_verify_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'invalid_token', 'The recovery link is invalid or expired.', requestId); }
+        if (!provider?.user?.id || !provider.access_token) return sendError(res, 400, 'invalid_token', 'The recovery link is invalid or expired.', requestId);
+        const created = await createSession(provider.user.id, provider, req);
+        setCookies(res, cookieHeaders(config, created.token, created.csrf));
+        return json(res, 204);
+      }
       if (method === 'POST' && path === '/v1/auth/login') {
         const body = await readJson(req);
         const validation = validateRegistration({ email: body.email, password: body.password });
@@ -339,11 +351,12 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       }
       if (method === 'POST' && path === '/v1/auth/password-reset/confirm') {
         const body = await readJson(req);
-        if (typeof body.token !== 'string' || body.token.length < 20) return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId);
         if (typeof body.password !== 'string' || body.password.length < 12) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, { password: 'too_short' });
         if (!await checkAuthRateLimit(rateLimiter, 'password-reset-confirm', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
-        try { await auth.confirmPasswordReset(body.token, body.password); }
-        catch (error) { logger('password_reset_confirm_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId); }
+        const current = await withUser(req, res, requestId); if (!current) return;
+        if (!config.sessionEncryptionKey || !current.session.provider_access_token_enc) return sendError(res, 401, 'recovery_session_expired', 'The recovery session has expired. Request a new link.', requestId);
+        try { await auth.confirmPasswordReset(decrypt(current.session.provider_access_token_enc, config.sessionEncryptionKey), body.password); }
+        catch (error) { logger('password_reset_confirm_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'password_update_failed', 'The password could not be updated. Request a new recovery link.', requestId); }
         return json(res, 204);
       }
       if (method === 'GET' && path === '/v1/me') {
