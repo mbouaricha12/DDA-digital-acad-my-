@@ -3023,3 +3023,10 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
  .public-header-actions .public-start{min-height:42px;padding-inline:12px}
  .public-menu summary{min-height:42px}
 }
+
+
+/* UX NAVIGATION PASS 06 — explicit exits between Academy and public site */
+.academy-public-exit{display:flex!important;align-items:center;gap:.55rem;margin:.65rem .75rem;padding:.7rem .85rem;border:1px solid rgba(217,164,65,.28);border-radius:12px;color:#e7c77f!important;background:rgba(217,164,65,.07);font-size:.82rem;font-weight:650;text-decoration:none}
+.academy-public-exit:hover,.academy-public-exit:focus-visible{background:rgba(217,164,65,.15);border-color:rgba(217,164,65,.6);outline:2px solid transparent}
+.sidebar-foot .academy-public-exit{margin:0 0 .65rem}
+.mobile-drawer .academy-public-exit{margin:.8rem 1rem 1.2rem}
