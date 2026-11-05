@@ -50,7 +50,7 @@
       choices: Object.freeze([
         Object.freeze({ text: 'Je sépare les éléments fournis par moi des informations ajoutées par l’IA, puis je confirme chaque date, adresse et tarif auprès de l’organisateur.', correct: true, feedback: 'Bonne méthode : tu identifies les ajouts non sourcés et tu vérifies les faits auprès de la personne ou du document qui fait autorité avant publication.' }),
         Object.freeze({ text: 'Je publie l’affiche telle quelle puisque la formulation est professionnelle.', correct: false, feedback: 'La qualité de la mise en forme ne garantit pas la véracité des informations. Une date ou un tarif inventé peut induire les participants en erreur.' }),
-        Object.freeze({ text: 'Je demande à une deuxième IA de valider les mêmes informations.', correct: false, feedback: 'Deux outils peuvent reproduire une erreur plausible. La confirmation doit venir d'une source responsable ou officielle, pas d’une autre IA.' })
+        Object.freeze({ text: 'Je demande à une deuxième IA de valider les mêmes informations.', correct: false, feedback: 'Deux outils peuvent reproduire une erreur plausible. La confirmation doit venir d'une source responsable ou officielle, pas d’une IA supplémentaire.' })
       ])
     });
     const evaluation = Object.freeze({
