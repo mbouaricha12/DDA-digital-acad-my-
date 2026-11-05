@@ -52,8 +52,11 @@
         content: safeTag('content'),
         partnerRef: /^[a-z0-9_-]{2,40}$/.test(refParam) ? refParam : null
       };
-      var verificationToken = params.get('token_hash') || params.get('token');
+      var hashParams = new URLSearchParams(location.hash.slice(1));
+      var recoveryType = params.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
+      var verificationToken = params.get('token_hash') || params.get('token') || hashParams.get('token_hash');
       if (verificationToken && verificationToken.length >= 32) window.DDA_VERIFY_TOKEN = verificationToken;
+      if (recoveryType) window.DDA_AUTH_RECOVERY = true;
       var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone']);
       var route = location.hash.slice(1);
       var safeHash = knownRoutes.has(route) ? '#' + route : '';
