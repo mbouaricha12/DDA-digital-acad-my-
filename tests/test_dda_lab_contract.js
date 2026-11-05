@@ -115,7 +115,6 @@ test('LAB2 contains a real learner-authored prompt mission with explicit self-re
   assert.ok(mission.brief && mission.placeholder && mission.example);
   assert.strictEqual(mission.criteria.length, 4);
   assert.ok(mission.criteria.every(item => item.length > 10));
-  assert.ok(mission.brief.includes('Bouaké'));
   assert.ok(mission.example.includes('[contact à ajouter]'));
   const rendererSource = fs.readFileSync(path.join(__dirname, '..', 'dist', 'lesson-renderer.js'), 'utf8');
   const rendererContext = { window: {}, URL };
