@@ -46,6 +46,10 @@ class SupabaseAuthAdapter {
     return this.publicRequest(`/auth/v1/verify?token=${encodeURIComponent(token)}&type=signup`, { method: 'GET' });
   }
 
+  async verifyRecoveryToken(token) {
+    return this.publicRequest(`/auth/v1/verify?token=${encodeURIComponent(token)}&type=recovery`, { method: 'GET' });
+  }
+
   async login({ email, password }) {
     return this.publicRequest('/auth/v1/token?grant_type=password', { method: 'POST', body: JSON.stringify({ email: normalizeEmail(email), password }) });
   }
