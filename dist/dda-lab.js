@@ -35,7 +35,7 @@
       principle: Object.freeze({ label: 'Principe essentiel', text: 'Une réponse qui sonne juste n’est pas une réponse vérifiée.' }),
       example: Object.freeze({
         label: 'Exemple concret',
-        text: 'Une personne à Abidjan demande à une IA les horaires d’ouverture d’un service administratif précis. L’IA répond avec assurance — mais invente des horaires plausibles. La personne se déplace pour rien : l’information n’a jamais existé dans ce qu’elle a appris, elle l’a simplement complétée pour donner une réponse cohérente.'
+        text: 'Une personne demande à une IA les horaires d’ouverture d’un service administratif précis. L’IA répond avec assurance — mais invente des horaires plausibles. La personne se déplace pour rien : l’information n’a jamais existé dans ce qu’elle a appris, elle l’a simplement complétée pour donner une réponse cohérente.'
       }),
       comparison: Object.freeze({
         heading: 'Deux façons d’utiliser une réponse IA',
