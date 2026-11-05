@@ -19,6 +19,8 @@ const validEnv = {
 assert.deepEqual(validateRuntimeConfig(configFromEnv(validEnv), validEnv), []);
 assert.equal(configFromEnv(validEnv).passwordRecoveryRedirectTo, 'https://app.example.dda.academy/?type=recovery');
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, PASSWORD_RECOVERY_REDIRECT_TO: 'https://other.example/?type=recovery' }), { ...validEnv, PASSWORD_RECOVERY_REDIRECT_TO: 'https://other.example/?type=recovery' }).some(issue => /PASSWORD_RECOVERY_REDIRECT_TO/.test(issue)));
+assert.equal(configFromEnv(validEnv).passwordRecoveryRedirectTo, 'https://app.example.dda.academy/?type=recovery');
+assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, PASSWORD_RECOVERY_REDIRECT_TO: 'https://other.example/?type=recovery' }), { ...validEnv, PASSWORD_RECOVERY_REDIRECT_TO: 'https://other.example/?type=recovery' }).some(issue => /PASSWORD_RECOVERY_REDIRECT_TO/.test(issue)));
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, ALLOWED_ORIGINS: '*' }), { ...validEnv, ALLOWED_ORIGINS: '*' }).some(issue => /exact HTTPS origins/.test(issue)));
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, BFF_COOKIE_SECURE: 'false' }), { ...validEnv, BFF_COOKIE_SECURE: 'false' }).some(issue => /__Host- cookies/.test(issue)));
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, SESSION_ENCRYPTION_KEY: 'short' }), { ...validEnv, SESSION_ENCRYPTION_KEY: 'short' }).some(issue => /32 bytes/.test(issue)));
