@@ -17,6 +17,8 @@ const validEnv = {
   BFF_COOKIE_SECURE: 'true'
 };
 assert.deepEqual(validateRuntimeConfig(configFromEnv(validEnv), validEnv), []);
+assert.equal(configFromEnv(validEnv).passwordRecoveryRedirectTo, 'https://app.example.dda.academy/?type=recovery');
+assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, PASSWORD_RECOVERY_REDIRECT_TO: 'https://other.example/?type=recovery' }), { ...validEnv, PASSWORD_RECOVERY_REDIRECT_TO: 'https://other.example/?type=recovery' }).some(issue => /PASSWORD_RECOVERY_REDIRECT_TO/.test(issue)));
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, ALLOWED_ORIGINS: '*' }), { ...validEnv, ALLOWED_ORIGINS: '*' }).some(issue => /exact HTTPS origins/.test(issue)));
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, BFF_COOKIE_SECURE: 'false' }), { ...validEnv, BFF_COOKIE_SECURE: 'false' }).some(issue => /__Host- cookies/.test(issue)));
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, SESSION_ENCRYPTION_KEY: 'short' }), { ...validEnv, SESSION_ENCRYPTION_KEY: 'short' }).some(issue => /32 bytes/.test(issue)));
@@ -58,7 +60,7 @@ function request(server, method, path, { body, rawBody, headers = {}, cookies = 
   let membership = { plan: 'free', status: 'active', ends_at: null, revoked_at: null };
   let entitlementNames = [];
   const entitlements = { async getForUser(userId) { assert.equal(userId, 'user-1'); return { membership, entitlements: entitlementNames }; } };
-  const handler = createBff({ auth, sessions, mutationStore, entitlements, logger: (...entry) => logs.push(entry), config: { allowedOrigins: ['http://localhost:8744'], secureCookies: true, sessionIdleMs: 60 * 60 * 1000, sessionAbsoluteMs: 24 * 60 * 60 * 1000, sessionEncryptionKey: null, emailRedirectTo: 'http://localhost:8744/access' }, clock: () => new Date('2026-09-28T00:00:00.000Z') });
+  const handler = createBff({ auth, sessions, mutationStore, entitlements, logger: (...entry) => logs.push(entry), config: { allowedOrigins: ['http://localhost:8744'], secureCookies: true, sessionIdleMs: 60 * 60 * 1000, sessionAbsoluteMs: 24 * 60 * 60 * 1000, sessionEncryptionKey: null, emailRedirectTo: 'http://localhost:8744/access', passwordRecoveryRedirectTo: 'http://localhost:8744/access?type=recovery' }, clock: () => new Date('2026-09-28T00:00:00.000Z') });
   const server = http.createServer(handler);
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   try {
