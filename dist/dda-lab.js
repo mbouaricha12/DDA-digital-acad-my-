@@ -149,6 +149,19 @@
           Object.freeze({ text: '« Écris-moi un message pour un client. »', correct: false, feedback: 'Aucun contexte (quel sujet, quel ton, quel objectif) : l’IA va produire un message générique qu’il faudra entièrement adapter.' })
         ])
       }),
+      Object.freeze({
+        type: 'mission', id: 'lab2-prompt-mission', step: 'exercise', outline: 'Mission : rédiger un prompt',
+        eyebrow: 'Mission terrain · 01', heading: 'Prépare une annonce utile pour collecter des livres scolaires à Bouaké',
+        brief: 'Une association organise une collecte. Elle veut publier un statut WhatsApp clair, sans inventer de numéro ni de lieu précis. Rédige un prompt qui permettra à une IA de produire ce statut.',
+        placeholder: 'Ex. : Tu es… Rédige… pour… Ton… Contraintes…',
+        criteria: Object.freeze([
+          'Le rôle ou le contexte de l’IA est précisé',
+          'Le public et l’objectif sont explicites',
+          'Le format et le ton sont indiqués',
+          'Les limites (3 phrases, aucun contact inventé) sont formulées'
+        ]),
+        example: 'Tu es chargé de communication d’une association à Bouaké. Rédige un statut WhatsApp de 3 phrases pour inviter les familles à donner des livres scolaires. Ton chaleureux et direct. N’invente ni adresse, ni numéro : utilise [lieu à confirmer] et [contact à ajouter].'
+      }),
       Object.freeze({ type: 'quiz', id: 'lab2-exercise', outline: practice.heading, step: 'exercise', locked: false, data: practice }),
       Object.freeze({ type: 'quiz', id: 'lab2-quiz', outline: evaluation.heading, step: 'quiz', locked: true, data: evaluation }),
       Object.freeze({ type: 'summary', id: 'lab2-result', step: 'review', idSuffix: 'lab2', data: result, continueTo: Object.freeze({ view: 'lesson-lab3', label: 'Continuer vers Vérifier et corriger' }) })
