@@ -1305,19 +1305,19 @@
           <img class="photo-fill" src="images/photos/hero-market-woman.jpg" alt="" loading="eager" fetchpriority="high">
           <div class="photo-scrim"></div>
           <div class="community-hero-copy">
-            <p class="eyebrow gold">Aperçu — bientôt disponible</p>
+            <p class="eyebrow gold">Assistant pédagogique · accès conditionnel</p>
             <h1 id="intelligence-title">Intelligence DDA</h1>
             <p>Un accompagnement plus personnalisé, pensé pour s’appuyer sur ce que tu construis déjà — jamais pour le remplacer.</p>
           </div>
         </div>
 
-        <div class="page-mission" data-mission="intelligence"><div><p class="eyebrow">Mission de cette page</p><strong>Recevoir un jour une aide qui explique, jamais qui décide.</strong><span>Intelligence DDA prépare l’assistance pédagogique ; elle ne remplace pas tes validations.</span></div><button class="text-action" data-view="path">Voir le socle de personnalisation <span>→</span></button></div>
+        <div class="page-mission" data-mission="intelligence"><div><p class="eyebrow">Mission de cette page</p><strong>Obtenir une aide qui explique, jamais qui décide.</strong><span>Le chat DDA AI s’active avec une session et un BFF configuré ; il ne remplace pas tes validations.</span></div><button class="text-action" data-view="path">Voir le socle de personnalisation <span>→</span></button></div>
         <div class="community-tiles">
           <div class="community-tile"><svg class="icon"><use href="#icon-compass"/></svg><span>Darius AI</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-path"/></svg><span>Personnalisation</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-progress"/></svg><span>Outils intelligents</span></div>
         </div>
-        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> En préparation — voici ce qu’elle fera, en toute transparence.</p>
+        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Le chat est intégré côté Academy ; sa disponibilité dépend de la session et de la configuration serveur.</p>
 
         <section class="future-principles intelligence-principles" aria-labelledby="intelligence-principles-title">
           <p class="eyebrow gold">La règle DDA AI</p>
@@ -1326,6 +1326,35 @@
             <article><span class="boundary-label">Elle pourra</span><p>Reformuler une notion, expliquer une erreur, proposer une révision bornée et relier une faiblesse à une activité du parcours.</p></article>
             <article><span class="boundary-label boundary-label-muted">Elle ne fera jamais</span><p>Donner un signal, prédire un actif, exécuter une transaction ou présenter un score pédagogique comme un diagnostic financier. Elle ne remplacera jamais un conseiller financier humain et ne garantira ni emploi ni revenu.</p></article>
           </div>
+        </section>
+
+        <section class="dda-ai-chat-shell" id="intelligence-ai-chat" aria-labelledby="intelligence-ai-chat-title">
+          <div class="dda-ai-chat-heading">
+            <div>
+              <p class="eyebrow gold">DDA AI · assistant pédagogique</p>
+              <h2 id="intelligence-ai-chat-title">Pose une question sur ton apprentissage.</h2>
+              <p class="dda-ai-chat-intro">Demande une explication, une reformulation ou une piste de révision. Le chat ne donne ni signal, ni prédiction, ni conseil d’achat ou de vente.</p>
+            </div>
+            <span class="dda-ai-chat-status" id="dda-ai-chat-status" role="status" aria-live="polite">Vérification du service…</span>
+          </div>
+          <div class="dda-ai-chat-layout">
+            <div class="dda-ai-transcript" id="dda-ai-transcript" role="log" aria-live="polite" aria-relevant="additions">
+              <div class="dda-ai-empty" id="dda-ai-empty"><strong>Commence par une question précise.</strong><span>Exemples : « Quelle est la différence entre une action et une obligation ? » ou « Reformule la notion de liquidité. »</span></div>
+            </div>
+            <form class="dda-ai-composer" id="dda-ai-form">
+              <label for="dda-ai-input">Ta question</label>
+              <textarea id="dda-ai-input" maxlength="2000" rows="4" placeholder="Ex. Explique-moi pourquoi un prix peut évoluer sans que cela soit un signal…" required></textarea>
+              <div class="dda-ai-composer-footer"><small>2000 caractères maximum · historique local limité à cet appareil</small><button class="primary-action" type="submit" id="dda-ai-submit">Envoyer <span>→</span></button></div>
+              <p class="form-error" id="dda-ai-error" role="alert"></p>
+            </form>
+          </div>
+          <div class="dda-ai-prompts" aria-label="Questions suggérées">
+            <span>Pour commencer</span>
+            <button type="button" data-ai-prompt="Peux-tu reformuler la différence entre une action et une obligation ?">Action ou obligation ?</button>
+            <button type="button" data-ai-prompt="Explique-moi ce que signifie la liquidité dans un marché.">Comprendre la liquidité</button>
+            <button type="button" data-ai-prompt="Aide-moi à préparer une révision pédagogique sur les supports et résistances, sans signal de marché.">Préparer une révision</button>
+          </div>
+          <p class="disclosure dda-ai-disclosure"><svg class="icon"><use href="#icon-shield"/></svg> Tes messages restent dans l’historique local de cet appareil. Le service ne répond que si une session DDA et le BFF sécurisé sont disponibles.</p>
         </section>
 
         <section class="community-featured" aria-labelledby="intelligence-featured-title">

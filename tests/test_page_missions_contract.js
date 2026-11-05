@@ -16,7 +16,7 @@ const missions = {
   support: 'Résoudre un blocage précis avant de reprendre.',
   community: 'Comprendre les futurs espaces d’échange, sans faux flux.',
   practice: 'Prolonger une compétence déjà observée.',
-  intelligence: 'Recevoir un jour une aide qui explique, jamais qui décide.',
+  intelligence: 'Obtenir une aide qui explique, jamais qui décide.',
   profile: 'Ajuster ton environnement, pas refaire ton parcours.'
 };
 
