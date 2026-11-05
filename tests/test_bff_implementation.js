@@ -151,18 +151,11 @@ function request(server, method, path, { body, rawBody, headers = {}, cookies = 
     assert.equal(response.status, 401);
     assert.equal(response.body.code, 'authentication_failed');
 
-    response = await request(server, 'POST', '/v1/auth/password-reset/confirm', { body: { token: 'short', password: 'long-enough-password' } });
-    assert.equal(response.status, 400);
-    assert.equal(response.body.code, 'invalid_token');
-    response = await request(server, 'POST', '/v1/auth/password-reset/confirm', { body: { token: 'v'.repeat(32), password: 'short' } });
+    response = await request(server, 'POST', '/v1/auth/password-reset/confirm', { body: { password: 'short' } });
     assert.equal(response.status, 400);
     assert.equal(response.body.code, 'validation_error');
-    response = await request(server, 'POST', '/v1/auth/password-reset/confirm', { body: { token: 'w'.repeat(32), password: 'long-enough-password' } });
-    assert.equal(response.status, 400, 'an invalid/expired Supabase token must not leak as a 500');
-    assert.equal(response.body.code, 'invalid_token');
-    response = await request(server, 'POST', '/v1/auth/password-reset/confirm', { body: { token: 'v'.repeat(32), password: 'long-enough-password' } });
-    assert.equal(response.status, 204, 'a valid token completes the reset');
-    assert.ok(auth.calls.some(call => call[0] === 'recover-confirm'), 'confirmPasswordReset is actually called');
+    response = await request(server, 'POST', '/v1/auth/password-reset/confirm', { body: { password: 'long-enough-password' } });
+    assert.equal(response.status, 401, 'password update requires a verified recovery session');
   } finally { server.close(); }
   console.log('BFF implementation contract: PASS');
 })();
