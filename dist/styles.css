@@ -2873,3 +2873,26 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
 @media(max-width:460px){
   .brvm-data-facts,.brvm-pole-grid{grid-template-columns:1fr}
 }
+
+
+/* DDA Lab — guided learner-authored mission (LAB2 pilot) */
+.lab-mission{margin:18px 0;padding:clamp(16px,3vw,26px);border:1px solid rgba(224,184,94,.28);border-radius:18px;background:linear-gradient(145deg,rgba(224,184,94,.07),rgba(255,255,255,.025));}
+.lab-mission h3{margin:6px 0 12px;color:#f4f7fc;font-size:clamp(1.2rem,2.4vw,1.65rem);line-height:1.25}
+.lab-mission-brief{max-width:72ch;color:rgba(244,247,252,.76);line-height:1.7}
+.lab-mission-label{display:block;margin:22px 0 8px;color:#e7c77e;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.lab-mission textarea{display:block;width:100%;min-height:130px;box-sizing:border-box;padding:14px;border:1px solid rgba(255,255,255,.16);border-radius:12px;background:rgba(3,10,18,.72);color:#f4f7fc;font:inherit;line-height:1.6;resize:vertical}
+.lab-mission textarea:focus-visible,.lab-mission input:focus-visible{outline:2px solid #e7c77e;outline-offset:3px}
+.lab-mission-meta{display:flex;justify-content:space-between;gap:12px;margin:7px 0 18px;color:rgba(244,247,252,.5);font-size:11px}
+.lab-mission-rubric{display:grid;gap:10px;margin:0 0 18px;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:12px}
+.lab-mission-rubric legend{padding:0 7px;color:#f4f7fc;font-size:13px;font-weight:800}
+.lab-mission-criterion{display:flex;align-items:flex-start;gap:10px;color:rgba(244,247,252,.78);font-size:13px;line-height:1.5;cursor:pointer}
+.lab-mission-criterion input{flex:none;margin-top:3px;accent-color:#d9a441;width:16px;height:16px}
+.lab-mission [data-mission-review]{width:100%;justify-content:center}
+.lab-mission-feedback{margin-top:14px;padding:14px;border:1px solid rgba(217,164,65,.35);border-radius:12px;color:#f4f7fc;font-size:13px;line-height:1.65}
+.lab-mission-feedback.is-ready{border-color:rgba(79,190,133,.42);background:rgba(79,190,133,.07)}
+.lab-mission-feedback.is-review{background:rgba(217,164,65,.06)}
+.lab-mission-example{margin-top:18px;border-top:1px solid rgba(255,255,255,.1);padding-top:14px;color:rgba(244,247,252,.7);font-size:13px}
+.lab-mission-example summary{color:#e7c77e;cursor:pointer;font-weight:700}
+.lab-mission-example p{line-height:1.7}
+.lab-mission-note{margin:12px 0 0;color:rgba(244,247,252,.45);font-size:11px;line-height:1.5}
+@media(max-width:520px){.lab-mission-meta{font-size:10px}.lab-mission{padding:16px}.lab-mission-rubric{padding:12px}}
