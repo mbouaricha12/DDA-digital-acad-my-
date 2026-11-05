@@ -25,8 +25,13 @@ for (const [view, mission] of Object.entries(missions)) {
   assert.ok(start >= 0, `${view} route remains mounted`);
   const end = html.indexOf('</section>', start);
   const chunk = html.slice(start, end < 0 ? html.length : end);
-  assert.match(chunk, new RegExp(`data-mission="${view}"`), `${view} declares its page mission`);
-  assert.ok(chunk.includes(mission), `${view} mission remains specific and readable`);
+  if (view === "dashboard") {
+    assert.doesNotMatch(chunk, /data-mission="dashboard"/, "dashboard stays free of a redundant mission banner");
+    assert.doesNotMatch(chunk, /Choisir l’action utile d’aujourd’hui\./, "dashboard keeps its action-first hierarchy");
+  } else {
+    assert.match(chunk, new RegExp(`data-mission="${view}"`), `${view} declares its page mission`);
+    assert.ok(chunk.includes(mission), `${view} mission remains specific and readable`);
+  }
 }
 
 assert.match(html, /data-view="dashboard" data-scroll-to="analysis-terminal"[^>]*>Manipuler une série pédagogique/, 'Market Intelligence hands off to the Terminal, not back to itself');
