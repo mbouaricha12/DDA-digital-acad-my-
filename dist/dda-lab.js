@@ -45,22 +45,22 @@
     });
     const practice = Object.freeze({
       id: 'lab1-exercise', label: 'Exercice', heading: 'Repérer une information à vérifier',
-      prompt: 'Tu demandes à une IA le numéro officiel d’un service public pour un proche. Elle te donne un numéro précis, présenté avec assurance. Que fais-tu avant de le communiquer ?',
+      prompt: 'Tu prépares une affiche pour un atelier à Bouaké. L’IA a proposé une date, une adresse et un tarif qui ne figuraient pas dans ton brief. Avant de publier, quelle démarche est la plus sûre ?',
       successText: 'Exactement : un numéro, une adresse ou un prix a un coût réel s’il est faux. Tu le vérifies sur une source officielle avant de t’en servir.',
       choices: Object.freeze([
-        Object.freeze({ text: 'Je le vérifie sur le site officiel du service ou un document récent avant de le communiquer.', correct: true, feedback: 'C’est le bon réflexe : une information qui a une conséquence réelle (appeler, se déplacer, payer) se vérifie toujours avant usage.' }),
-        Object.freeze({ text: 'Je le communique directement : l’IA a dû le trouver quelque part.', correct: false, feedback: 'L’IA n’a pas « trouvé » ce numéro dans une base à jour — elle a généré la réponse la plus probable. Sans vérification, tu risques de transmettre une erreur avec assurance.' }),
-        Object.freeze({ text: 'Je redemande la même question à la même IA pour confirmer.', correct: false, feedback: 'Reposer la même question au même outil donne souvent la même réponse, vraie ou fausse — ce n’est pas une vérification, juste une répétition.' })
+        Object.freeze({ text: 'Je sépare les éléments fournis par moi des informations ajoutées par l’IA, puis je confirme chaque date, adresse et tarif auprès de l’organisateur.', correct: true, feedback: 'Bonne méthode : tu identifies les ajouts non sourcés et tu vérifies les faits auprès de la personne ou du document qui fait autorité avant publication.' }),
+        Object.freeze({ text: 'Je publie l’affiche telle quelle puisque la formulation est professionnelle.', correct: false, feedback: 'La qualité de la mise en forme ne garantit pas la véracité des informations. Une date ou un tarif inventé peut induire les participants en erreur.' }),
+        Object.freeze({ text: 'Je demande à une deuxième IA de valider les mêmes informations.', correct: false, feedback: 'Deux outils peuvent reproduire une erreur plausible. La confirmation doit venir d'une source responsable ou officielle, pas d'un autre générateur.' })
       ])
     });
     const evaluation = Object.freeze({
       id: 'lab1-quiz', label: 'Quiz de validation', heading: 'Ce que l’IA fait bien, ce qu’elle fait mal',
-      prompt: 'Pour quel type de tâche une IA générative est-elle la MOINS fiable sans vérification ?',
+      prompt: 'Tu dois publier demain une information sur une fermeture exceptionnelle d’un service. Quelle source constitue la vérification la plus solide ?',
       successText: 'Les faits précis et datés (chiffres, horaires, événements récents) sont exactement ce qu’une IA générative peut inventer avec le plus d’assurance — c’est là que la vérification compte le plus.',
       choices: Object.freeze([
         Object.freeze({ text: 'Reformuler un texte que tu lui donnes toi-même dans un style plus clair.', correct: false, feedback: 'Reformuler un texte que tu fournis est un point fort réel de l’IA : elle travaille sur une matière que tu contrôles déjà.' }),
-        Object.freeze({ text: 'Donner un chiffre précis, une date ou un événement récent sans le signaler comme incertain.', correct: true, feedback: 'C’est exactement le point faible à surveiller : l’IA peut produire un fait précis totalement inventé, avec le même ton que les faits exacts.' }),
-        Object.freeze({ text: 'Proposer plusieurs façons de présenter une même idée.', correct: false, feedback: 'Proposer des variantes autour d’une idée que tu donnes est un usage fiable — il n’y a pas de fait à vérifier, seulement une formulation.' })
+        Object.freeze({ text: 'Une annonce datée publiée sur le canal officiel du service, ou confirmée directement par celui-ci.', correct: true, feedback: 'Oui : la source responsable est la meilleure preuve pour une information opérationnelle et récente. Vérifie aussi la date de publication et le périmètre de l’annonce.' }),
+        Object.freeze({ text: 'Un message vocal transféré sans date ni auteur identifié.', correct: false, feedback: 'Un message transféré peut être ancien, incomplet ou falsifié. Il ne permet pas de confirmer une fermeture officielle.' })
       ])
     });
     const result = Object.freeze({ heading: 'Première leçon du Lab terminée.', body: 'Tu sais maintenant repérer une réponse IA à vérifier avant de l’utiliser — la base de tout le reste.' });
