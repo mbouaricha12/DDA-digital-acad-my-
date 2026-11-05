@@ -316,6 +316,15 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         await auth.verifyEmail(body.token);
         return json(res, 204);
       }
+      if (method === 'POST' && path === '/v1/auth/password-reset/exchange') {
+        const body = await readJson(req);
+        if (typeof body.code !== 'string' || body.code.length < 10) return sendError(res, 400, 'invalid_code', 'The recovery code is invalid or expired.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-exchange', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please request a new link later.', requestId);
+        let provider;
+        try { provider = await auth.exchangeRecoveryCode(body.code); } catch (error) { logger('password_reset_exchange_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'invalid_code', 'The recovery link is invalid or expired.', requestId); }
+        if (!provider?.user?.id || !provider.access_token) return sendError(res, 400, 'invalid_code', 'The recovery link is invalid or expired.', requestId);
+        const created = await createSession(provider.user.id, provider, req); setCookies(res, cookieHeaders(config, created.token, created.csrf)); return json(res, 204);
+      }
       if (method === 'POST' && path === '/v1/auth/password-reset/verify') {
         const body = await readJson(req);
         if (typeof body.token !== 'string' || body.token.length < 20) return sendError(res, 400, 'invalid_token', 'The recovery link is invalid or expired.', requestId);

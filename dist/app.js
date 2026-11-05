@@ -877,43 +877,21 @@ function showOnboardingAfterRemoteAuth(user) {
 }
 
 async function handleBffVerificationToken() {
-  const token = window.DDA_VERIFY_TOKEN;
-  const recovery = window.DDA_AUTH_RECOVERY === true;
-  delete window.DDA_VERIFY_TOKEN;
-  delete window.DDA_AUTH_RECOVERY;
-  if (!token || !window.DDABFF?.enabled()) return;
-  if (recovery) {
-    const form = document.getElementById('bff-reset-password-form');
-    const signup = document.getElementById('signup-form');
-    const recoveryForm = document.getElementById('bff-recovery-form');
-    if (signup) signup.hidden = true;
-    if (recoveryForm) recoveryForm.hidden = true;
-    if (form) form.hidden = false;
-    try {
-      await window.DDABFF.verifyRecoveryToken(token);
-      form?.setAttribute('data-recovery-ready', 'true');
-      document.getElementById('reset-password-error').textContent = '';
-    } catch {
-      if (form) form.hidden = true;
-      const panel = document.getElementById('bff-verify-panel');
-      panel.hidden = false;
-      document.getElementById('bff-verify-message').textContent = 'Lien de récupération invalide ou expiré. Retourne à la connexion et demande un nouveau lien.';
-    }
-    return;
-  }
-  const panel = document.getElementById('bff-verify-panel');
-  const message = document.getElementById('bff-verify-message');
-  const form = document.getElementById('signup-form');
-  if (panel) panel.hidden = false;
-  if (form) form.hidden = true;
-  try {
-    await window.DDABFF.verifyEmail(token);
-    if (message) message.textContent = 'Adresse confirmée. Tu peux maintenant ouvrir ta session.';
-  } catch {
-    if (message) message.textContent = 'Ce lien est invalide, expiré ou déjà utilisé. Demande un nouveau lien depuis l’inscription.';
-  }
+ const params=new URLSearchParams(location.search),hashParams=new URLSearchParams(location.hash.slice(1));
+ const recovery=window.DDA_AUTH_RECOVERY===true||params.get('type')==='recovery'||hashParams.get('type')==='recovery';
+ const token=window.DDA_VERIFY_TOKEN||params.get('token_hash')||params.get('token')||hashParams.get('token_hash')||hashParams.get('token'),code=params.get('code');
+ delete window.DDA_VERIFY_TOKEN;delete window.DDA_AUTH_RECOVERY;if(!window.DDABFF?.enabled())return;
+ if(recovery)showView('access',false,'replace');
+ if(recovery&&code){const form=document.getElementById('bff-reset-password-form');document.getElementById('signup-form').hidden=true;document.getElementById('bff-recovery-form').hidden=true;form.hidden=false;form.dataset.recoveryReady='false';
+  try{await window.DDABFF.exchangeRecoveryCode(code);form.dataset.recoveryReady='true';document.getElementById('reset-password-error').textContent='';}
+  catch{form.hidden=true;const panel=document.getElementById('bff-verify-panel');panel.hidden=false;document.getElementById('bff-verify-message').textContent='Lien de récupération invalide ou expiré. Demande un nouveau lien.';}return;}
+ if(!token){if(recovery){document.getElementById('bff-reset-password-form').hidden=true;const panel=document.getElementById('bff-verify-panel');panel.hidden=false;document.getElementById('bff-verify-message').textContent='Lien de récupération incomplet. Demande un nouveau lien.';}return;}
+ if(recovery){const form=document.getElementById('bff-reset-password-form');document.getElementById('signup-form').hidden=true;document.getElementById('bff-recovery-form').hidden=true;form.hidden=false;form.dataset.recoveryReady='false';
+  try{await window.DDABFF.verifyRecoveryToken(token);form.dataset.recoveryReady='true';document.getElementById('reset-password-error').textContent='';}
+  catch{form.hidden=true;const panel=document.getElementById('bff-verify-panel');panel.hidden=false;document.getElementById('bff-verify-message').textContent='Lien de récupération invalide ou expiré. Demande un nouveau lien.';}return;}
+ const panel=document.getElementById('bff-verify-panel'),message=document.getElementById('bff-verify-message'),form=document.getElementById('signup-form');if(panel)panel.hidden=false;if(form)form.hidden=true;
+ try{await window.DDABFF.verifyEmail(token);if(message)message.textContent='Adresse confirmée. Tu peux maintenant ouvrir ta session.';}catch{if(message)message.textContent='Ce lien est invalide, expiré ou déjà utilisé. Demande un nouveau lien depuis l’inscription';}
 }
-
 function initBffAuthUi() {
   if (!window.DDABFF?.enabled()) return;
   document.getElementById('bff-auth-tools').hidden = false;

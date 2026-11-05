@@ -67,6 +67,12 @@
     if (!result.response.ok) throw resultError(result, 'recovery_token_invalid');
     return true;
   }
+  async function exchangeRecoveryCode(code) {
+    const result = await request('/v1/auth/password-reset/exchange', { method: 'POST', body: { code } });
+    if (!result.enabled) return null;
+    if (!result.response.ok) throw resultError(result, 'recovery_code_invalid');
+    return true;
+  }
 
   async function verifyEmail(token) {
     const result = await request('/v1/auth/verify-email', { method: 'POST', body: { token } });
@@ -224,7 +230,7 @@
   }
 
   window.DDABFF = Object.freeze({
-    enabled, register, verifyEmail, verifyRecoveryToken, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
+    enabled, register, verifyEmail, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
     getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, askAI,
     getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }
