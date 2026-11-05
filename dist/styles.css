@@ -2976,3 +2976,26 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
   #lab .premium-track-panel{margin:18px 0}
   #lab .premium-locked-note{margin:14px 0}
 }
+
+
+/* DDA UX pass 03 — Academy: remove explanatory overload, surface the next action. */
+#path .section-intro{max-width:760px;margin-inline:auto;padding:clamp(20px,4vw,38px) 0 18px}
+#path .section-intro h1{max-width:14ch;font-size:clamp(2.2rem,6vw,4rem);line-height:1.02;letter-spacing:-.04em}
+#path .section-intro>p:last-child{max-width:52ch;font-size:1rem;line-height:1.55;color:#b8c6d5}
+#path .page-mission{margin:0 auto 18px;max-width:900px;padding:16px 20px;border-radius:14px}
+#path .page-mission .eyebrow{margin-bottom:5px}
+#path .page-mission strong{font-size:15px}
+#path .page-mission span{display:block;margin-top:5px;font-size:12px;line-height:1.45;color:#aab8c8}
+#path .path-context-grid{display:none!important}
+#path .journey{margin-top:16px}
+#dashboard .dashboard-operating-line{display:none}
+#dashboard .dashboard-mastery-thread{margin-bottom:14px}
+#dashboard .dashboard-command-head{padding:clamp(18px,4vw,30px);border-radius:16px}
+#dashboard .dashboard-command-head h1{font-size:clamp(2rem,6vw,3.8rem);line-height:1.05;letter-spacing:-.04em}
+#dashboard #personalized-next{max-width:48ch;font-size:15px;line-height:1.55;color:#b8c6d5}
+@media(max-width:600px){
+  #path .section-intro{padding:22px 0 14px}
+  #path .page-mission{padding:14px;margin-bottom:12px}
+  #dashboard .dashboard-command-head{padding:18px 16px}
+  #dashboard .dashboard-kpi-row{gap:8px}
+}
