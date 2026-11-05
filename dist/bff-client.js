@@ -61,7 +61,7 @@
     return result.body;
   }
 
-  async function verifyEmail(token) {
+  async function verifyRecoveryToken(token) {\n    const result = await request('/v1/auth/password-reset/verify', { method: 'POST', body: { token } });\n    if (!result.enabled) return null;\n    if (!result.response.ok) throw resultError(result, 'recovery_token_invalid');\n    return true;\n  }\n\n  async function verifyEmail(token) {
     const result = await request('/v1/auth/verify-email', { method: 'POST', body: { token } });
     if (!result.enabled) return null;
     if (!result.response.ok) throw resultError(result, 'verification_failed');
