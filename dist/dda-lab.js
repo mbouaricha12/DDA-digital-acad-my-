@@ -116,20 +116,20 @@
     });
     const practice = Object.freeze({
       id: 'lab2-exercise', label: 'Exercice', heading: 'Choisir la meilleure version d’un prompt',
-      prompt: 'Tu veux un plan de révision pour un examen dans 3 semaines. Quel prompt donnera le résultat le plus utile ?',
+      prompt: 'Une association te demande un message WhatsApp pour annoncer une collecte de livres. Quel brief donne à l’IA assez de contexte pour produire un message exploitable ?',
       successText: 'Exactement : préciser la matière, le temps disponible et le format demandé (un planning jour par jour) guide l’IA vers une réponse directement utilisable.',
       choices: Object.freeze([
-        Object.freeze({ text: '« Fais-moi un planning de révision de mathématiques pour un examen dans 3 semaines, 1h par jour en semaine, présenté jour par jour. »', correct: true, feedback: 'C’est un prompt structuré : matière, délai, temps disponible et format sont tous précisés — la réponse sera directement exploitable.' }),
+        Object.freeze({ text: '« Pour une collecte de livres scolaires à Bouaké samedi, écris un statut WhatsApp de 3 phrases pour les parents : indique les livres recherchés, le lieu à compléter et un ton chaleureux. N’invente aucun contact. »', correct: true, feedback: 'C’est un prompt structuré : matière, délai, temps disponible et format sont tous précisés — la réponse sera directement exploitable.' }),
         Object.freeze({ text: '« Aide-moi à réviser. »', correct: false, feedback: 'Aucune matière, aucun délai, aucun format : l’IA va devoir deviner, et la réponse sera trop générale pour être vraiment utile.' }),
         Object.freeze({ text: '« Donne-moi tout ce qu’il faut savoir en mathématiques. »', correct: false, feedback: 'C’est une demande illimitée dans un domaine entier — sans délai ni niveau précisé, le résultat sera soit trop long, soit hors sujet.' })
       ])
     });
     const evaluation = Object.freeze({
       id: 'lab2-quiz', label: 'Quiz de validation', heading: 'Que faire quand la réponse ne convient pas',
-      prompt: 'L’IA te donne un texte trop long et trop formel pour un message WhatsApp à un client. Quelle est la meilleure prochaine étape ?',
+      prompt: 'L’IA a produit un message de collecte correct, mais il manque le lieu et le texte dépasse trois phrases. Quelle correction est la plus efficace ?',
       successText: 'Redemander en précisant exactement ce qui ne va pas (longueur, ton) est toujours plus efficace que recommencer à zéro ou abandonner — c’est la bonne façon d’itérer.',
       choices: Object.freeze([
-        Object.freeze({ text: 'Je précise : « Raccourcis à 2 phrases et rends le ton plus simple, comme à un ami. »', correct: true, feedback: 'C’est la bonne méthode : tu gardes la base du travail déjà fait et tu corriges exactement ce qui ne convient pas.' }),
+        Object.freeze({ text: 'Je demande : « Réduis à 3 phrases maximum et laisse [LIEU] visible à compléter. Ne crée aucune adresse. »', correct: true, feedback: 'C’est la bonne méthode : tu gardes la base du travail déjà fait et tu corriges exactement ce qui ne convient pas.' }),
         Object.freeze({ text: 'Je recommence une nouvelle conversation depuis zéro en espérant un meilleur résultat.', correct: false, feedback: 'Recommencer à zéro fait perdre le contexte déjà construit — il est presque toujours plus rapide de corriger ce qui ne va pas.' }),
         Object.freeze({ text: 'Je copie le texte tel quel, il est globalement correct.', correct: false, feedback: 'Un ton inadapté au bon destinataire peut nuire à la relation avec un client — corriger le ton ne prend qu’une phrase de plus.' })
       ])
@@ -187,10 +187,10 @@
     });
     const practice = Object.freeze({
       id: 'lab3-exercise', label: 'Exercice', heading: 'Corriger au bon endroit',
-      prompt: 'L’IA a rédigé un texte correct, mais il contient une date de rendez-vous qui ne correspond pas à celle que tu avais donnée dans ta demande. Quelle est la meilleure réaction ?',
+      prompt: 'Tu relis un résumé de réunion généré par l’IA. Il paraît clair, mais attribue une décision à la mauvaise personne. Quelle action prioritaire adoptes-tu ?',
       successText: 'Exactement : tu demandes une correction précise sur ce point exact, sans tout regénérer — c’est plus rapide et tu gardes le reste du texte qui était bon.',
       choices: Object.freeze([
-        Object.freeze({ text: 'Je précise la bonne date à l’IA et je lui demande de corriger uniquement cette phrase.', correct: true, feedback: 'C’est la bonne méthode : une correction ciblée garde ce qui fonctionnait déjà et règle précisément l’erreur.' }),
+        Object.freeze({ text: 'Je compare le résumé aux notes de réunion, corrige le nom et la décision, puis vérifie les autres attributions avant diffusion.', correct: true, feedback: 'C’est la bonne méthode : une correction ciblée garde ce qui fonctionnait déjà et règle précisément l’erreur.' }),
         Object.freeze({ text: 'Je corrige moi-même la date directement dans le texte sans rien dire à l’IA.', correct: false, feedback: 'Ce n’est pas faux en soi, mais tu perds l’occasion de vérifier si l’erreur vient d’un malentendu qui pourrait se reproduire ailleurs dans le texte.' }),
         Object.freeze({ text: 'Je redemande tout le texte depuis le début en espérant que la date soit juste cette fois.', correct: false, feedback: 'Régénérer tout le texte sans préciser l’erreur ne garantit rien — le plus efficace est de signaler exactement ce qui doit changer.' })
       ])
