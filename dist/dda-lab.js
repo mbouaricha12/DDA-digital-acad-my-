@@ -45,7 +45,7 @@
     });
     const practice = Object.freeze({
       id: 'lab1-exercise', label: 'Exercice', heading: 'Repérer une information à vérifier',
-      prompt: 'Tu prépares une affiche pour un atelier à Bouaké. L’IA a proposé une date, une adresse et un tarif qui ne figuraient pas dans ton brief. Avant de publier, quelle démarche est la plus sûre ?',
+      prompt: 'Tu prépares une affiche pour un atelier. L’IA a proposé une date, une adresse et un tarif qui ne figuraient pas dans ton brief. Avant de publier, quelle démarche est la plus sûre ?',
       successText: 'Exactement : un numéro, une adresse ou un prix a un coût réel s’il est faux. Tu le vérifies sur une source officielle avant de t’en servir.',
       choices: Object.freeze([
         Object.freeze({ text: 'Je sépare les éléments fournis par moi des informations ajoutées par l’IA, puis je confirme chaque date, adresse et tarif auprès de l’organisateur.', correct: true, feedback: 'Bonne méthode : tu identifies les ajouts non sourcés et tu vérifies les faits auprès de la personne ou du document qui fait autorité avant publication.' }),
@@ -106,7 +106,7 @@
       principle: Object.freeze({ label: 'Principe essentiel', text: 'Si ta demande est vague, la réponse sera vague — précise la demande avant de juger la réponse.' }),
       example: Object.freeze({
         label: 'Avant / après',
-        text: 'Avant : « Écris-moi un texte pour vendre mes mangues. » Après : « Je vends des mangues à Bouaké. Écris un statut WhatsApp de 2 phrases, ton chaleureux et direct, avec le prix du kilo à préciser entre crochets, sans emoji. » Le second prompt donne un texte utilisable immédiatement ; le premier donne un texte générique qu’il faut tout réécrire.'
+        text: 'Avant : « Écris-moi un texte pour vendre mes mangues. » Après : « Je vends des mangues. Écris un statut WhatsApp de 2 phrases, ton chaleureux et direct, avec le prix du kilo à préciser entre crochets, sans emoji. » Le second prompt donne un texte utilisable immédiatement ; le premier donne un texte générique qu’il faut tout réécrire.'
       }),
       comparison: Object.freeze({
         heading: 'Deux façons de demander',
@@ -119,7 +119,7 @@
       prompt: 'Une association te demande un message WhatsApp pour annoncer une collecte de livres. Quel brief donne à l’IA assez de contexte pour produire un message exploitable ?',
       successText: 'Exactement : préciser la matière, le temps disponible et le format demandé (un planning jour par jour) guide l’IA vers une réponse directement utilisable.',
       choices: Object.freeze([
-        Object.freeze({ text: '« Pour une collecte de livres scolaires à Bouaké samedi, écris un statut WhatsApp de 3 phrases pour les parents : indique les livres recherchés, le lieu à compléter et un ton chaleureux. N’invente aucun contact. »', correct: true, feedback: 'C’est un prompt structuré : matière, délai, temps disponible et format sont tous précisés — la réponse sera directement exploitable.' }),
+        Object.freeze({ text: '« Pour une collecte de livres scolaires  samedi, écris un statut WhatsApp de 3 phrases pour les parents : indique les livres recherchés, le lieu à compléter et un ton chaleureux. N’invente aucun contact. »', correct: true, feedback: 'C’est un prompt structuré : matière, délai, temps disponible et format sont tous précisés — la réponse sera directement exploitable.' }),
         Object.freeze({ text: '« Aide-moi à réviser. »', correct: false, feedback: 'Aucune matière, aucun délai, aucun format : l’IA va devoir deviner, et la réponse sera trop générale pour être vraiment utile.' }),
         Object.freeze({ text: '« Donne-moi tout ce qu’il faut savoir en mathématiques. »', correct: false, feedback: 'C’est une demande illimitée dans un domaine entier — sans délai ni niveau précisé, le résultat sera soit trop long, soit hors sujet.' })
       ])
@@ -151,7 +151,7 @@
       }),
       Object.freeze({
         type: 'mission', id: 'lab2-prompt-mission', step: 'exercise', outline: 'Mission : rédiger un prompt',
-        eyebrow: 'Mission terrain · 01', heading: 'Prépare une annonce utile pour collecter des livres scolaires à Bouaké',
+        eyebrow: 'Mission terrain · 01', heading: 'Prépare une annonce utile pour collecter des livres scolaires ',
         brief: 'Une association organise une collecte. Elle veut publier un statut WhatsApp clair, sans inventer de numéro ni de lieu précis. Rédige un prompt qui permettra à une IA de produire ce statut.',
         placeholder: 'Ex. : Tu es… Rédige… pour… Ton… Contraintes…',
         criteria: Object.freeze([
@@ -160,7 +160,7 @@
           'Le format et le ton sont indiqués',
           'Les limites (3 phrases, aucun contact inventé) sont formulées'
         ]),
-        example: 'Tu es chargé de communication d’une association à Bouaké. Rédige un statut WhatsApp de 3 phrases pour inviter les familles à donner des livres scolaires. Ton chaleureux et direct. N’invente ni adresse, ni numéro : utilise [lieu à confirmer] et [contact à ajouter].'
+        example: 'Tu es chargé de communication d’une association . Rédige un statut WhatsApp de 3 phrases pour inviter les familles à donner des livres scolaires. Ton chaleureux et direct. N’invente ni adresse, ni numéro : utilise [lieu à confirmer] et [contact à ajouter].'
       }),
       Object.freeze({ type: 'quiz', id: 'lab2-exercise', outline: practice.heading, step: 'exercise', locked: false, data: practice }),
       Object.freeze({ type: 'quiz', id: 'lab2-quiz', outline: evaluation.heading, step: 'quiz', locked: true, data: evaluation }),
@@ -262,7 +262,7 @@
       principle: Object.freeze({ label: 'Principe essentiel', text: 'Un livrable fini n’est jamais le premier brouillon accepté tel quel — c’est le résultat d’au moins une correction ciblée.' }),
       example: Object.freeze({
         label: 'Exemple complet',
-        text: 'Fatou répare des téléphones à Lomé. Brief donné à l’IA : « Rédige une courte page de présentation pour mon activité de réparation de téléphones, pour des clients qui me trouveraient sur WhatsApp : qui je suis, ce que je répare, pourquoi me faire confiance, comment me contacter. Ton simple et rassurant, 150 mots maximum. » Premier brouillon trop long → relecture ciblée : « Raccourcis à 100 mots et commence directement par ce que tu répares. » Résultat : un texte prêt à coller dans son statut WhatsApp Business.'
+        text: 'Fatou répare des téléphones . Brief donné à l’IA : « Rédige une courte page de présentation pour mon activité de réparation de téléphones, pour des clients qui me trouveraient sur WhatsApp : qui je suis, ce que je répare, pourquoi me faire confiance, comment me contacter. Ton simple et rassurant, 150 mots maximum. » Premier brouillon trop long → relecture ciblée : « Raccourcis à 100 mots et commence directement par ce que tu répares. » Résultat : un texte prêt à coller dans son statut WhatsApp Business.'
       })
     });
     const automation = Object.freeze({
