@@ -243,6 +243,15 @@
               <button class="primary-action" type="submit" disabled>Continuer <span>→</span></button>
             </form>
             <button class="text-action" id="bff-forgot-password" type="button" hidden>Mot de passe oublié ?</button>
+            <form id="bff-reset-password-form" method="dialog" hidden>
+              <p class="eyebrow gold">Sécurité du compte</p>
+              <h2>Choisis un nouveau mot de passe.</h2>
+              <p class="access-form-note">Utilise au moins 12 caractères. Tu pourras ensuite te connecter avec ce nouveau mot de passe.</p>
+              <label>Nouveau mot de passe<input id="reset-password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></label>
+              <label>Confirmer le mot de passe<input id="reset-password-confirm" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></label>
+              <p class="form-error" id="reset-password-error" role="alert"></p>
+              <button class="primary-action" type="submit">Enregistrer le mot de passe <span>→</span></button>
+            </form>
             <section id="bff-verify-panel" hidden aria-live="polite">
               <p class="eyebrow gold">Vérification e-mail</p>
               <h2>Confirme ton adresse e-mail.</h2>
