@@ -35,7 +35,7 @@
       principle: Object.freeze({ label: 'Principe essentiel', text: 'Une réponse qui sonne juste n’est pas une réponse vérifiée.' }),
       example: Object.freeze({
         label: 'Exemple concret',
-        text: 'Une personne à Abidjan demande à une IA les horaires d’ouverture d’un service administratif précis. L’IA répond avec assurance — mais invente des horaires plausibles. La personne se déplace pour rien : l’information n’a jamais existé dans ce qu’elle a appris, elle l’a simplement complétée pour donner une réponse cohérente.'
+        text: 'Une personne demande à une IA les horaires d’ouverture d’un service administratif précis. L’IA répond avec assurance — mais invente des horaires plausibles. La personne se déplace pour rien : l’information n’a jamais existé dans ce qu’elle a appris, elle l’a simplement complétée pour donner une réponse cohérente.'
       }),
       comparison: Object.freeze({
         heading: 'Deux façons d’utiliser une réponse IA',
@@ -45,22 +45,22 @@
     });
     const practice = Object.freeze({
       id: 'lab1-exercise', label: 'Exercice', heading: 'Repérer une information à vérifier',
-      prompt: 'Tu demandes à une IA le numéro officiel d’un service public pour un proche. Elle te donne un numéro précis, présenté avec assurance. Que fais-tu avant de le communiquer ?',
+      prompt: 'Tu prépares une affiche pour un atelier. L’IA a proposé une date, une adresse et un tarif qui ne figuraient pas dans ton brief. Avant de publier, quelle démarche est la plus sûre ?',
       successText: 'Exactement : un numéro, une adresse ou un prix a un coût réel s’il est faux. Tu le vérifies sur une source officielle avant de t’en servir.',
       choices: Object.freeze([
-        Object.freeze({ text: 'Je le vérifie sur le site officiel du service ou un document récent avant de le communiquer.', correct: true, feedback: 'C’est le bon réflexe : une information qui a une conséquence réelle (appeler, se déplacer, payer) se vérifie toujours avant usage.' }),
-        Object.freeze({ text: 'Je le communique directement : l’IA a dû le trouver quelque part.', correct: false, feedback: 'L’IA n’a pas « trouvé » ce numéro dans une base à jour — elle a généré la réponse la plus probable. Sans vérification, tu risques de transmettre une erreur avec assurance.' }),
-        Object.freeze({ text: 'Je redemande la même question à la même IA pour confirmer.', correct: false, feedback: 'Reposer la même question au même outil donne souvent la même réponse, vraie ou fausse — ce n’est pas une vérification, juste une répétition.' })
+        Object.freeze({ text: 'Je sépare les éléments fournis par moi des informations ajoutées par l’IA, puis je confirme chaque date, adresse et tarif auprès de l’organisateur.', correct: true, feedback: 'Bonne méthode : tu identifies les ajouts non sourcés et tu vérifies les faits auprès de la personne ou du document qui fait autorité avant publication.' }),
+        Object.freeze({ text: 'Je publie l’affiche telle quelle puisque la formulation est professionnelle.', correct: false, feedback: 'La qualité de la mise en forme ne garantit pas la véracité des informations. Une date ou un tarif inventé peut induire les participants en erreur.' }),
+        Object.freeze({ text: 'Je demande à une deuxième IA de valider les mêmes informations.', correct: false, feedback: 'Deux outils peuvent reproduire une erreur plausible. La confirmation doit venir d’une source responsable ou officielle, pas d’une IA supplémentaire.' })
       ])
     });
     const evaluation = Object.freeze({
       id: 'lab1-quiz', label: 'Quiz de validation', heading: 'Ce que l’IA fait bien, ce qu’elle fait mal',
-      prompt: 'Pour quel type de tâche une IA générative est-elle la MOINS fiable sans vérification ?',
+      prompt: 'Tu dois publier demain une information sur une fermeture exceptionnelle d’un service. Quelle source constitue la vérification la plus solide ?',
       successText: 'Les faits précis et datés (chiffres, horaires, événements récents) sont exactement ce qu’une IA générative peut inventer avec le plus d’assurance — c’est là que la vérification compte le plus.',
       choices: Object.freeze([
         Object.freeze({ text: 'Reformuler un texte que tu lui donnes toi-même dans un style plus clair.', correct: false, feedback: 'Reformuler un texte que tu fournis est un point fort réel de l’IA : elle travaille sur une matière que tu contrôles déjà.' }),
-        Object.freeze({ text: 'Donner un chiffre précis, une date ou un événement récent sans le signaler comme incertain.', correct: true, feedback: 'C’est exactement le point faible à surveiller : l’IA peut produire un fait précis totalement inventé, avec le même ton que les faits exacts.' }),
-        Object.freeze({ text: 'Proposer plusieurs façons de présenter une même idée.', correct: false, feedback: 'Proposer des variantes autour d’une idée que tu donnes est un usage fiable — il n’y a pas de fait à vérifier, seulement une formulation.' })
+        Object.freeze({ text: 'Une annonce datée publiée sur le canal officiel du service, ou confirmée directement par celui-ci.', correct: true, feedback: 'Oui : la source responsable est la meilleure preuve pour une information opérationnelle et récente. Vérifie aussi la date de publication et le périmètre de l’annonce.' }),
+        Object.freeze({ text: 'Un message vocal transféré sans date ni auteur identifié.', correct: false, feedback: 'Un message transféré peut être ancien, incomplet ou falsifié. Il ne permet pas de confirmer une fermeture officielle.' })
       ])
     });
     const result = Object.freeze({ heading: 'Première leçon du Lab terminée.', body: 'Tu sais maintenant repérer une réponse IA à vérifier avant de l’utiliser — la base de tout le reste.' });
@@ -106,7 +106,7 @@
       principle: Object.freeze({ label: 'Principe essentiel', text: 'Si ta demande est vague, la réponse sera vague — précise la demande avant de juger la réponse.' }),
       example: Object.freeze({
         label: 'Avant / après',
-        text: 'Avant : « Écris-moi un texte pour vendre mes mangues. » Après : « Je vends des mangues à Bouaké. Écris un statut WhatsApp de 2 phrases, ton chaleureux et direct, avec le prix du kilo à préciser entre crochets, sans emoji. » Le second prompt donne un texte utilisable immédiatement ; le premier donne un texte générique qu’il faut tout réécrire.'
+        text: 'Avant : « Écris-moi un texte pour vendre mes mangues. » Après : « Je vends des mangues. Écris un statut WhatsApp de 2 phrases, ton chaleureux et direct, avec le prix du kilo à préciser entre crochets, sans emoji. » Le second prompt donne un texte utilisable immédiatement ; le premier donne un texte générique qu’il faut tout réécrire.'
       }),
       comparison: Object.freeze({
         heading: 'Deux façons de demander',
@@ -116,20 +116,20 @@
     });
     const practice = Object.freeze({
       id: 'lab2-exercise', label: 'Exercice', heading: 'Choisir la meilleure version d’un prompt',
-      prompt: 'Tu veux un plan de révision pour un examen dans 3 semaines. Quel prompt donnera le résultat le plus utile ?',
+      prompt: 'Une association te demande un message WhatsApp pour annoncer une collecte de livres. Quel brief donne à l’IA assez de contexte pour produire un message exploitable ?',
       successText: 'Exactement : préciser la matière, le temps disponible et le format demandé (un planning jour par jour) guide l’IA vers une réponse directement utilisable.',
       choices: Object.freeze([
-        Object.freeze({ text: '« Fais-moi un planning de révision de mathématiques pour un examen dans 3 semaines, 1h par jour en semaine, présenté jour par jour. »', correct: true, feedback: 'C’est un prompt structuré : matière, délai, temps disponible et format sont tous précisés — la réponse sera directement exploitable.' }),
+        Object.freeze({ text: '« Pour une collecte de livres scolaires  samedi, écris un statut WhatsApp de 3 phrases pour les parents : indique les livres recherchés, le lieu à compléter et un ton chaleureux. N’invente aucun contact. »', correct: true, feedback: 'C’est un prompt structuré : matière, délai, temps disponible et format sont tous précisés — la réponse sera directement exploitable.' }),
         Object.freeze({ text: '« Aide-moi à réviser. »', correct: false, feedback: 'Aucune matière, aucun délai, aucun format : l’IA va devoir deviner, et la réponse sera trop générale pour être vraiment utile.' }),
         Object.freeze({ text: '« Donne-moi tout ce qu’il faut savoir en mathématiques. »', correct: false, feedback: 'C’est une demande illimitée dans un domaine entier — sans délai ni niveau précisé, le résultat sera soit trop long, soit hors sujet.' })
       ])
     });
     const evaluation = Object.freeze({
       id: 'lab2-quiz', label: 'Quiz de validation', heading: 'Que faire quand la réponse ne convient pas',
-      prompt: 'L’IA te donne un texte trop long et trop formel pour un message WhatsApp à un client. Quelle est la meilleure prochaine étape ?',
+      prompt: 'L’IA a produit un message de collecte correct, mais il manque le lieu et le texte dépasse trois phrases. Quelle correction est la plus efficace ?',
       successText: 'Redemander en précisant exactement ce qui ne va pas (longueur, ton) est toujours plus efficace que recommencer à zéro ou abandonner — c’est la bonne façon d’itérer.',
       choices: Object.freeze([
-        Object.freeze({ text: 'Je précise : « Raccourcis à 2 phrases et rends le ton plus simple, comme à un ami. »', correct: true, feedback: 'C’est la bonne méthode : tu gardes la base du travail déjà fait et tu corriges exactement ce qui ne convient pas.' }),
+        Object.freeze({ text: 'Je demande : « Réduis à 3 phrases maximum et laisse [LIEU] visible à compléter. Ne crée aucune adresse. »', correct: true, feedback: 'C’est la bonne méthode : tu gardes la base du travail déjà fait et tu corriges exactement ce qui ne convient pas.' }),
         Object.freeze({ text: 'Je recommence une nouvelle conversation depuis zéro en espérant un meilleur résultat.', correct: false, feedback: 'Recommencer à zéro fait perdre le contexte déjà construit — il est presque toujours plus rapide de corriger ce qui ne va pas.' }),
         Object.freeze({ text: 'Je copie le texte tel quel, il est globalement correct.', correct: false, feedback: 'Un ton inadapté au bon destinataire peut nuire à la relation avec un client — corriger le ton ne prend qu’une phrase de plus.' })
       ])
@@ -148,6 +148,19 @@
           Object.freeze({ text: '« Écris-moi un message professionnel mais ferme pour relancer un client sur une facture impayée de 15 jours, en gardant une porte ouverte pour continuer à travailler ensemble. »', correct: true, feedback: 'Contexte, ton et objectif sont précisés — le résultat sera directement utilisable, sans devoir tout réécrire.' }),
           Object.freeze({ text: '« Écris-moi un message pour un client. »', correct: false, feedback: 'Aucun contexte (quel sujet, quel ton, quel objectif) : l’IA va produire un message générique qu’il faudra entièrement adapter.' })
         ])
+      }),
+      Object.freeze({
+        type: 'mission', id: 'lab2-prompt-mission', step: 'exercise', outline: 'Mission : rédiger un prompt',
+        eyebrow: 'Mission terrain · 01', heading: 'Prépare une annonce utile pour collecter des livres scolaires ',
+        brief: 'Une association organise une collecte. Elle veut publier un statut WhatsApp clair, sans inventer de numéro ni de lieu précis. Rédige un prompt qui permettra à une IA de produire ce statut.',
+        placeholder: 'Ex. : Tu es… Rédige… pour… Ton… Contraintes…',
+        criteria: Object.freeze([
+          'Le rôle ou le contexte de l’IA est précisé',
+          'Le public et l’objectif sont explicites',
+          'Le format et le ton sont indiqués',
+          'Les limites (3 phrases, aucun contact inventé) sont formulées'
+        ]),
+        example: 'Tu es chargé de communication d’une association . Rédige un statut WhatsApp de 3 phrases pour inviter les familles à donner des livres scolaires. Ton chaleureux et direct. N’invente ni adresse, ni numéro : utilise [lieu à confirmer] et [contact à ajouter].'
       }),
       Object.freeze({ type: 'quiz', id: 'lab2-exercise', outline: practice.heading, step: 'exercise', locked: false, data: practice }),
       Object.freeze({ type: 'quiz', id: 'lab2-quiz', outline: evaluation.heading, step: 'quiz', locked: true, data: evaluation }),
@@ -187,10 +200,10 @@
     });
     const practice = Object.freeze({
       id: 'lab3-exercise', label: 'Exercice', heading: 'Corriger au bon endroit',
-      prompt: 'L’IA a rédigé un texte correct, mais il contient une date de rendez-vous qui ne correspond pas à celle que tu avais donnée dans ta demande. Quelle est la meilleure réaction ?',
+      prompt: 'Tu relis un résumé de réunion généré par l’IA. Il paraît clair, mais attribue une décision à la mauvaise personne. Quelle action prioritaire adoptes-tu ?',
       successText: 'Exactement : tu demandes une correction précise sur ce point exact, sans tout regénérer — c’est plus rapide et tu gardes le reste du texte qui était bon.',
       choices: Object.freeze([
-        Object.freeze({ text: 'Je précise la bonne date à l’IA et je lui demande de corriger uniquement cette phrase.', correct: true, feedback: 'C’est la bonne méthode : une correction ciblée garde ce qui fonctionnait déjà et règle précisément l’erreur.' }),
+        Object.freeze({ text: 'Je compare le résumé aux notes de réunion, corrige le nom et la décision, puis vérifie les autres attributions avant diffusion.', correct: true, feedback: 'C’est la bonne méthode : une correction ciblée garde ce qui fonctionnait déjà et règle précisément l’erreur.' }),
         Object.freeze({ text: 'Je corrige moi-même la date directement dans le texte sans rien dire à l’IA.', correct: false, feedback: 'Ce n’est pas faux en soi, mais tu perds l’occasion de vérifier si l’erreur vient d’un malentendu qui pourrait se reproduire ailleurs dans le texte.' }),
         Object.freeze({ text: 'Je redemande tout le texte depuis le début en espérant que la date soit juste cette fois.', correct: false, feedback: 'Régénérer tout le texte sans préciser l’erreur ne garantit rien — le plus efficace est de signaler exactement ce qui doit changer.' })
       ])
@@ -249,7 +262,7 @@
       principle: Object.freeze({ label: 'Principe essentiel', text: 'Un livrable fini n’est jamais le premier brouillon accepté tel quel — c’est le résultat d’au moins une correction ciblée.' }),
       example: Object.freeze({
         label: 'Exemple complet',
-        text: 'Fatou répare des téléphones à Lomé. Brief donné à l’IA : « Rédige une courte page de présentation pour mon activité de réparation de téléphones, pour des clients qui me trouveraient sur WhatsApp : qui je suis, ce que je répare, pourquoi me faire confiance, comment me contacter. Ton simple et rassurant, 150 mots maximum. » Premier brouillon trop long → relecture ciblée : « Raccourcis à 100 mots et commence directement par ce que tu répares. » Résultat : un texte prêt à coller dans son statut WhatsApp Business.'
+        text: 'Fatou répare des téléphones . Brief donné à l’IA : « Rédige une courte page de présentation pour mon activité de réparation de téléphones, pour des clients qui me trouveraient sur WhatsApp : qui je suis, ce que je répare, pourquoi me faire confiance, comment me contacter. Ton simple et rassurant, 150 mots maximum. » Premier brouillon trop long → relecture ciblée : « Raccourcis à 100 mots et commence directement par ce que tu répares. » Résultat : un texte prêt à coller dans son statut WhatsApp Business.'
       })
     });
     const automation = Object.freeze({

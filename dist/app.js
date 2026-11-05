@@ -3439,6 +3439,39 @@ function bindRegistryQuestions(entry) {
 }
 mountedLessons.forEach(bindRegistryQuestions);
 
+// DDA Lab guided mission: learner-authored output + transparent self-review.
+// Delegated once so the activity works in every mounted lesson and after view changes.
+(function bindLabMissionInteractions() {
+  if (document.documentElement.dataset.labMissionBound === 'true') return;
+  document.documentElement.dataset.labMissionBound = 'true';
+  document.addEventListener('input', event => {
+    const area = event.target.closest('[data-mission-answer]');
+    if (!area) return;
+    const mission = area.closest('[data-lab-mission]');
+    const count = mission?.querySelector('[data-mission-count]');
+    if (count) count.textContent = `${area.value.length} / 1200`;
+  });
+  document.addEventListener('click', event => {
+    const button = event.target.closest('[data-mission-review]');
+    if (!button) return;
+    const mission = button.closest('[data-lab-mission]');
+    if (!mission) return;
+    const answer = mission.querySelector('[data-mission-answer]')?.value.trim() || '';
+    const checks = [...mission.querySelectorAll('[data-mission-criterion]')];
+    const completed = checks.filter(check => check.checked).length;
+    const feedback = mission.querySelector('[data-mission-feedback]');
+    if (!feedback) return;
+    feedback.hidden = false;
+    feedback.className = 'lab-mission-feedback ' + (answer.length >= 40 && completed === checks.length ? 'is-ready' : 'is-review');
+    feedback.textContent = answer.length < 40
+      ? 'Ton livrable est encore trop court. Ajoute le contexte, le public, le format et les contraintes avant de faire ton bilan.'
+      : completed < checks.length
+        ? `Tu as coché ${completed}/${checks.length} critères. Relis ton prompt et complète les éléments manquants avant de le réutiliser.`
+        : 'Bilan positif : tu as rédigé un livrable et vérifié les 4 critères. Relis-le une dernière fois pour confirmer qu’aucune information n’a été inventée. Cette auto-évaluation ne remplace pas le quiz de validation.';
+  });
+})();
+
+
 function mountPremiumLessons() {
   if (!canUnlock('premium_track')) return;
   mountedLessons.filter(entry => entry.permission === 'premium_track').forEach(entry => {

@@ -146,7 +146,27 @@
 
   /* ---- Block renderers — one per type. Each takes only its own block. ---- */
 
+  function renderMission(block) {
+    const criteria = (block.criteria || []).map((criterion, index) => `
+      <label class="lab-mission-criterion"><input type="checkbox" data-mission-criterion><span>${index + 1}. ${criterion}</span></label>`).join('');
+    return `
+      <section class="lab-mission" id="${escapeAttr(block.id)}-block" data-lab-mission>
+        <p class="eyebrow gold">${escapeAttr(block.eyebrow || 'Mission guidée')}</p>
+        <h3>${escapeAttr(block.heading)}</h3>
+        <p class="lab-mission-brief">${escapeAttr(block.brief)}</p>
+        <label class="lab-mission-label" for="${escapeAttr(block.id)}-answer">Ton livrable</label>
+        <textarea id="${escapeAttr(block.id)}-answer" data-mission-answer rows="5" maxlength="1200" placeholder="${escapeAttr(block.placeholder || 'Écris ta proposition ici…')}"></textarea>
+        <div class="lab-mission-meta"><span>Minimum conseillé : 40 caractères</span><span data-mission-count>0 / 1200</span></div>
+        <fieldset class="lab-mission-rubric"><legend>Auto-évalue ton livrable</legend>${criteria}</fieldset>
+        <button type="button" class="primary-action" data-mission-review>Faire le bilan de ma mission <span>→</span></button>
+        <div class="lab-mission-feedback" data-mission-feedback role="status" aria-live="polite" hidden></div>
+        <details class="lab-mission-example"><summary>Voir un exemple après ton essai</summary><p>${escapeAttr(block.example || '')}</p></details>
+        <p class="lab-mission-note">Cette activité est un entraînement local : aucun texte n’est envoyé ni évalué par un serveur.</p>
+      </section>`;
+  }
+
   const BLOCK_RENDERERS = {
+    mission: renderMission,
     text_short(block) {
       return `
       <div class="lesson-copy">

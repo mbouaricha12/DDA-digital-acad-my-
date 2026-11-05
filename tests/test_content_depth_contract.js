@@ -9,23 +9,23 @@ const access = html.match(/<section class="view[^>]*id="access"[\s\S]*?<section 
 const path = html.match(/<section class="view[^>]*id="path"[\s\S]*?<section class="view[^>]*id="lesson"/i)?.[0] || '';
 const resources = html.match(/<section class="view[^>]*id="resources"[\s\S]*?<section class="view[^>]*id="membership"/i)?.[0] || '';
 
-assert(dashboard.includes('dashboard-mission'), 'Dashboard keeps a single explicit page mission');
-assert(dashboard.includes('dashboard-supporting'), 'Dashboard secondary surfaces are grouped and labelled');
-assert(dashboard.includes('terminal-practice-mission'), 'Dashboard retains a real practice output');
-assert(dashboard.includes('data-scroll-to="terminal-practice-mission"'), 'Dashboard secondary CTA has a different practice intent');
+assert(!dashboard.includes('dashboard-mission'), 'Dashboard avoids a redundant page mission');
+assert(dashboard.includes('terminal-lead'), 'Dashboard keeps a clear primary learning action');
+assert(dashboard.includes('lesson-primary-action'), 'Dashboard exposes a direct resume-lesson action');
+assert(dashboard.includes('data-view="path"') || dashboard.includes('lesson-primary-action'), 'Dashboard directs learners to a concrete next step');
 
 assert(!access.includes('data-view="journal"'), 'Access does not become a Journal navigation hub');
 assert(!access.includes('data-view="markets"'), 'Access does not become a Market Intelligence navigation hub');
 assert(access.includes('onboarding-form'), 'Access keeps the onboarding value');
 
-assert(path.includes('path-context-grid'), 'Path explains how to read the curriculum before the journey');
-assert(path.includes('Un ordre, pas une course'), 'Path gives context about locked modules');
-assert(path.includes('Une validation par étape'), 'Path explains proof-based progression');
+assert(!path.includes('path-context-grid'), 'Path avoids redundant explanatory cards');
+assert(path.includes('path-list'), 'Path presents the learning sequence');
+
 
 assert(resources.includes('resource-meta'), 'Resources expose usable metadata for each item');
 assert(resources.includes('resource-use-note'), 'Resources explains how to use the library');
-assert(css.includes('.dashboard-supporting'), 'Dashboard hierarchy has dedicated styling');
-assert(css.includes('.path-context-grid'), 'Path context has dedicated styling');
+
+
 assert(css.includes('.resource-use-note'), 'Resource guidance has dedicated styling');
 
 console.log('RESULT: Content depth and page mission contract passed');

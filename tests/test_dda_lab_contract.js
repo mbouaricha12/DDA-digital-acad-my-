@@ -109,6 +109,25 @@ test('LAB4 introduces automation without requiring a paid account or implying DD
   assert.ok(text.includes('google forms') || text.includes('google sheets'), 'the automation example must be a genuinely free, concrete tool');
 });
 
+test('LAB2 contains a real learner-authored prompt mission with explicit self-review criteria', () => {
+  const mission = l2.blocks.find(b => b.type === 'mission' && b.id === 'lab2-prompt-mission');
+  assert.ok(mission, 'LAB2 must include the interactive prompt-writing mission');
+  assert.ok(mission.brief && mission.placeholder && mission.example);
+  assert.strictEqual(mission.criteria.length, 4);
+  assert.ok(mission.criteria.every(item => item.length > 10));
+  assert.ok(mission.example.includes('[contact à ajouter]'));
+  const rendererSource = fs.readFileSync(path.join(__dirname, '..', 'dist', 'lesson-renderer.js'), 'utf8');
+  const rendererContext = { window: {}, URL };
+  vm.runInNewContext(rendererSource, rendererContext);
+  const html = rendererContext.window.DDALessonRenderer.renderBlock(mission);
+  for (const fragment of ['data-lab-mission', 'data-mission-answer', 'data-mission-criterion', 'data-mission-review', 'data-mission-feedback', 'Voir un exemple après ton essai']) {
+    assert.ok(html.includes(fragment), `mission renderer must output ${fragment}`);
+  }
+  const appSource = fs.readFileSync(path.join(__dirname, '..', 'dist', 'app.js'), 'utf8');
+  assert.ok(appSource.includes('bindLabMissionInteractions'), 'app must bind mission interactions');
+  assert.ok(appSource.includes('aucune information n’a été inventée'), 'feedback must remind learner to verify factual claims');
+});
+
 test('every quiz block id matches its data.id, so [data-question] stays unique across all simultaneously-mounted lessons', () => {
   // lesson-renderer.js's quiz() renders data-question="${block.data.id}", not
   // block.id — if data.id collided across lessons (e.g. every lesson reusing
