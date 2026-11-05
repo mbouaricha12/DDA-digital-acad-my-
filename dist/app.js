@@ -3104,6 +3104,117 @@ bindNotifyButton('experts', 'experts-notify', 'expertsNotify', 'DDA Experts');
 bindNotifyButton('live', 'live-notify', 'liveNotify', 'DDA Live');
 bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business');
 
+/* DDA AI Academy chat — a thin UI bridge over the authenticated BFF client.
+   The browser never receives a provider key and never invents a reply when the
+   BFF is disabled, unauthenticated or not configured. Only the last 12 turns
+   are kept locally so the learner can continue a short pedagogical thread. */
+(function initDdaAiChat() {
+  const form = document.getElementById('dda-ai-form');
+  const input = document.getElementById('dda-ai-input');
+  const transcript = document.getElementById('dda-ai-transcript');
+  const empty = document.getElementById('dda-ai-empty');
+  const status = document.getElementById('dda-ai-chat-status');
+  const error = document.getElementById('dda-ai-error');
+  const submit = document.getElementById('dda-ai-submit');
+  if (!form || !input || !transcript || !status || !window.DDABFF) return;
+  const storageKey = 'dda-ai-chat-v1';
+  const maxTurns = 12;
+  let history = [];
+  let pending = false;
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    if (Array.isArray(saved)) history = saved.filter(turn => ['user', 'assistant'].includes(turn?.role) && typeof turn.content === 'string').slice(-maxTurns);
+  } catch { history = []; }
+  const saveHistory = () => {
+    try { localStorage.setItem(storageKey, JSON.stringify(history.slice(-maxTurns))); } catch { /* storage is optional */ }
+  };
+  function appendMessage(role, text, options = {}) {
+    const item = document.createElement('div');
+    item.className = `dda-ai-message dda-ai-message-${role}${options.pending ? ' is-pending' : ''}`;
+    item.dataset.aiMessage = role;
+    const label = document.createElement('span');
+    label.className = 'dda-ai-message-label';
+    label.textContent = role === 'user' ? 'Toi' : 'DDA AI';
+    const copy = document.createElement('p');
+    copy.className = 'dda-ai-message-copy';
+    copy.textContent = text;
+    item.append(label, copy);
+    transcript.appendChild(item);
+    empty.hidden = true;
+    transcript.scrollTop = transcript.scrollHeight;
+    return item;
+  }
+  history.forEach(turn => appendMessage(turn.role, turn.content));
+  if (!window.DDABFF.enabled()) {
+    status.textContent = 'Service en attente de configuration';
+    status.dataset.state = 'offline';
+  } else {
+    status.textContent = 'BFF sécurisé · session requise';
+    status.dataset.state = 'ready';
+  }
+  function setPending(value) {
+    pending = value;
+    input.disabled = value;
+    submit.disabled = value;
+    submit.innerHTML = value ? 'Réflexion…' : 'Envoyer <span>→</span>';
+  }
+  function showUnavailable() {
+    status.textContent = 'Assistant non disponible';
+    status.dataset.state = 'offline';
+    appendMessage('assistant', window.DDABFF.enabled()
+      ? 'DDA AI n’est pas disponible pour cette session. Connecte-toi à ton compte DDA ou réessaie lorsque le service sera activé.'
+      : 'DDA AI est en préparation sur cet environnement. Le BFF sécurisé n’est pas encore configuré ; aucune réponse simulée ne sera affichée.');
+  }
+  function providerError(code) {
+    if (code === 'rate_limited') return 'La limite pédagogique temporaire est atteinte. Reviens plus tard pour continuer ta révision.';
+    return 'Le service DDA AI rencontre un problème temporaire. Ta question n’a pas été remplacée par une réponse inventée.';
+  }
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (pending) return;
+    const message = input.value.trim();
+    if (!message) { error.textContent = 'Écris une question avant d’envoyer.'; input.focus(); return; }
+    error.textContent = '';
+    const priorHistory = history.slice(-maxTurns);
+    appendMessage('user', message);
+    history.push({ role: 'user', content: message });
+    saveHistory();
+    input.value = '';
+    setPending(true);
+    const pendingMessage = appendMessage('assistant', 'DDA AI prépare une explication pédagogique…', { pending: true });
+    try {
+      const result = await window.DDABFF.askAI(message, priorHistory);
+      pendingMessage.remove();
+      if (!result.available) {
+        showUnavailable();
+      } else if (result.error) {
+        status.textContent = 'Réponse interrompue';
+        status.dataset.state = 'error';
+        appendMessage('assistant', providerError(result.error));
+      } else if (result.reply) {
+        status.textContent = 'Assistant disponible';
+        status.dataset.state = 'ready';
+        appendMessage('assistant', result.reply);
+        history.push({ role: 'assistant', content: result.reply });
+        saveHistory();
+      } else {
+        status.textContent = 'Réponse indisponible';
+        status.dataset.state = 'error';
+        appendMessage('assistant', 'DDA AI n’a pas fourni de réponse exploitable. Réessaie avec une question plus précise.');
+      }
+    } catch {
+      pendingMessage.remove();
+      status.textContent = 'Service indisponible';
+      status.dataset.state = 'error';
+      appendMessage('assistant', 'Le service est momentanément indisponible. Tes données locales restent intactes.');
+    } finally { setPending(false); input.focus(); }
+  });
+  document.querySelectorAll('[data-ai-prompt]').forEach(button => button.addEventListener('click', () => {
+    input.value = button.dataset.aiPrompt || '';
+    input.focus();
+  }));
+})();
+
 document.getElementById('play-demo').addEventListener('click', event => {
   const caption = document.getElementById('video-caption');
   event.currentTarget.textContent = event.currentTarget.textContent === '▶' ? 'Ⅱ' : '▶';

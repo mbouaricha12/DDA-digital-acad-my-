@@ -665,6 +665,7 @@
 
         <section class="panel mastery-panel">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-progress"/></svg> Fil de maîtrise</p><h3>Ce que tu as réellement démontré, compétence par compétence</h3></div></div>
+          <div class="mastery-reading-guide" aria-label="Comment lire le Fil de maîtrise"><div><strong>Preuve</strong><span>les étapes déjà validées</span></div><div><strong>Niveau</strong><span>l’état réel de la compétence</span></div><div><strong>Suite</strong><span>une seule action utile</span></div></div>
           <div class="mastery-list" id="mastery-list"></div>
         </section>
 
@@ -1030,15 +1031,16 @@
       <section class="view" id="markets" aria-labelledby="markets-title">
         <div class="section-intro"><p class="eyebrow gold">Market Intelligence · BRVM</p><h1 id="markets-title">Comprendre avant d’agir.</h1><p>Le pôle BRVM de DDA commence par une information vérifiable : contexte institutionnel, sources officielles et parcours d’apprentissage. Aucun cours n’est inventé et aucune série n’est présentée comme temps réel.</p></div>
         <div class="page-mission" data-mission="markets"><div><p class="eyebrow">Mission de cette page</p><strong>Lire un contexte régional sans le confondre avec un signal.</strong><span>Market Intelligence donne le cadre éditorial ; le Terminal reste l’espace où tu manipules et documentes.</span></div><button class="text-action" data-view="dashboard" data-scroll-to="analysis-terminal">Manipuler une série pédagogique <span>→</span></button></div>
+        <nav class="market-section-rail" aria-label="Accès rapide Market Intelligence"><span>Lire par étape</span><a href="#market-indices">Repères</a><a href="#market-context">Contexte</a><a href="#market-sources">Sources BRVM</a><a href="#market-publications">Publications</a></nav>
 
         <div class="market-visit-cue"><svg class="icon"><use href="#icon-compass"/></svg><p>Tu as suivi cet espace <strong id="market-visit-days">1</strong> <span id="market-visit-days-suffix">jour</span> sur cet appareil.</p></div>
 
-        <section class="market-zone">
+        <section class="market-zone" id="market-indices">
           <p class="eyebrow gold zone-label">Vue marché</p>
           <div class="index-grid" id="market-indices" aria-label="Indices suivis (aperçu)"></div>
         </section>
 
-        <section class="market-zone market-zone-brief">
+        <section class="market-zone market-zone-brief" id="market-context">
           <p class="eyebrow gold zone-label">Pourquoi cela compte</p>
           <article class="market-brief"><h2>Du contexte vers le curriculum.</h2><div class="brief-step"><span><svg class="icon"><use href="#icon-search"/></svg></span><div><strong>Que s’est-il passé ?</strong><p>Identifier le fait, sans exagération ni prédiction.</p></div></div><div class="brief-step"><span><svg class="icon"><use href="#icon-target"/></svg></span><div><strong>Pourquoi cela compte ?</strong><p>Relier le contexte à la volatilité, au risque et au comportement.</p></div></div><div class="brief-step"><span><svg class="icon"><use href="#icon-book"/></svg></span><div><strong>Quelle notion travailler ?</strong><p>Choisir un module dans le Parcours au lieu de chercher un signal.</p></div></div><button class="primary-action" data-view="path">Choisir une notion à travailler <span>→</span></button></article>
         </section>
@@ -1059,7 +1061,7 @@
               <ul><li><svg class="icon"><use href="#icon-book"/></svg> Repères pédagogiques UEMOA</li><li><svg class="icon"><use href="#icon-help"/></svg> Glossaire et méthode de lecture</li><li><svg class="icon"><use href="#icon-calendar"/></svg> Publications à vérifier sur BRVM</li><li><svg class="icon"><use href="#icon-shield"/></svg> Provenance et date toujours visibles</li></ul>
             </div>
           </div>
-          <article class="market-calendar brvm-information-desk">
+          <article class="market-calendar brvm-information-desk" id="market-sources">
             <div class="brvm-desk-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-shield"/></svg> Information contrôlée</p><h2>Ce que DDA peut confirmer aujourd’hui</h2></div><span class="data-badge brvm-status-badge"><svg class="icon"><use href="#icon-clock"/></svg> Données de marché différées</span></div>
             <p>DDA ne dispose pas encore d’une source automatisée autorisée pour importer les cours, volumes ou événements du jour. Cette page fournit donc des repères institutionnels et dirige vers les publications BRVM officielles au lieu d’afficher des sociétés ou des dates fictives.</p>
             <dl class="brvm-provenance"><div><dt>Statut</dt><dd>Information éditoriale et liens officiels</dd></div><div><dt>Référence</dt><dd>À consulter sur le site BRVM</dd></div><div><dt>Heure de récupération</dt><dd>Pas de flux automatique connecté</dd></div></dl>
@@ -1088,7 +1090,7 @@
           </section>
         </section>
 
-        <section class="market-zone market-zone-publications" aria-labelledby="brvm-publications-title">
+        <section class="market-zone market-zone-publications" id="market-publications" aria-labelledby="brvm-publications-title">
           <p class="eyebrow gold zone-label">Documents vérifiés</p>
           <div class="brvm-publications-head"><div><h2 id="brvm-publications-title">Publications financières BRVM</h2><p>Une bibliothèque courte de documents officiellement identifiés, datés et contrôlés avant d’être proposés à l’apprentissage.</p></div><span class="data-badge"><span class="status-dot"></span>Aucun document validé</span></div>
           <div class="brvm-publications-empty" id="brvm-publications-list" role="status" aria-live="polite"></div>
@@ -1247,13 +1249,14 @@
           <img class="photo-fill" src="images/photos/terminal-desk-trading.jpg" alt="" loading="lazy">
           <div class="photo-scrim"></div>
           <div class="community-hero-copy">
-            <p class="eyebrow gold">Aperçu — bientôt disponible</p>
+            <p class="eyebrow gold">Pratique Terminal · active aujourd’hui</p>
             <h1 id="practice-title">Pratique avancée</h1>
-            <p>Des outils pour analyser tes décisions plus finement — une fois cette brique activée.</p>
+            <p>Commence par le Terminal d’observation ; les outils de replay et de feedback viendront ensuite, sans remplacer ta preuve de travail.</p>
           </div>
         </div>
 
         <div class="page-mission" data-mission="practice"><div><p class="eyebrow">Mission de cette page</p><strong>Prolonger une compétence déjà observée.</strong><span>La Pratique avancée sera l’espace de replay et de feedback ; aujourd’hui, le Journal reste la preuve active.</span></div><button class="text-action" data-view="journal">Ouvrir la preuve de travail <span>→</span></button></div>
+        <section class="practice-live-handoff" aria-labelledby="practice-live-title"><div><p class="eyebrow gold">Point de départ réel</p><h2 id="practice-live-title">Un geste, une preuve, une trace.</h2><p>Le Practice Terminal est déjà disponible dans Aujourd’hui : tu peux observer une série synthétique, placer une zone et conserver ton raisonnement localement.</p></div><button class="primary-action" data-view="dashboard" data-scroll-to="analysis-terminal">Ouvrir le Practice Terminal <span>→</span></button></section>
         <div class="community-tiles community-tiles-6">
           <div class="community-tile"><svg class="icon"><use href="#icon-calendar"/></svg><span>Revue hebdomadaire</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-play"/></svg><span>Decision Replay</span></div>
@@ -1262,7 +1265,7 @@
           <div class="community-tile"><svg class="icon"><use href="#icon-spark"/></svg><span>Trader DNA</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-chart"/></svg><span>Skill Graph</span></div>
         </div>
-        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Ces outils ne sont pas encore actifs — DDA ne simule jamais une analyse ou un score qu’il n’a pas réellement calculé.</p>
+        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Le Terminal et le Journal sont actifs ; les autres briques restent identifiées comme futures tant qu’aucune mesure réelle n’est disponible.</p>
 
         <section class="future-principles" aria-labelledby="practice-principles-title">
           <p class="eyebrow gold">La mesure qui compte</p>
@@ -1305,19 +1308,19 @@
           <img class="photo-fill" src="images/photos/hero-market-woman.jpg" alt="" loading="eager" fetchpriority="high">
           <div class="photo-scrim"></div>
           <div class="community-hero-copy">
-            <p class="eyebrow gold">Aperçu — bientôt disponible</p>
+            <p class="eyebrow gold">Assistant pédagogique · accès conditionnel</p>
             <h1 id="intelligence-title">Intelligence DDA</h1>
             <p>Un accompagnement plus personnalisé, pensé pour s’appuyer sur ce que tu construis déjà — jamais pour le remplacer.</p>
           </div>
         </div>
 
-        <div class="page-mission" data-mission="intelligence"><div><p class="eyebrow">Mission de cette page</p><strong>Recevoir un jour une aide qui explique, jamais qui décide.</strong><span>Intelligence DDA prépare l’assistance pédagogique ; elle ne remplace pas tes validations.</span></div><button class="text-action" data-view="path">Voir le socle de personnalisation <span>→</span></button></div>
+        <div class="page-mission" data-mission="intelligence"><div><p class="eyebrow">Mission de cette page</p><strong>Obtenir une aide qui explique, jamais qui décide.</strong><span>Le chat DDA AI s’active avec une session et un BFF configuré ; il ne remplace pas tes validations.</span></div><button class="text-action" data-view="path">Voir le socle de personnalisation <span>→</span></button></div>
         <div class="community-tiles">
           <div class="community-tile"><svg class="icon"><use href="#icon-compass"/></svg><span>Darius AI</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-path"/></svg><span>Personnalisation</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-progress"/></svg><span>Outils intelligents</span></div>
         </div>
-        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> En préparation — voici ce qu’elle fera, en toute transparence.</p>
+        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Le chat est intégré côté Academy ; sa disponibilité dépend de la session et de la configuration serveur.</p>
 
         <section class="future-principles intelligence-principles" aria-labelledby="intelligence-principles-title">
           <p class="eyebrow gold">La règle DDA AI</p>
@@ -1326,6 +1329,35 @@
             <article><span class="boundary-label">Elle pourra</span><p>Reformuler une notion, expliquer une erreur, proposer une révision bornée et relier une faiblesse à une activité du parcours.</p></article>
             <article><span class="boundary-label boundary-label-muted">Elle ne fera jamais</span><p>Donner un signal, prédire un actif, exécuter une transaction ou présenter un score pédagogique comme un diagnostic financier. Elle ne remplacera jamais un conseiller financier humain et ne garantira ni emploi ni revenu.</p></article>
           </div>
+        </section>
+
+        <section class="dda-ai-chat-shell" id="intelligence-ai-chat" aria-labelledby="intelligence-ai-chat-title">
+          <div class="dda-ai-chat-heading">
+            <div>
+              <p class="eyebrow gold">DDA AI · assistant pédagogique</p>
+              <h2 id="intelligence-ai-chat-title">Pose une question sur ton apprentissage.</h2>
+              <p class="dda-ai-chat-intro">Demande une explication, une reformulation ou une piste de révision. Le chat ne donne ni signal, ni prédiction, ni conseil d’achat ou de vente.</p>
+            </div>
+            <span class="dda-ai-chat-status" id="dda-ai-chat-status" role="status" aria-live="polite">Vérification du service…</span>
+          </div>
+          <div class="dda-ai-chat-layout">
+            <div class="dda-ai-transcript" id="dda-ai-transcript" role="log" aria-live="polite" aria-relevant="additions">
+              <div class="dda-ai-empty" id="dda-ai-empty"><strong>Commence par une question précise.</strong><span>Exemples : « Quelle est la différence entre une action et une obligation ? » ou « Reformule la notion de liquidité. »</span></div>
+            </div>
+            <form class="dda-ai-composer" id="dda-ai-form">
+              <label for="dda-ai-input">Ta question</label>
+              <textarea id="dda-ai-input" maxlength="2000" rows="4" placeholder="Ex. Explique-moi pourquoi un prix peut évoluer sans que cela soit un signal…" required></textarea>
+              <div class="dda-ai-composer-footer"><small>2000 caractères maximum · historique local limité à cet appareil</small><button class="primary-action" type="submit" id="dda-ai-submit">Envoyer <span>→</span></button></div>
+              <p class="form-error" id="dda-ai-error" role="alert"></p>
+            </form>
+          </div>
+          <div class="dda-ai-prompts" aria-label="Questions suggérées">
+            <span>Pour commencer</span>
+            <button type="button" data-ai-prompt="Peux-tu reformuler la différence entre une action et une obligation ?">Action ou obligation ?</button>
+            <button type="button" data-ai-prompt="Explique-moi ce que signifie la liquidité dans un marché.">Comprendre la liquidité</button>
+            <button type="button" data-ai-prompt="Aide-moi à préparer une révision pédagogique sur les supports et résistances, sans signal de marché.">Préparer une révision</button>
+          </div>
+          <p class="disclosure dda-ai-disclosure"><svg class="icon"><use href="#icon-shield"/></svg> Tes messages restent dans l’historique local de cet appareil. Le service ne répond que si une session DDA et le BFF sécurisé sont disponibles.</p>
         </section>
 
         <section class="community-featured" aria-labelledby="intelligence-featured-title">

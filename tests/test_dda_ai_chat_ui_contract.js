@@ -1,0 +1,22 @@
+'use strict';
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const root = path.join(__dirname, '..');
+const html = fs.readFileSync(path.join(root, 'dist', 'academy.html'), 'utf8');
+const app = fs.readFileSync(path.join(root, 'dist', 'app.js'), 'utf8');
+const css = fs.readFileSync(path.join(root, 'dist', 'alpha-polish.css'), 'utf8');
+
+assert.match(html, /id="intelligence-ai-chat"/, 'Academy exposes the DDA AI chat surface');
+assert.match(html, /id="dda-ai-form"/, 'chat has a real submit form');
+assert.match(html, /id="dda-ai-transcript"[^>]*role="log"/, 'chat transcript is an accessible live log');
+assert.match(html, /maxlength="2000"/, 'chat input matches the BFF message limit');
+assert.match(html, /ne donne ni signal, ni prédiction/i, 'UI states the pedagogical boundary');
+assert.match(app, /window\.DDABFF\.askAI\(message, priorHistory\)/, 'Academy calls the BFF askAI bridge');
+assert.match(app, /localStorage\.setItem\(storageKey/, 'chat history is persisted locally only');
+assert.match(app, /DDA AI est en préparation/, 'disabled BFF state is honest and not simulated');
+assert.match(app, /providerError\(code\)/, 'provider errors are rendered without inventing a reply');
+assert.match(app, /textContent = text/, 'chat messages use textContent rather than unsanitized HTML');
+assert.match(css, /\.dda-ai-chat-shell/, 'chat surface has a dedicated visual layer');
+assert.match(css, /@media\(max-width:760px\).*dda-ai-chat-layout/s, 'chat collapses to one column on mobile');
+console.log('RESULT: DDA AI Academy chat UI contract passed');
