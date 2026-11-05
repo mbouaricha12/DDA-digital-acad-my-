@@ -879,8 +879,8 @@ function showOnboardingAfterRemoteAuth(user) {
 async function handleBffVerificationToken() {
  const params=new URLSearchParams(location.search),hashParams=new URLSearchParams(location.hash.slice(1));
  const recovery=window.DDA_AUTH_RECOVERY===true||params.get('type')==='recovery'||hashParams.get('type')==='recovery';
- const token=window.DDA_VERIFY_TOKEN||params.get('token_hash')||params.get('token')||hashParams.get('token_hash')||hashParams.get('token'),code=params.get('code');
- delete window.DDA_VERIFY_TOKEN;delete window.DDA_AUTH_RECOVERY;if(!window.DDABFF?.enabled())return;
+ const token=window.DDA_VERIFY_TOKEN||params.get('token_hash')||params.get('token')||hashParams.get('token_hash')||hashParams.get('token'),code=window.DDA_AUTH_CODE||params.get('code');
+ delete window.DDA_VERIFY_TOKEN;delete window.DDA_AUTH_RECOVERY;delete window.DDA_AUTH_CODE;if(!window.DDABFF?.enabled())return;
  if(recovery)showView('access',false,'replace');
  if(recovery&&code){const form=document.getElementById('bff-reset-password-form');document.getElementById('signup-form').hidden=true;document.getElementById('bff-recovery-form').hidden=true;form.hidden=false;form.dataset.recoveryReady='false';
   try{await window.DDABFF.exchangeRecoveryCode(code);form.dataset.recoveryReady='true';document.getElementById('reset-password-error').textContent='';}
