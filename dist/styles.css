@@ -3030,3 +3030,28 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
 .academy-public-exit:hover,.academy-public-exit:focus-visible{background:rgba(217,164,65,.15);border-color:rgba(217,164,65,.6);outline:2px solid transparent}
 .sidebar-foot .academy-public-exit{margin:0 0 .65rem}
 .mobile-drawer .academy-public-exit{margin:.8rem 1rem 1.2rem}
+
+/* UX pass 07 — learner dashboard: remove product noise, foreground next lesson */
+#dashboard .dda-ecosystem-strip,
+#dashboard .dashboard-mission,
+#dashboard .dashboard-mastery-thread,
+#dashboard .dashboard-kpi-row,
+#dashboard .dashboard-proof-strip,
+#dashboard .dashboard-operating-line{display:none!important}
+#dashboard .dashboard-command-head{margin:0 0 18px;padding:22px 0 8px;border:0;background:transparent}
+#dashboard .dashboard-command-head .eyebrow{display:none}
+#dashboard .dashboard-command-head h1{font-size:clamp(1.8rem,5vw,3rem);font-weight:650;letter-spacing:-.045em}
+#dashboard #personalized-next{margin-top:8px;max-width:46ch;font-size:15px;color:var(--muted,#aebdce)}
+#dashboard .terminal-lead{margin-top:0;border-radius:18px;overflow:hidden}
+#dashboard .terminal-lead h2{max-width:18ch;font-size:clamp(1.45rem,4vw,2.5rem);line-height:1.12}
+#dashboard .terminal-lead-summary{max-width:52ch}
+#dashboard .terminal-lead-meta{margin-top:18px}
+#dashboard .terminal-lead-photo{min-height:260px}
+#dashboard .terminal-divider{margin:22px 0}
+@media(max-width:640px){
+ #dashboard .dashboard-command-head{padding:18px 0 12px}
+ #dashboard .terminal-lead{display:flex;flex-direction:column}
+ #dashboard .terminal-lead-photo{min-height:190px;order:-1}
+ #dashboard .terminal-lead-actions{display:grid;grid-template-columns:1fr}
+ #dashboard .terminal-lead-go{width:100%;justify-content:center}
+}
