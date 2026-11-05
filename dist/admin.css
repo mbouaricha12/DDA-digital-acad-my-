@@ -39,3 +39,29 @@
 .admin-empty-state .primary-action{margin-top:16px}
 
 .admin-exit-row{margin-top:auto;display:grid;gap:8px;padding-top:18px;border-top:1px solid var(--line-soft)}
+
+
+/* DDA UX pass 05 — back-office hierarchy and table readability */
+#admin-shell .sidebar{padding:22px 16px}
+#admin-shell .nav-section-label{margin:24px 10px 8px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8294aa}
+#admin-shell .nav-item{min-height:44px;border-radius:10px;font-size:13px}
+#admin-shell .admin-exit-row{gap:10px}
+#admin-shell .topbar{min-height:72px;padding-inline:clamp(16px,3vw,30px)}
+#admin-shell .context-section{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8294aa}
+#admin-shell #admin-context-title{font-size:20px;line-height:1.2}
+#admin-shell main{padding:clamp(16px,3vw,32px)}
+#admin-shell .view>h1{margin:0 0 20px;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+#admin-shell .admin-metrics{gap:12px}
+#admin-shell .admin-table-wrap{border-radius:14px;overflow:auto;border:1px solid rgba(255,255,255,.1)}
+#admin-shell .admin-table{font-size:12px;min-width:720px}
+#admin-shell .admin-table th{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#93a6bc}
+#admin-shell .admin-table td,#admin-shell .admin-table th{padding:13px 14px}
+#admin-shell .admin-pager{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;font-size:12px}
+#admin-shell .admin-pager #admin-users-page-label{color:#9aadc2}
+@media(max-width:600px){
+ #admin-shell main{padding:16px}
+ #admin-shell .topbar{min-height:60px;padding-inline:14px}
+ #admin-shell #admin-context-title{font-size:17px}
+ #admin-shell .admin-pager{gap:8px}
+ #admin-shell .admin-pager button{min-height:40px}
+}
