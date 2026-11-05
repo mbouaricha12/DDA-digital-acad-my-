@@ -878,8 +878,29 @@ function showOnboardingAfterRemoteAuth(user) {
 
 async function handleBffVerificationToken() {
   const token = window.DDA_VERIFY_TOKEN;
+  const recovery = window.DDA_AUTH_RECOVERY === true;
   delete window.DDA_VERIFY_TOKEN;
+  delete window.DDA_AUTH_RECOVERY;
   if (!token || !window.DDABFF?.enabled()) return;
+  if (recovery) {
+    const form = document.getElementById('bff-reset-password-form');
+    const signup = document.getElementById('signup-form');
+    const recoveryForm = document.getElementById('bff-recovery-form');
+    if (signup) signup.hidden = true;
+    if (recoveryForm) recoveryForm.hidden = true;
+    if (form) form.hidden = false;
+    try {
+      await window.DDABFF.verifyRecoveryToken(token);
+      form?.setAttribute('data-recovery-ready', 'true');
+      document.getElementById('reset-password-error').textContent = '';
+    } catch {
+      if (form) form.hidden = true;
+      const panel = document.getElementById('bff-verify-panel');
+      panel.hidden = false;
+      document.getElementById('bff-verify-message').textContent = 'Lien de récupération invalide ou expiré. Retourne à la connexion et demande un nouveau lien.';
+    }
+    return;
+  }
   const panel = document.getElementById('bff-verify-panel');
   const message = document.getElementById('bff-verify-message');
   const form = document.getElementById('signup-form');
@@ -923,6 +944,31 @@ function initBffAuthUi() {
     document.getElementById('bff-recovery-form').hidden = true;
     document.getElementById('signup-form').hidden = false;
     setBffAuthMode('login');
+  });
+  document.getElementById('bff-reset-password-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const password = document.getElementById('reset-password').value;
+    const confirm = document.getElementById('reset-password-confirm').value;
+    const error = document.getElementById('reset-password-error');
+    if (form.dataset.recoveryReady !== 'true') { error.textContent = 'Le lien de récupération doit être validé. Demande un nouveau lien.'; return; }
+    if (password.length < 12) { error.textContent = 'Le mot de passe doit contenir au moins 12 caractères.'; return; }
+    if (password !== confirm) { error.textContent = 'Les deux mots de passe ne correspondent pas.'; return; }
+    error.textContent = '';
+    const submit = form.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    try {
+      await window.DDABFF.confirmPasswordReset({ password });
+      form.hidden = true;
+      form.dataset.recoveryReady = 'false';
+      document.getElementById('signup-form').hidden = false;
+      setBffAuthMode('login');
+      document.getElementById('bff-auth-status').textContent = 'Mot de passe modifié. Connecte-toi avec ton nouveau mot de passe.';
+      document.getElementById('reset-password').value = '';
+      document.getElementById('reset-password-confirm').value = '';
+    } catch {
+      error.textContent = 'Impossible de modifier le mot de passe. Le lien a peut-être expiré : demande-en un nouveau.';
+    } finally { submit.disabled = false; }
   });
   document.getElementById('bff-recovery-form').addEventListener('submit', async event => {
     event.preventDefault();
