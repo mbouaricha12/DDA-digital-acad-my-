@@ -217,7 +217,7 @@
   }
 
   window.DDABFF = Object.freeze({
-    enabled, register, verifyEmail, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
+    enabled, register, verifyEmail, verifyRecoveryToken, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
     getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, askAI,
     getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }
