@@ -54,6 +54,8 @@
       };
       var hashParams = new URLSearchParams(location.hash.slice(1));
       var recoveryType = params.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
+      var recoveryCode = params.get('code');
+      if (recoveryCode) window.DDA_AUTH_CODE = recoveryCode;
       var verificationToken = params.get('token_hash') || params.get('token') || hashParams.get('token_hash');
       if (verificationToken && verificationToken.length >= 32) window.DDA_VERIFY_TOKEN = verificationToken;
       if (recoveryType) window.DDA_AUTH_RECOVERY = true;
