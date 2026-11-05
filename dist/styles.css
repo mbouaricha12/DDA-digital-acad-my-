@@ -2896,3 +2896,46 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
 .lab-mission-example p{line-height:1.7}
 .lab-mission-note{margin:12px 0 0;color:rgba(244,247,252,.45);font-size:11px;line-height:1.5}
 @media(max-width:520px){.lab-mission-meta{font-size:10px}.lab-mission{padding:16px}.lab-mission-rubric{padding:12px}}
+
+
+/* DDA UX pass 01 — lesson progress must remain readable on narrow screens.
+   Replace the compressed horizontal rail with a clear vertical sequence. */
+@media (max-width: 600px) {
+  .lesson-loop {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    align-items: stretch;
+    margin: 18px 0 22px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 14px;
+    background: rgba(4,12,22,.38);
+    color: #b8c6d5;
+    letter-spacing: 0;
+    font-size: 13px;
+  }
+  .lesson-loop li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 42px;
+    padding: 8px 0;
+    line-height: 1.35;
+  }
+  .lesson-loop li:not(:last-child):after {
+    width: 1px;
+    height: 12px;
+    margin: 0;
+    position: absolute;
+    transform: translate(8px, 21px);
+    background: rgba(224,203,155,.24);
+  }
+  .lesson-loop li.now {
+    color: #f4f7fc;
+    font-weight: 800;
+  }
+  .lesson-loop li.done { color: #a9d9c5; }
+  .lesson-loop .loop-bead { width: 18px; height: 18px; }
+  .lesson-loop li.now .loop-bead { width: 20px; height: 20px; }
+}
