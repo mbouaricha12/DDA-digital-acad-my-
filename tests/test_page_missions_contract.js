@@ -29,7 +29,7 @@ for (const [view, mission] of Object.entries(missions)) {
     assert.doesNotMatch(chunk, /data-mission="dashboard"/, "dashboard stays free of a redundant mission banner");
     assert.doesNotMatch(chunk, /Choisir l’action utile d’aujourd’hui\./, "dashboard keeps its action-first hierarchy");
   } else {
-    const pageHeading = chunk.match(/<h1[^>]*>([\\s\\S]*?)<\\/h1>/);
+    const pageHeading = chunk.match(/<h1[^>]*>([\s\S]*?)<\/h1>/);
     assert.ok(pageHeading, `${view} exposes a clear page heading`);
     assert.ok(pageHeading[1].trim().length > 5, `${view} heading is meaningful`);
     assert.ok(chunk.includes('<p'), `${view} provides explanatory content`);
