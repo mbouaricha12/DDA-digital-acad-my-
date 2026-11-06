@@ -2181,6 +2181,87 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  console.log('\n-- W. DDA AI — assistant pédagogique réel --');
+
+  await test('without a BFF configured, the chat is honestly offline and never fakes a reply', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#intelligence`);
+    await page.waitForSelector('#intelligence.view.active');
+    assert.equal((await page.textContent('#dda-ai-chat-status')).trim(), 'Service en attente de configuration');
+    await page.fill('#dda-ai-input', 'Qu’est-ce qu’un support ?');
+    await page.click('#dda-ai-submit');
+    await page.waitForSelector('.dda-ai-message-assistant');
+    const replies = await page.locator('.dda-ai-message-assistant .dda-ai-message-copy').allTextContents();
+    assert.ok(replies.some(text => /en préparation/i.test(text)), 'an unconfigured BFF must say so, never invent a pedagogical answer');
+    await context.close();
+  });
+
+  await test('in BFF mode, a real reply is rendered, persisted locally across a reload, and the forbidden-signal boundary copy is present', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/security/csrf', route => route.fulfill({ status: 204 }));
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    let askBody = null;
+    await context.route('https://bff.test/v1/ai/ask', route => {
+      askBody = route.request().postDataJSON();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ reply: 'Un support est une zone de prix observée historiquement.' }) });
+    });
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#intelligence`);
+    await page.waitForSelector('#intelligence.view.active');
+    assert.match(await page.textContent('.intelligence-boundaries'), /ne fera jamais.*signal/is, 'the chat page must still state the no-signal boundary');
+    await page.fill('#dda-ai-input', 'Qu’est-ce qu’un support ?');
+    await page.click('#dda-ai-submit');
+    await page.waitForSelector('.dda-ai-message-assistant:has-text("zone de prix")');
+    assert.equal(askBody.message, 'Qu’est-ce qu’un support ?');
+    assert.deepEqual(askBody.history, []);
+    await page.reload();
+    await page.waitForSelector('#intelligence.view.active');
+    await page.waitForSelector('.dda-ai-message-user:has-text("Qu’est-ce qu’un support ?")');
+    await page.waitForSelector('.dda-ai-message-assistant:has-text("zone de prix")');
+    await context.close();
+  });
+
+  await test('a rate-limit response shows a distinct honest message, never a generic failure or a fake reply', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/security/csrf', route => route.fulfill({ status: 204 }));
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    await context.route('https://bff.test/v1/ai/ask', route => route.fulfill({
+      status: 429, contentType: 'application/json',
+      body: JSON.stringify({ code: 'rate_limited', message: 'Too many questions in a short time. Please try again later.' })
+    }));
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#intelligence`);
+    await page.waitForSelector('#intelligence.view.active');
+    await page.fill('#dda-ai-input', 'Une autre question');
+    await page.click('#dda-ai-submit');
+    await page.waitForSelector('.dda-ai-message-assistant:has-text("limite pédagogique")');
+    await context.close();
+  });
+
+  await test('a suggested prompt button fills the composer without sending', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#intelligence`);
+    await page.waitForSelector('#intelligence.view.active');
+    await page.click('[data-ai-prompt="Explique-moi ce que signifie la liquidité dans un marché."]');
+    assert.equal(await page.inputValue('#dda-ai-input'), 'Explique-moi ce que signifie la liquidité dans un marché.');
+    assert.equal(await page.locator('.dda-ai-message').count(), 0, 'filling a suggested prompt must never auto-send it');
+    await context.close();
+  });
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 
