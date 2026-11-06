@@ -441,6 +441,12 @@ function refreshMountedLessons() {
   LESSON_REGISTRY.filter(entry => entry.permission === 'premium_track' && !mountedLessons.some(m => m.id === entry.id)).forEach(entry => {
     if (canUnlock('premium_track')) renderPremiumContentUnavailable(entry.viewId, entry.title);
   });
+  // DDA Lab (Lot 1, mandate §6 audit): dda-lab.js is now lazy-loaded via the
+  // "ailab" group, so window.DDALab may only just have become available —
+  // (re)build its registry and mount/bind what it unlocks. Both calls are
+  // idempotent no-ops once already done (see their own comments above).
+  mountLabTrack();
+  mountPremiumLabLessons();
   renderState();
   if (window.DDAMarketIntelligence) {
     renderMarketIntelligence();
@@ -672,11 +678,25 @@ const titles = {
   // second hand-maintained list to keep in sync.
   ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.title])),
   // DDA Lab lesson titles come from window.DDALab's own data, not a second
-  // hand-maintained list — same principle as LESSON_REGISTRY above. LAB_REGISTRY
-  // itself is declared later in this file, so the id→viewId map is repeated
-  // here in the one place it is needed before that point.
+  // hand-maintained list — same principle as LESSON_REGISTRY above.
+  // dda-lab.js is now lazy-loaded (Lot 1, mandate §6 audit): window.DDALab
+  // may not exist yet at this point, so these keys are filled in later by
+  // applyLabTitles() the moment it becomes available — `titles` is a plain
+  // mutable object, never frozen, precisely so this patch-in-place works.
   ...(window.DDALab ? { 'lesson-lab1': window.DDALab.lessons[0].title, 'lesson-lab2': window.DDALab.lessons[1].title, 'lesson-lab3': window.DDALab.lessons[2].title, 'lesson-lab4': window.DDALab.lessons[3].title, 'lesson-lab-capstone': window.DDALab.capstone.title } : {})
 };
+// See the comment on the `titles` literal above — fills the lesson-lab*
+// titles once dda-lab.js has actually loaded (deep-link boot, or lazily via
+// mountLabTrack()/DDA_LAZY_REFRESH). Safe to call repeatedly.
+function applyLabTitles() {
+  if (!window.DDALab) return;
+  titles['lesson-lab1'] = window.DDALab.lessons[0].title;
+  titles['lesson-lab2'] = window.DDALab.lessons[1].title;
+  titles['lesson-lab3'] = window.DDALab.lessons[2].title;
+  titles['lesson-lab4'] = window.DDALab.lessons[3].title;
+  titles['lesson-lab-capstone'] = window.DDALab.capstone.title;
+}
+applyLabTitles();
 // V1.1 correction: 'dashboard' was never gated here even though DDA.curriculum's
 // own entitlements model (dda-core.js ENTITLEMENTS) already lists 'dashboard' as a
 // free/premium-only permission, not a visitor one — the deep-link/reload matrix this
@@ -3810,14 +3830,24 @@ function mountPremiumLessons() {
    have produced. Progress persists through the existing DDA.updateLesson()
    (a flat `state.lessons[id]` map, already lesson-id-agnostic) — no new
    storage key, no schema change. ------------------------------------------- */
-// LAB_REGISTRY used to be built once, synchronously, straight from
-// window.DDALab. Lot 2 (mandate §6 audit) made LAB4/LABCAP's real content
+// dda-lab.js is now lazy-loaded (Lot 1, mandate §6 audit — it used to be the
+// only authored content file still fetched unconditionally for 100% of
+// visitors, regardless of whether they ever opened the Lab). window.DDALab
+// may therefore not exist yet the first time this file runs: labModule/
+// LAB_REGISTRY/LAB_PREREQUISITE/LAB_VIEW_ID start empty and are (re)built by
+// rebuildLabRegistry(), called once at boot (handles the deep-link case,
+// where dda-lazy-modules.js's document.write bootstrap already loaded
+// dda-lab.js before this script runs — same as p2-lessons.js already did)
+// and again from mountLabTrack() once the lazy group actually finishes
+// loading later (DDA_LAZY_REFRESH hook below).
+// Lot 2 (mandate §6 audit) separately made LAB4/LABCAP's own real content
 // arrive later and asynchronously (fetched from the authenticated BFF only
-// once Premium is actually confirmed — see ensurePremiumContentLoaded()
+// once Premium is actually confirmed — see ensureLabPremiumContentLoaded()
 // below), so window.DDALab.lessons[3]/.capstone can be *replaced* at
-// runtime once that fetch resolves. rebuildLabRegistry() re-derives
-// everything below from whatever window.DDALab currently is, and is safe
-// to call again after such a replacement.
+// runtime once that fetch resolves, independently of whether dda-lab.js
+// itself has already loaded. rebuildLabRegistry() re-derives everything
+// below from whatever window.DDALab currently is, and is safe to call again
+// after either event — it deliberately has no "already built" guard.
 let labModule = null;
 let LAB_REGISTRY = [];
 let LAB_PREREQUISITE = Object.freeze({});
@@ -3865,10 +3895,11 @@ function rebuildLabRegistry() {
 rebuildLabRegistry();
 // Navigation audit follow-up: initLessonPrevLinks (further up this file)
 // only covers LESSON_REGISTRY — DDA Lab is a deliberately separate registry
-// (see the block comment above) with its own prerequisite chain, so it
-// needs its own, identically-shaped injector rather than reusing
-// LESSON_PREREQUISITE/LESSON_VIEW_ID for lessons that aren't in them.
-// Idempotent via its own DOM guard, so it is safe to call again.
+// (see the block comment above rebuildLabRegistry) with its own prerequisite
+// chain, so it needs its own, identically-shaped injector rather than
+// reusing LESSON_PREREQUISITE/LESSON_VIEW_ID for lessons that aren't in them.
+// Idempotent via its own DOM guard (quickNav.querySelector), so it is safe
+// to call again — including every time mountLabTrack() runs.
 function initLabPrevLinks() {
   LAB_REGISTRY.forEach(entry => {
     const prevViewId = LAB_VIEW_ID[LAB_PREREQUISITE[entry.viewId]];
@@ -3896,8 +3927,24 @@ initLabPrevLinks();
 function labContentReady(entry) {
   return entry.permission !== 'premium_track' || (Array.isArray(entry.meta?.lesson?.blocks) && entry.meta.lesson.blocks.length > 0);
 }
-function mountLabEntries() {
+// Mounts the free LAB1-3 lessons (plus LAB4/capstone when already
+// Premium-entitled AND their real content has actually arrived — see
+// labContentReady() above) and binds their interactions. A no-op until
+// dda-lab.js has actually loaded. Called once at boot (deep-link case) and
+// again from the DDA_LAZY_REFRESH hook once the lazy "ailab" group resolves
+// (normal nav-click case, where window.DDALab did not exist yet at boot) —
+// every step here is guarded so repeated calls stay harmless:
+// rebuildLabRegistry() just re-derives the same data when nothing actually
+// changed, mountLesson() no-ops once a view is mounted, and the one
+// genuinely non-idempotent step (bindMarkUnderstood, which would otherwise
+// double-bind a click listener) only ever runs on the first successful pass
+// via `labMarkUnderstoodBound`.
+let labMarkUnderstoodBound = false;
+function mountLabTrack() {
   if (!window.DDALab) return;
+  rebuildLabRegistry();
+  applyLabTitles();
+  initLabPrevLinks();
   LAB_REGISTRY.forEach(entry => {
     // Same rule boot-time LESSON_REGISTRY mounting already uses (line ~158):
     // a premium entry mounts at boot too when the already-loaded state is
@@ -3908,22 +3955,29 @@ function mountLabEntries() {
     const main = document.getElementById(`${entry.viewId}-main`);
     const wasMounted = main?.dataset.ddaLessonMounted === 'true';
     mountLesson(entry);
+    if (!wasMounted) bindRegistryQuestions(entry);
+  });
+  if (!labMarkUnderstoodBound) {
+    labMarkUnderstoodBound = true;
+    LAB_REGISTRY.forEach(entry => {
+      const ui = lessonUiIds(entry);
+      bindMarkUnderstood(entry.id, { buttonId: ui.markUnderstoodId, savedStateId: ui.savedStateId, scrollToId: entry.understoodScrollTo });
+    });
+  }
+}
+mountLabTrack();
+function mountPremiumLabLessons() {
+  if (!window.DDALab || !canUnlock('premium_track')) return;
+  LAB_REGISTRY.filter(entry => entry.permission === 'premium_track').forEach(entry => {
+    if (!labContentReady(entry)) { renderPremiumContentUnavailable(entry.viewId, entry.meta?.lesson?.title); return; }
+    const main = document.getElementById(`${entry.viewId}-main`);
+    const wasMounted = main?.dataset.ddaLessonMounted === 'true';
+    mountLesson(entry);
     if (!wasMounted && main) {
       bindRegistryQuestions(entry);
       main.querySelectorAll('[data-view]').forEach(bindViewButton);
     }
   });
-}
-mountLabEntries();
-if (window.DDALab) {
-  LAB_REGISTRY.forEach(entry => {
-    const ui = lessonUiIds(entry);
-    bindMarkUnderstood(entry.id, { buttonId: ui.markUnderstoodId, savedStateId: ui.savedStateId, scrollToId: entry.understoodScrollTo });
-  });
-}
-function mountPremiumLabLessons() {
-  if (!window.DDALab || !canUnlock('premium_track')) return;
-  mountLabEntries();
 }
 // Lot 2 (mandate §6 audit): fetches LAB4/LABCAP's real content from the
 // authenticated BFF and, if it actually came back, replaces window.DDALab

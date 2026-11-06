@@ -7,7 +7,15 @@
     lessons: ['m1-1-lesson.js', 'm1-2-lesson.js', 'm1-3-lesson.js'],
     premium: ['p2-lessons.js'],
     markets: ['market-intelligence.js'],
-    brvm: ['mbrvm-1-lesson.js']
+    brvm: ['mbrvm-1-lesson.js'],
+    // DDA Lab ("IA pour agir"): exactly the same deferred-loading model
+    // already used for p2-lessons.js above (mandate §6 audit — dda-lab.js
+    // was the only authored content file still loaded unconditionally for
+    // 100% of visitors). This mitigates exposure by no longer fetching it
+    // for a visitor who never opens the Lab; it is not, on its own, a fix
+    // for the file's content still being publicly readable on direct
+    // request — that is a separate, deeper fix tracked outside this file.
+    ailab: ['dda-lab.js']
   };
   function loadScript(src) {
     if (loaded.has(src)) return loaded.get(src);
@@ -30,6 +38,10 @@
     // link never pays a second, visible lazy-load delay on click.
     if (view === 'markets') return ['markets', 'brvm'];
     if (view === 'lesson-mbrvm1') return ['brvm'];
+    // DDA Lab catalog + its five lessons (LAB1-4, capstone). Note: 'premium-lab'
+    // above is an unrelated, pre-existing feature (the Risk Plan Practice Lab) —
+    // this is the separate "IA pour agir" track registered by dda-lab.js.
+    if (['lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone'].includes(view)) return ['ailab'];
     return [];
   }
   // A deep-link is a deliberate request for a feature. During the parser
