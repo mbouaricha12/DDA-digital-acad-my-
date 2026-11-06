@@ -58,7 +58,14 @@ function state(plan = 'premium') {
 
     const curriculum = await page.evaluate(() => window.DDA.curriculum.modules.flatMap(module => module.lessons.map(lesson => ({ module: module.id, id: lesson.id, title: lesson.title }))));
     assert.deepEqual(curriculum.filter(item => item.module !== 'M2').map(item => item.id), ['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3']);
-    assert.deepEqual(curriculum.filter(item => item.module === 'M2').map(item => item.id), ['P2.1', 'P2.2']);
+    // Lot 2 (mandate §6 audit): P2.1/P2.2's real content no longer ships in
+    // this public bundle at all — in this no-BFF local/pilot run there is no
+    // server left to fetch it from, so module M2 is honestly empty here
+    // instead of showing the real authored lessons (the old behavior this
+    // assertion used to check is exactly the leak Lot 2 closes; see
+    // tests/test_bff_implementation.js and tests/test_premium_p2_contract.js
+    // for the BFF-mode path that actually serves this content now).
+    assert.deepEqual(curriculum.filter(item => item.module === 'M2').map(item => item.id), []);
 
     await page.goto(`${ACADEMY}#premium-track`);
     await page.getByRole('button', { name: 'Ouvrir le Lab', exact: true }).click();

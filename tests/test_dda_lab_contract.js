@@ -10,8 +10,21 @@ const ctx = { window: {}, console };
 vm.runInNewContext(source, ctx);
 
 const lab = ctx.window.DDALab;
-const [l1, l2, l3, l4] = lab.lessons;
-const cap = lab.capstone;
+const [l1, l2, l3, l4Meta] = lab.lessons;
+const capMeta = lab.capstone;
+// Lot 2 (mandate §6 audit): LAB4/LABCAP's real text, exercises and quiz
+// answers no longer live in this public, statically-served file — only
+// non-secret metadata does (l4Meta/capMeta above: title, prerequisite,
+// premium flag, empty blocks). The real content now lives only on the
+// authenticated BFF (bff/src/premium-content.js) — load it the same way to
+// validate it, and use it (not the metadata shells) for every assertion
+// that needs the real lesson body.
+const premiumContentSource = fs.readFileSync(path.join(__dirname, '..', 'bff', 'src', 'premium-content.js'), 'utf8');
+const premiumCtx = { module: { exports: {} }, require, console };
+vm.runInNewContext(premiumContentSource, premiumCtx);
+const { PREMIUM_CONTENT } = premiumCtx.module.exports;
+const l4 = PREMIUM_CONTENT.LAB4;
+const cap = PREMIUM_CONTENT.LABCAP;
 const all = [l1, l2, l3, l4, cap];
 
 let passed = 0;
@@ -141,6 +154,16 @@ test('every quiz block id matches its data.id, so [data-question] stays unique a
       ids.add(block.id);
     });
   });
+});
+
+test('LAB4/LABCAP metadata shells in the public dist/dda-lab.js carry no real content (Lot 2, mandate §6 audit)', () => {
+  assert.deepEqual(l4Meta.blocks, [], 'the public client file must never ship LAB4\'s real blocks again');
+  assert.deepEqual(capMeta.blocks, [], 'the public client file must never ship LABCAP\'s real blocks again');
+  assert.equal(l4Meta.content, null);
+  assert.equal(capMeta.content, null);
+  assert.equal(l4Meta.prerequisite, l4.prerequisite, 'the non-secret metadata shell must still agree with the real server content');
+  assert.equal(capMeta.prerequisite, cap.prerequisite);
+  assert.doesNotMatch(source, /déclencheur|aucune note serveur|lab4-automation-concept/, 'none of LAB4/LABCAP\'s real authored text must be present in this public file');
 });
 
 console.log(`RESULT: ${passed} DDA Lab content contract checks passed`);

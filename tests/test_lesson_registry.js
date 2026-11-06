@@ -56,7 +56,14 @@ const coreCtx = {
   // independent module, between M1 and M2 in curriculum order.
   DDAMBRVM1Lesson: require('../dist/mbrvm-1-lesson.js')
 };
-vm.runInNewContext(fs.readFileSync(path.join(root, 'dist', 'p2-lessons.js'), 'utf8'), coreCtx);
+// P2.1/P2.2's real content no longer lives in dist/p2-lessons.js (Lot 2,
+// mandate §6 audit) — it is fetched from the authenticated BFF at runtime
+// (bff/src/premium-content.js). This structural test validates the
+// registry against the REAL authored content, so it loads it from there
+// directly, exactly as dist/p2-lessons.js would have populated
+// window.DDAP2Lessons once its fetch succeeded.
+const { PREMIUM_CONTENT } = require('../bff/src/premium-content.js');
+coreCtx.window.DDAP2Lessons = Object.freeze({ p21: PREMIUM_CONTENT['P2.1'], p22: PREMIUM_CONTENT['P2.2'] });
 vm.runInNewContext(fs.readFileSync(path.join(root, 'dist', 'dda-core.js'), 'utf8'), coreCtx);
 const DDA = coreCtx.window.DDA;
 vm.runInNewContext(fs.readFileSync(path.join(root, 'dist', 'lesson-renderer.js'), 'utf8'), coreCtx);

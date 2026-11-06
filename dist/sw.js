@@ -1,4 +1,4 @@
-const CACHE = 'dda-shell-v25';
+const CACHE = 'dda-shell-v26';
 
 // Critical shell only. Optional authored modules are cached at first use by the
 // runtime strategy, preserving the lazy-loading benefit on first installation.

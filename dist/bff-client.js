@@ -131,6 +131,22 @@
   // reply. A provider failure or rate limit also resolves to {available:true,
   // error:<code>} rather than throwing, so a transient outage never crashes
   // the chat UI.
+  // Real Premium lesson/lab content (mandate §6 audit, Lot 2 — see
+  // bff/src/premium-content.js). Mirrors adminRequest's {enabled, status, …}
+  // shape rather than collapsing every outcome to null/throw: the caller
+  // must tell "not entitled (yet)" (401/403, already handled by the honest
+  // paywall gate elsewhere) and "unknown id" (404) apart from a genuine
+  // network/server failure, which is thrown so the caller can show a
+  // distinct "temporarily unavailable, try again" message instead of a
+  // silent empty lesson.
+  async function fetchPremiumContent(lessonId) {
+    const result = await request(`/v1/premium/content/${encodeURIComponent(lessonId)}`);
+    if (!result.enabled) return { enabled: false };
+    if ([401, 403, 404].includes(result.response.status)) return { enabled: true, status: result.response.status, lesson: null };
+    if (!result.response.ok) throw resultError(result, 'premium_content_failed');
+    return { enabled: true, status: 200, lesson: result.body?.lesson || null };
+  }
+
   async function askAI(message, history) {
     const result = await request('/v1/ai/ask', { method: 'POST', body: { message, history } });
     if (!result.enabled || result.response.status === 401) return { available: false };
@@ -231,7 +247,7 @@
 
   window.DDABFF = Object.freeze({
     enabled, register, verifyEmail, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
-    getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, askAI,
+    getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, fetchPremiumContent, askAI,
     getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }
   });
