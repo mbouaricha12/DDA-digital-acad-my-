@@ -17,9 +17,11 @@ const validEnv = {
   BFF_COOKIE_SECURE: 'true'
 };
 assert.deepEqual(validateRuntimeConfig(configFromEnv(validEnv), validEnv), []);
-assert.equal(configFromEnv(validEnv).passwordRecoveryRedirectTo, 'https://app.example.dda.academy/?type=recovery');
-assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, PASSWORD_RECOVERY_REDIRECT_TO: 'https://other.example/?type=recovery' }), { ...validEnv, PASSWORD_RECOVERY_REDIRECT_TO: 'https://other.example/?type=recovery' }).some(issue => /PASSWORD_RECOVERY_REDIRECT_TO/.test(issue)));
-assert.equal(configFromEnv(validEnv).passwordRecoveryRedirectTo, 'https://app.example.dda.academy/?type=recovery');
+// EMAIL_REDIRECT_TO carries the #access hash (the SPA route the reset-password
+// form lives on); URL serialization always places a derived query string
+// before an existing hash, so the auto-derived recovery redirect keeps it too
+// — the frontend force-navigates to the access view on recovery regardless.
+assert.equal(configFromEnv(validEnv).passwordRecoveryRedirectTo, 'https://app.example.dda.academy/?type=recovery#access');
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, PASSWORD_RECOVERY_REDIRECT_TO: 'https://other.example/?type=recovery' }), { ...validEnv, PASSWORD_RECOVERY_REDIRECT_TO: 'https://other.example/?type=recovery' }).some(issue => /PASSWORD_RECOVERY_REDIRECT_TO/.test(issue)));
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, ALLOWED_ORIGINS: '*' }), { ...validEnv, ALLOWED_ORIGINS: '*' }).some(issue => /exact HTTPS origins/.test(issue)));
 assert.ok(validateRuntimeConfig(configFromEnv({ ...validEnv, BFF_COOKIE_SECURE: 'false' }), { ...validEnv, BFF_COOKIE_SECURE: 'false' }).some(issue => /__Host- cookies/.test(issue)));

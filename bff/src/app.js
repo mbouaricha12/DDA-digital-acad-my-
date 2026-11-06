@@ -68,7 +68,6 @@ function validateRuntimeConfig(config, env = process.env) {
     const recoveryRedirect = new URL(config.passwordRecoveryRedirectTo);
     if (recoveryRedirect.username || recoveryRedirect.password || !config.allowedOrigins.includes(recoveryRedirect.origin) || recoveryRedirect.searchParams.get('type') !== 'recovery') issues.push('PASSWORD_RECOVERY_REDIRECT_TO must be credential-free, use an allowlisted origin and include type=recovery');
   } catch { issues.push('PASSWORD_RECOVERY_REDIRECT_TO must be a valid URL'); }
-  try { const recovery = new URL(config.passwordRecoveryRedirectTo); if (recovery.username || recovery.password || !config.allowedOrigins.includes(recovery.origin) || recovery.searchParams.get('type') !== 'recovery') issues.push('PASSWORD_RECOVERY_REDIRECT_TO must be credential-free, allowlisted and include type=recovery'); } catch { issues.push('PASSWORD_RECOVERY_REDIRECT_TO must be a valid URL'); }
   return issues;
 }
 
