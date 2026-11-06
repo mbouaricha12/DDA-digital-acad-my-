@@ -26,7 +26,7 @@ const CORE = [
 
 const OPTIONAL_MODULES = [
   './m1-1-lesson.js', './m1-2-lesson.js', './m1-3-lesson.js',
-  './p2-lessons.js', './market-intelligence.js'
+  './p2-lessons.js', './market-intelligence.js', './mbrvm-1-lesson.js'
 ];
 const isSameOrigin = request => new URL(request.url).origin === self.location.origin;
 const isApiRequest = url => url.pathname.includes('/v1/');

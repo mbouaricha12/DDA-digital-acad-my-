@@ -55,7 +55,7 @@ assert.match(app, /window\.addEventListener\('hashchange'/, 'hash links remain s
 assert.match(app, /history\.back\(\)/, 'in-app Retour uses the native route history when available');
 assert.match(app, /function writeDdaHistory\(/, 'route entries store only the current DDA view in history state');
 
-const appViews = ['landing','access','dashboard','path','lesson','lesson-m02','lesson-m03','lesson-m11','lesson-m12','lesson-m13','lesson-p21','lesson-p22','premium-track','premium-lab','premium-assessment','progress','journal','resources','membership','markets','brokers','support','community','practice','intelligence','profile'];
+const appViews = ['landing','access','dashboard','path','lesson','lesson-m02','lesson-m03','lesson-m11','lesson-m12','lesson-m13','lesson-mbrvm1','lesson-p21','lesson-p22','premium-track','premium-lab','premium-assessment','progress','journal','resources','membership','markets','brokers','support','community','practice','intelligence','profile'];
 for (const view of appViews) {
   assert.match(html, new RegExp(`id="${view}"`), `the existing ${view} route remains mounted`);
   assert.match(css, new RegExp(`#${view}\\.view`), `the global Deep Navy shell includes ${view}`);

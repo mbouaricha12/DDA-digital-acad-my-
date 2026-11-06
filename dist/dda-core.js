@@ -4,7 +4,7 @@
   const STORAGE_KEY = 'dda-prototype-state-v4';
   const LEGACY_KEYS = ['dda-prototype-state-v3', 'dda-prototype-state-v2', 'dda-prototype-state'];
   const SCHEMA_VERSION = 4;
-  const LANDING_ROUTES = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile']);
+  const LANDING_ROUTES = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile']);
   const ATTRIBUTION_VALUES = {
     source: new Set(['newsletter', 'youtube', 'facebook', 'instagram', 'linkedin', 'tiktok', 'google', 'bing', 'direct', 'partner', 'whatsapp', 'telegram', 'community', 'x']),
     medium: new Set(['email', 'video', 'social', 'cpc', 'paid', 'organic', 'referral', 'newsletter', 'paid-social', 'paid_search']),
@@ -526,12 +526,19 @@
     const M11_LESSON = globalThis.DDAM1GoldenLesson || null;
     const M12_LESSON = globalThis.DDAM12GoldenLesson || null;
     const M13_LESSON = globalThis.DDAM13GoldenLesson || null;
+    const MBRVM1_LESSON = globalThis.DDAMBRVM1Lesson || null;
     return Object.freeze({
       id: 'darius-free',
       title: 'Darius Free',
       modules: Object.freeze([
         { id: 'M0', title: 'Fondations des marchés', lessons: Object.freeze([buildM01Lesson(), buildM02Lesson(), buildM03Lesson()]) },
         { id: 'M1', title: 'Comprendre les marchés financiers', summary: 'Pourquoi les prix évoluent et comment les marchés s’organisent.', lessons: Object.freeze([M11_LESSON, M12_LESSON, M13_LESSON].filter(Boolean)) },
+        // BRVM (mandat §6, P1.2) : domaine pédagogique à part, jamais
+        // séquentiel avec le Trading général ni avec Premium (M2) —
+        // `independent: true` (learning-engine.js) le rend disponible dès
+        // que le fichier authored est chargé, sans dépendre d'un autre
+        // module ni changer le verrou existant de M2.
+        { id: 'MBRVM', title: 'Introduction à la BRVM', summary: 'La bourse régionale UEMOA, ses titres et sa capitalisation boursière.', independent: true, lessons: Object.freeze([MBRVM1_LESSON].filter(Boolean)) },
         { id: 'M2', title: 'Risque et discipline', summary: 'Protéger son capital avant de rechercher la performance.', permission: 'premium_track', premiumOnly: true, lessons: Object.freeze([(globalThis.DDAP2Lessons || globalThis.window?.DDAP2Lessons)?.p21, (globalThis.DDAP2Lessons || globalThis.window?.DDAP2Lessons)?.p22].filter(Boolean)) },
         { id: 'M3', title: 'À venir', lessons: Object.freeze([]) },
         { id: 'M4', title: 'À venir', lessons: Object.freeze([]) },
