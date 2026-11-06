@@ -1729,6 +1729,28 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
   console.log('\n-- N. DDA Lab — catalogue, parcours et verrou Premium --');
 
+  await test('dda-lab.js is never fetched for a visitor who never opens the DDA Lab, but loads on demand when they do (Lot 1, mandate §6 audit)', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'M0.1': { quizComplete: true } }, 'free');
+    const page = await context.newPage();
+    const requestedUrls = [];
+    page.on('request', request => requestedUrls.push(request.url()));
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    await page.click('[data-view="path"]');
+    await page.waitForSelector('#path.view.active');
+    await page.click('[data-view="progress"]');
+    await page.waitForSelector('#progress.view.active');
+    assert.equal(requestedUrls.some(url => url.endsWith('dda-lab.js')), false, 'dda-lab.js must not be downloaded while the visitor never navigates into the Lab');
+
+    requestedUrls.length = 0;
+    await page.click('[data-view="lab"]');
+    await page.waitForSelector('#lab.view.active');
+    assert.equal(requestedUrls.some(url => url.endsWith('dda-lab.js')), true, 'opening the DDA Lab must still load its content on demand');
+    assert.equal((await page.locator('#lab-LAB1-status').textContent()).trim(), 'À commencer', 'the Lab catalog actually renders real data once loaded');
+    await context.close();
+  });
+
   await test('DDA Lab catalog opens for Free, LAB1 completes end to end, and LAB2 unlocks', async () => {
     const context = await freshContext(browser, { width: 390, height: 844 });
     await seedLocalLearner(context, {}, 'free');

@@ -1617,7 +1617,12 @@
     );
   </script>
   <script src="dda-core.js"></script>
-  <script src="dda-lab.js"></script>
+  <!-- dda-lab.js is no longer loaded unconditionally here (mandate §6 audit,
+       Lot 1): it is now fetched on demand by dda-lazy-modules.js (group
+       "ailab"), the exact same deferred model already used for
+       p2-lessons.js, so it is never downloaded by a visitor who never opens
+       the DDA Lab / #lab view. See dda-lazy-modules.js and the LAB_REGISTRY
+       section of app.js (mountLabTrack). -->
   <script src="learning-engine.js"></script>
   <script src="lesson-renderer.js"></script>
   <script src="dda-analytics.js"></script>
