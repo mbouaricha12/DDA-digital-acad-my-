@@ -142,6 +142,8 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .context-section{display:block;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .context-section[hidden]{display:none}
 .context strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.topbar-search{display:none}
+.topbar-user{display:none}
 .network-state{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;margin-left:auto}
 .network-state i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(79,190,133,.14)}
 .network-state.offline i{background:var(--gold);box-shadow:0 0 0 4px rgba(217,164,65,.14)}
@@ -485,6 +487,37 @@ a.nav-item[hidden]{display:none}
 .module-toc-status{flex:none;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);padding-right:6px}
 .module-toc-status[data-status="done"]{color:var(--green)}
 .module-toc-status[data-status="locked"]{color:var(--muted-2)}
+
+/* Lesson Experience V3 — breadcrumb + "% of module" strip above the player,
+   and the right-hand module card below the lesson outline. Both are filled
+   by renderLessonProgressHead()/renderLessonSidecard() (app.js) from the
+   exact same LESSON_REGISTRY/DDALearning data the existing .module-toc list
+   already uses — purely additive, .module-toc itself is untouched. */
+.lesson-progress-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 18px;margin-bottom:18px}
+.lesson-progress-head:empty{display:none}
+.lesson-breadcrumb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;color:var(--muted);min-width:0}
+.lesson-breadcrumb-link{border:0;background:none;color:var(--muted);font:inherit;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
+.lesson-breadcrumb-link:hover,.lesson-breadcrumb-link:focus-visible{color:var(--gold-soft)}
+.lesson-breadcrumb-current{color:rgba(244,247,252,.78)}
+.lesson-breadcrumb [aria-current="page"]{color:var(--gold-soft);font-weight:700}
+.lesson-module-progress{display:flex;align-items:center;gap:10px;flex:none}
+.lesson-module-progress-label{font-size:11px;font-weight:700;letter-spacing:.03em;color:var(--muted);white-space:nowrap}
+.lesson-module-progress-bar{width:110px;height:6px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;flex:none}
+.lesson-module-progress-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-soft));border-radius:999px;transition:width .3s var(--ease)}
+
+.lesson-sidecard{display:grid;gap:18px;margin-bottom:22px}
+.lesson-sidecard:empty{display:none;margin:0}
+.lesson-sidecard-recap{padding:16px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--navy-800)}
+.lesson-sidecard-recap h3{margin:2px 0 14px;font-size:15px}
+.lesson-sidecard-recap-row{display:flex;align-items:center;gap:16px}
+.lesson-sidecard-ring{width:58px;flex:none}
+.lesson-sidecard-ring strong{font-size:14px}
+.lesson-sidecard-recap-facts{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:12.5px;color:var(--muted)}
+.lesson-sidecard-cta{padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-md);background:rgba(255,255,255,.02)}
+.lesson-sidecard-cta p:not(.eyebrow){margin:4px 0 12px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.lesson-sidecard-cta .secondary-action{min-height:42px;font-size:13px}
+.lesson-sidecard-premium{border-color:rgba(217,164,65,.35);background:rgba(217,164,65,.06)}
+.lesson-sidecard-next{margin-top:2px}
 .lesson-lead{font-size:16px;color:rgba(244,247,252,.68)}
 .video-stage{
   aspect-ratio:16/11;border:1px solid var(--line);border-radius:var(--r-lg);
@@ -1263,6 +1296,17 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .context{display:grid;flex:initial}
   .context-section{font-size:10px}
   .context strong{font-size:17px}
+  .topbar-search{display:flex;align-items:center;gap:8px;flex:1;max-width:280px;padding:0 14px;height:40px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03);color:var(--muted)}
+  .topbar-search .icon{width:16px;height:16px;flex:none}
+  .topbar-search input{flex:1;min-width:0;border:0;background:none;color:var(--white);font:inherit;font-size:13px}
+  .topbar-search input::placeholder{color:var(--muted-2)}
+  .topbar-search input:focus{outline:none}
+  .topbar-user{display:flex;align-items:center;gap:10px;border:0;background:none;color:inherit;cursor:pointer;padding:4px 6px 4px 4px;border-radius:999px;flex:none}
+  .topbar-user:hover,.topbar-user:focus-visible{background:rgba(255,255,255,.05)}
+  .topbar-user .avatar{width:34px;height:34px;font-size:13px}
+  .topbar-user-meta{display:flex;flex-direction:column;text-align:left;line-height:1.25;min-width:0}
+  .topbar-user-meta strong{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+  .topbar-user-meta small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
   .network-state span{display:inline}
   .mobile-nav{display:none}
   .mobile-menu-toggle,.mobile-drawer,.mobile-drawer-backdrop{display:none}
