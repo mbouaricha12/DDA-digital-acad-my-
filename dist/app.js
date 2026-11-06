@@ -266,7 +266,11 @@ function mountLesson(entry) {
   if (!main || !outline || main.dataset.ddaLessonMounted === 'true') return;
   const suffix = entry.suffix || undefined;
   main.insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(entry.meta.module, entry.meta.lesson, suffix));
-  outline.innerHTML = DDALessonRenderer.renderLessonOutline(entry.meta.lesson, suffix);
+  // academy.html gives .lesson-outline a static, empty [data-sidecard-slot]
+  // child (the mount point renderLessonSidecard fills) — preserve it instead
+  // of wiping it out with the lesson's own "Dans cette leçon" outline below.
+  const sidecardSlot = outline.querySelector('[data-sidecard-slot]');
+  outline.innerHTML = (sidecardSlot ? sidecardSlot.outerHTML : '') + DDALessonRenderer.renderLessonOutline(entry.meta.lesson, suffix);
   // P1.3 : une leçon peut référencer une vidéo réelle du VIDEO_REGISTRY par
   // son id (champ `video`). Rendue avec le lecteur léger déjà utilisé par la
   // Bibliothèque (#resources) — miniature, clic pour charger, pas d'autoplay
@@ -1731,7 +1735,11 @@ function renderLessonProgressUI(lessonId, lessonDef, ids) {
   // full showView re-entry. LAB_REGISTRY lessons call this same function but
   // aren't in LESSON_VIEW_ID, so this is a no-op for them (no module-toc
   // container exists on their views either).
-  if (LESSON_VIEW_ID[lessonId]) renderModuleToc(LESSON_VIEW_ID[lessonId]);
+  if (LESSON_VIEW_ID[lessonId]) {
+    renderModuleToc(LESSON_VIEW_ID[lessonId]);
+    renderLessonProgressHead(LESSON_VIEW_ID[lessonId]);
+    renderLessonSidecard(LESSON_VIEW_ID[lessonId]);
+  }
   return { lessonProgress, step, complete };
 }
 
@@ -2558,6 +2566,108 @@ function renderModuleToc(viewId) {
   list.querySelectorAll('[data-view]:not([disabled])').forEach(bindViewButton);
 }
 
+// Lesson Experience V3 (founder mockup pass): a breadcrumb + "% of module
+// complete" strip above the player, and a right-hand module card below the
+// lesson outline — both derived from the exact same LESSON_REGISTRY/
+// DDALearning data `renderModuleToc` already uses, never new fabricated
+// numbers. Scoped to the 8 LESSON_REGISTRY views (M0/M1/P2) that already
+// have a `-progress-head`/`-sidecard` mount point in academy.html; DDA Lab
+// lessons keep their own existing chrome untouched.
+function moduleSiblingsFor(viewId) {
+  const lessonId = VIEW_TO_LESSON_ID[viewId];
+  const moduleKey = lessonId?.split('.')[0];
+  if (!moduleKey) return null;
+  const siblings = LESSON_REGISTRY.filter(entry => entry.id.split('.')[0] === moduleKey);
+  return { moduleKey, siblings, lessonId };
+}
+function renderLessonProgressHead(viewId) {
+  const head = document.getElementById(`${viewId}-progress-head`);
+  if (!head) return;
+  const info = moduleSiblingsFor(viewId);
+  if (!info) { head.innerHTML = ''; return; }
+  const { moduleKey, siblings } = info;
+  const current = siblings.find(s => s.viewId === viewId);
+  const doneCount = siblings.filter(s => moduleTocLessonStatus(s).key === 'done').length;
+  const percent = siblings.length ? Math.round((doneCount / siblings.length) * 100) : 0;
+  head.innerHTML = `
+    <nav class="lesson-breadcrumb" aria-label="Fil d’Ariane">
+      <button type="button" class="lesson-breadcrumb-link" data-sidecard-view="path">Mon parcours</button>
+      <span aria-hidden="true">›</span>
+      <span class="lesson-breadcrumb-current">${escapeHtml(moduleGroupLabel(moduleKey))}</span>
+      <span aria-hidden="true">›</span>
+      <span class="lesson-breadcrumb-current" aria-current="page">${escapeHtml(current?.title || '')}</span>
+    </nav>
+    <div class="lesson-module-progress" role="group" aria-label="Progression du module">
+      <span class="lesson-module-progress-label">${percent}% du module complété</span>
+      <span class="lesson-module-progress-bar"><span style="width:${percent}%"></span></span>
+    </div>`;
+  head.querySelectorAll('[data-sidecard-view]').forEach(button => {
+    button.addEventListener('click', () => showView(button.dataset.sidecardView));
+  });
+}
+function renderLessonSidecard(viewId) {
+  const card = document.getElementById(`${viewId}-sidecard`);
+  if (!card) return;
+  const info = moduleSiblingsFor(viewId);
+  if (!info) { card.innerHTML = ''; return; }
+  const { moduleKey, siblings } = info;
+  const current = siblings.find(s => s.viewId === viewId);
+  const doneCount = siblings.filter(s => moduleTocLessonStatus(s).key === 'done').length;
+  const percent = siblings.length ? Math.round((doneCount / siblings.length) * 100) : 0;
+  // Honesty mandate: a total duration is only shown when EVERY sibling lesson
+  // actually declares one in LESSON_REGISTRY (today: only P2.1/P2.2) — never
+  // an invented number for M0/M1, which have no authored duration data.
+  const allDurations = siblings.every(s => Number.isFinite(s.duration));
+  const totalMinutes = allDurations ? siblings.reduce((sum, s) => sum + s.duration, 0) : null;
+
+  const recap = `
+    <div class="lesson-sidecard-recap">
+      <p class="eyebrow">Module en cours</p>
+      <h3>${escapeHtml(moduleGroupLabel(moduleKey))}</h3>
+      <div class="lesson-sidecard-recap-row">
+        <div class="progress-ring lesson-sidecard-ring" style="--progress:${percent}"><strong>${percent}%</strong></div>
+        <ul class="lesson-sidecard-recap-facts">
+          <li>${siblings.length} leçon${siblings.length > 1 ? 's' : ''}</li>
+          ${totalMinutes != null ? `<li>${totalMinutes} min au total</li>` : ''}
+        </ul>
+      </div>
+    </div>`;
+
+  const quiz = current?.quizBlock ? `
+    <div class="lesson-sidecard-cta">
+      <p class="eyebrow gold">Vérifier ta compréhension</p>
+      <p>Le quiz de cette leçon valide ce que tu viens d’apprendre.</p>
+      <button type="button" class="secondary-action" data-scroll-anchor="${escapeHtml(current.quizBlock)}-block">Aller au quiz de la leçon <span>→</span></button>
+    </div>` : '';
+
+  const premium = prototypeState.membership?.plan !== 'premium' ? `
+    <div class="lesson-sidecard-cta lesson-sidecard-premium">
+      <p class="eyebrow gold">DDA Premium</p>
+      <p>Débloque le Practice Lab, l’assessment guidé et le suivi complet de ta progression.</p>
+      <button type="button" class="secondary-action" data-sidecard-view="membership">Découvrir Premium <span>→</span></button>
+    </div>` : '';
+
+  const next = LESSON_REGISTRY.find(entry => entry.prerequisite === current?.id);
+  const nextButton = next
+    ? `<button type="button" class="primary-action lesson-sidecard-next" data-sidecard-view="${next.viewId}">Leçon suivante : ${escapeHtml(next.title)} <span>→</span></button>`
+    : `<button type="button" class="secondary-action lesson-sidecard-next" data-sidecard-view="path">Retourner à mon parcours <span>→</span></button>`;
+
+  card.innerHTML = `${recap}${quiz}${premium}${nextButton}`;
+  // Deliberately data-sidecard-view, not the generic [data-view] bindViewButton
+  // wires everywhere else: several existing tests target an unscoped
+  // `[data-view="lesson-pXX"]` link elsewhere on the same lesson view (e.g.
+  // the module-toc entry), and this card's own real navigation must never
+  // silently shadow that element for `.last()`-style locators. Same
+  // showView() call either way — just a separate, non-colliding hook.
+  card.querySelectorAll('[data-sidecard-view]').forEach(button => {
+    button.addEventListener('click', () => showView(button.dataset.sidecardView));
+  });
+  card.querySelectorAll('[data-scroll-anchor]').forEach(button => {
+    button.addEventListener('click', () => {
+      document.getElementById(button.dataset.scrollAnchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+}
 function smartBackTarget() {
   if (previousView && titles[previousView] && !LESSON_VIEW_IDS.has(previousView) && previousView !== 'access') return previousView;
   return 'dashboard';
@@ -2775,7 +2885,11 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
   if (id === 'markets') loadBrvmPublications();
   if (recordEvent) trackEvent('view_opened', { view: id });
   if (recordEvent && VIEW_TO_LESSON_ID[id]) trackEvent('lesson_started', { lesson: VIEW_TO_LESSON_ID[id] });
-  if (LESSON_VIEW_IDS.has(id)) renderModuleToc(id);
+  if (LESSON_VIEW_IDS.has(id)) {
+    renderModuleToc(id);
+    renderLessonProgressHead(id);
+    renderLessonSidecard(id);
+  }
   if (recordEvent && id === 'premium-track') trackEvent('premium_track_viewed', { view: id });
   if (recordEvent && (id === 'lesson-p21' || id === 'lesson-p22')) trackEvent('premium_module_started', { module: 'P2', lesson: id });
   if (id === 'landing') {

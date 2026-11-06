@@ -2266,6 +2266,98 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  console.log('\n-- Y. Lesson Experience V3 — breadcrumb, module progress, right-hand module card --');
+
+  await test('the lesson player header shows a real breadcrumb and the module\'s true % complete', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'M0.1': { quizComplete: true } }, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-m02`);
+    await page.waitForSelector('#lesson-m02.view.active');
+    const breadcrumb = await page.textContent('#lesson-m02-progress-head .lesson-breadcrumb');
+    assert.match(breadcrumb, /Mon parcours/);
+    assert.match(breadcrumb, /Fondations des marchés/);
+    assert.match(breadcrumb, /Support/);
+    // M0 has 3 lessons (M0.1, M0.2, M0.3); only M0.1 is done here → 33%.
+    assert.match(await page.textContent('#lesson-m02-progress-head .lesson-module-progress-label'), /33% du module complété/);
+    await context.close();
+  });
+
+  await test('the right-hand module card shows a real lesson-count/ring recap, a working quiz shortcut and a real next-lesson button', async () => {
+    const context = await freshContext(browser);
+    // M0.2's quiz is already complete here: the sidecard's "next lesson"
+    // button still goes through the exact same sequential-lock check as
+    // every other navigation (showView), so it must not be fabricated-open
+    // against a lesson whose prerequisite is not actually satisfied.
+    await seedLocalLearner(context, { 'M0.1': { quizComplete: true }, 'M0.2': { quizComplete: true } }, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-m02`);
+    await page.waitForSelector('#lesson-m02.view.active');
+    const card = page.locator('#lesson-m02-sidecard');
+    assert.match(await card.locator('.lesson-sidecard-recap').textContent(), /3 leçons/);
+    // M0 lessons declare no `duration` in LESSON_REGISTRY — the card must
+    // never invent one.
+    assert.doesNotMatch((await card.locator('.lesson-sidecard-recap-facts').textContent()).trim(), /min au total/);
+    await card.locator('[data-scroll-anchor]').click();
+    await page.waitForFunction(() => {
+      const el = document.getElementById('m2-quiz-block');
+      if (!el) return false;
+      const rect = el.getBoundingClientRect();
+      return rect.top >= 0 && rect.top < window.innerHeight;
+    });
+    assert.match(await card.locator('.lesson-sidecard-next').textContent(), /Lire une tendance/, 'the real next lesson title, never a generic label');
+    await card.locator('.lesson-sidecard-next').click();
+    await page.waitForSelector('#lesson-m03.view.active');
+    await context.close();
+  });
+
+  await test('the module card shows a real total duration only when every sibling lesson actually declares one (Premium Track), and offers Premium to a Free learner on the preview lesson', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    // P2.1 is the honest free preview of the Premium Track (preview: true) —
+    // showView() never gates it for Free, unlike P2.2.
+    await page.goto(`${ACADEMY_BASE}#lesson-p21`);
+    await page.waitForSelector('#lesson-p21.view.active');
+    const card = page.locator('#lesson-p21-sidecard');
+    assert.match(await card.locator('.lesson-sidecard-recap-facts').textContent(), /33 min au total/, 'P2.1 (15) + P2.2 (18) are both real durations declared in LESSON_REGISTRY');
+    assert.equal(await card.locator('.lesson-sidecard-premium').count(), 1, 'a Free learner previewing the Premium Track still gets the Premium upsell card');
+    await context.close();
+  });
+
+  await test('a Premium learner on P2.2 (the last authored lesson — nothing has it as a prerequisite) sees no Premium upsell card and a real "back to path" exit, never a fabricated next lesson', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'P2.1': { quizComplete: true } }, 'premium');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#premium-track`);
+    await page.click('#premium-track [data-view="lesson-p22"]');
+    await page.reload();
+    await page.waitForSelector('#lesson-p22.view.active');
+    const card = page.locator('#lesson-p22-sidecard');
+    assert.equal(await card.locator('.lesson-sidecard-premium').count(), 0, 'a confirmed Premium learner never sees the Premium upsell card');
+    assert.match(await card.locator('.lesson-sidecard-next').textContent(), /Retourner à mon parcours/);
+    await card.locator('.lesson-sidecard-next').click();
+    await page.waitForSelector('#path.view.active');
+    await context.close();
+  });
+
+  console.log('\n-- Z. Layout shell — no horizontal overflow at 360/390/1440px (mobile touch targets) --');
+
+  await test('the new topbar search/help/user chip and the lesson module card add no horizontal scroll at 360, 390 or 1440px', async () => {
+    for (const width of [360, 390, 1440]) {
+      const context = await freshContext(browser, { width, height: 844 });
+      // M0.2 has a prerequisite (M0.1) — mark it done so this reaches the
+      // real lesson view (with its module card) instead of being redirected.
+      await seedLocalLearner(context, { 'M0.1': { quizComplete: true } });
+      const page = await context.newPage();
+      await page.goto(`${ACADEMY_BASE}#lesson-m02`);
+      await page.waitForSelector('#lesson-m02.view.active');
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+      assert.equal(overflow, false, `no horizontal overflow at ${width}px on the redesigned lesson view`);
+      await context.close();
+    }
+  });
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 
