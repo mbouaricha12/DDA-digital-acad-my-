@@ -86,6 +86,16 @@ async function fillOnboarding(page, { level = 'Débutant', goal = 'Comprendre le
   await page.click('#onboarding-form button[type=submit]');
 }
 
+// Lesson Tabs (founder mandate, done in this pass): the exercise/quiz block
+// now lives in a `hidden` "Exercice/Quiz" tab panel until that tab is opened
+// — a Playwright `.click()` on a button inside it would otherwise time out
+// waiting for visibility. Every test that answers an exercise or quiz must
+// open that lesson's tab first; `suffix` matches lessonUiIds' suffix ('' for
+// M0.1, '-m2' for M0.2, '-p21' for P2.1, '-lab1' for LAB1, …).
+async function openLessonExerciseTab(page, suffix = '') {
+  await page.click(`#lesson-tab-exercise${suffix}`);
+}
+
 async function completeSignupFlow(page, opts) {
   await page.goto(`${ACADEMY_BASE}#access`);
   await fillSignup(page, opts);
@@ -314,6 +324,9 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.click('#premium-track [data-view="lesson-p21"]');
     await page.reload();
     assert.equal(await page.locator('#lesson-p21').isVisible(), true, 'P2.1 deep-link survives reload for Premium Demo');
+    // P2.1's exercise/quiz now live in the "Exercice/Quiz" tab (hidden by
+    // default) — open it before the question buttons are clickable.
+    await openLessonExerciseTab(page, '-p21');
     await page.locator('[data-question="p21-decision"] button[data-correct="true"]').click();
     await page.locator('[data-question="p21-quiz"] button[data-correct="true"]').click();
     let state = await page.evaluate(() => window.DDA.load());
@@ -323,6 +336,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.locator('#lesson-p21 [data-view="lesson-p22"]').last().click();
     await page.reload();
     assert.equal(await page.locator('#lesson-p22').isVisible(), true, 'P2.2 opens only after P2.1 and survives reload');
+    await openLessonExerciseTab(page, '-p22');
     await page.locator('[data-question="p22-sequence"] button[data-correct="true"]').click();
     await page.locator('[data-question="p22-quiz"] button[data-correct="true"]').click();
     state = await page.evaluate(() => window.DDA.load());
@@ -550,6 +564,9 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const context = await freshContext(browser);
     const page = await context.newPage();
     await completeSignupFlow(page);
+    // M0.1's exercise now lives in the "Exercice/Quiz" tab (hidden by
+    // default) — open it before the question is clickable.
+    await openLessonExerciseTab(page);
     const correctExercise = page.locator('[data-question="exercise"] button[data-correct="true"]').first();
     await correctExercise.scrollIntoViewIfNeeded();
     await correctExercise.click();
@@ -562,6 +579,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const context = await freshContext(browser);
     const page = await context.newPage();
     await completeSignupFlow(page);
+    await openLessonExerciseTab(page);
     await page.locator('[data-question="exercise"] button[data-correct="true"]').first().click();
     const quizButton = page.locator('#quiz-block [data-question] button[data-correct="true"]').first();
     await quizButton.scrollIntoViewIfNeeded();
@@ -788,6 +806,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const context = await freshContext(browser);
     const page = await context.newPage();
     await completeSignupFlow(page);
+    await openLessonExerciseTab(page);
     await page.locator('[data-question="exercise"] button[data-correct="true"]').first().click();
     const queue = await page.evaluate(() => window.DDAAnalytics.getDebugQueue());
     const entry = queue.find(e => e.localName === 'exercise_attempt');
@@ -801,6 +820,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const context = await freshContext(browser);
     const page = await context.newPage();
     await completeSignupFlow(page);
+    await openLessonExerciseTab(page);
     await page.locator('[data-question="exercise"] button[data-correct="true"]').first().click();
     const quizButton = page.locator('#quiz-block [data-question] button[data-correct="true"]').first();
     await quizButton.scrollIntoViewIfNeeded();
@@ -905,6 +925,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.click('.sidebar .nav-item[data-view="brokers"]');
     await page.locator('.broker-row[data-broker="Deriv"] .broker-detail').click();
     await page.click('.sidebar .nav-item[data-view="lesson"]');
+    await openLessonExerciseTab(page);
     await page.locator('[data-question="exercise"] button[data-correct="true"]').first().click();
     const quizButton = page.locator('#quiz-block [data-question] button[data-correct="true"]').first();
     await quizButton.scrollIntoViewIfNeeded();
@@ -1720,6 +1741,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
     await page.click('[data-view="lesson-lab1"]');
     await page.waitForSelector('#lesson-lab1.view.active');
+    await openLessonExerciseTab(page, '-lab1');
     await page.locator('[data-question="lab1-exercise"] button[data-correct="true"]').first().click();
     let state = await page.evaluate(() => window.DDA.load());
     assert.equal(state.lessons['LAB1'].exerciseComplete, true);
@@ -1757,6 +1779,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal((await page.locator('#lab-LAB4-status').textContent()).trim(), 'À commencer', 'Premium + prerequisite satisfied makes LAB4 available, not Premium-locked');
     await page.click('[data-view="lesson-lab4"]');
     await page.waitForSelector('#lesson-lab4.view.active');
+    await openLessonExerciseTab(page, '-lab4');
     await page.locator('[data-question="lab4-exercise"] button[data-correct="true"]').first().click();
     await page.locator('[data-question="lab4-quiz"] button[data-correct="true"]').first().click();
     const state = await page.evaluate(() => window.DDA.load());
