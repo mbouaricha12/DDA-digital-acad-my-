@@ -391,22 +391,54 @@
   // idSuffix (optional) lets a second lesson mount alongside M0.1 without id
   // collisions (#lesson-title, #lesson-loop, #mark-understood). Omitted, this
   // renders the exact same ids M0.1 has always used — zero behavior change.
+  //
+  // Lesson Tabs (founder mandate, PR #205/#206 deliberately deferred this):
+  // every authored block already carries a `step` ('lesson' | 'exercise' |
+  // 'quiz' | 'review', set once per block in dda-core.js/m1-*-lesson.js/
+  // p2-lessons.js/dda-lab.js and already surfaced on the rendered wrapper as
+  // data-lesson-step — see renderBlock below). That existing, authored field
+  // is the only thing used to split a lesson into two real DOM panels:
+  // "À propos de la leçon" (step 'lesson', plus the lesson's own intro video)
+  // and "Exercice/Quiz" (step 'exercise' | 'quiz' | 'review' — the gated
+  // exercise, the quiz it unlocks, and the journal/summary that follow it).
+  // Nothing is removed from the DOM: the inactive panel is only `hidden`
+  // (see app.js's activateLessonTab), so every existing [id] target, every
+  // scrollIntoView anchor and every locked-check/aria-disabled gate still
+  // exists exactly where app.js's bindQuestion/renderLessonProgressUI expect
+  // it — only its container's `hidden` attribute changes. `.lesson-actions`
+  // (Quitter / "Passer à l'exercice") stays in the "À propos" panel: it is
+  // the call-to-action that leaves it, not content that belongs to it.
   function renderLessonMain(module, lesson, idSuffix) {
     const suffix = idSuffix ? `-${idSuffix}` : '';
     const lessonIndex = module.lessons.findIndex(l => l.id === lesson.id) + 1;
+    const aboutBlocks = lesson.blocks.filter(block => (block.step || 'lesson') === 'lesson');
+    const practiceBlocks = lesson.blocks.filter(block => (block.step || 'lesson') !== 'lesson');
+    const hasTabs = practiceBlocks.length > 0;
+    const tabsNav = hasTabs ? `
+      <div class="lesson-tabs" role="tablist" aria-label="Sections de la leçon">
+        <button type="button" class="lesson-tab is-active" id="lesson-tab-about${suffix}" role="tab" aria-selected="true" aria-controls="lesson-panel-about${suffix}" data-lesson-tab="about">À propos de la leçon</button>
+        <button type="button" class="lesson-tab" id="lesson-tab-exercise${suffix}" role="tab" aria-selected="false" tabindex="-1" aria-controls="lesson-panel-exercise${suffix}" data-lesson-tab="exercise">Exercice/Quiz</button>
+      </div>` : '';
+    const aboutPanelAttrs = hasTabs ? ` role="tabpanel" aria-labelledby="lesson-tab-about${suffix}"` : '';
+    const practicePanel = hasTabs ? `
+      <div class="lesson-tab-panel" id="lesson-panel-exercise${suffix}" role="tabpanel" aria-labelledby="lesson-tab-exercise${suffix}" data-lesson-panel="exercise" hidden>${practiceBlocks.map(renderBlock).join('\n')}
+      </div>` : '';
     return `
       <p class="eyebrow gold">${module.title} · Leçon ${lessonIndex}</p>
       <h1 id="lesson-title${suffix}">${lesson.title}</h1>
       <p class="lesson-lead">${lesson.content.lead}</p>
       <ol class="lesson-loop" id="lesson-loop${suffix}" tabindex="0" aria-label="Progression dans la leçon — utilise les flèches pour faire défiler les étapes">${lesson.steps.map(s => `<li data-step="${s.id}"><i class="loop-bead" aria-hidden="true"></i><span>${s.label}</span></li>`).join('')}</ol>
+      ${tabsNav}
+      <div class="lesson-tab-panel" id="lesson-panel-about${suffix}"${aboutPanelAttrs} data-lesson-panel="about">
+        ${lesson.video ? renderVideoSurface(lesson.video, `lesson-video${suffix}`) : ''}
+        ${aboutBlocks.map(renderBlock).join('\n')}
 
-      ${lesson.video ? renderVideoSurface(lesson.video, `lesson-video${suffix}`) : ''}
-      ${lesson.blocks.map(renderBlock).join('\n')}
-
-      <div class="lesson-actions">
-        <button class="secondary-action" data-view="back">Quitter</button>
-        <button class="primary-action" id="mark-understood${suffix}">${lesson.markUnderstoodLabel || 'Passer à l’exercice'} <span>→</span></button>
-      </div>`;
+        <div class="lesson-actions">
+          <button class="secondary-action" data-view="back">Quitter</button>
+          <button class="primary-action" id="mark-understood${suffix}">${lesson.markUnderstoodLabel || 'Passer à l’exercice'} <span>→</span></button>
+        </div>
+      </div>
+      ${practicePanel}`;
   }
 
   function renderLessonOutline(lesson, idSuffix) {
