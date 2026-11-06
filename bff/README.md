@@ -22,7 +22,8 @@ SUPABASE_PUBLISHABLE_KEY
 SUPABASE_SERVICE_ROLE_KEY
 SESSION_ENCRYPTION_KEY   # 32 octets encodés base64url
 ALLOWED_ORIGINS          # ex. https://app.example.dda.academy
-EMAIL_REDIRECT_TO        # URL de retour, sur une origine allowlistée
+EMAIL_REDIRECT_TO        # URL de retour inscription, sur une origine allowlistée
+PASSWORD_RECOVERY_REDIRECT_TO # URL recovery (type=recovery), optionnelle; dérivée automatiquement
 BFF_COOKIE_SECURE=true
 PORT=8744
 ```

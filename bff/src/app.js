@@ -20,7 +20,8 @@ function configFromEnv(env = process.env) {
     sessionIdleMs: Number(env.SESSION_IDLE_MS || 12 * 60 * 60 * 1000),
     sessionAbsoluteMs: Number(env.SESSION_ABSOLUTE_MS || 30 * 24 * 60 * 60 * 1000),
     sessionEncryptionKey: env.SESSION_ENCRYPTION_KEY || null,
-    emailRedirectTo: env.EMAIL_REDIRECT_TO || 'http://localhost:8744/access'
+    emailRedirectTo: env.EMAIL_REDIRECT_TO || 'http://localhost:8744/access',
+    passwordRecoveryRedirectTo: env.PASSWORD_RECOVERY_REDIRECT_TO || (() => { const u = new URL(env.EMAIL_REDIRECT_TO || 'http://localhost:8744/access'); u.searchParams.set('type', 'recovery'); return u.toString(); })()
   };
 }
 
@@ -63,6 +64,10 @@ function validateRuntimeConfig(config, env = process.env) {
     const redirect = new URL(config.emailRedirectTo);
     if (redirect.username || redirect.password || !config.allowedOrigins.includes(redirect.origin)) issues.push('EMAIL_REDIRECT_TO must be credential-free and use an origin listed in ALLOWED_ORIGINS');
   } catch { issues.push('EMAIL_REDIRECT_TO must be a valid URL'); }
+  try {
+    const recoveryRedirect = new URL(config.passwordRecoveryRedirectTo);
+    if (recoveryRedirect.username || recoveryRedirect.password || !config.allowedOrigins.includes(recoveryRedirect.origin) || recoveryRedirect.searchParams.get('type') !== 'recovery') issues.push('PASSWORD_RECOVERY_REDIRECT_TO must be credential-free, use an allowlisted origin and include type=recovery');
+  } catch { issues.push('PASSWORD_RECOVERY_REDIRECT_TO must be a valid URL'); }
   return issues;
 }
 
@@ -355,7 +360,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const email = normalizeEmail(body.email);
         if (!/^\S+@\S+\.\S+$/.test(email)) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId);
         if (!await checkAuthRateLimit(rateLimiter, 'password-reset-request', { ip: clientIp(req), email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
-        try { await auth.requestPasswordReset(email, config.emailRedirectTo); } catch (error) { logger('recovery_failed', { requestId, status: error.status || 500 }); }
+        try { await auth.requestPasswordReset(email, config.passwordRecoveryRedirectTo || config.emailRedirectTo); } catch (error) { logger('recovery_failed', { requestId, status: error.status || 500 }); }
         return json(res, 202, { message: 'If the account can be recovered, a message will be sent.' });
       }
       if (method === 'POST' && path === '/v1/auth/password-reset/confirm') {
