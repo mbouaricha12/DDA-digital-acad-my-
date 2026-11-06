@@ -1922,8 +1922,18 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
   console.log('\n-- O. Navigation — sommaire de module, sorties Lab/Premium, lien back-office --');
 
-  await test('a lesson\'s module summary lists its sibling lessons with live status, and clicking a sibling navigates there', async () => {
-    const context = await freshContext(browser);
+  await test('a lesson\'s module summary (.module-toc) lists its sibling lessons with live status, and clicking a sibling navigates there — the mobile/tablet rendering below the 860px breakpoint, where the right-hand sidecard is display:none', async () => {
+    // Design audit (Lot C): a learner used to see this .module-toc block AND
+    // the right-hand "Module en cours" sidecard's own copy of the same list
+    // at the same time on wide viewports — a double inventory. Fixed by
+    // hiding .module-toc once the sidecard itself becomes visible
+    // (min-width:860px in styles.css), so this specific block is now only
+    // ever the thing a learner sees below that width — pinned here instead
+    // of the suite's default (wide) viewport, which used to work only
+    // because the sidecard didn't yet duplicate this list. See the sibling
+    // test right below for the >=860px / sidecard-embedded rendering of the
+    // exact same feature.
+    const context = await freshContext(browser, { width: 820, height: 1000 });
     await seedLocalLearner(context, { 'M0.1': { quizComplete: true }, 'M0.2': { quizComplete: true } }, 'free');
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#lesson-m02`);
@@ -1936,6 +1946,29 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(await page.locator('#lesson-m02 .module-toc-item.is-current .module-toc-link').isDisabled(), false);
 
     await page.locator('#lesson-m02 .module-toc-link', { hasText: 'Lire une tendance' }).click();
+    await page.waitForSelector('#lesson-m03.view.active');
+    await context.close();
+  });
+
+  await test('the same module summary, embedded in the right-hand "Module en cours" sidecard (>=860px, where .module-toc is hidden instead) — single inventory, not a second copy', async () => {
+    // Companion to the test above: at the suite's default (wide) viewport,
+    // .module-toc is CSS-hidden and renderLessonSidecard's own copy of the
+    // identical list (moduleTocListMarkup's 'sidecard' variant —
+    // .sidecard-toc-* classes, data-sidecard-view instead of data-view, see
+    // dist/app.js) is the one a learner actually sees and can click.
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'M0.1': { quizComplete: true }, 'M0.2': { quizComplete: true } }, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-m02`);
+    await page.waitForSelector('#lesson-m02.view.active');
+    assert.equal(await page.locator('#lesson-m02 .module-toc').isVisible(), false, 'the full-width block is hidden once the sidecard itself is visible');
+    const items = await page.locator('#lesson-m02-sidecard .sidecard-toc-item').allTextContents();
+    assert.equal(items.length, 3, 'M0 has three lessons (M0.1, M0.2, M0.3)');
+    const m01Status = await page.locator('#lesson-m02-sidecard .sidecard-toc-item', { hasText: 'Leçon en cours' }).locator('.sidecard-toc-status').textContent();
+    assert.equal(m01Status.trim(), 'Terminée', 'M0.1 already completed shows as done from inside M0.2');
+    assert.equal(await page.locator('#lesson-m02-sidecard .sidecard-toc-item.is-current .sidecard-toc-link').isDisabled(), false);
+
+    await page.locator('#lesson-m02-sidecard .sidecard-toc-link', { hasText: 'Lire une tendance' }).click();
     await page.waitForSelector('#lesson-m03.view.active');
     await context.close();
   });

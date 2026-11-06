@@ -477,16 +477,16 @@ a.nav-item[hidden]{display:none}
    anchors) and from #path (the full curriculum, a whole screen away). */
 .module-toc{margin:0 0 26px;padding:16px 18px;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 var(--r-md) var(--r-md) 0;background:var(--navy-800)}
 .module-toc-heading{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:10px}
-.module-toc-list{list-style:none;margin:0;padding:0;display:grid;gap:2px}
-.module-toc-item{display:flex;align-items:center;justify-content:space-between;gap:12px;border-radius:10px}
-.module-toc-item.is-current{background:rgba(255,255,255,.04)}
-.module-toc-link{flex:1;text-align:left;background:none;border:0;color:inherit;font:inherit;padding:8px 6px;min-height:44px;cursor:pointer;border-radius:8px}
-.module-toc-link:hover:not(:disabled),.module-toc-link:focus-visible{background:rgba(255,255,255,.05)}
-.module-toc-link:disabled{color:var(--muted-2);cursor:default}
-.module-toc-item.is-current .module-toc-link{color:var(--gold-soft);font-weight:800}
-.module-toc-status{flex:none;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);padding-right:6px}
-.module-toc-status[data-status="done"]{color:var(--green)}
-.module-toc-status[data-status="locked"]{color:var(--muted-2)}
+.module-toc-list,.sidecard-toc-list{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.module-toc-item,.sidecard-toc-item{display:flex;align-items:center;justify-content:space-between;gap:12px;border-radius:10px}
+.module-toc-item.is-current,.sidecard-toc-item.is-current{background:rgba(255,255,255,.04)}
+.module-toc-link,.sidecard-toc-link{flex:1;text-align:left;background:none;border:0;color:inherit;font:inherit;padding:8px 6px;min-height:44px;cursor:pointer;border-radius:8px}
+.module-toc-link:hover:not(:disabled),.module-toc-link:focus-visible,.sidecard-toc-link:hover:not(:disabled),.sidecard-toc-link:focus-visible{background:rgba(255,255,255,.05)}
+.module-toc-link:disabled,.sidecard-toc-link:disabled{color:var(--muted-2);cursor:default}
+.module-toc-item.is-current .module-toc-link,.sidecard-toc-item.is-current .sidecard-toc-link{color:var(--gold-soft);font-weight:800}
+.module-toc-status,.sidecard-toc-status{flex:none;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);padding-right:6px}
+.module-toc-status[data-status="done"],.sidecard-toc-status[data-status="done"]{color:var(--green)}
+.module-toc-status[data-status="locked"],.sidecard-toc-status[data-status="locked"]{color:var(--muted-2)}
 
 /* Lesson Experience V3 — breadcrumb + "% of module" strip above the player,
    and the right-hand module card below the lesson outline. Both are filled
@@ -513,6 +513,7 @@ a.nav-item[hidden]{display:none}
 .lesson-sidecard-ring{width:58px;flex:none}
 .lesson-sidecard-ring strong{font-size:14px}
 .lesson-sidecard-recap-facts{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:12.5px;color:var(--muted)}
+.lesson-sidecard-module-list{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);font-size:13px}
 .lesson-sidecard-cta{padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-md);background:rgba(255,255,255,.02)}
 .lesson-sidecard-cta p:not(.eyebrow){margin:4px 0 12px;font-size:12.5px;color:var(--muted);line-height:1.5}
 .lesson-sidecard-cta .secondary-action{min-height:42px;font-size:13px}
@@ -1348,6 +1349,16 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .lesson-outline ol{padding-left:18px;color:var(--muted);margin:0}
   .lesson-outline li{padding:7px 4px}
   .lesson-outline li.active{color:var(--gold-soft);font-weight:800}
+  /* Single module inventory (design audit, Lot C): below this breakpoint
+     .lesson-outline (and the "Module en cours" sidecard inside it) is
+     display:none, so the full-width .module-toc block is the only lesson
+     index a learner ever sees — kept exactly as-is for mobile/tablet. From
+     here up, the sidecard becomes visible and itself renders the same
+     itemized list (renderLessonSidecard, moduleTocListMarkup) right below
+     its progress ring, so the full-width block is redundant and hidden —
+     never both visible at once. Scoped to lesson views that actually have a
+     sidecard; MBRVM.1 has none, so its .module-toc stays visible here too. */
+  .lesson-layout:has(.lesson-sidecard) .module-toc{display:none}
   .result-stats{grid-template-columns:repeat(3,1fr)}
   .lesson-actions{position:static;background:transparent;padding:22px 0 0}
   .video-stage{aspect-ratio:16/9}
