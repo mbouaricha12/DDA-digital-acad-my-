@@ -2205,6 +2205,38 @@ body.public-shell{background:var(--dda-ivory);color:#15243a}
   margin-bottom:12px;
   border-bottom:1px solid rgba(232,198,133,.16);
 }
+/* Lesson Tabs — founder mandate, done this pass (PR #205/#206 deliberately
+   deferred it). Two real DOM panels ("À propos de la leçon" / "Exercice/
+   Quiz"); the inactive one is only [hidden] (see styles.css's global
+   [hidden]{display:none!important} rule), never removed, so every existing
+   scroll anchor and gate keeps working once its tab is opened. */
+.lesson-tabs{
+  display:flex;
+  gap:4px;
+  margin:4px 0 clamp(20px,4vw,32px);
+  overflow-x:auto;
+  scrollbar-width:none;
+  border-bottom:1px solid rgba(147,166,186,.18);
+}
+.lesson-tabs::-webkit-scrollbar{display:none}
+.lesson-tab{
+  flex:none;
+  padding:11px 4px;
+  margin-right:22px;
+  min-height:44px;
+  background:none;
+  border:0;
+  border-bottom:2px solid transparent;
+  font:700 13.5px/1 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  letter-spacing:.01em;
+  color:rgba(246,243,236,.56);
+  cursor:pointer;
+  transition:color .15s ease,border-color .15s ease;
+}
+.lesson-tab:hover{color:rgba(246,243,236,.86)}
+.lesson-tab:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.lesson-tab.is-active{color:var(--ivory);border-color:var(--gold)}
+.lesson-tab-panel[hidden]{display:none}
 .lesson-beat{
   counter-increment:dda-beat;
   position:relative;
