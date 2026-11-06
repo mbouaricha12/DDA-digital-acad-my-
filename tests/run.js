@@ -1897,6 +1897,8 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const context = await freshContext(browser);
     await seedLocalLearner(context, {}, 'free');
     const page = await context.newPage();
+    const cspViolations = [];
+    page.on('console', msg => { if (msg.type() === 'error' && /Content Security Policy/i.test(msg.text())) cspViolations.push(msg.text()); });
     await page.goto(`${ACADEMY_BASE}#resources`);
     await page.waitForSelector('#resources.view.active');
     const videoEntries = page.locator('#video-shelf-list .library-entry');
@@ -1906,10 +1908,12 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.waitForSelector('#resource-reader:not([hidden])');
     assert.equal(await page.locator('#reader-content .video-lite-thumb').isVisible(), true, 'a static thumbnail is shown before any click');
     assert.equal(await page.locator('#reader-content iframe').count(), 0, 'no iframe — and so no YouTube request — is created before the learner clicks play');
+    assert.equal(cspViolations.length, 0, `the thumbnail must not be silently blocked by CSP (img-src): ${cspViolations.join(' | ')}`);
     await page.locator('#reader-content .video-lite-play').click();
     const iframeSrc = await page.locator('#reader-content iframe').getAttribute('src');
     assert.match(iframeSrc, /^https:\/\/www\.youtube-nocookie\.com\/embed\//, 'the loaded player must use the privacy-enhanced nocookie domain');
     assert.ok(!/autoplay/.test(iframeSrc), 'no autoplay parameter — the mandate requires no autoplay');
+    assert.equal(cspViolations.length, 0, `the YouTube iframe must not be silently blocked by CSP (frame-src): ${cspViolations.join(' | ')}`);
     await context.close();
   });
 
