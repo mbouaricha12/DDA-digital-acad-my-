@@ -2470,6 +2470,11 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.match(await page.textContent('#lesson-title-mbrvm1'), /Introduction à la BRVM/);
     assert.equal(await page.evaluate(() => window.DDALearning.moduleStatus(window.DDA.curriculum, 'M2', window.DDA.load())), 'coming_soon', 'the independent BRVM lesson never changes the honest Premium Track (M2) status for a Free learner');
 
+    // MBRVM.1's exercise/quiz now live in the "Exercice/Quiz" tab (hidden by
+    // default, Lesson Tabs — PR #207) — open it before the question buttons
+    // are clickable, same as every other lesson in this suite.
+    await openLessonExerciseTab(page, '-mbrvm1');
+    assert.equal(await page.locator('#lesson-tab-exercise-mbrvm1').getAttribute('aria-selected'), 'true', 'opening the tab actually activates it');
     const exercise = page.locator('[data-question="mbrvm1-exercise"] button[data-correct="true"]').first();
     await exercise.scrollIntoViewIfNeeded();
     await exercise.click();
