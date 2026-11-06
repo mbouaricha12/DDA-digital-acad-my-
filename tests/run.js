@@ -1939,6 +1939,34 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('a lesson video thumbnail shows a title + key-points overlay drawn only from that lesson\'s own already-authored outline, and the overlay is gone once the video is launched', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'M0.1': { quizComplete: true } }, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-m02`);
+    await page.waitForSelector('#lesson-m02.view.active');
+    const overlay = page.locator('#lesson-m02-main .video-lite-overlay');
+    assert.equal(await overlay.isVisible(), true, 'a real VIDEO_REGISTRY-backed lesson video shows the overlay');
+    assert.match(await overlay.locator('strong').textContent(), /Support/, 'the overlay title is the real lesson title, never a placeholder');
+    const pointCount = await overlay.locator('li').count();
+    assert.ok(pointCount >= 2 && pointCount <= 4, `expected 2-4 key points, got ${pointCount}`);
+    const outlineText = await page.locator('#lesson-outline-list-m2').textContent();
+    const firstPoint = (await overlay.locator('li').first().textContent()).trim();
+    assert.ok(outlineText.includes(firstPoint), 'every overlay point is text already authored in this lesson\'s own outline, never invented');
+    await page.locator('#lesson-m02-main .video-lite-play').click();
+    assert.equal(await page.locator('#lesson-m02-main .video-lite-overlay').count(), 0, 'the overlay disappears the instant the real video is launched');
+
+    // A lesson with a real video but no "lesson"-step outline beats would
+    // show no overlay rather than an invented one — resources/library videos
+    // (never lesson context) are the one real case: assert they stay clean.
+    await page.goto(`${ACADEMY_BASE}#resources`);
+    await page.waitForSelector('#resources.view.active');
+    await page.click('.resource-open[data-video]');
+    await page.waitForSelector('#resource-reader:not([hidden])');
+    assert.equal(await page.locator('#resource-reader .video-lite-overlay').count(), 0, 'the video library reader never shows a lesson-style overlay — it is not lesson context');
+    await context.close();
+  });
+
   console.log('\n-- R. Paywall Premium honnête, aperçu gratuit et liste d\'attente --');
 
   await test('P2.1 is marked preview=true and stays open for a Free learner despite its premium_track permission', async () => {
@@ -2054,6 +2082,32 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const csv = require('fs').readFileSync(csvPath, 'utf8');
     assert.match(csv, /ambassador-7/);
     assert.match(csv, /^email,display_name,status,role,ref,created_at,last_sign_in_at/);
+    await context.close();
+  });
+
+  await test('the back-office header search filters the real admin sidebar items, and the profile chip shows the real connected admin name/role from /v1/me, never a fake identity', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/admin/overview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-overview-v1', generated_at: new Date().toISOString(), caller: { user_id: 'owner-1', role: 'owner' }, metrics: {} })
+    }));
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ user_id: 'owner-1', email: 'owner@dariusdigitalacademy.com', display_name: 'Richard Owner', status: 'active', entitlements: [] })
+    }));
+    const page = await context.newPage();
+    await page.goto(`${BASE}/admin.html`);
+    await page.waitForSelector('#admin-topbar-name');
+    await page.waitForFunction(() => document.getElementById('admin-topbar-name').textContent === 'Richard Owner');
+    assert.equal(await page.textContent('#admin-topbar-role'), 'owner', 'the role shown is the real server-derived caller role, never a client guess');
+    assert.equal(await page.textContent('#admin-topbar-avatar'), 'RO');
+
+    await page.fill('#admin-topbar-search-input', 'abonnements');
+    assert.equal(await page.locator('.sidebar [data-admin-view="memberships"]').isVisible(), true, 'the matching item stays visible');
+    assert.equal(await page.locator('.sidebar [data-admin-view="users"]').isVisible(), false, 'a non-matching real admin nav item is hidden, not a fake search result');
+    await page.fill('#admin-topbar-search-input', '');
+    assert.equal(await page.locator('.sidebar [data-admin-view="users"]').isVisible(), true, 'clearing the search restores every item');
     await context.close();
   });
 
@@ -2338,6 +2392,26 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.match(await card.locator('.lesson-sidecard-next').textContent(), /Retourner à mon parcours/);
     await card.locator('.lesson-sidecard-next').click();
     await page.waitForSelector('#path.view.active');
+    await context.close();
+  });
+
+  console.log('\n-- AA. Sidebar labels — aligned to the founder\'s mockup wording where it is a real feature --');
+
+  await test('the sidebar and mobile drawer use the mockup wording (Mes Parcours, Ressources, Journal de trading) while routing to the exact same real views', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.match(await page.textContent('.sidebar .nav-item[data-view="path"]'), /Mes Parcours/);
+    assert.match(await page.textContent('.sidebar .nav-item[data-view="resources"]'), /Ressources/);
+    assert.match(await page.textContent('.sidebar .nav-item[data-view="journal"]'), /Journal de trading/);
+    await page.click('.sidebar .nav-item[data-view="path"]');
+    await page.waitForSelector('#path.view.active');
+    await page.click('.sidebar .nav-item[data-view="resources"]');
+    await page.waitForSelector('#resources.view.active');
+    await page.click('.sidebar .nav-item[data-view="journal"]');
+    await page.waitForSelector('#journal.view.active');
     await context.close();
   });
 

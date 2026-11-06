@@ -76,6 +76,48 @@
   drawerBackdrop?.addEventListener('click', closeDrawer);
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && drawer && !drawer.hidden) closeDrawer(); });
 
+  // ---------- Header search: filters the existing admin sidebar nav items by
+  // their real label text — same pattern as the Academy's topbar search
+  // (dist/app.js initTopbarSearch). No fake search index, no new content.
+  (function initAdminTopbarSearch() {
+    const form = document.getElementById('admin-topbar-search-form');
+    const input = document.getElementById('admin-topbar-search-input');
+    if (!form || !input) return;
+    form.addEventListener('submit', event => event.preventDefault());
+    input.addEventListener('input', () => {
+      const query = input.value.trim().toLowerCase();
+      document.querySelectorAll('.sidebar [data-admin-view]').forEach(item => {
+        const label = item.textContent.trim().toLowerCase();
+        item.style.display = !query || label.includes(query) ? '' : 'none';
+      });
+      document.querySelectorAll('.sidebar .nav-section-label').forEach(label => {
+        let node = label.nextElementSibling;
+        let hasVisible = false;
+        while (node && !node.classList.contains('nav-section-label')) {
+          if (node.matches('[data-admin-view]') && node.style.display !== 'none') hasVisible = true;
+          node = node.nextElementSibling;
+        }
+        label.style.display = query && !hasVisible ? 'none' : '';
+      });
+    });
+  })();
+
+  // ---------- Header profile chip: read-only mirror of the connected admin's
+  // identity. Name/e-mail come from the same /v1/me the learner app already
+  // uses (window.DDABFF.getMe — no new route); role comes from the admin
+  // overview call already made at boot. Never writes anything — this only
+  // ever displays what the server already confirmed.
+  function renderAdminProfileChip(role, me) {
+    const chip = document.getElementById('admin-topbar-user');
+    if (!chip) return;
+    const name = (me && (me.display_name || me.email)) || 'Administrateur';
+    const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'AD';
+    document.getElementById('admin-topbar-avatar').textContent = initials;
+    document.getElementById('admin-topbar-name').textContent = name;
+    document.getElementById('admin-topbar-role').textContent = role || '—';
+    chip.hidden = false;
+  }
+
   // ---------- Overview ----------
   function renderMetrics(metrics) {
     const cards = [
@@ -255,5 +297,12 @@
     callerRole = result.data.caller.role;
     renderMetrics(result.data.metrics);
     showAdminView('overview');
+    // Best-effort display only: if /v1/me fails for any reason, the chip
+    // simply falls back to a generic "Administrateur" label — it never
+    // blocks the back-office or retries into the role-mutation flow above.
+    // getMe() returns the /v1/me body directly (or null), unlike the
+    // {status, data} shape of the admin-only endpoints above.
+    try { renderAdminProfileChip(callerRole, await window.DDABFF.getMe()); }
+    catch { renderAdminProfileChip(callerRole, null); }
   })();
 })();

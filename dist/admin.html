@@ -24,6 +24,7 @@
     <symbol id="admin-icon-users" viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3"/><circle cx="16" cy="9" r="2.5"/><path d="M3 20a5.5 5.5 0 0 1 11 0"/><path d="M14 20a4.5 4.5 0 0 1 7-3.7"/></symbol>
     <symbol id="admin-icon-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></symbol>
     <symbol id="admin-icon-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6Z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="admin-icon-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></symbol>
   </svg>
 
   <div class="app-shell" id="admin-shell" data-layer="admin">
@@ -70,7 +71,15 @@
         <button class="icon-button mobile-menu-toggle" type="button" id="admin-menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="admin-drawer"><svg class="icon"><use href="#admin-icon-menu"/></svg></button>
         <button class="mobile-brand" type="button" onclick="location.href='academy.html'" aria-label="Retour à l’Academy"><b>DDA</b><small>BACK-OFFICE</small></button>
         <div class="context"><span class="context-section">Back-office</span><strong id="admin-context-title">Aperçu</strong></div>
+        <form class="topbar-search" role="search" id="admin-topbar-search-form" action="#" aria-label="Rechercher dans la navigation du back-office">
+          <svg class="icon"><use href="#admin-icon-search"/></svg>
+          <input type="search" id="admin-topbar-search-input" placeholder="Rechercher une section…" aria-label="Rechercher une section du back-office" autocomplete="off">
+        </form>
         <div class="network-state" id="admin-network-state" role="status"><i></i><span>Vérification</span></div>
+        <button class="topbar-user" type="button" id="admin-topbar-user" aria-label="Mon profil admin">
+          <span class="avatar" id="admin-topbar-avatar">—</span>
+          <span class="topbar-user-meta"><strong id="admin-topbar-name">—</strong><small id="admin-topbar-role">—</small></span>
+        </button>
       </header>
 
       <div id="admin-gate" class="admin-empty-state" hidden>

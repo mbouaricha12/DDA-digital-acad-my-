@@ -93,15 +93,27 @@
   // app.js owns the click handler (this file renders markup only); it swaps
   // this block for an iframe pointed at youtube-nocookie.com, with no
   // autoplay parameter, per the mandate's "no autoplay" rule.
-  function renderYouTubeLite(video, id) {
+  // `overlay` (optional) is { title, points }: a lesson title + up to 4 key
+  // points shown on top of the thumbnail, gone the instant the learner
+  // clicks play (the click handler in app.js replaces this whole frame's
+  // innerHTML with the real iframe, taking the overlay with it — no extra
+  // hide/show code needed). Only ever passed by callers that already hold
+  // real, already-authored lesson data — this file never invents either.
+  function renderYouTubeLite(video, id, overlay) {
     const ytId = getYouTubeId(video && video.url);
     const label = escapeAttr((video && video.title) || 'Vidéo pédagogique DDA');
     if (!ytId) {
       return `<div class="video-explainer-block video-explainer-fallback" id="${escapeAttr(id)}-block" data-video-state="missing"><div class="video-fallback-panel guided-fallback" role="status"><svg class="icon"><use href="#icon-book"/></svg><strong>Vidéo en préparation</strong><span>Le lien de cette vidéo n’est pas encore disponible.</span></div></div>`;
     }
+    const points = overlay && Array.isArray(overlay.points) ? overlay.points.filter(Boolean).slice(0, 4) : [];
+    const overlayTitle = overlay && overlay.title ? escapeAttr(overlay.title) : '';
+    const overlayMarkup = overlayTitle
+      ? `<div class="video-lite-overlay" aria-hidden="true"><strong>${overlayTitle}</strong>${points.length ? `<ul>${points.map(point => `<li>${escapeAttr(point)}</li>`).join('')}</ul>` : ''}</div>`
+      : '';
     return `<figure class="video-explainer-block video-lite-block" id="${escapeAttr(id)}-block" data-video-state="idle">
       <div class="video-frame video-lite-frame" data-youtube-id="${escapeAttr(ytId)}" data-youtube-title="${label}">
         <img class="video-lite-thumb" src="https://i.ytimg.com/vi/${escapeAttr(ytId)}/hqdefault.jpg" alt="" loading="lazy">
+        ${overlayMarkup}
         <button type="button" class="video-lite-play" aria-label="Lire : ${label}"><svg class="icon"><use href="#icon-play"/></svg></button>
       </div>
       <figcaption class="video-explainer-caption">${label}</figcaption>
