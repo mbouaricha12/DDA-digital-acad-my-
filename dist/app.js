@@ -279,7 +279,16 @@ function mountLesson(entry) {
     const video = VIDEO_REGISTRY.find(v => v.id === entry.video);
     const loop = main.querySelector('.lesson-loop');
     if (video && loop) {
-      loop.insertAdjacentHTML('afterend', DDALessonRenderer.renderYouTubeLite(video, `lesson-video-${entry.id}`));
+      // Overlay key points: the same "Dans cette leçon" outline beats already
+      // authored for this lesson (lesson.blocks[].outline) and already shown
+      // elsewhere on the page — never a separate, invented list. Capped to
+      // the pre-exercise beats so the overlay previews the lesson, never the
+      // exercise/quiz answers.
+      const outlinePoints = (entry.meta.lesson.blocks || [])
+        .filter(block => block.outline && block.step === 'lesson')
+        .map(block => block.outline);
+      const overlay = outlinePoints.length ? { title: entry.meta.lesson.title, points: outlinePoints } : null;
+      loop.insertAdjacentHTML('afterend', DDALessonRenderer.renderYouTubeLite(video, `lesson-video-${entry.id}`, overlay));
     }
   }
   main.querySelectorAll('[data-video-frame], .video-frame video').forEach(media => {

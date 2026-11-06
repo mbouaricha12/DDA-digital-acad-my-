@@ -1939,6 +1939,34 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('a lesson video thumbnail shows a title + key-points overlay drawn only from that lesson\'s own already-authored outline, and the overlay is gone once the video is launched', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'M0.1': { quizComplete: true } }, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-m02`);
+    await page.waitForSelector('#lesson-m02.view.active');
+    const overlay = page.locator('#lesson-m02-main .video-lite-overlay');
+    assert.equal(await overlay.isVisible(), true, 'a real VIDEO_REGISTRY-backed lesson video shows the overlay');
+    assert.match(await overlay.locator('strong').textContent(), /Support/, 'the overlay title is the real lesson title, never a placeholder');
+    const pointCount = await overlay.locator('li').count();
+    assert.ok(pointCount >= 2 && pointCount <= 4, `expected 2-4 key points, got ${pointCount}`);
+    const outlineText = await page.locator('#lesson-outline-list-m2').textContent();
+    const firstPoint = (await overlay.locator('li').first().textContent()).trim();
+    assert.ok(outlineText.includes(firstPoint), 'every overlay point is text already authored in this lesson\'s own outline, never invented');
+    await page.locator('#lesson-m02-main .video-lite-play').click();
+    assert.equal(await page.locator('#lesson-m02-main .video-lite-overlay').count(), 0, 'the overlay disappears the instant the real video is launched');
+
+    // A lesson with a real video but no "lesson"-step outline beats would
+    // show no overlay rather than an invented one — resources/library videos
+    // (never lesson context) are the one real case: assert they stay clean.
+    await page.goto(`${ACADEMY_BASE}#resources`);
+    await page.waitForSelector('#resources.view.active');
+    await page.click('.resource-open[data-video]');
+    await page.waitForSelector('#resource-reader:not([hidden])');
+    assert.equal(await page.locator('#resource-reader .video-lite-overlay').count(), 0, 'the video library reader never shows a lesson-style overlay — it is not lesson context');
+    await context.close();
+  });
+
   console.log('\n-- R. Paywall Premium honnête, aperçu gratuit et liste d\'attente --');
 
   await test('P2.1 is marked preview=true and stays open for a Free learner despite its premium_track permission', async () => {
