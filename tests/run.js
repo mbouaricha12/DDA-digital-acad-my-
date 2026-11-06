@@ -2057,6 +2057,32 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('the back-office header search filters the real admin sidebar items, and the profile chip shows the real connected admin name/role from /v1/me, never a fake identity', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/admin/overview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-overview-v1', generated_at: new Date().toISOString(), caller: { user_id: 'owner-1', role: 'owner' }, metrics: {} })
+    }));
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ user_id: 'owner-1', email: 'owner@dariusdigitalacademy.com', display_name: 'Richard Owner', status: 'active', entitlements: [] })
+    }));
+    const page = await context.newPage();
+    await page.goto(`${BASE}/admin.html`);
+    await page.waitForSelector('#admin-topbar-name');
+    await page.waitForFunction(() => document.getElementById('admin-topbar-name').textContent === 'Richard Owner');
+    assert.equal(await page.textContent('#admin-topbar-role'), 'owner', 'the role shown is the real server-derived caller role, never a client guess');
+    assert.equal(await page.textContent('#admin-topbar-avatar'), 'RO');
+
+    await page.fill('#admin-topbar-search-input', 'abonnements');
+    assert.equal(await page.locator('.sidebar [data-admin-view="memberships"]').isVisible(), true, 'the matching item stays visible');
+    assert.equal(await page.locator('.sidebar [data-admin-view="users"]').isVisible(), false, 'a non-matching real admin nav item is hidden, not a fake search result');
+    await page.fill('#admin-topbar-search-input', '');
+    assert.equal(await page.locator('.sidebar [data-admin-view="users"]').isVisible(), true, 'clearing the search restores every item');
+    await context.close();
+  });
+
   console.log('\n-- T. Broker Hub — registre préparatoire --');
 
   await test('every BROKER_REGISTRY entry is not_configured with no affiliate_url, and no fiche can be active without a confirmed disclosure and regulation status', async () => {
