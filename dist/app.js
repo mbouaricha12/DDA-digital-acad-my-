@@ -384,6 +384,32 @@ const contextSection = document.getElementById('context-section');
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && !drawer.hidden) close(); });
 })();
 
+// Header search: filters the existing sidebar navigation by its real label
+// text — never a fake/unwired search box. No new content, no server call;
+// it only shows/hides .nav-item entries already in the DOM.
+(function initTopbarSearch() {
+  const form = document.getElementById('topbar-search-form');
+  const input = document.getElementById('topbar-search-input');
+  if (!form || !input) return;
+  form.addEventListener('submit', event => event.preventDefault());
+  input.addEventListener('input', () => {
+    const query = input.value.trim().toLowerCase();
+    document.querySelectorAll('.sidebar .nav-item').forEach(item => {
+      const label = item.textContent.trim().toLowerCase();
+      item.style.display = !query || label.includes(query) ? '' : 'none';
+    });
+    document.querySelectorAll('.sidebar .nav-section-label').forEach(label => {
+      let node = label.nextElementSibling;
+      let hasVisible = false;
+      while (node && !node.classList.contains('nav-section-label')) {
+        if (node.classList.contains('nav-item') && node.style.display !== 'none') hasVisible = true;
+        node = node.nextElementSibling;
+      }
+      label.style.display = query && !hasVisible ? 'none' : '';
+    });
+  });
+})();
+
 // Access onboarding selects — native controls remain in the form as the
 // source of truth, while the visible interaction uses DDA's own Learning OS
 // surface. This preserves validation, keyboard semantics and existing submit
@@ -2315,6 +2341,12 @@ function renderState() {
   document.getElementById('dashboard-name').textContent = name;
   document.getElementById('profile-name').textContent = name;
   document.getElementById('profile-avatar').textContent = initials;
+  // Header user chip (topbar-user): a second, independent on-screen copy of
+  // the same name/initials the sidebar profile chip already shows — never a
+  // second source of truth. [data-profile-name]/[data-profile-avatar] lets
+  // both update from this one assignment without colliding ids.
+  document.querySelectorAll('[data-profile-name]').forEach(node => { node.textContent = name; });
+  document.querySelectorAll('[data-profile-avatar]').forEach(node => { node.textContent = initials; });
   document.getElementById('greeting-prefix').textContent = greetingPrefix();
   document.getElementById('module-percent').textContent = `${progress}%`;
   document.getElementById('module-ring').style.setProperty('--progress', progress);
@@ -2401,6 +2433,7 @@ function renderState() {
   document.getElementById('event-count').textContent = `${count} événement${count > 1 ? 's' : ''}`;
 
   document.getElementById('sidebar-plan').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
+  document.querySelectorAll('[data-profile-role]').forEach(node => { node.textContent = premium ? 'Apprenant Premium' : 'Apprenant'; });
   document.getElementById('membership-status').textContent = premium ? 'DDA Premium · aperçu local' : 'DDA Free';
   const membershipStatusNote = document.getElementById('membership-status-note');
   if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Démonstration sur cet appareil · aucun achat actif' : 'Disponible maintenant · aucun achat actif';

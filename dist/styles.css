@@ -142,6 +142,8 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .context-section{display:block;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .context-section[hidden]{display:none}
 .context strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.topbar-search{display:none}
+.topbar-user{display:none}
 .network-state{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;margin-left:auto}
 .network-state i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(79,190,133,.14)}
 .network-state.offline i{background:var(--gold);box-shadow:0 0 0 4px rgba(217,164,65,.14)}
@@ -1263,6 +1265,17 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .context{display:grid;flex:initial}
   .context-section{font-size:10px}
   .context strong{font-size:17px}
+  .topbar-search{display:flex;align-items:center;gap:8px;flex:1;max-width:280px;padding:0 14px;height:40px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03);color:var(--muted)}
+  .topbar-search .icon{width:16px;height:16px;flex:none}
+  .topbar-search input{flex:1;min-width:0;border:0;background:none;color:var(--white);font:inherit;font-size:13px}
+  .topbar-search input::placeholder{color:var(--muted-2)}
+  .topbar-search input:focus{outline:none}
+  .topbar-user{display:flex;align-items:center;gap:10px;border:0;background:none;color:inherit;cursor:pointer;padding:4px 6px 4px 4px;border-radius:999px;flex:none}
+  .topbar-user:hover,.topbar-user:focus-visible{background:rgba(255,255,255,.05)}
+  .topbar-user .avatar{width:34px;height:34px;font-size:13px}
+  .topbar-user-meta{display:flex;flex-direction:column;text-align:left;line-height:1.25;min-width:0}
+  .topbar-user-meta strong{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+  .topbar-user-meta small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
   .network-state span{display:inline}
   .mobile-nav{display:none}
   .mobile-menu-toggle,.mobile-drawer,.mobile-drawer-backdrop{display:none}

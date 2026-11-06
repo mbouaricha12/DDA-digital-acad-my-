@@ -192,8 +192,17 @@
         <button class="icon-button mobile-menu-toggle" type="button" id="mobile-menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-drawer"><svg class="icon"><use href="#icon-menu"/></svg></button>
         <button class="mobile-brand" data-view="dashboard" aria-label="Accueil DDA"><b>DDA</b><small>DIGITAL ACADEMY</small></button>
         <div class="context"><span class="context-section" id="context-section" hidden></span><strong id="context-title">Aujourd’hui</strong></div>
+        <form class="topbar-search" role="search" id="topbar-search-form" action="#" aria-label="Rechercher dans la navigation DDA">
+          <svg class="icon"><use href="#icon-search"/></svg>
+          <input type="search" id="topbar-search-input" placeholder="Rechercher une section…" aria-label="Rechercher une section de l’Academy" autocomplete="off">
+        </form>
         <div class="network-state" id="network-state" role="status"><i></i><span>Vérification réseau</span></div>
+        <button class="icon-button" aria-label="Aide et support" data-view="support"><svg class="icon"><use href="#icon-help"/></svg></button>
         <button class="icon-button" aria-label="Notifications"><svg class="icon"><use href="#icon-bell"/></svg><span class="notification-dot"></span></button>
+        <button class="topbar-user" type="button" data-view="profile" aria-label="Mon profil">
+          <span class="avatar" data-profile-avatar id="topbar-profile-avatar">RD</span>
+          <span class="topbar-user-meta"><strong data-profile-name id="topbar-profile-name">Richard</strong><small data-profile-role>Apprenant</small></span>
+        </button>
       </header>
 
       <div class="dda-surface dda-public-surface" data-surface="public">
