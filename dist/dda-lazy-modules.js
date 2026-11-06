@@ -63,7 +63,20 @@
   async function ensure(view) {
     const groupsToLoad = groupForView(view);
     for (const group of groupsToLoad) {
-      for (const src of groups[group]) await loadScript(src);
+      for (const src of groups[group]) {
+        await loadScript(src);
+        // Lot 2 (mandate §6 audit): a content-fetching module (currently
+        // p2-lessons.js) can only start its authenticated BFF fetch once its
+        // own script has actually run — that fetch necessarily outlives the
+        // script tag's own `onload` (loadScript() above). Such a module
+        // registers its in-flight fetch promise at
+        // window.DDALazyContentReady[src] (keyed by its own filename, so
+        // this stays generic for any future module) — awaiting it here
+        // means curriculum rebuild / DOM mounting below never runs on
+        // half-loaded Premium content. A plain script with no such entry is
+        // unaffected: awaiting `undefined` resolves immediately.
+        await window.DDALazyContentReady?.[src];
+      }
     }
     if (groupsToLoad.includes('lessons') || groupsToLoad.includes('premium') || groupsToLoad.includes('brvm')) {
       window.DDA?.refreshCurriculum?.();

@@ -248,6 +248,26 @@ function canUnlock(permission) {
 async function refreshServerPremiumEntitlement() {
   if (!window.DDABFF?.enabled() || !remoteUser) { serverPremiumConfirmed = null; return; }
   serverPremiumConfirmed = await window.DDABFF.hasServerPremiumEntitlement();
+  // Lot 2 (mandate §6 audit): P2.2/LAB4/LABCAP's real content is never
+  // shipped to the browser until the server has actually confirmed this —
+  // fetch it now, before mounting anything, so mountPremiumLessons()/
+  // mountPremiumLabLessons() below never render a half-loaded or empty
+  // Premium lesson. A Free learner (serverPremiumConfirmed !== true) never
+  // reaches this fetch for P2.2/LAB4/LABCAP; P2.1's own free-preview fetch
+  // already happened independently when p2-lessons.js first loaded.
+  if (serverPremiumConfirmed === true) {
+    if (!window.DDAP2Lessons?.p22 && typeof window.DDAReloadPremiumLessonContent === 'function') {
+      await window.DDAReloadPremiumLessonContent();
+      window.DDA?.refreshCurriculum?.();
+      mountedLessons = LESSON_REGISTRY
+        .map(entry => ({ ...entry, meta: DDALearning.findLesson(DDA.curriculum, entry.id) }))
+        .filter(entry => entry.meta);
+    }
+    await ensureLabPremiumContentLoaded();
+  }
+  // Both of these now also show the honest "temporarily unavailable"
+  // message themselves (see their own comments) when canUnlock is true but
+  // the real content's fetch failed — never a silently blank lesson.
   mountPremiumLessons();
   mountPremiumLabLessons();
   renderState();
@@ -322,6 +342,14 @@ function mountLesson(entry) {
   const main = document.getElementById(`${entry.viewId}-main`);
   const outline = document.getElementById(`${entry.viewId}-outline`);
   if (!main || !outline || main.dataset.ddaLessonMounted === 'true') return;
+  // The content fetch behind this entry may have failed on an earlier
+  // attempt and already shown the honest "temporarily unavailable" message
+  // (renderPremiumContentUnavailable) — real content has now actually
+  // arrived, so clear that message before mounting it.
+  if (main.dataset.ddaPremiumUnavailable === 'true') {
+    main.querySelector('.lesson-premium-unavailable')?.remove();
+    delete main.dataset.ddaPremiumUnavailable;
+  }
   const suffix = entry.suffix || undefined;
   main.insertAdjacentHTML('beforeend', DDALessonRenderer.renderLessonMain(entry.meta.module, entry.meta.lesson, suffix));
   // academy.html gives .lesson-outline a static, empty [data-sidecard-slot]
@@ -371,9 +399,33 @@ function mountLesson(entry) {
   if (entry.id === 'P2.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff premium-handoff"><p class="eyebrow gold">Après les leçons</p><h3>Practice Lab — Build the Risk Plan</h3><p>Construis un plan dans un scénario pédagogique synthétique, puis fais vérifier ta décision.</p><button type="button" class="secondary-action" data-view="premium-lab">Ouvrir le Practice Lab <span>→</span></button></section>');
   main.dataset.ddaLessonMounted = 'true';
 }
+// Lot 2 (mandate §6 audit): a Premium lesson's real content now arrives
+// from the authenticated BFF, never embedded in this public bundle. A
+// learner can reach this point with `canUnlock('premium_track')` true but
+// the content genuinely missing in exactly two honest cases: a local/pilot
+// session with no BFF configured (there is no server left to fetch real
+// content from — the old "embed it anyway" fallback is exactly the leak
+// this fix closes, so it is no longer available here either) or a
+// server-confirmed Premium learner whose content fetch itself failed
+// (network/BFF outage). Both get this same honest message — never a
+// fabricated placeholder that would resemble the real lesson, and never a
+// silently blank view.
+function renderPremiumContentUnavailable(viewId, title) {
+  const main = document.getElementById(`${viewId}-main`);
+  if (!main || main.dataset.ddaLessonMounted === 'true' || main.dataset.ddaPremiumUnavailable === 'true') return;
+  main.dataset.ddaPremiumUnavailable = 'true';
+  const reason = window.DDABFF?.enabled()
+    ? 'Nous n’avons pas pu charger le contenu réel de cette leçon Premium depuis le serveur. Réessaie dans un instant.'
+    : 'Cette leçon Premium nécessite une connexion au serveur DDA pour charger son contenu réel, qui n’est plus jamais inclus dans l’application elle-même.';
+  main.insertAdjacentHTML('beforeend', `<section class="lesson-premium-unavailable"><p class="eyebrow gold">Contenu Premium</p><h2>${title ? `${title} est ` : ''}temporairement indisponible</h2><p>${reason}</p><button type="button" class="secondary-action" data-view="path">Retour à mon parcours</button></section>`);
+  main.querySelectorAll('[data-view]').forEach(bindViewButton);
+}
 mountedLessons.forEach(entry => {
   if (entry.permission === 'premium_track' && !canUnlock('premium_track')) return;
   mountLesson(entry);
+});
+LESSON_REGISTRY.filter(entry => entry.permission === 'premium_track' && !mountedLessons.some(m => m.id === entry.id)).forEach(entry => {
+  if (canUnlock('premium_track')) renderPremiumContentUnavailable(entry.viewId, entry.title);
 });
 function refreshMountedLessons() {
   mountedLessons = LESSON_REGISTRY
@@ -385,6 +437,9 @@ function refreshMountedLessons() {
     const wasMounted = main?.dataset.ddaLessonMounted === 'true';
     mountLesson(entry);
     if (!wasMounted) bindRegistryQuestions(entry);
+  });
+  LESSON_REGISTRY.filter(entry => entry.permission === 'premium_track' && !mountedLessons.some(m => m.id === entry.id)).forEach(entry => {
+    if (canUnlock('premium_track')) renderPremiumContentUnavailable(entry.viewId, entry.title);
   });
   // DDA Lab (Lot 1, mandate §6 audit): dda-lab.js is now lazy-loaded via the
   // "ailab" group, so window.DDALab may only just have become available —
@@ -3751,6 +3806,15 @@ function mountPremiumLessons() {
       main.querySelectorAll('[data-view]').forEach(bindViewButton);
     }
   });
+  // Lot 2 (mandate §6 audit): canUnlock('premium_track') is true here, but a
+  // premium_track LESSON_REGISTRY entry whose real content never arrived
+  // (no BFF configured — e.g. the local "Premium Demo" preview toggle — or
+  // a genuine fetch failure) is simply absent from mountedLessons. Every
+  // call site of this function (gate-unlock, refreshServerPremiumEntitlement,
+  // the boot-time mount pass) gets the same honest fallback this way,
+  // instead of a silently blank lesson view.
+  LESSON_REGISTRY.filter(entry => entry.permission === 'premium_track' && !mountedLessons.some(m => m.id === entry.id))
+    .forEach(entry => renderPremiumContentUnavailable(entry.viewId, entry.title));
 }
 
 /* -------------------------------------------------------------------------
@@ -3771,17 +3835,25 @@ function mountPremiumLessons() {
 // visitors, regardless of whether they ever opened the Lab). window.DDALab
 // may therefore not exist yet the first time this file runs: labModule/
 // LAB_REGISTRY/LAB_PREREQUISITE/LAB_VIEW_ID start empty and are (re)built by
-// buildLabRegistry(), called once at boot (handles the deep-link case,
+// rebuildLabRegistry(), called once at boot (handles the deep-link case,
 // where dda-lazy-modules.js's document.write bootstrap already loaded
 // dda-lab.js before this script runs — same as p2-lessons.js already did)
 // and again from mountLabTrack() once the lazy group actually finishes
 // loading later (DDA_LAZY_REFRESH hook below).
+// Lot 2 (mandate §6 audit) separately made LAB4/LABCAP's own real content
+// arrive later and asynchronously (fetched from the authenticated BFF only
+// once Premium is actually confirmed — see ensureLabPremiumContentLoaded()
+// below), so window.DDALab.lessons[3]/.capstone can be *replaced* at
+// runtime once that fetch resolves, independently of whether dda-lab.js
+// itself has already loaded. rebuildLabRegistry() re-derives everything
+// below from whatever window.DDALab currently is, and is safe to call again
+// after either event — it deliberately has no "already built" guard.
 let labModule = null;
 let LAB_REGISTRY = [];
 let LAB_PREREQUISITE = Object.freeze({});
 let LAB_VIEW_ID = Object.freeze({});
-function buildLabRegistry() {
-  if (!window.DDALab || LAB_REGISTRY.length) return;
+function rebuildLabRegistry() {
+  if (!window.DDALab) { labModule = null; LAB_REGISTRY = []; LAB_PREREQUISITE = Object.freeze({}); LAB_VIEW_ID = Object.freeze({}); return; }
   labModule = Object.freeze({ title: window.DDALab.track.title, lessons: [...window.DDALab.lessons, window.DDALab.capstone] });
   LAB_REGISTRY = Object.freeze([
     { id: 'LAB1', viewId: 'lesson-lab1', suffix: 'lab1', permission: 'lesson_m01', quizBlock: 'lab1-quiz', understoodScrollTo: 'lab1-exercise-block',
@@ -3820,13 +3892,14 @@ function buildLabRegistry() {
   // prerequisite id back into a navigable view.
   LAB_VIEW_ID = Object.freeze(Object.fromEntries(LAB_REGISTRY.map(entry => [entry.id, entry.viewId])));
 }
+rebuildLabRegistry();
 // Navigation audit follow-up: initLessonPrevLinks (further up this file)
 // only covers LESSON_REGISTRY — DDA Lab is a deliberately separate registry
-// (see the block comment above buildLabRegistry) with its own prerequisite
+// (see the block comment above rebuildLabRegistry) with its own prerequisite
 // chain, so it needs its own, identically-shaped injector rather than
 // reusing LESSON_PREREQUISITE/LESSON_VIEW_ID for lessons that aren't in them.
 // Idempotent via its own DOM guard (quickNav.querySelector), so it is safe
-// to call every time mountLabTrack() runs.
+// to call again — including every time mountLabTrack() runs.
 function initLabPrevLinks() {
   LAB_REGISTRY.forEach(entry => {
     const prevViewId = LAB_VIEW_ID[LAB_PREREQUISITE[entry.viewId]];
@@ -3844,19 +3917,32 @@ function initLabPrevLinks() {
     bindViewButton(prevButton);
   });
 }
+initLabPrevLinks();
+// Lot 2 (mandate §6 audit): LAB4/LABCAP's real content now arrives only
+// from the authenticated BFF, so a premium-gated entry must never be
+// mounted while its content is still the empty metadata shell (dda-lab.js'
+// buildLab4Meta()/buildLabCapstoneMeta()) — that would render a broken,
+// content-less lesson instead of the honest "not loaded yet" state. LAB1-3
+// are always free, static and immediately ready.
+function labContentReady(entry) {
+  return entry.permission !== 'premium_track' || (Array.isArray(entry.meta?.lesson?.blocks) && entry.meta.lesson.blocks.length > 0);
+}
 // Mounts the free LAB1-3 lessons (plus LAB4/capstone when already
-// Premium-entitled) and binds their interactions. A no-op until dda-lab.js
-// has actually loaded. Called once at boot (deep-link case) and again from
-// the DDA_LAZY_REFRESH hook once the lazy "ailab" group resolves (normal
-// nav-click case, where window.DDALab did not exist yet at boot) — every
-// step here is guarded so repeated calls stay harmless: mountLesson() no-ops
-// once a view is mounted, and the one genuinely non-idempotent step
-// (bindMarkUnderstood, which would otherwise double-bind a click listener)
-// only ever runs on the first successful pass via `labMarkUnderstoodBound`.
+// Premium-entitled AND their real content has actually arrived — see
+// labContentReady() above) and binds their interactions. A no-op until
+// dda-lab.js has actually loaded. Called once at boot (deep-link case) and
+// again from the DDA_LAZY_REFRESH hook once the lazy "ailab" group resolves
+// (normal nav-click case, where window.DDALab did not exist yet at boot) —
+// every step here is guarded so repeated calls stay harmless:
+// rebuildLabRegistry() just re-derives the same data when nothing actually
+// changed, mountLesson() no-ops once a view is mounted, and the one
+// genuinely non-idempotent step (bindMarkUnderstood, which would otherwise
+// double-bind a click listener) only ever runs on the first successful pass
+// via `labMarkUnderstoodBound`.
 let labMarkUnderstoodBound = false;
 function mountLabTrack() {
   if (!window.DDALab) return;
-  buildLabRegistry();
+  rebuildLabRegistry();
   applyLabTitles();
   initLabPrevLinks();
   LAB_REGISTRY.forEach(entry => {
@@ -3865,6 +3951,7 @@ function mountLabTrack() {
     // already premium (e.g. after a reload) — "not premium_track" alone
     // would wrongly skip LAB4/capstone for an already-premium learner.
     if (entry.permission === 'premium_track' && !canUnlock('premium_track')) return;
+    if (!labContentReady(entry)) { renderPremiumContentUnavailable(entry.viewId, entry.meta?.lesson?.title); return; }
     const main = document.getElementById(`${entry.viewId}-main`);
     const wasMounted = main?.dataset.ddaLessonMounted === 'true';
     mountLesson(entry);
@@ -3882,6 +3969,7 @@ mountLabTrack();
 function mountPremiumLabLessons() {
   if (!window.DDALab || !canUnlock('premium_track')) return;
   LAB_REGISTRY.filter(entry => entry.permission === 'premium_track').forEach(entry => {
+    if (!labContentReady(entry)) { renderPremiumContentUnavailable(entry.viewId, entry.meta?.lesson?.title); return; }
     const main = document.getElementById(`${entry.viewId}-main`);
     const wasMounted = main?.dataset.ddaLessonMounted === 'true';
     mountLesson(entry);
@@ -3890,6 +3978,27 @@ function mountPremiumLabLessons() {
       main.querySelectorAll('[data-view]').forEach(bindViewButton);
     }
   });
+}
+// Lot 2 (mandate §6 audit): fetches LAB4/LABCAP's real content from the
+// authenticated BFF and, if it actually came back, replaces window.DDALab
+// wholesale (its lessons/capstone are frozen — never mutated in place) and
+// rebuilds LAB_REGISTRY/the prerequisite maps against the new object.
+// Resolves to false (no-op) when the BFF is disabled, the fetch fails, or
+// the content was already loaded — callers never re-render on a no-op.
+async function ensureLabPremiumContentLoaded() {
+  if (!window.DDALab || typeof window.DDAFetchLabPremiumContent !== 'function') return false;
+  const lab4Entry = LAB_REGISTRY.find(entry => entry.id === 'LAB4');
+  if (labContentReady(lab4Entry || { permission: 'premium_track', meta: { lesson: window.DDALab.lessons[3] } })) return false;
+  const { lab4, labcap } = await window.DDAFetchLabPremiumContent();
+  if (!lab4 && !labcap) return false;
+  window.DDALab = Object.freeze({
+    track: window.DDALab.track,
+    lessons: Object.freeze([window.DDALab.lessons[0], window.DDALab.lessons[1], window.DDALab.lessons[2], lab4 || window.DDALab.lessons[3]]),
+    capstone: labcap || window.DDALab.capstone
+  });
+  rebuildLabRegistry();
+  initLabPrevLinks();
+  return true;
 }
 // A lesson's own three durable flags collapse here to one honest status word —
 // never a fabricated "Maîtrisé" from a single quiz pass (the exact conflation

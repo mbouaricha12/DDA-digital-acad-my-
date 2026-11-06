@@ -6,6 +6,7 @@ const { executeIdempotentMutation, validateClientMutationId } = require('./idemp
 const { checkAuthRateLimit } = require('./rate-limiter');
 const { VALID_ROLES: VALID_ADMIN_ROLES } = require('./admin-roles-store');
 const { validateAskRequest } = require('./ai-assistant');
+const { PREMIUM_CONTENT, FREE_PREVIEW_IDS } = require('./premium-content');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
@@ -382,6 +383,26 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const snapshot = await currentEntitlements(current.user.user_id);
         if (!hasActivePremium(snapshot, clock())) return sendError(res, 403, 'premium_required', 'An active Premium entitlement is required.', requestId);
         return json(res, 200, { resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true });
+      }
+      // Real Premium lesson/lab content (mandate §6 audit, Lot 2): the only
+      // place the text, exercises and quiz answers of P2.2/LAB4/LABCAP live
+      // now — see bff/src/premium-content.js's header comment for why this
+      // route exists. Guarded by the exact same hasActivePremium() check as
+      // /v1/premium/preview above; P2.1 is the Premium Track's free preview
+      // (mandate §5) and is served to any authenticated learner, Premium or
+      // not, exactly like the client already treats it as a Free-readable
+      // lesson despite its premium_track permission.
+      if (method === 'GET' && path.startsWith('/v1/premium/content/')) {
+        const lessonId = path.slice('/v1/premium/content/'.length);
+        if (!LESSON_ID.test(lessonId) || !Object.prototype.hasOwnProperty.call(PREMIUM_CONTENT, lessonId)) {
+          return sendError(res, 404, 'not_found', 'Unknown lesson id.', requestId);
+        }
+        const current = await withUser(req, res, requestId); if (!current) return;
+        if (!FREE_PREVIEW_IDS.has(lessonId)) {
+          const snapshot = await currentEntitlements(current.user.user_id);
+          if (!hasActivePremium(snapshot, clock())) return sendError(res, 403, 'premium_required', 'An active Premium entitlement is required.', requestId);
+        }
+        return json(res, 200, { lesson: PREMIUM_CONTENT[lessonId] });
       }
       if (method === 'POST' && path === '/v1/ai/ask') {
         const current = await withUser(req, res, requestId); if (!current) return;

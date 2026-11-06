@@ -246,123 +246,71 @@
   }
 
   /* ---------------------------------------------------------------------
-     L4 (Premium) — Produire un livrable complet + introduction à l'automatisation
-     Compétence : construire un document fini avec l'IA ; reconnaître une
-     tâche automatisable simple. Aucun outil payant, aucune API DDA appelée.
+     L4 et Projet final (Premium) — mandate §6 audit, Lot 2.
+     Leur VRAI contenu (texte, exercices, réponses de quiz) ne vit plus ici :
+     ce fichier est public et statique, donc tout ce qu'il contenait pouvait
+     être lu par un simple curl, sans authentification — exactement la fuite
+     que ce lot corrige. Seules les métadonnées non sensibles (déjà visibles
+     ailleurs : academy.html affiche déjà ces titres en HTML statique dans le
+     catalogue du Lab, y compris pour un visiteur anonyme) restent ici, pour
+     que LAB_REGISTRY, le statut du catalogue et la chaîne de prérequis
+     continuent de fonctionner sans jamais avoir besoin du vrai contenu.
+     Le vrai contenu vit uniquement sur le BFF authentifié
+     (bff/src/premium-content.js), derrière GET /v1/premium/content/:id —
+     même garde hasActivePremium() que /v1/premium/preview. app.js récupère
+     ce contenu via fetchLabPremiumContent() ci-dessous, uniquement après
+     confirmation serveur d'un abonnement Premium actif (voir
+     refreshServerPremiumEntitlement() dans app.js), et ne monte jamais la
+     leçon tant que ses blocks sont vides — jamais un contenu par défaut qui
+     ressemblerait au vrai contenu.
      --------------------------------------------------------------------- */
-  function buildLab4() {
-    const competency = Object.freeze({ id: 'lab_ai_production', label: 'Produire un livrable complet avec l’IA' });
-    const xp = Object.freeze({ lessonViewed: 25, exerciseComplete: 50, quizComplete: 100 });
-    const content = Object.freeze({
-      lead: 'Tu sais déjà vérifier et corriger. Cette leçon t’apprend à aller jusqu’au bout : un document fini, prêt à partager — et à repérer les tâches répétitives qu’on peut automatiser.',
-      concept: Object.freeze({
-        heading: 'Produire un document complet, en quatre étapes',
-        body: '1) Un brief précis (à qui s’adresse le document, pour quoi faire, quelle longueur). 2) Un premier brouillon généré par l’IA. 3) Une relecture ciblée, en corrigeant un point à la fois (jamais tout en même temps). 4) Une mise en forme finale lisible sur téléphone : titres courts, phrases courtes, un seul message par paragraphe.'
-      }),
-      principle: Object.freeze({ label: 'Principe essentiel', text: 'Un livrable fini n’est jamais le premier brouillon accepté tel quel — c’est le résultat d’au moins une correction ciblée.' }),
-      example: Object.freeze({
-        label: 'Exemple complet',
-        text: 'Fatou répare des téléphones . Brief donné à l’IA : « Rédige une courte page de présentation pour mon activité de réparation de téléphones, pour des clients qui me trouveraient sur WhatsApp : qui je suis, ce que je répare, pourquoi me faire confiance, comment me contacter. Ton simple et rassurant, 150 mots maximum. » Premier brouillon trop long → relecture ciblée : « Raccourcis à 100 mots et commence directement par ce que tu répares. » Résultat : un texte prêt à coller dans son statut WhatsApp Business.'
-      })
-    });
-    const automation = Object.freeze({
-      heading: 'Qu’est-ce qu’une automatisation simple ?',
-      body: 'Une automatisation relie trois éléments : un déclencheur (ce qui se passe), une action (ce qui doit arriver automatiquement) et parfois une condition (seulement si…). Exemple entièrement gratuit : un formulaire Google Forms où chaque nouvelle réponse (déclencheur) s’ajoute automatiquement comme une ligne dans un Google Sheets (action) — sans qu’un abonnement payant soit nécessaire. L’automatisation ne remplace pas ton jugement : elle ne sert que pour les tâches répétitives, jamais pour une décision qui demande de réfléchir à chaque fois.'
-    });
-    const comparison = Object.freeze({
-      heading: 'Quelle tâche automatiser, laquelle garder manuelle',
-      bad: Object.freeze({ label: 'À garder manuel', items: Object.freeze(['Répondre à une réclamation d’un client mécontent', 'Décider d’un prix spécial pour une situation particulière', 'Rédiger un message pour une occasion unique et sensible']) }),
-      good: Object.freeze({ label: 'Bon candidat à l’automatisation', items: Object.freeze(['Enregistrer chaque nouvelle commande reçue par formulaire', 'Envoyer un message de confirmation identique à chaque inscription', 'Classer automatiquement les réponses d’un sondage par catégorie']) })
-    });
-    const practice = Object.freeze({
-      id: 'lab4-exercise', label: 'Exercice', heading: 'Repérer une bonne candidate à l’automatisation',
-      prompt: 'Tu gères les inscriptions à un petit atelier de couture via un formulaire en ligne. Chaque semaine, tu recopies à la main les réponses dans un tableau. Est-ce une bonne tâche à automatiser ?',
-      successText: 'Oui : c’est une tâche répétitive, sans jugement à exercer — exactement le type de tâche qu’une automatisation simple (formulaire → tableau) peut faire à ta place.',
-      choices: Object.freeze([
-        Object.freeze({ text: 'Oui : recopier les mêmes informations chaque semaine est répétitif et ne demande aucune décision.', correct: true, feedback: 'Exactement — c’est le profil parfait d’une automatisation simple : répétitif, sans jugement, toujours la même action.' }),
-        Object.freeze({ text: 'Non : il vaut mieux tout recopier soi-même pour garder le contrôle.', correct: false, feedback: 'Le contrôle n’est pas perdu : tu choisis l’outil et tu vérifies le résultat. Recopier à la main une tâche identique chaque semaine fait perdre du temps sans ajouter de valeur.' })
-      ])
-    });
-    const evaluation = Object.freeze({
-      id: 'lab4-quiz', label: 'Quiz de validation', heading: 'Produire et automatiser avec méthode',
-      prompt: 'Quelle affirmation décrit le mieux une automatisation « simple » telle que vue dans cette leçon ?',
-      successText: 'Une automatisation simple relie toujours un déclencheur à une action — rien de plus. Elle ne prend jamais de décision à ta place sur un cas particulier.',
-      choices: Object.freeze([
-        Object.freeze({ text: 'Elle relie un événement déclencheur à une action qui se répète toujours de la même façon.', correct: true, feedback: 'C’est la définition vue dans cette leçon : déclencheur → action, parfois avec une condition « seulement si ».' }),
-        Object.freeze({ text: 'Elle remplace ton jugement pour toutes les décisions répétitives de ton activité.', correct: false, feedback: 'Une automatisation ne juge jamais un cas particulier — elle répète une action identique, elle ne remplace pas une décision qui dépend du contexte.' }),
-        Object.freeze({ text: 'Elle nécessite toujours un abonnement payant pour fonctionner.', correct: false, feedback: 'L’exemple formulaire → tableau de cette leçon est entièrement gratuit — une automatisation simple ne demande pas nécessairement un outil payant.' })
-      ])
-    });
-    const result = Object.freeze({ heading: 'Quatrième leçon terminée.', body: 'Tu es prêt(e) pour le projet final : construire ta propre page de présentation, du brief jusqu’au résultat fini.' });
-    const blocks = Object.freeze([
-      Object.freeze({ type: 'competency_check', id: 'lab4-competency-intro', step: 'lesson', mode: 'targets', competency }),
-      Object.freeze({ type: 'text_short', id: 'lab4-concept', outline: content.concept.heading, step: 'lesson', eyebrow: 'Le concept', heading: content.concept.heading, body: content.concept.body, principle: content.principle }),
-      Object.freeze({ type: 'case_study', id: 'lab4-example', outline: content.example.label, step: 'lesson', label: content.example.label, text: content.example.text }),
-      Object.freeze({ type: 'text_short', id: 'lab4-automation-concept', outline: automation.heading, step: 'lesson', eyebrow: 'Introduction à l’automatisation', heading: automation.heading, body: automation.body }),
-      Object.freeze({ type: 'scenario', id: 'lab4-comparison', outline: comparison.heading, step: 'lesson', heading: comparison.heading, bad: comparison.bad, good: comparison.good }),
-      Object.freeze({ type: 'quiz', id: 'lab4-exercise', outline: practice.heading, step: 'exercise', locked: false, data: practice }),
-      Object.freeze({ type: 'quiz', id: 'lab4-quiz', outline: evaluation.heading, step: 'quiz', locked: true, data: evaluation }),
-      Object.freeze({ type: 'summary', id: 'lab4-result', step: 'review', idSuffix: 'lab4', data: result, continueTo: Object.freeze({ view: 'lesson-lab-capstone', label: 'Commencer le projet final' }) })
-    ]);
+  function buildLab4Meta() {
     return Object.freeze({
       id: 'LAB4', title: 'Produire un livrable complet avec l’IA', prerequisite: 'LAB3', premium: true,
       summary: 'Aller du brief au document fini, et repérer une tâche automatisable.',
       estimatedMinutes: 15, markUnderstoodLabel: 'Passer à l’exercice',
-      competency, xp, content, practice, evaluation, result, steps: STEPS, blocks
+      competency: Object.freeze({ id: 'lab_ai_production', label: 'Produire un livrable complet avec l’IA' }),
+      xp: Object.freeze({ lessonViewed: 25, exerciseComplete: 50, quizComplete: 100 }),
+      // Real content arrives only via fetchLabPremiumContent() below, once
+      // the server has confirmed Premium — until then this stays empty/null
+      // and app.js's mountLesson() never renders it.
+      content: null, practice: null, evaluation: null, result: null,
+      steps: STEPS, blocks: Object.freeze([])
     });
   }
 
-  /* ---------------------------------------------------------------------
-     Projet final (Premium) — page de présentation réalisée avec l'IA.
-     Aucune correction automatique : auto-évaluation guidée contre une
-     grille explicite, jamais présentée comme une évaluation serveur.
-     --------------------------------------------------------------------- */
-  function buildLabCapstone() {
-    const competency = Object.freeze({ id: 'lab_capstone_delivery', label: 'Livrer un document complet et vérifié' });
-    const xp = Object.freeze({ lessonViewed: 30, exerciseComplete: 0, quizComplete: 150 });
-    const brief = Object.freeze({
-      heading: 'Ton projet : une page de présentation prête à partager',
-      body: 'Choisis un petit service ou produit — le tien, celui d’un proche, ou un exemple imaginé (couture, réparation, cours particuliers, petite restauration, revente). Avec une IA gratuite (ChatGPT ou Gemini), rédige une page de présentation courte : qui, quoi, pourquoi te faire confiance, comment te contacter. Utilise exactement la méthode des 4 leçons précédentes : brief précis → brouillon → relecture ciblée (faits, ton, ce qui manque) → mise en forme finale lisible sur téléphone.'
-    });
-    const template = Object.freeze({
-      label: 'Gabarit à suivre',
-      text: '1) Une phrase d’accroche (qui tu es, ce que tu fais). 2) Trois à cinq lignes sur ce que tu proposes concrètement. 3) Une phrase sur pourquoi te faire confiance (expérience, exemple, garantie). 4) Un appel à l’action clair (numéro, WhatsApp, lieu). Conserve le prompt final que tu as utilisé : c’est ta preuve de démarche, pas seulement le résultat.'
-    });
-    const checklist = Object.freeze({
-      heading: 'Grille d’auto-évaluation',
-      good: Object.freeze({ label: 'Mon livrable respecte ces points', items: Object.freeze(['Chaque fait annoncé (prix, lieu, contact) est vrai et vérifié par moi', 'Le ton correspond à la personne qui va lire ce texte', 'Le texte suit le gabarit en 4 parties, sans partie manquante', 'Le texte est lisible en une seule fois sur un petit écran de téléphone', 'J’ai gardé le prompt final utilisé comme preuve de ma démarche']) }),
-      bad: Object.freeze({ label: 'Signes qu’il faut encore corriger', items: Object.freeze(['Un chiffre, un nom ou un prix non vérifié reste dans le texte', 'Le texte est trop long pour être lu d’un coup sur téléphone', 'Le ton ne ressemble pas à la façon dont tu parles vraiment à tes clients']) })
-    });
-    const evaluation = Object.freeze({
-      id: 'labcap-quiz', label: 'Vérification finale', heading: 'As-tu vérifié ces points avant de publier ?',
-      prompt: 'Ce quiz vérifie que tu as bien appliqué la méthode — il ne lit pas ton texte : c’est à toi de comparer ton livrable à la grille ci-dessus avant de répondre honnêtement.',
-      successText: 'C’est la bonne réponse : la méthode complète inclut toujours une relecture ciblée contre une grille explicite, jamais une publication directe du premier brouillon.',
-      choices: Object.freeze([
-        Object.freeze({ text: 'J’ai comparé mon texte final à la grille d’auto-évaluation et corrigé ce qui manquait avant de considérer le projet terminé.', correct: true, feedback: 'C’est exactement la méthode enseignée dans ce parcours : produire, puis vérifier contre des critères explicites — jamais publier le premier résultat tel quel.' }),
-        Object.freeze({ text: 'J’ai utilisé directement le premier texte généré par l’IA, sans le comparer à la grille.', correct: false, feedback: 'Reviens à la grille d’auto-évaluation ci-dessus : compare ton texte point par point avant de considérer le projet terminé — c’est le cœur de la méthode de ce parcours.' })
-      ])
-    });
-    const result = Object.freeze({ heading: 'Projet final complété.', body: 'Tu as produit un livrable réel avec l’IA, du brief jusqu’à la vérification finale — déclaré terminé par toi, selon la grille ci-dessus. Aucune note serveur n’est attribuée : seule ta propre vérification compte ici.' });
-    const blocks = Object.freeze([
-      Object.freeze({ type: 'competency_check', id: 'labcap-competency-intro', step: 'lesson', mode: 'targets', competency }),
-      Object.freeze({ type: 'text_short', id: 'labcap-brief', outline: brief.heading, step: 'lesson', eyebrow: 'Le projet', heading: brief.heading, body: brief.body }),
-      Object.freeze({ type: 'case_study', id: 'labcap-template', outline: template.label, step: 'lesson', label: template.label, text: template.text }),
-      Object.freeze({ type: 'scenario', id: 'labcap-checklist', outline: checklist.heading, step: 'exercise', heading: checklist.heading, bad: checklist.bad, good: checklist.good }),
-      Object.freeze({ type: 'quiz', id: 'labcap-quiz', outline: evaluation.heading, step: 'quiz', locked: false, data: evaluation }),
-      Object.freeze({ type: 'summary', id: 'labcap-result', step: 'review', idSuffix: 'labcap', data: result })
-    ]);
+  function buildLabCapstoneMeta() {
     return Object.freeze({
       id: 'LABCAP', title: 'Projet final — Ta page de présentation', prerequisite: 'LAB4', premium: true,
       summary: 'Produire un livrable réel, vérifié contre une grille explicite.',
       estimatedMinutes: 25, markUnderstoodLabel: 'Voir la grille d’auto-évaluation',
-      competency, xp, content: Object.freeze({ lead: brief.body }), evaluation, result, steps: Object.freeze([
+      competency: Object.freeze({ id: 'lab_capstone_delivery', label: 'Livrer un document complet et vérifié' }),
+      xp: Object.freeze({ lessonViewed: 30, exerciseComplete: 0, quizComplete: 150 }),
+      content: null, evaluation: null, result: null,
+      steps: Object.freeze([
         Object.freeze({ id: 'lesson', label: 'Comprendre' }),
         Object.freeze({ id: 'exercise', label: 'Produire' }),
         Object.freeze({ id: 'quiz', label: 'Vérifier' }),
         Object.freeze({ id: 'review', label: 'Terminer' })
-      ]), blocks
+      ]), blocks: Object.freeze([])
     });
   }
+
+  // Fetches the real LAB4/LABCAP content from the authenticated BFF. Each
+  // call returns either the real, complete lesson object the server sends
+  // back (id/title/steps/blocks all included — the server's copy, not a
+  // merge with the metadata above) or null, honestly, when the BFF is
+  // disabled, the learner is not actually entitled, or the request fails —
+  // never a fabricated fallback that would resemble real content.
+  async function fetchLabPremiumContent() {
+    if (!window.DDABFF?.enabled() || typeof window.DDABFF.fetchPremiumContent !== 'function') return { lab4: null, labcap: null };
+    let lab4 = null;
+    let labcap = null;
+    try { lab4 = (await window.DDABFF.fetchPremiumContent('LAB4')).lesson || null; } catch { /* honest failure */ }
+    try { labcap = (await window.DDABFF.fetchPremiumContent('LABCAP')).lesson || null; } catch { /* honest failure */ }
+    return { lab4, labcap };
+  }
+  window.DDAFetchLabPremiumContent = fetchLabPremiumContent;
 
   window.DDALab = Object.freeze({
     track: Object.freeze({
@@ -371,7 +319,7 @@
       promise: 'Utiliser l’IA pour produire, organiser et construire un petit projet numérique concret — sans jargon, sans outil payant obligatoire.',
       audience: 'Grand débutant, sur téléphone, avec les versions gratuites des outils IA.'
     }),
-    lessons: Object.freeze([buildLab1(), buildLab2(), buildLab3(), buildLab4()]),
-    capstone: buildLabCapstone()
+    lessons: Object.freeze([buildLab1(), buildLab2(), buildLab3(), buildLab4Meta()]),
+    capstone: buildLabCapstoneMeta()
   });
 })();

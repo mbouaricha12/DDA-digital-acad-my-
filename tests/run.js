@@ -31,6 +31,11 @@ try {
   module.paths.push(execSync('npm root -g').toString().trim());
 }
 const { chromium } = require('playwright');
+// Lot 2 (mandate §6 audit): P2.1/P2.2's real content no longer ships in
+// dist/p2-lessons.js — tests that need it to actually drive the UI (clicking
+// real quiz buttons, etc.) in BFF mode mock /v1/premium/content/:id with
+// this real data, the exact same content the BFF now serves.
+const { PREMIUM_CONTENT } = require('../bff/src/premium-content.js');
 
 const DIST = path.join(__dirname, '..', 'dist');
 const PORT = 8743;
@@ -309,20 +314,90 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.click('#gate-unlock');
     await page.waitForTimeout(50);
     assert.equal(await page.evaluate(() => location.hash), '#premium-track');
-    assert.equal((await page.locator('#lesson-p21-main').innerText()).includes('Before the trade, define the risk.'), true, 'Premium Demo mounts the authored lesson after preview activation');
+    // Lot 2 (mandate §6 audit): this "Premium Demo" button only ever existed
+    // in local/pilot mode (no BFF configured) — exactly the mode that can no
+    // longer be trusted with real content, since the exact same public dist/
+    // bundle is also what ships to production: embedding the real lesson
+    // here "just for local mode" would be the identical leak this fix
+    // closes, regardless of which hostname happens to load it. So the local
+    // demo now honestly says the content needs a real server, instead of
+    // mounting the real authored lesson the way it used to.
+    assert.equal((await page.locator('#lesson-p21-main').innerText()).includes('Before the trade, define the risk.'), false, 'the real authored lesson must never be mounted in local/pilot (no BFF) mode, even after the local Premium Demo toggle');
+    assert.match(await page.locator('#lesson-p21-main').innerText(), /indisponible/i, 'an honest "content unavailable without a server" message is shown instead');
+    await context.close();
+  });
+
+  await test('in BFF mode, a server-confirmed Premium entitlement fetches and mounts the real P2.1/P2.2 content (Lot 2, mandate §6 audit)', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true })
+    }));
+    const contentRequests = [];
+    await context.route('https://bff.test/v1/premium/content/P2.1', route => {
+      contentRequests.push('P2.1');
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lesson: PREMIUM_CONTENT['P2.1'] }) });
+    });
+    await context.route('https://bff.test/v1/premium/content/P2.2', route => {
+      contentRequests.push('P2.2');
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lesson: PREMIUM_CONTENT['P2.2'] }) });
+    });
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-p21`);
+    await page.waitForSelector('#lesson-p21.view.active');
+    await page.waitForFunction(() => document.querySelector('#lesson-p21-main')?.innerText.includes('Before the trade, define the risk.'));
+    assert.ok(contentRequests.includes('P2.1'), 'the client actually called the authenticated content route for P2.1');
+    assert.ok(contentRequests.includes('P2.2'), 'P2.2 is fetched too (needed once the learner reaches it), never embedded');
     await context.close();
   });
 
   await test('Premium P2 completes lesson → lab → assessment → proof → progression → Journal with reloads', async () => {
     const context = await freshContext(browser, { width: 390, height: 844 });
+    // Lot 2 (mandate §6 audit): this full walkthrough needs P2.1/P2.2's real
+    // content, which only a real (or, here, mocked) BFF can provide any
+    // more — local/pilot mode (no BFF) can no longer show it (see the two
+    // tests above). The rest of the journey (Risk Plan Lab, Controlled
+    // Decision assessment, Journal, Weekly Review) is unrelated static
+    // product surface and is otherwise unaffected by Lot 2.
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true })
+    }));
+    await context.route('https://bff.test/v1/premium/content/P2.1', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lesson: PREMIUM_CONTENT['P2.1'] }) }));
+    await context.route('https://bff.test/v1/premium/content/P2.2', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lesson: PREMIUM_CONTENT['P2.2'] }) }));
     await seedLocalLearner(context, {}, 'premium');
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#premium-track`);
+    // Lot 2 (mandate §6 audit): in BFF mode, the very first render of a
+    // premium_track view fails closed (canUnlock is null/false until
+    // refreshServerPremiumEntitlement()'s mocked round trip resolves) — the
+    // honest paywall gate opens first and only then re-navigates here once
+    // the server confirms Premium (pendingGatedView). Wait for that to
+    // settle instead of a fixed timeout.
+    await page.waitForSelector('#premium-track.view.active', { timeout: 10000 });
     assert.equal(await page.locator('#premium-track').isVisible(), true);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'Premium Track must not overflow on mobile');
 
     await page.click('#premium-track [data-view="lesson-p21"]');
     await page.reload();
+    // Lot 2 (mandate §6 audit): in BFF mode, canUnlock('premium_track') is
+    // false until refreshServerPremiumEntitlement() resolves after each
+    // reload (the gate briefly shows first) and the real content is then
+    // fetched from the (mocked) BFF asynchronously — wait for the real
+    // content to actually mount, instead of asserting isVisible()
+    // immediately after reload, which can race both of those.
+    await page.waitForSelector('[data-question="p21-decision"]', { state: 'attached' });
     assert.equal(await page.locator('#lesson-p21').isVisible(), true, 'P2.1 deep-link survives reload for Premium Demo');
     // P2.1's exercise/quiz now live in the "Exercice/Quiz" tab (hidden by
     // default) — open it before the question buttons are clickable.
@@ -335,6 +410,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
     await page.locator('#lesson-p21 [data-view="lesson-p22"]').last().click();
     await page.reload();
+    await page.waitForSelector('[data-question="p22-sequence"]', { state: 'attached' });
     assert.equal(await page.locator('#lesson-p22').isVisible(), true, 'P2.2 opens only after P2.1 and survives reload');
     await openLessonExerciseTab(page, '-p22');
     await page.locator('[data-question="p22-sequence"] button[data-correct="true"]').click();
@@ -345,7 +421,10 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
     await page.locator('#lesson-p22 [data-view="premium-lab"]').last().click();
     await page.reload();
-    assert.equal(await page.locator('#premium-lab').isVisible(), true);
+    // Lot 2 (mandate §6 audit): in BFF mode, canUnlock('premium_track') is
+    // false until refreshServerPremiumEntitlement() resolves after each
+    // reload — a plain isVisible() can race that, unlike waitForSelector.
+    await page.waitForSelector('#premium-lab.view.active');
     await page.selectOption('#p2-direction', 'Long');
     await page.fill('#p2-setup', 'The support zone matches the controlled bullish setup context.');
     await page.fill('#p2-entry', 'Wait for a clear reaction before considering an entry.');
@@ -378,6 +457,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(state.premium.proofs['p2-risk-foundations'].level, 'Level 3 — Apply');
 
     await page.reload();
+    await page.waitForSelector('#premium-assessment.view.active');
     assert.equal(await page.locator('#premium-proof-receipt').isVisible(), true, 'proof receipt survives assessment reload');
     await page.click('#p2-journal-bridge');
     assert.equal(await page.evaluate(() => location.hash), '#journal');
@@ -1801,6 +1881,37 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal((await page.locator('#lab-LAB4-status').textContent()).trim(), 'À commencer', 'Premium + prerequisite satisfied makes LAB4 available, not Premium-locked');
     await page.click('[data-view="lesson-lab4"]');
     await page.waitForSelector('#lesson-lab4.view.active');
+    // Lot 2 (mandate §6 audit): LAB4's real content is no longer embedded in
+    // this public bundle — in this local/pilot (no BFF) run there is no
+    // server left to fetch it from, so the honest "unavailable" message is
+    // shown instead of the real exercise/quiz (see the BFF-mode test below
+    // for the real fetch-and-mount flow this closes the leak with).
+    await page.waitForSelector('#lesson-lab4-main .lesson-premium-unavailable');
+    assert.match(await page.locator('#lesson-lab4-main').innerText(), /indisponible/i);
+    assert.equal(await page.locator('[data-question="lab4-exercise"]').count(), 0, 'the real LAB4 exercise must never be mounted without a server to fetch it from');
+    await context.close();
+  });
+
+  await test('in BFF mode, a server-confirmed Premium entitlement fetches and mounts the real LAB4/LABCAP content (Lot 2, mandate §6 audit)', async () => {
+    const context = await freshContext(browser, { width: 1024, height: 900 });
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true })
+    }));
+    const contentRequests = [];
+    await context.route('https://bff.test/v1/premium/content/LAB4', route => { contentRequests.push('LAB4'); return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lesson: PREMIUM_CONTENT.LAB4 }) }); });
+    await context.route('https://bff.test/v1/premium/content/LABCAP', route => { contentRequests.push('LABCAP'); return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lesson: PREMIUM_CONTENT.LABCAP }) }); });
+    await seedLocalLearner(context, { LAB1: { quizComplete: true }, LAB2: { quizComplete: true }, LAB3: { quizComplete: true } }, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-lab4`);
+    await page.waitForSelector('#lesson-lab4.view.active');
+    await page.waitForSelector('[data-question="lab4-exercise"]', { state: 'attached' });
+    assert.ok(contentRequests.includes('LAB4'), 'the client actually called the authenticated content route for LAB4');
     await openLessonExerciseTab(page, '-lab4');
     await page.locator('[data-question="lab4-exercise"] button[data-correct="true"]').first().click();
     await page.locator('[data-question="lab4-quiz"] button[data-correct="true"]').first().click();
@@ -2224,13 +2335,22 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
   console.log('\n-- V. Protection Premium côté serveur (P1.1) --');
 
-  await test('in local/pilot mode (no BFF), a learner who sets plan to premium locally still sees Premium content exactly as before (no regression)', async () => {
+  await test('in local/pilot mode (no BFF), a learner who sets plan to premium locally still bypasses the paywall gate — but, since Lot 2 (mandate §6 audit), never sees the real content either', async () => {
     const context = await freshContext(browser);
     await seedLocalLearner(context, { 'P2.1': { quizComplete: true } }, 'premium');
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#lesson-p22`);
     await page.waitForSelector('#lesson-p22.view.active');
-    assert.equal(await page.locator('#gate-layer').isVisible(), false, 'local-only mode keeps today\'s honest local-plan behavior untouched');
+    assert.equal(await page.locator('#gate-layer').isVisible(), false, 'local-only mode keeps today\'s honest local-plan gate behavior untouched: no paywall shown');
+    // Lot 2 (mandate §6 audit): the real P2.2 content is never embedded in
+    // this public bundle any more, so a locally-forced "premium" plan with
+    // no real server behind it (trivially editable from the browser
+    // console) can no longer unlock it either — the exact same dist/ bundle
+    // is what ships to production, so "local mode only" would reopen the
+    // leak. The honest "unavailable without a server" message is shown
+    // instead of either the real content or a silently blank lesson.
+    await page.waitForSelector('#lesson-p22-main .lesson-premium-unavailable');
+    assert.match(await page.locator('#lesson-p22-main').innerText(), /indisponible/i);
     await context.close();
   });
 

@@ -124,6 +124,45 @@ function request(server, method, path, { body, rawBody, headers = {}, cookies = 
     membership = { plan: 'free', status: 'active', ends_at: null, revoked_at: null };
     entitlementNames = [];
 
+    // Real Premium lesson/lab content (mandate §6 audit, Lot 2) — the fix for
+    // the leak this route exists to close: P2.1 is the free-preview lesson
+    // and must be served to any authenticated learner regardless of Premium;
+    // P2.2/LAB4/LABCAP require the exact same hasActivePremium() check as
+    // /v1/premium/preview above.
+    response = await request(server, 'GET', '/v1/premium/content/P2.1', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
+    assert.equal(response.status, 200, 'P2.1 is a free preview — a Free user can read it');
+    assert.equal(response.body.lesson.id, 'P2.1');
+    assert.ok(response.body.lesson.blocks.length > 3, 'the real authored content is returned, not a stub');
+
+    response = await request(server, 'GET', '/v1/premium/content/P2.2', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
+    assert.equal(response.status, 403, 'Free user is denied the real P2.2 content, same as /v1/premium/preview');
+    assert.equal(response.body.code, 'premium_required');
+    response = await request(server, 'GET', '/v1/premium/content/LAB4', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
+    assert.equal(response.status, 403, 'Free user is denied the real LAB4 content');
+    response = await request(server, 'GET', '/v1/premium/content/LABCAP', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
+    assert.equal(response.status, 403, 'Free user is denied the real LABCAP content');
+
+    response = await request(server, 'GET', '/v1/premium/content/UNKNOWN-ID', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
+    assert.equal(response.status, 404, 'an unknown lesson id is a plain 404, never a 403 that would confirm it exists');
+
+    response = await request(server, 'GET', '/v1/premium/content/P2.2');
+    assert.equal(response.status, 401, 'no session at all is rejected before any entitlement check runs');
+
+    membership = { plan: 'premium', status: 'active', ends_at: null, revoked_at: null };
+    entitlementNames = ['premium_track'];
+    response = await request(server, 'GET', '/v1/premium/content/P2.2', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
+    assert.equal(response.status, 200, 'a server-confirmed Premium entitlement unlocks the real P2.2 content');
+    assert.equal(response.body.lesson.id, 'P2.2');
+    assert.ok(JSON.stringify(response.body.lesson).includes('p22-quiz'), 'the real P2.2 quiz is actually returned');
+    response = await request(server, 'GET', '/v1/premium/content/LAB4', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
+    assert.equal(response.status, 200);
+    assert.equal(response.body.lesson.id, 'LAB4');
+    response = await request(server, 'GET', '/v1/premium/content/LABCAP', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
+    assert.equal(response.status, 200);
+    assert.equal(response.body.lesson.id, 'LABCAP');
+    membership = { plan: 'free', status: 'active', ends_at: null, revoked_at: null };
+    entitlementNames = [];
+
     entitlements.getForUser = async () => { throw new Error('Journal secret <script>alert(1)</script>'); };
     response = await request(server, 'GET', '/v1/premium/preview', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
     assert.equal(response.status, 500);
