@@ -256,6 +256,47 @@ const activeLessonId = DDA.primaryLessonId;
 const activeLessonMeta = DDALearning.findLesson(DDA.curriculum, activeLessonId);
 const activeLessonDef = activeLessonMeta.lesson;
 
+// Lesson Tabs (founder mandate, done this pass — PR #205/#206 deliberately
+// deferred it). `scope` is the `${viewId}-main` element a lesson's markup was
+// mounted into: it holds both the [data-lesson-tab] buttons and the
+// [data-lesson-panel] panels lesson-renderer.js now emits (see its
+// renderLessonMain comment). Switching is purely a `hidden` toggle — nothing
+// is ever unmounted, so every existing scroll anchor, [data-question] group
+// and locked-check gate still exists in the DOM exactly where it always has.
+function activateLessonTab(scope, name) {
+  if (!scope) return;
+  scope.querySelectorAll('[data-lesson-tab]').forEach(tab => {
+    const active = tab.dataset.lessonTab === name;
+    tab.setAttribute('aria-selected', String(active));
+    tab.tabIndex = active ? 0 : -1;
+    tab.classList.toggle('is-active', active);
+  });
+  scope.querySelectorAll('[data-lesson-panel]').forEach(panel => {
+    panel.hidden = panel.dataset.lessonPanel !== name;
+  });
+}
+function bindLessonTabs(main) {
+  const tabs = main?.querySelectorAll('[data-lesson-tab]');
+  if (!tabs || !tabs.length) return;
+  tabs.forEach(tab => tab.addEventListener('click', () => activateLessonTab(main, tab.dataset.lessonTab)));
+}
+// Every programmatic "scroll a learner to this lesson block" call in this
+// file (the mark-understood anchor, the exercise→quiz gate reveal, the quiz
+// result card, the module sidecard's "Aller au quiz" shortcut) now has to
+// open that block's tab first if it is the inactive one — a scrollIntoView
+// on a `hidden` element has no box to scroll to. This is the single place
+// that does it: callers that used to do
+// `document.getElementById(id)?.scrollIntoView(...)` now do
+// `revealLessonAnchor(id)?.scrollIntoView(...)`, with identical behavior for
+// any target that isn't inside a lesson tab panel (most of the app).
+function revealLessonAnchor(idOrElement) {
+  const el = typeof idOrElement === 'string' ? document.getElementById(idOrElement) : idOrElement;
+  if (!el) return null;
+  const panel = el.closest('[data-lesson-panel]');
+  if (panel && panel.hidden) activateLessonTab(panel.parentElement, panel.dataset.lessonPanel);
+  return el;
+}
+
 // The lesson reader is data-driven: render each lesson's markup into its mount
 // points only when its local entitlement allows it. Premium lessons are
 // mounted later when the local demo is activated, before their interactions
@@ -277,8 +318,13 @@ function mountLesson(entry) {
   // — sans aucune modification de lesson-renderer.js.
   if (entry.video) {
     const video = VIDEO_REGISTRY.find(v => v.id === entry.video);
+    // Lesson Tabs: the "À propos de la leçon" panel (data-lesson-panel="about")
+    // is where the lesson's own intro video belongs now that it exists —
+    // fall back to the pre-tabs "right after the stepper" placement for any
+    // lesson the tab split leaves untabbed (none today, kept defensive).
+    const aboutPanel = main.querySelector('[data-lesson-panel="about"]');
     const loop = main.querySelector('.lesson-loop');
-    if (video && loop) {
+    if (video && (aboutPanel || loop)) {
       // Overlay key points: the same "Dans cette leçon" outline beats already
       // authored for this lesson (lesson.blocks[].outline) and already shown
       // elsewhere on the page — never a separate, invented list. Capped to
@@ -288,9 +334,12 @@ function mountLesson(entry) {
         .filter(block => block.outline && block.step === 'lesson')
         .map(block => block.outline);
       const overlay = outlinePoints.length ? { title: entry.meta.lesson.title, points: outlinePoints } : null;
-      loop.insertAdjacentHTML('afterend', DDALessonRenderer.renderYouTubeLite(video, `lesson-video-${entry.id}`, overlay));
+      const videoMarkup = DDALessonRenderer.renderYouTubeLite(video, `lesson-video-${entry.id}`, overlay);
+      if (aboutPanel) aboutPanel.insertAdjacentHTML('afterbegin', videoMarkup);
+      else loop.insertAdjacentHTML('afterend', videoMarkup);
     }
   }
+  bindLessonTabs(main);
   main.querySelectorAll('[data-video-frame], .video-frame video').forEach(media => {
     media.addEventListener('error', () => {
       const surface = media.closest('.video-explainer-block');
@@ -354,7 +403,7 @@ function bindViewButton(button) {
       showView(targetView);
     }
     if (button.dataset.scrollTo) {
-      requestAnimationFrame(() => document.getElementById(button.dataset.scrollTo)?.scrollIntoView({
+      requestAnimationFrame(() => revealLessonAnchor(button.dataset.scrollTo)?.scrollIntoView({
         behavior: prototypeState.preferences?.lowData ? 'auto' : 'smooth',
         block: 'start'
       }));
@@ -2673,7 +2722,7 @@ function renderLessonSidecard(viewId) {
   });
   card.querySelectorAll('[data-scroll-anchor]').forEach(button => {
     button.addEventListener('click', () => {
-      document.getElementById(button.dataset.scrollAnchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      revealLessonAnchor(button.dataset.scrollAnchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 }
@@ -3411,7 +3460,7 @@ function bindMarkUnderstood(lessonId, ids) {
       state.style.borderColor = '#58b88a';
       state.style.color = '#58b88a';
     }
-    const scrollTarget = document.getElementById(ids.scrollToId);
+    const scrollTarget = revealLessonAnchor(ids.scrollToId);
     if (scrollTarget) scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
     updateLessonState(lessonId, { lessonViewed: true });
     trackEvent('lesson_understood', { lesson: lessonId });
@@ -3561,6 +3610,7 @@ function bindQuestion(lessonId, question, options) {
       if (gate) {
         gate.classList.remove('locked-check');
         gate.setAttribute('aria-disabled', 'false');
+        revealLessonAnchor(gate);
         gate.scrollIntoView({ behavior: 'smooth', block: 'start' });
         // The one moment in the app a learner actually watches something
         // unlock live, in place, instead of returning to it later — give it
@@ -3582,6 +3632,7 @@ function bindQuestion(lessonId, question, options) {
       if (resultCard) {
         resultCard.hidden = false;
         resultCard.classList.add('just-completed');
+        revealLessonAnchor(resultCard);
         resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setTimeout(() => resultCard.classList.remove('just-completed'), 900);
       }
