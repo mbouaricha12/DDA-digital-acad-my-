@@ -68,7 +68,7 @@ assert.match(css, /#profile \.profile-panel[^\{]*\{[^}]*background:/, 'profile a
 assert.match(css, /#gate-layer \.gate-card[^\{]*\{[^}]*background:/, 'permission overlays use the shared dark surface');
 assert.match(html, /data-scroll-to="analysis-terminal"/, 'Terminal remains a reachable in-dashboard practice destination');
 assert.match(html, /<p class="nav-section-label">Mon travail<\/p>/, 'Progression and Journal have a distinct work/evidence group');
-assert.match(html, /<button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"\/><\/svg> Journal<\/button>/, 'navigation calls the destination Journal, not a second Plan');
+assert.match(html, /<button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"\/><\/svg> Journal de trading<\/button>/, 'navigation calls the destination Journal de trading, not a second Plan');
 assert.match(css, /#landing \.landing-aperture-copy\{display:none!important\}/, 'decorative hero slogan cannot obscure the product mockups');
 assert.match(css, /#landing \.landing-device-chart-head strong\{[^}]*font:600 8px\//, 'device mockup labels stay at product scale rather than inheriting the hero headline');
 assert.match(css, /#progress \.mastery-context-note\{[^}]*background:rgba\(10,20,36,\.78\)/, 'future skill context uses the same calm dark surface as the rest of Progression');

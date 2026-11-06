@@ -2395,6 +2395,26 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  console.log('\n-- AA. Sidebar labels — aligned to the founder\'s mockup wording where it is a real feature --');
+
+  await test('the sidebar and mobile drawer use the mockup wording (Mes Parcours, Ressources, Journal de trading) while routing to the exact same real views', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.match(await page.textContent('.sidebar .nav-item[data-view="path"]'), /Mes Parcours/);
+    assert.match(await page.textContent('.sidebar .nav-item[data-view="resources"]'), /Ressources/);
+    assert.match(await page.textContent('.sidebar .nav-item[data-view="journal"]'), /Journal de trading/);
+    await page.click('.sidebar .nav-item[data-view="path"]');
+    await page.waitForSelector('#path.view.active');
+    await page.click('.sidebar .nav-item[data-view="resources"]');
+    await page.waitForSelector('#resources.view.active');
+    await page.click('.sidebar .nav-item[data-view="journal"]');
+    await page.waitForSelector('#journal.view.active');
+    await context.close();
+  });
+
   console.log('\n-- Z. Layout shell — no horizontal overflow at 360/390/1440px (mobile touch targets) --');
 
   await test('the new topbar search/help/user chip and the lesson module card add no horizontal scroll at 360, 390 or 1440px', async () => {
