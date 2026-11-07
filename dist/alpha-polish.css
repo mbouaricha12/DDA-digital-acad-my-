@@ -2946,6 +2946,53 @@ body.public-shell .prototype-banner{display:none}
   :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-tab{min-height:44px;flex:none}
   :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-main > h1{font-size:clamp(2.2rem,9vw,3.5rem);line-height:.98}
   :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-quick-nav{top:93px}
+
+  /* Mobile lesson-navigation panel (.module-toc) was shipped with the same
+     padding/row-height/margins as desktop, so on a phone it alone ran to
+     ~220-240px — close to a third of a 360x800 viewport — before any lesson
+     content, video or the Exercice/Quiz tabs were visible at all ("panneau
+     de navigation des leçons trop volumineux sur mobile"). Tightened padding,
+     row height and gaps keep every row tappable (44px target preserved via
+     min-height on the link, not the whole row) while taking roughly half
+     the vertical space. */
+  .module-toc{margin:0 0 10px;padding:9px 11px}
+  .module-toc-heading{margin-bottom:4px;font-size:10px}
+  .module-toc-link{padding:5px 6px;min-height:36px}
+  .lesson-quick-nav{gap:2px 12px;margin-bottom:6px}
+  .lesson-quick-nav .text-action,.lesson-quick-nav .back-link{min-height:36px;padding:6px 0}
+  .lesson-progress-head{margin-bottom:8px}
+}
+
+/* On common Android phone heights (confirmed at both 360x800 and 390x844),
+   the stack of header, "where am I" progress head, quick-nav and module-toc
+   above the video/content ran long enough on its own, unscrolled, static
+   position to land the lesson's Exercice/Quiz tab row (.lesson-tabs) — or,
+   for a lesson with no video (a taller "séquence guidée" fallback panel),
+   the lesson's own h1 — exactly inside the fixed bottom nav's 68px band,
+   painted over and invisible before the learner scrolls at all. A real,
+   reproducible instance of "onglets pédagogiques potentiellement coupés"
+   from the mandate, confirmed with getBoundingClientRect, not just a
+   screenshot. The video thumbnail is the one block here that's decorative
+   padding rather than information (its real content already repeats in the
+   lesson text/steps below), so it's the one trimmed further — everything
+   else already carries real navigation/progress meaning. */
+@media(max-width:859px){
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-hero-media{margin-bottom:6px}
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-main > .eyebrow.gold{margin-top:2px;letter-spacing:.04em;font-size:10px}
+  .module-toc-link{padding:4px 6px;min-height:34px}
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-hero-media .video-frame,
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-hero-media .video-fallback-panel:not(.guided-fallback){aspect-ratio:16/9;max-height:34vh}
+  /* The no-video "séquence guidée" placeholder isn't a video frame — forcing
+     the same 16:9 box on it just wasted height a shorter, content-sized
+     panel doesn't need, which is exactly what pushed the lesson's own h1
+     under the fixed bottom nav on a phone. */
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-hero-media .video-fallback-panel.guided-fallback{aspect-ratio:auto;height:auto}
+  /* The OUTER wrapper (.video-explainer-fallback, same element as
+     .lesson-guided-thumbnail) forces its own 16:9 box independently of the
+     inner panel above — both had to be unlocked, or the inner panel's
+     shorter content just left empty space inside a still-168px-tall box. */
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-hero-media .video-explainer-fallback.lesson-guided-thumbnail{aspect-ratio:auto}
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-tab{min-height:40px;padding:9px 14px}
 }
 @media(max-width:520px){
   :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-hero-media .video-fallback-panel{padding:18px;min-height:0}
@@ -2991,6 +3038,24 @@ body.public-shell .prototype-banner{display:none}
   .lesson-about-grid{grid-template-columns:1fr;gap:16px}
   .lesson-pedagogical-visual{position:static;margin-top:8px}
   :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-tab{padding-inline:14px;min-height:46px;font-size:12px}
+  /* Overrides the unscoped `margin:0 0 22px` a few rules above (same
+     selector specificity — this wins on source order): part of the mobile
+     chrome-height trim that keeps .lesson-tabs and the lesson's own h1 out
+     from under the fixed bottom nav on a phone (see the fuller note near
+     the top of this file's mobile lesson block). */
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-tabs{margin:10px 0 14px}
+  /* A lesson with no video yet (M0.1, M1.1…) shows this "séquence guidée"
+     placeholder instead — its generous desktop padding made it the single
+     tallest block above the fold on a phone, pushing the lesson's own h1
+     under the fixed bottom nav. */
+  /* `:is(#lesson,…)` prefix matches the specificity of the pre-existing
+     ≤520px override above (an :is() selector takes the specificity of its
+     most specific argument — an id — not of the pseudo-class itself), so
+     this reliably wins regardless of source order. */
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-guided-thumbnail .video-fallback-panel{padding:16px;gap:6px}
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-guided-thumbnail .video-fallback-panel .icon{width:22px;height:22px}
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-guided-thumbnail .video-fallback-panel strong{font-size:14px}
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-guided-thumbnail .video-fallback-panel span{font-size:11.5px;line-height:1.45}
 }
 
 

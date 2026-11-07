@@ -540,6 +540,30 @@ const contextSection = document.getElementById('context-section');
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && !drawer.hidden) close(); });
 })();
 
+// Mobile header overlap fix: .topbar is sticky at a fixed offset equal to
+// the prototype banner's single-line height (29px). The banner's disclosure
+// copy is long enough to wrap to two lines on narrow phones (~360-400px),
+// which made the sticky topbar overlap/clip the banner's second line and,
+// because both are position:sticky stacked by a hardcoded pixel offset, the
+// topbar's own content (brand, context title) then rendered partly hidden
+// behind the banner — the "header dégradé" bug reported on real devices.
+// Measuring the banner's real rendered height and exposing it as a CSS
+// custom property keeps the two elements correctly stacked at any width,
+// font-scaling or text-wrap, instead of guessing a constant.
+(function syncBannerHeight() {
+  const banner = document.querySelector('.prototype-banner');
+  if (!banner) return;
+  function sync() {
+    document.documentElement.style.setProperty('--banner-h', `${Math.ceil(banner.getBoundingClientRect().height)}px`);
+  }
+  sync();
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(sync).observe(banner);
+  } else {
+    window.addEventListener('resize', sync);
+  }
+})();
+
 // Topbar notifications bell: no notification system exists yet, so it must
 // never look like it holds something unread. Clicking it gives an honest,
 // visible answer instead of doing nothing.
