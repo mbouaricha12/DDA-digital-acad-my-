@@ -80,6 +80,17 @@
     if (!result.response.ok) throw resultError(result, 'verification_failed');
     return true;
   }
+  // PKCE signup confirmation (P0 auth reliability audit, 2026-11): the
+  // confirmation link's `code` alone proves nothing — the server pairs it
+  // with the code_verifier it kept in this browser's own httpOnly cookie
+  // (sent automatically via credentials:'include' above), which a security
+  // scanner's sandboxed browser never has. See bff/src/app.js and pkce.js.
+  async function exchangeSignupCode(code) {
+    const result = await request('/v1/auth/verify-email', { method: 'POST', body: { code } });
+    if (!result.enabled) return null;
+    if (!result.response.ok) throw resultError(result, 'verification_failed');
+    return true;
+  }
 
   async function login({ email, password }) {
     const result = await request('/v1/auth/login', { method: 'POST', body: { email, password } });
@@ -246,7 +257,7 @@
   }
 
   window.DDABFF = Object.freeze({
-    enabled, register, verifyEmail, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
+    enabled, register, verifyEmail, exchangeSignupCode, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
     getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, fetchPremiumContent, askAI,
     getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }

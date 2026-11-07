@@ -114,4 +114,78 @@ function makeFetch(calls) {
   );
 
   console.log('RESULT: supabase-auth adapter sends redirect_to as a query param on password-reset requests, not just the body — PASS');
+
+  // PKCE (P0 auth reliability audit, 2026-11-07) — see pkce.js and
+  // app.js's newPkcePair()/setVerifierCookie() for the full rationale: a
+  // security scanner's sandboxed browser was burning the founder's own
+  // recovery link 12-28 seconds after it was sent, long before a human
+  // could plausibly have clicked it. The fix sends code_challenge /
+  // code_challenge_method (S256, matching GoTrue's documented
+  // RecoverParams/SignupParams body shape and exactly what the official
+  // supabase-js client sends for a PKCE-flow project) on both /recover and
+  // /signup, and the exchange sends code_verifier alongside auth_code —
+  // this guards the exact wire shape of all three calls directly, not
+  // through a route fake, since that is precisely what would have hidden
+  // the original "exchangeRecoveryCode never sent code_verifier" gap.
+  {
+    const calls = [];
+    const fetchImpl = async (url, options) => {
+      calls.push({ url, options });
+      if (url.includes('/auth/v1/recover')) return { ok: true, text: async () => '' };
+      if (url.endsWith('/auth/v1/signup')) return { ok: true, text: async () => JSON.stringify({ user: null }) };
+      if (url.includes('/auth/v1/token?grant_type=pkce')) return { ok: true, text: async () => JSON.stringify({ user: { id: 'user-1' }, access_token: 'a', refresh_token: 'r' }) };
+      throw new Error(`unexpected request: ${options.method} ${url}`);
+    };
+    const auth5 = new SupabaseAuthAdapter({ supabaseUrl: 'https://project.supabase.co', publishableKey: 'pub', serviceRoleKey: 'service', fetchImpl });
+
+    await auth5.requestPasswordReset('a@example.com', 'https://dariusdigitalacademy.com/academy.html?type=recovery#access', 'challenge-abc');
+    const recoverBody = JSON.parse(calls.find(c => c.url.includes('/auth/v1/recover')).options.body);
+    assert.equal(recoverBody.code_challenge, 'challenge-abc', 'requestPasswordReset() must forward code_challenge to /auth/v1/recover');
+    assert.equal(recoverBody.code_challenge_method, 'S256', 'the only supported method is S256 — "plain" would make the challenge equal to the verifier');
+
+    await auth5.register({ email: 'b@example.com', password: 'x'.repeat(12), display_name: 'B', codeChallenge: 'challenge-xyz' });
+    const signupBody = JSON.parse(calls.find(c => c.url.endsWith('/auth/v1/signup') && JSON.parse(c.options.body).email === 'b@example.com').options.body);
+    assert.equal(signupBody.code_challenge, 'challenge-xyz', 'register() must forward code_challenge to /auth/v1/signup');
+    assert.equal(signupBody.code_challenge_method, 'S256');
+
+    // Without a codeChallenge argument at all (e.g. SESSION_ENCRYPTION_KEY
+    // unset — see app.js's newPkcePair()), neither call must send a
+    // code_challenge field — a PKCE flow with a challenge nobody can ever
+    // complete is worse than no challenge at all.
+    await auth5.requestPasswordReset('c@example.com', 'https://dariusdigitalacademy.com/academy.html?type=recovery#access');
+    const noChallengeRecover = JSON.parse(calls.find(c => c.url.includes('/auth/v1/recover') && JSON.parse(c.options.body).email === 'c@example.com').options.body);
+    assert.equal(noChallengeRecover.code_challenge, undefined, 'requestPasswordReset() must never send a code_challenge it has no matching verifier for');
+
+    await auth5.exchangeRecoveryCode('auth-code-1', 'verifier-1');
+    const exchangeBody = JSON.parse(calls.find(c => c.url.includes('grant_type=pkce') && JSON.parse(c.options.body).auth_code === 'auth-code-1').options.body);
+    assert.equal(exchangeBody.auth_code, 'auth-code-1');
+    assert.equal(exchangeBody.code_verifier, 'verifier-1', 'exchangeRecoveryCode() must send code_verifier — without it GoTrue cannot complete the PKCE exchange at all (the production bug this fix closes)');
+
+    await auth5.exchangeSignupCode('auth-code-2', 'verifier-2');
+    const signupExchangeBody = JSON.parse(calls.find(c => c.url.includes('grant_type=pkce') && JSON.parse(c.options.body).auth_code === 'auth-code-2').options.body);
+    assert.equal(signupExchangeBody.code_verifier, 'verifier-2', 'exchangeSignupCode() must send code_verifier for the signup-confirmation PKCE exchange too');
+
+    console.log('RESULT: supabase-auth adapter sends code_challenge/code_challenge_method on /recover and /signup, and code_verifier on the PKCE exchange — PASS');
+  }
+
+  // generateCodeVerifier()/computeCodeChallenge() themselves — RFC 7636
+  // compliance (unreserved URL-safe alphabet, 43-128 chars) and the S256
+  // derivation, checked directly rather than only through the HTTP calls
+  // above.
+  {
+    const { generateCodeVerifier, computeCodeChallenge } = require('../bff/src/pkce');
+    const crypto = require('node:crypto');
+    const verifier = generateCodeVerifier();
+    assert.ok(verifier.length >= 43 && verifier.length <= 128, `code_verifier must be 43-128 chars long per RFC 7636, got ${verifier.length}`);
+    assert.match(verifier, /^[A-Za-z0-9\-._~]+$/, 'code_verifier must use only RFC 7636\'s unreserved URL-safe alphabet');
+    const verifier2 = generateCodeVerifier();
+    assert.notEqual(verifier, verifier2, 'each call must produce a fresh, unpredictable verifier');
+
+    const challenge = computeCodeChallenge(verifier);
+    const expected = crypto.createHash('sha256').update(verifier, 'ascii').digest('base64url');
+    assert.equal(challenge, expected, 'computeCodeChallenge() must be BASE64URL(SHA256(verifier)) — RFC 7636\'s S256 method');
+    assert.doesNotMatch(challenge, /[+/=]/, 'the challenge must be base64url, never standard base64 with +, / or = padding');
+
+    console.log('RESULT: generateCodeVerifier()/computeCodeChallenge() are RFC 7636-compliant — PASS');
+  }
 })();
