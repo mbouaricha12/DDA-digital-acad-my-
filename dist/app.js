@@ -221,6 +221,11 @@ const VIDEO_REGISTRY = Object.freeze([
 let prototypeState = DDA.load();
 let remoteUser = null;
 let bffAuthMode = 'signup';
+// Last successful signup's credentials, kept only in memory for this page
+// load — never persisted — so the "resend confirmation" action (signup
+// reliability audit, P0 2026-11) can reuse them without asking the learner
+// to retype the whole form.
+let lastSignupAttempt = null;
 
 // Protection Premium côté serveur (mandat §7.3, P1.1). `prototypeState.
 // membership.plan` is a local, learner-editable value — it must stay the
@@ -1066,26 +1071,40 @@ function setBffAuthMode(mode) {
   const firstNameLabel = firstNameField?.closest('label');
   const passwordField = document.getElementById('access-password');
   const passwordLabel = document.getElementById('access-password-field');
+  const passwordHelp = document.getElementById('access-password-help');
   const consentField = document.getElementById('access-consent-field');
+  const consentLabel = document.getElementById('access-consent-label');
   const consent = document.getElementById('consent');
   const title = document.getElementById('access-form-title');
   const step = document.getElementById('access-step-label');
   const note = document.getElementById('access-form-note');
   const submit = document.querySelector('#signup-form button[type="submit"]');
   const forgot = document.getElementById('bff-forgot-password');
+  const resend = document.getElementById('bff-resend-confirmation');
   if (firstNameLabel) firstNameLabel.hidden = login;
   if (firstNameField) firstNameField.required = !login;
   if (passwordLabel) passwordLabel.hidden = false;
   if (passwordField) { passwordField.required = true; passwordField.autocomplete = login ? 'current-password' : 'new-password'; }
+  // A clear, upfront password requirement (signup reliability, P0 2026-11):
+  // shown only while creating an account, where the 12-character minimum is
+  // new information, not while signing back in with a password already set.
+  if (passwordHelp) passwordHelp.hidden = login;
   if (consentField) consentField.hidden = login;
   if (consent) consent.required = !login;
+  // The BFF path really does create a server-side account (Supabase Auth),
+  // unlike the local-only prototype mode this label's original wording
+  // describes — showing that copy here would tell a real signer-upper
+  // something false about where their data goes.
+  if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe) pour retrouver ma progression sur n’importe quel appareil, après avoir confirmé mon adresse e-mail.';
   if (title) title.textContent = login ? 'Se connecter' : 'Commence ton parcours Free';
   if (step) step.textContent = login ? 'Accès sécurisé' : 'Étape 1 sur 2 · commencer';
   if (note) note.textContent = login
     ? 'Retrouve ton parcours avec ton compte serveur sécurisé.'
-    : 'Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon. Cette version conserve ta progression sur cet appareil.';
+    : 'Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon.';
   if (submit) submit.innerHTML = login ? 'Ouvrir ma session <span>→</span>' : 'Recevoir le lien de vérification <span>→</span>';
   if (forgot) forgot.hidden = !login;
+  if (resend) resend.hidden = true;
+  lastSignupAttempt = null;
   document.getElementById('signup-error').textContent = '';
 }
 
@@ -1135,6 +1154,28 @@ function initBffAuthUi() {
       passwordInput.type = show ? 'text' : 'password';
       toggle.textContent = show ? 'Masquer' : 'Afficher';
       toggle.setAttribute('aria-pressed', String(show));
+    });
+  }
+  // Resend confirmation (signup reliability, P0 2026-11): a learner whose
+  // verification e-mail is slow, filtered to spam, or simply never arrived
+  // must not be stuck re-typing the whole form — re-sending reuses exactly
+  // the credentials just submitted, kept only in memory for this page.
+  const resendButton = document.getElementById('bff-resend-confirmation');
+  if (resendButton) {
+    resendButton.addEventListener('click', async () => {
+      if (!lastSignupAttempt || resendButton.disabled) return;
+      resendButton.disabled = true;
+      const originalLabel = resendButton.textContent;
+      resendButton.textContent = 'Envoi…';
+      try {
+        await window.DDABFF.register(lastSignupAttempt);
+        document.getElementById('bff-auth-status').textContent = 'Nouveau lien envoyé. Vérifie ta boîte mail (et les spams).';
+      } catch {
+        document.getElementById('bff-auth-status').textContent = 'Impossible de renvoyer le lien pour le moment. Réessaie dans un instant.';
+      } finally {
+        resendButton.disabled = false;
+        resendButton.textContent = originalLabel;
+      }
     });
   }
   document.getElementById('bff-mode-signup').addEventListener('click', () => {
@@ -3707,6 +3748,15 @@ function authErrorMessage(authError, { signup } = {}) {
   if (code === 'email_not_confirmed') {
     return 'Confirme ton adresse e-mail avant de te connecter : vérifie ta boîte mail (et les spams) puis clique sur le lien de confirmation.';
   }
+  // Signup reliability audit (P0, 2026-11): classifyRegisterError() in
+  // bff/src/app.js now tells a password the provider itself rejects as too
+  // weak apart from every other registration failure — this used to fall
+  // through to the same generic "could not complete this step" as a random
+  // server glitch, which looks exactly like a bug to the person who just
+  // typed the password that triggered it.
+  if (code === 'weak_password') {
+    return 'Ton mot de passe est trop simple : ajoute des majuscules, des chiffres ou des symboles.';
+  }
   if (code === 'rate_limited') {
     return 'Trop de tentatives. Réessaie dans quelques minutes.';
   }
@@ -3757,10 +3807,16 @@ document.getElementById('signup-form').addEventListener('submit', async event =>
     if (submitButton) { submitButton.disabled = true; submitButton.innerHTML = bffAuthMode === 'login' ? 'Connexion…' : 'Envoi…'; }
     try {
       if (bffAuthMode === 'signup') {
-        await window.DDABFF.register({ email, password, display_name: name, ref: prototypeState.acquisition?.partnerRef });
-        document.getElementById('bff-auth-status').textContent = 'Si l’inscription peut être finalisée, un lien de vérification vient d’être envoyé. Vérifie ta boîte mail puis connecte-toi.';
+        const attempt = { email, password, display_name: name, ref: prototypeState.acquisition?.partnerRef };
+        await window.DDABFF.register(attempt);
+        document.getElementById('bff-auth-status').textContent = 'Si l’inscription peut être finalisée, un lien de vérification vient d’être envoyé. Vérifie ta boîte mail (et les spams) puis connecte-toi.';
         setBffAuthMode('login');
         document.getElementById('email').value = email;
+        // Must be set after setBffAuthMode('login'): mode switches clear any
+        // previously remembered attempt and re-hide the resend button.
+        lastSignupAttempt = attempt;
+        const resendButton = document.getElementById('bff-resend-confirmation');
+        if (resendButton) resendButton.hidden = false;
       } else {
         await window.DDABFF.login({ email, password });
         const user = await hydrateRemoteSession();

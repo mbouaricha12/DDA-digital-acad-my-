@@ -69,4 +69,24 @@ function makeFetch(calls) {
   assert.equal(threw.code, 'email_not_confirmed', 'the caller must be able to tell this apart from a wrong password at the same HTTP status');
 
   console.log('RESULT: supabase-auth adapter surfaces error_code so email_not_confirmed is never collapsed into invalid_credentials — PASS');
+
+  // Signup reliability audit (P0, 2026-11): the SAME capture must apply to
+  // /auth/v1/signup, not just /auth/v1/token — classifyRegisterError() in
+  // app.js relies on error.code from a failed register() call exactly the
+  // way classifyLoginError() relies on it from login().
+  const signupErrorFetch = async (url, options) => {
+    if (url.endsWith('/auth/v1/signup')) {
+      return { ok: false, status: 422, text: async () => JSON.stringify({ error_code: 'weak_password', msg: 'Password should contain at least one character of each: lowercase, uppercase, number and symbol.' }) };
+    }
+    throw new Error(`unexpected request: ${options.method} ${url}`);
+  };
+  const auth3 = new SupabaseAuthAdapter({ supabaseUrl: 'https://project.supabase.co', publishableKey: 'pub', serviceRoleKey: 'service', fetchImpl: signupErrorFetch });
+  threw = null;
+  try { await auth3.register({ email: 'weak@example.com', password: 'x'.repeat(12), display_name: 'A' }); }
+  catch (error) { threw = error; }
+  assert.ok(threw, 'register() must reject when GoTrue returns a non-2xx status');
+  assert.equal(threw.status, 422);
+  assert.equal(threw.code, 'weak_password', 'the adapter must surface error_code from a failed signup, not just a failed login');
+
+  console.log('RESULT: supabase-auth adapter surfaces error_code on signup failures too — PASS');
 })();

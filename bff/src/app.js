@@ -114,6 +114,49 @@ function classifyLoginError(error) {
   return { status: 503, code: 'server_error', message: 'Authentication is temporarily unavailable. Please try again shortly.' };
 }
 
+// Signup reliability audit (P0, 2026-11): the register handler used to let
+// ANY failure from Supabase Auth — a password that fails the project's
+// strength policy, a provider outage, an email the provider refuses, or an
+// account that already exists — fall through to the generic 500 handler at
+// the bottom of this module, which told the learner "Request could not be
+// processed" for every one of these, indistinguishable from a real bug on
+// our side. Two things never happen here: a genuinely actionable problem
+// (weak password, provider outage) is never reported as a fabricated
+// internal_error, and a duplicate-account attempt is never told apart from
+// a first-time signup — "swallow" tells the caller to send back the exact
+// same ambiguous 202 success body the happy path already uses, preserving
+// anti-enumeration even when the provider itself errors instead of faking
+// success.
+function classifyRegisterError(error) {
+  const code = String(error?.code || '').toLowerCase();
+  const message = String(error?.message || '').toLowerCase();
+  const status = Number(error?.status) || 0;
+  if (['user_already_exists', 'email_exists', 'email_address_already_registered'].includes(code) || message.includes('already registered') || message.includes('already exists')) {
+    return { swallow: true, code: 'email_exists' };
+  }
+  if (code === 'weak_password' || message.includes('weak password')) {
+    // GoTrue's own weak_password text never contains the password itself or
+    // any account state, so it is safe to carry in field_errors for an API
+    // caller or a log — the dist/app.js client deliberately shows its own
+    // French message instead of this raw (English, version-specific) text.
+    return { status: 400, code: 'weak_password', message: 'Password does not meet the required strength.', fieldErrors: { password: error.message || 'Password is too weak.' } };
+  }
+  if (code === 'email_address_invalid' || (status === 400 && message.includes('email'))) {
+    return { status: 400, code: 'validation_error', message: 'Request could not be processed.', fieldErrors: { email: 'Enter a valid email address.' } };
+  }
+  if (code === 'signup_disabled') {
+    return { status: 503, code: 'registrations_unavailable', message: 'New registrations are temporarily unavailable. Please try again later.' };
+  }
+  if (status === 429 || code === 'over_email_send_rate_limit' || code === 'too_many_requests' || message.includes('rate limit')) {
+    return { status: 429, code: 'rate_limited', message: 'Too many attempts. Please try again later.' };
+  }
+  // No HTTP status at all (network/DNS failure) or an unrecognized provider
+  // error: this is not the caller's fault and must never be reported as an
+  // internal_error on our side, which would send whoever reads the logs
+  // chasing a bug in our own code instead of the provider.
+  return { status: 503, code: 'server_error', message: 'Registration is temporarily unavailable. Please try again shortly.' };
+}
+
 function clientIp(req) {
   return String(req.socket?.remoteAddress || '');
 }
@@ -340,7 +383,16 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const validation = validateRegistration(body);
         if (Object.keys(validation.fields).length) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, validation.fields);
         if (!await checkAuthRateLimit(rateLimiter, 'register', { ip: clientIp(req), email: validation.email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
-        await auth.register({ email: validation.email, password: body.password, display_name: body.display_name, ref: validation.ref, redirectTo: config.emailRedirectTo });
+        try {
+          await auth.register({ email: validation.email, password: body.password, display_name: body.display_name, ref: validation.ref, redirectTo: config.emailRedirectTo });
+        } catch (error) {
+          const outcome = classifyRegisterError(error);
+          // Never log the password or the raw provider error body — only the
+          // status/code classification, which is enough to diagnose a
+          // production incident without exposing credentials.
+          logger('register_failed', { requestId, status: outcome.status, code: outcome.code });
+          if (!outcome.swallow) return sendError(res, outcome.status, outcome.code, outcome.message, requestId, outcome.fieldErrors);
+        }
         return json(res, 202, { message: 'If the registration can be completed, a verification message will be sent.' });
       }
       if (method === 'POST' && path === '/v1/auth/verify-email') {
