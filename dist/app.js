@@ -1124,6 +1124,21 @@ function showOnboardingAfterRemoteAuth(user) {
   document.getElementById('step-dot-2').classList.add('active');
 }
 
+// PKCE error messages (P0 auth reliability audit, 2026-11): "verifier
+// expired/missing" (this browser never made the original request, or its
+// cookie expired — see bff/src/app.js) is a materially different, and more
+// honest, situation than "the code itself is invalid/already used". Showing
+// the same generic text for both would hide the real, actionable advice
+// ("open the link in the same browser you used to ask for it") behind a
+// message that reads like the link is simply dead.
+function bffVerifierErrorMessage(error, genericMessage) {
+  const code = error?.body?.code;
+  if (code === 'recovery_verifier_expired' || code === 'signup_verifier_expired') {
+    return 'Ce lien doit être ouvert dans le même navigateur que celui utilisé pour la demande, et la demande ne doit pas avoir expiré. Fais une nouvelle demande.';
+  }
+  return genericMessage;
+}
+
 async function handleBffVerificationToken() {
  const params=new URLSearchParams(location.search),hashParams=new URLSearchParams(location.hash.slice(1));
  const recovery=window.DDA_AUTH_RECOVERY===true||params.get('type')==='recovery'||hashParams.get('type')==='recovery';
@@ -1132,7 +1147,19 @@ async function handleBffVerificationToken() {
  if(recovery)showView('access',false,'replace');
  if(recovery&&code){const form=document.getElementById('bff-reset-password-form');document.getElementById('signup-form').hidden=true;document.getElementById('bff-recovery-form').hidden=true;form.hidden=false;form.dataset.recoveryReady='false';
   try{await window.DDABFF.exchangeRecoveryCode(code);form.dataset.recoveryReady='true';document.getElementById('reset-password-error').textContent='';}
-  catch{form.hidden=true;const panel=document.getElementById('bff-verify-panel');panel.hidden=false;document.getElementById('bff-verify-message').textContent='Lien de récupération invalide ou expiré. Demande un nouveau lien.';}return;}
+  catch(error){form.hidden=true;const panel=document.getElementById('bff-verify-panel');panel.hidden=false;document.getElementById('bff-verify-message').textContent=bffVerifierErrorMessage(error,'Lien de récupération invalide ou expiré. Demande un nouveau lien.');}return;}
+ // New, PKCE-protected signup confirmation links carry `code` instead of
+ // `token` (see bff/src/supabase-auth.js's register()). The exchange only
+ // succeeds in the SAME browser that submitted the signup form — that is
+ // the whole point: a security scanner's sandboxed browser pre-visiting
+ // this link has no way to complete it, so it can never falsely report
+ // "lien invalide" to the real learner afterwards.
+ if(!recovery&&code){
+  const panel=document.getElementById('bff-verify-panel'),message=document.getElementById('bff-verify-message'),form=document.getElementById('signup-form');if(panel)panel.hidden=false;if(form)form.hidden=true;
+  try{await window.DDABFF.exchangeSignupCode(code);if(message)message.textContent='Adresse confirmée. Tu peux maintenant ouvrir ta session.';}
+  catch(error){if(message)message.textContent=bffVerifierErrorMessage(error,'Ce lien est invalide, expiré ou déjà utilisé. Demande un nouveau lien depuis l’inscription');}
+  return;
+ }
  if(!token){if(recovery){document.getElementById('bff-reset-password-form').hidden=true;const panel=document.getElementById('bff-verify-panel');panel.hidden=false;document.getElementById('bff-verify-message').textContent='Lien de récupération incomplet. Demande un nouveau lien.';}return;}
  if(recovery){const form=document.getElementById('bff-reset-password-form');document.getElementById('signup-form').hidden=true;document.getElementById('bff-recovery-form').hidden=true;form.hidden=false;form.dataset.recoveryReady='false';
   try{await window.DDABFF.verifyRecoveryToken(token);form.dataset.recoveryReady='true';document.getElementById('reset-password-error').textContent='';}

@@ -42,29 +42,61 @@ class SupabaseAuthAdapter {
     return body;
   }
 
-  async register({ email, password, display_name, ref, redirectTo }) {
+  // `codeChallenge`, when supplied, asks GoTrue to mint a PKCE-protected
+  // confirmation link (see pkce.js's header comment for the full rationale):
+  // the resulting e-mail link yields only a single-use `code`, which is
+  // worthless without the `code_verifier` this server kept to itself. This
+  // mirrors exactly what the official Supabase client SDK sends when its
+  // auth flow type is set to PKCE — the same `code_challenge` /
+  // `code_challenge_method` fields, in the request body, documented in
+  // GoTrue's own SignupParams/RecoverParams request shape.
+  async register({ email, password, display_name, ref, redirectTo, codeChallenge }) {
     // Partner attribution is written once, at account creation, and never
     // touched again — updateUser() below merges around it precisely so a
     // later profile edit can never overwrite or erase it.
-    return this.publicRequest('/auth/v1/signup', { method: 'POST', body: JSON.stringify({ email: normalizeEmail(email), password, data: { display_name: display_name || '', ref: ref || null }, redirect_to: redirectTo }) });
+    const body = { email: normalizeEmail(email), password, data: { display_name: display_name || '', ref: ref || null }, redirect_to: redirectTo };
+    if (codeChallenge) { body.code_challenge = codeChallenge; body.code_challenge_method = 'S256'; }
+    return this.publicRequest('/auth/v1/signup', { method: 'POST', body: JSON.stringify(body) });
   }
 
+  // Legacy path, kept for any confirmation links already sent before this
+  // deploy (and as a fallback for a flow that never got a code_verifier —
+  // e.g. SESSION_ENCRYPTION_KEY unset in a non-production config): GoTrue
+  // still honors a bare token_hash/type=signup verification. New links
+  // issued by register() above go through exchangeSignupCode() instead.
   async verifyEmail(token) {
     return this.publicRequest(`/auth/v1/verify?token=${encodeURIComponent(token)}&type=signup`, { method: 'GET' });
   }
 
+  // Legacy path — see verifyEmail()'s comment; superseded for new recovery
+  // links by exchangeRecoveryCode() below once a code_verifier is available.
   async verifyRecoveryToken(token) {
     return this.publicRequest(`/auth/v1/verify?token=${encodeURIComponent(token)}&type=recovery`, { method: 'GET' });
   }
-  async exchangeRecoveryCode(code) {
-    return this.publicRequest('/auth/v1/token?grant_type=pkce', { method: 'POST', body: JSON.stringify({ auth_code: code }) });
+
+  // The actual PKCE exchange: GoTrue's /token?grant_type=pkce resolves the
+  // single-use `auth_code` from the e-mail link's redirect ONLY when it is
+  // paired with the exact `code_verifier` whose SHA-256 produced the
+  // `code_challenge` originally sent to /recover or /signup. A scanner that
+  // merely loads the redirect page never has this value (it lives only in
+  // this server's encrypted, httpOnly cookie on the browser that made the
+  // original request — see app.js) and so can never complete this call,
+  // whatever it does with the `code` on its own.
+  async exchangePkceCode(code, codeVerifier) {
+    return this.publicRequest('/auth/v1/token?grant_type=pkce', { method: 'POST', body: JSON.stringify({ auth_code: code, code_verifier: codeVerifier }) });
+  }
+  async exchangeRecoveryCode(code, codeVerifier) {
+    return this.exchangePkceCode(code, codeVerifier);
+  }
+  async exchangeSignupCode(code, codeVerifier) {
+    return this.exchangePkceCode(code, codeVerifier);
   }
 
   async login({ email, password }) {
     return this.publicRequest('/auth/v1/token?grant_type=password', { method: 'POST', body: JSON.stringify({ email: normalizeEmail(email), password }) });
   }
 
-  async requestPasswordReset(email, redirectTo) {
+  async requestPasswordReset(email, redirectTo, codeChallenge) {
     // Unlike /auth/v1/signup, GoTrue's /auth/v1/recover reads redirect_to only
     // from the request's query string — a body field here is silently ignored,
     // and the email link falls back to the bare Site URL with no recovery
@@ -73,7 +105,9 @@ class SupabaseAuthAdapter {
     // kept too since GoTrue accepts it there without error; the query param is
     // what actually makes it into the email.
     const path = redirectTo ? `/auth/v1/recover?redirect_to=${encodeURIComponent(redirectTo)}` : '/auth/v1/recover';
-    return this.publicRequest(path, { method: 'POST', body: JSON.stringify({ email: normalizeEmail(email), redirect_to: redirectTo }) });
+    const body = { email: normalizeEmail(email), redirect_to: redirectTo };
+    if (codeChallenge) { body.code_challenge = codeChallenge; body.code_challenge_method = 'S256'; }
+    return this.publicRequest(path, { method: 'POST', body: JSON.stringify(body) });
   }
 
   async confirmPasswordReset(accessToken, password) {

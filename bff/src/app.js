@@ -2,6 +2,7 @@
 
 const { randomUUID } = require('node:crypto');
 const { randomToken, sha256, timingSafeEqualText, parseCookies, serializeCookie, encrypt, decrypt, normalizeEmail } = require('./security');
+const { generateCodeVerifier, computeCodeChallenge } = require('./pkce');
 const { executeIdempotentMutation, validateClientMutationId } = require('./idempotency');
 const { checkAuthRateLimit } = require('./rate-limiter');
 const { VALID_ROLES: VALID_ADMIN_ROLES } = require('./admin-roles-store');
@@ -10,6 +11,14 @@ const { PREMIUM_CONTENT, FREE_PREVIEW_IDS } = require('./premium-content');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
+// PKCE code_verifier carriers (P0 auth reliability audit, 2026-11 — see
+// pkce.js and the password-reset/register handlers below for the full
+// rationale). One per flow, both httpOnly so client JS can never read or
+// leak them, and both short-lived: a verifier that outlives the e-mail link
+// it protects is a liability with no benefit, and GoTrue's own one-time
+// code expires long before either TTL below.
+const RECOVERY_VERIFIER_COOKIE = '__Host-dda_pw_verifier';
+const SIGNUP_VERIFIER_COOKIE = '__Host-dda_signup_verifier';
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 function configFromEnv(env = process.env) {
@@ -22,7 +31,17 @@ function configFromEnv(env = process.env) {
     sessionAbsoluteMs: Number(env.SESSION_ABSOLUTE_MS || 30 * 24 * 60 * 60 * 1000),
     sessionEncryptionKey: env.SESSION_ENCRYPTION_KEY || null,
     emailRedirectTo: env.EMAIL_REDIRECT_TO || 'http://localhost:8744/access',
-    passwordRecoveryRedirectTo: env.PASSWORD_RECOVERY_REDIRECT_TO || (() => { const u = new URL(env.EMAIL_REDIRECT_TO || 'http://localhost:8744/access'); u.searchParams.set('type', 'recovery'); return u.toString(); })()
+    passwordRecoveryRedirectTo: env.PASSWORD_RECOVERY_REDIRECT_TO || (() => { const u = new URL(env.EMAIL_REDIRECT_TO || 'http://localhost:8744/access'); u.searchParams.set('type', 'recovery'); return u.toString(); })(),
+    // How long this server holds a PKCE code_verifier before it expires —
+    // i.e. how long the learner has, from clicking "forgot password" /
+    // "sign up", to click through the resulting e-mail in the SAME browser.
+    // Recovery is the more sensitive action and gets the shorter window;
+    // signup confirmation e-mails are routinely checked later, so it gets
+    // more room. Both are deliberately short-lived compared to GoTrue's own
+    // link TTL — the verifier only needs to outlive "time to open the inbox
+    // and click", never the full link lifetime.
+    recoveryVerifierTtlMs: Number(env.PASSWORD_RECOVERY_VERIFIER_TTL_MS || 30 * 60 * 1000),
+    signupVerifierTtlMs: Number(env.SIGNUP_VERIFIER_TTL_MS || 60 * 60 * 1000)
   };
 }
 
@@ -34,6 +53,9 @@ function validateRuntimeConfig(config, env = process.env) {
   if (!Number.isInteger(config.port) || config.port < 1 || config.port > 65535) issues.push('PORT must be an integer from 1 to 65535');
   if (!Number.isFinite(config.sessionIdleMs) || config.sessionIdleMs <= 0 || !Number.isFinite(config.sessionAbsoluteMs) || config.sessionAbsoluteMs < config.sessionIdleMs) {
     issues.push('Session durations are invalid');
+  }
+  if (!Number.isFinite(config.recoveryVerifierTtlMs) || config.recoveryVerifierTtlMs <= 0 || !Number.isFinite(config.signupVerifierTtlMs) || config.signupVerifierTtlMs <= 0) {
+    issues.push('PKCE verifier TTLs (PASSWORD_RECOVERY_VERIFIER_TTL_MS, SIGNUP_VERIFIER_TTL_MS) must be positive');
   }
   if (!config.secureCookies) issues.push('BFF_COOKIE_SECURE must be true for __Host- cookies');
   if (Buffer.from(String(config.sessionEncryptionKey || ''), 'base64url').length !== 32) issues.push('SESSION_ENCRYPTION_KEY must decode to exactly 32 bytes');
@@ -193,6 +215,50 @@ function cookieHeaders(config, sessionToken, csrfToken, clear = false) {
 }
 
 function setCookies(res, values) { res.setHeader('Set-Cookie', values); }
+
+// PKCE verifier cookie: httpOnly (client JS can never read it, so it can
+// never be exfiltrated by injected/third-party script), Secure + SameSite
+// SameSite=None (same cross-origin requirement as the session cookie,
+// cookieHeaders() above — the BFF and the static site are different
+// origins) and short-lived. Encrypted with the exact same AES-256-GCM
+// primitive already used for provider tokens on the session row (security.js)
+// rather than a new mechanism — this is "a secret this server must be able
+// to read back later", precisely what that primitive is for.
+function appendSetCookie(res, value) {
+  const existing = res.getHeader('Set-Cookie');
+  if (!existing) return res.setHeader('Set-Cookie', [value]);
+  res.setHeader('Set-Cookie', Array.isArray(existing) ? [...existing, value] : [existing, value]);
+}
+
+function setVerifierCookie(res, config, name, codeVerifier, ttlMs) {
+  if (!config.sessionEncryptionKey || !codeVerifier) return;
+  const encrypted = encrypt(codeVerifier, config.sessionEncryptionKey);
+  appendSetCookie(res, serializeCookie(name, encrypted, { secure: config.secureCookies, sameSite: 'None', path: '/', httpOnly: true, maxAge: Math.floor(ttlMs / 1000) }));
+}
+
+function readVerifierCookie(cookies, config, name) {
+  if (!config.sessionEncryptionKey || !cookies[name]) return null;
+  try { return decrypt(cookies[name], config.sessionEncryptionKey); }
+  catch { return null; }
+}
+
+function clearVerifierCookie(res, config, name) {
+  appendSetCookie(res, serializeCookie(name, '', { secure: config.secureCookies, sameSite: 'None', path: '/', httpOnly: true, maxAge: 0 }));
+}
+
+// Generates a fresh PKCE pair when (and only when) this server is able to
+// hold onto the verifier (SESSION_ENCRYPTION_KEY configured) — without a
+// key to encrypt it into the cookie above, sending a code_challenge with no
+// way to ever retrieve the matching verifier would make the resulting link
+// permanently unexchangeable, which is worse than falling back to the
+// legacy (unchallenged) flow. Real production always has the key
+// (validateRuntimeConfig enforces it); this guard only matters for minimal
+// test configs that intentionally omit it to exercise unrelated behavior.
+function newPkcePair(config) {
+  if (!config.sessionEncryptionKey) return { codeVerifier: null, codeChallenge: null };
+  const codeVerifier = generateCodeVerifier();
+  return { codeVerifier, codeChallenge: computeCodeChallenge(codeVerifier) };
+}
 
 function validateOrigin(req, config) {
   const origin = req.headers.origin;
@@ -383,8 +449,15 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const validation = validateRegistration(body);
         if (Object.keys(validation.fields).length) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, validation.fields);
         if (!await checkAuthRateLimit(rateLimiter, 'register', { ip: clientIp(req), email: validation.email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        // PKCE (P0 auth reliability audit, 2026-11): a fresh verifier per
+        // signup attempt, bound to THIS browser via an httpOnly cookie — see
+        // pkce.js. Generated unconditionally (success or failure path below)
+        // so its mere presence never hints at whether the account already
+        // existed, preserving the anti-enumeration guarantee the swallow
+        // path already relies on.
+        const { codeVerifier, codeChallenge } = newPkcePair(config);
         try {
-          await auth.register({ email: validation.email, password: body.password, display_name: body.display_name, ref: validation.ref, redirectTo: config.emailRedirectTo });
+          await auth.register({ email: validation.email, password: body.password, display_name: body.display_name, ref: validation.ref, redirectTo: config.emailRedirectTo, codeChallenge });
         } catch (error) {
           const outcome = classifyRegisterError(error);
           // Never log the password or the raw provider error body — only the
@@ -393,12 +466,31 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
           logger('register_failed', { requestId, status: outcome.status, code: outcome.code });
           if (!outcome.swallow) return sendError(res, outcome.status, outcome.code, outcome.message, requestId, outcome.fieldErrors);
         }
+        setVerifierCookie(res, config, SIGNUP_VERIFIER_COOKIE, codeVerifier, config.signupVerifierTtlMs);
         return json(res, 202, { message: 'If the registration can be completed, a verification message will be sent.' });
       }
       if (method === 'POST' && path === '/v1/auth/verify-email') {
         const body = await readJson(req);
-        if (typeof body.token !== 'string' || body.token.length < 32) return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId);
+        // New, PKCE-protected confirmation links carry `code` (see register()
+        // above and pkce.js): the e-mail link alone can never confirm the
+        // account — a security scanner's sandboxed browser that pre-visits it
+        // has no way to reach the code_verifier, which exists only in this
+        // browser's own httpOnly cookie, set when THIS browser submitted the
+        // signup form. `token` remains for any confirmation links already
+        // sent before this deploy.
+        const usesCode = typeof body.code === 'string';
+        if (usesCode) { if (body.code.length < 10) return sendError(res, 400, 'invalid_code', 'The confirmation code is invalid or expired.', requestId); }
+        else if (typeof body.token !== 'string' || body.token.length < 32) return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId);
         if (!await checkAuthRateLimit(rateLimiter, 'verify-email', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        if (usesCode) {
+          const cookies = parseCookies(req.headers.cookie || '');
+          const codeVerifier = readVerifierCookie(cookies, config, SIGNUP_VERIFIER_COOKIE);
+          if (!codeVerifier) return sendError(res, 400, 'signup_verifier_expired', 'This confirmation link must be opened in the same browser used to sign up, and the request must not have expired. Please sign up again or request a new confirmation e-mail.', requestId);
+          try { await auth.exchangeSignupCode(body.code, codeVerifier); }
+          catch (error) { logger('verify_email_exchange_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'invalid_code', 'This confirmation link is invalid or expired.', requestId); }
+          clearVerifierCookie(res, config, SIGNUP_VERIFIER_COOKIE);
+          return json(res, 204);
+        }
         await auth.verifyEmail(body.token);
         return json(res, 204);
       }
@@ -406,10 +498,22 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         if (typeof body.code !== 'string' || body.code.length < 10) return sendError(res, 400, 'invalid_code', 'The recovery code is invalid or expired.', requestId);
         if (!await checkAuthRateLimit(rateLimiter, 'password-reset-exchange', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please request a new link later.', requestId);
+        // PKCE exchange — the heart of this fix (P0 auth reliability audit,
+        // 2026-11): without a code_verifier that matches what was sent to
+        // /auth/v1/recover, this call is refused BEFORE ever reaching
+        // GoTrue, so a scanner that merely loaded the redirect page (and so
+        // never has this browser's httpOnly cookie) can never burn the
+        // underlying one-time code — it is left intact for the real learner.
+        const cookies = parseCookies(req.headers.cookie || '');
+        const codeVerifier = readVerifierCookie(cookies, config, RECOVERY_VERIFIER_COOKIE);
+        if (!codeVerifier) return sendError(res, 400, 'recovery_verifier_expired', 'This recovery link must be opened in the same browser used to request it, and the request must not have expired. Please request a new recovery link.', requestId);
         let provider;
-        try { provider = await auth.exchangeRecoveryCode(body.code); } catch (error) { logger('password_reset_exchange_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'invalid_code', 'The recovery link is invalid or expired.', requestId); }
+        try { provider = await auth.exchangeRecoveryCode(body.code, codeVerifier); } catch (error) { logger('password_reset_exchange_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'invalid_code', 'The recovery link is invalid or expired.', requestId); }
         if (!provider?.user?.id || !provider.access_token) return sendError(res, 400, 'invalid_code', 'The recovery link is invalid or expired.', requestId);
-        const created = await createSession(provider.user.id, provider, req); setCookies(res, cookieHeaders(config, created.token, created.csrf)); return json(res, 204);
+        const created = await createSession(provider.user.id, provider, req);
+        setCookies(res, cookieHeaders(config, created.token, created.csrf));
+        clearVerifierCookie(res, config, RECOVERY_VERIFIER_COOKIE);
+        return json(res, 204);
       }
       if (method === 'POST' && path === '/v1/auth/password-reset/verify') {
         const body = await readJson(req);
@@ -448,7 +552,14 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const email = normalizeEmail(body.email);
         if (!/^\S+@\S+\.\S+$/.test(email)) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId);
         if (!await checkAuthRateLimit(rateLimiter, 'password-reset-request', { ip: clientIp(req), email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
-        try { await auth.requestPasswordReset(email, config.passwordRecoveryRedirectTo || config.emailRedirectTo); } catch (error) { logger('recovery_failed', { requestId, status: error.status || 500 }); }
+        // PKCE (P0 auth reliability audit, 2026-11): a fresh verifier per
+        // recovery attempt, bound to THIS browser via an httpOnly cookie —
+        // generated and stored unconditionally (whether or not the account
+        // exists), so its presence never leaks account existence on top of
+        // the always-202 response this route already gives.
+        const { codeVerifier, codeChallenge } = newPkcePair(config);
+        try { await auth.requestPasswordReset(email, config.passwordRecoveryRedirectTo || config.emailRedirectTo, codeChallenge); } catch (error) { logger('recovery_failed', { requestId, status: error.status || 500 }); }
+        setVerifierCookie(res, config, RECOVERY_VERIFIER_COOKIE, codeVerifier, config.recoveryVerifierTtlMs);
         return json(res, 202, { message: 'If the account can be recovered, a message will be sent.' });
       }
       if (method === 'POST' && path === '/v1/auth/password-reset/confirm') {
