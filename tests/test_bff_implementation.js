@@ -36,7 +36,17 @@ function makeAuth() {
     calls,
     async register(input) { calls.push(['register', input]); users.set(input.email, { id: 'user-1', email: input.email, email_confirmed_at: new Date().toISOString(), user_metadata: { display_name: input.display_name || '' } }); return { user: null }; },
     async verifyEmail(token) { assert.equal(token, 'v'.repeat(32)); return {}; },
-    async login({ email, password }) { calls.push(['login', email, password]); if (password === 'wrong' || password === 'wrong-password') throw Object.assign(new Error('invalid'), { status: 400 }); return { user: { id: 'user-1' }, access_token: 'access-token', refresh_token: 'refresh-token' }; },
+    async login({ email, password }) {
+      calls.push(['login', email, password]);
+      // Mirrors the real shapes GoTrue returns, so the BFF's error
+      // classification (bff/src/app.js classifyLoginError) is exercised the
+      // same way it is in production, not a stand-in status code.
+      if (password === 'wrong' || password === 'wrong-password') throw Object.assign(new Error('Invalid login credentials'), { status: 400, code: 'invalid_credentials' });
+      if (password === 'unconfirmed-account-password') throw Object.assign(new Error('Email not confirmed'), { status: 400, code: 'email_not_confirmed' });
+      if (password === 'rate-limited-password') throw Object.assign(new Error('Too many requests'), { status: 429, code: 'over_request_rate_limit' });
+      if (password === 'provider-down-password') throw Object.assign(new Error('fetch failed'), { status: undefined, code: undefined });
+      return { user: { id: 'user-1' }, access_token: 'access-token', refresh_token: 'refresh-token' };
+    },
     async requestPasswordReset(email) { calls.push(['recover', email]); },
     async confirmPasswordReset(token, password) { calls.push(['recover-confirm', token]); if (token !== 'v'.repeat(32)) throw Object.assign(new Error('invalid'), { status: 401 }); return {}; },
     async getUser(userId) { assert.equal(userId, 'user-1'); return { user_id: userId, email: 'a@example.com', email_verified: true, display_name: 'A', status: 'active', entitlements: [] }; },
@@ -192,9 +202,28 @@ function request(server, method, path, { body, rawBody, headers = {}, cookies = 
     response = await request(server, 'GET', '/v1/me', { cookies: { [SESSION_COOKIE]: decodeURIComponent(sessionCookie) } });
     assert.equal(response.status, 401);
 
+    // P0 auth reliability audit (2026-11): a wrong password, an unconfirmed
+    // email, a provider-side rate limit, and a transient outage must each
+    // get their own status/code — collapsing them into one
+    // "authentication_failed" 401 is the bug that made real users with a
+    // correct password see "Mot de passe incorrect" after signup.
     response = await request(server, 'POST', '/v1/auth/login', { body: { email: 'a@example.com', password: 'wrong-password' } });
     assert.equal(response.status, 401);
-    assert.equal(response.body.code, 'authentication_failed');
+    assert.equal(response.body.code, 'invalid_credentials');
+
+    response = await request(server, 'POST', '/v1/auth/login', { body: { email: 'a@example.com', password: 'unconfirmed-account-password' } });
+    assert.equal(response.status, 403, 'an unconfirmed email is never reported as a wrong password');
+    assert.equal(response.body.code, 'email_not_confirmed');
+
+    response = await request(server, 'POST', '/v1/auth/login', { body: { email: 'a@example.com', password: 'rate-limited-password' } });
+    assert.equal(response.status, 429, 'a provider-side rate limit is never reported as a wrong password');
+    assert.equal(response.body.code, 'rate_limited');
+
+    response = await request(server, 'POST', '/v1/auth/login', { body: { email: 'a@example.com', password: 'provider-down-password' } });
+    assert.equal(response.status, 503, 'a provider outage (no HTTP status at all) is never reported as a wrong password');
+    assert.equal(response.body.code, 'server_error');
+    const loginFailureLogs = logs.filter(entry => entry[0] === 'login_failed');
+    assert.ok(loginFailureLogs.every(entry => !('password' in entry[1]) && !JSON.stringify(entry[1]).toLowerCase().includes('wrong')), 'no password or raw provider error text is ever logged');
 
     response = await request(server, 'POST', '/v1/auth/password-reset/confirm', { body: { password: 'short' } });
     assert.equal(response.status, 400);

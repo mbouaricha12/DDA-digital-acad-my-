@@ -673,6 +673,9 @@ body.access-mode .prototype-banner{
 #access .access-card #bff-verify-panel{padding-top:4px}
 #access .access-card #bff-recovery-form .text-action{justify-self:start}
 #access .access-card #bff-verify-panel p:not(.eyebrow){color:#cbd5e1;line-height:1.6}
+#access .access-card .password-field-wrap{position:relative;display:block}
+#access .access-card .password-field-wrap input{width:100%;padding-right:76px}
+#access .access-card .password-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);min-height:28px;padding:0 4px;font-size:.82rem}
 #access .access-illustration{color:#94a3b8;opacity:.8}
 @media(max-width:639px){
   #access .access-card{border-radius:16px}
