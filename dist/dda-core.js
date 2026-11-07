@@ -404,15 +404,33 @@
     });
 
     function trendOptions(correctLabel) {
+      // Lot E (contenu/valeur pédagogique) : chaque bonne réponse avait son
+      // feedback `undefined` ici, ce qui faisait retomber bindQuestion()
+      // (app.js) sur le successText générique du registre — "Bonne lecture."
+      // identique pour m3-classify-1/2/3, trois graphiques pourtant différents
+      // (hausse/baisse/range). Un `right` propre à chaque cas donne enfin une
+      // explication argumentée, spécifique au graphique qui vient d'être lu.
       const base = [
-        Object.freeze({ key: 'up', text: 'Tendance haussière : le prix progresse globalement vers le haut.', wrong: 'Regarde l’ensemble du graphique, pas un instant isolé : compare surtout le point de départ et le point d’arrivée.' }),
-        Object.freeze({ key: 'down', text: 'Tendance baissière : le prix recule globalement.', wrong: 'Regarde l’ensemble du graphique, pas un instant isolé : compare surtout le point de départ et le point d’arrivée.' }),
-        Object.freeze({ key: 'range', text: 'Tendance latérale : le prix oscille sans direction générale claire.', wrong: 'Ici, la direction générale entre le début et la fin du graphique est en réalité assez nette.' })
+        Object.freeze({
+          key: 'up', text: 'Tendance haussière : le prix progresse globalement vers le haut.',
+          right: 'Exact. Entre le premier et le dernier point du graphique, le prix est globalement plus haut qu’au départ — les reculs intermédiaires ne changent pas cette direction générale.',
+          wrong: 'Regarde l’ensemble du graphique, pas un instant isolé : compare surtout le point de départ et le point d’arrivée.'
+        }),
+        Object.freeze({
+          key: 'down', text: 'Tendance baissière : le prix recule globalement.',
+          right: 'Exact. Entre le premier et le dernier point du graphique, le prix est globalement plus bas qu’au départ — les rebonds intermédiaires ne changent pas cette direction générale.',
+          wrong: 'Regarde l’ensemble du graphique, pas un instant isolé : compare surtout le point de départ et le point d’arrivée.'
+        }),
+        Object.freeze({
+          key: 'range', text: 'Tendance latérale : le prix oscille sans direction générale claire.',
+          right: 'Exact. Le prix revient répétitivement entre les mêmes niveaux haut et bas : le point de départ et le point d’arrivée ne montrent aucune direction générale nette.',
+          wrong: 'Ici, la direction générale entre le début et la fin du graphique est en réalité assez nette.'
+        })
       ];
       return Object.freeze(base.map(opt => Object.freeze({
         text: opt.text,
         correct: opt.key === correctLabel,
-        feedback: opt.key === correctLabel ? undefined : opt.wrong
+        feedback: opt.key === correctLabel ? opt.right : opt.wrong
       })));
     }
 
