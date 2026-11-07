@@ -65,7 +65,15 @@ class SupabaseAuthAdapter {
   }
 
   async requestPasswordReset(email, redirectTo) {
-    return this.publicRequest('/auth/v1/recover', { method: 'POST', body: JSON.stringify({ email: normalizeEmail(email), redirect_to: redirectTo }) });
+    // Unlike /auth/v1/signup, GoTrue's /auth/v1/recover reads redirect_to only
+    // from the request's query string — a body field here is silently ignored,
+    // and the email link falls back to the bare Site URL with no recovery
+    // token at all (confirmed against production: the founder's own recovery
+    // link landed on academy.html with zero query params). The body field is
+    // kept too since GoTrue accepts it there without error; the query param is
+    // what actually makes it into the email.
+    const path = redirectTo ? `/auth/v1/recover?redirect_to=${encodeURIComponent(redirectTo)}` : '/auth/v1/recover';
+    return this.publicRequest(path, { method: 'POST', body: JSON.stringify({ email: normalizeEmail(email), redirect_to: redirectTo }) });
   }
 
   async confirmPasswordReset(accessToken, password) {
