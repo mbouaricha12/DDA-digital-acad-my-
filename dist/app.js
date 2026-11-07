@@ -2697,6 +2697,40 @@ function moduleTocLessonStatus(entry) {
   if (progress.exerciseComplete || progress.lessonViewed) return { label: 'En cours', key: 'in_progress' };
   return { label: 'À commencer', key: 'available' };
 }
+// Shared by renderModuleToc, which fills academy.html's static .module-toc
+// container (every M0/M1/P2/MBRVM.1 lesson view has one — the only inventory
+// below the 860px breakpoint, and still the only one MBRVM.1 ever gets, since
+// it has no sidecard), and renderLessonSidecard, which embeds this same list
+// a second time inside the right-hand "Module en cours" card — the one that
+// actually shows once the viewport is wide enough for .module-toc to be
+// hidden in CSS. See the "Lesson Experience — single module inventory" note
+// below for the full breakpoint rationale.
+//
+// `variant` picks the markup's classes/navigation hook: default (used by
+// .module-toc) keeps the original module-toc-item/-link/-status classes and
+// a real data-view attribute, bound through bindViewButton exactly as
+// before. 'sidecard' renders the identical list under sidecard-toc-*
+// classes instead (styled the same — see styles.css — but a distinct
+// selector, so a learner's-eye-view count like "how many lessons does this
+// module summary list" never double-counts both copies at once) and uses
+// data-sidecard-view, the same non-colliding hook the card's own CTA
+// buttons already use, specifically so a generic `[data-view="lesson-pXX"]`
+// locator elsewhere in the DOM (the .module-toc copy, hidden but still
+// present at this breakpoint) can never be the one a `.last()`-style click
+// accidentally resolves to.
+function moduleTocListMarkup(viewId, siblings, variant) {
+  const sidecard = variant === 'sidecard';
+  const itemClass = sidecard ? 'sidecard-toc-item' : 'module-toc-item';
+  const linkClass = sidecard ? 'sidecard-toc-link' : 'module-toc-link';
+  const statusClass = sidecard ? 'sidecard-toc-status' : 'module-toc-status';
+  const viewAttr = sidecard ? 'data-sidecard-view' : 'data-view';
+  return siblings.map(sibling => {
+    const status = moduleTocLessonStatus(sibling);
+    const isCurrent = sibling.viewId === viewId;
+    const disabled = status.key === 'locked' && !isCurrent;
+    return `<li class="${itemClass}${isCurrent ? ' is-current' : ''}"><button type="button" class="${linkClass}" ${viewAttr}="${sibling.viewId}"${disabled ? ' disabled aria-disabled="true"' : ''}${isCurrent ? ' aria-current="page"' : ''}>${escapeHtml(sibling.title)}</button><span class="${statusClass}" data-status="${status.key}">${status.label}</span></li>`;
+  }).join('');
+}
 function renderModuleToc(viewId) {
   const root = document.getElementById(viewId);
   const list = root?.querySelector('.module-toc-list');
@@ -2707,12 +2741,7 @@ function renderModuleToc(viewId) {
   const siblings = LESSON_REGISTRY.filter(entry => entry.id.split('.')[0] === moduleKey);
   if (siblings.length < 2) { heading.textContent = ''; list.innerHTML = ''; return; }
   heading.textContent = moduleGroupLabel(moduleKey);
-  list.innerHTML = siblings.map(sibling => {
-    const status = moduleTocLessonStatus(sibling);
-    const isCurrent = sibling.viewId === viewId;
-    const disabled = status.key === 'locked' && !isCurrent;
-    return `<li class="module-toc-item${isCurrent ? ' is-current' : ''}"><button type="button" class="module-toc-link" data-view="${sibling.viewId}"${disabled ? ' disabled aria-disabled="true"' : ''}${isCurrent ? ' aria-current="page"' : ''}>${escapeHtml(sibling.title)}</button><span class="module-toc-status" data-status="${status.key}">${status.label}</span></li>`;
-  }).join('');
+  list.innerHTML = moduleTocListMarkup(viewId, siblings);
   list.querySelectorAll('[data-view]:not([disabled])').forEach(bindViewButton);
 }
 
@@ -2723,6 +2752,28 @@ function renderModuleToc(viewId) {
 // numbers. Scoped to the 8 LESSON_REGISTRY views (M0/M1/P2) that already
 // have a `-progress-head`/`-sidecard` mount point in academy.html; DDA Lab
 // lessons keep their own existing chrome untouched.
+//
+// Lesson Experience — single module inventory (design audit, Lot C): these 8
+// views used to ALSO render the static .module-toc block from academy.html
+// (via renderModuleToc) directly under the breadcrumb — a second, full-width
+// "here are this module's lessons" list duplicating what this card already
+// shows, visible at the same time on the same page on wide viewports.
+// renderLessonSidecard now folds that same itemized, click-to-jump list
+// (moduleTocListMarkup's 'sidecard' variant — same data, same status
+// labels, distinct classes and a data-sidecard-view hook instead of
+// data-view, so it can never collide with the still-present .module-toc
+// copy's own `[data-view]` buttons) into its own markup below the ring
+// recap, and styles.css hides academy.html's static .module-toc (min-width:860px, the same
+// breakpoint .lesson-outline/.lesson-sidecard itself becomes visible at) so
+// only one copy ever shows at a time. Below that breakpoint the sidecard is
+// `display:none` (existing, unrelated-to-this-fix rule) and .module-toc is
+// the only inventory — i.e. on mobile/tablet nothing changed: it is still
+// rendered by renderModuleToc exactly as before, just no longer also shown
+// next to a visible sidecard on desktop. MBRVM.1 has no sidecard at all, so
+// its .module-toc is never hidden and renderModuleToc keeps rendering it at
+// every width. Nothing is lost: the quick-nav's "← Leçon précédente" link (a
+// distinct feature — a jump to a specific prior lesson, not an index) was
+// never part of .module-toc and still lives in .lesson-quick-nav, unchanged.
 function moduleSiblingsFor(viewId) {
   const lessonId = VIEW_TO_LESSON_ID[viewId];
   const moduleKey = lessonId?.split('.')[0];
@@ -2770,6 +2821,18 @@ function renderLessonSidecard(viewId) {
   const allDurations = siblings.every(s => Number.isFinite(s.duration));
   const totalMinutes = allDurations ? siblings.reduce((sum, s) => sum + s.duration, 0) : null;
 
+  // The itemized, click-to-jump list of every sibling lesson (with its live
+  // status) also renders as academy.html's static .module-toc block, filled
+  // by renderModuleToc — at narrow widths (<860px) that is the only copy a
+  // learner sees, since this whole card is display:none there. From 860px up
+  // the card becomes visible too, so styles.css hides .module-toc there and
+  // this embedded copy (moduleTocListMarkup's 'sidecard' variant — same
+  // data, same styling, distinct classes/nav hook) becomes the one a
+  // learner sees instead — never both at once. See the long note above
+  // moduleSiblingsFor for the full breakpoint rationale.
+  const siblingList = siblings.length > 1 ? `
+      <ol class="sidecard-toc-list lesson-sidecard-module-list">${moduleTocListMarkup(viewId, siblings, 'sidecard')}</ol>` : '';
+
   const recap = `
     <div class="lesson-sidecard-recap">
       <p class="eyebrow">Module en cours</p>
@@ -2780,7 +2843,7 @@ function renderLessonSidecard(viewId) {
           <li>${siblings.length} leçon${siblings.length > 1 ? 's' : ''}</li>
           ${totalMinutes != null ? `<li>${totalMinutes} min au total</li>` : ''}
         </ul>
-      </div>
+      </div>${siblingList}
     </div>`;
 
   const quiz = current?.quizBlock ? `
@@ -2804,11 +2867,16 @@ function renderLessonSidecard(viewId) {
 
   card.innerHTML = `${recap}${quiz}${premium}${nextButton}`;
   // Deliberately data-sidecard-view, not the generic [data-view] bindViewButton
-  // wires everywhere else: several existing tests target an unscoped
-  // `[data-view="lesson-pXX"]` link elsewhere on the same lesson view (e.g.
-  // the module-toc entry), and this card's own real navigation must never
-  // silently shadow that element for `.last()`-style locators. Same
-  // showView() call either way — just a separate, non-colliding hook.
+  // wires everywhere else: academy.html's static .module-toc (hidden by CSS
+  // at this breakpoint, but still physically present in the DOM for narrower
+  // viewports) already owns every real `[data-view="lesson-pXX"]` match on
+  // the page, and this card's own navigation — the embedded sibling list
+  // included (moduleTocListMarkup's 'sidecard' variant) — must never
+  // silently become a second match a `.last()`-style locator could resolve
+  // to instead of the one that's actually visible. Same showView() call
+  // either way, just a separate, non-colliding hook, covering every button
+  // this card renders: the sibling-lesson list and the quiz/premium/next
+  // exits alike.
   card.querySelectorAll('[data-sidecard-view]').forEach(button => {
     button.addEventListener('click', () => showView(button.dataset.sidecardView));
   });
