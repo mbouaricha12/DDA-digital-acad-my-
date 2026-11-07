@@ -8,10 +8,9 @@
 // consulted: every admin route re-derives the caller's role from this
 // store, keyed by the user_id the session already proved server-side.
 //
-// assignRole/revokeRole are not wired to any HTTP route yet (no admin
-// mutation route exists in this slice — only read routes do). They exist
-// now, with their invariants enforced and tested, so that a future
-// role-management route has nothing left to get wrong:
+// assignRole/revokeRole are wired to POST /v1/admin/roles and
+// DELETE /v1/admin/roles/:id (bff/src/app.js) — those routes only forward
+// the call; every invariant below is enforced and tested here, not there:
 //   - only an existing owner may assign or revoke a role (self-elevation
 //     from admin to owner is impossible: the acting user's OWN role is
 //     checked, not the role being granted);

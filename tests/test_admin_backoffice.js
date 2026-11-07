@@ -2,13 +2,18 @@
 /*
  * DDA — Back-office (admin.html) regression test.
  *
- * Read-only V1: the server exposes GET /v1/admin/overview, /v1/admin/users
- * and /v1/admin/memberships, gated server-side by the session cookie
- * (bff/src/app.js withAdmin) — never by anything the browser sends. This
- * test mocks those three routes exactly as tests/run.js already mocks
+ * The server exposes GET /v1/admin/overview, /v1/admin/users and
+ * /v1/admin/memberships for reading, plus POST /v1/admin/roles and
+ * DELETE /v1/admin/roles/:id for role assignment/revocation — all gated
+ * server-side by the session cookie (bff/src/app.js withAdmin) and the
+ * owner-only check in admin-roles-store.js, never by anything the browser
+ * sends. This test mocks those routes exactly as tests/run.js already mocks
  * /v1/publications/brvm, and checks every honest-state branch: BFF not
- * configured, 401 (not logged in), 403 (logged in, not an admin), and the
- * real 200 render of metrics + paginated users + memberships.
+ * configured, 401 (not logged in), 403 (logged in, not an admin), the real
+ * 200 render of metrics + paginated users + memberships, the confirmation
+ * gate in front of every role change (accepted and declined), the
+ * memberships table's best-effort email correlation, and the read-only
+ * Content view.
  *
  * Run with: node tests/test_admin_backoffice.js
  */
@@ -149,6 +154,10 @@ async function withBffContext(browser) {
     // The caller is an owner, so the role cell is an editable control, not just a tag.
     assert.equal(await page.locator('.admin-role-select').count(), 1);
     await context.route('https://bff.test/v1/security/csrf', route => route.fulfill({ status: 204 }));
+
+    // Every role change is confirm()-gated — accept it here so the request
+    // actually fires, same as a real admin clicking "OK".
+    page.on('dialog', dialog => dialog.accept());
     let roleRequestBody = null;
     await page.route('https://bff.test/v1/admin/roles', route => {
       roleRequestBody = route.request().postDataJSON();
@@ -166,6 +175,56 @@ async function withBffContext(browser) {
     await page.click('.sidebar .nav-item[data-admin-view="memberships"]');
     await page.waitForSelector('#admin-memberships-body tr');
     assert.match(await page.textContent('#admin-memberships-body'), /chariow/);
+    // u1 is the same account on both the Users page (already loaded above)
+    // and this membership row — the table must show the known email, not
+    // the bare user_id, once that account's Users page has been seen.
+    assert.match(await page.textContent('#admin-memberships-body'), /ada@example\.com/);
+    assert.doesNotMatch(await page.textContent('#admin-memberships-body'), /\bu1\b/);
+    await context.close();
+  });
+
+  await test('declining the confirmation dialog leaves the role untouched and sends no request', async () => {
+    const context = await withBffContext(browser);
+    await context.route('https://bff.test/v1/admin/overview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-overview-v1', generated_at: new Date().toISOString(), caller: { user_id: 'admin-1', role: 'owner' }, metrics: {} })
+    }));
+    await context.route(/https:\/\/bff\.test\/v1\/admin\/users.*page=1/, route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-users-v1', page: 1, per_page: 20, total: 1, users: [{ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', status: 'active', role: 'owner', created_at: '2026-01-01T00:00:00Z', last_sign_in_at: null }] })
+    }));
+    const page = await context.newPage();
+    await page.goto(ADMIN_BASE);
+    await page.waitForSelector('.admin-metrics');
+    await page.click('.sidebar .nav-item[data-admin-view="users"]');
+    await page.waitForSelector('.admin-role-select');
+
+    let roleRequestFired = false;
+    await page.route('https://bff.test/v1/admin/roles/u1', route => { roleRequestFired = true; route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }); });
+    page.on('dialog', dialog => dialog.dismiss());
+    await page.selectOption('.admin-role-select', '');
+    // Give any (wrongly) fired request a moment to land before asserting it didn't.
+    await page.waitForTimeout(150);
+    assert.equal(roleRequestFired, false, 'declining the confirm() dialog must never call the server');
+    assert.equal(await page.inputValue('.admin-role-select'), 'owner', 'the dropdown reverts to the role that is actually still granted');
+    assert.equal(await page.isHidden('#admin-role-feedback'), true, 'no feedback banner for a change that never happened');
+    await context.close();
+  });
+
+  await test('the Content view lists published lesson/module routes from the public route manifest, read-only', async () => {
+    const context = await withBffContext(browser);
+    await context.route('https://bff.test/v1/admin/overview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-overview-v1', generated_at: new Date().toISOString(), caller: { user_id: 'admin-1', role: 'admin' }, metrics: {} })
+    }));
+    const page = await context.newPage();
+    await page.goto(ADMIN_BASE);
+    await page.waitForSelector('.admin-metrics');
+    await page.click('.sidebar .nav-item[data-admin-view="content"]');
+    await page.waitForSelector('#admin-content-body tr');
+    const text = await page.textContent('#admin-content-body');
+    assert.match(text, /Leçon en cours|M0\.1|Support/, 'at least one real, publicly-served lesson title is listed');
+    assert.doesNotMatch(text, /quiz|exercise-block|@practice/i, 'only the public title/route is shown — never internal lesson authoring fields');
     await context.close();
   });
 

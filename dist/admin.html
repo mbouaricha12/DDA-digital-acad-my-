@@ -39,6 +39,8 @@
         <p class="nav-section-label">Comptes</p>
         <button class="nav-item" data-admin-view="users" type="button"><svg class="icon"><use href="#admin-icon-users"/></svg> Utilisateurs</button>
         <button class="nav-item" data-admin-view="memberships" type="button"><svg class="icon"><use href="#admin-icon-spark"/></svg> Abonnements</button>
+        <p class="nav-section-label">Pédagogie</p>
+        <button class="nav-item" data-admin-view="content" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Contenu</button>
       </nav>
       <div class="admin-exit-row">
         <a class="secondary-action" href="academy.html"><svg class="icon"><use href="#admin-icon-home"/></svg> Retour à l’Academy</a>
@@ -61,6 +63,8 @@
       <p class="nav-section-label">Comptes</p>
       <button class="nav-item" data-admin-view="users" type="button"><svg class="icon"><use href="#admin-icon-users"/></svg> Utilisateurs</button>
       <button class="nav-item" data-admin-view="memberships" type="button"><svg class="icon"><use href="#admin-icon-spark"/></svg> Abonnements</button>
+      <p class="nav-section-label">Pédagogie</p>
+      <button class="nav-item" data-admin-view="content" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Contenu</button>
       <div class="admin-exit-row">
         <a class="secondary-action" href="academy.html"><svg class="icon"><use href="#admin-icon-home"/></svg> Retour à l’Academy</a>
       </div>
@@ -122,6 +126,17 @@
           <button class="text-action" id="admin-memberships-prev" type="button">← Précédent</button>
           <span id="admin-memberships-page-label">Page 1</span>
           <button class="text-action" id="admin-memberships-next" type="button">Suivant →</button>
+        </div>
+      </section>
+
+      <section class="view" id="admin-view-content" aria-labelledby="admin-content-title">
+        <h1 id="admin-content-title" class="eyebrow gold">Contenu</h1>
+        <p class="admin-role-feedback" style="border-color:var(--line);color:var(--muted)">Liste en lecture seule des modules et leçons publiés (titres publics déjà servis aux apprenants) — aucune donnée Premium réelle n’apparaît ici.</p>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Leçon / module</th><th>Route</th></tr></thead>
+            <tbody id="admin-content-body"></tbody>
+          </table>
         </div>
       </section>
     </main>

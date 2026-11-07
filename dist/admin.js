@@ -1,11 +1,16 @@
 (function () {
   'use strict';
 
-  // DDA back-office (admin). Read-only V1: the server exposes exactly three
-  // admin routes today (GET /v1/admin/overview, /v1/admin/users,
-  // /v1/admin/memberships) and no role-mutation route yet — so this screen
-  // only ever reads. No action here can assign/revoke a role, ban a user or
-  // change a membership; that stays server-side work for a later lot.
+  // DDA back-office (admin). The server exposes GET /v1/admin/overview,
+  // /v1/admin/users and /v1/admin/memberships for reading, plus
+  // POST /v1/admin/roles and DELETE /v1/admin/roles/:id for role
+  // assignment/revocation (bff/src/app.js withAdmin, enforced owner-only by
+  // admin-roles-store.js — never by anything this file decides). This
+  // screen reflects exactly what the server allows: role controls only
+  // render for an owner (see roleCell below), and every mutation still goes
+  // through the server, which can still refuse it (403/409/400) regardless
+  // of what the UI shows. Nothing here can ban a user or edit a membership;
+  // that stays server-side work for a later lot.
   // Admin auth reuses the exact same session cookie as the learner app
   // (bff/src/app.js withAdmin → withUser): there is no separate admin login.
 
@@ -47,14 +52,20 @@
   const views = document.querySelectorAll('main .view');
   const navButtons = document.querySelectorAll('[data-admin-view]');
   const contextTitle = document.getElementById('admin-context-title');
-  const viewTitles = { overview: 'Aperçu', users: 'Utilisateurs', memberships: 'Abonnements' };
+  const viewTitles = { overview: 'Aperçu', users: 'Utilisateurs', memberships: 'Abonnements', content: 'Contenu' };
 
   function showAdminView(id) {
     views.forEach(view => view.classList.toggle('active', view.id === `admin-view-${id}`));
     navButtons.forEach(button => button.classList.toggle('active', button.dataset.adminView === id));
     contextTitle.textContent = viewTitles[id] || 'Back-office';
     if (id === 'users' && !usersState.loaded) loadUsers(1);
+    // Opening Memberships also warms the email-correlation map (above) with
+    // page 1 of Users, best-effort, if nothing has populated it yet — purely
+    // so the "Utilisateur" column has a chance to show an email instead of a
+    // raw id on a fresh session. It never blocks the memberships render.
+    if (id === 'memberships' && !usersState.loaded) loadUsers(1);
     if (id === 'memberships' && !membershipsState.loaded) loadMemberships(1);
+    if (id === 'content' && !contentState.loaded) loadContent();
   }
 
   navButtons.forEach(button => button.addEventListener('click', () => {
@@ -153,6 +164,14 @@
   // an admin (not an owner) never even sees controls that would just 403.
   let callerRole = null;
   const usersState = { page: 1, perPage: 20, loaded: false, lastUsers: [] };
+  // Accumulates user_id -> email across every Users page the admin has
+  // actually loaded in this session, so the Memberships table (which the
+  // server only ever returns keyed by user_id — see bff/src/billing-store.js
+  // listMemberships) can show a human-readable account instead of a bare
+  // UUID whenever that account's page has already been seen. This never
+  // calls a new route and never guesses: a user_id not yet seen on a Users
+  // page is shown as-is, honestly, rather than papered over.
+  const knownEmailsById = new Map();
   const roleFeedback = document.getElementById('admin-role-feedback');
 
   function showRoleFeedback(message, kind) {
@@ -167,14 +186,28 @@
       return user.role ? `<span class="admin-role-tag" data-role="${escapeHtml(user.role)}">${escapeHtml(user.role)}</span>` : '—';
     }
     const options = ROLE_OPTIONS.map(([value, label]) => `<option value="${value}" ${((user.role || '') === value) ? 'selected' : ''}>${label}</option>`).join('');
-    return `<select class="admin-role-select" data-user-id="${escapeHtml(user.user_id)}" data-previous="${escapeHtml(user.role || '')}">${options}</select>`;
+    return `<select class="admin-role-select" data-user-id="${escapeHtml(user.user_id)}" data-email="${escapeHtml(user.email || user.user_id)}" data-previous="${escapeHtml(user.role || '')}">${options}</select>`;
   }
 
+  // A role change is security-sensitive and not easily undone from this
+  // screen (revoking the last owner is blocked server-side, but revoking or
+  // granting any other role takes effect immediately) — so every change
+  // asks for an explicit confirmation naming the account and the exact role
+  // before the request is sent. Declining reverts the dropdown with no
+  // network call at all, same as a server refusal.
   async function onRoleChange(event) {
     const select = event.target;
     const userId = select.dataset.userId;
+    const email = select.dataset.email || userId;
     const previous = select.dataset.previous;
     const nextRole = select.value;
+    const confirmMessage = nextRole
+      ? `Attribuer le rôle "${nextRole}" à ${email} ?`
+      : `Retirer le rôle administrateur de ${email} ? Ce compte perdra immédiatement l’accès au back-office.`;
+    if (!window.confirm(confirmMessage)) {
+      select.value = previous;
+      return;
+    }
     roleFeedback.hidden = true;
     const result = nextRole
       ? await window.DDABFF.assignAdminRole(userId, nextRole)
@@ -201,6 +234,7 @@
     if (result.status !== 200) return; // gate already shown at boot; nothing more to render
     const { users, total } = result.data;
     usersState.lastUsers = users;
+    users.forEach(user => { if (user.user_id && user.email) knownEmailsById.set(user.user_id, user.email); });
     const body = document.getElementById('admin-users-body');
     body.innerHTML = users.map(user => `
       <tr>
@@ -249,7 +283,7 @@
     const items = result.data.items || [];
     document.getElementById('admin-memberships-body').innerHTML = items.map(item => `
       <tr>
-        <td>${escapeHtml(item.user_id)}</td>
+        <td>${escapeHtml(knownEmailsById.get(item.user_id) || item.user_id)}</td>
         <td>${escapeHtml(item.provider)}</td>
         <td><span class="admin-status-tag" data-status="${escapeHtml(item.status)}">${escapeHtml(item.status)}</span></td>
         <td>${escapeHtml(item.product_id) || '—'}</td>
@@ -265,6 +299,43 @@
   }
   document.getElementById('admin-memberships-prev').addEventListener('click', () => { if (membershipsState.page > 1) loadMemberships(membershipsState.page - 1); });
   document.getElementById('admin-memberships-next').addEventListener('click', () => loadMemberships(membershipsState.page + 1));
+
+  // ---------- Content (read-only) ----------
+  // There is no server endpoint for "what modules/lessons exist" — the
+  // curriculum is static front-end data (LESSON_REGISTRY in dist/app.js).
+  // Rather than hand-copy that registry into a second, parallel list here
+  // (the exact duplication LESSON_REGISTRY's own header comment says it was
+  // built to end), this reads dist/manus-routes.json: the single public
+  // route manifest the site already keeps in sync with every published
+  // page (tests/test_public_autonomous_pages.js, test_legacy_public_aliases
+  // _contract.js), filtered to the lesson/module/premium routes. It is a
+  // same-origin static file fetch, not a BFF call, so it renders even if
+  // the admin API is degraded, and it carries no learner data — only the
+  // public titles already served to every visitor.
+  // Deliberately only Title + Route here: the manifest carries no
+  // entitlement tier, and guessing one from the title string (e.g. "LAB4
+  // (Premium)") would be unreliable for routes that don't spell it out
+  // (P2.2 is premium_track in LESSON_REGISTRY but its title doesn't say so)
+  // — an admin screen must never show a tier it cannot actually verify.
+  const contentState = { loaded: false };
+  const CONTENT_PATH_PATTERN = /#(lesson|premium-track|premium-lab|premium-assessment)/i;
+  async function loadContent() {
+    contentState.loaded = true;
+    const body = document.getElementById('admin-content-body');
+    try {
+      const response = await fetch('manus-routes.json', { credentials: 'omit' });
+      if (!response.ok) throw new Error(`manus-routes.json ${response.status}`);
+      const manifest = await response.json();
+      const rows = (manifest.routes || []).filter(route => CONTENT_PATH_PATTERN.test(route.path));
+      body.innerHTML = rows.map(route => `
+      <tr>
+        <td>${escapeHtml(route.title)}</td>
+        <td>${escapeHtml(route.path)}</td>
+      </tr>`).join('') || `<tr><td colspan="2">Aucun contenu publié trouvé.</td></tr>`;
+    } catch (error) {
+      body.innerHTML = `<tr><td colspan="2">Liste du contenu indisponible (${escapeHtml(error.message)}).</td></tr>`;
+    }
+  }
 
   // ---------- Logout ----------
   document.getElementById('admin-logout')?.addEventListener('click', async () => {
