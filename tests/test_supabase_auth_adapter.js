@@ -89,4 +89,29 @@ function makeFetch(calls) {
   assert.equal(threw.code, 'weak_password', 'the adapter must surface error_code from a failed signup, not just a failed login');
 
   console.log('RESULT: supabase-auth adapter surfaces error_code on signup failures too — PASS');
+
+  // Production incident (2026-11-07): the founder's own real recovery link
+  // landed on the bare site root with zero query params — no token, no
+  // type=recovery — because GoTrue's /auth/v1/recover reads redirect_to only
+  // from the request's query string, unlike /auth/v1/signup which reads it
+  // from the body. A body-only redirect_to is silently dropped and GoTrue
+  // falls back to the project's bare Site URL, producing exactly that dead
+  // link. This guards the fix: redirect_to must reach GoTrue as a query param.
+  const recoverCalls = [];
+  const recoverFetch = async (url, options) => {
+    recoverCalls.push({ url, options });
+    if (url.includes('/auth/v1/recover')) return { ok: true, text: async () => '' };
+    throw new Error(`unexpected request: ${options.method} ${url}`);
+  };
+  const auth4 = new SupabaseAuthAdapter({ supabaseUrl: 'https://project.supabase.co', publishableKey: 'pub', serviceRoleKey: 'service', fetchImpl: recoverFetch });
+  await auth4.requestPasswordReset('a@example.com', 'https://dariusdigitalacademy.com/academy.html?type=recovery#access');
+  const recoverCall = recoverCalls.find(c => c.url.includes('/auth/v1/recover'));
+  const recoverUrl = new URL(recoverCall.url);
+  assert.equal(
+    recoverUrl.searchParams.get('redirect_to'),
+    'https://dariusdigitalacademy.com/academy.html?type=recovery#access',
+    'redirect_to must be sent as a query param on /auth/v1/recover — a body field alone is silently ignored by GoTrue'
+  );
+
+  console.log('RESULT: supabase-auth adapter sends redirect_to as a query param on password-reset requests, not just the body — PASS');
 })();
