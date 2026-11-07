@@ -391,7 +391,13 @@ function mountLesson(entry) {
         .map(block => block.outline);
       const overlay = outlinePoints.length ? { title: entry.meta.lesson.title, points: outlinePoints } : null;
       const videoMarkup = DDALessonRenderer.renderYouTubeLite(video, `lesson-video-${entry.id}`, overlay);
-      heroAnchor.insertAdjacentHTML('beforebegin', `<div class="lesson-video-hero">${videoMarkup}</div>`);
+      const reservedHero = main.querySelector('.lesson-hero-media');
+      if (reservedHero) {
+        reservedHero.classList.add('lesson-video-hero');
+        reservedHero.innerHTML = videoMarkup;
+      } else {
+        heroAnchor.insertAdjacentHTML('beforebegin', `<div class="lesson-video-hero">${videoMarkup}</div>`);
+      }
     }
   }
   bindLessonTabs(main);

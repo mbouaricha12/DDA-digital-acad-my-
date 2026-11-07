@@ -388,6 +388,23 @@
     return `<div class="lesson-beat lesson-beat-${block.type}${quiet ? ' lesson-beat-quiet' : ''}" data-lesson-step="${block.step || 'lesson'}" data-block-type="${block.type}">${markup}</div>`;
   }
 
+  function renderPedagogicalVisual(lesson, suffix) {
+    const label = escapeAttr(`Illustration pédagogique — ${lesson.title || 'structure du marché'}`);
+    return `<aside class="lesson-pedagogical-visual" aria-label="${label}">
+      <div class="lesson-pedagogical-visual-head"><span class="eyebrow gold">Lecture visuelle</span><strong>Structure du mouvement</strong></div>
+      <svg class="lesson-pedagogical-chart" viewBox="0 0 360 230" role="img" aria-label="Schéma pédagogique de tendance, range et renversement">
+        <defs><linearGradient id="lesson-chart-glow${escapeAttr(suffix || '')}" x1="0" x2="1"><stop offset="0" stop-color="#23c889"/><stop offset=".52" stop-color="#d8ae61"/><stop offset="1" stop-color="#ed6a5a"/></linearGradient></defs>
+        <path class="lesson-chart-grid" d="M24 32H336M24 78H336M24 124H336M24 170H336M24 216H336M24 20V216M102 20V216M180 20V216M258 20V216M336 20V216"/>
+        <path class="lesson-chart-line" d="M24 176 C48 169 56 143 76 151 S108 128 126 137 S156 106 174 117 S208 74 228 91 S254 55 274 68 S309 42 336 35"/>
+        <path class="lesson-chart-range" d="M140 142h62v32h-62z"/>
+        <path class="lesson-chart-arrow lesson-chart-arrow-up" d="M52 194L112 144"/>
+        <path class="lesson-chart-arrow lesson-chart-arrow-down" d="M244 91L310 154"/>
+        <text x="38" y="207">Tendance</text><text x="151" y="164">Range</text><text x="271" y="178">Renversement</text>
+      </svg>
+      <p>Schéma synthétique pour raisonner avec les échanges et la liquidité — pas une donnée de marché réelle.</p>
+    </aside>`;
+  }
+
   // idSuffix (optional) lets a second lesson mount alongside M0.1 without id
   // collisions (#lesson-title, #lesson-loop, #mark-understood). Omitted, this
   // renders the exact same ids M0.1 has always used — zero behavior change.
@@ -417,21 +434,29 @@
     const tabsNav = hasTabs ? `
       <div class="lesson-tabs" role="tablist" aria-label="Sections de la leçon">
         <button type="button" class="lesson-tab is-active" id="lesson-tab-about${suffix}" role="tab" aria-selected="true" aria-controls="lesson-panel-about${suffix}" data-lesson-tab="about">À propos de la leçon</button>
+        <button type="button" class="lesson-tab lesson-tab-link" data-view="journal"><svg class="icon" aria-hidden="true"><use href="#icon-edit"/></svg>Notes</button>
+        <button type="button" class="lesson-tab lesson-tab-link" data-view="resources"><svg class="icon" aria-hidden="true"><use href="#icon-book"/></svg>Ressources</button>
         <button type="button" class="lesson-tab" id="lesson-tab-exercise${suffix}" role="tab" aria-selected="false" tabindex="-1" aria-controls="lesson-panel-exercise${suffix}" data-lesson-tab="exercise">Exercice/Quiz</button>
+        <button type="button" class="lesson-tab lesson-tab-link" data-view="support"><svg class="icon" aria-hidden="true"><use href="#icon-chat"/></svg>Commentaires</button>
       </div>` : '';
     const aboutPanelAttrs = hasTabs ? ` role="tabpanel" aria-labelledby="lesson-tab-about${suffix}"` : '';
     const practicePanel = hasTabs ? `
       <div class="lesson-tab-panel" id="lesson-panel-exercise${suffix}" role="tabpanel" aria-labelledby="lesson-tab-exercise${suffix}" data-lesson-panel="exercise" hidden>${practiceBlocks.map(renderBlock).join('\n')}
       </div>` : '';
     return `
-      <p class="eyebrow gold">${module.title} · Leçon ${lessonIndex}</p>
-      <h1 id="lesson-title${suffix}">${lesson.title}</h1>
-      <p class="lesson-lead">${lesson.content.lead}</p>
-      <ol class="lesson-loop" id="lesson-loop${suffix}" tabindex="0" aria-label="Progression dans la leçon — utilise les flèches pour faire défiler les étapes">${lesson.steps.map(s => `<li data-step="${s.id}"><i class="loop-bead" aria-hidden="true"></i><span>${s.label}</span></li>`).join('')}</ol>
+      <div class="lesson-hero-media" aria-label="Support principal de la leçon">${lesson.video ? renderVideoSurface(lesson.video, `lesson-video${suffix}`) : `<div class="video-explainer-block video-explainer-fallback lesson-guided-thumbnail" data-video-state="missing"><div class="video-fallback-panel guided-fallback" role="status"><svg class="icon"><use href="#icon-book"/></svg><strong>Séquence pédagogique guidée</strong><span>Aucune vidéo publiée pour cette leçon. Le contenu, le schéma et l’exercice restent disponibles ci-dessous.</span></div></div>`}</div>
       ${tabsNav}
+      <div class="lesson-intro-grid">
+        <div class="lesson-intro-copy">
+          <p class="eyebrow gold">${module.title} · Leçon ${lessonIndex}</p>
+          <h1 id="lesson-title${suffix}">${lesson.title}</h1>
+          <p class="lesson-lead">${lesson.content.lead}</p>
+          <ol class="lesson-loop" id="lesson-loop${suffix}" tabindex="0" aria-label="Progression dans la leçon — utilise les flèches pour faire défiler les étapes">${lesson.steps.map(s => `<li data-step="${s.id}"><i class="loop-bead" aria-hidden="true"></i><span>${s.label}</span></li>`).join('')}</ol>
+        </div>
+        ${renderPedagogicalVisual(lesson, suffix)}
+      </div>
       <div class="lesson-tab-panel" id="lesson-panel-about${suffix}"${aboutPanelAttrs} data-lesson-panel="about">
-        ${lesson.video ? renderVideoSurface(lesson.video, `lesson-video${suffix}`) : ''}
-        ${aboutBlocks.map(renderBlock).join('\n')}
+        <div class="lesson-about-copy">${aboutBlocks.map(renderBlock).join('\n')}</div>
 
         <div class="lesson-actions">
           <button class="secondary-action" data-view="back">Quitter</button>
