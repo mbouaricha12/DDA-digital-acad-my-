@@ -39,4 +39,34 @@ function makeFetch(calls) {
   assert.equal(JSON.parse(putCall.options.body).user_metadata.ref, 'partner-01', 'the merged write sent to GoTrue itself carries the preserved ref, not just the response');
 
   console.log('RESULT: supabase-auth adapter preserves immutable partner ref across profile edits — PASS');
+
+  // P0 auth reliability audit (2026-11): the adapter must surface GoTrue's
+  // error_code, not just the HTTP status, because an unconfirmed email and
+  // a wrong password are both plain 400s from /auth/v1/token — the status
+  // alone cannot tell them apart. Bodies below are GoTrue's real documented
+  // shape for each case.
+  const errorFetch = async (url, options) => {
+    if (url.includes('/auth/v1/token') && JSON.parse(options.body).password === 'wrong') {
+      return { ok: false, status: 400, text: async () => JSON.stringify({ error: 'invalid_grant', error_code: 'invalid_credentials', error_description: 'Invalid login credentials', msg: 'Invalid login credentials' }) };
+    }
+    if (url.includes('/auth/v1/token') && JSON.parse(options.body).password === 'unconfirmed') {
+      return { ok: false, status: 400, text: async () => JSON.stringify({ error_code: 'email_not_confirmed', msg: 'Email not confirmed' }) };
+    }
+    throw new Error(`unexpected request: ${options.method} ${url}`);
+  };
+  const auth2 = new SupabaseAuthAdapter({ supabaseUrl: 'https://project.supabase.co', publishableKey: 'pub', serviceRoleKey: 'service', fetchImpl: errorFetch });
+
+  let threw = null;
+  try { await auth2.login({ email: 'A@Example.com ', password: 'wrong' }); } catch (error) { threw = error; }
+  assert.ok(threw, 'a wrong password rejects');
+  assert.equal(threw.status, 400);
+  assert.equal(threw.code, 'invalid_credentials', 'the adapter must surface error_code, not collapse it');
+
+  threw = null;
+  try { await auth2.login({ email: 'a@example.com', password: 'unconfirmed' }); } catch (error) { threw = error; }
+  assert.ok(threw, 'an unconfirmed account rejects');
+  assert.equal(threw.status, 400, 'GoTrue reports both cases as plain 400 — only error_code tells them apart');
+  assert.equal(threw.code, 'email_not_confirmed', 'the caller must be able to tell this apart from a wrong password at the same HTTP status');
+
+  console.log('RESULT: supabase-auth adapter surfaces error_code so email_not_confirmed is never collapsed into invalid_credentials — PASS');
 })();

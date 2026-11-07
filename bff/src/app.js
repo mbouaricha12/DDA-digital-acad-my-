@@ -86,6 +86,34 @@ function sendError(res, status, code, message, requestId, fieldErrors) {
   return json(res, status, errorBody(code, message, requestId, fieldErrors));
 }
 
+// P0 auth reliability audit (2026-11): the login handler used to collapse
+// every failure from Supabase Auth — wrong password, an unconfirmed email,
+// a provider-side rate limit, a transient outage — into the same 401
+// "authentication_failed", and the client showed "E-mail ou mot de passe
+// incorrect." for all of them. A real user who had just set a password that
+// worked was told it was wrong when the actual cause was an unconfirmed
+// email or a momentary Supabase hiccup. This never trusts the client with
+// more than it needs (no stack traces, no provider payloads) but it does
+// tell the four causes apart so the UI can say something true.
+function classifyLoginError(error) {
+  const code = String(error?.code || '').toLowerCase();
+  const message = String(error?.message || '').toLowerCase();
+  const status = Number(error?.status) || 0;
+  if (code === 'email_not_confirmed' || message.includes('email not confirmed') || message.includes('confirm')) {
+    return { status: 403, code: 'email_not_confirmed', message: 'Confirm your email before signing in.' };
+  }
+  if (status === 429 || code === 'over_request_rate_limit' || code === 'too_many_requests' || message.includes('rate limit')) {
+    return { status: 429, code: 'rate_limited', message: 'Too many attempts. Please try again later.' };
+  }
+  if (status === 400 || status === 401 || code === 'invalid_credentials' || code === 'invalid_grant') {
+    return { status: 401, code: 'invalid_credentials', message: 'Invalid email or password.' };
+  }
+  // No HTTP status at all (network/DNS failure) or a 5xx from the provider:
+  // this is not the caller's fault and must never be reported as a wrong
+  // password.
+  return { status: 503, code: 'server_error', message: 'Authentication is temporarily unavailable. Please try again shortly.' };
+}
+
 function clientIp(req) {
   return String(req.socket?.remoteAddress || '');
 }
@@ -350,8 +378,15 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         if (!await checkAuthRateLimit(rateLimiter, 'login', { ip: clientIp(req), email: validation.email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
         let provider;
         try { provider = await auth.login({ email: validation.email, password: body.password }); }
-        catch (error) { logger('login_failed', { requestId, status: error.status || 401 }); return sendError(res, 401, 'authentication_failed', 'Authentication failed.', requestId); }
-        if (!provider?.user?.id || !provider.access_token) return sendError(res, 401, 'authentication_failed', 'Authentication failed.', requestId);
+        catch (error) {
+          const outcome = classifyLoginError(error);
+          // Never log the password or the raw provider error body — only
+          // the status/code classification, which is enough to diagnose a
+          // production incident without exposing credentials.
+          logger('login_failed', { requestId, status: outcome.status, code: outcome.code });
+          return sendError(res, outcome.status, outcome.code, outcome.message, requestId);
+        }
+        if (!provider?.user?.id || !provider.access_token) return sendError(res, 401, 'invalid_credentials', 'Invalid email or password.', requestId);
         const created = await createSession(provider.user.id, provider, req);
         setCookies(res, cookieHeaders(config, created.token, created.csrf));
         return json(res, 204);

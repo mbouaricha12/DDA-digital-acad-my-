@@ -1101,6 +1101,18 @@ function initBffAuthUi() {
   if (!window.DDABFF?.enabled()) return;
   document.getElementById('bff-auth-tools').hidden = false;
   setBffAuthMode('signup');
+  // Show/hide password toggle (P0.4) — a mistyped password that the learner
+  // cannot see is a real cause of "it worked at signup, not at login".
+  const toggle = document.getElementById('toggle-access-password');
+  const passwordInput = document.getElementById('access-password');
+  if (toggle && passwordInput) {
+    toggle.addEventListener('click', () => {
+      const show = passwordInput.type === 'password';
+      passwordInput.type = show ? 'text' : 'password';
+      toggle.textContent = show ? 'Masquer' : 'Afficher';
+      toggle.setAttribute('aria-pressed', String(show));
+    });
+  }
   document.getElementById('bff-mode-signup').addEventListener('click', () => {
     document.getElementById('bff-recovery-form').hidden = true;
     document.getElementById('bff-verify-panel').hidden = true;
@@ -3659,6 +3671,35 @@ mountedLessons.forEach(entry => {
   bindMarkUnderstood(entry.id, { buttonId: ui.markUnderstoodId, savedStateId: ui.savedStateId, scrollToId: entry.understoodScrollTo });
 });
 
+// P0 auth reliability audit (2026-11): the BFF now tells a wrong password
+// apart from an unconfirmed email, a provider-side rate limit, and a
+// transient server error (see classifyLoginError in bff/src/app.js). Before
+// this fix every one of those showed the same "E-mail ou mot de passe
+// incorrect." even when the password the user had just set was correct —
+// the exact symptom reported in production. Never report "mot de passe
+// incorrect" for a cause that is not actually a wrong credential.
+function authErrorMessage(authError, { signup } = {}) {
+  const code = authError?.body?.code || '';
+  if (code === 'email_not_confirmed') {
+    return 'Confirme ton adresse e-mail avant de te connecter : vérifie ta boîte mail (et les spams) puis clique sur le lien de confirmation.';
+  }
+  if (code === 'rate_limited') {
+    return 'Trop de tentatives. Réessaie dans quelques minutes.';
+  }
+  if (code === 'server_error' || authError?.status >= 500 || !authError?.status) {
+    return 'Le service est momentanément indisponible. Réessaie dans un instant.';
+  }
+  if (code === 'invalid_credentials' || authError?.status === 401) {
+    return 'E-mail ou mot de passe incorrect.';
+  }
+  if (code === 'validation_error') {
+    return signup
+      ? 'Vérifie ton e-mail et choisis un mot de passe d’au moins 12 caractères.'
+      : 'Indique ton e-mail et ton mot de passe.';
+  }
+  return 'Impossible de terminer cette étape pour le moment. Réessaie plus tard.';
+}
+
 document.getElementById('signup-form').addEventListener('submit', async event => {
   event.preventDefault();
   const nameField = document.getElementById('first-name');
@@ -3682,6 +3723,14 @@ document.getElementById('signup-form').addEventListener('submit', async event =>
   }
   error.textContent = '';
   if (bffMode) {
+    // Anti-double-submit + visible loading state (P0.4): a slow Supabase
+    // round trip must never let a second click fire a second signup/login,
+    // and the learner must see that something is happening rather than a
+    // frozen form.
+    const submitButton = document.querySelector('#signup-form button[type=submit]');
+    if (submitButton?.disabled) return;
+    const originalLabel = submitButton ? submitButton.innerHTML : '';
+    if (submitButton) { submitButton.disabled = true; submitButton.innerHTML = bffAuthMode === 'login' ? 'Connexion…' : 'Envoi…'; }
     try {
       if (bffAuthMode === 'signup') {
         await window.DDABFF.register({ email, password, display_name: name, ref: prototypeState.acquisition?.partnerRef });
@@ -3698,7 +3747,9 @@ document.getElementById('signup-form').addEventListener('submit', async event =>
         showOnboardingAfterRemoteAuth(user);
       }
     } catch (authError) {
-      error.textContent = authError?.status === 401 ? 'E-mail ou mot de passe incorrect.' : 'Impossible de terminer cette étape pour le moment. Réessaie plus tard.';
+      error.textContent = authErrorMessage(authError, { signup: bffAuthMode === 'signup' });
+    } finally {
+      if (submitButton) { submitButton.disabled = false; submitButton.innerHTML = originalLabel; }
     }
     return;
   }

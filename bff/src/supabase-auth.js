@@ -30,6 +30,13 @@ class SupabaseAuthAdapter {
     if (!response.ok) {
       const error = new Error(body?.msg || body?.message || body?.error_description || `Supabase Auth error ${response.status}`);
       error.status = response.status;
+      // GoTrue distinguishes "wrong password" from "email not confirmed" (and
+      // other causes) via error_code/code — never collapse that into a
+      // single generic status upstream, or the BFF loses the information it
+      // needs to tell a real caller apart from an unconfirmed one. See the
+      // login handler in app.js, which is the only consumer that must see
+      // this distinction (P0 auth reliability audit).
+      error.code = body?.error_code || body?.code || null;
       throw error;
     }
     return body;
