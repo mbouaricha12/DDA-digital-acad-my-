@@ -361,15 +361,26 @@ function mountLesson(entry) {
   // son id (champ `video`). Rendue avec le lecteur léger déjà utilisé par la
   // Bibliothèque (#resources) — miniature, clic pour charger, pas d'autoplay
   // — sans aucune modification de lesson-renderer.js.
+  //
+  // Lot D (founder mockup — lesson player): the mockup puts this same player
+  // in a dominant hero position at the very top of the lesson view, above
+  // the title/stepper/tabs — not buried inside the "À propos de la leçon"
+  // panel's text, where it used to sit (PR #205/#206). This moves the
+  // mount point only: the anchor is now the lesson's own leading
+  // `.eyebrow.gold` line (the first element renderLessonMain emits — see
+  // lesson-renderer.js), so the player lands right below the breadcrumb/
+  // progress head and .lesson-quick-nav/.module-toc that already sit above
+  // it in academy.html, and above eyebrow/h1/lesson-loop/tabs. It stays the
+  // exact same component (renderYouTubeLite — lesson-renderer.js is still
+  // never touched for this), wrapped in `.lesson-video-hero` purely for
+  // hero-sized CSS (styles.css) — no new markup, no second player, no
+  // duplicate mount. A lesson with no `video` field renders nothing here:
+  // never a fake/empty hero placeholder for the 7 of 9 lessons without a
+  // real VIDEO_REGISTRY entry.
   if (entry.video) {
     const video = VIDEO_REGISTRY.find(v => v.id === entry.video);
-    // Lesson Tabs: the "À propos de la leçon" panel (data-lesson-panel="about")
-    // is where the lesson's own intro video belongs now that it exists —
-    // fall back to the pre-tabs "right after the stepper" placement for any
-    // lesson the tab split leaves untabbed (none today, kept defensive).
-    const aboutPanel = main.querySelector('[data-lesson-panel="about"]');
-    const loop = main.querySelector('.lesson-loop');
-    if (video && (aboutPanel || loop)) {
+    const heroAnchor = main.querySelector('.eyebrow.gold') || main.querySelector('.lesson-loop');
+    if (video && heroAnchor) {
       // Overlay key points: the same "Dans cette leçon" outline beats already
       // authored for this lesson (lesson.blocks[].outline) and already shown
       // elsewhere on the page — never a separate, invented list. Capped to
@@ -380,8 +391,7 @@ function mountLesson(entry) {
         .map(block => block.outline);
       const overlay = outlinePoints.length ? { title: entry.meta.lesson.title, points: outlinePoints } : null;
       const videoMarkup = DDALessonRenderer.renderYouTubeLite(video, `lesson-video-${entry.id}`, overlay);
-      if (aboutPanel) aboutPanel.insertAdjacentHTML('afterbegin', videoMarkup);
-      else loop.insertAdjacentHTML('afterend', videoMarkup);
+      heroAnchor.insertAdjacentHTML('beforebegin', `<div class="lesson-video-hero">${videoMarkup}</div>`);
     }
   }
   bindLessonTabs(main);
