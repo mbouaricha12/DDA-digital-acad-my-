@@ -650,6 +650,17 @@ a.nav-item[hidden]{display:none}
 .video-lite-overlay li{font-size:11.5px;line-height:1.35;color:rgba(244,247,252,.78);padding-left:14px;position:relative}
 .video-lite-overlay li::before{content:'';position:absolute;left:0;top:7px;width:5px;height:5px;border-radius:50%;background:var(--gold-soft)}
 
+/* Lesson video hero (Lot D, founder mockup): the lesson's own
+   VIDEO_REGISTRY-backed player, positioned above the title/stepper/tabs —
+   not nested inside the "À propos de la leçon" text — so it reads as the
+   dominant element at the top of the lesson view, matching the mockup.
+   Same .video-explainer-block/.video-lite-block markup as everywhere else
+   (the library reader, #resources) — this wrapper only resets its default
+   margin and gives it a slightly heavier frame so it carries that weight. */
+.lesson-video-hero{margin:0 0 30px}
+.lesson-video-hero .video-explainer-block{margin:0}
+.lesson-video-hero .video-frame{border-color:rgba(212,175,106,.35);box-shadow:0 22px 48px -26px rgba(5,11,20,.9)}
+
 .mini-simulation-block,.graphical-exercise-block,.decision-choice-block{margin:26px 0;padding:22px;border:1px solid var(--line);border-left:3px solid var(--blue-2);border-radius:0 var(--r-md) var(--r-md) 0;background:var(--navy-800);box-shadow:0 10px 30px -18px rgba(5,11,20,.5)}
 .mini-simulation-block .eyebrow.gold,.graphical-exercise-block .eyebrow.gold,.decision-choice-block .eyebrow.gold{color:var(--gold-soft)!important}
 .mini-simulation-stage,.graphical-exercise-canvas{margin-top:16px;padding:28px 18px;border:1px dashed var(--line);border-radius:var(--r-sm);text-align:center;color:var(--muted);font-size:13px}
