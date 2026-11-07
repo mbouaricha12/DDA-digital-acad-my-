@@ -2593,23 +2593,35 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
-  console.log('\n-- AA. Sidebar labels — aligned to the founder\'s mockup wording where it is a real feature --');
+  console.log('\n-- AA. Sidebar labels — simple information architecture validated by the founder --');
 
-  await test('the sidebar and mobile drawer use the mockup wording (Mes Parcours, Ressources, Journal de trading) while routing to the exact same real views', async () => {
+  await test('the sidebar and mobile drawer use the simple Academy information architecture while routing to the exact same real views', async () => {
     const context = await freshContext(browser);
     await seedLocalLearner(context, {}, 'free');
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#dashboard`);
     await page.waitForSelector('#dashboard.view.active');
-    assert.match(await page.textContent('.sidebar .nav-item[data-view="path"]'), /Mes Parcours/);
+    assert.match(await page.textContent('.sidebar .nav-item[data-view="dashboard"]'), /Accueil/);
+    assert.match(await page.textContent('.sidebar .nav-item[data-view="path"]'), /Academy/);
+    assert.match(await page.textContent('.sidebar .nav-item[data-view="progress"]'), /Mon progrès/);
+    assert.match(await page.textContent('.sidebar .nav-item[data-view="lab"]'), /DDA Lab/);
+    assert.match(await page.textContent('.sidebar .nav-item[data-scroll-to="analysis-terminal"]'), /Terminal/);
+    assert.match(await page.textContent('.sidebar .nav-item[data-view="markets"]'), /BRVM/);
     assert.match(await page.textContent('.sidebar .nav-item[data-view="resources"]'), /Ressources/);
-    assert.match(await page.textContent('.sidebar .nav-item[data-view="journal"]'), /Journal de trading/);
+    assert.match(await page.textContent('.sidebar .nav-item[data-view="membership"]'), /Premium/);
+    assert.match(await page.textContent('.sidebar .nav-item[data-view="profile"]'), /Mon compte/);
     await page.click('.sidebar .nav-item[data-view="path"]');
     await page.waitForSelector('#path.view.active');
+    await page.click('.sidebar .nav-item[data-view="progress"]');
+    await page.waitForSelector('#progress.view.active');
+    await page.click('.sidebar .nav-item[data-view="markets"]');
+    await page.waitForSelector('#markets.view.active');
     await page.click('.sidebar .nav-item[data-view="resources"]');
     await page.waitForSelector('#resources.view.active');
-    await page.click('.sidebar .nav-item[data-view="journal"]');
-    await page.waitForSelector('#journal.view.active');
+    await page.click('.sidebar .nav-item[data-view="membership"]');
+    await page.waitForSelector('#membership.view.active');
+    await page.click('.sidebar .nav-item[data-view="profile"]');
+    await page.waitForSelector('#profile.view.active');
     await context.close();
   });
 

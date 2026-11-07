@@ -195,6 +195,8 @@ a.nav-item[hidden]{display:none}
 .nav-item .icon{width:20px;height:20px}
 .nav-item:hover,.nav-item.active{background:var(--navy-700);color:var(--white)}
 .nav-item.active{box-shadow:inset 3px 0 var(--gold)}
+.sidebar .nav-item-context{padding-left:49px;font-size:13px;color:var(--muted-2)}
+.sidebar .nav-item-context:hover{color:var(--white)}
 .nav-item:active{background:var(--navy-800,var(--navy-700))}
 @media(prefers-reduced-motion:reduce){.nav-item{transition:none}}
 .nav-item:has(.nav-status-tag){flex-wrap:wrap;row-gap:4px}
@@ -206,7 +208,7 @@ a.nav-item[hidden]{display:none}
 .profile-chip small{color:var(--muted)}
 /* ---------- Mobile bottom nav ---------- */
 .mobile-nav{
-  position:fixed;left:0;right:0;bottom:0;z-index:35;display:grid;grid-template-columns:repeat(5,1fr);
+  position:fixed;left:0;right:0;bottom:0;z-index:35;display:grid;grid-template-columns:repeat(6,1fr);
   height:calc(68px + var(--safe-b));padding-bottom:var(--safe-b);
   background:rgba(6,12,22,.96);backdrop-filter:blur(18px);border-top:1px solid var(--line-soft);
 }
