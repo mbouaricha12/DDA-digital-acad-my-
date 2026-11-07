@@ -534,6 +534,15 @@ const contextSection = document.getElementById('context-section');
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && !drawer.hidden) close(); });
 })();
 
+// Topbar notifications bell: no notification system exists yet, so it must
+// never look like it holds something unread. Clicking it gives an honest,
+// visible answer instead of doing nothing.
+(function initNotificationsBell() {
+  const bell = document.querySelector('.topbar [aria-label="Notifications"]');
+  if (!bell) return;
+  bell.addEventListener('click', () => showToast('Aucune notification pour le moment.'));
+})();
+
 // Header search: filters the existing sidebar navigation by its real label
 // text — never a fake/unwired search box. No new content, no server call;
 // it only shows/hides .nav-item entries already in the DOM.
