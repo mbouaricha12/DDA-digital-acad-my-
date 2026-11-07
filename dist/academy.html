@@ -253,11 +253,12 @@
               <p class="access-form-note" id="access-form-note">Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon. Cette version conserve ta progression sur cet appareil.</p>
               <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ex. Richard"></label>
               <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"><small class="field-help">Reste uniquement sur cet appareil tant qu'aucun compte serveur n'est activé — jamais envoyée ailleurs.</small></label>
-              <label id="access-password-field" hidden>Mot de passe<span class="password-field-wrap"><input id="access-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128"><button class="text-action password-toggle" id="toggle-access-password" type="button" aria-pressed="false">Afficher</button></span></label>
+              <label id="access-password-field" hidden>Mot de passe<span class="password-field-wrap"><input id="access-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128"><button class="text-action password-toggle" id="toggle-access-password" type="button" aria-pressed="false">Afficher</button></span><small class="field-help" id="access-password-help" hidden>12 caractères minimum.</small></label>
               <label class="consent" id="access-consent-field"><input id="consent" type="checkbox" required><span id="access-consent-label">Je comprends que ma progression est stockée uniquement sur cet appareil pendant ce pilote, et qu'elle peut être perdue définitivement (changement d'appareil, cache vidé, incident technique) — il n'existe pas de sauvegarde serveur.</span></label>
               <p class="form-error" id="signup-error" role="alert"></p>
               <button class="primary-action" type="submit" disabled>Continuer <span>→</span></button>
             </form>
+            <button class="text-action" id="bff-resend-confirmation" type="button" hidden>Je n'ai pas reçu l'e-mail — renvoyer le lien</button>
             <button class="text-action" id="bff-forgot-password" type="button" hidden>Mot de passe oublié ?</button>
             <form id="bff-reset-password-form" method="dialog" hidden>
               <p class="eyebrow gold">Sécurité du compte</p>
