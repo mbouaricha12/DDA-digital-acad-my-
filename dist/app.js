@@ -3927,18 +3927,31 @@ function rebuildLabRegistry() {
     { id: 'LAB1', viewId: 'lesson-lab1', suffix: 'lab1', permission: 'lesson_m01', quizBlock: 'lab1-quiz', understoodScrollTo: 'lab1-exercise-block',
       meta: { module: labModule, lesson: window.DDALab.lessons[0] },
       questions: [
+        // Lot F (audit DDA Lab/Premium) : ce decision_choice ("À toi de
+        // juger") n'était dans aucune entrée de questions ici — bindQuestion
+        // n'était donc jamais appelé pour lui, aucun clic sur ses boutons ne
+        // déclenchait de validation ni de surlignage, malgré un feedback déjà
+        // authored par choix dans dda-lab.js. role 'practice' : non bloquant,
+        // comme M0.1's comparison-choice.
+        { role: 'practice', block: 'lab1-practice-choice', success: 'Bonne lecture.' },
         { role: 'exercise', block: 'lab1-exercise', success: '@practice', gate: true },
         { role: 'quiz', block: 'lab1-quiz', success: '@data', result: true }
       ] },
     { id: 'LAB2', viewId: 'lesson-lab2', suffix: 'lab2', permission: 'lesson_m01', quizBlock: 'lab2-quiz', understoodScrollTo: 'lab2-exercise-block',
       meta: { module: labModule, lesson: window.DDALab.lessons[1] },
       questions: [
+        // Lot F : même écart que LAB1 ci-dessus, sur le decision_choice
+        // "À toi de choisir" de LAB2.
+        { role: 'practice', block: 'lab2-practice-choice', success: 'Bonne lecture.' },
         { role: 'exercise', block: 'lab2-exercise', success: '@practice', gate: true },
         { role: 'quiz', block: 'lab2-quiz', success: '@data', result: true }
       ] },
     { id: 'LAB3', viewId: 'lesson-lab3', suffix: 'lab3', permission: 'lesson_m01', quizBlock: 'lab3-quiz', understoodScrollTo: 'lab3-exercise-block',
       meta: { module: labModule, lesson: window.DDALab.lessons[2] },
       questions: [
+        // Lot F : même écart que LAB1/LAB2 ci-dessus, sur le decision_choice
+        // "À toi de juger" de LAB3.
+        { role: 'practice', block: 'lab3-practice-choice', success: 'Bonne lecture.' },
         { role: 'exercise', block: 'lab3-exercise', success: '@practice', gate: true },
         { role: 'quiz', block: 'lab3-quiz', success: '@data', result: true }
       ] },
