@@ -34,7 +34,19 @@ function makeAuth() {
   const calls = [];
   return {
     calls,
-    async register(input) { calls.push(['register', input]); users.set(input.email, { id: 'user-1', email: input.email, email_confirmed_at: new Date().toISOString(), user_metadata: { display_name: input.display_name || '' } }); return { user: null }; },
+    // Signup reliability audit (P0, 2026-11): magic markers in the local
+    // part of the email select a GoTrue registration failure mode
+    // deterministically, the same status/code shapes the real provider
+    // returns, so classifyRegisterError() in app.js is exercised against
+    // realistic input rather than only the happy path.
+    async register(input) {
+      calls.push(['register', input]);
+      if (input.email.includes('+weakpw')) throw Object.assign(new Error('Password should contain at least one character of each: lowercase, uppercase, number and symbol.'), { status: 422, code: 'weak_password' });
+      if (input.email.includes('+exists')) throw Object.assign(new Error('User already registered'), { status: 422, code: 'user_already_exists' });
+      if (input.email.includes('+serverdown')) throw Object.assign(new Error('upstream failure'), { status: 500 });
+      users.set(input.email, { id: 'user-1', email: input.email, email_confirmed_at: new Date().toISOString(), user_metadata: { display_name: input.display_name || '' } });
+      return { user: null };
+    },
     async verifyEmail(token) { assert.equal(token, 'v'.repeat(32)); return {}; },
     async login({ email, password }) {
       calls.push(['login', email, password]);
@@ -101,6 +113,24 @@ function request(server, method, path, { body, rawBody, headers = {}, cookies = 
     response = await request(server, 'POST', '/v1/auth/register', { body: { email: 'c@example.com', password: 'long-enough-password', ref: 'not a valid ref!!' } });
     assert.equal(response.status, 202, 'an invalid ref never blocks account creation');
     assert.equal(auth.calls.filter(c => c[0] === 'register').pop()[1].ref, null, 'an invalid ref is dropped, never forwarded as-is');
+
+    // Signup reliability audit (P0, 2026-11): classifyRegisterError() must
+    // tell these causes apart instead of collapsing every one of them into
+    // the generic 500 the catch-all at the bottom of the handler used to
+    // produce.
+    response = await request(server, 'POST', '/v1/auth/register', { body: { email: 'weak+weakpw@example.com', password: 'long-enough-password' } });
+    assert.equal(response.status, 400, 'a password the provider rejects as too weak must never be reported as a 500/internal_error');
+    assert.equal(response.body.code, 'weak_password');
+    assert.equal(response.body.field_errors.password, 'Password should contain at least one character of each: lowercase, uppercase, number and symbol.');
+
+    response = await request(server, 'POST', '/v1/auth/register', { body: { email: 'dup+exists@example.com', password: 'long-enough-password' } });
+    assert.equal(response.status, 202, 'an account that already exists must get the exact same ambiguous success as a new signup (anti-enumeration)');
+    assert.match(response.body.message, /verification/i);
+
+    response = await request(server, 'POST', '/v1/auth/register', { body: { email: 'down+serverdown@example.com', password: 'long-enough-password' } });
+    assert.equal(response.status, 503, 'a provider outage must be reported honestly, never as a fabricated internal_error');
+    assert.equal(response.body.code, 'server_error');
+    assert.ok(!logs.some(entry => JSON.stringify(entry).includes('upstream failure')), 'the raw provider error text must never reach the logs, only the status/code classification');
 
     response = await request(server, 'POST', '/v1/auth/login', { body: { email: 'a@example.com', password: 'long-enough-password' } });
     assert.equal(response.status, 204);
