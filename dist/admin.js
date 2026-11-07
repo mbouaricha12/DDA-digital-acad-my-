@@ -28,6 +28,14 @@
   function showGate({ title, description, actionText = 'Retour à l’Academy', actionHref = 'academy.html' }) {
     document.querySelectorAll('.sidebar, .mobile-drawer, .mobile-drawer-backdrop, .mobile-nav, main .view').forEach(el => el.hidden = true);
     document.querySelector('.mobile-menu-toggle')?.setAttribute('hidden', 'true');
+    // Hiding .sidebar above removes it from the desktop grid's auto-placement
+    // (grid-template-columns:260px 1fr) — without collapsing to a single
+    // column the same way #landing already does, `main` is auto-placed into
+    // the sidebar's leftover 260px track instead of spanning the row,
+    // squeezing the gate card into a narrow strip. public-shell is a
+    // one-way flip here: showGate only runs during initial bootstrap and is
+    // never reversed mid-session (a role change requires a reload).
+    document.body.classList.add('public-shell');
     gateTitle.textContent = title;
     gateDescription.textContent = description;
     gateAction.textContent = actionText;
