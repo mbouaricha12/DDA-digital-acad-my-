@@ -2666,6 +2666,31 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  console.log('\n-- AC. Boot structure fix — a returning learner with no hash never sees a blank shell --');
+
+  await test('an already-onboarded local learner opening academy.html with no hash lands on #dashboard, not a blank app shell (fix/design-structure-color-3d-alignment)', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(ACADEMY_BASE); // no hash at all — a bare bookmark/typed URL
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(await page.locator('.dda-app-surface.is-active').count(), 1, 'the learner-app surface is actually shown, not left display:none');
+    assert.match(await page.textContent('#dashboard-title'), /Ada/, 'the real dashboard content renders (greeting), not an empty shell');
+    assert.match(page.url(), /#dashboard$/, 'the URL hash is normalized to #dashboard for an onboarded learner');
+    await context.close();
+  });
+
+  await test('the DDA AI sidebar entry (desktop + mobile drawer) opens the real #intelligence view for a Free learner', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    await page.click('.sidebar .nav-item[data-view="intelligence"]');
+    await page.waitForSelector('#intelligence.view.active');
+    await context.close();
+  });
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 

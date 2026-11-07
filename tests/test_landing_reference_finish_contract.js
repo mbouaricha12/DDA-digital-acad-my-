@@ -12,10 +12,14 @@ assert.match(html,/class="landing-market-strip"/);
 assert.match(html,/BRVM COMPOSITE/);
 assert.match(css,/#landing \.landing-trust-strip/);
 assert.match(css,/#landing \.landing-market-strip/);
-// The CTA button uses the shared blue→cyan "genuine action" gradient (AURORA
+// The CTA button uses the shared gold "proof accent" gradient (AURORA
 // tokens), never a one-off #landing override — a duplicate green override of
 // this exact selector was the landing/Academy palette rupture fixed in Lot B.
-assert.match(css,/\.primary-action,\.public-start,\.landing-mobile-cta button[^{]*\{\s*border:1px solid rgba\(113,194,255,\.58\);\s*background:linear-gradient\(112deg,#155fde/);
+// Blue was reverted to gold to match the founder's reference maquette
+// (fix/design-structure-color-3d-alignment): gold is the primary-action
+// color across the public site and the Academy app; cyan/blue remain the
+// secondary accent elsewhere.
+assert.match(css,/\.primary-action,\.public-start,\.landing-mobile-cta button[^{]*\{\s*border:1px solid rgba\(240,207,138,\.6\);\s*background:linear-gradient\(112deg,#f6c860/);
 assert.doesNotMatch(css,/\#landing \.public-start\{background:linear-gradient/);
 // landing-3d-core/orbit/node keep their gold base + blue glow overlay
 // (AURORA tokens); no green override duplicates these selectors.

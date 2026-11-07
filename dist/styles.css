@@ -191,7 +191,7 @@ body.public-shell main{padding-bottom:0}
 
 /* ---------- Buttons ---------- */
 .primary-action,.secondary-action{border:0;border-radius:var(--r-sm);padding:15px 18px;font-weight:800;cursor:pointer;min-height:50px;transition:transform .15s var(--ease),filter .15s var(--ease),background .15s}
-.primary-action{background:linear-gradient(135deg,var(--cta-blue-2),var(--cta-blue));color:#fff;box-shadow:0 12px 28px rgba(13,79,176,.32);display:inline-flex;align-items:center;justify-content:center;gap:14px;width:100%}
+.primary-action{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:var(--navy-950);box-shadow:0 12px 28px rgba(201,139,30,.32);display:inline-flex;align-items:center;justify-content:center;gap:14px;width:100%}
 .primary-action span{font-size:19px;transition:transform .2s var(--ease)}
 .primary-action:hover span{transform:translateX(3px)}
 .primary-action:active{transform:scale(.98)}
