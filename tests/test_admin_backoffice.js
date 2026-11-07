@@ -79,6 +79,14 @@ async function withBffContext(browser) {
     await page.waitForSelector('#admin-gate:not([hidden])');
     assert.match(await page.textContent('#admin-gate-title'), /non disponible/i);
     assert.equal(await page.isHidden('.sidebar'), true, 'nav must not render while the server identity cannot be verified');
+    // Hiding .sidebar pulls it out of the desktop grid's auto-placement
+    // (260px sidebar + 1fr main); without collapsing to a single column the
+    // same way #landing does, `main` is auto-placed into the sidebar's
+    // leftover 260px track instead of spanning the row, squeezing the gate
+    // card into a narrow strip pinned to the left edge.
+    const mainBox = await page.locator('main').boundingBox();
+    const viewport = page.viewportSize();
+    assert.ok(mainBox.width > viewport.width * 0.9, `main must span (near) the full page width once the sidebar is hidden, got ${mainBox.width}px of ${viewport.width}px`);
     await context.close();
   });
 
