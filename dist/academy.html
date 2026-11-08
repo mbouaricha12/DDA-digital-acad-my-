@@ -59,6 +59,16 @@
       var verificationToken = params.get('token_hash') || params.get('token') || hashParams.get('token_hash');
       if (verificationToken && verificationToken.length >= 32) window.DDA_VERIFY_TOKEN = verificationToken;
       if (recoveryType) window.DDA_AUTH_RECOVERY = true;
+      // Google OAuth return (founder directive, 2026-11): the `auth=oauth-google`
+      // marker and any `error`/`error_description` GoTrue appends on a refused
+      // or misconfigured attempt must be captured into globals the SAME way as
+      // `code`/`type=recovery` just above, for the SAME reason — the
+      // history.replaceState below wipes the entire query string from the
+      // address bar before app.js's handleBffVerificationToken() ever runs.
+      var oauthProvider = params.get('auth') || hashParams.get('auth');
+      if (oauthProvider) window.DDA_OAUTH_PROVIDER = oauthProvider;
+      var oauthError = params.get('error') || hashParams.get('error');
+      if (oauthError) window.DDA_OAUTH_ERROR = oauthError;
       var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone']);
       var route = location.hash.slice(1);
       var safeHash = knownRoutes.has(route) ? '#' + route : '';
@@ -249,6 +259,18 @@
               <button class="text-action" id="bff-mode-login" type="button">Se connecter</button>
             </div>
             <p class="form-error" id="bff-auth-status" role="status" aria-live="polite"></p>
+            <div id="bff-oauth-google-wrap" hidden>
+              <button class="oauth-google-action" id="bff-oauth-google" type="button">
+                <svg class="oauth-google-logo" width="22" height="22" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+                  <path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/>
+                  <path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.32-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/>
+                  <path fill="#FBBC05" d="M11.68 28.18A13.93 13.93 0 0 1 10.73 24c0-1.45.25-2.86.7-4.18v-5.7H4.34A23.93 23.93 0 0 0 2 24c0 3.86.92 7.5 2.56 10.69z"/>
+                  <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.3-6.3C34.91 3.99 29.93 2 24 2 15.4 2 7.96 6.93 4.34 13.93l6.1 4.7c1.74-5.2 6.59-7.88 13.56-7.88z"/>
+                </svg>
+                <span>Continuer avec Google</span>
+              </button>
+              <div class="auth-divider"><span>ou</span></div>
+            </div>
             <form id="signup-form" data-js-submit method="dialog">
               <p class="eyebrow" id="access-step-label">Étape 1 sur 2 · commencer</p><h2 id="access-form-title">Commence ton parcours Free</h2>
               <p class="access-form-note" id="access-form-note">Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon. Cette version conserve ta progression sur cet appareil.</p>

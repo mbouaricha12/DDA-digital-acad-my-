@@ -92,6 +92,30 @@
     return true;
   }
 
+  // Google OAuth — start (founder directive, 2026-11): deliberately NOT a
+  // fetch. This hands back the BFF's own start URL so the caller can do a
+  // real top-level navigation (`location.href = ...`) — a full page
+  // redirect, the one flow this button needs, and the one kind of request
+  // that reliably carries the httpOnly verifier cookie the BFF sets on its
+  // own 302 response through Supabase and back. A fetch here would run the
+  // whole Google/Supabase hop inside an XHR, which neither follows
+  // cross-origin redirects the way a navigation does nor is what any mobile
+  // browser expects for a sign-in button — no popup, same as the rest of
+  // this site.
+  function oauthGoogleStartUrl() {
+    return enabled() ? `${configuredBase}/v1/auth/oauth/google/start` : null;
+  }
+  // The return leg, once the browser is back on academy.html with Supabase's
+  // one-time `code` in the query string: a plain fetch, same shape as
+  // exchangeRecoveryCode/exchangeSignupCode above, since the verifier cookie
+  // travels automatically via credentials:'include'.
+  async function exchangeOAuthCode(provider, code) {
+    const result = await request(`/v1/auth/oauth/${encodeURIComponent(provider)}/exchange`, { method: 'POST', body: { code } });
+    if (!result.enabled) return null;
+    if (!result.response.ok) throw resultError(result, 'oauth_exchange_failed');
+    return true;
+  }
+
   async function login({ email, password }) {
     const result = await request('/v1/auth/login', { method: 'POST', body: { email, password } });
     if (!result.enabled) return null;
@@ -258,6 +282,7 @@
 
   window.DDABFF = Object.freeze({
     enabled, register, verifyEmail, exchangeSignupCode, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
+    oauthGoogleStartUrl, exchangeOAuthCode,
     getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, fetchPremiumContent, askAI,
     getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }

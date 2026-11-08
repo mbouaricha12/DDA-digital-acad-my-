@@ -678,6 +678,25 @@ body.access-mode .prototype-banner{
 #access .access-card .password-field-wrap input{width:100%;padding-right:76px}
 #access .access-card .password-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);min-height:28px;padding:0 4px;font-size:.82rem}
 #access .access-card #bff-resend-confirmation{margin-top:-4px;margin-bottom:12px}
+/* Google OAuth sign-in (founder directive, 2026-11): placed ABOVE the
+   email/password form, right under the status line — the founder asked for
+   it to be the first, most obvious choice, never a secondary option
+   scrolled past or hidden below the form. The wrap's visibility tracks
+   #signup-form's own hidden state via this relational rule — shown/hidden
+   together with the email/password form at every one of dist/app.js's
+   existing mode-switch call sites, with no extra JS wiring at each of them
+   (initBffAuthUi only ever reveals the wrap once, the same way it reveals
+   #bff-auth-tools). :has() is already used elsewhere in this file
+   (e.g. .nav-item:has(.nav-status-tag)). */
+#access .access-card #bff-oauth-google-wrap:has(+#signup-form[hidden]){display:none}
+#access .access-card #bff-oauth-google-wrap{margin:0 0 18px}
+#access .access-card .auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0 0;color:#94a3b8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+#access .access-card .auth-divider::before,
+#access .access-card .auth-divider::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.14)}
+#access .access-card .oauth-google-action{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:50px;padding:13px 18px;border:1px solid rgba(255,255,255,.14);border-radius:var(--r-sm);background:#fff;color:#1f2430;font:inherit;font-weight:700;font-size:15px;cursor:pointer;transition:transform .15s var(--ease),box-shadow .15s var(--ease)}
+#access .access-card .oauth-google-action:hover{box-shadow:0 10px 24px rgba(0,0,0,.3)}
+#access .access-card .oauth-google-action:focus-visible{outline:2px solid #d9a441;outline-offset:2px}
+#access .access-card .oauth-google-logo{flex:none}
 #access .access-illustration{color:#94a3b8;opacity:.8}
 @media(max-width:639px){
   #access .access-card{border-radius:16px}
