@@ -118,7 +118,7 @@ const LESSON_REGISTRY = Object.freeze([
     ]
   },
   {
-    id: 'P2.1', viewId: 'lesson-p21', suffix: 'p21', title: 'Risk Before Entry',
+    id: 'P2.1', viewId: 'lesson-p21', suffix: 'p21', title: 'Le risque avant l’entrée',
     permission: 'premium_track', quizBlock: 'p21-quiz', understoodScrollTo: 'p21-decision-block',
     // Aperçu gratuit du module Premium Track (mandat §5) : cette leçon reste
     // lisible sans Premium — showView() laisse passer un apprenant Free ici
@@ -131,7 +131,7 @@ const LESSON_REGISTRY = Object.freeze([
     ]
   },
   {
-    id: 'P2.2', viewId: 'lesson-p22', suffix: 'p22', title: 'The Anatomy of a Controlled Trade', prerequisite: 'P2.1',
+    id: 'P2.2', viewId: 'lesson-p22', suffix: 'p22', title: 'L’anatomie d’un trade contrôlé', prerequisite: 'P2.1',
     permission: 'premium_track', quizBlock: 'p22-quiz', understoodScrollTo: 'p22-sequence-block',
     duration: 18, objectives: ['Décomposer un trade contrôlé en ses étapes', 'Relier chaque étape à une condition de non-trade'],
     premiumReason: 'Premium donne accès au Risk Plan Lab et à l’assessment Controlled Decision qui prolongent cette leçon par la pratique guidée.',
@@ -2404,7 +2404,7 @@ function renderTerminalMarketIntelligence() {
     </div>`).join('');
 }
 
-// Darius Analysis Terminal — only deterministic, pedagogical series are rendered.
+// Terminal d'analyse — only deterministic, pedagogical series are rendered.
 // Values are normalized indices, not quotes, recommendations or live market data.
 const TERMINAL_SERIES = Object.freeze({
   'BRVM Composite': [48, 50, 49, 52, 55, 54, 57, 56, 58, 61, 60, 63, 62, 65, 64, 67, 66, 64, 68, 70, 69, 72, 71, 74, 73, 76, 75, 77, 76, 79, 78, 80],
@@ -2553,7 +2553,7 @@ function terminalJournalDraft() {
   const drawingLabels = state.drawings.map(drawing => ({ zone: 'zone Support/Résistance', line: 'ligne de tendance', fib: 'Fibonacci' }[drawing.type] || 'annotation')).join(', ');
   return {
     market: state.instrument,
-    context: `Observation du Darius Analysis Terminal — timeframe ${state.timeframe}. Série pédagogique locale contrôlée, sans cotation en temps réel.`,
+    context: `Observation du Terminal d’analyse — timeframe ${state.timeframe}. Série pédagogique locale contrôlée, sans cotation en temps réel.`,
     scenario: state.observation,
     process: `Graphique manipulé en ${state.timeframe}, zoom ${state.zoom}/3${drawingLabels ? `; annotations : ${drawingLabels}` : ''}.`,
     note: drawingLabels ? `Annotations conservées dans le Terminal : ${drawingLabels}.` : 'Brouillon transféré depuis le Terminal — complète ton raisonnement avant d’enregistrer.',
@@ -3343,17 +3343,17 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
       const isPremiumTrack = permission === 'premium_track';
       const lessonInfo = lessonGateInfo(id);
       openGate({
-        eyebrow: isPremiumTrack ? 'DDA Premium · P2' : 'Offre Standard · M1+',
-        title: lessonInfo ? `« ${lessonInfo.title} » est une leçon Premium.` : (isPremiumTrack ? 'Cette expérience est réservée à Premium.' : 'Ce module est réservé à l’offre Standard.'),
+        eyebrow: isPremiumTrack ? 'DDA Premium · P2' : 'DDA Premium · M1+',
+        title: lessonInfo ? `« ${lessonInfo.title} » est une leçon Premium.` : 'Ce module est réservé à DDA Premium.',
         description: lessonInfo
           ? lessonInfo.premiumReason
           : (isPremiumTrack
-            ? 'DDA Free (Découverte) peut voir l’aperçu, mais le contenu P2 complet est disponible uniquement dans la démonstration Premium locale. Aucun paiement réel — active l’aperçu pour explorer ce module.'
-            : 'DDA Free (Découverte) donne accès au module M0 Fondations. Les modules M1 et suivants sont réservés aux offres Standard et Pro (CDCP-OS §4.2). Aucun paiement réel — active l’aperçu pour explorer ce module.'),
+            ? 'DDA Free peut voir l’aperçu, mais le contenu P2 complet est disponible uniquement dans la démonstration Premium locale. Aucun paiement réel — active l’aperçu pour explorer ce module.'
+            : 'DDA Free donne accès au module M0 Fondations. Les modules M1 et suivants sont réservés à DDA Premium. Aucun paiement réel — active l’aperçu pour explorer ce module.'),
         duration: lessonInfo?.duration || null,
         objectives: lessonInfo?.objectives || [],
         canUnlock: true,
-        unlockText: isPremiumTrack ? 'Activer l’aperçu Premium (simulation)' : 'Activer l’aperçu Standard (simulation)',
+        unlockText: 'Activer l’aperçu Premium (simulation)',
         previewText: 'Voir la formule Premium',
         targetView: id
       });
@@ -4502,10 +4502,10 @@ function renderPremiumState() {
   set('premium-track-progress', assessment.passed ? 'Preuve créée · prochaine action : Journal' : lab.status === 'validated' ? 'Lab validé · assessment disponible' : p22.quizComplete ? 'Leçons validées · Lab disponible' : p21.quizComplete ? 'P2.1 validée · P2.2 disponible' : 'Prêt à commencer ? Ta première étape t’attend.');
   const receipt = document.getElementById('premium-proof-receipt');
   if (receipt) receipt.hidden = !proof;
-  if (proof) set('p2-proof-date', proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Local timestamp');
+  if (proof) set('p2-proof-date', proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Horodatage local');
   const progress = document.getElementById('premium-proof-progress');
   if (progress) progress.innerHTML = proof
-    ? `<article class="premium-proof-row"><strong>${proof.skill || 'Risk Foundations'}</strong><span>${proof.level || 'Level 3 — Apply'}</span><p>${proof.source || 'P2 Guided Risk Lab + Assessment'}</p><small>${proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Local timestamp'} · ${proof.nextAction || 'Continue to the next Premium Practice.'}</small></article>`
+    ? `<article class="premium-proof-row"><strong>${proof.skill || 'Fondations du risque'}</strong><span>${proof.level || 'Niveau 3 — Appliquer'}</span><p>${proof.source || 'P2 Lab de risque guidé + Assessment'}</p><small>${proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Horodatage local'} · ${proof.nextAction || 'Continuer vers la prochaine pratique Premium.'}</small></article>`
     : '<p>Ta première preuve Premium apparaîtra ici après ta prochaine validation.</p>';
 }
 
@@ -4537,19 +4537,19 @@ document.getElementById('premium-lab-form')?.addEventListener('submit', event =>
   const feedback = document.getElementById('premium-lab-feedback');
   const attempts = Number(premiumRecord().labs?.['p2-risk-plan']?.attempts || 0) + 1;
   let status = 'retry';
-  let message = 'Review required. Your stop is present, but the scenario invalidation has not been established. Revisit the market structure before defining the risk.';
-  let title = 'Review required';
+  let message = 'Revue nécessaire. Ton stop est présent, mais l’invalidation du scénario n’a pas été établie. Revois la structure de marché avant de définir le risque.';
+  let title = 'Revue nécessaire';
   if (values.invalidation.length < 10) {
-    message = 'Review required. Your stop is present, but the scenario invalidation has not been established. Revisit the market structure before defining the risk.';
+    message = 'Revue nécessaire. Ton stop est présent, mais l’invalidation du scénario n’a pas été établie. Revois la structure de marché avant de définir le risque.';
   } else if (values.entry.length < 10) {
-    title = 'Decision check';
-    message = 'Decision check. You have identified a zone, but a zone alone does not define an entry condition.';
+    title = 'Vérification de la décision';
+    message = 'Vérification de la décision. Tu as identifié une zone, mais une zone seule ne définit pas une condition d’entrée.';
   } else if (!Number.isFinite(values.risk) || values.risk <= 0 || values.risk > 50 || values.target.length < 5 || values.noTrade.length < 10) {
-    title = 'Risk boundary check';
-    message = 'Define a measurable risk at or below the $50 educational example, a coherent target and a clear no-trade condition before execution.';
+    title = 'Vérification de la limite de risque';
+    message = 'Définis un risque mesurable égal ou inférieur à l’exemple pédagogique de $50, un objectif cohérent et une condition de non-trade claire avant l’exécution.';
   } else {
-    status = 'validated'; title = 'Good';
-    message = 'Your invalidation is defined before execution. This gives the trade a measurable risk boundary.';
+    status = 'validated'; title = 'Bien';
+    message = 'Ton invalidation est définie avant l’exécution. Cela donne au trade une limite de risque mesurable.';
   }
   const lab = { status, attempts, lastFeedback: message, sourceLesson: 'P2.2', proofId: 'p2-risk-foundations', ...(status === 'validated' ? { completedAt: new Date().toISOString() } : {}) };
   savePremiumPatch({ trackId: 'P2-risk-discipline', labs: { ...premiumRecord().labs, 'p2-risk-plan': lab } });
@@ -4562,7 +4562,7 @@ document.getElementById('premium-assessment-form')?.addEventListener('submit', e
   event.preventDefault();
   const feedback = document.getElementById('premium-assessment-feedback');
   if (premiumRecord().labs?.['p2-risk-plan']?.status !== 'validated') {
-    premiumFeedback(feedback, false, 'Lab required', 'Valide d’abord le P2 Lab afin que l’assessment repose sur une décision construite.'); return;
+    premiumFeedback(feedback, false, 'Lab requis', 'Valide d’abord le P2 Lab afin que l’assessment repose sur une décision construite.'); return;
   }
   const answers = ['p2-q1', 'p2-q2', 'p2-q3', 'p2-q4'].map(name => document.querySelector(`input[name="${name}"]:checked`)?.value);
   const passed = answers.join('|') === 'wait|respect|c|b';
@@ -4571,13 +4571,13 @@ document.getElementById('premium-assessment-form')?.addEventListener('submit', e
   savePremiumPatch({ assessments: { ...premiumRecord().assessments, 'p2-controlled-decision': assessment } });
   trackEvent('premium_assessment_completed', { assessment: 'p2-controlled-decision' });
   if (!passed) {
-    premiumFeedback(feedback, false, 'Review required', 'Relis la distinction entre résultat et processus, puis vérifie que le risque ne dépasse jamais la limite définie.'); return;
+    premiumFeedback(feedback, false, 'Revue nécessaire', 'Relis la distinction entre résultat et processus, puis vérifie que le risque ne dépasse jamais la limite définie.'); return;
   }
   const createdAt = new Date().toISOString();
-  const proof = { type: 'skill_evidence', source: 'P2 Guided Risk Lab + Assessment', competencyId: 'risk_foundations', skill: 'Risk Foundations', level: 'Level 3 — Apply', createdAt, nextAction: 'Continue to the next Premium Practice.' };
+  const proof = { type: 'skill_evidence', source: 'P2 Lab de risque guidé + Assessment', competencyId: 'risk_foundations', skill: 'Fondations du risque', level: 'Niveau 3 — Appliquer', createdAt, nextAction: 'Continuer vers la prochaine pratique Premium.' };
   savePremiumPatch({ modules: { ...premiumRecord().modules, P2: { status: 'completed', completedAt: createdAt } }, proofs: { ...premiumRecord().proofs, 'p2-risk-foundations': proof } });
-  trackEvent('premium_proof_created', { proof: 'p2-risk-foundations', skill: 'Risk Foundations', nextAction: 'Journal' });
-  premiumFeedback(feedback, true, 'Validated', 'Controlled Decision validée. Une preuve pédagogique locale a été créée — elle ne constitue pas une certification officielle.');
+  trackEvent('premium_proof_created', { proof: 'p2-risk-foundations', skill: 'Fondations du risque', nextAction: 'Journal' });
+  premiumFeedback(feedback, true, 'Validé', 'Controlled Decision validée. Une preuve pédagogique locale a été créée — elle ne constitue pas une certification officielle.');
 });
 
 document.getElementById('p2-journal-bridge')?.addEventListener('click', event => {
@@ -4587,14 +4587,14 @@ document.getElementById('p2-journal-bridge')?.addEventListener('click', event =>
   showView('journal');
   openJournalComposer(null, event.currentTarget, {
     market: 'XAUUSD — scénario synthétique',
-    context: 'Price approaches a previously identified support zone. Higher-timeframe structure remains bullish.',
-    scenario: 'Potential bullish reaction — exercice pédagogique local.',
-    process: 'Context → Setup → Entry → Invalidation → Risk → Target → Review',
-    decision: 'Risk Plan construit dans le P2 Guided Risk Lab.',
+    context: 'Le prix approche une zone de support identifiée précédemment. La structure du timeframe supérieur reste haussière.',
+    scenario: 'Réaction haussière potentielle — exercice pédagogique local.',
+    process: 'Contexte → Setup → Entrée → Invalidation → Risque → Objectif → Revue',
+    decision: 'Risk Plan construit dans le P2 Lab de risque guidé.',
     outcome: 'À revoir dans le Journal — aucune donnée de marché réelle.',
     whatWorked: 'J’ai défini une invalidation avant de considérer l’entrée.',
     toImprove: 'Continuer à distinguer résultat et qualité du processus.',
-    note: 'Risk Foundations · Level 3 — Apply', terminalSource: true, sourceLesson: 'P2.2', proofId: 'p2-risk-foundations', proofType: 'skill_evidence'
+    note: 'Fondations du risque · Niveau 3 — Appliquer', terminalSource: true, sourceLesson: 'P2.2', proofId: 'p2-risk-foundations', proofType: 'skill_evidence'
   });
 });
 

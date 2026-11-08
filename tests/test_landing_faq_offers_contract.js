@@ -64,7 +64,7 @@ assert.doesNotMatch(plansBlock, /chariow/i, 'the landing must never reference th
 // Premium card content must be drawn from already-built, real product features
 // (dist/academy.html's #membership panel), not invented marketing copy.
 const academy = fs.readFileSync(path.join(root, 'dist', 'academy.html'), 'utf8');
-for (const feature of ['Risk Before Entry', 'The Anatomy of a Controlled Trade', 'Risk Plan Lab', 'Controlled Decision']) {
+for (const feature of ['Le risque avant l’entrée', 'L’anatomie d’un trade contrôlé', 'Risk Plan Lab', 'Controlled Decision']) {
   assert.ok(academy.includes(feature), `"${feature}" must be a real, already-built feature in dist/academy.html for the landing to reference it`);
   assert.ok(plansBlock.includes(feature), `the Premium card must mention the real feature "${feature}"`);
 }
