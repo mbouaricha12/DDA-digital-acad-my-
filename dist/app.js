@@ -4519,6 +4519,14 @@ renderMarketIntelligence();
 // the real entry point — Access/onboarding — never on the Terminal's static
 // default-active markup, which would otherwise show a placeholder "Richard"
 // dashboard as if already signed in before anyone has actually onboarded.
+//
+// Structure fix (fix/design-structure-color-3d-alignment): a RETURNING,
+// already-onboarded learner opening academy.html with no hash (a bare
+// bookmark, typed URL, or external link) used to hit neither branch below —
+// showView() was never called, so no .view ever got its 'active' class and
+// the learner saw a blank app shell (sidebar/topbar only, no content). The
+// final `else` makes the same real entry point this comment already
+// describes for every other case: dashboard for an onboarded learner.
 const initialView = BOOT_HASH_VIEW;
 if (initialView && document.getElementById(initialView)) {
   // Pre-seed currentView to the view we're actually booting into so showView()'s
@@ -4527,7 +4535,11 @@ if (initialView && document.getElementById(initialView)) {
   // above (see V1.1 correction) with the hardcoded 'dashboard' default.
   currentView = initialView;
   showView(initialView);
-} else if (!prototypeState.user) showView('access');
+} else if (!prototypeState.user) {
+  showView('access');
+} else {
+  showView(prototypeState.onboarding?.complete ? 'dashboard' : 'access');
+}
 
 if (!appHistoryInitialized) {
   const activeViewId = document.querySelector('.view.active')?.id || 'dashboard';
