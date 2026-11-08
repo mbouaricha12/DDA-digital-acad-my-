@@ -579,6 +579,34 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('a brand-new learner never sees the "a progression already exists, resume or erase it?" nudge on step 2 of their own signup', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#access`);
+    await page.waitForSelector('#signup-form:not([hidden])');
+    await fillSignup(page);
+    await page.waitForSelector('#onboarding-form:not([hidden])');
+    assert.equal(await page.isVisible('#resume-device'), false, 'the resume/erase nudge is false and confusing for a user that was just created by this very step 1 submission');
+    await context.close();
+  });
+
+  await test('a genuinely returning learner with a pre-existing, unfinished session sees the resume/erase nudge on #access', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => {
+      window.localStorage.setItem('dda-prototype-state-v4', JSON.stringify({
+        schemaVersion: 4, user: { id: 'returning', name: 'Awa', email: 'awa@example.com', mode: 'device-demo' },
+        membership: { plan: 'free', status: 'demo' }, onboarding: null,
+        lessons: {}, journal: { entries: [], plan: {} }, preferences: { lowData: false, reminders: false },
+        terminal: {}, events: [], acquisition: {}, updatedAt: null
+      }));
+    });
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#access`);
+    await page.waitForTimeout(200);
+    assert.equal(await page.isVisible('#resume-device'), true, 'a learner who genuinely has a prior, unfinished session must still be offered to resume or erase it');
+    await context.close();
+  });
+
   await test('onboarding_complete event is recorded locally', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
