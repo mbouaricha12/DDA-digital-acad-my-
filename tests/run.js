@@ -310,7 +310,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#premium-track`);
     const freeContent = await page.locator('#lesson-p21-main').innerText();
-    assert.equal(freeContent.includes('Before the trade, define the risk.'), false, 'authored P2 content must not be mounted for Free');
+    assert.equal(freeContent.includes('Avant le trade, définis le risque.'), false, 'authored P2 content must not be mounted for Free');
     await page.click('#gate-unlock');
     await page.waitForTimeout(50);
     assert.equal(await page.evaluate(() => location.hash), '#premium-track');
@@ -322,7 +322,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     // closes, regardless of which hostname happens to load it. So the local
     // demo now honestly says the content needs a real server, instead of
     // mounting the real authored lesson the way it used to.
-    assert.equal((await page.locator('#lesson-p21-main').innerText()).includes('Before the trade, define the risk.'), false, 'the real authored lesson must never be mounted in local/pilot (no BFF) mode, even after the local Premium Demo toggle');
+    assert.equal((await page.locator('#lesson-p21-main').innerText()).includes('Avant le trade, définis le risque.'), false, 'the real authored lesson must never be mounted in local/pilot (no BFF) mode, even after the local Premium Demo toggle');
     assert.match(await page.locator('#lesson-p21-main').innerText(), /indisponible/i, 'an honest "content unavailable without a server" message is shown instead');
     await context.close();
   });
@@ -351,7 +351,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#lesson-p21`);
     await page.waitForSelector('#lesson-p21.view.active');
-    await page.waitForFunction(() => document.querySelector('#lesson-p21-main')?.innerText.includes('Before the trade, define the risk.'));
+    await page.waitForFunction(() => document.querySelector('#lesson-p21-main')?.innerText.includes('Avant le trade, définis le risque.'));
     assert.ok(contentRequests.includes('P2.1'), 'the client actually called the authenticated content route for P2.1');
     assert.ok(contentRequests.includes('P2.2'), 'P2.2 is fetched too (needed once the learner reaches it), never embedded');
     await context.close();
@@ -435,7 +435,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.locator('#premium-lab-form button[type="submit"]').click();
     state = await page.evaluate(() => window.DDA.load());
     assert.equal(state.premium.labs['p2-risk-plan'].status, 'validated');
-    assert.ok((await page.locator('#premium-lab-feedback').textContent()).includes('Good'));
+    assert.ok((await page.locator('#premium-lab-feedback').textContent()).includes('Bien'));
 
     await page.click('#premium-lab [data-view="premium-track"]');
     await page.click('#premium-track [data-view="premium-assessment"]');
@@ -454,7 +454,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     state = await page.evaluate(() => window.DDA.load());
     assert.equal(state.premium.assessments['p2-controlled-decision'].passed, true);
     assert.equal(state.premium.assessments['p2-controlled-decision'].attempts, 2);
-    assert.equal(state.premium.proofs['p2-risk-foundations'].level, 'Level 3 — Apply');
+    assert.equal(state.premium.proofs['p2-risk-foundations'].level, 'Niveau 3 — Appliquer');
 
     await page.reload();
     await page.waitForSelector('#premium-assessment.view.active');
@@ -463,7 +463,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(await page.evaluate(() => location.hash), '#journal');
     assert.equal(await page.locator('#journal-composer').isVisible(), true);
     assert.equal(await page.locator('#journal-market').inputValue(), 'XAUUSD — scénario synthétique');
-    assert.ok((await page.locator('#journal-context').inputValue()).includes('support zone'));
+    assert.ok((await page.locator('#journal-context').inputValue()).includes('zone de support'));
     await page.click('#journal-step-next');
     await page.click('#journal-step-next');
     await page.click('#journal-step-save');
@@ -476,8 +476,8 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(await page.locator('#journal-list details').count(), 1, 'Journal entry survives reload');
     await page.click('.mobile-nav button[data-view="progress"]');
     const proofProgress = await page.locator('#premium-proof-progress').innerText();
-    assert.ok(proofProgress.includes('Risk Foundations'));
-    assert.ok(proofProgress.includes('Level 3 — Apply'));
+    assert.ok(proofProgress.includes('Fondations du risque'));
+    assert.ok(proofProgress.includes('Niveau 3 — Appliquer'));
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'Progression must not overflow on mobile');
     await context.close();
   });
@@ -2271,7 +2271,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#lesson-p22`);
     await page.waitForSelector('#gate-layer:not([hidden])');
-    assert.match(await page.textContent('#gate-title'), /The Anatomy of a Controlled Trade/, 'the real lesson title is shown, not a generic label');
+    assert.match(await page.textContent('#gate-title'), /anatomie d.un trade contrôlé/, 'the real lesson title is shown, not a generic label');
     assert.match(await page.textContent('#gate-meta'), /18 min/, 'the real duration is shown');
     assert.equal(await page.locator('#gate-objectives li').count(), 2, 'the lesson\'s real objectives are listed');
     await page.click('#gate-continue-free');
@@ -2505,7 +2505,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.goto(`${ACADEMY_BASE}#lesson-p22`);
     await page.waitForSelector('#gate-layer:not([hidden])');
     assert.notEqual(await page.evaluate(() => location.hash), '#lesson-p22', 'a locally-forced premium plan is rejected: the Premium lesson never activates without server confirmation');
-    assert.match(await page.textContent('#gate-title'), /The Anatomy of a Controlled Trade/, 'the honest paywall is shown instead, same as a genuine Free learner');
+    assert.match(await page.textContent('#gate-title'), /anatomie d.un trade contrôlé/, 'the honest paywall is shown instead, same as a genuine Free learner');
     await page.waitForTimeout(200);
     assert.equal(await page.locator('#gate-layer').isVisible(), true, 'the gate stays shown once the server confirms there is no entitlement');
     await context.close();
