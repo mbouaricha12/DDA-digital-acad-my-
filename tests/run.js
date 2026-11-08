@@ -1083,7 +1083,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(productState.m1, 'completed');
     assert.equal(productState.m2, 'coming_soon');
     assert.equal(productState.terminalTitle, 'Toutes les leçons disponibles sont validées.');
-    assert.ok(productState.terminalIndex.includes('M0') && productState.terminalIndex.includes('M1'), 'Terminal completion label must reflect both completed authored modules');
+    assert.match(productState.terminalIndex, /PARCOURS .* VALIDÉS/, 'Terminal completion label must reflect both completed authored modules in learner language');
     assert.equal(productState.primaryView, 'journal', 'with an empty journal, the honest daily action is Journal — not a phantom lesson');
     assert.equal(productState.progressNext, 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.');
 
@@ -1776,7 +1776,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const progressProof = await page.locator('#progress-practice-proof').textContent();
     assert.ok(progressProof.includes('m02-zone-identification'), 'Progression surfaces the same stable practice proof');
     assert.ok(progressProof.includes('Identification de zone'), 'Progression classifies the artifact as practice, not as a quiz result');
-    assert.ok(progressProof.includes('Après la leçon M0.2 · Support & Résistance'), 'Progression preserves the mission source');
+    assert.ok(progressProof.includes('Après la leçon Support & Résistance — Identifier les zones de support et de résistance'), 'Progression preserves the mission source in learner language');
     const lessonProgress = await page.evaluate(() => window.DDA.load().lessons['M0.2']);
     assert.equal(lessonProgress.quizComplete, false, 'a valid Practice Terminal proof does not fabricate lesson mastery');
 
@@ -2001,7 +2001,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.waitForSelector('#lesson-p22.view.active');
     assert.equal(await page.locator('#lesson-p22 .lesson-quick-nav [data-view="path"]').isVisible(), true);
     assert.equal(await page.locator('#lesson-p22 .lesson-quick-nav [data-view="dashboard"]').isVisible(), true);
-    assert.match(await page.textContent('#lesson-p22 .module-toc-heading'), /Premium Track/);
+    assert.match(await page.textContent('#lesson-p22 .module-toc-heading'), /Risque et discipline/);
     assert.equal(await page.locator('#lesson-p22 .module-toc-item').count(), 2, 'the Premium Track module summary lists P2.1 and P2.2');
     const prevLink = page.locator('#lesson-p22 [data-lesson-prev]');
     await prevLink.click();
@@ -2175,7 +2175,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#lesson-p22`);
     await page.waitForSelector('#gate-layer:not([hidden])');
-    assert.match(await page.textContent('#gate-title'), /The Anatomy of a Controlled Trade/, 'the real lesson title is shown, not a generic label');
+    assert.match(await page.textContent('#gate-title'), /Construire une décision maîtrisée/, 'the real lesson title is shown, not a generic label');
     assert.match(await page.textContent('#gate-meta'), /18 min/, 'the real duration is shown');
     assert.equal(await page.locator('#gate-objectives li').count(), 2, 'the lesson\'s real objectives are listed');
     await page.click('#gate-continue-free');
@@ -2409,7 +2409,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.goto(`${ACADEMY_BASE}#lesson-p22`);
     await page.waitForSelector('#gate-layer:not([hidden])');
     assert.notEqual(await page.evaluate(() => location.hash), '#lesson-p22', 'a locally-forced premium plan is rejected: the Premium lesson never activates without server confirmation');
-    assert.match(await page.textContent('#gate-title'), /The Anatomy of a Controlled Trade/, 'the honest paywall is shown instead, same as a genuine Free learner');
+    assert.match(await page.textContent('#gate-title'), /Construire une décision maîtrisée/, 'the honest paywall is shown instead, same as a genuine Free learner');
     await page.waitForTimeout(200);
     assert.equal(await page.locator('#gate-layer').isVisible(), true, 'the gate stays shown once the server confirms there is no entitlement');
     await context.close();

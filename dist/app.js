@@ -14,9 +14,24 @@
    Ce littéral reste volontairement des données pures (aucune référence
    externe) : le test le réévalue tel quel avec vm.
    ========================================================================== */
+const DDA_VISIBLE_LESSON_TITLES = Object.freeze({
+  'M0.1': 'Leçon en cours — Le trading comme commerce',
+  'M0.2': 'Support & Résistance — Identifier les zones de support et de résistance',
+  'M0.3': 'Lire une tendance — Comprendre les tendances du marché',
+  'M1.1': 'Pourquoi les prix évoluent ? — Comprendre la formation des prix',
+  'M1.2': 'Comment les ordres s’exécutent ? — Comprendre l’exécution des ordres',
+  'M1.3': 'Comment les marchés s’organisent ? — Découvrir les acteurs des marchés financiers',
+  'MBRVM.1': 'Introduction à la BRVM',
+  'P2.1': 'Définir son risque avant une décision',
+  'P2.2': 'Construire une décision maîtrisée'
+});
+function displayLessonTitle(id, fallback = '') {
+  return DDA_VISIBLE_LESSON_TITLES[id] || fallback || 'Leçon';
+}
+
 const LESSON_REGISTRY = Object.freeze([
   {
-    id: 'M0.1', viewId: 'lesson', suffix: '', title: 'Leçon en cours',
+    id: 'M0.1', viewId: 'lesson', suffix: '', title: DDA_VISIBLE_LESSON_TITLES['M0.1'],
     permission: 'lesson_m01',
     quizBlock: 'quiz', understoodScrollTo: 'exercise-block',
     questions: [
@@ -26,7 +41,7 @@ const LESSON_REGISTRY = Object.freeze([
     ]
   },
   {
-    id: 'M0.2', viewId: 'lesson-m02', suffix: 'm2', title: 'Support & Résistance', prerequisite: 'M0.1',
+    id: 'M0.2', viewId: 'lesson-m02', suffix: 'm2', title: DDA_VISIBLE_LESSON_TITLES['M0.2'], prerequisite: 'M0.1',
     permission: 'lesson_m01',
     // Vidéo réelle du VIDEO_REGISTRY (mandat §5, P1.3) : correspondance directe
     // avec le sujet de cette leçon.
@@ -42,7 +57,7 @@ const LESSON_REGISTRY = Object.freeze([
     ]
   },
   {
-    id: 'M0.3', viewId: 'lesson-m03', suffix: 'm3', title: 'Lire une tendance', prerequisite: 'M0.2',
+    id: 'M0.3', viewId: 'lesson-m03', suffix: 'm3', title: DDA_VISIBLE_LESSON_TITLES['M0.3'], prerequisite: 'M0.2',
     permission: 'lesson_m01',
     // Vidéo réelle du VIDEO_REGISTRY (mandat §5, P1.3) : les moyennes mobiles
     // sont un outil courant de lecture de tendance, cohérent avec cette leçon.
@@ -62,7 +77,7 @@ const LESSON_REGISTRY = Object.freeze([
     // est absent, l'entrée reste inerte au lieu d'un rendu partiel.
     // Matrice des droits CDCP-OS §4.2 (arbitrage D1 Option B) : M1+ réservé à
     // l'offre Standard/Pro (advanced_modules).
-    id: 'M1.1', viewId: 'lesson-m11', suffix: 'm11', title: 'Pourquoi les prix évoluent ?', prerequisite: 'M0.3',
+    id: 'M1.1', viewId: 'lesson-m11', suffix: 'm11', title: DDA_VISIBLE_LESSON_TITLES['M1.1'], prerequisite: 'M0.3',
     permission: 'advanced_modules',
     quizBlock: 'm1-quiz', understoodScrollTo: 'm1-exercise-case-block',
     questions: [
@@ -74,7 +89,7 @@ const LESSON_REGISTRY = Object.freeze([
     ]
   },
   {
-    id: 'M1.2', viewId: 'lesson-m12', suffix: 'm12', title: 'Comment les ordres s’exécutent ?', prerequisite: 'M1.1',
+    id: 'M1.2', viewId: 'lesson-m12', suffix: 'm12', title: DDA_VISIBLE_LESSON_TITLES['M1.2'], prerequisite: 'M1.1',
     permission: 'advanced_modules',
     quizBlock: 'm12-quiz', understoodScrollTo: 'm12-slippage-case-block',
     questions: [
@@ -89,7 +104,7 @@ const LESSON_REGISTRY = Object.freeze([
     // M1.3 est authored dans son propre fichier (m1-3-lesson.js) et promue dans
     // le curriculum par dda-core.js quand ce fichier est chargé ; si le fichier
     // est absent, l'entrée reste inerte au lieu d'un rendu partiel.
-    id: 'M1.3', viewId: 'lesson-m13', suffix: 'm13', title: 'Comment les marchés s’organisent ?', prerequisite: 'M1.2',
+    id: 'M1.3', viewId: 'lesson-m13', suffix: 'm13', title: DDA_VISIBLE_LESSON_TITLES['M1.3'], prerequisite: 'M1.2',
     permission: 'advanced_modules',
     quizBlock: 'm13-quiz', understoodScrollTo: 'm13-exercise-case-block',
     questions: [
@@ -106,7 +121,7 @@ const LESSON_REGISTRY = Object.freeze([
     // Domaine indépendant (mandat §6) : aucun `prerequisite` — accessible dès
     // qu'un apprenant Free ouvre #markets, sans dépendre de M0/M1 ni de
     // Premium.
-    id: 'MBRVM.1', viewId: 'lesson-mbrvm1', suffix: 'mbrvm1', title: 'Introduction à la BRVM',
+    id: 'MBRVM.1', viewId: 'lesson-mbrvm1', suffix: 'mbrvm1', title: DDA_VISIBLE_LESSON_TITLES['MBRVM.1'],
     permission: 'lesson_m01', independent: true,
     quizBlock: 'mbrvm1-quiz', understoodScrollTo: 'mbrvm1-exercise-case-block',
     questions: [
@@ -118,7 +133,7 @@ const LESSON_REGISTRY = Object.freeze([
     ]
   },
   {
-    id: 'P2.1', viewId: 'lesson-p21', suffix: 'p21', title: 'Risk Before Entry',
+    id: 'P2.1', viewId: 'lesson-p21', suffix: 'p21', title: DDA_VISIBLE_LESSON_TITLES['P2.1'],
     permission: 'premium_track', quizBlock: 'p21-quiz', understoodScrollTo: 'p21-decision-block',
     // Aperçu gratuit du module Premium Track (mandat §5) : cette leçon reste
     // lisible sans Premium — showView() laisse passer un apprenant Free ici
@@ -131,7 +146,7 @@ const LESSON_REGISTRY = Object.freeze([
     ]
   },
   {
-    id: 'P2.2', viewId: 'lesson-p22', suffix: 'p22', title: 'The Anatomy of a Controlled Trade', prerequisite: 'P2.1',
+    id: 'P2.2', viewId: 'lesson-p22', suffix: 'p22', title: DDA_VISIBLE_LESSON_TITLES['P2.2'], prerequisite: 'P2.1',
     permission: 'premium_track', quizBlock: 'p22-quiz', understoodScrollTo: 'p22-sequence-block',
     duration: 18, objectives: ['Décomposer un trade contrôlé en ses étapes', 'Relier chaque étape à une condition de non-trade'],
     premiumReason: 'Premium donne accès au Risk Plan Lab et à l’assessment Controlled Decision qui prolongent cette leçon par la pratique guidée.',
@@ -1312,7 +1327,7 @@ function renderModulesRecap() {
   const visibleModules = modules.slice(0, Math.min(modules.length, Math.max(3, activeIndex + 2)));
   container.innerHTML = visibleModules.map(module => {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
-    return `<li><span class="module-id">${module.id}</span><strong>${module.title}</strong><span class="module-pill ${status}">${MODULE_STATUS_LABEL[status] || status}</span></li>`;
+    return `<li><span class="module-id">Parcours ${modules.indexOf(module) + 1}</span><strong>${module.title}</strong><span class="module-pill ${status}">${MODULE_STATUS_LABEL[status] || status}</span></li>`;
   }).join('');
   const hidden = modules.length - visibleModules.length;
   if (hidden > 0) container.insertAdjacentHTML('beforeend', `<li class="modules-recap-more"><span class="module-id">…</span><strong>${hidden} modules plus loin</strong><span class="module-pill coming_soon">Progressif</span></li>`);
@@ -1404,7 +1419,7 @@ function renderMasteryList() {
     return `
       <article class="mastery-row mastery-row-focused" data-mastery-level="${level}" data-proof-state="${level >= 4 ? 'confirmed' : level >= 3 ? 'practiced' : 'learning'}">
         <div class="mastery-row-head">
-          <div><p class="mastery-lesson">${lesson.id} — ${lesson.title}</p><strong>${lesson.competency.label}</strong></div>
+          <div><p class="mastery-lesson">${displayLessonTitle(lesson.id, lesson.title)}</p><strong>${lesson.competency.label}</strong></div>
           <div class="mastery-level">
             <div class="terminal-thread-beads" role="img" aria-label="${beadsAriaLabel(level)}">${renderBeads(level)}</div>
             <span>${COMPETENCY_LEVEL_LABEL[level]}</span>
@@ -1433,7 +1448,7 @@ function renderPracticeProof() {
   }
   const validated = practice.status === 'validated';
   const proof = practice.proof || {};
-  const source = practice.sourceLessonTitle ? `Après la leçon ${practice.sourceLesson} · ${practice.sourceLessonTitle}` : 'Practice Terminal autonome';
+  const source = practice.sourceLessonTitle ? `Après la leçon ${displayLessonTitle(practice.sourceLesson, practice.sourceLessonTitle)}` : 'Practice Terminal autonome';
   const proofType = proof.type === 'zone_identification' ? 'Identification de zone' : 'Mission Practice';
   container.innerHTML = `<div class="practice-proof-row ${validated ? 'is-validated' : 'is-retry'}"><span class="practice-proof-icon">${validated ? '✓' : '↻'}</span><div><strong>${escapeHtml(proofType)} — Practice Terminal</strong><p>${escapeHtml(source)}</p><p>${escapeHtml(practice.feedback || 'Mission tentée localement.')}</p><small>Preuve ${escapeHtml(proof.id || 'locale')} · ${validated ? 'conservée sur cet appareil.' : 'à reprendre — elle ne compte pas comme compétence acquise.'}</small></div></div>`;
 }
@@ -1480,7 +1495,7 @@ function renderDashboardProof(continueTarget, curriculumComplete) {
   if (curriculumComplete) {
     actionEl.textContent = (prototypeState.journal?.entries || []).length === 0 ? 'Ouvrir le Journal' : 'Explorer les marchés';
   } else if (continueTarget) {
-    actionEl.textContent = `Reprendre ${continueTarget.lesson.id}`;
+    actionEl.textContent = `Reprendre ${continueTarget.lesson.title}`;
   } else {
     actionEl.textContent = '—';
   }
@@ -1504,14 +1519,14 @@ function renderProgressNextStep() {
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   if (el) {
     el.textContent = next
-      ? `Continuer ${next.lesson.title} (${next.lesson.id}) — ${NEXT_STEP_PHRASE[next.step] || 'continuer'}.`
+      ? `Continuer ${next.lesson.title} — ${NEXT_STEP_PHRASE[next.step] || 'continuer'}.`
       : 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.';
   }
   if (action) {
     action.hidden = !next;
     if (next) {
       action.dataset.view = LESSON_VIEW_ID[next.lesson.id] || 'lesson';
-      action.innerHTML = `${next.step === 'lesson' ? 'Commencer' : 'Reprendre'} ${next.lesson.id} · ${next.lesson.title} <span>→</span>`;
+      action.innerHTML = `${next.step === 'lesson' ? 'Commencer' : 'Reprendre'} ${next.lesson.title} <span>→</span>`;
     }
   }
   const noteEl = document.getElementById('progress-journal-note');
@@ -1656,7 +1671,8 @@ function renderJournalList() {
       .map(([field, label]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(entry[field])}</dd></div>`)
       .join('');
     const sourceView = entry.sourceLesson === 'M0.2' ? 'lesson-m02' : '';
-    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve ${escapeHtml(entry.proofId || 'locale')}</strong><span>${escapeHtml(entry.sourceLesson || 'M0.2')} · ${escapeHtml(entry.proofType || 'zone_identification')}</span>${sourceView ? `<button type="button" class="text-action journal-proof-source" data-view="${sourceView}">Revoir la leçon <span>→</span></button>` : ''}</div>` : '';
+    const proofLessonLabel = displayLessonTitle(entry.sourceLesson, 'Leçon de référence');
+    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve ${escapeHtml(entry.proofId || 'locale')}</strong><span>${escapeHtml(proofLessonLabel)} · ${escapeHtml(entry.proofType || 'zone_identification')}</span>${sourceView ? `<button type="button" class="text-action journal-proof-source" data-view="${sourceView}">Revoir la leçon <span>→</span></button>` : ''}</div>` : '';
     const snippet = entry.decision || entry.scenario || entry.context || 'Aucun détail renseigné.';
     const entryNumber = String(entries.length - idx).padStart(2, '0');
     return `
@@ -2043,7 +2059,7 @@ function renderTerminalMeta(continueTarget) {
   const lessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
   const step = DDALearning.lessonNextStep(lessonProgress);
   stepEl.textContent = step === 'review' ? 'leçon terminée' : (NEXT_STEP_PHRASE[step] || '—');
-  document.getElementById('terminal-meta-module').textContent = continueTarget.lesson.id;
+  document.getElementById('terminal-meta-module').textContent = continueTarget.lesson.title;
   const xpKey = step === 'lesson' ? 'lessonViewed' : step === 'exercise' ? 'exerciseComplete' : step === 'quiz' ? 'quizComplete' : null;
   const nextXp = xpKey && continueTarget.lesson.xp ? continueTarget.lesson.xp[xpKey] : null;
   document.getElementById('terminal-meta-xp').textContent = nextXp ? `+${nextXp} XP` : '—';
@@ -2090,9 +2106,10 @@ function renderTerminalLeadComplete() {
   const indexEl = document.getElementById('lesson-index-label');
   if (indexEl) {
     const completedIds = completedModuleIds();
-    indexEl.textContent = completedIds.length
-      ? `CURRICULUM ${completedIds.join(' + ')} COMPLÉTÉ${completedIds.length > 1 ? 'S' : ''}`
-      : 'CURRICULUM DISPONIBLE COMPLÉTÉ';
+      const completedTitles = completedIds.map(id => DDA.curriculum.modules.find(module => module.id === id)?.title || 'Parcours');
+      indexEl.textContent = completedTitles.length
+      ? `PARCOURS ${completedTitles.join(' + ')} VALIDÉ${completedTitles.length > 1 ? 'S' : ''}`
+      : 'PARCOURS DISPONIBLE VALIDÉ';
   }
   const moduleEl = document.getElementById('terminal-lead-module');
   if (moduleEl) moduleEl.textContent = last ? last.module.title : 'DDA';
@@ -2118,7 +2135,7 @@ function renderTerminalLeadComplete() {
     if (last) {
       secondary.hidden = false;
       secondary.dataset.view = LESSON_VIEW_ID[last.lesson.id] || 'lesson';
-      secondary.innerHTML = `Revoir ${last.lesson.id} <span>→</span>`;
+      secondary.innerHTML = `Revoir ${last.lesson.title} <span>→</span>`;
     } else {
       secondary.hidden = true;
     }
@@ -2497,7 +2514,7 @@ function renderMembershipNextStep(premium) {
   }
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   el.textContent = next
-    ? `Continuer ${next.lesson.title} (${next.lesson.id}) sur DDA Free — Premium reste disponible en aperçu quand tu voudras l’explorer.`
+    ? `Continuer ${next.lesson.title} sur DDA Free — Premium reste disponible en aperçu quand tu voudras l’explorer.`
     : 'Tu as validé les leçons disponibles sur DDA Free — ouvre l’aperçu Premium ci-dessus pour voir ce qu’il débloque dès aujourd’hui.';
 }
 
@@ -2552,7 +2569,7 @@ function renderState() {
   document.getElementById('personalized-next').textContent = curriculumComplete
     ? 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.'
     : prototypeState.onboarding?.goal
-      ? `Objectif : ${prototypeState.onboarding.goal}. Prochaine étape : terminer ${continueTarget.lesson.id}.`
+      ? `Objectif : ${prototypeState.onboarding.goal}. Prochaine étape : terminer « ${continueTarget.lesson.title} ».`
       : 'Une étape claire pour continuer à progresser.';
 
   if (continueTarget) {
@@ -2712,7 +2729,7 @@ const LESSON_PREREQUISITE = Object.freeze(Object.fromEntries(LESSON_REGISTRY.fil
 // lives outside DDA.curriculum by design), so its heading is named directly
 // rather than invented from a non-existent module record.
 function moduleGroupLabel(moduleKey) {
-  if (moduleKey === 'P2') return 'Premium Track';
+  if (moduleKey === 'P2') return 'Risque et discipline';
   return DDA.curriculum.modules.find(module => module.id === moduleKey)?.title || moduleKey;
 }
 function moduleTocLessonStatus(entry) {
@@ -3010,7 +3027,7 @@ function openGate(options = {}) {
 function lessonGateInfo(viewId) {
   const lesson = LESSON_REGISTRY.find(entry => entry.viewId === viewId && entry.permission === 'premium_track');
   if (lesson) {
-    return { title: lesson.title, duration: lesson.duration || null, objectives: lesson.objectives || [], premiumReason: lesson.premiumReason || '' };
+    return { title: displayLessonTitle(lesson.id, lesson.title), duration: lesson.duration || null, objectives: lesson.objectives || [], premiumReason: lesson.premiumReason || '' };
   }
   const lab = LAB_REGISTRY.find(entry => entry.viewId === viewId && entry.permission === 'premium_track');
   if (lab) {
@@ -4156,7 +4173,7 @@ function renderPremiumState() {
     set(`p2-progress-${step}-status`, text);
   };
   const p21Status = p21.quizComplete ? 'Validée' : p21.exerciseComplete ? 'En cours' : 'À commencer';
-  const p22Status = p22.quizComplete ? 'Validée' : p22.exerciseComplete ? 'En cours' : p21.quizComplete ? 'À commencer' : 'Après P2.1';
+  const p22Status = p22.quizComplete ? 'Validée' : p22.exerciseComplete ? 'En cours' : p21.quizComplete ? 'À commencer' : 'Après la leçon précédente';
   const labStatus = lab.status === 'validated' ? 'Validé' : lab.status === 'retry' ? 'À reprendre' : p22.quizComplete ? 'À commencer' : 'Après les leçons';
   const assessmentStatus = assessment.passed ? 'Validé' : lab.status === 'validated' ? 'À commencer' : 'Après le Lab';
   set('p2-p21-status', p21Status); set('p2-p22-status', p22Status); set('p2-lab-status', labStatus); set('p2-assessment-status', assessmentStatus);
@@ -4164,7 +4181,7 @@ function renderPremiumState() {
   syncStep('p22', p22.quizComplete ? 'complete' : p22.exerciseComplete ? 'active' : p21.quizComplete ? 'ready' : 'locked', p22Status);
   syncStep('lab', lab.status === 'validated' ? 'complete' : lab.status === 'retry' ? 'active' : p22.quizComplete ? 'ready' : 'locked', labStatus);
   syncStep('assessment', assessment.passed ? 'complete' : lab.status === 'validated' ? 'ready' : 'locked', assessmentStatus);
-  set('premium-track-progress', assessment.passed ? 'Preuve créée · prochaine action : Journal' : lab.status === 'validated' ? 'Lab validé · assessment disponible' : p22.quizComplete ? 'Leçons validées · Lab disponible' : p21.quizComplete ? 'P2.1 validée · P2.2 disponible' : 'Prêt à commencer ? Ta première étape t’attend.');
+  set('premium-track-progress', assessment.passed ? 'Preuve créée · prochaine action : Journal' : lab.status === 'validated' ? 'Atelier validé · évaluation disponible' : p22.quizComplete ? 'Leçons validées · atelier disponible' : p21.quizComplete ? 'Première leçon validée · seconde leçon disponible' : 'Prêt à commencer ? Ta première étape t’attend.');
   const receipt = document.getElementById('premium-proof-receipt');
   if (receipt) receipt.hidden = !proof;
   if (proof) set('p2-proof-date', proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Local timestamp');
