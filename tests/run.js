@@ -625,16 +625,54 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const wrapper = page.locator('[data-select-for="goal"]');
     await wrapper.locator('.dda-select-trigger').click();
     await page.waitForTimeout(220);
+    // The open mobile sheet is reparented to <body> (see the stacking-context
+    // fix below), so it must be found by id, not by a wrapper-scoped query.
     const geometry = await page.evaluate(() => {
-      const menu = document.querySelector('[data-select-for="goal"] .dda-select-menu');
+      const menu = document.getElementById('goal-dda-menu');
       const nav = document.querySelector('.mobile-nav');
       const menuBox = menu.getBoundingClientRect();
       const navBox = nav.getBoundingClientRect();
-      return { position: getComputedStyle(menu).position, menuBottom: menuBox.bottom, navTop: navBox.top, visible: getComputedStyle(menu).visibility === 'visible' };
+      return { position: getComputedStyle(menu).position, menuBottom: menuBox.bottom, navTop: navBox.top, visible: getComputedStyle(menu).visibility === 'visible', parent: menu.parentNode.tagName };
     });
     assert.equal(geometry.position, 'fixed');
     assert.equal(geometry.visible, true);
+    assert.equal(geometry.parent, 'BODY', 'an open mobile sheet must be a direct child of <body>, not nested inside its field — see "mobile onboarding dropdown never overlaps a sibling field" below for why');
     assert.ok(geometry.menuBottom <= geometry.navTop, `dropdown must stay above mobile navigation: ${JSON.stringify(geometry)}`);
+    await context.close();
+  });
+
+  // Real bug (founder-reported, reproduced on real-device screenshots at
+  // 360/390px): opening "Niveau" showed "Objectif pédagogique" bleeding on
+  // top of it instead of its own field's options. Root cause — confirmed by
+  // walking document.elementsFromPoint() at the overlapping coordinates
+  // before the fix: #access.view.active carries a CSS fade-in animation
+  // (`animation: dda-access-enter`), which establishes a stacking context.
+  // That traps the mobile sheet's position:fixed/z-index:100 inside its own
+  // field's local stacking order (z-index:2) instead of letting it escape to
+  // the page root the way position:fixed visually promises — so a LATER
+  // field's trigger, sharing the identical z-index, paints on top of an
+  // EARLIER field's open sheet. The fix reparents the open sheet to <body>.
+  await test('mobile onboarding dropdown never overlaps a sibling field (founder-reported overlap bug)', async () => {
+    const context = await freshContext(browser, { width: 360, height: 780 });
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#access`);
+    await fillSignup(page);
+    await page.waitForSelector('#onboarding-form:not([hidden])');
+    await page.click('[data-select-for="level"] .dda-select-trigger');
+    await page.waitForTimeout(220);
+    const result = await page.evaluate(() => {
+      const goalTrigger = document.querySelector('[data-select-for="goal"] .dda-select-trigger');
+      const r = goalTrigger.getBoundingClientRect();
+      const topElement = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return {
+        topElementIsGoalTrigger: topElement === goalTrigger,
+        topElementInsideLevelMenu: Boolean(topElement.closest('#level-dda-menu')),
+        levelMenuOptionTexts: [...document.querySelectorAll('#level-dda-menu .dda-select-option')].map(o => o.textContent)
+      };
+    });
+    assert.equal(result.topElementIsGoalTrigger, false, '"Objectif pédagogique" must never paint on top of an open "Niveau" sheet');
+    assert.equal(result.topElementInsideLevelMenu, true, 'the open "Niveau" sheet must legitimately cover the rest of the screen while open, like any modal bottom sheet');
+    assert.deepEqual(result.levelMenuOptionTexts, ['Choisir', 'Débutant', 'Intermédiaire', 'Avancé'], 'the open sheet must only ever show its own field\'s options');
     await context.close();
   });
 
@@ -1784,6 +1822,64 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.locator('#journal-list details summary').click();
     await page.locator('#journal-list .journal-proof-source').click();
     assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'lesson-m02', 'Journal source link reaches its real M0.2 lesson');
+    await context.close();
+  });
+
+  // Real bug (founder-reported): a system-looking "Impossible d'enregistrer"
+  // toast seen on mobile around the Journal. No such string exists anywhere
+  // in this codebase (verified by search) — the app never generates a raw
+  // native-looking notification. The real, confirmed defect this audit
+  // found: when the underlying localStorage write genuinely fails (quota,
+  // private browsing, a storage-restricted in-app browser), DDA.save()
+  // already catches that silently and never throws, but every Journal save
+  // path still showed its success toast ("Entrée enregistrée localement.")
+  // unconditionally — telling the learner their entry was saved when it was
+  // not. These two tests prove both halves: the previously-missing honest
+  // failure message, and that a healthy save still gets its normal
+  // confirmation (no regression).
+  await test('Journal save failure (storage unavailable) shows an honest in-app message, never a false "saved" toast', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(context, { 'M0.1': { quizComplete: true } });
+    const page = await context.newPage();
+    const pageErrors = [];
+    page.on('pageerror', error => pageErrors.push(String(error)));
+    await page.goto(`${ACADEMY_BASE}#journal`);
+    await page.evaluate(() => {
+      const original = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (key, value) {
+        if (key === 'dda-prototype-state-v4') throw new DOMException('Quota exceeded', 'QuotaExceededError');
+        return original.call(this, key, value);
+      };
+    });
+    await page.click('#journal-new-entry');
+    await page.fill('#journal-market', 'EUR/USD');
+    await page.fill('#journal-context', 'Simulated storage failure.');
+    await page.click('#journal-step-next');
+    await page.click('#journal-step-next');
+    await page.click('#journal-entry-form button[type="submit"]');
+    const toastText = (await page.locator('#toast').textContent()).trim();
+    assert.equal(toastText.includes('Entrée enregistrée localement'), false, 'a failed save must never claim success');
+    assert.match(toastText, /Impossible d.enregistrer/, 'the learner must see an honest, specific failure message');
+    assert.equal(await page.locator('#storage-warning').isHidden(), false, 'the persistent storage banner also reflects the real failure');
+    assert.deepEqual(pageErrors, [], 'a blocked write must never surface as an uncaught, native-looking error');
+    await context.close();
+  });
+
+  await test('Journal save with healthy storage still shows its normal success toast and actually persists', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(context, { 'M0.1': { quizComplete: true } });
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#journal`);
+    await page.click('#journal-new-entry');
+    await page.fill('#journal-market', 'EUR/USD');
+    await page.fill('#journal-context', 'Healthy storage control case.');
+    await page.click('#journal-step-next');
+    await page.click('#journal-step-next');
+    await page.click('#journal-entry-form button[type="submit"]');
+    const toastText = (await page.locator('#toast').textContent()).trim();
+    assert.equal(toastText, 'Entrée enregistrée localement.');
+    assert.equal(await page.locator('#storage-warning').isHidden(), true);
+    assert.equal(await page.evaluate(() => window.DDA.load().journal.entries.length), 1, 'the entry must actually be persisted when storage genuinely works');
     await context.close();
   });
 

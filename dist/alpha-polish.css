@@ -750,7 +750,8 @@ body.access-mode .prototype-banner{
   max-height:min(62vh,420px);
   overflow:auto;
 }
-.dda-select.is-open .dda-select-menu{opacity:1;visibility:visible;transform:none}
+.dda-select.is-open .dda-select-menu,
+.dda-select-menu.is-open{opacity:1;visibility:visible;transform:none}
 .dda-select-option{
   min-height:48px;
   padding:13px 14px;
@@ -780,8 +781,10 @@ body.access-mode .prototype-banner{
     border-radius:18px;
     transform:translateY(22px);
   }
-  .dda-select.is-open .dda-select-menu{transform:none}
-  .dda-select.is-open .dda-select-menu::before{
+  .dda-select.is-open .dda-select-menu,
+  .dda-select-menu.is-open{transform:none}
+  .dda-select.is-open .dda-select-menu::before,
+  .dda-select-menu.is-open::before{
     content:'Choisir une option';
     display:block;
     padding:4px 4px 10px;
@@ -794,7 +797,14 @@ body.access-mode .prototype-banner{
 }
 
 
-/* Le Bottom Sheet doit être ancré à la fenêtre, jamais au panneau animé. */
+/* Le Bottom Sheet doit être ancré à la fenêtre, jamais au panneau animé.
+   `position:fixed` seul ne suffit pas : cette animation fait de #access.active
+   un contexte d'empilement, ce qui piège le menu fixed dans l'ordre de
+   peinture local de son propre champ (z-index:2) — un champ plus bas dans
+   le formulaire peut alors recouvrir le menu ouvert d'un champ plus haut
+   (bug réel, signalé par le fondateur). app.js déplace donc le menu ouvert
+   en enfant direct de <body> tant qu'il est affiché sur mobile, pour qu'il
+   échappe vraiment à tout contexte d'empilement ancêtre. */
 #access.view.active{animation:dda-access-enter .32s ease both}
 @keyframes dda-access-enter{from{opacity:0}to{opacity:1}}
 @media(max-width:639px){

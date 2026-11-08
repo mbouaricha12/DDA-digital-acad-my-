@@ -681,9 +681,28 @@ function initDdaSelect(select) {
     });
     trigger.setAttribute('aria-invalid', select.getAttribute('aria-invalid') || 'false');
   };
+  // Below 640px the menu becomes a fixed, viewport-anchored "bottom sheet"
+  // (see alpha-polish.css) — its on-screen position no longer depends on
+  // `wrapper` at all. Left nested inside `wrapper` anyway, it still has to
+  // resolve its paint order inside whichever stacking context `wrapper`
+  // happens to sit in (e.g. #access's own fade-in animation creates one),
+  // so a LATER field in the same form — sharing the exact same wrapper
+  // z-index — can paint its own trigger on top of an EARLIER field's open
+  // sheet. That is the confirmed cause of the reported bug: opening
+  // "Niveau" shows "Objectif pédagogique"'s trigger bleeding through on
+  // top of it. Moving the sheet to a direct child of <body> while open
+  // removes it from every ancestor stacking context, so it always paints
+  // above the whole page — matching what position:fixed already visually
+  // promises. Desktop/tablet keep the menu nested (position:absolute,
+  // anchored to the trigger), so it is restored to `wrapper` whenever the
+  // breakpoint isn't the mobile sheet.
+  const isMobileSheet = () => Boolean(window.matchMedia?.('(max-width: 639px)').matches);
+  const restoreMenuHome = () => { if (menu.parentNode !== wrapper) wrapper.appendChild(menu); };
   const open = () => {
     document.querySelectorAll('.dda-select.is-open').forEach(other => { if (other !== wrapper) closeDdaSelect(other); });
+    if (isMobileSheet()) document.body.appendChild(menu); else restoreMenuHome();
     wrapper.classList.add('is-open');
+    menu.classList.add('is-open');
     trigger.setAttribute('aria-expanded', 'true');
   };
   const focusOptionWhenVisible = option => {
@@ -732,13 +751,38 @@ function closeDdaSelect(wrapper) {
   wrapper.classList.remove('is-open');
   const trigger = wrapper.querySelector('.dda-select-trigger');
   trigger?.setAttribute('aria-expanded', 'false');
+  // The open menu may currently live under <body> (mobile bottom sheet —
+  // see open() above) rather than under `wrapper`, so it has to be found by
+  // id (aria-controls), not by a wrapper-scoped query, then returned home.
+  const menuId = trigger?.getAttribute('aria-controls');
+  const menu = menuId && document.getElementById(menuId);
+  if (menu) {
+    menu.classList.remove('is-open');
+    if (menu.parentNode !== wrapper) wrapper.appendChild(menu);
+  }
 }
 ['level', 'goal', 'time', 'terminal-instrument', 'terminal-timeframe', 'p2-direction', 'broker-market', 'broker-use', 'support-subject', 'profile-level', 'profile-goal', 'profile-time'].forEach(id => initDdaSelect(document.getElementById(id)));
 document.addEventListener('click', event => {
-  if (!event.target.closest('.dda-select')) document.querySelectorAll('.dda-select.is-open').forEach(closeDdaSelect);
+  // The open menu can be a direct child of <body> (mobile bottom sheet), so
+  // "inside the control" must also accept a click that lands in the
+  // detached menu itself, not only inside its original `.dda-select` wrapper.
+  if (!event.target.closest('.dda-select, .dda-select-menu')) document.querySelectorAll('.dda-select.is-open').forEach(closeDdaSelect);
 });
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') document.querySelectorAll('.dda-select.is-open').forEach(closeDdaSelect);
+});
+// Crossing the mobile-sheet breakpoint (e.g. a device rotation) while a
+// menu is open would otherwise leave it detached at <body> under desktop's
+// position:absolute rules (or vice versa), rendered at a meaningless
+// location — simplest correct behavior is to close any open menu so the
+// next open() re-evaluates isMobileSheet() and reparents correctly.
+let ddaSelectWasMobileSheet = Boolean(window.matchMedia?.('(max-width: 639px)').matches);
+window.addEventListener('resize', () => {
+  const nowMobileSheet = Boolean(window.matchMedia?.('(max-width: 639px)').matches);
+  if (nowMobileSheet !== ddaSelectWasMobileSheet) {
+    ddaSelectWasMobileSheet = nowMobileSheet;
+    document.querySelectorAll('.dda-select.is-open').forEach(closeDdaSelect);
+  }
 });
 
 const titles = {
@@ -3654,6 +3698,21 @@ document.getElementById('weekly-review-form').addEventListener('submit', event =
   closeWeeklyReview();
   showToast('Revue hebdomadaire enregistrée localement.');
 });
+// A Journal save can silently fail at the localStorage layer (quota
+// exceeded, private-browsing storage caps, some in-app Android browsers
+// that restrict storage outright) — DDA.save() already catches that
+// internally and never throws, but every Journal call site below used to
+// show its "saved" toast unconditionally, regardless of whether anything
+// was actually persisted. DDA.storageAvailable() reflects the outcome of
+// the write that just ran (it's set synchronously inside save(), which
+// every journal mutation above funnels through), so checking it right
+// after is enough to tell a real failure from a real success — no native
+// browser-style notification, just one honest in-app message either way.
+function journalSaveToast(successMessage) {
+  showToast(DDA.storageAvailable()
+    ? successMessage
+    : 'Impossible d’enregistrer : stockage indisponible sur cet appareil. Ce changement ne sera pas conservé après la fermeture de la page.');
+}
 document.getElementById('journal-new-entry').addEventListener('click', event => openJournalComposer(null, event.currentTarget));
 document.getElementById('journal-composer-back').addEventListener('click', closeJournalComposer);
 document.getElementById('journal-step-prev').addEventListener('click', () => goToJournalStep(journalStep - 1));
@@ -3663,7 +3722,7 @@ document.getElementById('journal-composer-delete').addEventListener('click', () 
   deleteJournalEntry(journalEditingId);
   trackEvent('journal_entry_deleted', {});
   closeJournalComposer();
-  showToast('Entrée supprimée.');
+  journalSaveToast('Entrée supprimée.');
 });
 document.getElementById('journal-entry-form').addEventListener('submit', event => {
   event.preventDefault();
@@ -3684,7 +3743,7 @@ document.getElementById('journal-entry-form').addEventListener('submit', event =
     trackEvent('journal_entry_created', {});
   }
   closeJournalComposer();
-  showToast(editingId ? 'Entrée mise à jour.' : 'Entrée enregistrée localement.');
+  journalSaveToast(editingId ? 'Entrée mise à jour.' : 'Entrée enregistrée localement.');
 });
 document.getElementById('journal-list').addEventListener('click', event => {
   const editButton = event.target.closest('.journal-entry-edit');
@@ -3698,7 +3757,7 @@ document.getElementById('journal-list').addEventListener('click', event => {
   } else if (deleteButton) {
     deleteJournalEntry(deleteButton.dataset.id);
     trackEvent('journal_entry_deleted', {});
-    showToast('Entrée supprimée.');
+    journalSaveToast('Entrée supprimée.');
   }
 });
 document.getElementById('journal-plan-form').addEventListener('submit', event => {
@@ -3713,7 +3772,7 @@ document.getElementById('journal-plan-form').addEventListener('submit', event =>
     pointsToVerify: document.getElementById('plan-checkpoints').value
   });
   trackEvent('journal_plan_saved', {});
-  showToast('Plan personnel enregistré.');
+  journalSaveToast('Plan personnel enregistré.');
 });
 
 document.getElementById('support-form').addEventListener('submit', event => {
