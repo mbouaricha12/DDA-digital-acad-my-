@@ -1136,14 +1136,69 @@ function bffVerifierErrorMessage(error, genericMessage) {
   if (code === 'recovery_verifier_expired' || code === 'signup_verifier_expired') {
     return 'Ce lien doit être ouvert dans le même navigateur que celui utilisé pour la demande, et la demande ne doit pas avoir expiré. Fais une nouvelle demande.';
   }
+  if (code === 'oauth_verifier_expired') {
+    return 'La connexion avec Google doit se terminer dans le même onglet que celui qui l’a démarrée, et la demande ne doit pas avoir expiré. Réessaie « Continuer avec Google ».';
+  }
+  if (code === 'oauth_email_unverified') {
+    return 'Ton compte Google n’a pas d’adresse e-mail vérifiée. Vérifie-la auprès de Google, ou utilise l’e-mail et le mot de passe.';
+  }
   return genericMessage;
+}
+
+// Google OAuth return (founder directive, 2026-11): GoTrue's own redirect
+// carries the STANDARD OAuth error params (`error`/`error_description`) when
+// the user refuses consent at Google, or `oauth_provider_not_configured`
+// when bff/src/app.js's /v1/auth/oauth/google/start route bounced back
+// because the founder has not finished enabling the provider in the
+// Supabase dashboard yet — see that route's own comment. Each gets its own
+// honest, specific message rather than one generic "connection failed".
+function oauthErrorMessage(code) {
+  if (code === 'access_denied') return 'Tu as annulé la connexion avec Google. Tu peux réessayer, ou utiliser l’e-mail et le mot de passe.';
+  if (code === 'oauth_provider_not_configured' || code === 'oauth_not_configured') return 'La connexion avec Google n’est pas encore activée sur ce compte. Utilise l’e-mail et le mot de passe en attendant.';
+  if (code === 'rate_limited') return 'Trop de tentatives. Réessaie dans quelques minutes.';
+  if (code === 'server_error') return 'La connexion avec Google est momentanément indisponible. Réessaie dans un instant, ou utilise l’e-mail et le mot de passe.';
+  return 'La connexion avec Google a échoué. Réessaie, ou utilise l’e-mail et le mot de passe.';
 }
 
 async function handleBffVerificationToken() {
  const params=new URLSearchParams(location.search),hashParams=new URLSearchParams(location.hash.slice(1));
  const recovery=window.DDA_AUTH_RECOVERY===true||params.get('type')==='recovery'||hashParams.get('type')==='recovery';
  const token=window.DDA_VERIFY_TOKEN||params.get('token_hash')||params.get('token')||hashParams.get('token_hash')||hashParams.get('token'),code=window.DDA_AUTH_CODE||params.get('code');
- delete window.DDA_VERIFY_TOKEN;delete window.DDA_AUTH_RECOVERY;delete window.DDA_AUTH_CODE;if(!window.DDABFF?.enabled())return;
+ // Google OAuth return (founder directive, 2026-11): Supabase bounces the
+ // browser back to the exact redirect_to bff/src/app.js's start route gave
+ // it, which always carries this marker — set once, server-side, never
+ // guessed from the presence of `code` alone (recovery and signup-
+ // confirmation links also carry a bare `code`; this is what tells an OAuth
+ // return apart from either of those). Read from the SAME window globals
+ // academy.html's inline head script stashes `code`/`type=recovery` into
+ // (window.DDA_OAUTH_PROVIDER / window.DDA_OAUTH_ERROR), never from
+ // location.search/hash directly: by the time this function runs, that
+ // script has already stripped the entire query string from the address
+ // bar (privacy hygiene, same as it does for `code`/`token`), so params
+ // read here would otherwise always be empty.
+ const oauthProvider=window.DDA_OAUTH_PROVIDER||params.get('auth')||hashParams.get('auth');
+ const oauthError=window.DDA_OAUTH_ERROR||params.get('error')||hashParams.get('error');
+ delete window.DDA_VERIFY_TOKEN;delete window.DDA_AUTH_RECOVERY;delete window.DDA_AUTH_CODE;delete window.DDA_OAUTH_PROVIDER;delete window.DDA_OAUTH_ERROR;if(!window.DDABFF?.enabled())return;
+ if(oauthProvider==='oauth-google'){
+  showView('access',false,'replace');
+  const panel=document.getElementById('bff-verify-panel'),message=document.getElementById('bff-verify-message'),form=document.getElementById('signup-form');
+  if(panel)panel.hidden=false;if(form)form.hidden=true;
+  if(oauthError){if(message)message.textContent=oauthErrorMessage(oauthError);return;}
+  if(!code){if(message)message.textContent='Lien de connexion Google incomplet. Réessaie « Continuer avec Google ».';return;}
+  if(message)message.textContent='Connexion avec Google en cours…';
+  try{
+   await window.DDABFF.exchangeOAuthCode('google',code);
+   const user=await hydrateRemoteSession();
+   if(!user)throw new Error('session_missing');
+   revealAdminLinkIfAdmin();
+   refreshServerPremiumEntitlement();
+   showOnboardingAfterRemoteAuth(user);
+  }catch(error){
+   if(panel)panel.hidden=false;if(form)form.hidden=true;
+   if(message)message.textContent=bffVerifierErrorMessage(error,'La connexion avec Google a échoué ou le lien a expiré. Réessaie « Continuer avec Google ».');
+  }
+  return;
+ }
  if(recovery)showView('access',false,'replace');
  if(recovery&&code){const form=document.getElementById('bff-reset-password-form');document.getElementById('signup-form').hidden=true;document.getElementById('bff-recovery-form').hidden=true;form.hidden=false;form.dataset.recoveryReady='false';
   try{await window.DDABFF.exchangeRecoveryCode(code);form.dataset.recoveryReady='true';document.getElementById('reset-password-error').textContent='';}
@@ -1170,6 +1225,25 @@ async function handleBffVerificationToken() {
 function initBffAuthUi() {
   if (!window.DDABFF?.enabled()) return;
   document.getElementById('bff-auth-tools').hidden = false;
+  // The wrap's own visibility then stays in sync with #signup-form's
+  // (a :has() rule in alpha-polish.css) — shown here once,
+  // exactly like #bff-auth-tools above, never re-toggled at every
+  // mode-switch call site the way #signup-form itself is.
+  const googleWrap = document.getElementById('bff-oauth-google-wrap');
+  if (googleWrap) googleWrap.hidden = false;
+  const googleButton = document.getElementById('bff-oauth-google');
+  if (googleButton) {
+    googleButton.addEventListener('click', () => {
+      const url = window.DDABFF.oauthGoogleStartUrl();
+      // A real full-page navigation — never a fetch (see bff-client.js's
+      // oauthGoogleStartUrl comment): this is a redirect-based sign-in flow,
+      // not an API call, and the one kind of request that reliably carries
+      // the httpOnly verifier cookie the BFF is about to set on its own
+      // redirect through Supabase and Google — mobile-safe, no popup, same
+      // as the rest of this site.
+      if (url) window.location.href = url;
+    });
+  }
   setBffAuthMode('signup');
   // Show/hide password toggle (P0.4) — a mistyped password that the learner
   // cannot see is a real cause of "it worked at signup, not at login".

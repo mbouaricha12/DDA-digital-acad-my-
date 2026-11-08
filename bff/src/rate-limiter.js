@@ -42,7 +42,9 @@ const RULES = {
   'verify-email': { windowSeconds: 3600, limit: 10 },
   login: { windowSeconds: 900, limit: 10 },
   'password-reset-request': { windowSeconds: 3600, limit: 5 },
-  'password-reset-confirm': { windowSeconds: 3600, limit: 10 }
+  'password-reset-confirm': { windowSeconds: 3600, limit: 10 },
+  'oauth-google-start': { windowSeconds: 3600, limit: 30 },
+  'oauth-google-exchange': { windowSeconds: 3600, limit: 30 }
 };
 
 const LOGIN_PER_EMAIL = { windowSeconds: 900, limit: 5 };

@@ -91,6 +91,49 @@ class SupabaseAuthAdapter {
   async exchangeSignupCode(code, codeVerifier) {
     return this.exchangePkceCode(code, codeVerifier);
   }
+  // Google OAuth sign-in (founder directive, 2026-11): once GoTrue has
+  // completed its own handshake with Google and bounced the browser back to
+  // our redirect_to with a one-time `code`, that code is resolved via the
+  // EXACT same PKCE exchange as recovery/signup above — GoTrue does not
+  // distinguish the flow that produced the code, only that the submitted
+  // code_verifier hashes to the code_challenge given when the flow started.
+  // No third near-duplicate HTTP call is written; this is a named alias onto
+  // the one real implementation.
+  async exchangeOAuthCode(code, codeVerifier) {
+    return this.exchangePkceCode(code, codeVerifier);
+  }
+
+  // Builds the URL the BROWSER (never this server) must navigate to, to
+  // start a GoTrue OAuth flow. This performs no network call itself — GoTrue
+  // validates/redirects when the user's own browser visits it, exactly as
+  // the official supabase-js `signInWithOAuth()` does from the browser. PKCE
+  // is requested the same way as register()/requestPasswordReset() above
+  // (`code_challenge` + `code_challenge_method=S256`): GoTrue mints the
+  // returned `code` bound to this challenge, so only the browser holding the
+  // matching code_verifier (this server's own encrypted, httpOnly cookie —
+  // see app.js) can ever redeem it.
+  buildAuthorizeUrl({ provider, redirectTo, codeChallenge }) {
+    const url = new URL(`${this.url}/auth/v1/authorize`);
+    url.searchParams.set('provider', provider);
+    if (redirectTo) url.searchParams.set('redirect_to', redirectTo);
+    if (codeChallenge) {
+      url.searchParams.set('code_challenge', codeChallenge);
+      url.searchParams.set('code_challenge_method', 'S256');
+    }
+    return url.toString();
+  }
+
+  // GoTrue's public, unauthenticated settings endpoint reports which social
+  // providers are currently enabled on this project (documented at
+  // https://supabase.com/docs/guides/self-hosting/self-hosted-oauth —
+  // `curl .../auth/v1/settings` returns `{ "external": { "google": true, ... } }`).
+  // Checked BEFORE ever redirecting a learner toward Google: if the founder
+  // has not finished enabling the provider in the Supabase dashboard yet,
+  // this lets the start route bounce back with an honest, specific reason
+  // instead of sending the browser into GoTrue's own raw error response.
+  async getProviderSettings() {
+    return this.publicRequest('/auth/v1/settings', { method: 'GET' });
+  }
 
   async login({ email, password }) {
     return this.publicRequest('/auth/v1/token?grant_type=password', { method: 'POST', body: JSON.stringify({ email: normalizeEmail(email), password }) });
