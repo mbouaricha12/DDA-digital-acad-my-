@@ -118,7 +118,23 @@
 .lesson-main .lesson-header{max-width:700px}
 .lesson-main .lesson-header h1{font-size:clamp(2.4rem,5.3vw,5rem);line-height:.94}
 .lesson-main .lesson-lead{max-width:620px;font-size:clamp(1rem,1.7vw,1.22rem);line-height:1.65}
-.lesson-main .lesson-loop{margin-top:30px;padding:11px 14px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(255,255,255,.035)}
+/* Bug fix (founder mobile report, DDA Lab): this pill shape is only correct
+   while .lesson-loop renders as a single-row rail (desktop, or the
+   horizontal-scroll rail used ≥601px — see styles.css's own ≤720px rule).
+   Below 601px, styles.css's "UX pass 01" (≈line 3031 there) already
+   replaces it with a readable vertical sequence, with its own padding,
+   border and a 14px radius designed for a tall, multi-row block. This rule
+   used to apply unconditionally and, having a higher selector specificity
+   (".lesson-main .lesson-loop" vs styles.css's plain ".lesson-loop") while
+   loading after styles.css in <head>, it always won — so the 999px pill
+   radius kept being applied to the tall stacked list too, ballooning into
+   an oversized rounded blob whose curved edges visually overlapped the
+   step bullets and the start of each label ("Essayer", "Vérifier"…).
+   Scoping it to ≥601px removes that conflict without changing anything
+   at the width it was actually designed for. */
+@media(min-width:601px){
+  .lesson-main .lesson-loop{margin-top:30px;padding:11px 14px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(255,255,255,.035)}
+}
 .lesson-main .lesson-copy{max-width:700px;padding-top:26px;border-top:1px solid var(--dda-rule)}
 .lesson-main .learning-check,.lesson-main .comparison-block{border-radius:2px 16px 2px 16px;box-shadow:10px 10px 0 rgba(84,197,232,.045)}
 .lesson-main .result-card{border-radius:2px 20px 2px 20px;background:linear-gradient(135deg,rgba(24,155,146,.15),rgba(255,255,255,.035))}
@@ -1542,8 +1558,26 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
    leak against it. Scoped to #lab only: never changes Premium Track's own
    look. Also fixes the 5-item desktop grid, previously hardcoded to 4
    columns (repeat(4,...)), which left the 5th step wrapping alone into an
-   orphaned, visually empty row. */
-#lab .premium-progress-strip{grid-template-columns:repeat(5,minmax(0,1fr));border-color:rgba(174,191,213,.18);background:transparent}
+   orphaned, visually empty row.
+
+   Bug fix (founder mobile report): that 5-column grid-template-columns used
+   to apply unconditionally, i.e. at every width. styles.css already has its
+   own, correct mobile fix for this exact component (≈line 3072 there,
+   "DDA UX pass 02 — Lab catalog"), stacking it to one column via
+   `@media(max-width:760px){#lab .premium-progress-strip{grid-template-columns:1fr}}`.
+   But because this file loads after styles.css in <head> and both rules
+   share the same selector specificity (#lab .premium-progress-strip), this
+   unconditional declaration always won the cascade, on mobile included —
+   forcing 5 equal ~24px-wide columns at 390px width and splitting every
+   step label ("Formuler une demande claire"…) into one or two letters per
+   line. Moving it into a ≥761px query (the exact complement of styles.css's
+   ≤760px breakpoint for this component) restores styles.css's existing
+   mobile stacking without changing the desktop 5-column layout this
+   comment describes. */
+@media(min-width:761px){
+  #lab .premium-progress-strip{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+#lab .premium-progress-strip{border-color:rgba(174,191,213,.18);background:transparent}
 #lab .premium-progress-strip li{background:linear-gradient(145deg,rgba(17,42,68,.78),rgba(7,18,31,.92));border-right-color:rgba(174,191,213,.14)}
 #lab .premium-progress-strip li:not(:last-child)::after{background:rgba(216,174,97,.35)}
 #lab .premium-progress-index{border-color:rgba(174,191,213,.28);color:#9fb0c4;background:rgba(255,255,255,.04)}
