@@ -2691,6 +2691,126 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  console.log('\n-- AD. Academy sidebar restructure — Academy group, Mes Leçons/Exercices & Quiz deep-links, Certificats, Communauté, DDA Premium card (founder reference maquette) --');
+
+  await test('the Academy section opens expanded by default on desktop and collapses/expands on click, without touching routing', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(await page.getAttribute('#nav-academy-toggle', 'aria-expanded'), 'true', 'expanded by default, matching the maquette');
+    assert.equal(await page.isVisible('.sidebar .nav-item[data-view="path"]'), true, 'Mes Parcours is visible without any extra click');
+    await page.click('#nav-academy-toggle');
+    assert.equal(await page.getAttribute('#nav-academy-toggle', 'aria-expanded'), 'false');
+    assert.equal(await page.isVisible('.sidebar .nav-item[data-view="path"]'), false, 'collapsing really hides the sub-items');
+    await page.click('#nav-academy-toggle');
+    assert.equal(await page.getAttribute('#nav-academy-toggle', 'aria-expanded'), 'true');
+    assert.equal(await page.isVisible('.sidebar .nav-item[data-view="path"]'), true, 'expanding again restores them');
+    await context.close();
+  });
+
+  await test('"Mes Leçons" and "Exercices & Quiz" follow the real current lesson, and Exercices & Quiz opens straight on that lesson\'s real Exercice/Quiz tab', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(await page.getAttribute('#nav-current-lesson', 'data-view'), 'lesson', 'Mes Leçons targets the real current lesson (M0.1 for a fresh learner)');
+    assert.equal(await page.getAttribute('#nav-current-exercise', 'data-view'), 'lesson');
+    assert.equal(await page.getAttribute('#nav-current-exercise', 'data-scroll-to'), 'lesson-panel-exercise');
+    await page.click('#nav-current-exercise');
+    await page.waitForSelector('#lesson.view.active');
+    await page.waitForFunction(() => document.getElementById('lesson-tab-exercise')?.getAttribute('aria-selected') === 'true');
+    assert.equal(await page.isVisible('#lesson-panel-exercise'), true, 'the real Exercice/Quiz panel is actually shown, not just targeted');
+    await context.close();
+  });
+
+  await test('"Mes Leçons" and "Exercices & Quiz" advance together once a lesson is completed (no stale M0.1 shortcut)', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'M0.1': { lessonViewed: true, exerciseComplete: true, quizComplete: true } });
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(await page.getAttribute('#nav-current-lesson', 'data-view'), 'lesson-m02', 'Mes Leçons moved on to the real next lesson, M0.2');
+    assert.equal(await page.getAttribute('#nav-current-exercise', 'data-view'), 'lesson-m02');
+    assert.equal(await page.getAttribute('#nav-current-exercise', 'data-scroll-to'), 'lesson-panel-exercise-m2', 'the exercise deep-link uses M0.2\'s real panel id');
+    await context.close();
+  });
+
+  await test('"Certificats" opens the real certification-preview panel inside Progression, honestly — not a fabricated standalone Certificats page', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    await page.click('.sidebar .nav-item[data-view="progress"][data-scroll-to="certificate-panel"]');
+    await page.waitForSelector('#progress.view.active');
+    await page.waitForFunction(() => {
+      const el = document.getElementById('certificate-panel');
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      return r.top < window.innerHeight && r.bottom > 0;
+    }, { timeout: 4000 });
+    await context.close();
+  });
+
+  await test('"Communauté" is a direct, working sidebar entry to the real (honest "coming soon") community view', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    await page.click('.sidebar .nav-item[data-view="community"]');
+    await page.waitForSelector('#community.view.active');
+    await context.close();
+  });
+
+  await test('the sidebar\'s DDA Premium card opens the real Premium preview, and the equivalent mobile-drawer card is reachable and not clipped at 390px', async () => {
+    const context = await freshContext(browser, { width: 1440, height: 900 });
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.match(await page.textContent('.sidebar .sidebar-premium-card'), /DDA Premium/);
+    await page.click('.sidebar .sidebar-premium-card [data-view="membership"]');
+    await page.waitForSelector('#membership.view.active');
+    await context.close();
+
+    const mobileContext = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(mobileContext);
+    const mobilePage = await mobileContext.newPage();
+    await mobilePage.goto(`${ACADEMY_BASE}#dashboard`);
+    await mobilePage.waitForSelector('#dashboard.view.active');
+    await mobilePage.click('#mobile-menu-toggle');
+    await mobilePage.waitForSelector('#mobile-drawer:not([hidden])');
+    const card = mobilePage.locator('.mobile-drawer .sidebar-premium-card');
+    await card.scrollIntoViewIfNeeded();
+    assert.equal(await card.isVisible(), true, 'the Premium card is reachable in the mobile drawer, not buried off-screen');
+    const box = await card.boundingBox();
+    assert.ok(box, 'the Premium card has a real, measurable box in the drawer');
+    assert.ok(box.width <= 390, 'the Premium card never forces the drawer wider than the viewport');
+    assert.equal(await mobilePage.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), true, 'no page-level horizontal overflow at 390px with the drawer open');
+    await mobileContext.close();
+  });
+
+  await test('the restructured Academy group and DDA Premium card render with no horizontal overflow at 360/390/1440px, drawer included', async () => {
+    for (const viewport of [{ width: 360, height: 780 }, { width: 390, height: 844 }, { width: 1440, height: 900 }]) {
+      const context = await freshContext(browser, viewport);
+      await seedLocalLearner(context);
+      const page = await context.newPage();
+      await page.goto(`${ACADEMY_BASE}#dashboard`);
+      await page.waitForSelector('#dashboard.view.active');
+      if (viewport.width < 860) {
+        await page.click('#mobile-menu-toggle');
+        await page.waitForSelector('#mobile-drawer:not([hidden])');
+      }
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      assert.ok(overflow <= 1, `no horizontal overflow at ${viewport.width}px (measured ${overflow}px)`);
+      await context.close();
+    }
+  });
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 

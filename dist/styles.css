@@ -213,6 +213,29 @@ a.nav-item[hidden]{display:none}
 @media(prefers-reduced-motion:reduce){.nav-item{transition:none}}
 .nav-item:has(.nav-status-tag){flex-wrap:wrap;row-gap:4px}
 .nav-status-tag{margin-left:34px;padding:2px 8px;border-radius:999px;border:1px solid rgba(217,164,65,.35);background:rgba(217,164,65,.1);color:var(--gold);font-size:10px;font-weight:700;letter-spacing:.02em;white-space:nowrap;flex:none}
+
+/* Academy nav section (founder reference maquette): a collapsible group
+   header — same base look as .nav-item, plus a chevron that rotates to show
+   open/closed state — and the indented real nav-items underneath it. */
+.nav-section-toggle{display:flex;align-items:center;gap:14px;width:100%;padding:13px 15px;border-radius:13px;background:none;border:0;font:inherit;font-weight:700;color:var(--muted);text-align:left;cursor:pointer;transition:background .15s ease,color .15s ease}
+.nav-section-toggle:hover{background:var(--navy-700);color:var(--white)}
+.nav-section-toggle .icon:first-child{width:20px;height:20px}
+.nav-section-chevron{width:16px;height:16px;margin-left:auto;transform:rotate(90deg);transition:transform .2s ease}
+.nav-section-toggle[aria-expanded="false"] .nav-section-chevron{transform:rotate(0deg)}
+@media(prefers-reduced-motion:reduce){.nav-section-toggle,.nav-section-chevron{transition:none}}
+.nav-group{display:grid;gap:4px;padding-left:14px;margin:2px 0 6px}
+.nav-group[hidden]{display:none}
+.nav-item.nav-subitem{padding-left:15px}
+
+/* Sidebar-bottom "DDA Premium" card (founder reference maquette) — a real
+   link to the already-built honest Premium preview (membership view), never
+   a payment flow: DDA has no active checkout anywhere in the product. */
+.sidebar-premium-card{display:grid;gap:8px;margin:14px 0 2px;padding:16px;border:1px solid rgba(217,164,65,.35);border-radius:14px;background:linear-gradient(160deg,rgba(217,164,65,.14),rgba(217,164,65,.03))}
+.sidebar-premium-icon{width:22px;height:22px;color:var(--gold)}
+.sidebar-premium-card strong{color:var(--gold-soft);font-size:14px}
+.sidebar-premium-card p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.5}
+.sidebar-premium-card .secondary-action{min-height:40px;padding:10px 14px;font-size:13px}
+
 .plan-label{display:inline-block;color:var(--gold);font-size:12px;margin:0 8px 15px}
 .profile-chip{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:8px;background:none;border:0;font:inherit;color:inherit;cursor:pointer}
 .profile-chip b{font-weight:800}
@@ -796,7 +819,7 @@ a.nav-item[hidden]{display:none}
 .modules-track .module-id{font-family:Georgia,serif;color:var(--gold-soft);font-size:13px;width:30px;flex:none}
 
 /* ---------- Certification preview (Progression) ---------- */
-.certificate-panel{margin-top:16px}
+.certificate-panel{margin-top:16px;scroll-margin-top:110px}
 .certificate-locked,.certificate-gate{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:26px 16px;margin-top:16px;border:1px dashed rgba(255,255,255,.14);border-radius:var(--r-md);color:rgba(244,247,252,.65)}
 .certificate-locked .icon{color:rgba(244,247,252,.65);width:24px;height:24px}
 .certificate-locked p,.certificate-gate p{margin:0;font-size:13px;max-width:360px}
@@ -2279,6 +2302,7 @@ body.public-shell{background:var(--dda-ivory);color:#15243a}
 .lesson-tab:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .lesson-tab.is-active{color:var(--ivory);border-color:var(--gold)}
 .lesson-tab-panel[hidden]{display:none}
+.lesson-tab-panel{scroll-margin-top:90px}
 .lesson-beat{
   counter-increment:dda-beat;
   position:relative;

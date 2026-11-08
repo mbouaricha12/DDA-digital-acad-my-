@@ -111,6 +111,7 @@
       <symbol id="icon-blocked" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M6.3 6.3l11.4 11.4"/></symbol>
       <symbol id="icon-photo" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.5" cy="10" r="1.8"/><path d="M3 16.5l5.5-5 4 3.5 3-2.5L21 16"/></symbol>
       <symbol id="icon-award" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5.5"/><path d="M9 13.5L7.5 21l4.5-2.5L16.5 21 15 13.5"/></symbol>
+      <symbol id="icon-crown" viewBox="0 0 24 24"><path d="M4 18h16l1.4-8.6-4.9 3.2L12 6l-4.5 6.6-4.9-3.2Z"/><path d="M5.5 20.5h13"/></symbol>
       <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></symbol>
       <symbol id="icon-journal" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M4 7h2M4 17h2M8 8h8M8 12h8M8 16h5"/></symbol>
       <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
@@ -127,32 +128,29 @@
         <span class="brand-name">Darius Digital Academy</span>
       </a>
       <nav>
-        <p class="nav-section-label">Formation</p>
-        <button class="nav-item active" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Aujourd’hui</button>
-        <button class="nav-item" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mes Parcours</button>
-        <button class="nav-item" id="nav-current-lesson" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Cours en cours</button>
-        <p class="nav-section-label">S’entraîner</p>
-        <button class="nav-item" data-view="dashboard" data-scroll-to="analysis-terminal"><svg class="icon"><use href="#icon-chart"/></svg> Terminal d’analyse</button>
-        <button class="nav-item" data-view="practice"><svg class="icon"><use href="#icon-target"/></svg> Pratique avancée</button>
-        <p class="nav-section-label">Suivi</p>
-        <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
-        <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal de trading</button>
-        <p class="nav-section-label">Ressources</p>
+        <button class="nav-item active" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Mon Espace</button>
+
+        <button class="nav-section-toggle" type="button" id="nav-academy-toggle" aria-expanded="true" aria-controls="nav-academy-group"><svg class="icon"><use href="#icon-book"/></svg> Academy <svg class="icon nav-section-chevron" aria-hidden="true"><use href="#icon-chevron-right"/></svg></button>
+        <div class="nav-group" id="nav-academy-group">
+          <button class="nav-item nav-subitem" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mes Parcours</button>
+          <button class="nav-item nav-subitem" id="nav-current-lesson" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Mes Leçons</button>
+          <button class="nav-item nav-subitem" id="nav-current-exercise" data-view="lesson" data-scroll-to="lesson-panel-exercise"><svg class="icon"><use href="#icon-check-circle"/></svg> Exercices &amp; Quiz</button>
+          <button class="nav-item nav-subitem" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
+          <button class="nav-item nav-subitem" data-view="progress" data-scroll-to="certificate-panel"><svg class="icon"><use href="#icon-award"/></svg> Certificats</button>
+        </div>
+
         <button class="nav-item" data-view="lab"><svg class="icon"><use href="#icon-award"/></svg> DDA Lab</button>
         <button class="nav-item" data-view="intelligence"><svg class="icon"><use href="#icon-chat"/></svg> DDA AI<span class="nav-status-tag">Beta</span></button>
+        <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal de trading</button>
+        <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
+        <button class="nav-item" data-view="community"><svg class="icon"><use href="#icon-users"/></svg> Communauté</button>
 
-
-
-
-        <button class="nav-item" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
+        <p class="nav-section-label">Mon travail</p>
+        <button class="nav-item" data-view="dashboard" data-scroll-to="analysis-terminal"><svg class="icon"><use href="#icon-chart"/></svg> Terminal d’analyse</button>
+        <button class="nav-item" data-view="practice"><svg class="icon"><use href="#icon-target"/></svg> Pratique avancée</button>
         <button class="nav-item" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg> Marchés & BRVM</button>
-
-
-
-
         <button class="nav-item" data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg> Broker Hub</button>
         <p class="nav-section-label">Compte</p>
-        <button class="nav-item" data-view="membership"><svg class="icon"><use href="#icon-spark"/></svg> DDA Premium</button>
         <button class="nav-item" data-view="support"><svg class="icon"><use href="#icon-help"/></svg> Aide & support</button>
         <button class="nav-item" data-view="profile"><svg class="icon"><use href="#icon-user"/></svg> Profil</button>
         <a class="nav-item" href="admin.html" id="sidebar-admin-link" hidden><svg class="icon"><use href="#icon-shield"/></svg> Back-office</a>
@@ -161,6 +159,12 @@
         <a class="nav-item academy-public-exit" href="index.html">← Site public</a>
         <span class="plan-label" id="sidebar-plan">DDA Free</span>
         <button class="profile-chip" data-view="profile"><span class="avatar" id="profile-avatar">RD</span><span><b id="profile-name">Richard</b><br><small>Mon profil (local)</small></span></button>
+        <div class="sidebar-premium-card">
+          <svg class="icon sidebar-premium-icon" aria-hidden="true"><use href="#icon-crown"/></svg>
+          <strong>DDA Premium</strong>
+          <p>Débloque les leçons Premium (Risque &amp; Discipline), le Lab IA avancé — livrable et projet final — et la revue hebdomadaire guidée.</p>
+          <button type="button" class="secondary-action" data-view="membership">Découvrir Premium <span>→</span></button>
+        </div>
       </div>
     </aside>
 
@@ -173,27 +177,38 @@
         </a>
         <button class="icon-button" type="button" id="mobile-drawer-close" aria-label="Fermer le menu"><svg class="icon"><use href="#icon-close"/></svg></button>
       </div>
-      <p class="nav-section-label">Apprendre</p>
-      <button class="nav-item" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Aujourd’hui</button>
-      <button class="nav-item" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mes Parcours</button>
-      <button class="nav-item" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Cours en cours</button>
-      <p class="nav-section-label">Pratiquer</p>
-      <button class="nav-item" data-view="dashboard" data-scroll-to="analysis-terminal"><svg class="icon"><use href="#icon-chart"/></svg> Terminal d’analyse</button>
-      <button class="nav-item" data-view="practice"><svg class="icon"><use href="#icon-target"/></svg> Pratique avancée</button>
-      <p class="nav-section-label">Mon travail</p>
-      <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
-      <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal de trading</button>
-      <p class="nav-section-label">Explorer</p>
+      <button class="nav-item" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Mon Espace</button>
+
+      <button class="nav-section-toggle" type="button" id="drawer-academy-toggle" aria-expanded="true" aria-controls="drawer-academy-group"><svg class="icon"><use href="#icon-book"/></svg> Academy <svg class="icon nav-section-chevron" aria-hidden="true"><use href="#icon-chevron-right"/></svg></button>
+      <div class="nav-group" id="drawer-academy-group">
+        <button class="nav-item nav-subitem" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mes Parcours</button>
+        <button class="nav-item nav-subitem" id="drawer-current-lesson" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Mes Leçons</button>
+        <button class="nav-item nav-subitem" id="drawer-current-exercise" data-view="lesson" data-scroll-to="lesson-panel-exercise"><svg class="icon"><use href="#icon-check-circle"/></svg> Exercices &amp; Quiz</button>
+        <button class="nav-item nav-subitem" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
+        <button class="nav-item nav-subitem" data-view="progress" data-scroll-to="certificate-panel"><svg class="icon"><use href="#icon-award"/></svg> Certificats</button>
+      </div>
+
       <button class="nav-item" data-view="lab"><svg class="icon"><use href="#icon-award"/></svg> DDA Lab</button>
       <button class="nav-item" data-view="intelligence"><svg class="icon"><use href="#icon-chat"/></svg> DDA AI<span class="nav-status-tag">Beta</span></button>
-      <button class="nav-item" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
+      <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal de trading</button>
+      <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
+      <button class="nav-item" data-view="community"><svg class="icon"><use href="#icon-users"/></svg> Communauté</button>
+
+      <p class="nav-section-label">Mon travail</p>
+      <button class="nav-item" data-view="dashboard" data-scroll-to="analysis-terminal"><svg class="icon"><use href="#icon-chart"/></svg> Terminal d’analyse</button>
+      <button class="nav-item" data-view="practice"><svg class="icon"><use href="#icon-target"/></svg> Pratique avancée</button>
       <button class="nav-item" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg> Marchés &amp; BRVM</button>
       <button class="nav-item" data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg> Broker Hub</button>
       <p class="nav-section-label">Compte</p>
-      <button class="nav-item" data-view="membership"><svg class="icon"><use href="#icon-spark"/></svg> DDA Premium</button>
       <button class="nav-item" data-view="support"><svg class="icon"><use href="#icon-help"/></svg> Aide &amp; support</button>
       <button class="nav-item" data-view="profile"><svg class="icon"><use href="#icon-user"/></svg> Profil</button>
       <a class="nav-item" href="admin.html" id="drawer-admin-link" hidden><svg class="icon"><use href="#icon-shield"/></svg> Back-office</a>
+      <div class="sidebar-premium-card">
+        <svg class="icon sidebar-premium-icon" aria-hidden="true"><use href="#icon-crown"/></svg>
+        <strong>DDA Premium</strong>
+        <p>Débloque les leçons Premium (Risque &amp; Discipline), le Lab IA avancé — livrable et projet final — et la revue hebdomadaire guidée.</p>
+        <button type="button" class="secondary-action" data-view="membership">Découvrir Premium <span>→</span></button>
+      </div>
       <a class="nav-item academy-public-exit" href="index.html">← Retour au site public</a>
     </nav>
 
@@ -707,7 +722,7 @@
           <ol id="modules-recap-list"></ol>
         </section>
 
-        <section class="panel certificate-panel">
+        <section class="panel certificate-panel" id="certificate-panel">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> Aperçu de certification</p><h3>Un aperçu de ce que DDA délivrera</h3></div></div>
           <div class="certificate-locked" id="certificate-locked"><svg class="icon"><use href="#icon-lock"/></svg><p>Termine ta première leçon (M0.1) pour débloquer un aperçu de certification.</p></div>
           <div class="certificate-gate" id="certificate-gate" hidden><p>L’aperçu de certification est réservé à DDA Premium.</p><button class="secondary-action premium-gate" data-permission="certificate_preview">Voir l’aperçu Premium</button></div>

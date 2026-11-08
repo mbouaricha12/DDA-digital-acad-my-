@@ -519,6 +519,24 @@ const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
 const contextSection = document.getElementById('context-section');
 
+// The sidebar's "Academy" nav section (founder reference maquette: Mes
+// Parcours/Mes Leçons/Exercices & Quiz/Ressources/Certificats grouped and
+// collapsible) — opens expanded by default on both the desktop rail and the
+// mobile drawer (matching the maquette), [data-view] routing on its real
+// nav-items underneath is untouched; this only toggles visibility + the
+// chevron, purely presentational, one real DOM id per rail so desktop and
+// drawer collapse independently.
+['nav-academy', 'drawer-academy'].forEach(prefix => {
+  const toggle = document.getElementById(`${prefix}-toggle`);
+  const group = document.getElementById(`${prefix}-group`);
+  if (!toggle || !group) return;
+  toggle.addEventListener('click', () => {
+    const expanded = toggle.getAttribute('aria-expanded') !== 'false';
+    toggle.setAttribute('aria-expanded', String(!expanded));
+    group.hidden = expanded;
+  });
+});
+
 // Mobile drawer — the sidebar's full navigation, reachable on mobile where
 // .sidebar itself stays display:none. Routing is already handled by the
 // generic [data-view] binding above; this only opens/closes the panel.
@@ -2120,26 +2138,51 @@ function lastAuthoredLesson() {
   return flat.length ? flat[flat.length - 1] : null;
 }
 
-// The sidebar's "Leçon en cours" shortcut, corrected: it used to be pinned to
-// the fixed view id "lesson" (always M0.1), so once a learner moved on to
-// M0.2/M0.3 it silently sent them back to a lesson they had already
-// completed. It now targets whatever resolveContinueTarget() honestly
-// reports as current, via the same LESSON_VIEW_ID map the Terminal's own
-// primary action uses — one source of truth, no second nav engine. Once the
-// curriculum is complete it relabels itself as a review link to the last
-// real lesson rather than pointing at a dead "current lesson" concept.
+// The sidebar's "Mes Leçons" shortcut (desktop #nav-current-lesson and the
+// mobile drawer's #drawer-current-lesson — same behavior, both kept in sync
+// here so the hamburger drawer is never a stale copy of the desktop rail),
+// corrected: it used to be pinned to the fixed view id "lesson" (always
+// M0.1), so once a learner moved on to M0.2/M0.3 it silently sent them back
+// to a lesson they had already completed. It now targets whatever
+// resolveContinueTarget() honestly reports as current, via the same
+// LESSON_VIEW_ID map the Terminal's own primary action uses — one source of
+// truth, no second nav engine. The label stays the static "Mes Leçons" (the
+// founder's reference maquette wording) — only the real [data-view] target
+// changes, exactly like every other nav-item's routing.
 function renderNavCurrentLesson(continueTarget) {
-  const item = document.getElementById('nav-current-lesson');
-  if (!item) return;
-  const label = item.querySelector('svg') ? item.lastChild : null;
-  if (continueTarget) {
-    item.dataset.view = LESSON_VIEW_ID[continueTarget.lesson.id] || 'lesson';
-    if (label) label.textContent = ' Leçon en cours';
-  } else {
-    const last = lastAuthoredLesson();
-    item.dataset.view = last ? (LESSON_VIEW_ID[last.lesson.id] || 'lesson') : 'lesson';
-    if (label) label.textContent = ' Revoir la dernière leçon';
-  }
+  const last = continueTarget ? null : lastAuthoredLesson();
+  const lessonId = continueTarget ? continueTarget.lesson.id : last?.lesson.id;
+  const viewId = lessonId ? (LESSON_VIEW_ID[lessonId] || 'lesson') : 'lesson';
+  ['nav-current-lesson', 'drawer-current-lesson'].forEach(id => {
+    const item = document.getElementById(id);
+    if (item) item.dataset.view = viewId;
+  });
+}
+
+// The sidebar's "Exercices & Quiz" shortcut — same current/last lesson target
+// as renderNavCurrentLesson above, but it also opens straight onto that
+// lesson's real Exercice/Quiz tab (lesson-renderer.js's renderLessonMain):
+// data-scroll-to points at that tab's panel id (lesson-panel-exercise, or
+// -<suffix> for every lesson after M0.1 — the exact id renderLessonMain
+// gives it), and bindViewButton's existing data-scroll-to handling already
+// calls revealLessonAnchor(), which opens the tab (activateLessonTab) before
+// scrolling to it. A lesson authored with no exercise/quiz blocks (none
+// exist today) simply has no such panel — revealLessonAnchor() already
+// no-ops safely on a missing id, so this never throws, it just lands on the
+// lesson itself. No new exercise/quiz surface is invented: this only opens
+// the one that already exists per lesson.
+function renderNavCurrentExercise(continueTarget) {
+  const last = continueTarget ? null : lastAuthoredLesson();
+  const lessonId = continueTarget ? continueTarget.lesson.id : last?.lesson.id;
+  const viewId = lessonId ? (LESSON_VIEW_ID[lessonId] || 'lesson') : 'lesson';
+  const entry = lessonId ? LESSON_REGISTRY.find(e => e.id === lessonId) : null;
+  const panelSuffix = entry?.suffix ? `-${entry.suffix}` : '';
+  ['nav-current-exercise', 'drawer-current-exercise'].forEach(id => {
+    const item = document.getElementById(id);
+    if (!item) return;
+    item.dataset.view = viewId;
+    item.dataset.scrollTo = `lesson-panel-exercise${panelSuffix}`;
+  });
 }
 
 // The real, greeting-time-of-day text — never a fixed "Bonsoir" regardless of the hour.
@@ -2765,6 +2808,7 @@ function renderState() {
   renderJournalPlan();
 
   renderNavCurrentLesson(continueTarget);
+  renderNavCurrentExercise(continueTarget);
 
   // Restore every mounted lesson's progress UI from stored state — one
   // registry-driven loop covers all of them, ids derived by lessonUiIds.
