@@ -2202,6 +2202,25 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('the membership page\'s Free/Premium plan-card checkmarks (CSS mask data: URI) are not silently blocked by CSP img-src', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    const cspViolations = [];
+    page.on('console', msg => { if (msg.type() === 'error' && /Content Security Policy/i.test(msg.text())) cspViolations.push(msg.text()); });
+    await page.goto(`${ACADEMY_BASE}#membership`);
+    await page.waitForSelector('#membership.view.active');
+    await page.waitForTimeout(200);
+    const checkmarkSize = await page.locator('.plan-card li').first().evaluate(el => {
+      const before = getComputedStyle(el, '::before');
+      return { width: before.width, maskImage: before.webkitMaskImage || before.maskImage };
+    });
+    assert.notEqual(checkmarkSize.width, '0px', 'the checkmark pseudo-element must actually render, not collapse to zero width');
+    assert.ok(/data:/.test(checkmarkSize.maskImage || ''), 'the checkmark uses a data: mask-image, which img-src must explicitly allow');
+    assert.equal(cspViolations.length, 0, `plan-card checkmarks must not be silently blocked by CSP (img-src): ${cspViolations.join(' | ')}`);
+    await context.close();
+  });
+
   await test('authored lessons referencing a VIDEO_REGISTRY entry (M0.2, M0.3) show the real click-to-load video, and a lesson without one shows no video block', async () => {
     const context = await freshContext(browser);
     await seedLocalLearner(context, { 'M0.1': { quizComplete: true }, 'M0.2': { quizComplete: true } }, 'free');
