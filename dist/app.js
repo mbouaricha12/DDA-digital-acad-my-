@@ -1629,7 +1629,7 @@ function renderCertificatePreview(lessonProgress) {
   preview.hidden = !eligible || !premium;
   if (!eligible || !premium) return;
 
-  const name = prototypeState.user?.name || 'Richard';
+  const name = prototypeState.user?.name || 'Apprenant';
   const event = [...(prototypeState.events || [])].reverse().find(e => e.name === 'quiz_complete');
   const date = event ? new Date(event.at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
   document.getElementById('certificate-name').textContent = name;
@@ -2524,7 +2524,7 @@ function renderMembershipNextStep(premium) {
 }
 
 function renderState() {
-  const name = prototypeState.user?.name || 'Richard';
+  const name = prototypeState.user?.name || 'Apprenant';
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'RD';
   const activeLessonProgress = DDALearning.getLessonProgress(prototypeState, activeLessonId);
   const xp = DDALearning.totalXp(DDA.curriculum, prototypeState);
