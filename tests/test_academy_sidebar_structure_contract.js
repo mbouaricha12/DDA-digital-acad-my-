@@ -76,7 +76,7 @@ assert.match(coreJs, /premium_track/, 'premium_track is a real entitlement');
 assert.match(academyHtml, /<section class="view premium-view" id="lesson-lab4"/, 'the Lab "livrable" (LAB4) premium-gated lesson really exists');
 assert.match(academyHtml, /<section class="view premium-view" id="lesson-lab-capstone"/, 'the Lab "projet final" (Capstone) premium-gated lesson really exists');
 assert.match(academyHtml, /Revue hebdomadaire guidée/, 'the weekly review referenced by the Premium card copy really exists in the Journal view');
-assert.match(academyHtml, /Risk Before Entry|The Anatomy of a Controlled Trade/, 'the "leçons Premium" referenced by the Premium card copy really exist (P2.1/P2.2)');
+assert.match(academyHtml, /Le risque avant l.entrée|L.anatomie d.un trade contrôlé/, 'the "leçons Premium" referenced by the Premium card copy really exist (P2.1/P2.2)');
 
 // ---------------------------------------------------------------------
 // Dynamic routing: Mes Leçons / Exercices & Quiz follow the real

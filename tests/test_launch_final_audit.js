@@ -77,7 +77,7 @@ function state(plan = 'premium') {
     await page.fill('#p2-target', 'Objectif pédagogique cohérent.');
     await page.fill('#p2-no-trade', 'Je refuse si la confirmation ou la limite disparaît.');
     await page.click('#premium-lab-form button[type="submit"]');
-    assert.match(await page.locator('#premium-lab-feedback').innerText(), /measurable risk boundary|validated/i);
+    assert.match(await page.locator('#premium-lab-feedback').innerText(), /limite de risque mesurable|bien/i);
 
     await page.goto(`${ACADEMY}#premium-track`);
     await page.getByRole('button', { name: 'Ouvrir l’assessment', exact: true }).click();
