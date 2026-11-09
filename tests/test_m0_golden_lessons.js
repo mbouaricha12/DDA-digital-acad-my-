@@ -75,4 +75,14 @@ test('all M0 lessons use the four proof stages', () => {
   });
 });
 
+test('M0.1 keeps its real exchange diagram and a locked proof quiz', () => {
+  const diagram = m01.blocks.find(block => block.id === 'exchange-diagram');
+  const quiz = m01.blocks.find(block => block.id === 'quiz');
+  assert.ok(diagram, 'M0.1 exchange diagram must remain mounted');
+  assert.strictEqual(diagram.type, 'diagram');
+  assert.strictEqual(diagram.diagram, 'exchange');
+  assert.ok(quiz && quiz.locked === true, 'M0.1 proof quiz must remain gated after the exercise');
+  assert.strictEqual(m01.blocks.find(block => block.type === 'summary').continueTo.view, 'lesson-m02');
+});
+
 console.log(`RESULT: ${passed} M0 foundation checks passed`);
