@@ -444,7 +444,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await assessmentLabels.filter({ hasText: 'Entrer avec une petite position.' }).click();
     await assessmentLabels.filter({ hasText: 'Ne pas exécuter dans ces conditions' }).click();
     await assessmentLabels.filter({ hasText: 'Le trade peut être perdant tout en étant correctement exécuté.' }).click();
-    await assessmentLabels.filter({ hasText: 'Trader B : perdant, setup valide' }).click();
+    await assessmentLabels.filter({ hasText: 'Trader B : perdant, scénario valide' }).click();
     await page.locator('#premium-assessment-form button[type="submit"]').click();
     state = await page.evaluate(() => window.DDA.load());
     assert.equal(state.premium.assessments['p2-controlled-decision'].passed, false);
@@ -454,7 +454,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     state = await page.evaluate(() => window.DDA.load());
     assert.equal(state.premium.assessments['p2-controlled-decision'].passed, true);
     assert.equal(state.premium.assessments['p2-controlled-decision'].attempts, 2);
-    assert.equal(state.premium.proofs['p2-risk-foundations'].level, 'Level 3 — Apply');
+    assert.equal(state.premium.proofs['p2-risk-foundations'].level, 'Niveau 3 — Mise en pratique');
 
     await page.reload();
     await page.waitForSelector('#premium-assessment.view.active');
@@ -476,8 +476,8 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(await page.locator('#journal-list details').count(), 1, 'Journal entry survives reload');
     await page.click('.mobile-nav button[data-view="progress"]');
     const proofProgress = await page.locator('#premium-proof-progress').innerText();
-    assert.ok(proofProgress.includes('Risk Foundations'));
-    assert.ok(proofProgress.includes('Level 3 — Apply'));
+    assert.ok(proofProgress.includes('Fondations du risque'));
+    assert.ok(proofProgress.includes('Niveau 3 — Mise en pratique'));
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'Progression must not overflow on mobile');
     await context.close();
   });

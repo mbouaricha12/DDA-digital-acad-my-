@@ -38,5 +38,34 @@ function makeFetch(calls) {
   const putCall = calls.find(c => c.options.method === 'PUT');
   assert.equal(JSON.parse(putCall.options.body).user_metadata.ref, 'partner-01', 'the merged write sent to GoTrue itself carries the preserved ref, not just the response');
 
-  console.log('RESULT: supabase-auth adapter preserves immutable partner ref across profile edits — PASS');
+  const googleAuth = new SupabaseAuthAdapter({
+    supabaseUrl: 'https://project.supabase.co',
+    publishableKey: 'pub',
+    serviceRoleKey: 'service',
+    fetchImpl: async () => ({
+      ok: true,
+      text: async () => JSON.stringify({
+        id: 'google-user-1',
+        email: 'aicha.kone@example.com',
+        email_confirmed_at: '2026-11-08T12:00:00Z',
+        user_metadata: { full_name: 'Aïcha Koné', name: 'Aïcha Koné', avatar_url: 'https://example.com/avatar.png' }
+      })
+    })
+  });
+  const googleUser = await googleAuth.getUser('google-user-1');
+  assert.equal(googleUser.display_name, 'Aïcha Koné', 'Google full_name must become the canonical display_name exposed to the frontend');
+
+  const nameOnlyAuth = new SupabaseAuthAdapter({
+    supabaseUrl: 'https://project.supabase.co',
+    publishableKey: 'pub',
+    serviceRoleKey: 'service',
+    fetchImpl: async () => ({
+      ok: true,
+      text: async () => JSON.stringify({ id: 'google-user-2', email: 'name@example.com', user_metadata: { name: 'Nom Google' } })
+    })
+  });
+  const nameOnlyUser = await nameOnlyAuth.getUser('google-user-2');
+  assert.equal(nameOnlyUser.display_name, 'Nom Google', 'Google name must be accepted when full_name is absent');
+
+  console.log('RESULT: supabase-auth preserves partner ref and normalizes Google full_name/name — PASS');
 })();

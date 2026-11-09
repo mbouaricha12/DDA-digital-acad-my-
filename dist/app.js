@@ -426,8 +426,8 @@ function mountLesson(entry) {
       fallback.hidden = false;
     }, { once: true });
   });
-  if (entry.id === 'M0.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff"><p class="eyebrow gold">Après la leçon</p><h3>Mettre la lecture en pratique</h3><p>Ouvre une mission guidée dans le Terminal pour repérer une zone sans chercher un prix exact.</p><button type="button" class="secondary-action" data-practice-launch="M0.2">Lancer la mission Practice <span>→</span></button></section>');
-  if (entry.id === 'P2.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff premium-handoff"><p class="eyebrow gold">Après les leçons</p><h3>Practice Lab — Build the Risk Plan</h3><p>Construis un plan dans un scénario pédagogique synthétique, puis fais vérifier ta décision.</p><button type="button" class="secondary-action" data-view="premium-lab">Ouvrir le Practice Lab <span>→</span></button></section>');
+  if (entry.id === 'M0.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff"><p class="eyebrow gold">Après la leçon</p><h3>Mettre la lecture en pratique</h3><p>Ouvre une mission guidée dans le Terminal pour repérer une zone sans chercher un prix exact.</p><button type="button" class="secondary-action" data-practice-launch="M0.2">Lancer la mission guidée <span>→</span></button></section>');
+  if (entry.id === 'P2.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff premium-handoff"><p class="eyebrow gold">Après les leçons</p><h3>Atelier Plan de risque</h3><p>Construis un plan dans un scénario pédagogique synthétique, puis fais vérifier ta décision.</p><button type="button" class="secondary-action" data-view="premium-lab">Ouvrir l’atelier <span>→</span></button></section>');
   main.dataset.ddaLessonMounted = 'true';
 }
 // Lot 2 (mandate §6 audit): a Premium lesson's real content now arrives
@@ -1030,8 +1030,11 @@ async function hydrateRemoteSession() {
       ...prototypeState,
       user: {
         ...localUser,
-        name: user.display_name || localUser.name || 'Apprenant',
-        email: user.email || localUser.email || ''
+        // Once the server confirms a session, its identity is authoritative:
+        // never let a stale local prototype name (for example Richard) survive
+        // a Google/SSO callback whose metadata has no display_name.
+        name: user.display_name || 'Apprenant',
+        email: user.email || ''
       }
     };
     try {
@@ -1082,7 +1085,9 @@ function setBffAuthMode(mode) {
 
 function showOnboardingAfterRemoteAuth(user) {
   if (!user) return;
-  const name = user.display_name || prototypeState.user?.name || 'Apprenant';
+  // The authenticated provider owns the identity after callback validation;
+  // a stale local profile must not overwrite it.
+  const name = user.display_name || 'Apprenant';
   prototypeState = DDA.save({ ...prototypeState, user: DDA.createUser(name, user.email || '') });
   renderState();
   document.getElementById('signup-form').hidden = true;
@@ -2898,7 +2903,7 @@ function renderLessonSidecard(viewId) {
   const premium = prototypeState.membership?.plan !== 'premium' ? `
     <div class="lesson-sidecard-cta lesson-sidecard-premium">
       <p class="eyebrow gold">DDA Premium</p>
-      <p>Débloque le Practice Lab, l’assessment guidé et le suivi complet de ta progression.</p>
+      <p>Débloque l’atelier de pratique, l’évaluation guidée et le suivi complet de ta progression.</p>
       <button type="button" class="secondary-action" data-sidecard-view="membership">Découvrir Premium <span>→</span></button>
     </div>` : '';
 
@@ -4184,10 +4189,10 @@ function renderPremiumState() {
   set('premium-track-progress', assessment.passed ? 'Preuve créée · prochaine action : Journal' : lab.status === 'validated' ? 'Atelier validé · évaluation disponible' : p22.quizComplete ? 'Leçons validées · atelier disponible' : p21.quizComplete ? 'Première leçon validée · seconde leçon disponible' : 'Prêt à commencer ? Ta première étape t’attend.');
   const receipt = document.getElementById('premium-proof-receipt');
   if (receipt) receipt.hidden = !proof;
-  if (proof) set('p2-proof-date', proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Local timestamp');
+  if (proof) set('p2-proof-date', proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Date locale');
   const progress = document.getElementById('premium-proof-progress');
   if (progress) progress.innerHTML = proof
-    ? `<article class="premium-proof-row"><strong>${proof.skill || 'Risk Foundations'}</strong><span>${proof.level || 'Level 3 — Apply'}</span><p>${proof.source || 'P2 Guided Risk Lab + Assessment'}</p><small>${proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Local timestamp'} · ${proof.nextAction || 'Continue to the next Premium Practice.'}</small></article>`
+    ? `<article class="premium-proof-row"><strong>${proof.skill || 'Fondations du risque'}</strong><span>${proof.level || 'Niveau 3 — Mise en pratique'}</span><p>${proof.source || 'Atelier Plan de risque + évaluation guidée'}</p><small>${proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Date locale'} · ${proof.nextAction || 'Continuer vers la prochaine étape Premium.'}</small></article>`
     : '<p>Ta première preuve Premium apparaîtra ici après ta prochaine validation.</p>';
 }
 
@@ -4253,13 +4258,13 @@ document.getElementById('premium-assessment-form')?.addEventListener('submit', e
   savePremiumPatch({ assessments: { ...premiumRecord().assessments, 'p2-controlled-decision': assessment } });
   trackEvent('premium_assessment_completed', { assessment: 'p2-controlled-decision' });
   if (!passed) {
-    premiumFeedback(feedback, false, 'Review required', 'Relis la distinction entre résultat et processus, puis vérifie que le risque ne dépasse jamais la limite définie.'); return;
+    premiumFeedback(feedback, false, 'À revoir', 'Relis la distinction entre résultat et processus, puis vérifie que le risque ne dépasse jamais la limite définie.'); return;
   }
   const createdAt = new Date().toISOString();
-  const proof = { type: 'skill_evidence', source: 'P2 Guided Risk Lab + Assessment', competencyId: 'risk_foundations', skill: 'Risk Foundations', level: 'Level 3 — Apply', createdAt, nextAction: 'Continue to the next Premium Practice.' };
+  const proof = { type: 'skill_evidence', source: 'Atelier Plan de risque + évaluation guidée', competencyId: 'risk_foundations', skill: 'Fondations du risque', level: 'Niveau 3 — Mise en pratique', createdAt, nextAction: 'Continuer vers la prochaine étape Premium.' };
   savePremiumPatch({ modules: { ...premiumRecord().modules, P2: { status: 'completed', completedAt: createdAt } }, proofs: { ...premiumRecord().proofs, 'p2-risk-foundations': proof } });
   trackEvent('premium_proof_created', { proof: 'p2-risk-foundations', skill: 'Risk Foundations', nextAction: 'Journal' });
-  premiumFeedback(feedback, true, 'Validated', 'Controlled Decision validée. Une preuve pédagogique locale a été créée — elle ne constitue pas une certification officielle.');
+  premiumFeedback(feedback, true, 'Validée', 'Décision maîtrisée validée. Une preuve pédagogique locale a été créée — elle ne constitue pas une certification officielle.');
 });
 
 document.getElementById('p2-journal-bridge')?.addEventListener('click', event => {
@@ -4272,11 +4277,11 @@ document.getElementById('p2-journal-bridge')?.addEventListener('click', event =>
     context: 'Price approaches a previously identified support zone. Higher-timeframe structure remains bullish.',
     scenario: 'Potential bullish reaction — exercice pédagogique local.',
     process: 'Context → Setup → Entry → Invalidation → Risk → Target → Review',
-    decision: 'Risk Plan construit dans le P2 Guided Risk Lab.',
+    decision: 'Plan de risque construit dans l’atelier guidé.',
     outcome: 'À revoir dans le Journal — aucune donnée de marché réelle.',
     whatWorked: 'J’ai défini une invalidation avant de considérer l’entrée.',
     toImprove: 'Continuer à distinguer résultat et qualité du processus.',
-    note: 'Risk Foundations · Level 3 — Apply', terminalSource: true, sourceLesson: 'P2.2', proofId: 'p2-risk-foundations', proofType: 'skill_evidence'
+    note: 'Fondations du risque · Niveau 3 — Mise en pratique', terminalSource: true, sourceLesson: 'P2.2', proofId: 'p2-risk-foundations', proofType: 'skill_evidence'
   });
 });
 
