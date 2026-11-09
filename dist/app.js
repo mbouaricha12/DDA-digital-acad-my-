@@ -2874,7 +2874,15 @@ function renderState() {
   mountedLessons.forEach(entry => renderLessonProgressUI(entry.id, entry.meta.lesson, lessonUiIds(entry)));
   renderM0CompletionCta();
 
-  document.getElementById('resume-device').hidden = !prototypeState.user;
+  // Lot — Signup coherence: the resume/erase nudge is for a RETURNING
+  // learner who opens #access while a prior session already exists. Once
+  // the learner has reached step 2 of the current visit's own signup flow
+  // (onboarding-form revealed), prototypeState.user was just created by
+  // that same flow seconds ago — showing "a progression already exists,
+  // resume or erase it?" right under the active "Construire mon parcours"
+  // button is false and confusing, and risks a first-time learner erasing
+  // the account they are actively creating.
+  document.getElementById('resume-device').hidden = !prototypeState.user || !document.getElementById('onboarding-form').hidden;
   document.body.classList.toggle('low-data', Boolean(prototypeState.preferences.lowData));
 
   const premium = prototypeState.membership?.plan === 'premium';
@@ -4060,6 +4068,11 @@ document.getElementById('signup-form').addEventListener('submit', async event =>
   document.getElementById('step-dot-2').classList.add('active');
   document.getElementById('step-dot-1').removeAttribute('aria-current');
   document.getElementById('step-dot-2').setAttribute('aria-current', 'step');
+  // saveState() above already rendered with onboarding-form still hidden,
+  // so the resume/erase nudge was computed as visible for the user object
+  // this very step just created — correct that stale render now that step 2
+  // is actually showing (see its own hidden-condition comment above).
+  document.getElementById('resume-device').hidden = true;
 });
 
 document.getElementById('onboarding-form').addEventListener('submit', async event => {
