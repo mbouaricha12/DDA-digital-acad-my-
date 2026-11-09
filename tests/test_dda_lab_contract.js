@@ -141,6 +141,22 @@ test('LAB2 contains a real learner-authored prompt mission with explicit self-re
   assert.ok(appSource.includes('aucune information n’a été inventée'), 'feedback must remind learner to verify factual claims');
 });
 
+test('LAB2 feedback stays aligned with the books-collection scenario', () => {
+  const exercise = l2.blocks.find(block => block.id === 'lab2-exercise');
+  const validation = l2.blocks.find(block => block.id === 'lab2-quiz');
+  const text = JSON.stringify({ exercise, validation }).toLowerCase();
+  assert.match(text, /livres|collecte|statut whatsapp/);
+  assert.doesNotMatch(text, /planning jour par jour|matière, le temps disponible|ton inadapté au bon destinataire/);
+  assert.match(validation.data.choices.find(choice => choice.correct)?.feedback || '', /longueur.*lieu|lieu.*longueur/);
+});
+
+test('LAB3 exercise feedback stays aligned with the wrong-name decision scenario', () => {
+  const exercise = l3.blocks.find(block => block.id === 'lab3-exercise');
+  const text = JSON.stringify(exercise).toLowerCase();
+  assert.match(text, /mauvaise personne|nom et la décision|attribution/);
+  assert.doesNotMatch(text, /corrige moi-même la date|que la date soit juste/);
+});
+
 test('every quiz block id matches its data.id, so [data-question] stays unique across all simultaneously-mounted lessons', () => {
   // lesson-renderer.js's quiz() renders data-question="${block.data.id}", not
   // block.id — if data.id collided across lessons (e.g. every lesson reusing

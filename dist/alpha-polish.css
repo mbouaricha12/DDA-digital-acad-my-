@@ -824,7 +824,7 @@ body.access-mode .prototype-banner{
 #access.view.active{animation:dda-access-enter .32s ease both}
 @keyframes dda-access-enter{from{opacity:0}to{opacity:1}}
 @media(max-width:639px){
-  .dda-select-menu{bottom:calc(80px + var(--safe-b));max-height:min(62vh,420px);overflow:auto}
+  .dda-select-menu{top:12px;bottom:calc(80px + var(--safe-b));max-height:calc(100vh - 92px);overflow:auto}
 }
 
 
