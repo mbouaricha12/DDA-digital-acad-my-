@@ -7,10 +7,10 @@ BFF Node.js minimal pour la frontière `app.example.dda.academy` → `api.exampl
 - **Implémenté :** registration, email verification, login, password recovery request, CSRF cookie, `/me`, profile patch, session listing, logout, logout-all, session revocation, export JSON `/v1/account/export` et suppression confirmée `/v1/account`.
 - **Adaptateur :** Supabase Auth côté serveur et table `dda_sessions` via PostgREST.
 - **Pont frontend :** `dist/bff-client.js` couvre l’inscription, la vérification e-mail, la connexion, la récupération de mot de passe, la restauration de session via `/v1/me` et la synchronisation du nom via `PATCH /v1/me` lorsque `window.DDA_BFF_BASE_URL` est renseigné.
-- **Sécurité :** cookies `__Host-`, session opaque hashée, tokens Supabase chiffrés côté serveur, CSRF double-submit, CORS exact, Origin check, réponse anti-énumération, ownership dérivé de la session.
+- **Sécurité :** cookies `__Host-`, session opaque hashée, tokens Supabase chiffrés côté serveur, CSRF double-submit, CORS exact, Origin check, réponse anti-énumération, quotas 429 sur les routes d’authentification, invalidation des sessions des comptes non actifs, ownership dérivé de la session.
 - **Non déployé :** aucun secret, aucun projet Supabase, aucun domaine ou endpoint distant n’est configuré par ce dépôt.
 - **Schéma P3.1 préparé :** `dda_lesson_progress`, `dda_journal_entries`, `dda_journal_plans` et `dda_preferences` sont définies avec ownership serveur, bornes de taille, index et RLS ; elles ne sont pas encore appliquées au projet distant.
-- **À compléter avant production :** profils/entitlements métier Postgres, migration distante P3.1, rate limiting distribué, observabilité redacted, tests de restauration et revue DPA/région.
+- **À compléter avant production :** remplacer le limiteur mémoire par un quota distribué adapté au déploiement, profils/entitlements métier Postgres, migration distante P3.1, observabilité redacted, tests de restauration et revue DPA/région.
 
 ## Lancer en environnement configuré
 
@@ -25,6 +25,8 @@ ALLOWED_ORIGINS          # ex. https://app.example.dda.academy
 EMAIL_REDIRECT_TO        # URL de retour, sur une origine allowlistée
 BFF_COOKIE_SECURE=true
 PORT=8744
+AUTH_RATE_LIMIT_WINDOW_MS=60000
+AUTH_RATE_LIMIT_MAX=10
 ```
 
 Le fichier `bff/supabase/schema.sql` doit être relu et appliqué manuellement dans un projet Supabase validé. La `SERVICE_ROLE_KEY` ne doit jamais être livrée au navigateur, au dépôt ou aux logs.

@@ -3,6 +3,7 @@
 const { randomUUID } = require('node:crypto');
 const { randomToken, sha256, timingSafeEqualText, parseCookies, serializeCookie, encrypt, decrypt, normalizeEmail } = require('./security');
 const { executeIdempotentMutation, validateClientMutationId } = require('./idempotency');
+const { MemoryRateLimiter } = require('./rate-limiter');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
@@ -17,7 +18,9 @@ function configFromEnv(env = process.env) {
     sessionIdleMs: Number(env.SESSION_IDLE_MS || 12 * 60 * 60 * 1000),
     sessionAbsoluteMs: Number(env.SESSION_ABSOLUTE_MS || 30 * 24 * 60 * 60 * 1000),
     sessionEncryptionKey: env.SESSION_ENCRYPTION_KEY || null,
-    emailRedirectTo: env.EMAIL_REDIRECT_TO || 'http://localhost:8744/access'
+    emailRedirectTo: env.EMAIL_REDIRECT_TO || 'http://localhost:8744/access',
+    authRateLimitWindowMs: Number(env.AUTH_RATE_LIMIT_WINDOW_MS || 60 * 1000),
+    authRateLimitMax: Number(env.AUTH_RATE_LIMIT_MAX || 10)
   };
 }
 
@@ -33,6 +36,7 @@ function validateRuntimeConfig(config, env = process.env) {
   if (!config.secureCookies) issues.push('BFF_COOKIE_SECURE must be true for __Host- cookies');
   if (Buffer.from(String(config.sessionEncryptionKey || ''), 'base64url').length !== 32) issues.push('SESSION_ENCRYPTION_KEY must decode to exactly 32 bytes');
   if (!Array.isArray(config.allowedOrigins) || config.allowedOrigins.length === 0) issues.push('ALLOWED_ORIGINS must contain at least one exact origin');
+  if (!Number.isInteger(config.authRateLimitWindowMs) || config.authRateLimitWindowMs <= 0 || !Number.isInteger(config.authRateLimitMax) || config.authRateLimitMax <= 0) issues.push('Auth rate limit configuration is invalid');
   for (const origin of config.allowedOrigins || []) {
     if (origin === '*') {
       issues.push('ALLOWED_ORIGINS must contain exact HTTPS origins (HTTP is allowed only for localhost development)');
@@ -73,8 +77,8 @@ function errorBody(code, message, requestId, fieldErrors) {
   return { code, message, request_id: requestId, ...(fieldErrors ? { field_errors: fieldErrors } : {}) };
 }
 
-function sendError(res, status, code, message, requestId, fieldErrors) {
-  return json(res, status, errorBody(code, message, requestId, fieldErrors));
+function sendError(res, status, code, message, requestId, fieldErrors, headers) {
+  return json(res, status, errorBody(code, message, requestId, fieldErrors), headers);
 }
 
 async function readJson(req, maxBytes = 64 * 1024) {
@@ -141,12 +145,13 @@ function publicUser(user) {
 }
 
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, rateLimiter = null, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   businessStore = businessStore || {
     exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
     deleteUserData: async () => {}
   };
+  rateLimiter = rateLimiter || new MemoryRateLimiter({ windowMs: config.authRateLimitWindowMs || 60 * 1000, max: config.authRateLimitMax || 10, clock: () => clock().getTime() });
 
   async function currentEntitlements(userId) {
     if (!entitlements || typeof entitlements.getForUser !== 'function') return { membership: null, entitlements: [] };
@@ -199,8 +204,24 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
   async function withUser(req, res, requestId) {
     const state = await currentSession(req);
     if (!state.session) { sendError(res, 401, 'unauthenticated', 'Authentication required.', requestId); return null; }
-    try { return { ...state, user: await auth.getUser(state.session.user_id) }; }
+    try {
+      const user = await auth.getUser(state.session.user_id);
+      if (user?.status !== 'active') {
+        await sessions.revoke(state.session.session_id, clock());
+        sendError(res, 401, 'account_inactive', 'Authentication required.', requestId);
+        return null;
+      }
+      return { ...state, user };
+    }
     catch (error) { logger('get_user_failed', { requestId, status: error.status || 500 }); sendError(res, 401, 'unauthenticated', 'Authentication required.', requestId); return null; }
+  }
+
+  function enforceAuthRateLimit(req, res, requestId, route) {
+    const key = `${route}:${String(req.socket?.remoteAddress || 'unknown')}`;
+    const result = rateLimiter.consume(key);
+    if (result.allowed) return true;
+    sendError(res, 429, 'rate_limited', 'Too many requests. Try again later.', requestId, undefined, { 'Retry-After': String(result.retryAfterSeconds) });
+    return false;
   }
 
   return async function handle(req, res) {
@@ -240,6 +261,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         return json(res, 200, { items });
       }
       if (method === 'POST' && path === '/v1/auth/register') {
+        if (!enforceAuthRateLimit(req, res, requestId, 'register')) return;
         const body = await readJson(req);
         const validation = validateRegistration(body);
         if (Object.keys(validation.fields).length) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, validation.fields);
@@ -253,6 +275,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         return json(res, 204);
       }
       if (method === 'POST' && path === '/v1/auth/login') {
+        if (!enforceAuthRateLimit(req, res, requestId, 'login')) return;
         const body = await readJson(req);
         const validation = validateRegistration({ email: body.email, password: body.password });
         if (Object.keys(validation.fields).length) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId);
@@ -265,6 +288,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         return json(res, 204);
       }
       if (method === 'POST' && path === '/v1/auth/password-reset/request') {
+        if (!enforceAuthRateLimit(req, res, requestId, 'password-reset')) return;
         const body = await readJson(req);
         const email = normalizeEmail(body.email);
         if (!/^\S+@\S+\.\S+$/.test(email)) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId);
