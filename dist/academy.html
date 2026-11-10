@@ -1554,10 +1554,9 @@
         <div class="page-mission" data-mission="profile"><div><p class="eyebrow">Mission de cette page</p><strong>Ajuster ton environnement, pas refaire ton parcours.</strong><span>Le Profil garde tes préférences locales ; ta progression détaillée vit dans Progression.</span></div><button class="text-action" data-view="progress">Voir mes preuves <span>→</span></button></div>
         <div class="profile-layout">
           <form class="profile-panel" id="profile-form" data-js-submit method="dialog">
-            <!-- "local" here is accurate for the current default (no BFF/server auth enabled). If a future
-                 pass activates real BFF accounts, this copy needs a dynamic check (window.DDABFF?.enabled())
-                 rather than being hardcoded to "local" for every visitor. -->
-            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">RD</span><div><p class="eyebrow">Mon profil (local)</p><h2 id="profile-heading-name">Richard</h2><p id="profile-heading-email">Aucune donnée serveur</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
+            <!-- Identity and persistence labels are updated by app.js: a connected account does not
+                 imply synchronized learning data until the remote sync phase is enabled. -->
+            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">RD</span><div><p class="eyebrow" id="profile-identity-label">Mon profil</p><h2 id="profile-heading-name">Richard</h2><p id="profile-heading-email">Aucune donnée serveur</p><p class="persistence-status" id="profile-persistence-status" role="status">Progression locale · enregistrée sur cet appareil</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
             <div class="profile-progress-strip">
               <div><span>XP total</span><strong id="profile-total-xp">0</strong></div>
               <div><span>Modules amorcés</span><strong id="profile-modules-started">0/10</strong></div>
@@ -1577,7 +1576,7 @@
             <p class="eyebrow gold">Préférences</p><h3>Une expérience adaptée à ton appareil.</h3>
             <label class="preference-row"><span><b>Économie de données</b><small>Réduit mouvements et médias non essentiels.</small></span><input id="profile-low-data" type="checkbox"></label>
             <label class="preference-row"><span><b>Rappels pédagogiques</b><small>Préférence enregistrée seulement ; aucun message n’est envoyé.</small></span><input id="profile-reminders" type="checkbox"></label>
-            <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité.</strong> Ton profil, tes préférences et tes réponses restent sur cet appareil. Aucun courtier, paiement ou service publicitaire n’y a accès. Une mesure d’audience anonyme et pseudonyme peut être utilisée pour comprendre comment les visiteurs découvrent DDA — jamais ton nom, ton e-mail ni tes réponses.</span></p>
+            <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité.</strong> Ton profil, ta progression, tes préférences et tes réponses restent sur cet appareil. Il n’y a pas encore de synchronisation multi-appareils. Aucun courtier, paiement ou service publicitaire n’y a accès. Une mesure d’audience anonyme et pseudonyme peut être utilisée pour comprendre comment les visiteurs découvrent DDA — jamais ton nom, ton e-mail ni tes réponses.</span></p>
             <div class="activity-summary"><span>Activité locale</span><strong id="event-count">0 événement</strong><small>Mesure pédagogique anonyme sur cet appareil — ta relation avec l’écosystème DDA, jamais partagée.</small></div>
           </aside>
         </div>

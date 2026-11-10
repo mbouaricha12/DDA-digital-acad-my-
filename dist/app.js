@@ -1157,11 +1157,11 @@ function setBffAuthMode(mode) {
   // unlike the local-only prototype mode this label's original wording
   // describes — showing that copy here would tell a real signer-upper
   // something false about where their data goes.
-  if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe) pour retrouver ma progression sur n’importe quel appareil, après avoir confirmé mon adresse e-mail.';
+  if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe). La synchronisation de ma progression sera activée progressivement ; mon état local reste conservé sur cet appareil.';
   if (title) title.textContent = login ? 'Se connecter' : 'Commence ton parcours Free';
   if (step) step.textContent = login ? 'Accès sécurisé' : 'Étape 1 sur 2 · commencer';
   if (note) note.textContent = login
-    ? 'Retrouve ton parcours avec ton compte serveur sécurisé.'
+    ? 'Ouvre ta session serveur. La synchronisation de ta progression sera activée progressivement ; ton état local reste conservé sur cet appareil.'
     : 'Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon.';
   if (submit) submit.innerHTML = login ? 'Ouvrir ma session <span>→</span>' : 'Recevoir le lien de vérification <span>→</span>';
   if (forgot) forgot.hidden = !login;
@@ -2876,8 +2876,19 @@ function renderState() {
   document.getElementById('empty-profile').hidden = hasProfile;
   if (hasProfile) {
     document.getElementById('profile-large-avatar').textContent = initials;
+    const identityLabel = document.getElementById('profile-identity-label');
+    const persistenceStatus = document.getElementById('profile-persistence-status');
+    const remoteAccount = Boolean(window.DDABFF?.enabled() && remoteUser);
+    if (identityLabel) identityLabel.textContent = remoteAccount ? 'Mon profil · compte connecté' : 'Mon profil · local';
     document.getElementById('profile-heading-name').textContent = name;
     document.getElementById('profile-heading-email').textContent = prototypeState.user.email || 'Compte local';
+    if (persistenceStatus) {
+      const storageReady = DDA.storageAvailable();
+      persistenceStatus.textContent = storageReady
+        ? (remoteAccount ? 'Progression locale · compte connecté, synchronisation non activée' : 'Progression locale · enregistrée sur cet appareil')
+        : 'Progression en mémoire · stockage local indisponible';
+      persistenceStatus.classList.toggle('is-warning', !storageReady);
+    }
     document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
     document.getElementById('profile-first-name').value = name;
     document.getElementById('profile-level').value = prototypeState.onboarding?.level || 'Débutant';
