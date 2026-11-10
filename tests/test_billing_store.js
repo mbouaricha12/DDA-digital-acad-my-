@@ -29,11 +29,13 @@ const fakeFetch = async (url, options) => {
   });
   assert.equal(row.status, 'active');
   assert.deepEqual(row.entitlement_snapshot, ENTITLEMENTS);
-  assert.match(calls[1].url, /dda_billing_memberships\?on_conflict=provider,external_id/);
-  assert.equal(calls[1].options.headers.Prefer, 'resolution=merge-duplicates,return=representation');
+  assert.match(calls[1].url, /dda_billing_memberships\?provider=eq\.chariow/);
+  assert.equal(calls[1].options.method, 'GET');
+  assert.match(calls[2].url, /dda_billing_memberships\?on_conflict=provider,external_id/);
+  assert.equal(calls[2].options.headers.Prefer, 'resolution=merge-duplicates,return=representation');
 
   await store.markProcessed('pulse-delivery-1');
-  assert.equal(calls[2].options.method, 'PATCH');
+  assert.equal(calls[3].options.method, 'PATCH');
   const retryCalls = [];
   const retryStore = new PostgrestBillingStore({
     supabaseUrl: 'https://project.supabase.co/',

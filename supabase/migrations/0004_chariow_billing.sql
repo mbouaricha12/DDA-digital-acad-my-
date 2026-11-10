@@ -21,6 +21,7 @@ create table if not exists public.dda_billing_memberships (
   status text not null check (status in ('pending', 'active', 'expired', 'revoked')),
   entitlement_snapshot jsonb not null default '[]'::jsonb check (jsonb_typeof(entitlement_snapshot) = 'array'),
   source_event text not null,
+  provider_event_at timestamptz,
   starts_at timestamptz,
   ends_at timestamptz,
   created_at timestamptz not null default now(),
@@ -29,6 +30,8 @@ create table if not exists public.dda_billing_memberships (
 );
 create index if not exists dda_billing_memberships_user_idx on public.dda_billing_memberships(user_id, status);
 create index if not exists dda_billing_memberships_active_idx on public.dda_billing_memberships(user_id) where status = 'active';
+alter table public.dda_billing_memberships add column if not exists provider_event_at timestamptz;
+create index if not exists dda_billing_memberships_provider_event_idx on public.dda_billing_memberships(provider, external_id, provider_event_at);
 alter table public.dda_billing_deliveries enable row level security;
 alter table public.dda_billing_memberships enable row level security;
 revoke all on table public.dda_billing_deliveries from anon, authenticated;
