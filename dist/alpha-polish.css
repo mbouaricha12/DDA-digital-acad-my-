@@ -726,7 +726,8 @@ body.access-mode .prototype-banner{
   max-height:min(62vh,420px);
   overflow:auto;
 }
-.dda-select.is-open .dda-select-menu{opacity:1;visibility:visible;transform:none}
+.dda-select.is-open .dda-select-menu,
+.dda-select-menu.is-open{opacity:1;visibility:visible;transform:none}
 .dda-select-option{
   min-height:48px;
   padding:13px 14px;
@@ -756,8 +757,10 @@ body.access-mode .prototype-banner{
     border-radius:18px;
     transform:translateY(22px);
   }
-  .dda-select.is-open .dda-select-menu{transform:none}
-  .dda-select.is-open .dda-select-menu::before{
+  .dda-select.is-open .dda-select-menu,
+  .dda-select-menu.is-open{transform:none}
+  .dda-select.is-open .dda-select-menu::before,
+  .dda-select-menu.is-open::before{
     content:'Choisir une option';
     display:block;
     padding:4px 4px 10px;

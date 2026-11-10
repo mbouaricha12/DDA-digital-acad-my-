@@ -626,7 +626,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await wrapper.locator('.dda-select-trigger').click();
     await page.waitForTimeout(220);
     const geometry = await page.evaluate(() => {
-      const menu = document.querySelector('[data-select-for="goal"] .dda-select-menu');
+      const menu = document.querySelector('#goal-dda-menu');
       const nav = document.querySelector('.mobile-nav');
       const menuBox = menu.getBoundingClientRect();
       const navBox = nav.getBoundingClientRect();
@@ -635,6 +635,33 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(geometry.position, 'fixed');
     assert.equal(geometry.visible, true);
     assert.ok(geometry.menuBottom <= geometry.navTop, `dropdown must stay above mobile navigation: ${JSON.stringify(geometry)}`);
+    await context.close();
+  });
+
+  await test('mobile onboarding dropdown never overlaps a sibling field', async () => {
+    const context = await freshContext(browser, { width: 360, height: 780 });
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#access`);
+    await fillSignup(page);
+    await page.waitForSelector('#onboarding-form:not([hidden])');
+    await page.click('[data-select-for="level"] .dda-select-trigger');
+    await page.waitForTimeout(220);
+    const result = await page.evaluate(() => {
+      const goalTrigger = document.querySelector('[data-select-for="goal"] .dda-select-trigger');
+      const r = goalTrigger.getBoundingClientRect();
+      const topElement = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      const levelMenu = document.querySelector('#level-dda-menu');
+      return {
+        topElementIsGoalTrigger: topElement === goalTrigger,
+        topElementInsideLevelMenu: Boolean(topElement.closest('#level-dda-menu')),
+        menuParent: levelMenu.parentElement.tagName,
+        levelMenuOptionTexts: [...document.querySelectorAll('#level-dda-menu .dda-select-option')].map(o => o.textContent)
+      };
+    });
+    assert.equal(result.topElementIsGoalTrigger, false, 'the next onboarding field must not paint over the open level sheet');
+    assert.equal(result.topElementInsideLevelMenu, true, 'the open level sheet must cover the sibling field');
+    assert.equal(result.menuParent, 'BODY', 'an open mobile sheet must be reparented to body');
+    assert.deepEqual(result.levelMenuOptionTexts, ['Choisir', 'Débutant', 'Intermédiaire', 'Avancé']);
     await context.close();
   });
 

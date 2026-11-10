@@ -651,7 +651,9 @@ function initDdaSelect(select) {
   };
   const open = () => {
     document.querySelectorAll('.dda-select.is-open').forEach(other => { if (other !== wrapper) closeDdaSelect(other); });
+    reparentDdaMobileSheet(wrapper, menu);
     wrapper.classList.add('is-open');
+    menu.classList.add('is-open');
     trigger.setAttribute('aria-expanded', 'true');
   };
   const focusOptionWhenVisible = option => {
@@ -696,10 +698,27 @@ function initDdaSelect(select) {
   new MutationObserver(sync).observe(select, { attributes: true, attributeFilter: ['aria-invalid'] });
   sync();
 }
+function isDdaMobileViewport() {
+  return window.matchMedia?.('(max-width: 639px)').matches === true;
+}
+function reparentDdaMobileSheet(wrapper, menu) {
+  if (!isDdaMobileViewport() || menu.parentNode === document.body) return;
+  menu.dataset.ddaSheetParent = 'body';
+  document.body.appendChild(menu);
+}
+function restoreDdaMobileSheet(wrapper) {
+  const menu = document.querySelector('.dda-select-menu[data-dda-sheet-parent="body"]');
+  if (!menu) return;
+  delete menu.dataset.ddaSheetParent;
+  wrapper.appendChild(menu);
+}
 function closeDdaSelect(wrapper) {
+  const menu = wrapper.querySelector('.dda-select-menu') || document.querySelector(`.dda-select-menu[data-dda-sheet-parent="body"]`);
   wrapper.classList.remove('is-open');
   const trigger = wrapper.querySelector('.dda-select-trigger');
   trigger?.setAttribute('aria-expanded', 'false');
+  menu?.classList.remove('is-open');
+  restoreDdaMobileSheet(wrapper);
 }
 ['level', 'goal', 'time', 'terminal-instrument', 'terminal-timeframe', 'p2-direction', 'broker-market', 'broker-use', 'support-subject', 'profile-level', 'profile-goal', 'profile-time'].forEach(id => initDdaSelect(document.getElementById(id)));
 document.addEventListener('click', event => {
