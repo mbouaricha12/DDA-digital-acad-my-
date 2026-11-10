@@ -15,11 +15,15 @@
 //     from admin to owner is impossible: the acting user's OWN role is
 //     checked, not the role being granted);
 //   - the last remaining owner can never be revoked or demoted.
+// Future pedagogical roles are stored here only as server-side foundations;
+// no learner-facing route treats them as active until its own authorization
+// contract exists.
 
-const VALID_ROLES = Object.freeze(['owner', 'admin']);
+const VALID_ROLES = Object.freeze(['owner', 'admin', 'content_author', 'reviewer', 'support_agent', 'instructor', 'data_steward']);
+const CONTROL_PLANE_ROLES = Object.freeze(['owner', 'admin']);
 
 function ownerRequiredError() {
-  return Object.assign(new Error('Only an owner may assign or revoke an admin role.'), { code: 'owner_required', status: 403 });
+  return Object.assign(new Error('Only an owner may assign or revoke a managed role.'), { code: 'owner_required', status: 403 });
 }
 
 function lastOwnerError() {
@@ -112,4 +116,4 @@ class PostgrestAdminRolesStore {
   }
 }
 
-module.exports = { VALID_ROLES, MemoryAdminRolesStore, PostgrestAdminRolesStore };
+module.exports = { VALID_ROLES, CONTROL_PLANE_ROLES, MemoryAdminRolesStore, PostgrestAdminRolesStore };
