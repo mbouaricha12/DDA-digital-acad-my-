@@ -53,7 +53,9 @@ function startStaticServer() {
     assert.equal(await page.locator('#dashboard-name').innerText(), 'Amina A');
 
     activeUser = null;
-    await page.evaluate(() => window.DDABFF.logout());
+    await page.locator('#profile-logout').click();
+    await page.waitForFunction(() => location.hash === '#access');
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('dda-prototype-state-v4')).user), null);
     activeUser = userB;
     await page.evaluate(() => window.DDABFF.login({ email: 'b@example.com', password: 'long-enough-password' }));
     await page.reload();

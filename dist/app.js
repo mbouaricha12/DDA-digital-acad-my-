@@ -1030,6 +1030,26 @@ function countActiveDaysForView(events, viewId) {
 const BOOT_HASH_VIEW = location.hash.replace('#', '');
 const initialAttribution = window.DDA_INITIAL_ATTRIBUTION || {};
 delete window.DDA_INITIAL_ATTRIBUTION;
+const NEUTRAL_DISPLAY_NAME = 'Apprenant';
+
+function normalizeDisplayName(value) {
+  return typeof value === 'string' && value.trim() ? value.trim() : NEUTRAL_DISPLAY_NAME;
+}
+
+function remoteLearnerUser(user) {
+  return {
+    id: user.user_id,
+    name: normalizeDisplayName(user.display_name),
+    email: typeof user.email === 'string' ? user.email : '',
+    mode: 'server'
+  };
+}
+
+function clearLocalForExpiredRemoteSession() {
+  const acquisition = prototypeState.acquisition;
+  prototypeState = DDA.save({ ...DDA.clear(), acquisition });
+  remoteUser = null;
+}
 
 // Acquisition V1 — first-touch capture, a no-op after the first call on this
 // device (see DDA.captureAcquisition). Runs on every boot, before any view is
@@ -1099,17 +1119,16 @@ async function hydrateRemoteSession() {
   if (!window.DDABFF?.enabled()) return null;
   try {
     const user = await window.DDABFF.getMe();
-    if (!user) return null;
+    if (!user) {
+      if (remoteUser || prototypeState.user?.mode === 'server') clearLocalForExpiredRemoteSession();
+      return null;
+    }
     remoteUser = user;
-    const localUser = prototypeState.user || {};
-    let nextState = {
-      ...prototypeState,
-      user: {
-        ...localUser,
-        name: user.display_name || localUser.name || 'Apprenant',
-        email: user.email || localUser.email || ''
-      }
-    };
+    const sameRemoteUser = prototypeState.user?.mode === 'server' && prototypeState.user.id === user.user_id;
+    const nextStateBase = sameRemoteUser
+      ? prototypeState
+      : { ...DDA.clear(), acquisition: prototypeState.acquisition };
+    let nextState = { ...nextStateBase, user: remoteLearnerUser(user) };
     try {
       const remoteProgress = await window.DDABFF.getProgress();
       nextState = mergeProgressNeverDowngrade(nextState, remoteProgress);
@@ -1172,8 +1191,7 @@ function setBffAuthMode(mode) {
 
 function showOnboardingAfterRemoteAuth(user) {
   if (!user) return;
-  const name = user.display_name || prototypeState.user?.name || 'Apprenant';
-  prototypeState = DDA.save({ ...prototypeState, user: DDA.createUser(name, user.email || '') });
+  prototypeState = DDA.save({ ...prototypeState, user: remoteLearnerUser(user) });
   renderState();
   document.getElementById('signup-form').hidden = true;
   document.getElementById('bff-recovery-form').hidden = true;
@@ -2886,6 +2904,8 @@ function renderState() {
   }
   document.getElementById('profile-low-data').checked = Boolean(prototypeState.preferences.lowData);
   document.getElementById('profile-reminders').checked = Boolean(prototypeState.preferences.reminders);
+  const logoutButton = document.getElementById('profile-logout');
+  if (logoutButton) logoutButton.hidden = !(remoteUser && window.DDABFF?.enabled());
   const count = prototypeState.events?.length || 0;
   document.getElementById('event-count').textContent = `${count} événement${count > 1 ? 's' : ''}`;
 
@@ -4637,9 +4657,28 @@ function resetPilot() {
   storePreviousView(null);
   showToast('Tes données ont été effacées.');
 }
-
 document.getElementById('reset-session').addEventListener('click', resetPilot);
 document.getElementById('profile-reset').addEventListener('click', resetPilot);
+document.getElementById('profile-logout').addEventListener('click', async () => {
+  const button = document.getElementById('profile-logout');
+  button.disabled = true;
+  try {
+    if (window.DDABFF?.enabled()) await window.DDABFF.logout();
+    clearLocalForExpiredRemoteSession();
+    document.getElementById('signup-form').reset();
+    document.getElementById('signup-form').hidden = false;
+    document.getElementById('onboarding-form').hidden = true;
+    renderState();
+    showView('access', false);
+    previousView = null;
+    storePreviousView(null);
+    showToast('Ta session est fermée.');
+  } catch {
+    document.getElementById('profile-error').textContent = 'Impossible de fermer la session pour le moment. Réessaie.';
+  } finally {
+    button.disabled = false;
+  }
+});
 
 document.getElementById('profile-form').addEventListener('submit', async event => {
   event.preventDefault();

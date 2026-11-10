@@ -79,7 +79,7 @@ Les preuves disponibles sont solides sur le prototype et les contrats : suite E2
 - Back-office complet administrateur : utilisateurs, contenu, paiements, support et logs métier.
 - Synchronisation complète de la progression et du Journal sur plusieurs appareils.
 - Smoke test live avec deux comptes réels sur le domaine public.
-- Déconnexion visible dans l’interface Academy : le BFF expose `logout`, mais aucun contrôle visible n’a été trouvé dans `academy.html`.
+- Déconnexion visible dans l’interface Academy : le bouton Profil appelle désormais le logout BFF et purge l’état local serveur.
 
 ## 4. Finding P0 — identité utilisateur
 
@@ -102,6 +102,9 @@ Lorsqu’un compte B se connectait après un compte A conservé localement et qu
 - correction du certificat, du Dashboard et du Profil ;
 - remplacement des identités initiales visibles `Richard` par `Apprenant` ;
 - initiales neutres `AP` dans le shell HTML.
+- ajout du bouton visible de déconnexion ;
+- purge de l’identité et des données locales serveur à la fermeture de session ou après expiration ;
+- séparation explicite des utilisateurs serveur et des profils device-demo.
 
 ### Test automatisé
 
@@ -140,7 +143,7 @@ Résultat : **PASS**.
 
 ### P1 — Free launch
 
-- Ajouter un contrôle visible de déconnexion dans l’Academy.
+- Contrôle visible de déconnexion dans l’Academy : corrigé sur la branche P0 ; vérifier après déploiement.
 - Clarifier à l’écran le statut « compte connecté » versus « progression synchronisée ».
 - Documenter et tester les erreurs de BFF indisponible avec conservation locale honnête.
 - Vérifier les routes protégées et les rôles administrateur réels avant d’exposer un back-office.
