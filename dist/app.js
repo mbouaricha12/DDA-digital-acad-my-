@@ -1559,7 +1559,8 @@ function renderModulesRecap() {
 }
 
 function renderMarketIntelligence() {
-  const indices = document.getElementById('market-indices');
+  // Keep the public section anchor intact; only the inner grid is data-driven.
+  const indices = document.getElementById('market-index-grid');
   if (indices) {
     indices.innerHTML = marketDemo().indices.map((item, i) => `
       <article class="index-card">
