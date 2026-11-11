@@ -59,8 +59,10 @@ function startServer() {
 
 let passed = 0;
 const failures = [];
+const testNameFilter = String(process.env.DDA_TEST_ONLY || '').trim().toLowerCase();
 
 async function test(name, fn) {
+  if (testNameFilter && !name.toLowerCase().includes(testNameFilter)) return;
   try {
     await fn();
     passed++;
@@ -109,14 +111,13 @@ async function completeSignupFlow(page, opts) {
   await page.waitForSelector('.view.active#lesson');
 }
 
-async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = 'free') {
-  await context.addInitScript(({ lessons, plan }) => {
-    if (localStorage.getItem('dda-prototype-state-v4')) return;
+async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = 'free', accountId = 'u1') {
+  await context.addInitScript(({ lessons, plan, accountId: seededAccountId }) => {
     const lessonIds = ['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3', 'MBRVM.1', 'P2.1', 'P2.2', 'LAB1', 'LAB2', 'LAB3', 'LAB4', 'LABCAP'];
     const progress = Object.fromEntries(lessonIds.map(id => [id, {
       lessonViewed: false, exerciseComplete: false, quizComplete: false, ...(lessons[id] || {})
     }]));
-    localStorage.setItem('dda-prototype-state-v4', JSON.stringify({
+    const seededState = JSON.stringify({
       schemaVersion: 4,
       user: { id: 'e2e-learner', name: 'Ada', email: 'ada@example.com', mode: 'device-demo' },
       membership: { plan, status: 'demo' },
@@ -128,8 +129,14 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       events: [],
       acquisition: {},
       updatedAt: null
-    }));
-  }, { lessons: lessonProgress, plan: membershipPlan });
+    });
+    const keys = [
+      'dda-prototype-state-v4',
+      'dda-prototype-state-v4:guest',
+      `dda-prototype-state-v4:user:${encodeURIComponent(seededAccountId)}`
+    ];
+    keys.forEach(key => { if (!localStorage.getItem(key)) localStorage.setItem(key, seededState); });
+  }, { lessons: lessonProgress, plan: membershipPlan, accountId });
 }
 
 (async () => {
@@ -332,7 +339,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
     await context.route('https://bff.test/v1/me', route => route.fulfill({
       status: 200, contentType: 'application/json',
-      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
     }));
     await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
       status: 200, contentType: 'application/json',
@@ -368,7 +375,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
     await context.route('https://bff.test/v1/me', route => route.fulfill({
       status: 200, contentType: 'application/json',
-      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
     }));
     await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
       status: 200, contentType: 'application/json',
@@ -473,6 +480,8 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(state.journal.entries[0].proofId, 'p2-risk-foundations');
 
     await page.reload();
+    await page.waitForSelector('#journal.view.active');
+    await page.waitForFunction(() => document.querySelectorAll('#journal-list details').length === 1);
     assert.equal(await page.locator('#journal-list details').count(), 1, 'Journal entry survives reload');
     await page.click('.mobile-nav button[data-view="progress"]');
     const proofProgress = await page.locator('#premium-proof-progress').innerText();
@@ -2021,7 +2030,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
     await context.route('https://bff.test/v1/me', route => route.fulfill({
       status: 200, contentType: 'application/json',
-      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
     }));
     await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
       status: 200, contentType: 'application/json',
@@ -2144,11 +2153,15 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
     const bffContext = await freshContext(browser);
     await bffContext.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await bffContext.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ user_id: 'owner-1', email: 'owner@example.com', display_name: 'Owner', status: 'active' })
+    }));
     await bffContext.route('https://bff.test/v1/admin/overview', route => route.fulfill({
       status: 200, contentType: 'application/json',
       body: JSON.stringify({ contract: 'dda-admin-overview-v1', generated_at: new Date().toISOString(), caller: { user_id: 'owner-1', role: 'owner' }, metrics: {} })
     }));
-    await seedLocalLearner(bffContext, {}, 'free');
+    await seedLocalLearner(bffContext, {}, 'free', 'owner-1');
     const bffPage = await bffContext.newPage();
     await bffPage.goto(`${ACADEMY_BASE}#dashboard`);
     await bffPage.waitForSelector('#dashboard.view.active');
@@ -2221,10 +2234,16 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.waitForSelector('#resource-reader:not([hidden])');
     assert.equal(await page.locator('#reader-content .video-lite-thumb').isVisible(), true, 'a static thumbnail is shown before any click');
     assert.equal(await page.locator('#reader-content iframe').count(), 0, 'no iframe — and so no YouTube request — is created before the learner clicks play');
+    const youtubeFallback = page.locator('#reader-content .video-explainer-caption a');
+    assert.equal(await youtubeFallback.textContent().then(text => text.includes('Ouvrir sur YouTube')), true, 'a direct YouTube fallback is visible without loading the iframe');
+    assert.match(await youtubeFallback.getAttribute('href'), /^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$/);
+    assert.equal(await youtubeFallback.getAttribute('target'), '_blank');
+    assert.match(await youtubeFallback.getAttribute('rel'), /noopener/);
     assert.equal(cspViolations.length, 0, `the thumbnail must not be silently blocked by CSP (img-src): ${cspViolations.join(' | ')}`);
     await page.locator('#reader-content .video-lite-play').click();
     const iframeSrc = await page.locator('#reader-content iframe').getAttribute('src');
     assert.match(iframeSrc, /^https:\/\/www\.youtube-nocookie\.com\/embed\//, 'the loaded player must use the privacy-enhanced nocookie domain');
+    assert.equal(await youtubeFallback.isVisible(), true, 'direct playback remains available if YouTube embedding fails');
     assert.ok(!/autoplay/.test(iframeSrc), 'no autoplay parameter — the mandate requires no autoplay');
     assert.equal(cspViolations.length, 0, `the YouTube iframe must not be silently blocked by CSP (frame-src): ${cspViolations.join(' | ')}`);
     await context.close();
@@ -2261,6 +2280,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.locator('#lesson-m03-main .video-lite-play').click();
     const iframeSrc = await page.locator('#lesson-m03-main iframe').getAttribute('src');
     assert.match(iframeSrc, /^https:\/\/www\.youtube-nocookie\.com\/embed\//, 'the lesson video loads through the same privacy-enhanced nocookie player');
+    assert.equal(await page.locator('#lesson-m03-main .video-explainer-caption a').isVisible(), true, 'M0.3 retains a direct YouTube fallback after the iframe is inserted');
     assert.ok(!/autoplay/.test(iframeSrc), 'no autoplay parameter on a lesson video either');
     await page.goto(`${ACADEMY_BASE}#lesson-m02`);
     await page.waitForSelector('#lesson-m02.view.active');
@@ -2535,7 +2555,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
     await context.route('https://bff.test/v1/me', route => route.fulfill({
       status: 200, contentType: 'application/json',
-      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
     }));
     await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
       status: 403, contentType: 'application/json',
@@ -2563,7 +2583,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
     await context.route('https://bff.test/v1/me', route => route.fulfill({
       status: 200, contentType: 'application/json',
-      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
     }));
     await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
       status: 200, contentType: 'application/json',
@@ -2603,7 +2623,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.route('https://bff.test/v1/security/csrf', route => route.fulfill({ status: 204 }));
     await context.route('https://bff.test/v1/me', route => route.fulfill({
       status: 200, contentType: 'application/json',
-      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
     }));
     let askBody = null;
     await context.route('https://bff.test/v1/ai/ask', route => {
@@ -2633,7 +2653,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.route('https://bff.test/v1/security/csrf', route => route.fulfill({ status: 204 }));
     await context.route('https://bff.test/v1/me', route => route.fulfill({
       status: 200, contentType: 'application/json',
-      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
     }));
     await context.route('https://bff.test/v1/ai/ask', route => route.fulfill({
       status: 429, contentType: 'application/json',
@@ -2952,6 +2972,110 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       assert.ok(overflow <= 1, `no horizontal overflow at ${viewport.width}px (measured ${overflow}px)`);
       await context.close();
     }
+  });
+
+  await test('BFF sessions isolate guest data, learner progress and DDA AI history by authenticated user_id', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await context.addInitScript(() => {
+      window.DDA_BFF_BASE_URL = 'https://api.dariusdigitalacademy.com';
+      localStorage.setItem('dda-prototype-state-v4', JSON.stringify({
+        schemaVersion: 4,
+        user: { id: 'old-device-user', name: 'Guest Private', email: 'guest@example.com' },
+        onboarding: { level: 'Avancé', goal: 'Ancien objectif privé', time: '45 minutes, 3 fois par semaine', complete: true },
+        lessons: { 'M0.1': { lessonViewed: true, exerciseComplete: true, quizComplete: true } },
+        journal: { entries: [{ id: 'guest-journal-secret', note: 'DO_NOT_IMPORT_JOURNAL' }], plan: {} },
+        terminal: { observation: 'DO_NOT_IMPORT_TERMINAL' }, preferences: {}, events: [], acquisition: {}
+      }));
+      localStorage.setItem('dda-ai-chat-v1', JSON.stringify([{ role: 'user', content: 'PRIVATE_GUEST_AI_HISTORY' }]));
+      localStorage.setItem('dda-ai-chat-v1:user:account-a', JSON.stringify([{ role: 'assistant', content: 'PRIVATE_ACCOUNT_A_AI_HISTORY' }]));
+    });
+    let currentAccount = 'account-a';
+    const progressImports = [];
+    let logoutRequests = 0;
+    await context.route('https://api.dariusdigitalacademy.com/**', async route => {
+      const pathname = new URL(route.request().url()).pathname;
+      const cors = {
+        'Access-Control-Allow-Origin': BASE,
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Allow-Headers': 'Content-Type, X-CSRF-Token',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, OPTIONS',
+        'Content-Type': 'application/json'
+      };
+      if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
+      if (pathname === '/v1/security/csrf') return route.fulfill({ status: 204, headers: cors });
+      if (pathname === '/v1/auth/logout' && route.request().method() === 'POST') {
+        logoutRequests++;
+        return route.fulfill({ status: 204, headers: cors });
+      }
+      if (['/v1/progress/lesson', '/v1/progress/onboarding'].includes(pathname) && route.request().method() === 'PUT') {
+        const body = route.request().postDataJSON();
+        progressImports.push({ pathname, body });
+        return route.fulfill({ status: 200, headers: cors, body: JSON.stringify({ saved: true }) });
+      }
+      if (pathname === '/v1/me') return route.fulfill({ status: 200, headers: cors, body: JSON.stringify({ user_id: currentAccount, email: `${currentAccount}@example.com`, display_name: `Learner ${currentAccount}`, status: 'active', entitlements: [] }) });
+      if (pathname === '/v1/progress') return route.fulfill({ status: 200, headers: cors, body: JSON.stringify(currentAccount === 'account-a' ? {
+        lessons: { 'M0.1': { lessonViewed: true, exerciseComplete: true, quizComplete: true } },
+        onboarding: { level: 'Débutant', goal: 'Comprendre les marchés', time: '10 minutes par jour', complete: true }
+      } : { lessons: {}, onboarding: null }) });
+      if (pathname === '/v1/premium/preview') return route.fulfill({ status: 403, headers: cors, body: JSON.stringify({ code: 'premium_required' }) });
+      if (pathname === '/v1/admin/overview') return route.fulfill({ status: 403, headers: cors, body: JSON.stringify({ code: 'admin_required' }) });
+      return route.fulfill({ status: 404, headers: cors, body: JSON.stringify({ code: 'not_found' }) });
+    });
+
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(await page.textContent('#dashboard-name'), 'Learner account-a', 'the authenticated name comes from the BFF, not guest localStorage');
+    assert.equal(await page.locator('#profile-storage-scope').textContent(), 'Compte DDA');
+    assert.equal(await page.locator('#profile-first-name').inputValue(), 'Learner account-a');
+    const firstBoot = await page.evaluate(() => ({
+      oldGlobal: localStorage.getItem('dda-prototype-state-v4'),
+      guestScoped: localStorage.getItem('dda-prototype-state-v4:guest'),
+      accountA: JSON.parse(localStorage.getItem('dda-prototype-state-v4:user:account-a') || 'null'),
+      statusHidden: document.getElementById('session-check-status').hidden,
+      transcript: document.getElementById('dda-ai-transcript').innerText
+    }));
+    assert.equal(JSON.parse(firstBoot.oldGlobal).user.name, 'Guest Private', 'historic unscoped data stays untouched');
+    assert.ok(firstBoot.guestScoped, 'BFF guest data is written only to its separate guest key');
+    assert.equal(firstBoot.accountA.user.email, 'account-a@example.com');
+    assert.equal(firstBoot.accountA.lessons['M0.1'].quizComplete, true);
+    assert.equal(firstBoot.statusHidden, true, 'the session-check overlay disappears after hydration');
+    assert.match(firstBoot.transcript, /PRIVATE_ACCOUNT_A_AI_HISTORY/);
+    assert.doesNotMatch(firstBoot.transcript, /PRIVATE_GUEST_AI_HISTORY/);
+    assert.doesNotMatch(await page.locator('#academy-shell').innerText(), /Guest Private|Ancien objectif privé/);
+
+    currentAccount = 'account-b';
+    await page.reload();
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(await page.textContent('#dashboard-name'), 'Learner account-b');
+    const accountB = await page.evaluate(() => JSON.parse(localStorage.getItem('dda-prototype-state-v4:user:account-b') || 'null'));
+    assert.equal(accountB.user.email, 'account-b@example.com');
+    assert.equal(accountB.lessons['M0.1'], undefined, 'account B never sees account A progress');
+    assert.doesNotMatch(await page.locator('#dda-ai-transcript').innerText(), /PRIVATE_ACCOUNT_A_AI_HISTORY|PRIVATE_GUEST_AI_HISTORY/);
+    await page.goto(`${ACADEMY_BASE}#profile`);
+    await page.waitForSelector('#profile.view.active');
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'the account profile actions fit on mobile');
+    assert.equal(await page.locator('#profile-import-notice').isVisible(), true, 'a separately consented import is offered after the account is known');
+    page.on('dialog', dialog => dialog.accept());
+    await page.locator('#profile-import-progress').click();
+    await page.waitForFunction(() => localStorage.getItem('dda-progress-import-v1:user:account-b') === 'done');
+    assert.equal(await page.locator('#profile-import-notice').isHidden(), true, 'successful import is not offered again for the same account');
+    assert.equal(await page.locator('#profile-error').textContent(), '');
+    assert.equal(progressImports.length, 2, 'only one lesson proof and onboarding are sent to the BFF');
+    assert.deepEqual(progressImports.map(item => item.pathname).sort(), ['/v1/progress/lesson', '/v1/progress/onboarding']);
+    assert.equal(progressImports.some(item => JSON.stringify(item.body).includes('DO_NOT_IMPORT')), false, 'journal and terminal data never leave the device during migration');
+    assert.equal(progressImports.some(item => JSON.stringify(item.body).includes('guest@example.com') || JSON.stringify(item.body).includes('Guest Private')), false, 'guest identity is never copied into the account');
+    const importedAccountB = await page.evaluate(() => JSON.parse(localStorage.getItem('dda-prototype-state-v4:user:account-b') || 'null'));
+    assert.equal(importedAccountB.lessons['M0.1'].quizComplete, true, 'the learner-selected lesson completion is merged into this account only');
+    assert.equal(importedAccountB.journal.entries.length, 0, 'local Journal stays outside the imported subset');
+    assert.equal(importedAccountB.terminal.observation, '', 'local Terminal remains outside the imported subset');
+    await page.locator('#profile-logout').click();
+    await page.waitForSelector('#access.view.active');
+    assert.equal(logoutRequests, 1, 'the logout action revokes the BFF session');
+    assert.equal(await page.textContent('#dashboard-name'), 'Apprenant', 'the prior account name is removed from visible UI after logout');
+    assert.equal(await page.locator('#dda-ai-transcript').innerText(), '', 'the prior account chat history is removed from the active transcript');
+    assert.ok(await page.evaluate(() => localStorage.getItem('dda-prototype-state-v4:user:account-b')), 'logout preserves the isolated account storage instead of deleting learner work');
+    await context.close();
   });
 
   await browser.close();

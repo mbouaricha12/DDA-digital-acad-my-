@@ -676,6 +676,8 @@ a.nav-item[hidden]{display:none}
 .video-lite-play:hover,.video-lite-play:focus-visible{background:rgba(5,11,20,.42)}
 .video-lite-play .icon{width:56px;height:56px;color:var(--gold);filter:drop-shadow(0 6px 16px rgba(5,11,20,.5))}
 .video-explainer-caption{color:rgba(244,247,252,.6);font-size:12.5px;margin-top:8px;text-align:center}
+.video-explainer-caption a{display:inline-block;min-height:32px;padding:5px 4px;color:var(--gold);text-decoration:underline;text-underline-offset:3px}
+.video-explainer-caption a:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:3px}
 
 /* Key-points overlay on a lesson video's thumbnail (never shown once the
    iframe loads — app.js's click-to-play handler replaces this whole frame's

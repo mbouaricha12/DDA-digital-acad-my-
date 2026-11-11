@@ -97,7 +97,10 @@ async function completeLesson({ viewId, markId, exerciseName, quizName, resultId
 }
 
 (async () => {
-  await test('Academy shell boots on #access, never a fake dashboard', () => {
+  await test('Academy shell boots on #access, never a fake dashboard', async () => {
+    // The app now awaits remote-session hydration before its first render.
+    // Yield to the event loop rather than asserting against the static shell.
+    await wait(0);
     assert.equal(activeViewId(), 'access');
     assert.equal(document.getElementById('landing'), null, 'public landing is not mounted in Academy');
   });

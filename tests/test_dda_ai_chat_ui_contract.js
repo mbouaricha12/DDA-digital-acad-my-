@@ -13,7 +13,8 @@ assert.match(html, /id="dda-ai-transcript"[^>]*role="log"/, 'chat transcript is 
 assert.match(html, /maxlength="2000"/, 'chat input matches the BFF message limit');
 assert.match(html, /ne donne ni signal, ni prédiction/i, 'UI states the pedagogical boundary');
 assert.match(app, /window\.DDABFF\.askAI\(message, priorHistory\)/, 'Academy calls the BFF askAI bridge');
-assert.match(app, /localStorage\.setItem\(storageKey/, 'chat history is persisted locally only');
+assert.match(app, /localStorage\.setItem\(historyStorageKey/, 'chat history remains local to its active storage namespace');
+assert.match(app, /dda-ai-chat-v1:user:\$\{encodeURIComponent\(remoteUser\.user_id\)\}/, 'authenticated chat history is scoped to the server-provided user_id');
 assert.match(app, /DDA AI est en préparation/, 'disabled BFF state is honest and not simulated');
 assert.match(app, /providerError\(code\)/, 'provider errors are rendered without inventing a reply');
 assert.match(app, /textContent = text/, 'chat messages use textContent rather than unsanitized HTML');
