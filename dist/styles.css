@@ -115,15 +115,15 @@ main{min-width:0;padding-bottom:calc(84px + var(--safe-b))}
 .mobile-drawer .nav-section-label{margin:14px 0 2px;padding:0 8px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .mobile-drawer .nav-section-label:first-of-type{margin-top:0}
 @media (prefers-reduced-motion:reduce){.mobile-drawer,.mobile-drawer-backdrop{transition:none}}
-.academy-footer{display:flex;align-items:center;justify-content:space-between;gap:18px;max-width:1280px;margin:0 auto;padding:24px 18px calc(92px + var(--safe-b));border-top:1px solid var(--line-soft);color:var(--muted);font-size:12px}
+.academy-footer{display:flex;align-items:center;justify-content:space-between;gap:18px;max-width:1280px;margin:0 auto;padding:24px 18px calc(92px + var(--safe-b));border-top:1px solid var(--line-soft);color:var(--muted);font-size:12px;contain:layout paint}
 .academy-footer-brand{display:grid;gap:3px;min-width:0}
 .academy-footer-brand strong{color:var(--gold-soft);font-family:Georgia,serif;font-size:20px;letter-spacing:-.05em}
 .academy-footer-brand span{color:var(--muted);font-size:11px}
 .academy-footer-links{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap}
 .academy-footer a{color:var(--gold-soft);text-decoration:none;white-space:nowrap}
 .academy-footer a:hover,.academy-footer a:focus-visible{text-decoration:underline;text-underline-offset:3px}
-.academy-footer small{max-width:34ch;color:var(--muted-2);line-height:1.45;text-align:right}
-@media(max-width:720px){.academy-footer{display:grid;gap:14px;padding:22px 16px calc(92px + var(--safe-b));}.academy-footer-links{justify-content:flex-start;gap:8px 14px}.academy-footer small{text-align:left;max-width:48ch}}
+.academy-footer small{max-width:34ch;color:#9aa9ba;line-height:1.45;text-align:right}
+@media(max-width:720px){.academy-footer{display:grid;gap:14px;min-height:283px;padding:22px 16px calc(92px + var(--safe-b));contain-intrinsic-size:283px;}.academy-footer-links{justify-content:flex-start;gap:8px 14px}.academy-footer small{text-align:left;max-width:48ch}}
 
 /* Topbar (mobile default)
    --banner-h is measured live from .prototype-banner's real rendered height
@@ -183,6 +183,27 @@ body.public-shell main{padding-bottom:0}
    fix already used for #markets' in-page anchors just below. */
 .view{display:none;max-width:1280px;margin:0 auto;padding:26px 18px 40px;scroll-margin-top:calc(var(--banner-h,29px) + 64px)}
 .view.active{display:block;animation:dda-enter .32s var(--ease) both}
+/* The inline route normaliser marks the requested view before external CSS and
+   app.js finish booting. Keeping that view in flow prevents the footer from
+   appearing after a short empty main and then jumping several screens down on
+   mobile (the CLS source seen by Lighthouse). app.js still owns the final
+   active state and navigation semantics. */
+html[data-boot-view="access"] #access,
+html[data-boot-view="dashboard"] #dashboard,
+html[data-boot-view="path"] #path,
+html[data-boot-view="lesson"] #lesson,
+html[data-boot-view="progress"] #progress,
+html[data-boot-view="journal"] #journal,
+html[data-boot-view="resources"] #resources,
+html[data-boot-view="membership"] #membership,
+html[data-boot-view="markets"] #markets,
+html[data-boot-view="brokers"] #brokers,
+html[data-boot-view="support"] #support,
+html[data-boot-view="community"] #community,
+html[data-boot-view="practice"] #practice,
+html[data-boot-view="intelligence"] #intelligence,
+html[data-boot-view="profile"] #profile,
+html[data-boot-view="lab"] #lab{display:block}
 @keyframes dda-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .eyebrow{text-transform:uppercase;font-size:11px;letter-spacing:.14em;color:var(--muted);margin:0 0 6px;font-weight:800;display:flex;align-items:center;gap:6px}
 .gold{color:var(--gold-soft)}
