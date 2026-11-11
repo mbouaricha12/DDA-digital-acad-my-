@@ -85,6 +85,12 @@
       principle: Object.freeze({ label: 'Principe essentiel', text: 'Comprends d’abord la carte des acteurs — qui émet, qui investit, qui sert d’intermédiaire, où les titres se négocient. La lecture des prix vient ensuite, jamais l’inverse.' })
     }),
     Object.freeze({
+      type: 'image_explainer', id: 'm13-market-actors', step: 'lesson', outline: 'Schéma des acteurs et des deux marchés',
+      src: 'images/lessons/m13-market-actors.svg', tone: 'dark',
+      alt: 'Schéma du marché primaire : un émetteur crée des titres, des investisseurs y souscrivent par des intermédiaires sur la BRVM et les fonds vont à l’émetteur. Sur le marché secondaire, deux investisseurs échangent un titre par la SGI et la BRVM; l’émetteur ne reçoit pas le paiement.',
+      caption: 'Primaire : l’émetteur lève des fonds. Secondaire : les investisseurs échangent entre eux.'
+    }),
+    Object.freeze({
       type: 'case_study', id: 'm13-case-brvm', step: 'lesson', outline: 'Cas concret · BRVM', label: 'Cas concret · côte régionale',
       text: 'Une entreprise de la région veut financer son expansion. Plutôt qu’un simple prêt, elle peut être admise à la BRVM — la bourse commune aux 8 pays de l’UEMOA — et y émettre des actions. Un épargnant, à Abidjan comme ailleurs, peut alors y souscrire : pas dans la rue ni de main à main, mais par l’intermédiaire d’une société de gestion et d’intermédiation (SGI) agréée.'
     }),

@@ -116,7 +116,7 @@
         ${overlayMarkup}
         <button type="button" class="video-lite-play" aria-label="Lire : ${label}"><svg class="icon"><use href="#icon-play"/></svg></button>
       </div>
-      <figcaption class="video-explainer-caption">${label}</figcaption>
+      <figcaption class="video-explainer-caption">${label}<span aria-hidden="true"> · </span><a href="https://www.youtube.com/watch?v=${escapeAttr(ytId)}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Ouvrir sur YouTube<span aria-hidden="true"> ↗</span></a></figcaption>
     </figure>`;
   }
 
