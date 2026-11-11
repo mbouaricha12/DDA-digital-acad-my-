@@ -71,6 +71,7 @@
       if (oauthError) window.DDA_OAUTH_ERROR = oauthError;
       var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone']);
       var route = location.hash.slice(1);
+      document.documentElement.setAttribute('data-boot-view', knownRoutes.has(route) ? route : 'dashboard');
       var safeHash = knownRoutes.has(route) ? '#' + route : '';
       if (location.search || location.hash !== safeHash) history.replaceState(history.state, '', location.pathname + safeHash);
     })();
@@ -217,7 +218,7 @@
       <!-- Academy shell: public marketing content is intentionally outside this document. -->
       <header class="topbar">
         <button class="icon-button mobile-menu-toggle" type="button" id="mobile-menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-drawer"><svg class="icon"><use href="#icon-menu"/></svg></button>
-        <button class="mobile-brand" data-view="dashboard" aria-label="Accueil DDA"><b>DDA</b><small>DIGITAL ACADEMY</small></button>
+        <button class="mobile-brand" data-view="dashboard" aria-label="DDA DIGITAL ACADEMY — Accueil DDA"><b>DDA</b><small>DIGITAL ACADEMY</small></button>
         <button class="topbar-brand-lockup" data-view="dashboard" aria-label="Accueil Darius Digital Academy"><span class="topbar-brand-mark">DDA</span><span class="topbar-brand-copy"><strong>DARIUS DIGITAL</strong><small>ACADEMY</small></span></button>
         <span class="topbar-tagline">Trading &amp; Financial Markets Learning Operating System</span>
         <div class="context"><span class="context-section" id="context-section" hidden></span><strong id="context-title">Aujourd’hui</strong></div>

@@ -2357,6 +2357,26 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 .dda-surface.is-active{display:block}
 .dda-public-surface,.dda-auth-surface{width:100%}
 .dda-app-surface{width:100%;background:var(--navy-950);min-height:calc(100vh - 84px)}
+/* Match the early data-boot-view marker from academy.html so the route's
+   surface is in flow before app.js toggles .is-active. Without this, main is
+   temporarily only the topbar and the footer is painted near the top before
+   jumping below the authenticated view on mobile. */
+html[data-boot-view="access"] .dda-public-surface,
+html[data-boot-view="dashboard"] .dda-app-surface,
+html[data-boot-view="path"] .dda-app-surface,
+html[data-boot-view="lesson"] .dda-app-surface,
+html[data-boot-view="progress"] .dda-app-surface,
+html[data-boot-view="journal"] .dda-app-surface,
+html[data-boot-view="resources"] .dda-app-surface,
+html[data-boot-view="membership"] .dda-app-surface,
+html[data-boot-view="markets"] .dda-app-surface,
+html[data-boot-view="brokers"] .dda-app-surface,
+html[data-boot-view="support"] .dda-app-surface,
+html[data-boot-view="community"] .dda-app-surface,
+html[data-boot-view="practice"] .dda-app-surface,
+html[data-boot-view="intelligence"] .dda-app-surface,
+html[data-boot-view="profile"] .dda-app-surface,
+html[data-boot-view="lab"] .dda-app-surface{display:block}
 body.dda-app-shell main{background:var(--navy-950)}
 body.dda-auth-shell main{background:var(--navy-950)}
 body.dda-auth-shell #access{max-width:1280px;margin-inline:auto}
