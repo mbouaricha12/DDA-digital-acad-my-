@@ -30,6 +30,13 @@ const MOBILE = { name: 'mobile', width: 390, height: 844, deviceScaleFactor: 1 }
 const DESKTOP = { name: 'desktop', width: 1440, height: 900, deviceScaleFactor: 1 };
 const FREE_STATE = JSON.stringify({
   schemaVersion: 4,
+  user: {
+    id: 'local-performance-audit',
+    name: 'Apprenant Performance',
+    email: 'performance-audit@example.invalid',
+    mode: 'device-demo',
+  },
+  membership: { plan: 'free', status: 'demo' },
   onboarding: {
     level: 'Débutant',
     goal: 'Comprendre les marchés',
@@ -85,7 +92,8 @@ function parseArgs(argv) {
 
 function assertPrMerged(number) {
   const raw = execFileSync('gh', ['pr', 'view', String(number), '--json', 'state,mergedAt,headRefOid,url'], { encoding: 'utf8' });
-  const pr = JSON.parse(raw);
+  const clean = raw.replace(/[\u001B\u009B][[\]()#;?]*(?:(?:(?:[a-zA-Z\d]*(?:;[-a-zA-Z\d/#&.:=?%@~_]+)*)?\u0007)|(?:(?:\d{1,4}(?:;\d{0,4})*)?[\dA-PR-TZcf-nq-uy=><~]))/g, '');
+  const pr = JSON.parse(clean);
   if (pr.state !== 'MERGED' || !pr.mergedAt) {
     throw new Error(`PR #${number} is not merged: state=${pr.state}, mergedAt=${pr.mergedAt || 'null'}`);
   }
