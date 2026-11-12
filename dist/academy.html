@@ -71,6 +71,7 @@
       if (oauthError) window.DDA_OAUTH_ERROR = oauthError;
       var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone']);
       var route = location.hash.slice(1);
+      document.documentElement.setAttribute('data-boot-view', knownRoutes.has(route) ? route : 'dashboard');
       var safeHash = knownRoutes.has(route) ? '#' + route : '';
       if (location.search || location.hash !== safeHash) history.replaceState(history.state, '', location.pathname + safeHash);
     })();
@@ -120,6 +121,8 @@
       <symbol id="icon-users" viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3"/><circle cx="16" cy="9" r="2.5"/><path d="M3 20a5.5 5.5 0 0 1 11 0"/><path d="M14 20a4.5 4.5 0 0 1 7-3.7"/></symbol>
     </defs>
   </svg>
+  <div class="prototype-banner">Version d’apprentissage DDA — aucune donnée de marché réelle</div>
+  <div id="session-check-status" class="session-check-status" role="status" aria-live="polite" hidden>Vérification sécurisée de ton espace DDA…</div>
   <div class="app-shell" id="academy-shell" data-layer="academy">
     <aside class="sidebar" aria-label="Navigation principale">
       <a class="brand" href="#dashboard" aria-label="DDA — Accueil">
@@ -215,7 +218,7 @@
       <!-- Academy shell: public marketing content is intentionally outside this document. -->
       <header class="topbar">
         <button class="icon-button mobile-menu-toggle" type="button" id="mobile-menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-drawer"><svg class="icon"><use href="#icon-menu"/></svg></button>
-        <button class="mobile-brand" data-view="dashboard" aria-label="Accueil DDA"><b>DDA</b><small>DIGITAL ACADEMY</small></button>
+        <button class="mobile-brand" data-view="dashboard" aria-label="DDA DIGITAL ACADEMY — Accueil DDA"><b>DDA</b><small>DIGITAL ACADEMY</small></button>
         <button class="topbar-brand-lockup" data-view="dashboard" aria-label="Accueil Darius Digital Academy"><span class="topbar-brand-mark">DDA</span><span class="topbar-brand-copy"><strong>DARIUS DIGITAL</strong><small>ACADEMY</small></span></button>
         <span class="topbar-tagline">Trading &amp; Financial Markets Learning Operating System</span>
         <div class="context"><span class="context-section" id="context-section" hidden></span><strong id="context-title">Aujourd’hui</strong></div>
@@ -263,10 +266,11 @@
             <ul class="trust-list">
               <li><svg class="icon"><use href="#icon-target"/></svg> Une première leçon adaptée à ton point de départ</li>
               <li><svg class="icon"><use href="#icon-check-circle"/></svg> Un parcours construit depuis tes réponses</li>
-              <li><svg class="icon"><use href="#icon-shield"/></svg> Tes données restent locales sur cet appareil</li>
+              <li><svg class="icon"><use href="#icon-shield"/></svg> Sans compte serveur, tes données restent sur cet appareil</li>
             </ul>
           </div>
           <div class="access-card">
+            <a class="access-back-link" href="./index.html">← Retour au site DDA</a>
             <div class="step-indicator" aria-label="Progression de l’inscription"><span class="active" id="step-dot-1" aria-current="step">1</span><i></i><span id="step-dot-2">2</span></div>
             <div id="bff-auth-tools" hidden>
               <button class="text-action" id="bff-mode-signup" type="button">Créer un compte</button>
@@ -289,7 +293,8 @@
               <p class="eyebrow" id="access-step-label">Étape 1 sur 2 · commencer</p><h2 id="access-form-title">Commence ton parcours Free</h2>
               <p class="access-form-note" id="access-form-note">Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon. Cette version conserve ta progression sur cet appareil.</p>
               <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ex. Awa"></label>
-              <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"><small class="field-help">Reste uniquement sur cet appareil tant qu'aucun compte serveur n'est activé — jamais envoyée ailleurs.</small></label>
+              <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"><small class="field-help" id="access-email-help">Sans compte serveur, cette adresse reste sur cet appareil et n’est pas transmise.</small></label>
+
               <label id="access-password-field" hidden>Mot de passe<span class="password-field-wrap"><input id="access-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128"><button class="text-action password-toggle" id="toggle-access-password" type="button" aria-pressed="false">Afficher</button></span><small class="field-help" id="access-password-help" hidden>12 caractères minimum.</small></label>
               <label class="consent" id="access-consent-field"><input id="consent" type="checkbox" required><span id="access-consent-label">Je comprends que ma progression est stockée uniquement sur cet appareil pendant ce pilote, et qu'elle peut être perdue définitivement (changement d'appareil, cache vidé, incident technique) — il n'existe pas de sauvegarde serveur.</span></label>
               <p class="form-error" id="signup-error" role="alert"></p>
@@ -915,7 +920,7 @@
           <h2>Laboratoire de gestion du risque</h2>
           <p>Des scénarios guidés pour travailler sizing, invalidation et discipline.</p>
           <ul class="resource-meta resource-meta-dark" aria-label="Métadonnées de l’atelier Premium"><li>20 min</li><li>Premium</li><li>Après M0</li></ul>
-          <button class="secondary-action premium-gate" data-permission="resources_premium">Voir l’aperçu Premium</button>
+          <button class="secondary-action premium-gate" data-permission="premium_track" data-premium-target="premium-lab">Voir l’aperçu Premium</button>
         </article>
 
         <aside class="resource-use-note" aria-labelledby="resource-use-title"><p class="eyebrow gold">Comment utiliser la bibliothèque</p><h2 id="resource-use-title">Un outil, une intention, une prochaine pratique.</h2><p>Choisis une ressource pour débloquer une question précise. Lis-la, note ce que tu peux réutiliser, puis retourne à ton parcours ou à ton Terminal pour l’appliquer.</p></aside>
@@ -933,13 +938,13 @@
         </div>
 
         <section class="panel premium-waitlist-panel" id="premium-waitlist-panel" aria-labelledby="premium-waitlist-title">
-          <div class="panel-heading"><div><p class="eyebrow gold">Avant l’activation du paiement</p><h2 id="premium-waitlist-title">Liste d’attente Premium</h2></div></div>
-          <p>Le paiement Premium (Chariow) n’est pas encore activé. Si tu veux être informé(e) dès son ouverture, inscris-toi ici — aucune carte bancaire, aucun engagement.</p>
+          <div class="panel-heading"><div><p class="eyebrow gold">Avant l’activation du paiement</p><h2 id="premium-waitlist-title">Intérêt pour Premium</h2></div></div>
+          <p>Le paiement Premium n’est pas encore activé. Tu peux noter ton intérêt sur cet appareil. Cette préférence reste dans ce navigateur : elle ne crée aucune inscription et n’envoie aucune notification.</p>
           <div id="premium-waitlist-form">
-            <label class="premium-waitlist-consent"><input type="checkbox" id="premium-waitlist-consent"> Je comprends qu’aucun paiement n’est activé et je souhaite être informé(e) quand l’abonnement Premium sera disponible.</label>
-            <button class="secondary-action" id="premium-waitlist-join" disabled>Rejoindre la liste d’attente</button>
+            <label class="premium-waitlist-consent"><input type="checkbox" id="premium-waitlist-consent"> Je comprends que cette préférence reste enregistrée sur cet appareil et ne déclenche aucune notification.</label>
+            <button class="secondary-action" id="premium-waitlist-join" disabled>Enregistrer mon intérêt sur cet appareil</button>
           </div>
-          <p id="premium-waitlist-confirmation" role="status" aria-live="polite" hidden><svg class="icon"><use href="#icon-check-circle"/></svg> Tu es sur la liste d’attente Premium — nous ne t’enverrons rien d’autre pour l’instant.</p>
+          <p id="premium-waitlist-confirmation" role="status" aria-live="polite" hidden><svg class="icon"><use href="#icon-check-circle"/></svg> Ton intérêt est noté sur cet appareil. Tu n’es inscrit(e) à aucune liste et ne recevras pas de notification.</p>
         </section>
 
         <section class="panel access-model-panel" aria-labelledby="access-model-title">
@@ -1556,7 +1561,8 @@
             <!-- "local" here is accurate for the current default (no BFF/server auth enabled). If a future
                  pass activates real BFF accounts, this copy needs a dynamic check (window.DDABFF?.enabled())
                  rather than being hardcoded to "local" for every visitor. -->
-            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">A</span><div><p class="eyebrow">Mon profil</p><h2 id="profile-heading-name">Apprenant</h2><p id="profile-heading-email">Profil prêt à être personnalisé</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
+            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">A</span><div><p class="eyebrow" id="profile-storage-scope">Profil sur cet appareil</p><h2 id="profile-heading-name">Apprenant</h2><p id="profile-heading-email">Compte local</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
+            <div class="profile-import-notice" id="profile-import-notice" hidden><p><strong>Progression de cet appareil trouvée.</strong> Son propriétaire ne peut pas être vérifié. Si elle t’appartient, tu peux transférer uniquement l’onboarding et les étapes de leçon dans ce compte.</p><button class="secondary-action dark-action" id="profile-import-progress" type="button">Importer cette progression dans mon compte</button></div>
             <div class="profile-progress-strip">
               <div><span>XP total</span><strong id="profile-total-xp">0</strong></div>
               <div><span>Modules amorcés</span><strong id="profile-modules-started">0/10</strong></div>
@@ -1570,13 +1576,13 @@
               <label class="field-wide">Rythme<select id="profile-time"><option>10 minutes par jour</option><option>20 minutes par jour</option><option>45 minutes, 3 fois par semaine</option></select></label>
             </div>
             <p class="form-error" id="profile-error" role="alert"></p>
-            <div class="profile-actions"><button class="primary-action" type="submit" disabled>Enregistrer</button><button class="secondary-action dark-action" id="profile-reset" type="button">Réinitialiser mes données</button></div>
+            <div class="profile-actions"><button class="primary-action" type="submit" disabled>Enregistrer</button><button class="secondary-action dark-action" id="profile-reset" type="button">Réinitialiser mes données</button><button class="secondary-action dark-action" id="profile-logout" type="button" hidden>Se déconnecter</button></div>
           </form>
           <aside class="preference-panel">
             <p class="eyebrow gold">Préférences</p><h3>Une expérience adaptée à ton appareil.</h3>
             <label class="preference-row"><span><b>Économie de données</b><small>Réduit mouvements et médias non essentiels.</small></span><input id="profile-low-data" type="checkbox"></label>
             <label class="preference-row"><span><b>Rappels pédagogiques</b><small>Préférence enregistrée seulement ; aucun message n’est envoyé.</small></span><input id="profile-reminders" type="checkbox"></label>
-            <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité.</strong> Ton profil, tes préférences et tes réponses restent sous ton contrôle. Aucun courtier, paiement ou service publicitaire n’y a accès. Une mesure d’audience anonyme et pseudonyme peut être utilisée pour comprendre comment les visiteurs découvrent DDA — jamais ton nom, ton e-mail ni tes réponses.</span></p>
+            <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité.</strong> <span id="profile-storage-disclosure">Tes données sont enregistrées sur cet appareil. Une mesure d’audience pseudonyme peut aider à comprendre comment les visiteurs découvrent DDA ; elle ne contient ni ton nom ni ton e-mail.</span> Aucun courtier ni service publicitaire n’accède à tes réponses.</span></p>
             <div class="activity-summary"><span>Activité d’apprentissage</span><strong id="event-count">0 événement</strong><small>Un résumé pédagogique de ton parcours, uniquement pour t’aider à reprendre au bon endroit.</small></div>
           </aside>
         </div>
@@ -1652,6 +1658,7 @@
         ? 'https://api.dariusdigitalacademy.com'
         : ''
     );
+    if (window.DDA_BFF_BASE_URL) document.getElementById('session-check-status')?.removeAttribute('hidden');
   </script>
   <script src="dda-core.js"></script>
   <!-- dda-lab.js is no longer loaded unconditionally here (mandate §6 audit,

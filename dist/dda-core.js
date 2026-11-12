@@ -3,6 +3,8 @@
 
   const STORAGE_KEY = 'dda-prototype-state-v4';
   const LEGACY_KEYS = ['dda-prototype-state-v3', 'dda-prototype-state-v2', 'dda-prototype-state'];
+  let activeStorageKey = STORAGE_KEY;
+  let activeLegacyKeys = LEGACY_KEYS;
   const SCHEMA_VERSION = 4;
   const LANDING_ROUTES = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile']);
   const ATTRIBUTION_VALUES = {
@@ -887,9 +889,9 @@
 
   function load() {
     try {
-      const current = localStorage.getItem(STORAGE_KEY);
+      const current = localStorage.getItem(activeStorageKey);
       if (current) return normalizeLegacy(JSON.parse(current));
-      const legacy = LEGACY_KEYS
+      const legacy = activeLegacyKeys
         .map(key => ({ key, value: localStorage.getItem(key) }))
         .find(entry => entry.value);
       if (!legacy) return emptyState();
@@ -906,11 +908,11 @@
     safe.schemaVersion = SCHEMA_VERSION;
     safe.updatedAt = new Date().toISOString();
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
+      localStorage.setItem(activeStorageKey, JSON.stringify(safe));
       storageAvailable = true;
       // A completed v4 write is the migration commit point. Do not leave a
       // second, stale copy of personal profile data in older schema keys.
-      LEGACY_KEYS.forEach(key => {
+      activeLegacyKeys.forEach(key => {
         try { localStorage.removeItem(key); } catch { /* keep the successful v4 write */ }
       });
     } catch {
@@ -919,7 +921,35 @@
     return safe;
   }
 
-  function clear() { [STORAGE_KEY, ...LEGACY_KEYS].forEach(key => localStorage.removeItem(key)); return emptyState(); }
+  function clear() { [activeStorageKey, ...activeLegacyKeys].forEach(key => localStorage.removeItem(key)); return emptyState(); }
+
+  function setStorageScope(userId) {
+    const id = userId == null || userId === '' ? '' : String(userId).trim();
+    if (id && !/^[A-Za-z0-9._:-]{1,128}$/.test(id)) return null;
+    // Account/guest scopes deliberately never read or migrate legacy keys:
+    // historical data has no trustworthy authenticated owner and remains intact.
+    activeStorageKey = id
+      ? `${STORAGE_KEY}:user:${encodeURIComponent(id)}`
+      : `${STORAGE_KEY}:guest`;
+    activeLegacyKeys = [];
+    storageAvailable = true;
+    return load();
+  }
+
+  function readUnscopedProgressCandidate() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY) || LEGACY_KEYS.map(key => localStorage.getItem(key)).find(Boolean);
+      if (!stored) return null;
+      const state = normalizeLegacy(JSON.parse(stored));
+      const lessons = Object.fromEntries(Object.entries(state.lessons || {}).filter(([, progress]) =>
+        Boolean(progress.lessonViewed || progress.exerciseComplete || progress.quizComplete)));
+      const onboarding = state.onboarding?.complete ? {
+        level: state.onboarding.level || '', goal: state.onboarding.goal || '',
+        time: state.onboarding.time || '', complete: true
+      } : null;
+      return Object.keys(lessons).length || onboarding ? { lessons, onboarding } : null;
+    } catch { return null; }
+  }
 
   // Private/incognito storage limits or a full quota can make setItem throw.
   // The app must keep working in-memory for this session rather than crash.
@@ -943,6 +973,10 @@
     load,
     save,
     clear,
+    setStorageScope,
+    readUnscopedProgressCandidate,
+    emptyState,
+    storageKey() { return activeStorageKey; },
     storageAvailable() { return storageAvailable; },
     emptyLessonProgress,
     setPlan(state, plan) { return save({ ...state, membership: { plan: safePlan(plan), status: 'demo' } }); },
