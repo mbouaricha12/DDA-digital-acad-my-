@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline'; img-src 'self' https://i.ytimg.com; font-src 'self'; connect-src 'self' https:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.ytimg.com; font-src 'self'; connect-src 'self' https:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="theme-color" content="#081426">
   <title>DDA Academy — Apprendre, pratiquer, prouver</title>
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "@id": "https://dariusdigitalacademy.com/academy.html#webpage", "url": "https://dariusdigitalacademy.com/academy.html", "name": "DDA Academy — Apprendre, pratiquer, prouver", "description": "Darius Digital Academy transforme l'apprentissage des marchés financiers en un vrai parcours : comprendre, pratiquer, prouver ta progression — pas une liste de vidéos à consommer.", "inLanguage": "fr-FR", "isPartOf": {"@id": "https://dariusdigitalacademy.com/#website"}}</script>
@@ -59,8 +59,19 @@
       var verificationToken = params.get('token_hash') || params.get('token') || hashParams.get('token_hash');
       if (verificationToken && verificationToken.length >= 32) window.DDA_VERIFY_TOKEN = verificationToken;
       if (recoveryType) window.DDA_AUTH_RECOVERY = true;
+      // Google OAuth return (founder directive, 2026-11): the `auth=oauth-google`
+      // marker and any `error`/`error_description` GoTrue appends on a refused
+      // or misconfigured attempt must be captured into globals the SAME way as
+      // `code`/`type=recovery` just above, for the SAME reason — the
+      // history.replaceState below wipes the entire query string from the
+      // address bar before app.js's handleBffVerificationToken() ever runs.
+      var oauthProvider = params.get('auth') || hashParams.get('auth');
+      if (oauthProvider) window.DDA_OAUTH_PROVIDER = oauthProvider;
+      var oauthError = params.get('error') || hashParams.get('error');
+      if (oauthError) window.DDA_OAUTH_ERROR = oauthError;
       var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone']);
       var route = location.hash.slice(1);
+      document.documentElement.setAttribute('data-boot-view', knownRoutes.has(route) ? route : 'dashboard');
       var safeHash = knownRoutes.has(route) ? '#' + route : '';
       if (location.search || location.hash !== safeHash) history.replaceState(history.state, '', location.pathname + safeHash);
     })();
@@ -101,15 +112,17 @@
       <symbol id="icon-blocked" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M6.3 6.3l11.4 11.4"/></symbol>
       <symbol id="icon-photo" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.5" cy="10" r="1.8"/><path d="M3 16.5l5.5-5 4 3.5 3-2.5L21 16"/></symbol>
       <symbol id="icon-award" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5.5"/><path d="M9 13.5L7.5 21l4.5-2.5L16.5 21 15 13.5"/></symbol>
+      <symbol id="icon-crown" viewBox="0 0 24 24"><path d="M4 18h16l1.4-8.6-4.9 3.2L12 6l-4.5 6.6-4.9-3.2Z"/><path d="M5.5 20.5h13"/></symbol>
       <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></symbol>
       <symbol id="icon-journal" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M4 7h2M4 17h2M8 8h8M8 12h8M8 16h5"/></symbol>
+      <symbol id="icon-edit" viewBox="0 0 24 24"><path d="m4 16.5-.8 3.3 3.3-.8L18.8 6.7a2.3 2.3 0 0 0-3.3-3.3Z"/><path d="m14.5 5.5 4 4"/></symbol>
       <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
       <symbol id="icon-chevron-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
       <symbol id="icon-chat" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8A2.5 2.5 0 0 1 17.5 16H10l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 13.5Z"/></symbol>
       <symbol id="icon-users" viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3"/><circle cx="16" cy="9" r="2.5"/><path d="M3 20a5.5 5.5 0 0 1 11 0"/><path d="M14 20a4.5 4.5 0 0 1 7-3.7"/></symbol>
     </defs>
   </svg>
-  <div class="prototype-banner">Version d’apprentissage DDA — aucune donnée de marché réelle</div>
+  <div id="session-check-status" class="session-check-status" role="status" aria-live="polite" hidden>Vérification sécurisée de ton espace DDA…</div>
   <div class="app-shell" id="academy-shell" data-layer="academy">
     <aside class="sidebar" aria-label="Navigation principale">
       <a class="brand" href="#dashboard" aria-label="DDA — Accueil">
@@ -117,32 +130,29 @@
         <span class="brand-name">Darius Digital Academy</span>
       </a>
       <nav>
-        <p class="nav-section-label">Formation</p>
-        <button class="nav-item active" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Aujourd’hui</button>
-        <button class="nav-item" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mes Parcours</button>
-        <button class="nav-item" id="nav-current-lesson" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Cours en cours</button>
-        <p class="nav-section-label">S’entraîner</p>
+        <button class="nav-item active" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Mon Espace</button>
+
+        <button class="nav-section-toggle" type="button" id="nav-academy-toggle" aria-expanded="true" aria-controls="nav-academy-group"><svg class="icon"><use href="#icon-book"/></svg> Academy <svg class="icon nav-section-chevron" aria-hidden="true"><use href="#icon-chevron-right"/></svg></button>
+        <div class="nav-group" id="nav-academy-group">
+          <button class="nav-item nav-subitem" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mes Parcours</button>
+          <button class="nav-item nav-subitem" id="nav-current-lesson" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Mes Leçons</button>
+          <button class="nav-item nav-subitem" id="nav-current-exercise" data-view="lesson" data-scroll-to="lesson-panel-exercise"><svg class="icon"><use href="#icon-check-circle"/></svg> Exercices &amp; Quiz</button>
+          <button class="nav-item nav-subitem" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
+          <button class="nav-item nav-subitem" data-view="progress" data-scroll-to="certificate-panel"><svg class="icon"><use href="#icon-award"/></svg> Certificats</button>
+        </div>
+
+        <button class="nav-item" data-view="lab"><svg class="icon"><use href="#icon-award"/></svg> DDA Lab</button>
+        <button class="nav-item" data-view="intelligence"><svg class="icon"><use href="#icon-chat"/></svg> DDA AI<span class="nav-status-tag">Beta</span></button>
+        <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal de trading</button>
+        <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
+        <button class="nav-item" data-view="community"><svg class="icon"><use href="#icon-users"/></svg> Communauté</button>
+
+        <p class="nav-section-label">Mon travail</p>
         <button class="nav-item" data-view="dashboard" data-scroll-to="analysis-terminal"><svg class="icon"><use href="#icon-chart"/></svg> Terminal d’analyse</button>
         <button class="nav-item" data-view="practice"><svg class="icon"><use href="#icon-target"/></svg> Pratique avancée</button>
-        <p class="nav-section-label">Suivi</p>
-        <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
-        <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal de trading</button>
-        <p class="nav-section-label">Ressources</p>
-        <button class="nav-item" data-view="lab"><svg class="icon"><use href="#icon-award"/></svg> DDA Lab</button>
-
-
-
-
-
-        <button class="nav-item" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
         <button class="nav-item" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg> Marchés & BRVM</button>
-
-
-
-
         <button class="nav-item" data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg> Broker Hub</button>
         <p class="nav-section-label">Compte</p>
-        <button class="nav-item" data-view="membership"><svg class="icon"><use href="#icon-spark"/></svg> DDA Premium</button>
         <button class="nav-item" data-view="support"><svg class="icon"><use href="#icon-help"/></svg> Aide & support</button>
         <button class="nav-item" data-view="profile"><svg class="icon"><use href="#icon-user"/></svg> Profil</button>
         <a class="nav-item" href="admin.html" id="sidebar-admin-link" hidden><svg class="icon"><use href="#icon-shield"/></svg> Back-office</a>
@@ -150,7 +160,13 @@
       <div class="sidebar-foot">
         <a class="nav-item academy-public-exit" href="index.html">← Site public</a>
         <span class="plan-label" id="sidebar-plan">DDA Free</span>
-        <button class="profile-chip" data-view="profile"><span class="avatar" id="profile-avatar">AP</span><span><b id="profile-name">Apprenant</b><br><small>Mon profil local</small></span></button>
+        <button class="profile-chip" data-view="profile"><span class="avatar" id="profile-avatar">A</span><span><b id="profile-name">Apprenant</b><br><small>Profil d’apprentissage</small></span></button>
+        <div class="sidebar-premium-card">
+          <svg class="icon sidebar-premium-icon" aria-hidden="true"><use href="#icon-crown"/></svg>
+          <strong>DDA Premium</strong>
+          <p>Débloque les leçons Premium (Risque &amp; Discipline), le Lab IA avancé — livrable et projet final — et la revue hebdomadaire guidée.</p>
+          <button type="button" class="secondary-action" data-view="membership">Découvrir Premium <span>→</span></button>
+        </div>
       </div>
     </aside>
 
@@ -163,26 +179,38 @@
         </a>
         <button class="icon-button" type="button" id="mobile-drawer-close" aria-label="Fermer le menu"><svg class="icon"><use href="#icon-close"/></svg></button>
       </div>
-      <p class="nav-section-label">Apprendre</p>
-      <button class="nav-item" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Aujourd’hui</button>
-      <button class="nav-item" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mes Parcours</button>
-      <button class="nav-item" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Cours en cours</button>
-      <p class="nav-section-label">Pratiquer</p>
+      <button class="nav-item" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Mon Espace</button>
+
+      <button class="nav-section-toggle" type="button" id="drawer-academy-toggle" aria-expanded="true" aria-controls="drawer-academy-group"><svg class="icon"><use href="#icon-book"/></svg> Academy <svg class="icon nav-section-chevron" aria-hidden="true"><use href="#icon-chevron-right"/></svg></button>
+      <div class="nav-group" id="drawer-academy-group">
+        <button class="nav-item nav-subitem" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mes Parcours</button>
+        <button class="nav-item nav-subitem" id="drawer-current-lesson" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Mes Leçons</button>
+        <button class="nav-item nav-subitem" id="drawer-current-exercise" data-view="lesson" data-scroll-to="lesson-panel-exercise"><svg class="icon"><use href="#icon-check-circle"/></svg> Exercices &amp; Quiz</button>
+        <button class="nav-item nav-subitem" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
+        <button class="nav-item nav-subitem" data-view="progress" data-scroll-to="certificate-panel"><svg class="icon"><use href="#icon-award"/></svg> Certificats</button>
+      </div>
+
+      <button class="nav-item" data-view="lab"><svg class="icon"><use href="#icon-award"/></svg> DDA Lab</button>
+      <button class="nav-item" data-view="intelligence"><svg class="icon"><use href="#icon-chat"/></svg> DDA AI<span class="nav-status-tag">Beta</span></button>
+      <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal de trading</button>
+      <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
+      <button class="nav-item" data-view="community"><svg class="icon"><use href="#icon-users"/></svg> Communauté</button>
+
+      <p class="nav-section-label">Mon travail</p>
       <button class="nav-item" data-view="dashboard" data-scroll-to="analysis-terminal"><svg class="icon"><use href="#icon-chart"/></svg> Terminal d’analyse</button>
       <button class="nav-item" data-view="practice"><svg class="icon"><use href="#icon-target"/></svg> Pratique avancée</button>
-      <p class="nav-section-label">Mon travail</p>
-      <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
-      <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal de trading</button>
-      <p class="nav-section-label">Explorer</p>
-      <button class="nav-item" data-view="lab"><svg class="icon"><use href="#icon-award"/></svg> DDA Lab</button>
-      <button class="nav-item" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
       <button class="nav-item" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg> Marchés &amp; BRVM</button>
       <button class="nav-item" data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg> Broker Hub</button>
       <p class="nav-section-label">Compte</p>
-      <button class="nav-item" data-view="membership"><svg class="icon"><use href="#icon-spark"/></svg> DDA Premium</button>
       <button class="nav-item" data-view="support"><svg class="icon"><use href="#icon-help"/></svg> Aide &amp; support</button>
       <button class="nav-item" data-view="profile"><svg class="icon"><use href="#icon-user"/></svg> Profil</button>
       <a class="nav-item" href="admin.html" id="drawer-admin-link" hidden><svg class="icon"><use href="#icon-shield"/></svg> Back-office</a>
+      <div class="sidebar-premium-card">
+        <svg class="icon sidebar-premium-icon" aria-hidden="true"><use href="#icon-crown"/></svg>
+        <strong>DDA Premium</strong>
+        <p>Débloque les leçons Premium (Risque &amp; Discipline), le Lab IA avancé — livrable et projet final — et la revue hebdomadaire guidée.</p>
+        <button type="button" class="secondary-action" data-view="membership">Découvrir Premium <span>→</span></button>
+      </div>
       <a class="nav-item academy-public-exit" href="index.html">← Retour au site public</a>
     </nav>
 
@@ -190,7 +218,7 @@
       <!-- Academy shell: public marketing content is intentionally outside this document. -->
       <header class="topbar">
         <button class="icon-button mobile-menu-toggle" type="button" id="mobile-menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-drawer"><svg class="icon"><use href="#icon-menu"/></svg></button>
-        <button class="mobile-brand" data-view="dashboard" aria-label="Accueil DDA"><b>DDA</b><small>DIGITAL ACADEMY</small></button>
+        <button class="mobile-brand" data-view="dashboard" aria-label="DDA DIGITAL ACADEMY — Accueil DDA"><b>DDA</b><small>DIGITAL ACADEMY</small></button>
         <button class="topbar-brand-lockup" data-view="dashboard" aria-label="Accueil Darius Digital Academy"><span class="topbar-brand-mark">DDA</span><span class="topbar-brand-copy"><strong>DARIUS DIGITAL</strong><small>ACADEMY</small></span></button>
         <span class="topbar-tagline">Trading &amp; Financial Markets Learning Operating System</span>
         <div class="context"><span class="context-section" id="context-section" hidden></span><strong id="context-title">Aujourd’hui</strong></div>
@@ -202,7 +230,7 @@
         <button class="icon-button" aria-label="Aide et support" data-view="support"><svg class="icon"><use href="#icon-help"/></svg></button>
         <button class="icon-button" type="button" aria-label="Notifications" title="Aucune notification pour le moment"><svg class="icon"><use href="#icon-bell"/></svg></button>
         <button class="topbar-user" type="button" data-view="profile" aria-label="Mon profil">
-          <span class="avatar" data-profile-avatar id="topbar-profile-avatar">RD</span>
+          <span class="avatar" data-profile-avatar id="topbar-profile-avatar">A</span>
           <span class="topbar-user-meta"><strong data-profile-name id="topbar-profile-name">Apprenant</strong><small data-profile-role>Apprenant</small></span>
         </button>
       </header>
@@ -221,7 +249,7 @@
               <em>Prove Progress.</em>
               <div class="aperture-thread" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
             </div>
-            <div class="access-sequence" aria-label="Le parcours d’entrée DDA en trois étapes"><span><b>01</b><small>Créer</small></span><i></i><span><b>02</b><small>Calibrer</small></span><i></i><span><b>03</b><small>Commencer le parcours</small></span></div>
+            <div class="access-sequence" aria-label="Le parcours d’entrée DDA en trois étapes"><span><b>01</b><small>Créer</small></span><i></i><span><b>02</b><small>Calibrer</small></span><i></i><span><b>03</b><small>Commencer M0.1</small></span></div>
             <svg class="access-illustration" viewBox="0 0 300 160" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
               <path class="lane-a" d="M10 130 C 70 40, 150 150, 290 30" stroke="#c9beaa" stroke-dasharray="3 6"/>
               <circle cx="10" cy="130" r="5" fill="#0B6FAE" stroke="none"/>
@@ -238,26 +266,41 @@
             <ul class="trust-list">
               <li><svg class="icon"><use href="#icon-target"/></svg> Une première leçon adaptée à ton point de départ</li>
               <li><svg class="icon"><use href="#icon-check-circle"/></svg> Un parcours construit depuis tes réponses</li>
-              <li><svg class="icon"><use href="#icon-shield"/></svg> Tes données restent locales sur cet appareil</li>
+              <li><svg class="icon"><use href="#icon-shield"/></svg> Sans compte serveur, tes données restent sur cet appareil</li>
             </ul>
           </div>
           <div class="access-card">
+            <a class="access-back-link" href="./index.html">← Retour au site DDA</a>
             <div class="step-indicator" aria-label="Progression de l’inscription"><span class="active" id="step-dot-1" aria-current="step">1</span><i></i><span id="step-dot-2">2</span></div>
             <div id="bff-auth-tools" hidden>
               <button class="text-action" id="bff-mode-signup" type="button">Créer un compte</button>
               <button class="text-action" id="bff-mode-login" type="button">Se connecter</button>
             </div>
             <p class="form-error" id="bff-auth-status" role="status" aria-live="polite"></p>
+            <div id="bff-oauth-google-wrap" hidden>
+              <button class="oauth-google-action" id="bff-oauth-google" type="button">
+                <svg class="oauth-google-logo" width="22" height="22" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+                  <path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/>
+                  <path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.32-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/>
+                  <path fill="#FBBC05" d="M11.68 28.18A13.93 13.93 0 0 1 10.73 24c0-1.45.25-2.86.7-4.18v-5.7H4.34A23.93 23.93 0 0 0 2 24c0 3.86.92 7.5 2.56 10.69z"/>
+                  <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.3-6.3C34.91 3.99 29.93 2 24 2 15.4 2 7.96 6.93 4.34 13.93l6.1 4.7c1.74-5.2 6.59-7.88 13.56-7.88z"/>
+                </svg>
+                <span>Continuer avec Google</span>
+              </button>
+              <div class="auth-divider"><span>ou</span></div>
+            </div>
             <form id="signup-form" data-js-submit method="dialog">
               <p class="eyebrow" id="access-step-label">Étape 1 sur 2 · commencer</p><h2 id="access-form-title">Commence ton parcours Free</h2>
               <p class="access-form-note" id="access-form-note">Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon. Cette version conserve ta progression sur cet appareil.</p>
-              <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ex. Aïcha"></label>
-              <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"><small class="field-help">Reste uniquement sur cet appareil tant qu'aucun compte serveur n'est activé — jamais envoyée ailleurs.</small></label>
-              <label id="access-password-field" hidden>Mot de passe<input id="access-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128"></label>
+              <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ex. Awa"></label>
+              <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"><small class="field-help" id="access-email-help">Sans compte serveur, cette adresse reste sur cet appareil et n’est pas transmise.</small></label>
+
+              <label id="access-password-field" hidden>Mot de passe<span class="password-field-wrap"><input id="access-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128"><button class="text-action password-toggle" id="toggle-access-password" type="button" aria-pressed="false">Afficher</button></span><small class="field-help" id="access-password-help" hidden>12 caractères minimum.</small></label>
               <label class="consent" id="access-consent-field"><input id="consent" type="checkbox" required><span id="access-consent-label">Je comprends que ma progression est stockée uniquement sur cet appareil pendant ce pilote, et qu'elle peut être perdue définitivement (changement d'appareil, cache vidé, incident technique) — il n'existe pas de sauvegarde serveur.</span></label>
               <p class="form-error" id="signup-error" role="alert"></p>
               <button class="primary-action" type="submit" disabled>Continuer <span>→</span></button>
             </form>
+            <button class="text-action" id="bff-resend-confirmation" type="button" hidden>Je n'ai pas reçu l'e-mail — renvoyer le lien</button>
             <button class="text-action" id="bff-forgot-password" type="button" hidden>Mot de passe oublié ?</button>
             <form id="bff-reset-password-form" method="dialog" hidden>
               <p class="eyebrow gold">Sécurité du compte</p>
@@ -351,7 +394,7 @@
             <img class="photo-fill" src="images/photos/terminal-desk-trading.jpg" alt="" loading="lazy">
             <div class="photo-scrim"></div>
             <div class="progress-ring" id="module-ring" style="--progress: 18"><strong id="module-percent">18%</strong><span>du module</span></div>
-            <div class="terminal-visual-copy"><small>APPRENDRE → PRATIQUER → PROUVER</small><strong>Ta progression devient visible.</strong></div>
+            <div class="terminal-visual-copy"><small>LEARN → PRACTICE → PROVE</small><strong>Ta progression devient visible.</strong></div>
           </div>
         </article>
 
@@ -370,11 +413,11 @@
         <section class="analysis-terminal" id="analysis-terminal" aria-labelledby="analysis-terminal-title">
           <div class="analysis-terminal-head">
             <div>
-              <p class="eyebrow gold">DDA Terminal · Observation guidée</p>
+              <p class="eyebrow gold">Terminal d’analyse</p>
               <h2 id="analysis-terminal-title">Observer avant de décider.</h2>
               <p>Un espace de démonstration local pour manipuler une série historique contrôlée, annoter ton observation et la conserver sur cet appareil.</p>
             </div>
-            <span class="demo-data-badge"><span class="status-dot"></span>Données pédagogiques locales</span>
+            <span class="demo-data-badge"><span class="status-dot"></span>Données pédagogiques</span>
           </div>
 
           <div class="analysis-terminal-toolbar" role="group" aria-label="Marché et unité de temps">
@@ -395,7 +438,7 @@
                 <option value="1M">1M</option>
               </select>
             </label>
-            <span class="terminal-data-mark"><span class="status-dot"></span> Série synthétique · locale</span>
+            <span class="terminal-data-mark"><span class="status-dot"></span> Série synthétique · pédagogique</span>
           </div>
 
           <div class="analysis-chart-workspace">
@@ -442,14 +485,14 @@
                 <svg id="terminal-chart" class="analysis-chart" viewBox="0 0 900 420" preserveAspectRatio="none" tabindex="0" role="img" aria-label="Graphique de chandeliers pédagogiques interactif — valeurs synthétiques normalisées" aria-describedby="terminal-chart-caption"></svg>
               </div>
               <div class="analysis-chart-footer">
-                <p class="analysis-chart-caption" id="terminal-chart-caption">Série historique locale contrôlée · valeurs normalisées · aucune cotation en temps réel.</p>
+                <p class="analysis-chart-caption" id="terminal-chart-caption">Série historique contrôlée · valeurs normalisées · aucune cotation en temps réel.</p>
                 <span class="terminal-tool-hint" id="terminal-tool-hint" role="status" aria-live="polite">Déplace le pointeur sur le graphique.</span>
               </div>
             </div>
           </div>
 
           <section class="terminal-practice-mission" aria-labelledby="terminal-practice-title">
-            <div class="panel-heading"><div><p class="eyebrow gold">Terminal de pratique · mission guidée</p><h3 id="terminal-practice-title">Repère une zone, sans chercher à prédire.</h3></div><span class="practice-proof-badge" id="terminal-practice-proof">À commencer</span></div>
+            <div class="panel-heading"><div><p class="eyebrow gold">Practice Terminal · mission guidée</p><h3 id="terminal-practice-title">Repère une zone, sans chercher à prédire.</h3></div><span class="practice-proof-badge" id="terminal-practice-proof">À commencer</span></div>
             <p id="terminal-practice-instruction">Sélectionne l’outil <b>Zone S/R</b>, puis place une zone horizontale autour de la partie centrale du graphique. Une zone est une aire d’observation, pas un prix exact.</p>
             <div class="terminal-practice-actions"><button type="button" class="secondary-action" id="terminal-practice-validate">Vérifier ma lecture</button><span id="terminal-practice-feedback" role="status">Aucune vérification effectuée.</span></div>
           </section>
@@ -669,7 +712,7 @@
           <div id="progress-practice-proof"></div>
         </section>
 
-        <section class="panel premium-evidence-panel" aria-labelledby="premium-evidence-title"><div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> Preuves de compétence</p><h3 id="premium-evidence-title">Preuves Premium locales</h3></div></div><div id="premium-proof-progress"><p>Aucune preuve Premium validée pour le moment.</p></div></section>
+        <section class="panel premium-evidence-panel" aria-labelledby="premium-evidence-title"><div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> DDA Skill Evidence</p><h3 id="premium-evidence-title">Preuves Premium locales</h3></div></div><div id="premium-proof-progress"><p>Aucune preuve Premium validée pour le moment.</p></div></section>
 
         <section class="panel next-step-panel">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-compass"/></svg> Prochaine étape réelle</p></div></div>
@@ -683,9 +726,9 @@
           <ol id="modules-recap-list"></ol>
         </section>
 
-        <section class="panel certificate-panel">
+        <section class="panel certificate-panel" id="certificate-panel">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> Aperçu de certification</p><h3>Un aperçu de ce que DDA délivrera</h3></div></div>
-          <div class="certificate-locked" id="certificate-locked"><svg class="icon"><use href="#icon-lock"/></svg><p>Termine ta première leçon pour débloquer un aperçu de certification.</p></div>
+          <div class="certificate-locked" id="certificate-locked"><svg class="icon"><use href="#icon-lock"/></svg><p>Termine ta première leçon (M0.1) pour débloquer un aperçu de certification.</p></div>
           <div class="certificate-gate" id="certificate-gate" hidden><p>L’aperçu de certification est réservé à DDA Premium.</p><button class="secondary-action premium-gate" data-permission="certificate_preview">Voir l’aperçu Premium</button></div>
           <div class="certificate-preview" id="certificate-preview-block" hidden>
             <div class="certificate-mock" id="certificate-mock">
@@ -764,7 +807,7 @@
         <section class="journal-composer" id="journal-composer" hidden>
           <button class="back-link" id="journal-composer-back" type="button">← Retour au journal</button>
           <p class="eyebrow gold" id="journal-composer-eyebrow">Nouvelle entrée</p>
-          <p class="journal-source-context" id="journal-source-context" hidden>Préremplie depuis le Darius Analysis Terminal — relis chaque champ avant d’enregistrer.</p>
+          <p class="journal-source-context" id="journal-source-context" hidden>Préremplie depuis le Terminal d’analyse — relis chaque champ avant d’enregistrer.</p>
           <div class="step-indicator journal-step-indicator" aria-label="Étapes de l’entrée">
             <span class="active" id="journal-step-dot-1">1</span><i></i>
             <span id="journal-step-dot-2">2</span><i></i>
@@ -877,7 +920,7 @@
           <h2>Laboratoire de gestion du risque</h2>
           <p>Des scénarios guidés pour travailler sizing, invalidation et discipline.</p>
           <ul class="resource-meta resource-meta-dark" aria-label="Métadonnées de l’atelier Premium"><li>20 min</li><li>Premium</li><li>Après M0</li></ul>
-          <button class="secondary-action premium-gate" data-permission="resources_premium">Voir l’aperçu Premium</button>
+          <button class="secondary-action premium-gate" data-permission="premium_track" data-premium-target="premium-lab">Voir l’aperçu Premium</button>
         </article>
 
         <aside class="resource-use-note" aria-labelledby="resource-use-title"><p class="eyebrow gold">Comment utiliser la bibliothèque</p><h2 id="resource-use-title">Un outil, une intention, une prochaine pratique.</h2><p>Choisis une ressource pour débloquer une question précise. Lis-la, note ce que tu peux réutiliser, puis retourne à ton parcours ou à ton Terminal pour l’appliquer.</p></aside>
@@ -891,17 +934,17 @@
 
         <div class="plan-grid">
           <article class="plan-card current-plan"><p class="eyebrow">Ce que tu as aujourd’hui</p><h2>DDA Free</h2><p class="plan-tagline">Pour démarrer sérieusement, sans rien débourser.</p><ul><li>Parcours M0 Fondations et ses leçons</li><li>Exercices, quiz et Fil de maîtrise réel</li><li>Journal &amp; Plan</li><li>Market Intelligence (aperçu)</li></ul><span class="plan-state" id="free-plan-state">Formule active</span></article>
-          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">DDA Premium · aperçu local</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><p class="premium-local-status">Tu explores une démonstration pédagogique sur cet appareil, pas un abonnement actif.</p><ul><li>Leçons Premium P2 : risque avant entrée et trade contrôlé</li><li>Risk Plan Lab avec validation du scénario et conditions de non-trade</li><li>Assessment Controlled Decision et preuve locale de compétence</li><li>Revue hebdomadaire, ressources avancées et pont vers le Journal</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aucun paiement · aucun renouvellement · aucun entitlement serveur</small><a class="text-action membership-preparation-link" href="launch/">Comprendre la préparation commerciale <span>→</span></a></article>
+          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">DDA Premium · démonstration pédagogique</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><p class="premium-local-status">Tu explores ici les briques pédagogiques Premium disponibles : ce n’est pas un abonnement actif.</p><ul><li>Leçons Premium P2 : risque avant entrée et trade contrôlé</li><li>Risk Plan Lab avec validation du scénario et conditions de non-trade</li><li>Assessment Controlled Decision et preuve de compétence</li><li>Revue hebdomadaire, ressources avancées et pont vers le Journal</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aucun paiement · aucun renouvellement · aucun accès commercial activé</small><a class="text-action membership-preparation-link" href="launch/">Comprendre la préparation commerciale <span>→</span></a></article>
         </div>
 
         <section class="panel premium-waitlist-panel" id="premium-waitlist-panel" aria-labelledby="premium-waitlist-title">
-          <div class="panel-heading"><div><p class="eyebrow gold">Avant l’activation du paiement</p><h2 id="premium-waitlist-title">Liste d’attente Premium</h2></div></div>
-          <p>Le paiement Premium (Chariow) n’est pas encore activé. Si tu veux être informé(e) dès son ouverture, inscris-toi ici — aucune carte bancaire, aucun engagement.</p>
+          <div class="panel-heading"><div><p class="eyebrow gold">Avant l’activation du paiement</p><h2 id="premium-waitlist-title">Intérêt pour Premium</h2></div></div>
+          <p>Le paiement Premium n’est pas encore activé. Tu peux noter ton intérêt sur cet appareil. Cette préférence reste dans ce navigateur : elle ne crée aucune inscription et n’envoie aucune notification.</p>
           <div id="premium-waitlist-form">
-            <label class="premium-waitlist-consent"><input type="checkbox" id="premium-waitlist-consent"> Je comprends qu’aucun paiement n’est activé et je souhaite être informé(e) quand l’abonnement Premium sera disponible.</label>
-            <button class="secondary-action" id="premium-waitlist-join" disabled>Rejoindre la liste d’attente</button>
+            <label class="premium-waitlist-consent"><input type="checkbox" id="premium-waitlist-consent"> Je comprends que cette préférence reste enregistrée sur cet appareil et ne déclenche aucune notification.</label>
+            <button class="secondary-action" id="premium-waitlist-join" disabled>Enregistrer mon intérêt sur cet appareil</button>
           </div>
-          <p id="premium-waitlist-confirmation" role="status" aria-live="polite" hidden><svg class="icon"><use href="#icon-check-circle"/></svg> Tu es sur la liste d’attente Premium — nous ne t’enverrons rien d’autre pour l’instant.</p>
+          <p id="premium-waitlist-confirmation" role="status" aria-live="polite" hidden><svg class="icon"><use href="#icon-check-circle"/></svg> Ton intérêt est noté sur cet appareil. Tu n’es inscrit(e) à aucune liste et ne recevras pas de notification.</p>
         </section>
 
         <section class="panel access-model-panel" aria-labelledby="access-model-title">
@@ -909,7 +952,7 @@
           <p class="access-model-intro">Free doit rester utile. Premium doit apporter une profondeur réellement construite. Access préparera plus tard des bourses ou accès sponsorisés — rien n’est encore ouvert ni financé.</p>
           <div class="access-model-grid">
             <article><span class="access-model-kicker">Disponible maintenant</span><h3>DDA Free</h3><p>M0, exercices, feedback, progression, Journal &amp; Plan local et ressources Free.</p><strong>Valeur autonome</strong></article>
-            <article><span class="access-model-kicker gold">Démonstration locale</span><h3>DDA Premium</h3><p>P2 Risk &amp; Discipline, leçons authored, Risk Plan Lab, assessment et preuve locale.</p><strong>Aucun paiement actif</strong></article>
+            <article><span class="access-model-kicker gold">Démonstration pédagogique</span><h3>DDA Premium</h3><p>P2 Risque et discipline, leçons authored, Risk Plan Lab, assessment et preuve de compétence.</p><strong>Aucun paiement actif</strong></article>
             <article><span class="access-model-kicker muted">À préparer</span><h3>DDA Access</h3><p>Bourses, tarifs réduits ou accès sponsorisés selon des règles publiées et validées côté serveur.</p><strong>Non disponible aujourd’hui</strong></article>
           </div>
           <div class="access-model-rules"><strong>Conditions actuelles :</strong> aucun prix, checkout, abonnement ou renouvellement automatique n’est activé. Une modification de l’état local ne pourra jamais constituer un achat ou un droit Premium serveur.</div>
@@ -927,7 +970,7 @@
             <li class="status-future">Trading Lab <small>À construire</small></li>
             <li class="status-future">Trader DNA <small>À construire</small></li>
           </ol>
-          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Aujourd’hui : P2, Risk Plan Lab, Controlled Decision, preuve locale et Revue hebdomadaire sont utilisables en aperçu Premium sur cet appareil. Les futures briques restent clairement signalées.</span>
+          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Aujourd’hui : P2, Risk Plan Lab, Controlled Decision, preuve de compétence et Revue hebdomadaire sont utilisables en aperçu Premium sur cet appareil. Les futures briques restent clairement signalées.</span>
         </section>
 
         <section class="panel family-panel" aria-labelledby="family-title">
@@ -962,63 +1005,63 @@
         </section>
       </section>
 
-      <section class="view" id="lesson-p21" aria-labelledby="lesson-title-p21"><div class="view-photo-band" role="img" aria-label="Définir son risque avant une décision"><img class="photo-fill" src="images/photos/p2-discipline-review.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><p class="view-photo-band-copy">Définir le risque avant d'entrer, pas après.</p></div><div class="lesson-layout lesson-layout-premium"><article class="lesson-main" id="lesson-p21-main"><div class="lesson-progress-head" id="lesson-p21-progress-head"></div><div class="lesson-quick-nav"><button class="back-link" data-view="premium-track">← Retour au parcours Risque et discipline</button><button class="text-action" data-view="path">Mon parcours</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div><nav class="module-toc" aria-label="Sommaire du module"><strong class="module-toc-heading"></strong><ol class="module-toc-list"></ol></nav></article><aside class="lesson-outline" id="lesson-p21-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"><div class="lesson-sidecard" id="lesson-p21-sidecard" data-sidecard-slot></div></aside></div></section>
-      <section class="view" id="lesson-p22" aria-labelledby="lesson-title-p22"><div class="view-photo-band" role="img" aria-label="Construire une décision maîtrisée"><img class="photo-fill" src="images/photos/p2-discipline-review.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><p class="view-photo-band-copy">Une transaction contrôlée commence par un plan.</p></div><div class="lesson-layout lesson-layout-premium"><article class="lesson-main" id="lesson-p22-main"><div class="lesson-progress-head" id="lesson-p22-progress-head"></div><div class="lesson-quick-nav"><button class="back-link" data-view="premium-track">← Retour au parcours Risque et discipline</button><button class="text-action" data-view="path">Mon parcours</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div><nav class="module-toc" aria-label="Sommaire du module"><strong class="module-toc-heading"></strong><ol class="module-toc-list"></ol></nav></article><aside class="lesson-outline" id="lesson-p22-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"><div class="lesson-sidecard" id="lesson-p22-sidecard" data-sidecard-slot></div></aside></div></section>
+      <section class="view" id="lesson-p21" aria-labelledby="lesson-title-p21"><div class="view-photo-band" role="img" aria-label="Le risque avant l’entrée"><img class="photo-fill" src="images/photos/p2-discipline-review.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><p class="view-photo-band-copy">Définir le risque avant d'entrer, pas après.</p></div><div class="lesson-layout lesson-layout-premium"><article class="lesson-main" id="lesson-p21-main"><div class="lesson-progress-head" id="lesson-p21-progress-head"></div><div class="lesson-quick-nav"><button class="back-link" data-view="premium-track">← Retour au Premium Track</button><button class="text-action" data-view="path">Mon parcours</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div><nav class="module-toc" aria-label="Sommaire du module"><strong class="module-toc-heading"></strong><ol class="module-toc-list"></ol></nav></article><aside class="lesson-outline" id="lesson-p21-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"><div class="lesson-sidecard" id="lesson-p21-sidecard" data-sidecard-slot></div></aside></div></section>
+      <section class="view" id="lesson-p22" aria-labelledby="lesson-title-p22"><div class="view-photo-band" role="img" aria-label="Trade contrôlé"><img class="photo-fill" src="images/photos/p2-discipline-review.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><p class="view-photo-band-copy">Une transaction contrôlée commence par un plan.</p></div><div class="lesson-layout lesson-layout-premium"><article class="lesson-main" id="lesson-p22-main"><div class="lesson-progress-head" id="lesson-p22-progress-head"></div><div class="lesson-quick-nav"><button class="back-link" data-view="premium-track">← Retour au Premium Track</button><button class="text-action" data-view="path">Mon parcours</button><button class="text-action" data-view="dashboard">Tableau de bord</button></div><nav class="module-toc" aria-label="Sommaire du module"><strong class="module-toc-heading"></strong><ol class="module-toc-list"></ol></nav></article><aside class="lesson-outline" id="lesson-p22-outline" tabindex="0" role="region" aria-label="Plan de la leçon — utilise les flèches pour faire défiler"><div class="lesson-sidecard" id="lesson-p22-sidecard" data-sidecard-slot></div></aside></div></section>
 
       <section class="view premium-view" id="premium-track" aria-labelledby="premium-track-title">
-        <div class="section-intro"><p class="eyebrow gold">DDA Premium · Parcours Risque et discipline</p><h1 id="premium-track-title">Risque et discipline.</h1><p>Un parcours local pour apprendre à contrôler le risque avant de chercher une opportunité. Démonstration sur cet appareil — aucun paiement, aucune donnée en temps réel.</p></div>
-        <div class="premium-track-status"><span class="plan-state">Aperçu Premium local</span><strong>CONSTRUIRE → PRATIQUER → VALIDER → RELIRE → PROUVER SA PROGRESSION</strong><small id="premium-track-progress">Prêt à commencer ? Ta première étape t’attend.</small></div>
-        <ol class="premium-progress-strip" id="p2-progress-strip" aria-label="Progression du parcours Risque et discipline">
-          <li data-p2-step="p21" data-state="locked"><span class="premium-progress-index">01</span><div><strong>Définir son risque</strong><small id="p2-progress-p21-status">À commencer</small></div></li>
-          <li data-p2-step="p22" data-state="locked"><span class="premium-progress-index">02</span><div><strong>Construire une décision</strong><small id="p2-progress-p22-status">Après la leçon précédente</small></div></li>
-          <li data-p2-step="lab" data-state="locked"><span class="premium-progress-index">03</span><div><strong>Atelier Plan de risque</strong><small id="p2-progress-lab-status">Après les leçons</small></div></li>
-          <li data-p2-step="assessment" data-state="locked"><span class="premium-progress-index">04</span><div><strong>Évaluer sa décision</strong><small id="p2-progress-assessment-status">Après l’atelier</small></div></li>
+        <div class="section-intro"><p class="eyebrow gold">DDA Premium · P2</p><h1 id="premium-track-title">Risque et discipline.</h1><p>Une vertical slice locale pour apprendre à contrôler le risque avant de chercher une opportunité. Démonstration sur cet appareil — aucun paiement, aucune donnée live.</p></div>
+        <div class="premium-track-status"><span class="plan-state">Démo Premium locale</span><strong>CONSTRUIRE → PRATIQUER → VALIDER → REVOIR → PROUVER LA PROGRESSION</strong><small id="premium-track-progress">Prêt à commencer ? Ta première étape t’attend.</small></div>
+        <ol class="premium-progress-strip" id="p2-progress-strip" aria-label="Progression du Premium Track P2">
+          <li data-p2-step="p21" data-state="locked"><span class="premium-progress-index">01</span><div><strong>Le risque avant l’entrée</strong><small id="p2-progress-p21-status">À commencer</small></div></li>
+          <li data-p2-step="p22" data-state="locked"><span class="premium-progress-index">02</span><div><strong>Trade contrôlé</strong><small id="p2-progress-p22-status">Après P2.1</small></div></li>
+          <li data-p2-step="lab" data-state="locked"><span class="premium-progress-index">03</span><div><strong>Risk Plan Lab</strong><small id="p2-progress-lab-status">Après les leçons</small></div></li>
+          <li data-p2-step="assessment" data-state="locked"><span class="premium-progress-index">04</span><div><strong>Controlled Decision</strong><small id="p2-progress-assessment-status">Après le Lab</small></div></li>
         </ol>
-        <section class="panel premium-track-panel"><div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-path"/></svg> Parcours Risque et discipline</p><h2>Décider avec méthode</h2></div></div><p>Apprendre à définir ce que tu acceptes de risquer, pourquoi tu prends une décision et dans quelles conditions ton scénario devient invalide.</p><ol class="premium-module-rail"><li><span>01</span><div><strong>Définir son risque</strong><small id="p2-p21-status">À commencer</small></div><button class="secondary-action" data-view="lesson-p21">Ouvrir</button></li><li><span>02</span><div><strong>Construire une décision maîtrisée</strong><small id="p2-p22-status">Après la leçon précédente</small></div><button class="secondary-action" data-view="lesson-p22">Ouvrir</button></li><li><span>03</span><div><strong>Atelier Plan de risque</strong><small id="p2-lab-status">Après les leçons</small></div><button class="secondary-action" data-view="premium-lab">Ouvrir l’atelier</button></li><li><span>04</span><div><strong>Évaluer sa décision</strong><small id="p2-assessment-status">Après l’atelier</small></div><button class="secondary-action" data-view="premium-assessment">Ouvrir l’évaluation</button></li></ol></section>
+        <section class="panel premium-track-panel"><div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-path"/></svg> P2 Premium Track</p><h2>Risque et discipline</h2></div></div><p>Apprendre à définir ce que tu acceptes de risquer, pourquoi tu prends une décision et dans quelles conditions ton scénario devient invalide.</p><ol class="premium-module-rail"><li><span>01</span><div><strong>Le risque avant l’entrée</strong><small id="p2-p21-status">À commencer</small></div><button class="secondary-action" data-view="lesson-p21">Ouvrir</button></li><li><span>02</span><div><strong>L’anatomie d’un trade contrôlé</strong><small id="p2-p22-status">Après P2.1</small></div><button class="secondary-action" data-view="lesson-p22">Ouvrir</button></li><li><span>03</span><div><strong>Construire le Risk Plan</strong><small id="p2-lab-status">Après les leçons</small></div><button class="secondary-action" data-view="premium-lab">Ouvrir le Lab</button></li><li><span>04</span><div><strong>Controlled Decision</strong><small id="p2-assessment-status">Après le Lab</small></div><button class="secondary-action" data-view="premium-assessment">Ouvrir l’assessment</button></li></ol></section>
         <section class="premium-value-grid" aria-labelledby="premium-value-title">
           <div class="premium-value-heading"><p class="eyebrow gold">La valeur concrète de Premium</p><h2 id="premium-value-title">Tu ne consommes pas plus de contenu. Tu produis de meilleures décisions.</h2><p>Free installe les repères. Premium ajoute une boucle de travail complète : formuler, tester, invalider, revoir et conserver une preuve exploitable.</p></div>
           <div class="premium-value-cards">
-            <article class="premium-value-card"><span class="premium-value-number">01</span><h3>Construire</h3><p>Deux leçons te font expliciter le risque, l’entrée, l’invalidation et la condition de non-décision avant toute action.</p><button class="text-action" type="button" data-view="lesson-p21">Commencer le parcours <span>→</span></button></article>
-            <article class="premium-value-card"><span class="premium-value-number">02</span><h3>Tester</h3><p>L’atelier Plan de risque transforme une idée en plan contrôlable dans un scénario synthétique, avec retour et tentatives conservées localement.</p><button class="text-action" type="button" data-view="premium-lab">Ouvrir l’atelier <span>→</span></button></article>
-            <article class="premium-value-card"><span class="premium-value-number">03</span><h3>Valider</h3><p>L’évaluation de la décision vérifie la discipline du processus, puis crée une preuve de compétence reliée au Journal.</p><button class="text-action" type="button" data-view="premium-assessment">Voir l’évaluation <span>→</span></button></article>
+            <article class="premium-value-card"><span class="premium-value-number">01</span><h3>Construire</h3><p>Deux leçons P2 te font expliciter le risque, l’entrée, l’invalidation et la condition de non-trade avant toute décision.</p><button class="text-action" type="button" data-view="lesson-p21">Commencer P2 <span>→</span></button></article>
+            <article class="premium-value-card"><span class="premium-value-number">02</span><h3>Tester</h3><p>Le Risk Plan Lab transforme une idée en plan contrôlable dans un scénario synthétique, avec feedback et tentatives conservées localement.</p><button class="text-action" type="button" data-view="premium-lab">Ouvrir le Lab <span>→</span></button></article>
+            <article class="premium-value-card"><span class="premium-value-number">03</span><h3>Valider</h3><p>Controlled Decision vérifie la discipline du processus, puis crée une preuve de compétence reliée au Journal.</p><button class="text-action" type="button" data-view="premium-assessment">Voir l’assessment <span>→</span></button></article>
             <article class="premium-value-card"><span class="premium-value-number">04</span><h3>Revoir</h3><p>La Revue hebdomadaire transforme tes observations en points forts, schémas récurrents et prochaine action.</p><button class="text-action" type="button" data-view="journal">Ouvrir la Revue <span>→</span></button></article>
-            <article class="premium-value-card"><span class="premium-value-number">05</span><h3>Conserver</h3><p>La preuve locale, le Journal et la Progression rendent le travail visible sans promettre de rendement ni de certification officielle.</p><button class="text-action" type="button" data-view="progress">Voir les preuves <span>→</span></button></article>
+            <article class="premium-value-card"><span class="premium-value-number">05</span><h3>Conserver</h3><p>La preuve de compétence, le Journal et la Progression rendent le travail visible sans promettre de rendement ni de certification officielle.</p><button class="text-action" type="button" data-view="progress">Voir les preuves <span>→</span></button></article>
             <article class="premium-value-card"><span class="premium-value-number">06</span><h3>Approfondir</h3><p>Les Ressources Premium donnent un atelier supplémentaire pour relier la méthode, le risque et tes traces de travail.</p><button class="text-action" type="button" data-view="resources">Voir les ressources <span>→</span></button></article>
           </div>
         </section>
         <section class="panel premium-deliverables" aria-labelledby="premium-deliverables-title"><div class="panel-heading"><div><p class="eyebrow">À la sortie de cette tranche</p><h2 id="premium-deliverables-title">Trois livrables que tu peux montrer.</h2></div></div><div class="premium-deliverable-grid"><article><strong>Un Risk Plan</strong><span>Hypothèse, entrée, invalidation, risque maximum et refus explicite.</span></article><article><strong>Une décision contrôlée</strong><span>Une réponse évaluée sur le processus, pas sur le résultat financier.</span></article><article><strong>Une trace de progression</strong><span>Une preuve reliée au Journal et à ton prochain axe de travail.</span></article></div></section>
-        <section class="panel premium-locked-note"><p class="eyebrow gold">État honnête</p><h3>Aperçu Premium uniquement</h3><p>Le contenu est local et pédagogique. Aucun abonnement serveur, aucune certification officielle et aucune performance financière ne sont activés.</p></section>
+        <section class="panel premium-locked-note"><p class="eyebrow gold">État honnête</p><h3>Premium Demo uniquement</h3><p>Le contenu est local et pédagogique. Aucun abonnement serveur, aucune certification officielle et aucune performance financière ne sont activés.</p></section>
       </section>
 
       <section class="view premium-view" id="premium-lab" aria-labelledby="premium-lab-title">
-        <button class="back-link" data-view="premium-track">← Retour au parcours Risque et discipline</button>
-        <div class="section-intro"><p class="eyebrow gold">Atelier Plan de risque</p><h1 id="premium-lab-title">Construire son plan de risque.</h1><p>Scénario éducatif synthétique — XAUUSD · H1. Aucune cotation réelle, aucun signal et aucune recommandation.</p></div>
-        <section class="panel lab-brief"><p class="eyebrow">Scénario pédagogique synthétique</p><h2>XAUUSD — SCÉNARIO SYNTHÉTIQUE</h2><dl class="lab-facts"><div><dt>UNITÉ DE TEMPS</dt><dd>H1</dd></div><div><dt>CONTEXTE</dt><dd>Le prix approche d’une zone de support identifiée précédemment.</dd></div><div><dt>STRUCTURE</dt><dd>La structure de fond reste orientée à la hausse.</dd></div><div><dt>SCÉNARIO</dt><dd>Réaction potentiellement haussière.</dd></div><div><dt>INFORMATION ACTUELLE</dt><dd>Le prix a atteint la zone.</dd></div></dl><p><strong>TA MISSION</strong><br>Construire un plan de décision maîtrisé.</p></section>
+        <button class="back-link" data-view="premium-track">← Retour au Premium Track</button>
+        <div class="section-intro"><p class="eyebrow gold">P2 Practice Lab</p><h1 id="premium-lab-title">Build the Risk Plan.</h1><p>Scénario éducatif synthétique — XAUUSD · H1. Aucune cotation réelle, aucun signal et aucune recommandation.</p></div>
+        <section class="panel lab-brief"><p class="eyebrow">Synthetic educational scenario</p><h2>XAUUSD — SYNTHETIC SCENARIO</h2><dl class="lab-facts"><div><dt>TIMEFRAME</dt><dd>H1</dd></div><div><dt>CONTEXT</dt><dd>Price approaches a previously identified support zone.</dd></div><div><dt>STRUCTURE</dt><dd>Higher-timeframe structure remains bullish.</dd></div><div><dt>SETUP</dt><dd>Potential bullish reaction.</dd></div><div><dt>CURRENT INFORMATION</dt><dd>Price has reached the zone.</dd></div></dl><p><strong>YOUR TASK</strong><br>Build a controlled trade plan.</p></section>
         <form class="panel premium-lab-form" id="premium-lab-form">
           <label>01 — Direction<select id="p2-direction" required><option value="">Choisir</option><option>Long</option><option>Short</option><option>No Trade</option></select></label>
-          <label>02 — Scénario / Pourquoi ?<textarea id="p2-setup" minlength="10" maxlength="600" required placeholder="Pourquoi ce scénario correspond-il à ton raisonnement ?"></textarea></label>
-          <label>03 — Condition d’entrée / Qu'est-ce qui doit se produire ?<textarea id="p2-entry" minlength="10" maxlength="600" required placeholder="Quelle confirmation doit exister avant l'entrée ?"></textarea></label>
+          <label>02 — Setup / Pourquoi ?<textarea id="p2-setup" minlength="10" maxlength="600" required placeholder="Pourquoi ce setup correspond-il à ton raisonnement ?"></textarea></label>
+          <label>03 — Entry Condition / Qu'est-ce qui doit se produire ?<textarea id="p2-entry" minlength="10" maxlength="600" required placeholder="Quelle confirmation doit exister avant l'entrée ?"></textarea></label>
           <label>04 — Invalidation / Où le scénario devient-il invalide ?<textarea id="p2-invalidation" minlength="10" maxlength="600" required placeholder="Décris la condition qui invalide l'hypothèse."></textarea></label>
-          <label>05 — Risque <span class="field-help">Exemple pédagogique : capital $10,000 · allocation 0.5 % · maximum $50.</span><input id="p2-risk" type="number" min="0" max="50" step="1" required placeholder="Montant maximum accepté"></label>
-          <label>06 — Objectif cohérent<textarea id="p2-target" minlength="5" maxlength="400" required></textarea></label>
-          <label>07 — Condition de non-décision / Dans quelle situation refuses-tu finalement d’agir ?<textarea id="p2-no-trade" minlength="10" maxlength="600" required></textarea></label>
-          <button class="primary-action" type="submit">Vérifier mon plan de risque <span>→</span></button>
+          <label>05 — Risk <span class="field-help">Exemple pédagogique : capital $10,000 · allowance 0.5 % · maximum $50.</span><input id="p2-risk" type="number" min="0" max="50" step="1" required placeholder="Montant maximum accepté"></label>
+          <label>06 — Target / Objectif cohérent<textarea id="p2-target" minlength="5" maxlength="400" required></textarea></label>
+          <label>07 — No-Trade Condition / Dans quelle situation refuses-tu finalement le trade ?<textarea id="p2-no-trade" minlength="10" maxlength="600" required></textarea></label>
+          <button class="primary-action" type="submit">Vérifier mon Risk Plan <span>→</span></button>
           <p class="feedback" id="premium-lab-feedback" role="status" aria-live="polite"></p>
         </form>
       </section>
 
       <section class="view premium-view" id="premium-assessment" aria-labelledby="premium-assessment-title">
-        <button class="back-link" data-view="premium-lab">← Retour à l’atelier Plan de risque</button>
-        <div class="section-intro"><p class="eyebrow gold">Évaluation guidée</p><h1 id="premium-assessment-title">Décision maîtrisée.</h1><p>Quatre questions pour valider la qualité du processus — pas un score financier, pas une certification.</p></div>
+        <button class="back-link" data-view="premium-lab">← Retour au Practice Lab</button>
+        <div class="section-intro"><p class="eyebrow gold">P2 Assessment</p><h1 id="premium-assessment-title">Controlled Decision.</h1><p>Quatre questions pour valider la qualité du processus — pas un score financier, pas une certification.</p></div>
         <form class="panel premium-assessment-form" id="premium-assessment-form">
           <fieldset><legend>01 — Une zone est intéressante mais aucune invalidation claire n'est définie.</legend><label><input type="radio" name="p2-q1" value="wait"> Attendre de pouvoir définir clairement l'invalidation.</label><label><input type="radio" name="p2-q1" value="enter"> Entrer avec une petite position.</label></fieldset>
-          <fieldset><legend>02 — Le scénario est valide mais le risque nécessaire dépasse la limite définie.</legend><label><input type="radio" name="p2-q2" value="respect"> Ne pas exécuter dans ces conditions / revoir le plan sans dépasser la limite.</label><label><input type="radio" name="p2-q2" value="ignore"> Exécuter quand même puisque le scénario est valide.</label></fieldset>
+          <fieldset><legend>02 — Le scénario est valide mais le risque nécessaire dépasse la limite définie.</legend><label><input type="radio" name="p2-q2" value="respect"> Ne pas exécuter dans ces conditions / revoir le plan sans dépasser la limite.</label><label><input type="radio" name="p2-q2" value="ignore"> Exécuter quand même puisque le setup est valide.</label></fieldset>
           <fieldset><legend>03 — Le trade atteint le stop.</legend><label><input type="radio" name="p2-q3" value="a"> La stratégie est mauvaise.</label><label><input type="radio" name="p2-q3" value="b"> Le marché est truqué.</label><label><input type="radio" name="p2-q3" value="c"> Le trade peut être perdant tout en étant correctement exécuté.</label><label><input type="radio" name="p2-q3" value="d"> Doubler le risque au prochain trade.</label></fieldset>
-          <fieldset><legend>04 — Quel processus constitue la meilleure preuve de discipline ?</legend><label><input type="radio" name="p2-q4" value="a"> Trader A : gagnant, entrée improvisée, stop déplacé, risque augmenté.</label><label><input type="radio" name="p2-q4" value="b"> Trader B : perdant, scénario valide, risque défini, stop et plan respectés.</label></fieldset>
-          <button class="primary-action" type="submit">Valider ma décision <span>→</span></button>
+          <fieldset><legend>04 — Quel processus constitue la meilleure preuve de discipline ?</legend><label><input type="radio" name="p2-q4" value="a"> Trader A : gagnant, entrée improvisée, stop déplacé, risque augmenté.</label><label><input type="radio" name="p2-q4" value="b"> Trader B : perdant, setup valide, risque défini, stop et plan respectés.</label></fieldset>
+          <button class="primary-action" type="submit">Valider Controlled Decision <span>→</span></button>
           <p class="feedback" id="premium-assessment-feedback" role="status" aria-live="polite"></p>
         </form>
-        <section class="panel premium-proof-receipt" id="premium-proof-receipt" hidden><p class="eyebrow gold">Preuve de compétence</p><h2>Fondations du risque</h2><dl><div><dt>Niveau</dt><dd>Niveau 3 — Mise en pratique</dd></div><div><dt>Preuve</dt><dd>Atelier Plan de risque + évaluation guidée</dd></div><div><dt>Date</dt><dd id="p2-proof-date">Date locale</dd></div><div><dt>Prochaine action</dt><dd>Continuer vers la prochaine étape Premium.</dd></div></dl><button class="primary-action" id="p2-journal-bridge" type="button">Ajouter au Journal <span>→</span></button></section>
+        <section class="panel premium-proof-receipt" id="premium-proof-receipt" hidden><p class="eyebrow gold">DDA Skill Evidence</p><h2>Risk Foundations</h2><dl><div><dt>Level</dt><dd>Level 3 — Apply</dd></div><div><dt>Evidence</dt><dd>P2 Guided Risk Lab + Assessment</dd></div><div><dt>Date</dt><dd id="p2-proof-date">Local timestamp</dd></div><div><dt>Next Action</dt><dd>Continue to the next Premium Practice.</dd></div></dl><button class="primary-action" id="p2-journal-bridge" type="button">Take this into your Journal <span>→</span></button></section>
       </section>
 
       <section class="view" id="markets" aria-labelledby="markets-title">
@@ -1072,7 +1115,7 @@
             <div class="brvm-data-register-heading"><div><p class="eyebrow gold">Pôle BRVM DDA</p><h2 id="brvm-pole-title">Une architecture par étapes, pas une promesse uniforme.</h2></div></div>
             <div class="brvm-pole-grid">
               <article class="brvm-pole-item is-active"><span>01</span><div><strong>Vue d’ensemble</strong><small>Active · contexte pédagogique</small></div></article>
-              <article class="brvm-pole-item is-active"><span>02</span><div><strong>Formation BRVM</strong><small>Active · marchés financiers et fondations</small></div></article>
+              <article class="brvm-pole-item is-active"><span>02</span><div><strong>Formation BRVM</strong><small>Active · M1.3 et fondations</small></div></article>
               <article class="brvm-pole-item is-planned"><span>03</span><div><strong>Actions &amp; indices</strong><small>À connecter à des sources vérifiées</small></div></article>
               <article class="brvm-pole-item is-planned"><span>04</span><div><strong>Obligations &amp; émetteurs</strong><small>À cadrer avec documents officiels</small></div></article>
               <article class="brvm-pole-item is-planned"><span>05</span><div><strong>Fiches &amp; publications</strong><small>À construire avec provenance</small></div></article>
@@ -1496,7 +1539,7 @@
           <p class="eyebrow">Ce qui existe déjà</p>
           <article class="community-featured-card">
             <div class="community-featured-copy">
-              <h2 id="business-featured-title">DDA Premium — aperçu local</h2>
+              <h2 id="business-featured-title">DDA Premium — aperçu pédagogique</h2>
               <p>L’offre individuelle déjà présentée, en aperçu pédagogique sans paiement réel.</p>
               <button class="primary-action" data-view="membership">Voir l’aperçu Premium <span>→</span></button>
             </div>
@@ -1512,13 +1555,14 @@
 
       <section class="view" id="profile" aria-labelledby="profile-title">
         <div class="section-intro profile-intro"><p class="eyebrow gold">Espace personnel</p><h1 id="profile-title">Ton profil d’apprentissage.</h1><p>Modifie uniquement ce qui aide DDA à te proposer la prochaine étape utile.</p></div>
-        <div class="page-mission" data-mission="profile"><div><p class="eyebrow">Mission de cette page</p><strong>Ajuster ton environnement, pas refaire ton parcours.</strong><span>Le Profil garde tes préférences locales ; ta progression détaillée vit dans Progression.</span></div><button class="text-action" data-view="progress">Voir mes preuves <span>→</span></button></div>
+        <div class="page-mission" data-mission="profile"><div><p class="eyebrow">Mission de cette page</p><strong>Ajuster ton environnement, pas refaire ton parcours.</strong><span>Retrouve ici tes préférences, ton identité et les repères utiles pour la suite.</span></div><button class="text-action" data-view="progress">Voir mes preuves <span>→</span></button></div>
         <div class="profile-layout">
           <form class="profile-panel" id="profile-form" data-js-submit method="dialog">
             <!-- "local" here is accurate for the current default (no BFF/server auth enabled). If a future
                  pass activates real BFF accounts, this copy needs a dynamic check (window.DDABFF?.enabled())
                  rather than being hardcoded to "local" for every visitor. -->
-            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">AP</span><div><p class="eyebrow">Mon profil local</p><h2 id="profile-heading-name">Apprenant</h2><p id="profile-heading-email">Aucune donnée serveur</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
+            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">A</span><div><p class="eyebrow" id="profile-storage-scope">Profil sur cet appareil</p><h2 id="profile-heading-name">Apprenant</h2><p id="profile-heading-email">Compte local</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
+            <div class="profile-import-notice" id="profile-import-notice" hidden><p><strong>Progression de cet appareil trouvée.</strong> Son propriétaire ne peut pas être vérifié. Si elle t’appartient, tu peux transférer uniquement l’onboarding et les étapes de leçon dans ce compte.</p><button class="secondary-action dark-action" id="profile-import-progress" type="button">Importer cette progression dans mon compte</button></div>
             <div class="profile-progress-strip">
               <div><span>XP total</span><strong id="profile-total-xp">0</strong></div>
               <div><span>Modules amorcés</span><strong id="profile-modules-started">0/10</strong></div>
@@ -1532,14 +1576,14 @@
               <label class="field-wide">Rythme<select id="profile-time"><option>10 minutes par jour</option><option>20 minutes par jour</option><option>45 minutes, 3 fois par semaine</option></select></label>
             </div>
             <p class="form-error" id="profile-error" role="alert"></p>
-            <div class="profile-actions"><button class="primary-action" type="submit" disabled>Enregistrer</button><button class="secondary-action dark-action" id="profile-reset" type="button">Réinitialiser mes données</button></div>
+            <div class="profile-actions"><button class="primary-action" type="submit" disabled>Enregistrer</button><button class="secondary-action dark-action" id="profile-reset" type="button">Réinitialiser mes données</button><button class="secondary-action dark-action" id="profile-logout" type="button" hidden>Se déconnecter</button></div>
           </form>
           <aside class="preference-panel">
             <p class="eyebrow gold">Préférences</p><h3>Une expérience adaptée à ton appareil.</h3>
             <label class="preference-row"><span><b>Économie de données</b><small>Réduit mouvements et médias non essentiels.</small></span><input id="profile-low-data" type="checkbox"></label>
             <label class="preference-row"><span><b>Rappels pédagogiques</b><small>Préférence enregistrée seulement ; aucun message n’est envoyé.</small></span><input id="profile-reminders" type="checkbox"></label>
-            <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité.</strong> Ton profil, tes préférences et tes réponses restent sur cet appareil. Aucun courtier, paiement ou service publicitaire n’y a accès. Une mesure d’audience anonyme et pseudonyme peut être utilisée pour comprendre comment les visiteurs découvrent DDA — jamais ton nom, ton e-mail ni tes réponses.</span></p>
-            <div class="activity-summary"><span>Activité locale</span><strong id="event-count">0 événement</strong><small>Mesure pédagogique anonyme sur cet appareil — ta relation avec l’écosystème DDA, jamais partagée.</small></div>
+            <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité.</strong> <span id="profile-storage-disclosure">Tes données sont enregistrées sur cet appareil. Une mesure d’audience pseudonyme peut aider à comprendre comment les visiteurs découvrent DDA ; elle ne contient ni ton nom ni ton e-mail.</span> Aucun courtier ni service publicitaire n’accède à tes réponses.</span></p>
+            <div class="activity-summary"><span>Activité d’apprentissage</span><strong id="event-count">0 événement</strong><small>Un résumé pédagogique de ton parcours, uniquement pour t’aider à reprendre au bon endroit.</small></div>
           </aside>
         </div>
         <div class="empty-profile" id="empty-profile" hidden><span><svg class="icon"><use href="#icon-user"/></svg></span><h2>Aucun compte sur cet appareil.</h2><p>Commence l’inscription pour créer ton premier parcours.</p><button class="primary-action" data-view="access">Commencer</button></div>
@@ -1614,6 +1658,7 @@
         ? 'https://api.dariusdigitalacademy.com'
         : ''
     );
+    if (window.DDA_BFF_BASE_URL) document.getElementById('session-check-status')?.removeAttribute('hidden');
   </script>
   <script src="dda-core.js"></script>
   <!-- dda-lab.js is no longer loaded unconditionally here (mandate §6 audit,

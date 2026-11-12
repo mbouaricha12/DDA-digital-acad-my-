@@ -14,24 +14,9 @@
    Ce littéral reste volontairement des données pures (aucune référence
    externe) : le test le réévalue tel quel avec vm.
    ========================================================================== */
-const DDA_VISIBLE_LESSON_TITLES = Object.freeze({
-  'M0.1': 'Leçon en cours — Le trading comme commerce',
-  'M0.2': 'Support & Résistance — Identifier les zones de support et de résistance',
-  'M0.3': 'Lire une tendance — Comprendre les tendances du marché',
-  'M1.1': 'Pourquoi les prix évoluent ? — Comprendre la formation des prix',
-  'M1.2': 'Comment les ordres s’exécutent ? — Comprendre l’exécution des ordres',
-  'M1.3': 'Comment les marchés s’organisent ? — Découvrir les acteurs des marchés financiers',
-  'MBRVM.1': 'Introduction à la BRVM',
-  'P2.1': 'Définir son risque avant une décision',
-  'P2.2': 'Construire une décision maîtrisée'
-});
-function displayLessonTitle(id, fallback = '') {
-  return DDA_VISIBLE_LESSON_TITLES[id] || fallback || 'Leçon';
-}
-
 const LESSON_REGISTRY = Object.freeze([
   {
-    id: 'M0.1', viewId: 'lesson', suffix: '', title: DDA_VISIBLE_LESSON_TITLES['M0.1'],
+    id: 'M0.1', viewId: 'lesson', suffix: '', title: 'Leçon en cours',
     permission: 'lesson_m01',
     quizBlock: 'quiz', understoodScrollTo: 'exercise-block',
     questions: [
@@ -41,7 +26,7 @@ const LESSON_REGISTRY = Object.freeze([
     ]
   },
   {
-    id: 'M0.2', viewId: 'lesson-m02', suffix: 'm2', title: DDA_VISIBLE_LESSON_TITLES['M0.2'], prerequisite: 'M0.1',
+    id: 'M0.2', viewId: 'lesson-m02', suffix: 'm2', title: 'Support & Résistance', prerequisite: 'M0.1',
     permission: 'lesson_m01',
     // Vidéo réelle du VIDEO_REGISTRY (mandat §5, P1.3) : correspondance directe
     // avec le sujet de cette leçon.
@@ -57,7 +42,7 @@ const LESSON_REGISTRY = Object.freeze([
     ]
   },
   {
-    id: 'M0.3', viewId: 'lesson-m03', suffix: 'm3', title: DDA_VISIBLE_LESSON_TITLES['M0.3'], prerequisite: 'M0.2',
+    id: 'M0.3', viewId: 'lesson-m03', suffix: 'm3', title: 'Lire une tendance', prerequisite: 'M0.2',
     permission: 'lesson_m01',
     // Vidéo réelle du VIDEO_REGISTRY (mandat §5, P1.3) : les moyennes mobiles
     // sont un outil courant de lecture de tendance, cohérent avec cette leçon.
@@ -77,7 +62,7 @@ const LESSON_REGISTRY = Object.freeze([
     // est absent, l'entrée reste inerte au lieu d'un rendu partiel.
     // Matrice des droits CDCP-OS §4.2 (arbitrage D1 Option B) : M1+ réservé à
     // l'offre Standard/Pro (advanced_modules).
-    id: 'M1.1', viewId: 'lesson-m11', suffix: 'm11', title: DDA_VISIBLE_LESSON_TITLES['M1.1'], prerequisite: 'M0.3',
+    id: 'M1.1', viewId: 'lesson-m11', suffix: 'm11', title: 'Pourquoi les prix évoluent ?', prerequisite: 'M0.3',
     permission: 'advanced_modules',
     quizBlock: 'm1-quiz', understoodScrollTo: 'm1-exercise-case-block',
     questions: [
@@ -89,7 +74,7 @@ const LESSON_REGISTRY = Object.freeze([
     ]
   },
   {
-    id: 'M1.2', viewId: 'lesson-m12', suffix: 'm12', title: DDA_VISIBLE_LESSON_TITLES['M1.2'], prerequisite: 'M1.1',
+    id: 'M1.2', viewId: 'lesson-m12', suffix: 'm12', title: 'Comment les ordres s’exécutent ?', prerequisite: 'M1.1',
     permission: 'advanced_modules',
     quizBlock: 'm12-quiz', understoodScrollTo: 'm12-slippage-case-block',
     questions: [
@@ -104,7 +89,7 @@ const LESSON_REGISTRY = Object.freeze([
     // M1.3 est authored dans son propre fichier (m1-3-lesson.js) et promue dans
     // le curriculum par dda-core.js quand ce fichier est chargé ; si le fichier
     // est absent, l'entrée reste inerte au lieu d'un rendu partiel.
-    id: 'M1.3', viewId: 'lesson-m13', suffix: 'm13', title: DDA_VISIBLE_LESSON_TITLES['M1.3'], prerequisite: 'M1.2',
+    id: 'M1.3', viewId: 'lesson-m13', suffix: 'm13', title: 'Comment les marchés s’organisent ?', prerequisite: 'M1.2',
     permission: 'advanced_modules',
     quizBlock: 'm13-quiz', understoodScrollTo: 'm13-exercise-case-block',
     questions: [
@@ -121,7 +106,7 @@ const LESSON_REGISTRY = Object.freeze([
     // Domaine indépendant (mandat §6) : aucun `prerequisite` — accessible dès
     // qu'un apprenant Free ouvre #markets, sans dépendre de M0/M1 ni de
     // Premium.
-    id: 'MBRVM.1', viewId: 'lesson-mbrvm1', suffix: 'mbrvm1', title: DDA_VISIBLE_LESSON_TITLES['MBRVM.1'],
+    id: 'MBRVM.1', viewId: 'lesson-mbrvm1', suffix: 'mbrvm1', title: 'Introduction à la BRVM',
     permission: 'lesson_m01', independent: true,
     quizBlock: 'mbrvm1-quiz', understoodScrollTo: 'mbrvm1-exercise-case-block',
     questions: [
@@ -133,7 +118,7 @@ const LESSON_REGISTRY = Object.freeze([
     ]
   },
   {
-    id: 'P2.1', viewId: 'lesson-p21', suffix: 'p21', title: DDA_VISIBLE_LESSON_TITLES['P2.1'],
+    id: 'P2.1', viewId: 'lesson-p21', suffix: 'p21', title: 'Le risque avant l’entrée',
     permission: 'premium_track', quizBlock: 'p21-quiz', understoodScrollTo: 'p21-decision-block',
     // Aperçu gratuit du module Premium Track (mandat §5) : cette leçon reste
     // lisible sans Premium — showView() laisse passer un apprenant Free ici
@@ -146,7 +131,7 @@ const LESSON_REGISTRY = Object.freeze([
     ]
   },
   {
-    id: 'P2.2', viewId: 'lesson-p22', suffix: 'p22', title: DDA_VISIBLE_LESSON_TITLES['P2.2'], prerequisite: 'P2.1',
+    id: 'P2.2', viewId: 'lesson-p22', suffix: 'p22', title: 'L’anatomie d’un trade contrôlé', prerequisite: 'P2.1',
     permission: 'premium_track', quizBlock: 'p22-quiz', understoodScrollTo: 'p22-sequence-block',
     duration: 18, objectives: ['Décomposer un trade contrôlé en ses étapes', 'Relier chaque étape à une condition de non-trade'],
     premiumReason: 'Premium donne accès au Risk Plan Lab et à l’assessment Controlled Decision qui prolongent cette leçon par la pratique guidée.',
@@ -233,9 +218,24 @@ const VIDEO_REGISTRY = Object.freeze([
 
 // L’état est chargé avant le montage afin que les leçons Premium authored ne
 // soient jamais injectées dans le DOM d’un utilisateur Free.
-let prototypeState = DDA.load();
+let prototypeState = window.DDABFF?.enabled()
+  ? (DDA.setStorageScope(null) || DDA.load())
+  : DDA.load();
 let remoteUser = null;
 let bffAuthMode = 'signup';
+function progressImportMarkerKey(userId) {
+  return userId ? `dda-progress-import-v1:user:${encodeURIComponent(userId)}` : '';
+}
+function hasImportedUnscopedProgress(userId) {
+  const key = progressImportMarkerKey(userId);
+  if (!key) return false;
+  try { return localStorage.getItem(key) === 'done'; } catch { return false; }
+}
+// Last successful signup's credentials, kept only in memory for this page
+// load — never persisted — so the "resend confirmation" action (signup
+// reliability audit, P0 2026-11) can reuse them without asking the learner
+// to retype the whole form.
+let lastSignupAttempt = null;
 
 // Protection Premium côté serveur (mandat §7.3, P1.1). `prototypeState.
 // membership.plan` is a local, learner-editable value — it must stay the
@@ -426,8 +426,8 @@ function mountLesson(entry) {
       fallback.hidden = false;
     }, { once: true });
   });
-  if (entry.id === 'M0.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff"><p class="eyebrow gold">Après la leçon</p><h3>Mettre la lecture en pratique</h3><p>Ouvre une mission guidée dans le Terminal pour repérer une zone sans chercher un prix exact.</p><button type="button" class="secondary-action" data-practice-launch="M0.2">Lancer la mission guidée <span>→</span></button></section>');
-  if (entry.id === 'P2.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff premium-handoff"><p class="eyebrow gold">Après les leçons</p><h3>Atelier Plan de risque</h3><p>Construis un plan dans un scénario pédagogique synthétique, puis fais vérifier ta décision.</p><button type="button" class="secondary-action" data-view="premium-lab">Ouvrir l’atelier <span>→</span></button></section>');
+  if (entry.id === 'M0.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff"><p class="eyebrow gold">Après la leçon</p><h3>Mettre la lecture en pratique</h3><p>Ouvre une mission guidée dans le Terminal pour repérer une zone sans chercher un prix exact.</p><button type="button" class="secondary-action" data-practice-launch="M0.2">Lancer la mission Practice <span>→</span></button></section>');
+  if (entry.id === 'P2.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff premium-handoff"><p class="eyebrow gold">Après les leçons</p><h3>Practice Lab — Build the Risk Plan</h3><p>Construis un plan dans un scénario pédagogique synthétique, puis fais vérifier ta décision.</p><button type="button" class="secondary-action" data-view="premium-lab">Ouvrir le Practice Lab <span>→</span></button></section>');
   main.dataset.ddaLessonMounted = 'true';
 }
 // Lot 2 (mandate §6 audit): a Premium lesson's real content now arrives
@@ -529,6 +529,24 @@ const mobileItems = document.querySelectorAll('.mobile-nav button');
 const contextTitle = document.getElementById('context-title');
 const contextSection = document.getElementById('context-section');
 
+// The sidebar's "Academy" nav section (founder reference maquette: Mes
+// Parcours/Mes Leçons/Exercices & Quiz/Ressources/Certificats grouped and
+// collapsible) — opens expanded by default on both the desktop rail and the
+// mobile drawer (matching the maquette), [data-view] routing on its real
+// nav-items underneath is untouched; this only toggles visibility + the
+// chevron, purely presentational, one real DOM id per rail so desktop and
+// drawer collapse independently.
+['nav-academy', 'drawer-academy'].forEach(prefix => {
+  const toggle = document.getElementById(`${prefix}-toggle`);
+  const group = document.getElementById(`${prefix}-group`);
+  if (!toggle || !group) return;
+  toggle.addEventListener('click', () => {
+    const expanded = toggle.getAttribute('aria-expanded') !== 'false';
+    toggle.setAttribute('aria-expanded', String(!expanded));
+    group.hidden = expanded;
+  });
+});
+
 // Mobile drawer — the sidebar's full navigation, reachable on mobile where
 // .sidebar itself stays display:none. Routing is already handled by the
 // generic [data-view] binding above; this only opens/closes the panel.
@@ -553,6 +571,30 @@ const contextSection = document.getElementById('context-section');
   backdrop.addEventListener('click', close);
   drawer.addEventListener('click', event => { if (event.target.closest('[data-view]')) close(); });
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && !drawer.hidden) close(); });
+})();
+
+// Mobile header overlap fix: .topbar is sticky at a fixed offset equal to
+// the prototype banner's single-line height (29px). The banner's disclosure
+// copy is long enough to wrap to two lines on narrow phones (~360-400px),
+// which made the sticky topbar overlap/clip the banner's second line and,
+// because both are position:sticky stacked by a hardcoded pixel offset, the
+// topbar's own content (brand, context title) then rendered partly hidden
+// behind the banner — the "header dégradé" bug reported on real devices.
+// Measuring the banner's real rendered height and exposing it as a CSS
+// custom property keeps the two elements correctly stacked at any width,
+// font-scaling or text-wrap, instead of guessing a constant.
+(function syncBannerHeight() {
+  const banner = document.querySelector('.prototype-banner');
+  if (!banner) return;
+  function sync() {
+    document.documentElement.style.setProperty('--banner-h', `${Math.ceil(banner.getBoundingClientRect().height)}px`);
+  }
+  sync();
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(sync).observe(banner);
+  } else {
+    window.addEventListener('resize', sync);
+  }
 })();
 
 // Topbar notifications bell: no notification system exists yet, so it must
@@ -649,9 +691,26 @@ function initDdaSelect(select) {
     });
     trigger.setAttribute('aria-invalid', select.getAttribute('aria-invalid') || 'false');
   };
+  // Below 640px the menu becomes a fixed, viewport-anchored "bottom sheet"
+  // (see alpha-polish.css) — its on-screen position no longer depends on
+  // `wrapper` at all. Left nested inside `wrapper` anyway, it still has to
+  // resolve its paint order inside whichever stacking context `wrapper`
+  // happens to sit in (e.g. #access's own fade-in animation creates one),
+  // so a LATER field in the same form — sharing the exact same wrapper
+  // z-index — can paint its own trigger on top of an EARLIER field's open
+  // sheet. That is the confirmed cause of the reported bug: opening
+  // "Niveau" shows "Objectif pédagogique"'s trigger bleeding through on
+  // top of it. Moving the sheet to a direct child of <body> while open
+  // removes it from every ancestor stacking context, so it always paints
+  // above the whole page — matching what position:fixed already visually
+  // promises. Desktop/tablet keep the menu nested (position:absolute,
+  // anchored to the trigger), so it is restored to `wrapper` whenever the
+  // breakpoint isn't the mobile sheet.
+  const isMobileSheet = () => Boolean(window.matchMedia?.('(max-width: 639px)').matches);
+  const restoreMenuHome = () => { if (menu.parentNode !== wrapper) wrapper.appendChild(menu); };
   const open = () => {
     document.querySelectorAll('.dda-select.is-open').forEach(other => { if (other !== wrapper) closeDdaSelect(other); });
-    reparentDdaMobileSheet(wrapper, menu);
+    if (isMobileSheet()) document.body.appendChild(menu); else restoreMenuHome();
     wrapper.classList.add('is-open');
     menu.classList.add('is-open');
     trigger.setAttribute('aria-expanded', 'true');
@@ -698,34 +757,42 @@ function initDdaSelect(select) {
   new MutationObserver(sync).observe(select, { attributes: true, attributeFilter: ['aria-invalid'] });
   sync();
 }
-function isDdaMobileViewport() {
-  return window.matchMedia?.('(max-width: 639px)').matches === true;
-}
-function reparentDdaMobileSheet(wrapper, menu) {
-  if (!isDdaMobileViewport() || menu.parentNode === document.body) return;
-  menu.dataset.ddaSheetParent = 'body';
-  document.body.appendChild(menu);
-}
-function restoreDdaMobileSheet(wrapper) {
-  const menu = document.querySelector('.dda-select-menu[data-dda-sheet-parent="body"]');
-  if (!menu) return;
-  delete menu.dataset.ddaSheetParent;
-  wrapper.appendChild(menu);
-}
 function closeDdaSelect(wrapper) {
-  const menu = wrapper.querySelector('.dda-select-menu') || document.querySelector(`.dda-select-menu[data-dda-sheet-parent="body"]`);
   wrapper.classList.remove('is-open');
   const trigger = wrapper.querySelector('.dda-select-trigger');
   trigger?.setAttribute('aria-expanded', 'false');
-  menu?.classList.remove('is-open');
-  restoreDdaMobileSheet(wrapper);
+  // The open menu may currently live under <body> (mobile bottom sheet —
+  // see open() above) rather than under `wrapper`, so it has to be found by
+  // id (aria-controls), not by a wrapper-scoped query, then returned home.
+  const menuId = trigger?.getAttribute('aria-controls');
+  const menu = menuId && document.getElementById(menuId);
+  if (menu) {
+    menu.classList.remove('is-open');
+    if (menu.parentNode !== wrapper) wrapper.appendChild(menu);
+  }
 }
 ['level', 'goal', 'time', 'terminal-instrument', 'terminal-timeframe', 'p2-direction', 'broker-market', 'broker-use', 'support-subject', 'profile-level', 'profile-goal', 'profile-time'].forEach(id => initDdaSelect(document.getElementById(id)));
 document.addEventListener('click', event => {
-  if (!event.target.closest('.dda-select')) document.querySelectorAll('.dda-select.is-open').forEach(closeDdaSelect);
+  // The open menu can be a direct child of <body> (mobile bottom sheet), so
+  // "inside the control" must also accept a click that lands in the
+  // detached menu itself, not only inside its original `.dda-select` wrapper.
+  if (!event.target.closest('.dda-select, .dda-select-menu')) document.querySelectorAll('.dda-select.is-open').forEach(closeDdaSelect);
 });
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') document.querySelectorAll('.dda-select.is-open').forEach(closeDdaSelect);
+});
+// Crossing the mobile-sheet breakpoint (e.g. a device rotation) while a
+// menu is open would otherwise leave it detached at <body> under desktop's
+// position:absolute rules (or vice versa), rendered at a meaningless
+// location — simplest correct behavior is to close any open menu so the
+// next open() re-evaluates isMobileSheet() and reparents correctly.
+let ddaSelectWasMobileSheet = Boolean(window.matchMedia?.('(max-width: 639px)').matches);
+window.addEventListener('resize', () => {
+  const nowMobileSheet = Boolean(window.matchMedia?.('(max-width: 639px)').matches);
+  if (nowMobileSheet !== ddaSelectWasMobileSheet) {
+    ddaSelectWasMobileSheet = nowMobileSheet;
+    document.querySelectorAll('.dda-select.is-open').forEach(closeDdaSelect);
+  }
 });
 
 const titles = {
@@ -1041,17 +1108,25 @@ async function revealAdminLinkIfAdmin() {
 async function hydrateRemoteSession() {
   if (!window.DDABFF?.enabled()) return null;
   try {
-    const user = await window.DDABFF.getMe();
-    if (!user) return null;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    let user;
+    try { user = await window.DDABFF.getMe({ signal: controller.signal }); }
+    finally { clearTimeout(timeout); }
+    if (!user) {
+      remoteUser = null;
+      prototypeState = DDA.setStorageScope(null) || DDA.load();
+      window.DDARefreshAiHistory?.();
+      return null;
+    }
+    if (typeof user.user_id !== 'string' || !user.user_id.trim()) throw new Error('bff_user_identity_missing');
+    const accountState = DDA.setStorageScope(user.user_id);
+    if (!accountState) throw new Error('bff_user_identity_invalid');
     remoteUser = user;
-    const localUser = prototypeState.user || {};
     let nextState = {
-      ...prototypeState,
+      ...accountState,
       user: {
-        ...localUser,
-        // Once the server confirms a session, its identity is authoritative:
-        // never let a stale local prototype name (for example Richard) survive
-        // a Google/SSO callback whose metadata has no display_name.
+        ...(accountState.user || {}),
         name: user.display_name || 'Apprenant',
         email: user.email || ''
       }
@@ -1063,10 +1138,14 @@ async function hydrateRemoteSession() {
       // Progress sync is best-effort: a failed pull leaves local progress untouched.
     }
     prototypeState = DDA.save(nextState);
-    renderState();
+    window.DDARefreshAiHistory?.();
     return user;
   } catch {
-    // A temporary BFF outage must not destroy the learner's local prototype.
+    // A temporary BFF outage leaves the isolated guest namespace intact. It
+    // must never cause guest data to be attributed to a remote account.
+    remoteUser = null;
+    prototypeState = DDA.setStorageScope(null) || DDA.load();
+    window.DDARefreshAiHistory?.();
     return null;
   }
 }
@@ -1079,34 +1158,50 @@ function setBffAuthMode(mode) {
   const firstNameLabel = firstNameField?.closest('label');
   const passwordField = document.getElementById('access-password');
   const passwordLabel = document.getElementById('access-password-field');
+  const passwordHelp = document.getElementById('access-password-help');
   const consentField = document.getElementById('access-consent-field');
+  const consentLabel = document.getElementById('access-consent-label');
   const consent = document.getElementById('consent');
   const title = document.getElementById('access-form-title');
   const step = document.getElementById('access-step-label');
   const note = document.getElementById('access-form-note');
+  const emailHelp = document.getElementById('access-email-help');
   const submit = document.querySelector('#signup-form button[type="submit"]');
   const forgot = document.getElementById('bff-forgot-password');
+  const resend = document.getElementById('bff-resend-confirmation');
   if (firstNameLabel) firstNameLabel.hidden = login;
   if (firstNameField) firstNameField.required = !login;
   if (passwordLabel) passwordLabel.hidden = false;
   if (passwordField) { passwordField.required = true; passwordField.autocomplete = login ? 'current-password' : 'new-password'; }
+  // A clear, upfront password requirement (signup reliability, P0 2026-11):
+  // shown only while creating an account, where the 12-character minimum is
+  // new information, not while signing back in with a password already set.
+  if (passwordHelp) passwordHelp.hidden = login;
   if (consentField) consentField.hidden = login;
   if (consent) consent.required = !login;
+  // The BFF path really does create a server-side account (Supabase Auth),
+  // unlike the local-only prototype mode this label's original wording
+  // describes — showing that copy here would tell a real signer-upper
+  // something false about where their data goes.
+  if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe) pour retrouver ma progression sur n’importe quel appareil, après avoir confirmé mon adresse e-mail.';
+  if (emailHelp) emailHelp.textContent = login
+    ? 'Cette adresse e-mail est transmise au service d’authentification pour ouvrir ta session.'
+    : 'Cette adresse e-mail est transmise au service d’authentification pour créer ton compte et t’envoyer le lien de confirmation.';
   if (title) title.textContent = login ? 'Se connecter' : 'Commence ton parcours Free';
   if (step) step.textContent = login ? 'Accès sécurisé' : 'Étape 1 sur 2 · commencer';
   if (note) note.textContent = login
     ? 'Retrouve ton parcours avec ton compte serveur sécurisé.'
-    : 'Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon. Cette version conserve ta progression sur cet appareil.';
+    : 'Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon.';
   if (submit) submit.innerHTML = login ? 'Ouvrir ma session <span>→</span>' : 'Recevoir le lien de vérification <span>→</span>';
   if (forgot) forgot.hidden = !login;
+  if (resend) resend.hidden = true;
+  lastSignupAttempt = null;
   document.getElementById('signup-error').textContent = '';
 }
 
 function showOnboardingAfterRemoteAuth(user) {
   if (!user) return;
-  // The authenticated provider owns the identity after callback validation;
-  // a stale local profile must not overwrite it.
-  const name = user.display_name || 'Apprenant';
+  const name = user.display_name || prototypeState.user?.name || 'Apprenant';
   prototypeState = DDA.save({ ...prototypeState, user: DDA.createUser(name, user.email || '') });
   renderState();
   document.getElementById('signup-form').hidden = true;
@@ -1120,15 +1215,97 @@ function showOnboardingAfterRemoteAuth(user) {
   document.getElementById('step-dot-2').classList.add('active');
 }
 
+// PKCE error messages (P0 auth reliability audit, 2026-11): "verifier
+// expired/missing" (this browser never made the original request, or its
+// cookie expired — see bff/src/app.js) is a materially different, and more
+// honest, situation than "the code itself is invalid/already used". Showing
+// the same generic text for both would hide the real, actionable advice
+// ("open the link in the same browser you used to ask for it") behind a
+// message that reads like the link is simply dead.
+function bffVerifierErrorMessage(error, genericMessage) {
+  const code = error?.body?.code;
+  if (code === 'recovery_verifier_expired' || code === 'signup_verifier_expired') {
+    return 'Ce lien doit être ouvert dans le même navigateur que celui utilisé pour la demande, et la demande ne doit pas avoir expiré. Fais une nouvelle demande.';
+  }
+  if (code === 'oauth_verifier_expired') {
+    return 'La connexion avec Google doit se terminer dans le même onglet que celui qui l’a démarrée, et la demande ne doit pas avoir expiré. Réessaie « Continuer avec Google ».';
+  }
+  if (code === 'oauth_email_unverified') {
+    return 'Ton compte Google n’a pas d’adresse e-mail vérifiée. Vérifie-la auprès de Google, ou utilise l’e-mail et le mot de passe.';
+  }
+  return genericMessage;
+}
+
+// Google OAuth return (founder directive, 2026-11): GoTrue's own redirect
+// carries the STANDARD OAuth error params (`error`/`error_description`) when
+// the user refuses consent at Google, or `oauth_provider_not_configured`
+// when bff/src/app.js's /v1/auth/oauth/google/start route bounced back
+// because the founder has not finished enabling the provider in the
+// Supabase dashboard yet — see that route's own comment. Each gets its own
+// honest, specific message rather than one generic "connection failed".
+function oauthErrorMessage(code) {
+  if (code === 'access_denied') return 'Tu as annulé la connexion avec Google. Tu peux réessayer, ou utiliser l’e-mail et le mot de passe.';
+  if (code === 'oauth_provider_not_configured' || code === 'oauth_not_configured') return 'La connexion avec Google n’est pas encore activée sur ce compte. Utilise l’e-mail et le mot de passe en attendant.';
+  if (code === 'rate_limited') return 'Trop de tentatives. Réessaie dans quelques minutes.';
+  if (code === 'server_error') return 'La connexion avec Google est momentanément indisponible. Réessaie dans un instant, ou utilise l’e-mail et le mot de passe.';
+  return 'La connexion avec Google a échoué. Réessaie, ou utilise l’e-mail et le mot de passe.';
+}
+
 async function handleBffVerificationToken() {
  const params=new URLSearchParams(location.search),hashParams=new URLSearchParams(location.hash.slice(1));
  const recovery=window.DDA_AUTH_RECOVERY===true||params.get('type')==='recovery'||hashParams.get('type')==='recovery';
  const token=window.DDA_VERIFY_TOKEN||params.get('token_hash')||params.get('token')||hashParams.get('token_hash')||hashParams.get('token'),code=window.DDA_AUTH_CODE||params.get('code');
- delete window.DDA_VERIFY_TOKEN;delete window.DDA_AUTH_RECOVERY;delete window.DDA_AUTH_CODE;if(!window.DDABFF?.enabled())return;
+ // Google OAuth return (founder directive, 2026-11): Supabase bounces the
+ // browser back to the exact redirect_to bff/src/app.js's start route gave
+ // it, which always carries this marker — set once, server-side, never
+ // guessed from the presence of `code` alone (recovery and signup-
+ // confirmation links also carry a bare `code`; this is what tells an OAuth
+ // return apart from either of those). Read from the SAME window globals
+ // academy.html's inline head script stashes `code`/`type=recovery` into
+ // (window.DDA_OAUTH_PROVIDER / window.DDA_OAUTH_ERROR), never from
+ // location.search/hash directly: by the time this function runs, that
+ // script has already stripped the entire query string from the address
+ // bar (privacy hygiene, same as it does for `code`/`token`), so params
+ // read here would otherwise always be empty.
+ const oauthProvider=window.DDA_OAUTH_PROVIDER||params.get('auth')||hashParams.get('auth');
+ const oauthError=window.DDA_OAUTH_ERROR||params.get('error')||hashParams.get('error');
+ delete window.DDA_VERIFY_TOKEN;delete window.DDA_AUTH_RECOVERY;delete window.DDA_AUTH_CODE;delete window.DDA_OAUTH_PROVIDER;delete window.DDA_OAUTH_ERROR;if(!window.DDABFF?.enabled())return;
+ if(oauthProvider==='oauth-google'){
+  showView('access',false,'replace');
+  const panel=document.getElementById('bff-verify-panel'),message=document.getElementById('bff-verify-message'),form=document.getElementById('signup-form');
+  if(panel)panel.hidden=true;if(form)form.hidden=true;
+  if(oauthError){if(message)message.textContent=oauthErrorMessage(oauthError);if(panel)panel.hidden=false;return;}
+  if(!code){if(message)message.textContent='Lien de connexion Google incomplet. Réessaie « Continuer avec Google ».';if(panel)panel.hidden=false;return;}
+  if(message)message.textContent='Connexion avec Google en cours…';
+  try{
+   await window.DDABFF.exchangeOAuthCode('google',code);
+   const user=await hydrateRemoteSession();
+   if(!user)throw new Error('session_missing');
+   revealAdminLinkIfAdmin();
+   refreshServerPremiumEntitlement();
+   showOnboardingAfterRemoteAuth(user);
+  }catch(error){
+   if(panel)panel.hidden=false;if(form)form.hidden=true;
+   if(message)message.textContent=bffVerifierErrorMessage(error,'La connexion avec Google a échoué ou le lien a expiré. Réessaie « Continuer avec Google ».');
+  }
+  return;
+ }
  if(recovery)showView('access',false,'replace');
  if(recovery&&code){const form=document.getElementById('bff-reset-password-form');document.getElementById('signup-form').hidden=true;document.getElementById('bff-recovery-form').hidden=true;form.hidden=false;form.dataset.recoveryReady='false';
   try{await window.DDABFF.exchangeRecoveryCode(code);form.dataset.recoveryReady='true';document.getElementById('reset-password-error').textContent='';}
-  catch{form.hidden=true;const panel=document.getElementById('bff-verify-panel');panel.hidden=false;document.getElementById('bff-verify-message').textContent='Lien de récupération invalide ou expiré. Demande un nouveau lien.';}return;}
+  catch(error){form.hidden=true;const panel=document.getElementById('bff-verify-panel');panel.hidden=false;document.getElementById('bff-verify-message').textContent=bffVerifierErrorMessage(error,'Lien de récupération invalide ou expiré. Demande un nouveau lien.');}return;}
+ // New, PKCE-protected signup confirmation links carry `code` instead of
+ // `token` (see bff/src/supabase-auth.js's register()). The exchange only
+ // succeeds in the SAME browser that submitted the signup form — that is
+ // the whole point: a security scanner's sandboxed browser pre-visiting
+ // this link has no way to complete it, so it can never falsely report
+ // "lien invalide" to the real learner afterwards.
+ if(!recovery&&code){
+  const panel=document.getElementById('bff-verify-panel'),message=document.getElementById('bff-verify-message'),form=document.getElementById('signup-form');if(panel)panel.hidden=false;if(form)form.hidden=true;
+  try{await window.DDABFF.exchangeSignupCode(code);if(message)message.textContent='Adresse confirmée. Tu peux maintenant ouvrir ta session.';}
+  catch(error){if(message)message.textContent=bffVerifierErrorMessage(error,'Ce lien est invalide, expiré ou déjà utilisé. Demande un nouveau lien depuis l’inscription');}
+  return;
+ }
  if(!token){if(recovery){document.getElementById('bff-reset-password-form').hidden=true;const panel=document.getElementById('bff-verify-panel');panel.hidden=false;document.getElementById('bff-verify-message').textContent='Lien de récupération incomplet. Demande un nouveau lien.';}return;}
  if(recovery){const form=document.getElementById('bff-reset-password-form');document.getElementById('signup-form').hidden=true;document.getElementById('bff-recovery-form').hidden=true;form.hidden=false;form.dataset.recoveryReady='false';
   try{await window.DDABFF.verifyRecoveryToken(token);form.dataset.recoveryReady='true';document.getElementById('reset-password-error').textContent='';}
@@ -1139,7 +1316,60 @@ async function handleBffVerificationToken() {
 function initBffAuthUi() {
   if (!window.DDABFF?.enabled()) return;
   document.getElementById('bff-auth-tools').hidden = false;
+  // The wrap's own visibility then stays in sync with #signup-form's
+  // (a :has() rule in alpha-polish.css) — shown here once,
+  // exactly like #bff-auth-tools above, never re-toggled at every
+  // mode-switch call site the way #signup-form itself is.
+  const googleWrap = document.getElementById('bff-oauth-google-wrap');
+  if (googleWrap) googleWrap.hidden = false;
+  const googleButton = document.getElementById('bff-oauth-google');
+  if (googleButton) {
+    googleButton.addEventListener('click', () => {
+      const url = window.DDABFF.oauthGoogleStartUrl();
+      // A real full-page navigation — never a fetch (see bff-client.js's
+      // oauthGoogleStartUrl comment): this is a redirect-based sign-in flow,
+      // not an API call, and the one kind of request that reliably carries
+      // the httpOnly verifier cookie the BFF is about to set on its own
+      // redirect through Supabase and Google — mobile-safe, no popup, same
+      // as the rest of this site.
+      if (url) window.location.href = url;
+    });
+  }
   setBffAuthMode('signup');
+  // Show/hide password toggle (P0.4) — a mistyped password that the learner
+  // cannot see is a real cause of "it worked at signup, not at login".
+  const toggle = document.getElementById('toggle-access-password');
+  const passwordInput = document.getElementById('access-password');
+  if (toggle && passwordInput) {
+    toggle.addEventListener('click', () => {
+      const show = passwordInput.type === 'password';
+      passwordInput.type = show ? 'text' : 'password';
+      toggle.textContent = show ? 'Masquer' : 'Afficher';
+      toggle.setAttribute('aria-pressed', String(show));
+    });
+  }
+  // Resend confirmation (signup reliability, P0 2026-11): a learner whose
+  // verification e-mail is slow, filtered to spam, or simply never arrived
+  // must not be stuck re-typing the whole form — re-sending reuses exactly
+  // the credentials just submitted, kept only in memory for this page.
+  const resendButton = document.getElementById('bff-resend-confirmation');
+  if (resendButton) {
+    resendButton.addEventListener('click', async () => {
+      if (!lastSignupAttempt || resendButton.disabled) return;
+      resendButton.disabled = true;
+      const originalLabel = resendButton.textContent;
+      resendButton.textContent = 'Envoi…';
+      try {
+        await window.DDABFF.register(lastSignupAttempt);
+        document.getElementById('bff-auth-status').textContent = 'Nouveau lien envoyé. Vérifie ta boîte mail (et les spams).';
+      } catch {
+        document.getElementById('bff-auth-status').textContent = 'Impossible de renvoyer le lien pour le moment. Réessaie dans un instant.';
+      } finally {
+        resendButton.disabled = false;
+        resendButton.textContent = originalLabel;
+      }
+    });
+  }
   document.getElementById('bff-mode-signup').addEventListener('click', () => {
     document.getElementById('bff-recovery-form').hidden = true;
     document.getElementById('bff-verify-panel').hidden = true;
@@ -1351,7 +1581,7 @@ function renderModulesRecap() {
   const visibleModules = modules.slice(0, Math.min(modules.length, Math.max(3, activeIndex + 2)));
   container.innerHTML = visibleModules.map(module => {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
-    return `<li><span class="module-id">Parcours ${modules.indexOf(module) + 1}</span><strong>${module.title}</strong><span class="module-pill ${status}">${MODULE_STATUS_LABEL[status] || status}</span></li>`;
+    return `<li><span class="module-id">${module.id}</span><strong>${module.title}</strong><span class="module-pill ${status}">${MODULE_STATUS_LABEL[status] || status}</span></li>`;
   }).join('');
   const hidden = modules.length - visibleModules.length;
   if (hidden > 0) container.insertAdjacentHTML('beforeend', `<li class="modules-recap-more"><span class="module-id">…</span><strong>${hidden} modules plus loin</strong><span class="module-pill coming_soon">Progressif</span></li>`);
@@ -1443,7 +1673,7 @@ function renderMasteryList() {
     return `
       <article class="mastery-row mastery-row-focused" data-mastery-level="${level}" data-proof-state="${level >= 4 ? 'confirmed' : level >= 3 ? 'practiced' : 'learning'}">
         <div class="mastery-row-head">
-          <div><p class="mastery-lesson">${displayLessonTitle(lesson.id, lesson.title)}</p><strong>${lesson.competency.label}</strong></div>
+          <div><p class="mastery-lesson">${lesson.id} — ${lesson.title}</p><strong>${lesson.competency.label}</strong></div>
           <div class="mastery-level">
             <div class="terminal-thread-beads" role="img" aria-label="${beadsAriaLabel(level)}">${renderBeads(level)}</div>
             <span>${COMPETENCY_LEVEL_LABEL[level]}</span>
@@ -1472,7 +1702,7 @@ function renderPracticeProof() {
   }
   const validated = practice.status === 'validated';
   const proof = practice.proof || {};
-  const source = practice.sourceLessonTitle ? `Après la leçon ${displayLessonTitle(practice.sourceLesson, practice.sourceLessonTitle)}` : 'Practice Terminal autonome';
+  const source = practice.sourceLessonTitle ? `Après la leçon ${practice.sourceLesson} · ${practice.sourceLessonTitle}` : 'Practice Terminal autonome';
   const proofType = proof.type === 'zone_identification' ? 'Identification de zone' : 'Mission Practice';
   container.innerHTML = `<div class="practice-proof-row ${validated ? 'is-validated' : 'is-retry'}"><span class="practice-proof-icon">${validated ? '✓' : '↻'}</span><div><strong>${escapeHtml(proofType)} — Practice Terminal</strong><p>${escapeHtml(source)}</p><p>${escapeHtml(practice.feedback || 'Mission tentée localement.')}</p><small>Preuve ${escapeHtml(proof.id || 'locale')} · ${validated ? 'conservée sur cet appareil.' : 'à reprendre — elle ne compte pas comme compétence acquise.'}</small></div></div>`;
 }
@@ -1519,7 +1749,7 @@ function renderDashboardProof(continueTarget, curriculumComplete) {
   if (curriculumComplete) {
     actionEl.textContent = (prototypeState.journal?.entries || []).length === 0 ? 'Ouvrir le Journal' : 'Explorer les marchés';
   } else if (continueTarget) {
-    actionEl.textContent = `Reprendre ${continueTarget.lesson.title}`;
+    actionEl.textContent = `Reprendre ${continueTarget.lesson.id}`;
   } else {
     actionEl.textContent = '—';
   }
@@ -1543,14 +1773,14 @@ function renderProgressNextStep() {
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   if (el) {
     el.textContent = next
-      ? `Continuer ${next.lesson.title} — ${NEXT_STEP_PHRASE[next.step] || 'continuer'}.`
+      ? `Continuer ${next.lesson.title} (${next.lesson.id}) — ${NEXT_STEP_PHRASE[next.step] || 'continuer'}.`
       : 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.';
   }
   if (action) {
     action.hidden = !next;
     if (next) {
       action.dataset.view = LESSON_VIEW_ID[next.lesson.id] || 'lesson';
-      action.innerHTML = `${next.step === 'lesson' ? 'Commencer' : 'Reprendre'} ${next.lesson.title} <span>→</span>`;
+      action.innerHTML = `${next.step === 'lesson' ? 'Commencer' : 'Reprendre'} ${next.lesson.id} · ${next.lesson.title} <span>→</span>`;
     }
   }
   const noteEl = document.getElementById('progress-journal-note');
@@ -1695,8 +1925,7 @@ function renderJournalList() {
       .map(([field, label]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(entry[field])}</dd></div>`)
       .join('');
     const sourceView = entry.sourceLesson === 'M0.2' ? 'lesson-m02' : '';
-    const proofLessonLabel = displayLessonTitle(entry.sourceLesson, 'Leçon de référence');
-    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve ${escapeHtml(entry.proofId || 'locale')}</strong><span>${escapeHtml(proofLessonLabel)} · ${escapeHtml(entry.proofType || 'zone_identification')}</span>${sourceView ? `<button type="button" class="text-action journal-proof-source" data-view="${sourceView}">Revoir la leçon <span>→</span></button>` : ''}</div>` : '';
+    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve ${escapeHtml(entry.proofId || 'locale')}</strong><span>${escapeHtml(entry.sourceLesson || 'M0.2')} · ${escapeHtml(entry.proofType || 'zone_identification')}</span>${sourceView ? `<button type="button" class="text-action journal-proof-source" data-view="${sourceView}">Revoir la leçon <span>→</span></button>` : ''}</div>` : '';
     const snippet = entry.decision || entry.scenario || entry.context || 'Aucun détail renseigné.';
     const entryNumber = String(entries.length - idx).padStart(2, '0');
     return `
@@ -1982,26 +2211,51 @@ function lastAuthoredLesson() {
   return flat.length ? flat[flat.length - 1] : null;
 }
 
-// The sidebar's "Leçon en cours" shortcut, corrected: it used to be pinned to
-// the fixed view id "lesson" (always M0.1), so once a learner moved on to
-// M0.2/M0.3 it silently sent them back to a lesson they had already
-// completed. It now targets whatever resolveContinueTarget() honestly
-// reports as current, via the same LESSON_VIEW_ID map the Terminal's own
-// primary action uses — one source of truth, no second nav engine. Once the
-// curriculum is complete it relabels itself as a review link to the last
-// real lesson rather than pointing at a dead "current lesson" concept.
+// The sidebar's "Mes Leçons" shortcut (desktop #nav-current-lesson and the
+// mobile drawer's #drawer-current-lesson — same behavior, both kept in sync
+// here so the hamburger drawer is never a stale copy of the desktop rail),
+// corrected: it used to be pinned to the fixed view id "lesson" (always
+// M0.1), so once a learner moved on to M0.2/M0.3 it silently sent them back
+// to a lesson they had already completed. It now targets whatever
+// resolveContinueTarget() honestly reports as current, via the same
+// LESSON_VIEW_ID map the Terminal's own primary action uses — one source of
+// truth, no second nav engine. The label stays the static "Mes Leçons" (the
+// founder's reference maquette wording) — only the real [data-view] target
+// changes, exactly like every other nav-item's routing.
 function renderNavCurrentLesson(continueTarget) {
-  const item = document.getElementById('nav-current-lesson');
-  if (!item) return;
-  const label = item.querySelector('svg') ? item.lastChild : null;
-  if (continueTarget) {
-    item.dataset.view = LESSON_VIEW_ID[continueTarget.lesson.id] || 'lesson';
-    if (label) label.textContent = ' Leçon en cours';
-  } else {
-    const last = lastAuthoredLesson();
-    item.dataset.view = last ? (LESSON_VIEW_ID[last.lesson.id] || 'lesson') : 'lesson';
-    if (label) label.textContent = ' Revoir la dernière leçon';
-  }
+  const last = continueTarget ? null : lastAuthoredLesson();
+  const lessonId = continueTarget ? continueTarget.lesson.id : last?.lesson.id;
+  const viewId = lessonId ? (LESSON_VIEW_ID[lessonId] || 'lesson') : 'lesson';
+  ['nav-current-lesson', 'drawer-current-lesson'].forEach(id => {
+    const item = document.getElementById(id);
+    if (item) item.dataset.view = viewId;
+  });
+}
+
+// The sidebar's "Exercices & Quiz" shortcut — same current/last lesson target
+// as renderNavCurrentLesson above, but it also opens straight onto that
+// lesson's real Exercice/Quiz tab (lesson-renderer.js's renderLessonMain):
+// data-scroll-to points at that tab's panel id (lesson-panel-exercise, or
+// -<suffix> for every lesson after M0.1 — the exact id renderLessonMain
+// gives it), and bindViewButton's existing data-scroll-to handling already
+// calls revealLessonAnchor(), which opens the tab (activateLessonTab) before
+// scrolling to it. A lesson authored with no exercise/quiz blocks (none
+// exist today) simply has no such panel — revealLessonAnchor() already
+// no-ops safely on a missing id, so this never throws, it just lands on the
+// lesson itself. No new exercise/quiz surface is invented: this only opens
+// the one that already exists per lesson.
+function renderNavCurrentExercise(continueTarget) {
+  const last = continueTarget ? null : lastAuthoredLesson();
+  const lessonId = continueTarget ? continueTarget.lesson.id : last?.lesson.id;
+  const viewId = lessonId ? (LESSON_VIEW_ID[lessonId] || 'lesson') : 'lesson';
+  const entry = lessonId ? LESSON_REGISTRY.find(e => e.id === lessonId) : null;
+  const panelSuffix = entry?.suffix ? `-${entry.suffix}` : '';
+  ['nav-current-exercise', 'drawer-current-exercise'].forEach(id => {
+    const item = document.getElementById(id);
+    if (!item) return;
+    item.dataset.view = viewId;
+    item.dataset.scrollTo = `lesson-panel-exercise${panelSuffix}`;
+  });
 }
 
 // The real, greeting-time-of-day text — never a fixed "Bonsoir" regardless of the hour.
@@ -2083,7 +2337,7 @@ function renderTerminalMeta(continueTarget) {
   const lessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
   const step = DDALearning.lessonNextStep(lessonProgress);
   stepEl.textContent = step === 'review' ? 'leçon terminée' : (NEXT_STEP_PHRASE[step] || '—');
-  document.getElementById('terminal-meta-module').textContent = continueTarget.lesson.title;
+  document.getElementById('terminal-meta-module').textContent = continueTarget.lesson.id;
   const xpKey = step === 'lesson' ? 'lessonViewed' : step === 'exercise' ? 'exerciseComplete' : step === 'quiz' ? 'quizComplete' : null;
   const nextXp = xpKey && continueTarget.lesson.xp ? continueTarget.lesson.xp[xpKey] : null;
   document.getElementById('terminal-meta-xp').textContent = nextXp ? `+${nextXp} XP` : '—';
@@ -2130,10 +2384,9 @@ function renderTerminalLeadComplete() {
   const indexEl = document.getElementById('lesson-index-label');
   if (indexEl) {
     const completedIds = completedModuleIds();
-      const completedTitles = completedIds.map(id => DDA.curriculum.modules.find(module => module.id === id)?.title || 'Parcours');
-      indexEl.textContent = completedTitles.length
-      ? `PARCOURS ${completedTitles.join(' + ')} VALIDÉ${completedTitles.length > 1 ? 'S' : ''}`
-      : 'PARCOURS DISPONIBLE VALIDÉ';
+    indexEl.textContent = completedIds.length
+      ? `CURRICULUM ${completedIds.join(' + ')} COMPLÉTÉ${completedIds.length > 1 ? 'S' : ''}`
+      : 'CURRICULUM DISPONIBLE COMPLÉTÉ';
   }
   const moduleEl = document.getElementById('terminal-lead-module');
   if (moduleEl) moduleEl.textContent = last ? last.module.title : 'DDA';
@@ -2159,7 +2412,7 @@ function renderTerminalLeadComplete() {
     if (last) {
       secondary.hidden = false;
       secondary.dataset.view = LESSON_VIEW_ID[last.lesson.id] || 'lesson';
-      secondary.innerHTML = `Revoir ${last.lesson.title} <span>→</span>`;
+      secondary.innerHTML = `Revoir ${last.lesson.id} <span>→</span>`;
     } else {
       secondary.hidden = true;
     }
@@ -2180,7 +2433,7 @@ function renderTerminalMarketIntelligence() {
     </div>`).join('');
 }
 
-// Darius Analysis Terminal — only deterministic, pedagogical series are rendered.
+// Terminal d'analyse — only deterministic, pedagogical series are rendered.
 // Values are normalized indices, not quotes, recommendations or live market data.
 const TERMINAL_SERIES = Object.freeze({
   'BRVM Composite': [48, 50, 49, 52, 55, 54, 57, 56, 58, 61, 60, 63, 62, 65, 64, 67, 66, 64, 68, 70, 69, 72, 71, 74, 73, 76, 75, 77, 76, 79, 78, 80],
@@ -2329,7 +2582,7 @@ function terminalJournalDraft() {
   const drawingLabels = state.drawings.map(drawing => ({ zone: 'zone Support/Résistance', line: 'ligne de tendance', fib: 'Fibonacci' }[drawing.type] || 'annotation')).join(', ');
   return {
     market: state.instrument,
-    context: `Observation du Darius Analysis Terminal — timeframe ${state.timeframe}. Série pédagogique locale contrôlée, sans cotation en temps réel.`,
+    context: `Observation du Terminal d’analyse — timeframe ${state.timeframe}. Série pédagogique locale contrôlée, sans cotation en temps réel.`,
     scenario: state.observation,
     process: `Graphique manipulé en ${state.timeframe}, zoom ${state.zoom}/3${drawingLabels ? `; annotations : ${drawingLabels}` : ''}.`,
     note: drawingLabels ? `Annotations conservées dans le Terminal : ${drawingLabels}.` : 'Brouillon transféré depuis le Terminal — complète ton raisonnement avant d’enregistrer.',
@@ -2533,18 +2786,20 @@ function renderMembershipNextStep(premium) {
   const el = document.getElementById('membership-next-step');
   if (!el) return;
   if (premium) {
-    el.textContent = 'Ton accès Premium est en aperçu sur cet appareil — ouvre l’atelier Ressources Premium ou l’aperçu de certification pour voir ce qu’il débloque réellement dès aujourd’hui.';
+    el.textContent = 'Ton accès Premium est présenté en démonstration — ouvre l’atelier Ressources Premium ou l’aperçu de certification pour voir ce qu’il débloque réellement dès aujourd’hui.';
     return;
   }
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   el.textContent = next
-    ? `Continuer ${next.lesson.title} sur DDA Free — Premium reste disponible en aperçu quand tu voudras l’explorer.`
+    ? `Continuer ${next.lesson.title} (${next.lesson.id}) sur DDA Free — Premium reste disponible en aperçu quand tu voudras l’explorer.`
     : 'Tu as validé les leçons disponibles sur DDA Free — ouvre l’aperçu Premium ci-dessus pour voir ce qu’il débloque dès aujourd’hui.';
 }
 
 function renderState() {
   const name = prototypeState.user?.name || 'Apprenant';
-  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'RD';
+  const initials = prototypeState.user?.name
+    ? name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase()
+    : 'A';
   const activeLessonProgress = DDALearning.getLessonProgress(prototypeState, activeLessonId);
   const xp = DDALearning.totalXp(DDA.curriculum, prototypeState);
   // Deliberately out of scope for the Daily Value Loop correction: `complete`
@@ -2593,7 +2848,7 @@ function renderState() {
   document.getElementById('personalized-next').textContent = curriculumComplete
     ? 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.'
     : prototypeState.onboarding?.goal
-      ? `Objectif : ${prototypeState.onboarding.goal}. Prochaine étape : terminer « ${continueTarget.lesson.title} ».`
+      ? `Objectif : ${prototypeState.onboarding.goal}. Prochaine étape : terminer ${continueTarget.lesson.id}.`
       : 'Une étape claire pour continuer à progresser.';
 
   if (continueTarget) {
@@ -2628,12 +2883,21 @@ function renderState() {
   renderJournalPlan();
 
   renderNavCurrentLesson(continueTarget);
+  renderNavCurrentExercise(continueTarget);
 
   // Restore every mounted lesson's progress UI from stored state — one
   // registry-driven loop covers all of them, ids derived by lessonUiIds.
   mountedLessons.forEach(entry => renderLessonProgressUI(entry.id, entry.meta.lesson, lessonUiIds(entry)));
 
-  document.getElementById('resume-device').hidden = !prototypeState.user;
+  // Lot — Signup coherence: the resume/erase nudge is for a RETURNING
+  // learner who opens #access while a prior session already exists. Once
+  // the learner has reached step 2 of the current visit's own signup flow
+  // (onboarding-form revealed), prototypeState.user was just created by
+  // that same flow seconds ago — showing "a progression already exists,
+  // resume or erase it?" right under the active "Construire mon parcours"
+  // button is false and confusing, and risks a first-time learner erasing
+  // the account they are actively creating.
+  document.getElementById('resume-device').hidden = !prototypeState.user || !document.getElementById('onboarding-form').hidden;
   document.body.classList.toggle('low-data', Boolean(prototypeState.preferences.lowData));
 
   const premium = prototypeState.membership?.plan === 'premium';
@@ -2641,12 +2905,26 @@ function renderState() {
   document.getElementById('profile-form').hidden = !hasProfile;
   document.querySelector('.preference-panel').hidden = !hasProfile;
   document.getElementById('empty-profile').hidden = hasProfile;
+  document.getElementById('profile-large-avatar').textContent = initials;
+  document.getElementById('profile-heading-name').textContent = name;
+  document.getElementById('profile-heading-email').textContent = remoteUser?.email || prototypeState.user?.email || 'Compte local';
+  document.getElementById('profile-storage-scope').textContent = remoteUser ? 'Compte DDA' : 'Profil sur cet appareil';
+  document.querySelector('.profile-chip small').textContent = remoteUser ? 'Mon profil (compte)' : 'Mon profil (appareil)';
+  document.getElementById('profile-storage-disclosure').textContent = remoteUser
+    ? 'Les informations de profil et la progression des leçons sont rattachées à ton compte DDA. Le Journal, le Terminal, les préférences et l’historique DDA AI restent sur cet appareil, isolés par compte et non synchronisés.'
+    : 'Sans compte connecté, tes données restent sur cet appareil. Une mesure d’audience pseudonyme peut aider à comprendre comment les visiteurs découvrent DDA ; elle ne contient ni ton nom ni ton e-mail.';
+  const importNotice = document.getElementById('profile-import-notice');
+  if (importNotice) {
+    const candidate = remoteUser ? DDA.readUnscopedProgressCandidate?.() : null;
+    importNotice.hidden = !candidate || hasImportedUnscopedProgress(remoteUser?.user_id);
+  }
+  const logoutButton = document.getElementById('profile-logout');
+  if (logoutButton) logoutButton.hidden = !remoteUser;
+  document.getElementById('profile-first-name').value = hasProfile ? name : '';
+  document.getElementById('profile-error').textContent = '';
   if (hasProfile) {
-    document.getElementById('profile-large-avatar').textContent = initials;
-    document.getElementById('profile-heading-name').textContent = name;
-    document.getElementById('profile-heading-email').textContent = prototypeState.user.email || 'Compte local';
+
     document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
-    document.getElementById('profile-first-name').value = name;
     document.getElementById('profile-level').value = prototypeState.onboarding?.level || 'Débutant';
     document.getElementById('profile-goal').value = prototypeState.onboarding?.goal || 'Comprendre les marchés';
     document.getElementById('profile-time').value = prototypeState.onboarding?.time || '10 minutes par jour';
@@ -2658,9 +2936,9 @@ function renderState() {
 
   document.getElementById('sidebar-plan').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
   document.querySelectorAll('[data-profile-role]').forEach(node => { node.textContent = premium ? 'Apprenant Premium' : 'Apprenant'; });
-  document.getElementById('membership-status').textContent = premium ? 'DDA Premium · aperçu local' : 'DDA Free';
+  document.getElementById('membership-status').textContent = premium ? 'DDA Premium · démonstration' : 'DDA Free';
   const membershipStatusNote = document.getElementById('membership-status-note');
-  if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Démonstration sur cet appareil · aucun achat actif' : 'Disponible maintenant · aucun achat actif';
+  if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Démonstration pédagogique · aucun achat actif' : 'Disponible maintenant · aucun achat actif';
   document.getElementById('free-plan-state').textContent = premium ? 'Inclus avec Premium' : 'Formule active';
   document.getElementById('preview-premium').hidden = premium;
   document.getElementById('revert-free').hidden = !premium;
@@ -2753,7 +3031,7 @@ const LESSON_PREREQUISITE = Object.freeze(Object.fromEntries(LESSON_REGISTRY.fil
 // lives outside DDA.curriculum by design), so its heading is named directly
 // rather than invented from a non-existent module record.
 function moduleGroupLabel(moduleKey) {
-  if (moduleKey === 'P2') return 'Risque et discipline';
+  if (moduleKey === 'P2') return 'Premium Track';
   return DDA.curriculum.modules.find(module => module.id === moduleKey)?.title || moduleKey;
 }
 function moduleTocLessonStatus(entry) {
@@ -2922,7 +3200,7 @@ function renderLessonSidecard(viewId) {
   const premium = prototypeState.membership?.plan !== 'premium' ? `
     <div class="lesson-sidecard-cta lesson-sidecard-premium">
       <p class="eyebrow gold">DDA Premium</p>
-      <p>Débloque l’atelier de pratique, l’évaluation guidée et le suivi complet de ta progression.</p>
+      <p>Débloque le Practice Lab, l’assessment guidé et le suivi complet de ta progression.</p>
       <button type="button" class="secondary-action" data-sidecard-view="membership">Découvrir Premium <span>→</span></button>
     </div>` : '';
 
@@ -3051,7 +3329,7 @@ function openGate(options = {}) {
 function lessonGateInfo(viewId) {
   const lesson = LESSON_REGISTRY.find(entry => entry.viewId === viewId && entry.permission === 'premium_track');
   if (lesson) {
-    return { title: displayLessonTitle(lesson.id, lesson.title), duration: lesson.duration || null, objectives: lesson.objectives || [], premiumReason: lesson.premiumReason || '' };
+    return { title: lesson.title, duration: lesson.duration || null, objectives: lesson.objectives || [], premiumReason: lesson.premiumReason || '' };
   }
   const lab = LAB_REGISTRY.find(entry => entry.viewId === viewId && entry.permission === 'premium_track');
   if (lab) {
@@ -3118,17 +3396,17 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
       const isPremiumTrack = permission === 'premium_track';
       const lessonInfo = lessonGateInfo(id);
       openGate({
-        eyebrow: isPremiumTrack ? 'DDA Premium · P2' : 'Offre Standard · M1+',
-        title: lessonInfo ? `« ${lessonInfo.title} » est une leçon Premium.` : (isPremiumTrack ? 'Cette expérience est réservée à Premium.' : 'Ce module est réservé à l’offre Standard.'),
+        eyebrow: isPremiumTrack ? 'DDA Premium · P2' : 'DDA Premium · M1+',
+        title: lessonInfo ? `« ${lessonInfo.title} » est une leçon Premium.` : 'Ce module est réservé à DDA Premium.',
         description: lessonInfo
           ? lessonInfo.premiumReason
           : (isPremiumTrack
-            ? 'DDA Free (Découverte) peut voir l’aperçu, mais le contenu P2 complet est disponible uniquement dans la démonstration Premium locale. Aucun paiement réel — active l’aperçu pour explorer ce module.'
-            : 'DDA Free (Découverte) donne accès au module M0 Fondations. Les modules M1 et suivants sont réservés aux offres Standard et Pro (CDCP-OS §4.2). Aucun paiement réel — active l’aperçu pour explorer ce module.'),
+            ? 'DDA Free peut voir l’aperçu, mais le contenu P2 complet est disponible uniquement dans la démonstration Premium locale. Aucun paiement réel — active l’aperçu pour explorer ce module.'
+            : 'DDA Free donne accès au module M0 Fondations. Les modules M1 et suivants sont réservés à DDA Premium. Aucun paiement réel — active l’aperçu pour explorer ce module.'),
         duration: lessonInfo?.duration || null,
         objectives: lessonInfo?.objectives || [],
         canUnlock: true,
-        unlockText: isPremiumTrack ? 'Activer l’aperçu Premium (simulation)' : 'Activer l’aperçu Standard (simulation)',
+        unlockText: 'Activer l’aperçu Premium (simulation)',
         previewText: 'Voir la formule Premium',
         targetView: id
       });
@@ -3285,16 +3563,30 @@ function closeReader() {
 document.getElementById('reader-close').addEventListener('click', closeReader);
 
 document.querySelectorAll('.premium-gate').forEach(button => button.addEventListener('click', () => {
-  if (canUnlock(button.dataset.permission)) { showToast('Atelier Premium débloqué en aperçu.'); return; }
+  const target = button.dataset.premiumTarget;
+  if (canUnlock(button.dataset.permission)) {
+    if (target && viewPermissions[target] && !canUnlock(viewPermissions[target])) {
+      showView('membership');
+      showToast('L’aperçu local ne remplace pas un droit Premium confirmé par le serveur.');
+      return;
+    }
+    if (target) { showView(target); return; }
+    showToast('Atelier Premium débloqué en aperçu.');
+    return;
+  }
   gateTrigger = button;
   prototypeState = DDA.track(prototypeState, 'access_denied', { permission: button.dataset.permission, plan: 'free' });
+  const localPreviewAvailable = !window.DDABFF?.enabled();
   openGate({
     eyebrow: 'DDA Premium',
     title: 'Cette expérience sera disponible avec Premium.',
-    description: 'Aucun achat ni paiement réel n’est proposé ici.',
-    canUnlock: true,
-    unlockText: 'Simuler l’accès Premium sur cet appareil',
-    previewText: 'Voir la formule Premium'
+    description: localPreviewAvailable
+      ? 'Démonstration pédagogique sur cet appareil uniquement. Aucun achat ni paiement réel n’est proposé.'
+      : 'L’accès à cet atelier exige un droit Premium confirmé par le serveur. Aucun paiement réel n’est activé.',
+    canUnlock: localPreviewAvailable,
+    unlockText: localPreviewAvailable ? 'Essayer la démonstration sur cet appareil' : undefined,
+    previewText: 'Voir la formule Premium',
+    targetView: target
   });
 }));
 document.getElementById('gate-unlock')?.addEventListener('click', () => {
@@ -3473,6 +3765,21 @@ document.getElementById('weekly-review-form').addEventListener('submit', event =
   closeWeeklyReview();
   showToast('Revue hebdomadaire enregistrée localement.');
 });
+// A Journal save can silently fail at the localStorage layer (quota
+// exceeded, private-browsing storage caps, some in-app Android browsers
+// that restrict storage outright) — DDA.save() already catches that
+// internally and never throws, but every Journal call site below used to
+// show its "saved" toast unconditionally, regardless of whether anything
+// was actually persisted. DDA.storageAvailable() reflects the outcome of
+// the write that just ran (it's set synchronously inside save(), which
+// every journal mutation above funnels through), so checking it right
+// after is enough to tell a real failure from a real success — no native
+// browser-style notification, just one honest in-app message either way.
+function journalSaveToast(successMessage) {
+  showToast(DDA.storageAvailable()
+    ? successMessage
+    : 'Impossible d’enregistrer : stockage indisponible sur cet appareil. Ce changement ne sera pas conservé après la fermeture de la page.');
+}
 document.getElementById('journal-new-entry').addEventListener('click', event => openJournalComposer(null, event.currentTarget));
 document.getElementById('journal-composer-back').addEventListener('click', closeJournalComposer);
 document.getElementById('journal-step-prev').addEventListener('click', () => goToJournalStep(journalStep - 1));
@@ -3482,7 +3789,7 @@ document.getElementById('journal-composer-delete').addEventListener('click', () 
   deleteJournalEntry(journalEditingId);
   trackEvent('journal_entry_deleted', {});
   closeJournalComposer();
-  showToast('Entrée supprimée.');
+  journalSaveToast('Entrée supprimée.');
 });
 document.getElementById('journal-entry-form').addEventListener('submit', event => {
   event.preventDefault();
@@ -3503,7 +3810,7 @@ document.getElementById('journal-entry-form').addEventListener('submit', event =
     trackEvent('journal_entry_created', {});
   }
   closeJournalComposer();
-  showToast(editingId ? 'Entrée mise à jour.' : 'Entrée enregistrée localement.');
+  journalSaveToast(editingId ? 'Entrée mise à jour.' : 'Entrée enregistrée localement.');
 });
 document.getElementById('journal-list').addEventListener('click', event => {
   const editButton = event.target.closest('.journal-entry-edit');
@@ -3517,7 +3824,7 @@ document.getElementById('journal-list').addEventListener('click', event => {
   } else if (deleteButton) {
     deleteJournalEntry(deleteButton.dataset.id);
     trackEvent('journal_entry_deleted', {});
-    showToast('Entrée supprimée.');
+    journalSaveToast('Entrée supprimée.');
   }
 });
 document.getElementById('journal-plan-form').addEventListener('submit', event => {
@@ -3532,7 +3839,7 @@ document.getElementById('journal-plan-form').addEventListener('submit', event =>
     pointsToVerify: document.getElementById('plan-checkpoints').value
   });
   trackEvent('journal_plan_saved', {});
-  showToast('Plan personnel enregistré.');
+  journalSaveToast('Plan personnel enregistré.');
 });
 
 document.getElementById('support-form').addEventListener('submit', event => {
@@ -3562,7 +3869,7 @@ bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business'
 /* DDA AI Academy chat — a thin UI bridge over the authenticated BFF client.
    The browser never receives a provider key and never invents a reply when the
    BFF is disabled, unauthenticated or not configured. Only the last 12 turns
-   are kept locally so the learner can continue a short pedagogical thread. */
+   are kept locally, under the authenticated account's own storage namespace. */
 (function initDdaAiChat() {
   const form = document.getElementById('dda-ai-form');
   const input = document.getElementById('dda-ai-input');
@@ -3572,16 +3879,37 @@ bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business'
   const error = document.getElementById('dda-ai-error');
   const submit = document.getElementById('dda-ai-submit');
   if (!form || !input || !transcript || !status || !window.DDABFF) return;
-  const storageKey = 'dda-ai-chat-v1';
+  const guestStorageKey = 'dda-ai-chat-v1';
   const maxTurns = 12;
   let history = [];
+  let historyStorageKey = null;
   let pending = false;
-  try {
-    const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    if (Array.isArray(saved)) history = saved.filter(turn => ['user', 'assistant'].includes(turn?.role) && typeof turn.content === 'string').slice(-maxTurns);
-  } catch { history = []; }
+  function currentHistoryStorageKey() {
+    if (!window.DDABFF.enabled()) return guestStorageKey;
+    return remoteUser?.user_id
+      ? `dda-ai-chat-v1:user:${encodeURIComponent(remoteUser.user_id)}`
+      : null;
+  }
+  function loadHistoryForScope() {
+    const nextKey = currentHistoryStorageKey();
+    if (nextKey === historyStorageKey) return;
+    historyStorageKey = nextKey;
+    history = [];
+    transcript.replaceChildren();
+    empty.hidden = false;
+    if (historyStorageKey) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(historyStorageKey) || '[]');
+        if (Array.isArray(saved)) history = saved.filter(turn => ['user', 'assistant'].includes(turn?.role) && typeof turn.content === 'string').slice(-maxTurns);
+      } catch { history = []; }
+    }
+    history.forEach(turn => appendMessage(turn.role, turn.content));
+  }
+  loadHistoryForScope();
+  window.DDARefreshAiHistory = loadHistoryForScope;
   const saveHistory = () => {
-    try { localStorage.setItem(storageKey, JSON.stringify(history.slice(-maxTurns))); } catch { /* storage is optional */ }
+    if (!historyStorageKey) return;
+    try { localStorage.setItem(historyStorageKey, JSON.stringify(history.slice(-maxTurns))); } catch { /* storage is optional */ }
   };
   function appendMessage(role, text, options = {}) {
     const item = document.createElement('div');
@@ -3599,7 +3927,6 @@ bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business'
     transcript.scrollTop = transcript.scrollHeight;
     return item;
   }
-  history.forEach(turn => appendMessage(turn.role, turn.content));
   if (!window.DDABFF.enabled()) {
     status.textContent = 'Service en attente de configuration';
     status.dataset.state = 'offline';
@@ -3630,7 +3957,9 @@ bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business'
     const message = input.value.trim();
     if (!message) { error.textContent = 'Écris une question avant d’envoyer.'; input.focus(); return; }
     error.textContent = '';
+    loadHistoryForScope();
     const priorHistory = history.slice(-maxTurns);
+    const requestScope = historyStorageKey;
     appendMessage('user', message);
     history.push({ role: 'user', content: message });
     saveHistory();
@@ -3640,6 +3969,7 @@ bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business'
     try {
       const result = await window.DDABFF.askAI(message, priorHistory);
       pendingMessage.remove();
+      if (requestScope !== historyStorageKey) return;
       if (!result.available) {
         showUnavailable();
       } else if (result.error) {
@@ -3700,6 +4030,44 @@ mountedLessons.forEach(entry => {
   bindMarkUnderstood(entry.id, { buttonId: ui.markUnderstoodId, savedStateId: ui.savedStateId, scrollToId: entry.understoodScrollTo });
 });
 
+// P0 auth reliability audit (2026-11): the BFF now tells a wrong password
+// apart from an unconfirmed email, a provider-side rate limit, and a
+// transient server error (see classifyLoginError in bff/src/app.js). Before
+// this fix every one of those showed the same "E-mail ou mot de passe
+// incorrect." even when the password the user had just set was correct —
+// the exact symptom reported in production. Never report "mot de passe
+// incorrect" for a cause that is not actually a wrong credential.
+function authErrorMessage(authError, { signup } = {}) {
+  const code = authError?.body?.code || '';
+  if (code === 'email_not_confirmed') {
+    return 'Confirme ton adresse e-mail avant de te connecter : vérifie ta boîte mail (et les spams) puis clique sur le lien de confirmation.';
+  }
+  // Signup reliability audit (P0, 2026-11): classifyRegisterError() in
+  // bff/src/app.js now tells a password the provider itself rejects as too
+  // weak apart from every other registration failure — this used to fall
+  // through to the same generic "could not complete this step" as a random
+  // server glitch, which looks exactly like a bug to the person who just
+  // typed the password that triggered it.
+  if (code === 'weak_password') {
+    return 'Ton mot de passe est trop simple : ajoute des majuscules, des chiffres ou des symboles.';
+  }
+  if (code === 'rate_limited') {
+    return 'Trop de tentatives. Réessaie dans quelques minutes.';
+  }
+  if (code === 'server_error' || authError?.status >= 500 || !authError?.status) {
+    return 'Le service est momentanément indisponible. Réessaie dans un instant.';
+  }
+  if (code === 'invalid_credentials' || authError?.status === 401) {
+    return 'E-mail ou mot de passe incorrect.';
+  }
+  if (code === 'validation_error') {
+    return signup
+      ? 'Vérifie ton e-mail et choisis un mot de passe d’au moins 12 caractères.'
+      : 'Indique ton e-mail et ton mot de passe.';
+  }
+  return 'Impossible de terminer cette étape pour le moment. Réessaie plus tard.';
+}
+
 document.getElementById('signup-form').addEventListener('submit', async event => {
   event.preventDefault();
   const nameField = document.getElementById('first-name');
@@ -3723,12 +4091,26 @@ document.getElementById('signup-form').addEventListener('submit', async event =>
   }
   error.textContent = '';
   if (bffMode) {
+    // Anti-double-submit + visible loading state (P0.4): a slow Supabase
+    // round trip must never let a second click fire a second signup/login,
+    // and the learner must see that something is happening rather than a
+    // frozen form.
+    const submitButton = document.querySelector('#signup-form button[type=submit]');
+    if (submitButton?.disabled) return;
+    const originalLabel = submitButton ? submitButton.innerHTML : '';
+    if (submitButton) { submitButton.disabled = true; submitButton.innerHTML = bffAuthMode === 'login' ? 'Connexion…' : 'Envoi…'; }
     try {
       if (bffAuthMode === 'signup') {
-        await window.DDABFF.register({ email, password, display_name: name, ref: prototypeState.acquisition?.partnerRef });
-        document.getElementById('bff-auth-status').textContent = 'Si l’inscription peut être finalisée, un lien de vérification vient d’être envoyé. Vérifie ta boîte mail puis connecte-toi.';
+        const attempt = { email, password, display_name: name, ref: prototypeState.acquisition?.partnerRef };
+        await window.DDABFF.register(attempt);
+        document.getElementById('bff-auth-status').textContent = 'Si l’inscription peut être finalisée, un lien de vérification vient d’être envoyé. Vérifie ta boîte mail (et les spams) puis connecte-toi.';
         setBffAuthMode('login');
         document.getElementById('email').value = email;
+        // Must be set after setBffAuthMode('login'): mode switches clear any
+        // previously remembered attempt and re-hide the resend button.
+        lastSignupAttempt = attempt;
+        const resendButton = document.getElementById('bff-resend-confirmation');
+        if (resendButton) resendButton.hidden = false;
       } else {
         await window.DDABFF.login({ email, password });
         const user = await hydrateRemoteSession();
@@ -3739,7 +4121,9 @@ document.getElementById('signup-form').addEventListener('submit', async event =>
         showOnboardingAfterRemoteAuth(user);
       }
     } catch (authError) {
-      error.textContent = authError?.status === 401 ? 'E-mail ou mot de passe incorrect.' : 'Impossible de terminer cette étape pour le moment. Réessaie plus tard.';
+      error.textContent = authErrorMessage(authError, { signup: bffAuthMode === 'signup' });
+    } finally {
+      if (submitButton) { submitButton.disabled = false; submitButton.innerHTML = originalLabel; }
     }
     return;
   }
@@ -3750,6 +4134,11 @@ document.getElementById('signup-form').addEventListener('submit', async event =>
   document.getElementById('step-dot-2').classList.add('active');
   document.getElementById('step-dot-1').removeAttribute('aria-current');
   document.getElementById('step-dot-2').setAttribute('aria-current', 'step');
+  // saveState() above already rendered with onboarding-form still hidden,
+  // so the resume/erase nudge was computed as visible for the user object
+  // this very step just created — correct that stale render now that step 2
+  // is actually showing (see its own hidden-condition comment above).
+  document.getElementById('resume-device').hidden = true;
 });
 
 document.getElementById('onboarding-form').addEventListener('submit', async event => {
@@ -4197,7 +4586,7 @@ function renderPremiumState() {
     set(`p2-progress-${step}-status`, text);
   };
   const p21Status = p21.quizComplete ? 'Validée' : p21.exerciseComplete ? 'En cours' : 'À commencer';
-  const p22Status = p22.quizComplete ? 'Validée' : p22.exerciseComplete ? 'En cours' : p21.quizComplete ? 'À commencer' : 'Après la leçon précédente';
+  const p22Status = p22.quizComplete ? 'Validée' : p22.exerciseComplete ? 'En cours' : p21.quizComplete ? 'À commencer' : 'Après P2.1';
   const labStatus = lab.status === 'validated' ? 'Validé' : lab.status === 'retry' ? 'À reprendre' : p22.quizComplete ? 'À commencer' : 'Après les leçons';
   const assessmentStatus = assessment.passed ? 'Validé' : lab.status === 'validated' ? 'À commencer' : 'Après le Lab';
   set('p2-p21-status', p21Status); set('p2-p22-status', p22Status); set('p2-lab-status', labStatus); set('p2-assessment-status', assessmentStatus);
@@ -4205,13 +4594,13 @@ function renderPremiumState() {
   syncStep('p22', p22.quizComplete ? 'complete' : p22.exerciseComplete ? 'active' : p21.quizComplete ? 'ready' : 'locked', p22Status);
   syncStep('lab', lab.status === 'validated' ? 'complete' : lab.status === 'retry' ? 'active' : p22.quizComplete ? 'ready' : 'locked', labStatus);
   syncStep('assessment', assessment.passed ? 'complete' : lab.status === 'validated' ? 'ready' : 'locked', assessmentStatus);
-  set('premium-track-progress', assessment.passed ? 'Preuve créée · prochaine action : Journal' : lab.status === 'validated' ? 'Atelier validé · évaluation disponible' : p22.quizComplete ? 'Leçons validées · atelier disponible' : p21.quizComplete ? 'Première leçon validée · seconde leçon disponible' : 'Prêt à commencer ? Ta première étape t’attend.');
+  set('premium-track-progress', assessment.passed ? 'Preuve créée · prochaine action : Journal' : lab.status === 'validated' ? 'Lab validé · assessment disponible' : p22.quizComplete ? 'Leçons validées · Lab disponible' : p21.quizComplete ? 'P2.1 validée · P2.2 disponible' : 'Prêt à commencer ? Ta première étape t’attend.');
   const receipt = document.getElementById('premium-proof-receipt');
   if (receipt) receipt.hidden = !proof;
-  if (proof) set('p2-proof-date', proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Date locale');
+  if (proof) set('p2-proof-date', proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Horodatage local');
   const progress = document.getElementById('premium-proof-progress');
   if (progress) progress.innerHTML = proof
-    ? `<article class="premium-proof-row"><strong>${proof.skill || 'Fondations du risque'}</strong><span>${proof.level || 'Niveau 3 — Mise en pratique'}</span><p>${proof.source || 'Atelier Plan de risque + évaluation guidée'}</p><small>${proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Date locale'} · ${proof.nextAction || 'Continuer vers la prochaine étape Premium.'}</small></article>`
+    ? `<article class="premium-proof-row"><strong>${proof.skill || 'Fondations du risque'}</strong><span>${proof.level || 'Niveau 3 — Appliquer'}</span><p>${proof.source || 'P2 Lab de risque guidé + Assessment'}</p><small>${proof.createdAt ? new Date(proof.createdAt).toLocaleString('fr-FR') : 'Horodatage local'} · ${proof.nextAction || 'Continuer vers la prochaine pratique Premium.'}</small></article>`
     : '<p>Ta première preuve Premium apparaîtra ici après ta prochaine validation.</p>';
 }
 
@@ -4243,19 +4632,19 @@ document.getElementById('premium-lab-form')?.addEventListener('submit', event =>
   const feedback = document.getElementById('premium-lab-feedback');
   const attempts = Number(premiumRecord().labs?.['p2-risk-plan']?.attempts || 0) + 1;
   let status = 'retry';
-  let message = 'Review required. Your stop is present, but the scenario invalidation has not been established. Revisit the market structure before defining the risk.';
-  let title = 'Review required';
+  let message = 'Revue nécessaire. Ton stop est présent, mais l’invalidation du scénario n’a pas été établie. Revois la structure de marché avant de définir le risque.';
+  let title = 'Revue nécessaire';
   if (values.invalidation.length < 10) {
-    message = 'Review required. Your stop is present, but the scenario invalidation has not been established. Revisit the market structure before defining the risk.';
+    message = 'Revue nécessaire. Ton stop est présent, mais l’invalidation du scénario n’a pas été établie. Revois la structure de marché avant de définir le risque.';
   } else if (values.entry.length < 10) {
-    title = 'Decision check';
-    message = 'Decision check. You have identified a zone, but a zone alone does not define an entry condition.';
+    title = 'Vérification de la décision';
+    message = 'Vérification de la décision. Tu as identifié une zone, mais une zone seule ne définit pas une condition d’entrée.';
   } else if (!Number.isFinite(values.risk) || values.risk <= 0 || values.risk > 50 || values.target.length < 5 || values.noTrade.length < 10) {
-    title = 'Risk boundary check';
-    message = 'Define a measurable risk at or below the $50 educational example, a coherent target and a clear no-trade condition before execution.';
+    title = 'Vérification de la limite de risque';
+    message = 'Définis un risque mesurable égal ou inférieur à l’exemple pédagogique de $50, un objectif cohérent et une condition de non-trade claire avant l’exécution.';
   } else {
-    status = 'validated'; title = 'Good';
-    message = 'Your invalidation is defined before execution. This gives the trade a measurable risk boundary.';
+    status = 'validated'; title = 'Bien';
+    message = 'Ton invalidation est définie avant l’exécution. Cela donne au trade une limite de risque mesurable.';
   }
   const lab = { status, attempts, lastFeedback: message, sourceLesson: 'P2.2', proofId: 'p2-risk-foundations', ...(status === 'validated' ? { completedAt: new Date().toISOString() } : {}) };
   savePremiumPatch({ trackId: 'P2-risk-discipline', labs: { ...premiumRecord().labs, 'p2-risk-plan': lab } });
@@ -4268,7 +4657,7 @@ document.getElementById('premium-assessment-form')?.addEventListener('submit', e
   event.preventDefault();
   const feedback = document.getElementById('premium-assessment-feedback');
   if (premiumRecord().labs?.['p2-risk-plan']?.status !== 'validated') {
-    premiumFeedback(feedback, false, 'Lab required', 'Valide d’abord le P2 Lab afin que l’assessment repose sur une décision construite.'); return;
+    premiumFeedback(feedback, false, 'Lab requis', 'Valide d’abord le P2 Lab afin que l’assessment repose sur une décision construite.'); return;
   }
   const answers = ['p2-q1', 'p2-q2', 'p2-q3', 'p2-q4'].map(name => document.querySelector(`input[name="${name}"]:checked`)?.value);
   const passed = answers.join('|') === 'wait|respect|c|b';
@@ -4277,13 +4666,13 @@ document.getElementById('premium-assessment-form')?.addEventListener('submit', e
   savePremiumPatch({ assessments: { ...premiumRecord().assessments, 'p2-controlled-decision': assessment } });
   trackEvent('premium_assessment_completed', { assessment: 'p2-controlled-decision' });
   if (!passed) {
-    premiumFeedback(feedback, false, 'À revoir', 'Relis la distinction entre résultat et processus, puis vérifie que le risque ne dépasse jamais la limite définie.'); return;
+    premiumFeedback(feedback, false, 'Revue nécessaire', 'Relis la distinction entre résultat et processus, puis vérifie que le risque ne dépasse jamais la limite définie.'); return;
   }
   const createdAt = new Date().toISOString();
-  const proof = { type: 'skill_evidence', source: 'Atelier Plan de risque + évaluation guidée', competencyId: 'risk_foundations', skill: 'Fondations du risque', level: 'Niveau 3 — Mise en pratique', createdAt, nextAction: 'Continuer vers la prochaine étape Premium.' };
+  const proof = { type: 'skill_evidence', source: 'P2 Lab de risque guidé + Assessment', competencyId: 'risk_foundations', skill: 'Fondations du risque', level: 'Niveau 3 — Appliquer', createdAt, nextAction: 'Continuer vers la prochaine pratique Premium.' };
   savePremiumPatch({ modules: { ...premiumRecord().modules, P2: { status: 'completed', completedAt: createdAt } }, proofs: { ...premiumRecord().proofs, 'p2-risk-foundations': proof } });
-  trackEvent('premium_proof_created', { proof: 'p2-risk-foundations', skill: 'Risk Foundations', nextAction: 'Journal' });
-  premiumFeedback(feedback, true, 'Validée', 'Décision maîtrisée validée. Une preuve pédagogique locale a été créée — elle ne constitue pas une certification officielle.');
+  trackEvent('premium_proof_created', { proof: 'p2-risk-foundations', skill: 'Fondations du risque', nextAction: 'Journal' });
+  premiumFeedback(feedback, true, 'Validé', 'Controlled Decision validée. Une preuve pédagogique locale a été créée — elle ne constitue pas une certification officielle.');
 });
 
 document.getElementById('p2-journal-bridge')?.addEventListener('click', event => {
@@ -4293,14 +4682,14 @@ document.getElementById('p2-journal-bridge')?.addEventListener('click', event =>
   showView('journal');
   openJournalComposer(null, event.currentTarget, {
     market: 'XAUUSD — scénario synthétique',
-    context: 'Price approaches a previously identified support zone. Higher-timeframe structure remains bullish.',
-    scenario: 'Potential bullish reaction — exercice pédagogique local.',
-    process: 'Context → Setup → Entry → Invalidation → Risk → Target → Review',
-    decision: 'Plan de risque construit dans l’atelier guidé.',
+    context: 'Le prix approche une zone de support identifiée précédemment. La structure du timeframe supérieur reste haussière.',
+    scenario: 'Réaction haussière potentielle — exercice pédagogique local.',
+    process: 'Contexte → Setup → Entrée → Invalidation → Risque → Objectif → Revue',
+    decision: 'Risk Plan construit dans le P2 Lab de risque guidé.',
     outcome: 'À revoir dans le Journal — aucune donnée de marché réelle.',
     whatWorked: 'J’ai défini une invalidation avant de considérer l’entrée.',
     toImprove: 'Continuer à distinguer résultat et qualité du processus.',
-    note: 'Fondations du risque · Niveau 3 — Mise en pratique', terminalSource: true, sourceLesson: 'P2.2', proofId: 'p2-risk-foundations', proofType: 'skill_evidence'
+    note: 'Fondations du risque · Niveau 3 — Appliquer', terminalSource: true, sourceLesson: 'P2.2', proofId: 'p2-risk-foundations', proofType: 'skill_evidence'
   });
 });
 
@@ -4333,6 +4722,66 @@ function resetPilot() {
 
 document.getElementById('reset-session').addEventListener('click', resetPilot);
 document.getElementById('profile-reset').addEventListener('click', resetPilot);
+document.getElementById('profile-logout')?.addEventListener('click', async event => {
+  const email = remoteUser?.email || '';
+  if (!remoteUser) return;
+  event.currentTarget.disabled = true;
+  let serverConfirmed = false;
+  try {
+    await window.DDABFF.logout();
+    serverConfirmed = true;
+  } catch { /* Hide local account data even if revocation cannot be confirmed. */ }
+  remoteUser = null;
+  serverPremiumConfirmed = null;
+  prototypeState = DDA.setStorageScope(null) || DDA.load();
+  window.DDARefreshAiHistory?.();
+  renderState();
+  setBffAuthMode('login');
+  document.getElementById('email').value = email;
+  document.getElementById('access-password').value = '';
+  document.getElementById('signup-form').hidden = false;
+  document.getElementById('onboarding-form').hidden = true;
+  showView('access', false);
+  if (serverConfirmed) showToast('Session fermée. Les données du compte restent isolées sur cet appareil.');
+  else document.getElementById('bff-auth-status').textContent = 'Les données du compte sont masquées sur cet appareil, mais le serveur n’a pas confirmé la fermeture. Vérifie ta connexion avant de quitter le navigateur.';
+});
+
+document.getElementById('profile-import-progress')?.addEventListener('click', async event => {
+  if (!remoteUser || !window.DDABFF?.enabled()) return;
+  const candidate = DDA.readUnscopedProgressCandidate?.();
+  if (!candidate) return;
+  const accepted = window.confirm('Importer dans ce compte uniquement les étapes de leçon et les préférences d’onboarding trouvées sur cet appareil ? Le Journal, le Terminal, le profil historique et les conversations IA ne seront pas importés.');
+  if (!accepted) return;
+
+  const button = event.currentTarget;
+  button.disabled = true;
+  const importedState = mergeProgressNeverDowngrade(prototypeState, candidate);
+  prototypeState = DDA.save(importedState);
+  renderState();
+  try {
+    const lessonWrites = Object.entries(candidate.lessons || {}).map(([lessonId, progress]) =>
+      window.DDABFF.saveLessonProgress(lessonId, progress).then(result => {
+        if (!result) throw new Error('progress_import_session_expired');
+        return result;
+      }));
+    const onboardingWrite = candidate.onboarding
+      ? window.DDABFF.saveOnboardingProgress(candidate.onboarding).then(result => {
+          if (!result) throw new Error('onboarding_import_session_expired');
+          return result;
+        })
+      : Promise.resolve();
+    await Promise.all([...lessonWrites, onboardingWrite]);
+    localStorage.setItem(progressImportMarkerKey(remoteUser.user_id), 'done');
+    document.getElementById('profile-error').textContent = '';
+    renderState();
+    showToast('Progression importée et rattachée à ton compte DDA.');
+  } catch {
+    document.getElementById('profile-error').textContent = 'La progression importée est conservée dans cet espace de compte sur cet appareil, mais le serveur n’a pas confirmé toutes les étapes. Tu pourras réessayer.';
+    renderState();
+  } finally {
+    button.disabled = false;
+  }
+});
 
 document.getElementById('profile-form').addEventListener('submit', async event => {
   event.preventDefault();
@@ -4385,37 +4834,63 @@ document.getElementById('profile-reminders').addEventListener('change', event =>
 window.addEventListener('online', updateNetworkState);
 window.addEventListener('offline', updateNetworkState);
 updateNetworkState();
-initDariusAnalysisTerminal();
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
-renderState();
 initBffAuthUi();
-hydrateRemoteSession().then(refreshServerPremiumEntitlement);
-revealAdminLinkIfAdmin();
-handleBffVerificationToken();
-renderMarketIntelligence();
 
 // A first-time visitor (no local profile yet, no deep-link hash) must land on
 // the real entry point — Access/onboarding — never on the Terminal's static
-// default-active markup, which would otherwise show a placeholder "Richard"
+// default-active markup, which would otherwise show a placeholder "Apprenant"
 // dashboard as if already signed in before anyone has actually onboarded.
-const initialView = BOOT_HASH_VIEW;
-if (initialView && document.getElementById(initialView)) {
-  // Pre-seed currentView to the view we're actually booting into so showView()'s
-  // own "record previous" logic below doesn't treat this restore as a real
-  // transition and clobber the previousView just restored from sessionStorage
-  // above (see V1.1 correction) with the hardcoded 'dashboard' default.
-  currentView = initialView;
-  showView(initialView);
-} else if (!prototypeState.user) showView('access');
+//
+// Structure fix (fix/design-structure-color-3d-alignment): a RETURNING,
+// already-onboarded learner opening academy.html with no hash (a bare
+// bookmark, typed URL, or external link) used to hit neither branch below —
+// showView() was never called, so no .view ever got its 'active' class and
+// the learner saw a blank app shell (sidebar/topbar only, no content). The
+// final `else` makes the same real entry point this comment already
+// describes for every other case: dashboard for an onboarded learner.
+async function bootAcademyAfterSessionCheck() {
+  try {
+    await hydrateRemoteSession();
+    const savedLessons = Object.keys(prototypeState.lessons || {});
+    if (savedLessons.some(id => /^M1\./.test(id))) await window.DDALazyModules?.ensure('lesson-m11');
+    if (savedLessons.some(id => /^MBRVM\./.test(id))) await window.DDALazyModules?.ensure('lesson-mbrvm1');
+    await refreshServerPremiumEntitlement();
+  } catch {
+    // Fail closed: a failed identity/entitlement check never unlocks Premium.
+    serverPremiumConfirmed = null;
+  }
+  const sessionStatus = document.getElementById('session-check-status');
+  if (sessionStatus) sessionStatus.hidden = true;
+  initDariusAnalysisTerminal();
+  window.DDARefreshAiHistory?.();
+  renderState();
+  renderMarketIntelligence();
+  revealAdminLinkIfAdmin();
 
-if (!appHistoryInitialized) {
-  const activeViewId = document.querySelector('.view.active')?.id || 'dashboard';
-  writeDdaHistory(activeViewId, 'replace');
+  const initialView = BOOT_HASH_VIEW;
+  if (initialView && document.getElementById(initialView)) {
+    // Pre-seed currentView so restoring a deep link does not clobber the
+    // previously saved view in this tab's session history.
+    currentView = initialView;
+    showView(initialView);
+  } else if (!prototypeState.user) {
+    showView('access');
+  } else {
+    showView(prototypeState.onboarding?.complete ? 'dashboard' : 'access');
+  }
+
+  if (!appHistoryInitialized) {
+    const activeViewId = document.querySelector('.view.active')?.id || 'dashboard';
+    writeDdaHistory(activeViewId, 'replace');
+  }
+  await handleBffVerificationToken();
 }
+bootAcademyAfterSessionCheck();
 
 
 /* DDA Visual Identity V2 — progressive reveals for Academy surfaces only.

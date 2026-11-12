@@ -97,7 +97,10 @@ async function completeLesson({ viewId, markId, exerciseName, quizName, resultId
 }
 
 (async () => {
-  await test('Academy shell boots on #access, never a fake dashboard', () => {
+  await test('Academy shell boots on #access, never a fake dashboard', async () => {
+    // The app now awaits remote-session hydration before its first render.
+    // Yield to the event loop rather than asserting against the static shell.
+    await wait(0);
     assert.equal(activeViewId(), 'access');
     assert.equal(document.getElementById('landing'), null, 'public landing is not mounted in Academy');
   });
@@ -134,10 +137,10 @@ async function completeLesson({ viewId, markId, exerciseName, quizName, resultId
     exerciseName: 'm3-challenge', quizName: 'm3-quiz', resultId: 'result-card-m3'
   });
 
-  await test('Standard entitlement gate (CDCP-OS §4.2, Option B): Free user attempting M1.1 opens the Standard preview gate', () => {
+  await test('Premium entitlement gate (D1 Option B): Free user attempting M1.1 opens the Premium preview gate', () => {
     click(document.querySelector('#result-card-m3 [data-view="lesson-m11"]'));
     assert.equal(document.getElementById('gate-layer').hidden, false, 'gate modal opens for unentitled M1 lesson');
-    assert.ok(document.getElementById('gate-title').textContent.includes('Standard'), 'gate mentions Standard tier');
+    assert.ok(document.getElementById('gate-title').textContent.includes('Premium'), 'gate mentions Premium tier');
     click(document.getElementById('gate-unlock'));
     assert.equal(document.getElementById('gate-layer').hidden, true, 'gate closes on unlock');
     assert.equal(activeViewId(), 'lesson-m11', 'learner smoothly lands on M1.1 after unlock');

@@ -1,5 +1,9 @@
 name: DDA Product Gate
 
+# Note: this workflow's own path is in its `paths` filter below, so touching
+# it (e.g. a comment-only change) is a reliable way to force the required
+# "product-gate" check to run on a PR that doesn't otherwise touch a
+# matched path (e.g. a .claude/ config-only PR).
 on:
   pull_request:
     branches: [main]
@@ -9,6 +13,7 @@ on:
       - 'bff/**'
       - 'docs/**'
       - 'supabase/**'
+      - 'scripts/verify-performance.js'
       - 'scripts/check_production_availability.sh'
       - '.github/workflows/production-availability.yml'
       - '.github/workflows/product-gate.yml'

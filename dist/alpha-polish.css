@@ -118,7 +118,23 @@
 .lesson-main .lesson-header{max-width:700px}
 .lesson-main .lesson-header h1{font-size:clamp(2.4rem,5.3vw,5rem);line-height:.94}
 .lesson-main .lesson-lead{max-width:620px;font-size:clamp(1rem,1.7vw,1.22rem);line-height:1.65}
-.lesson-main .lesson-loop{margin-top:30px;padding:11px 14px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(255,255,255,.035)}
+/* Bug fix (founder mobile report, DDA Lab): this pill shape is only correct
+   while .lesson-loop renders as a single-row rail (desktop, or the
+   horizontal-scroll rail used ≥601px — see styles.css's own ≤720px rule).
+   Below 601px, styles.css's "UX pass 01" (≈line 3031 there) already
+   replaces it with a readable vertical sequence, with its own padding,
+   border and a 14px radius designed for a tall, multi-row block. This rule
+   used to apply unconditionally and, having a higher selector specificity
+   (".lesson-main .lesson-loop" vs styles.css's plain ".lesson-loop") while
+   loading after styles.css in <head>, it always won — so the 999px pill
+   radius kept being applied to the tall stacked list too, ballooning into
+   an oversized rounded blob whose curved edges visually overlapped the
+   step bullets and the start of each label ("Essayer", "Vérifier"…).
+   Scoping it to ≥601px removes that conflict without changing anything
+   at the width it was actually designed for. */
+@media(min-width:601px){
+  .lesson-main .lesson-loop{margin-top:30px;padding:11px 14px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(255,255,255,.035)}
+}
 .lesson-main .lesson-copy{max-width:700px;padding-top:26px;border-top:1px solid var(--dda-rule)}
 .lesson-main .learning-check,.lesson-main .comparison-block{border-radius:2px 16px 2px 16px;box-shadow:10px 10px 0 rgba(84,197,232,.045)}
 .lesson-main .result-card{border-radius:2px 20px 2px 20px;background:linear-gradient(135deg,rgba(24,155,146,.15),rgba(255,255,255,.035))}
@@ -139,6 +155,10 @@
 #profile .profile-panel{border:0;border-top:2px solid var(--dda-gold);border-radius:0;background:transparent;padding-inline:0}
 #profile .preference-panel{border-radius:2px 18px 2px 18px;background:rgba(255,255,255,.035)}
 #profile .profile-identity{padding:26px 0 28px}
+#profile .profile-import-notice{margin:0 0 24px;padding:16px 18px;border-left:2px solid var(--dda-cyan);background:rgba(84,197,232,.06);color:#cbd5e1;font-size:13px;line-height:1.6}
+#profile .profile-import-notice p{margin:0 0 12px}
+#profile .profile-import-notice .secondary-action{width:auto;max-width:100%;white-space:normal}
+#profile .profile-import-notice[hidden]{display:none}
 #profile .profile-large-avatar{width:84px;height:84px;border-radius:50%;box-shadow:0 0 0 7px rgba(201,154,69,.1),12px 12px 0 rgba(201,154,69,.08)}
 #profile .profile-identity h2{font-family:var(--dda-serif);font-size:clamp(1.8rem,4vw,3rem)}
 #profile .profile-progress-strip{gap:0;justify-content:space-between}
@@ -195,12 +215,13 @@
   color:var(--lp-blue-2);
 }
 #landing .primary-action{
-  background:var(--lp-blue);
-  box-shadow:0 10px 24px rgba(13,79,176,.24);
+  background:linear-gradient(135deg,var(--gold-soft),var(--gold));
+  color:var(--navy-950);
+  box-shadow:0 10px 24px rgba(217,164,65,.28);
 }
 #landing .primary-action:hover{
-  background:var(--lp-blue-2);
-  box-shadow:0 12px 28px rgba(13,79,176,.32);
+  background:linear-gradient(135deg,var(--gold-soft),var(--gold-soft));
+  box-shadow:0 12px 28px rgba(217,164,65,.38);
 }
 .landing-aperture{
   background:#102942;
@@ -425,8 +446,8 @@
 .public-header-nav button.active{box-shadow:inset 0 -1px var(--gold-soft)}
 .public-header-actions{display:flex;align-items:center;gap:14px;white-space:nowrap}
 .public-login{padding:9px 0;color:var(--lp-body-soft)!important;font-size:.76rem;font-weight:700}
-.public-start{padding:11px 14px!important;background:var(--lp-blue)!important;color:#fff!important;font-size:.76rem;font-weight:800}
-.public-start span{margin-left:8px;color:var(--gold-soft)}
+.public-start{padding:11px 14px!important;background:linear-gradient(135deg,var(--gold-soft),var(--gold))!important;color:var(--navy-950)!important;font-size:.76rem;font-weight:800}
+.public-start span{margin-left:8px;color:var(--navy-950)}
 .public-menu{display:none}
 
 .public-footer{
@@ -461,7 +482,7 @@
   .public-menu-panel{position:absolute;right:20px;top:calc(100% + 8px);display:grid;gap:2px;min-width:210px;padding:10px;border:1px solid var(--lp-line);background:var(--lp-card-2);box-shadow:0 14px 32px rgba(0,0,0,.32)}
   .public-menu-panel button{padding:10px;text-align:left;color:var(--lp-body);font-size:.78rem}
   .public-menu-panel button:hover{color:var(--lp-heading);background:rgba(255,255,255,.05)}
-  .public-menu-panel .public-menu-cta{margin-top:6px;background:var(--lp-blue);color:#fff}
+  .public-menu-panel .public-menu-cta{margin-top:6px;background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:var(--navy-950)}
   .public-footer{grid-template-columns:repeat(2,1fr);gap:32px 24px}
   .public-footer-brand{grid-column:1/-1}
 }
@@ -513,8 +534,8 @@
     box-shadow:0 8px 26px rgba(0,0,0,.35);
     backdrop-filter:blur(14px);
   }
-  .landing-mobile-cta button{width:100%;min-height:44px;border:0;background:var(--lp-blue);color:#fff;font-weight:800;cursor:pointer}
-  .landing-mobile-cta button span{margin-left:8px;color:var(--gold-soft)}
+  .landing-mobile-cta button{width:100%;min-height:44px;border:0;background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:var(--navy-950);font-weight:800;cursor:pointer}
+  .landing-mobile-cta button span{margin-left:8px;color:var(--navy-950)}
   .landing-final-cta{padding-bottom:120px}
 }
 
@@ -673,6 +694,29 @@ body.access-mode .prototype-banner{
 #access .access-card #bff-verify-panel{padding-top:4px}
 #access .access-card #bff-recovery-form .text-action{justify-self:start}
 #access .access-card #bff-verify-panel p:not(.eyebrow){color:#cbd5e1;line-height:1.6}
+#access .access-card .password-field-wrap{position:relative;display:block}
+#access .access-card .password-field-wrap input{width:100%;padding-right:76px}
+#access .access-card .password-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);min-height:28px;padding:0 4px;font-size:.82rem}
+#access .access-card #bff-resend-confirmation{margin-top:-4px;margin-bottom:12px}
+/* Google OAuth sign-in (founder directive, 2026-11): placed ABOVE the
+   email/password form, right under the status line — the founder asked for
+   it to be the first, most obvious choice, never a secondary option
+   scrolled past or hidden below the form. The wrap's visibility tracks
+   #signup-form's own hidden state via this relational rule — shown/hidden
+   together with the email/password form at every one of dist/app.js's
+   existing mode-switch call sites, with no extra JS wiring at each of them
+   (initBffAuthUi only ever reveals the wrap once, the same way it reveals
+   #bff-auth-tools). :has() is already used elsewhere in this file
+   (e.g. .nav-item:has(.nav-status-tag)). */
+#access .access-card #bff-oauth-google-wrap:has(+#signup-form[hidden]){display:none}
+#access .access-card #bff-oauth-google-wrap{margin:0 0 18px}
+#access .access-card .auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0 0;color:#94a3b8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+#access .access-card .auth-divider::before,
+#access .access-card .auth-divider::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.14)}
+#access .access-card .oauth-google-action{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:50px;padding:13px 18px;border:1px solid rgba(255,255,255,.14);border-radius:var(--r-sm);background:#fff;color:#1f2430;font:inherit;font-weight:700;font-size:15px;cursor:pointer;transition:transform .15s var(--ease),box-shadow .15s var(--ease)}
+#access .access-card .oauth-google-action:hover{box-shadow:0 10px 24px rgba(0,0,0,.3)}
+#access .access-card .oauth-google-action:focus-visible{outline:2px solid #d9a441;outline-offset:2px}
+#access .access-card .oauth-google-logo{flex:none}
 #access .access-illustration{color:#94a3b8;opacity:.8}
 @media(max-width:639px){
   #access .access-card{border-radius:16px}
@@ -773,11 +817,18 @@ body.access-mode .prototype-banner{
 }
 
 
-/* Le Bottom Sheet doit être ancré à la fenêtre, jamais au panneau animé. */
+/* Le Bottom Sheet doit être ancré à la fenêtre, jamais au panneau animé.
+   `position:fixed` seul ne suffit pas : cette animation fait de #access.active
+   un contexte d'empilement, ce qui piège le menu fixed dans l'ordre de
+   peinture local de son propre champ (z-index:2) — un champ plus bas dans
+   le formulaire peut alors recouvrir le menu ouvert d'un champ plus haut
+   (bug réel, signalé par le fondateur). app.js déplace donc le menu ouvert
+   en enfant direct de <body> tant qu'il est affiché sur mobile, pour qu'il
+   échappe vraiment à tout contexte d'empilement ancêtre. */
 #access.view.active{animation:dda-access-enter .32s ease both}
 @keyframes dda-access-enter{from{opacity:0}to{opacity:1}}
 @media(max-width:639px){
-  .dda-select-menu{bottom:calc(80px + var(--safe-b));max-height:min(62vh,420px);overflow:auto}
+  .dda-select-menu{top:12px;bottom:calc(80px + var(--safe-b));max-height:calc(100vh - 92px);overflow:auto}
 }
 
 
@@ -1511,8 +1562,26 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
    leak against it. Scoped to #lab only: never changes Premium Track's own
    look. Also fixes the 5-item desktop grid, previously hardcoded to 4
    columns (repeat(4,...)), which left the 5th step wrapping alone into an
-   orphaned, visually empty row. */
-#lab .premium-progress-strip{grid-template-columns:repeat(5,minmax(0,1fr));border-color:rgba(174,191,213,.18);background:transparent}
+   orphaned, visually empty row.
+
+   Bug fix (founder mobile report): that 5-column grid-template-columns used
+   to apply unconditionally, i.e. at every width. styles.css already has its
+   own, correct mobile fix for this exact component (≈line 3072 there,
+   "DDA UX pass 02 — Lab catalog"), stacking it to one column via
+   `@media(max-width:760px){#lab .premium-progress-strip{grid-template-columns:1fr}}`.
+   But because this file loads after styles.css in <head> and both rules
+   share the same selector specificity (#lab .premium-progress-strip), this
+   unconditional declaration always won the cascade, on mobile included —
+   forcing 5 equal ~24px-wide columns at 390px width and splitting every
+   step label ("Formuler une demande claire"…) into one or two letters per
+   line. Moving it into a ≥761px query (the exact complement of styles.css's
+   ≤760px breakpoint for this component) restores styles.css's existing
+   mobile stacking without changing the desktop 5-column layout this
+   comment describes. */
+@media(min-width:761px){
+  #lab .premium-progress-strip{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+#lab .premium-progress-strip{border-color:rgba(174,191,213,.18);background:transparent}
 #lab .premium-progress-strip li{background:linear-gradient(145deg,rgba(17,42,68,.78),rgba(7,18,31,.92));border-right-color:rgba(174,191,213,.14)}
 #lab .premium-progress-strip li:not(:last-child)::after{background:rgba(216,174,97,.35)}
 #lab .premium-progress-index{border-color:rgba(174,191,213,.28);color:#9fb0c4;background:rgba(255,255,255,.04)}
@@ -2082,13 +2151,13 @@ button:disabled{cursor:not-allowed}
 #dashboard .analysis-chart-shell{box-shadow:0 18px 44px rgba(0,0,0,.28),0 0 28px rgba(18,119,233,.08),0 0 0 1px rgba(91,169,255,.08)}
 #dashboard .terminal-tool.active{border-color:rgba(62,157,255,.44);background:linear-gradient(145deg,rgba(27,119,224,.2),rgba(12,57,103,.17));color:#9fd3ff;box-shadow:0 0 20px rgba(24,132,255,.16),inset 0 0 0 1px rgba(101,184,255,.1)}
 
-/* Blue-light CTAs are reserved for genuine actions; DDA gold remains the proof accent. */
+/* DDA gold is the brand's primary-action accent across the public site and the Academy app — matches the reference maquette. */
 .primary-action,.public-start,.landing-mobile-cta button,#landing .landing-actions .primary-action,#landing .landing-final-cta .primary-action{
-  border:1px solid rgba(113,194,255,.58);
-  background:linear-gradient(112deg,#155fde 0%,#2588ff 46%,#39d6cf 100%);
-  color:#fff;
-  box-shadow:0 10px 28px rgba(9,99,234,.32),0 0 28px rgba(37,136,255,.24),0 0 18px rgba(39,214,207,.12),inset 0 1px rgba(255,255,255,.28);
-  text-shadow:0 1px 5px rgba(4,28,69,.28);
+  border:1px solid rgba(240,207,138,.6);
+  background:linear-gradient(112deg,#f6c860 0%,#f0a934 60%,#e0932a 100%);
+  color:var(--navy-950);
+  box-shadow:0 10px 28px rgba(201,139,30,.32),0 0 28px rgba(240,169,52,.22),0 0 18px rgba(246,200,96,.14),inset 0 1px rgba(255,255,255,.4);
+  text-shadow:none;
   transition:transform .22s ease,box-shadow .22s ease,filter .22s ease,border-color .22s ease;
 }
 .public-start{border-radius:999px}
@@ -2106,8 +2175,8 @@ button:disabled{cursor:not-allowed}
   }
   .primary-action:hover:not(:disabled),.public-start:hover:not(:disabled),.landing-mobile-cta button:hover:not(:disabled),#landing .landing-actions .primary-action:hover:not(:disabled),#landing .landing-final-cta .primary-action:hover:not(:disabled){
     transform:translateY(-2px);
-    border-color:rgba(154,218,255,.82);
-    box-shadow:0 14px 34px rgba(9,99,234,.38),0 0 34px rgba(28,142,255,.28),inset 0 1px rgba(255,255,255,.32);
+    border-color:rgba(248,219,150,.9);
+    box-shadow:0 14px 34px rgba(201,139,30,.38),0 0 34px rgba(240,169,52,.3),inset 0 1px rgba(255,255,255,.42);
     filter:saturate(1.12) brightness(1.04);
   }
 }
@@ -2243,9 +2312,9 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 }
 #landing .landing-masthead{border-bottom-color:rgba(216,174,97,.2)}
 #landing .landing-actions .primary-action,#landing .landing-final-cta .primary-action,.public-start{
-  background:linear-gradient(112deg,#174fae 0%,#2e8cff 54%,#4cc3c4 100%);
-  border-color:rgba(240,207,138,.42);
-  box-shadow:0 14px 34px rgba(18,91,205,.28),0 0 24px rgba(46,140,255,.17),inset 0 1px rgba(255,255,255,.28);
+  background:linear-gradient(112deg,#f6c860 0%,#f0a934 60%,#dd8a1f 100%);
+  border-color:rgba(240,207,138,.6);
+  box-shadow:0 14px 34px rgba(201,139,30,.3),0 0 24px rgba(240,169,52,.2),inset 0 1px rgba(255,255,255,.3);
 }
 #landing .landing-free-grid article,#landing .landing-domain-groups article,#landing .landing-future-grid article,#landing .landing-plan-card{
   border-color:rgba(216,174,97,.2);
@@ -2288,6 +2357,26 @@ body.low-data #landing .landing-device-stage::before{animation:none!important}
 .dda-surface.is-active{display:block}
 .dda-public-surface,.dda-auth-surface{width:100%}
 .dda-app-surface{width:100%;background:var(--navy-950);min-height:calc(100vh - 84px)}
+/* Match the early data-boot-view marker from academy.html so the route's
+   surface is in flow before app.js toggles .is-active. Without this, main is
+   temporarily only the topbar and the footer is painted near the top before
+   jumping below the authenticated view on mobile. */
+html[data-boot-view="access"] .dda-public-surface,
+html[data-boot-view="dashboard"] .dda-app-surface,
+html[data-boot-view="path"] .dda-app-surface,
+html[data-boot-view="lesson"] .dda-app-surface,
+html[data-boot-view="progress"] .dda-app-surface,
+html[data-boot-view="journal"] .dda-app-surface,
+html[data-boot-view="resources"] .dda-app-surface,
+html[data-boot-view="membership"] .dda-app-surface,
+html[data-boot-view="markets"] .dda-app-surface,
+html[data-boot-view="brokers"] .dda-app-surface,
+html[data-boot-view="support"] .dda-app-surface,
+html[data-boot-view="community"] .dda-app-surface,
+html[data-boot-view="practice"] .dda-app-surface,
+html[data-boot-view="intelligence"] .dda-app-surface,
+html[data-boot-view="profile"] .dda-app-surface,
+html[data-boot-view="lab"] .dda-app-surface{display:block}
 body.dda-app-shell main{background:var(--navy-950)}
 body.dda-auth-shell main{background:var(--navy-950)}
 body.dda-auth-shell #access{max-width:1280px;margin-inline:auto}
@@ -2479,7 +2568,7 @@ body.public-shell .prototype-banner{display:none}
   transition:left .9s var(--motion-ease);pointer-events:none;
 }
 #landing .primary-action:hover,#landing .primary-action:focus-visible,#landing .public-start:hover,#landing .public-start:focus-visible,#landing .landing-mobile-cta button:hover,#landing .landing-mobile-cta button:focus-visible{
-  transform:translateY(-3px);box-shadow:0 20px 42px rgba(13,79,176,.3),0 0 0 1px rgba(227,194,127,.2);
+  transform:translateY(-3px);box-shadow:0 20px 42px rgba(201,139,30,.32),0 0 0 1px rgba(227,194,127,.3);
 }
 #landing .primary-action:hover::after,#landing .primary-action:focus-visible::after,#landing .public-start:hover::after,#landing .public-start:focus-visible::after,#landing .landing-mobile-cta button:hover::after,#landing .landing-mobile-cta button:focus-visible::after{left:125%}
 #landing .landing-aperture{animation:dda-aperture-in 1.1s var(--motion-spring) .12s both}
@@ -2802,7 +2891,7 @@ body.public-shell .prototype-banner{display:none}
 
 /* ======================================================================
    Dashboard ecosystem strip — an honest scrolling marquee of DDA's real
-   spaces and their real status (Actif / Aperçu local / En préparation),
+   spaces and their real status (Actif / Aperçu pédagogique / En préparation),
    the same labels already used as nav badges elsewhere. No invented
    numbers, no market ticker dressed up as live data: every chip links to
    a real view. Reuses the BRVM ticker's exact marquee technique
@@ -2946,6 +3035,53 @@ body.public-shell .prototype-banner{display:none}
   :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-tab{min-height:44px;flex:none}
   :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-main > h1{font-size:clamp(2.2rem,9vw,3.5rem);line-height:.98}
   :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-quick-nav{top:93px}
+
+  /* Mobile lesson-navigation panel (.module-toc) was shipped with the same
+     padding/row-height/margins as desktop, so on a phone it alone ran to
+     ~220-240px — close to a third of a 360x800 viewport — before any lesson
+     content, video or the Exercice/Quiz tabs were visible at all ("panneau
+     de navigation des leçons trop volumineux sur mobile"). Tightened padding,
+     row height and gaps keep every row tappable (44px target preserved via
+     min-height on the link, not the whole row) while taking roughly half
+     the vertical space. */
+  .module-toc{margin:0 0 10px;padding:9px 11px}
+  .module-toc-heading{margin-bottom:4px;font-size:10px}
+  .module-toc-link{padding:5px 6px;min-height:36px}
+  .lesson-quick-nav{gap:2px 12px;margin-bottom:6px}
+  .lesson-quick-nav .text-action,.lesson-quick-nav .back-link{min-height:36px;padding:6px 0}
+  .lesson-progress-head{margin-bottom:8px}
+}
+
+/* On common Android phone heights (confirmed at both 360x800 and 390x844),
+   the stack of header, "where am I" progress head, quick-nav and module-toc
+   above the video/content ran long enough on its own, unscrolled, static
+   position to land the lesson's Exercice/Quiz tab row (.lesson-tabs) — or,
+   for a lesson with no video (a taller "séquence guidée" fallback panel),
+   the lesson's own h1 — exactly inside the fixed bottom nav's 68px band,
+   painted over and invisible before the learner scrolls at all. A real,
+   reproducible instance of "onglets pédagogiques potentiellement coupés"
+   from the mandate, confirmed with getBoundingClientRect, not just a
+   screenshot. The video thumbnail is the one block here that's decorative
+   padding rather than information (its real content already repeats in the
+   lesson text/steps below), so it's the one trimmed further — everything
+   else already carries real navigation/progress meaning. */
+@media(max-width:859px){
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-hero-media{margin-bottom:6px}
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-main > .eyebrow.gold{margin-top:2px;letter-spacing:.04em;font-size:10px}
+  .module-toc-link{padding:4px 6px;min-height:34px}
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-hero-media .video-frame,
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-hero-media .video-fallback-panel:not(.guided-fallback){aspect-ratio:16/9;max-height:34vh}
+  /* The no-video "séquence guidée" placeholder isn't a video frame — forcing
+     the same 16:9 box on it just wasted height a shorter, content-sized
+     panel doesn't need, which is exactly what pushed the lesson's own h1
+     under the fixed bottom nav on a phone. */
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-hero-media .video-fallback-panel.guided-fallback{aspect-ratio:auto;height:auto}
+  /* The OUTER wrapper (.video-explainer-fallback, same element as
+     .lesson-guided-thumbnail) forces its own 16:9 box independently of the
+     inner panel above — both had to be unlocked, or the inner panel's
+     shorter content just left empty space inside a still-168px-tall box. */
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-hero-media .video-explainer-fallback.lesson-guided-thumbnail{aspect-ratio:auto}
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-tab{min-height:40px;padding:9px 14px}
 }
 @media(max-width:520px){
   :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-hero-media .video-fallback-panel{padding:18px;min-height:0}
@@ -2991,6 +3127,24 @@ body.public-shell .prototype-banner{display:none}
   .lesson-about-grid{grid-template-columns:1fr;gap:16px}
   .lesson-pedagogical-visual{position:static;margin-top:8px}
   :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-tab{padding-inline:14px;min-height:46px;font-size:12px}
+  /* Overrides the unscoped `margin:0 0 22px` a few rules above (same
+     selector specificity — this wins on source order): part of the mobile
+     chrome-height trim that keeps .lesson-tabs and the lesson's own h1 out
+     from under the fixed bottom nav on a phone (see the fuller note near
+     the top of this file's mobile lesson block). */
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-tabs{margin:10px 0 14px}
+  /* A lesson with no video yet (M0.1, M1.1…) shows this "séquence guidée"
+     placeholder instead — its generous desktop padding made it the single
+     tallest block above the fold on a phone, pushing the lesson's own h1
+     under the fixed bottom nav. */
+  /* `:is(#lesson,…)` prefix matches the specificity of the pre-existing
+     ≤520px override above (an :is() selector takes the specificity of its
+     most specific argument — an id — not of the pseudo-class itself), so
+     this reliably wins regardless of source order. */
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-guided-thumbnail .video-fallback-panel{padding:16px;gap:6px}
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-guided-thumbnail .video-fallback-panel .icon{width:22px;height:22px}
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-guided-thumbnail .video-fallback-panel strong{font-size:14px}
+  :is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-mbrvm1,#lesson-p21,#lesson-p22) .lesson-guided-thumbnail .video-fallback-panel span{font-size:11.5px;line-height:1.45}
 }
 
 
@@ -3000,3 +3154,28 @@ body.public-shell .prototype-banner{display:none}
 .lesson-intro-grid .lesson-pedagogical-visual{margin-top:0}
 .lesson-about-grid{display:block}
 @media(max-width:859px){.lesson-intro-grid{grid-template-columns:1fr;gap:16px}.lesson-intro-grid .lesson-pedagogical-visual{position:static;margin-top:0}}
+
+.session-check-status{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:24px;background:#060d17;color:#e8edf5;font-family:inherit;font-size:14px;font-weight:600;line-height:1.5;text-align:center}
+.session-check-status[hidden]{display:none}
+
+
+/* Final access-surface polish: keep learner chrome out of signup/login until an identity exists. */
+body.access-mode .sidebar,
+body.access-mode .mobile-nav,
+body.access-mode .mobile-drawer,
+body.access-mode .mobile-drawer-backdrop,
+body.access-mode .topbar .icon-button,
+body.access-mode .topbar-search,
+body.access-mode .topbar-tagline,
+body.access-mode .network-state,
+body.access-mode .topbar-user{display:none!important}
+body.access-mode main{padding-bottom:0}
+@media(min-width:860px){body.access-mode .app-shell{grid-template-columns:1fr}}
+#access .access-sequence{display:flex;align-items:center;gap:10px;margin:18px 0 20px;color:#d5dfed;font-size:12px}
+#access .access-sequence>span{display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap}
+#access .access-sequence>span b{color:#f5c96b;font-size:11px}
+#access .access-sequence>span small{font-size:11px}
+#access .access-sequence>i{display:block;flex:1;min-width:10px;height:1px;background:#c9c1b4}
+#access .access-back-link{display:inline-flex;align-items:center;gap:6px;margin:0 0 16px;color:#f5c96b;font-size:12px;font-weight:700;text-decoration:none}
+#access .access-back-link:hover,#access .access-back-link:focus-visible{text-decoration:underline;text-underline-offset:3px}
+@media(max-width:420px){#access .access-sequence{gap:6px}#access .access-sequence>span{gap:4px}#access .access-sequence>span small{font-size:10px}}

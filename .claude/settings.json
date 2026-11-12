@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__github__pull_request_read",
+      "mcp__github__actions_list",
+      "Bash(node tests/run.js)",
+      "Bash(node --check *)",
+      "Bash(git fetch *)",
+      "mcp__github__get_job_logs",
+      "mcp__github__actions_get",
+      "mcp__Vercel__list_deployments",
+      "Bash(node tests/verify_route_register_consistency.js)",
+      "mcp__Vercel__web_fetch_vercel_url",
+      "mcp__Vercel__get_project",
+      "mcp__Vercel__list_projects",
+      "mcp__Vercel__filter_project_envs",
+      "mcp__Vercel__get_deployment",
+      "Bash(node tests/test_rate_limiting_contract.js)",
+      "mcp__Supabase__list_tables",
+      "mcp__github__list_pull_requests",
+      "mcp__Supabase__list_projects",
+      "mcp__Supabase__get_project",
+      "mcp__Supabase__get_advisors"
+    ]
+  }
+}

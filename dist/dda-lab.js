@@ -117,9 +117,9 @@
     const practice = Object.freeze({
       id: 'lab2-exercise', label: 'Exercice', heading: 'Choisir la meilleure version d’un prompt',
       prompt: 'Une association te demande un message WhatsApp pour annoncer une collecte de livres. Quel brief donne à l’IA assez de contexte pour produire un message exploitable ?',
-      successText: 'Exactement : préciser la matière, le temps disponible et le format demandé (un planning jour par jour) guide l’IA vers une réponse directement utilisable.',
+      successText: 'Exactement : préciser les livres recherchés, le délai de la collecte, le format du statut et les informations à compléter guide l’IA vers une réponse directement utilisable.',
       choices: Object.freeze([
-        Object.freeze({ text: '« Pour une collecte de livres scolaires  samedi, écris un statut WhatsApp de 3 phrases pour les parents : indique les livres recherchés, le lieu à compléter et un ton chaleureux. N’invente aucun contact. »', correct: true, feedback: 'C’est un prompt structuré : matière, délai, temps disponible et format sont tous précisés — la réponse sera directement exploitable.' }),
+        Object.freeze({ text: '« Pour une collecte de livres scolaires samedi, écris un statut WhatsApp de 3 phrases pour les parents : indique les livres recherchés, le lieu à compléter et un ton chaleureux. N’invente aucun contact. »', correct: true, feedback: 'C’est un prompt structuré : les livres recherchés, le délai, le public, le format et les informations à compléter sont précisés — la réponse sera directement exploitable.' }),
         Object.freeze({ text: '« Aide-moi à réviser. »', correct: false, feedback: 'Aucune matière, aucun délai, aucun format : l’IA va devoir deviner, et la réponse sera trop générale pour être vraiment utile.' }),
         Object.freeze({ text: '« Donne-moi tout ce qu’il faut savoir en mathématiques. »', correct: false, feedback: 'C’est une demande illimitée dans un domaine entier — sans délai ni niveau précisé, le résultat sera soit trop long, soit hors sujet.' })
       ])
@@ -127,11 +127,11 @@
     const evaluation = Object.freeze({
       id: 'lab2-quiz', label: 'Quiz de validation', heading: 'Que faire quand la réponse ne convient pas',
       prompt: 'L’IA a produit un message de collecte correct, mais il manque le lieu et le texte dépasse trois phrases. Quelle correction est la plus efficace ?',
-      successText: 'Redemander en précisant exactement ce qui ne va pas (longueur, ton) est toujours plus efficace que recommencer à zéro ou abandonner — c’est la bonne façon d’itérer.',
+      successText: 'Redemander en précisant exactement ce qui ne va pas (longueur et lieu manquant) est plus efficace que recommencer à zéro — c’est la bonne façon d’itérer.',
       choices: Object.freeze([
-        Object.freeze({ text: 'Je demande : « Réduis à 3 phrases maximum et laisse [LIEU] visible à compléter. Ne crée aucune adresse. »', correct: true, feedback: 'C’est la bonne méthode : tu gardes la base du travail déjà fait et tu corriges exactement ce qui ne convient pas.' }),
+        Object.freeze({ text: 'Je demande : « Réduis à 3 phrases maximum et laisse [LIEU] visible à compléter. Ne crée aucune adresse. »', correct: true, feedback: 'C’est la bonne méthode : tu gardes la base du travail déjà fait et tu corriges exactement les deux points qui manquent, la longueur et le lieu.' }),
         Object.freeze({ text: 'Je recommence une nouvelle conversation depuis zéro en espérant un meilleur résultat.', correct: false, feedback: 'Recommencer à zéro fait perdre le contexte déjà construit — il est presque toujours plus rapide de corriger ce qui ne va pas.' }),
-        Object.freeze({ text: 'Je copie le texte tel quel, il est globalement correct.', correct: false, feedback: 'Un ton inadapté au bon destinataire peut nuire à la relation avec un client — corriger le ton ne prend qu’une phrase de plus.' })
+        Object.freeze({ text: 'Je copie le texte tel quel, il est globalement correct.', correct: false, feedback: 'Un lieu manquant et un texte trop long rendent l’annonce moins exploitable — corrige ces deux points avant de la publier.' })
       ])
     });
     const result = Object.freeze({ heading: 'Deuxième leçon du Lab terminée.', body: 'Tu sais maintenant structurer une demande et la corriger au lieu de la refaire à zéro.' });
@@ -204,8 +204,8 @@
       successText: 'Exactement : tu demandes une correction précise sur ce point exact, sans tout regénérer — c’est plus rapide et tu gardes le reste du texte qui était bon.',
       choices: Object.freeze([
         Object.freeze({ text: 'Je compare le résumé aux notes de réunion, corrige le nom et la décision, puis vérifie les autres attributions avant diffusion.', correct: true, feedback: 'C’est la bonne méthode : une correction ciblée garde ce qui fonctionnait déjà et règle précisément l’erreur.' }),
-        Object.freeze({ text: 'Je corrige moi-même la date directement dans le texte sans rien dire à l’IA.', correct: false, feedback: 'Ce n’est pas faux en soi, mais tu perds l’occasion de vérifier si l’erreur vient d’un malentendu qui pourrait se reproduire ailleurs dans le texte.' }),
-        Object.freeze({ text: 'Je redemande tout le texte depuis le début en espérant que la date soit juste cette fois.', correct: false, feedback: 'Régénérer tout le texte sans préciser l’erreur ne garantit rien — le plus efficace est de signaler exactement ce qui doit changer.' })
+        Object.freeze({ text: 'Je remplace seulement le nom dans le texte sans comparer avec les notes ni vérifier les autres attributions.', correct: false, feedback: 'Corriger un seul mot sans revenir aux notes peut laisser une autre attribution erronée — vérifie d’abord la source et le contexte de la décision.' }),
+        Object.freeze({ text: 'Je redemande tout le texte depuis le début en espérant que le nom et la décision soient justes cette fois.', correct: false, feedback: 'Régénérer tout le texte sans préciser l’erreur ne garantit rien — le plus efficace est de signaler exactement l’attribution à corriger.' })
       ])
     });
     const evaluation = Object.freeze({

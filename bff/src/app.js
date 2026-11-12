@@ -2,6 +2,7 @@
 
 const { randomUUID } = require('node:crypto');
 const { randomToken, sha256, timingSafeEqualText, parseCookies, serializeCookie, encrypt, decrypt, normalizeEmail } = require('./security');
+const { generateCodeVerifier, computeCodeChallenge } = require('./pkce');
 const { executeIdempotentMutation, validateClientMutationId } = require('./idempotency');
 const { checkAuthRateLimit } = require('./rate-limiter');
 const { VALID_ROLES: VALID_ADMIN_ROLES, CONTROL_PLANE_ROLES } = require('./admin-roles-store');
@@ -10,6 +11,20 @@ const { PREMIUM_CONTENT, FREE_PREVIEW_IDS } = require('./premium-content');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
+// PKCE code_verifier carriers (P0 auth reliability audit, 2026-11 — see
+// pkce.js and the password-reset/register handlers below for the full
+// rationale). One per flow, both httpOnly so client JS can never read or
+// leak them, and both short-lived: a verifier that outlives the e-mail link
+// it protects is a liability with no benefit, and GoTrue's own one-time
+// code expires long before either TTL below.
+const RECOVERY_VERIFIER_COOKIE = '__Host-dda_pw_verifier';
+const SIGNUP_VERIFIER_COOKIE = '__Host-dda_signup_verifier';
+// OAuth (Google sign-in, 2026-11): a third PKCE verifier carrier, same
+// mechanism as the two above. Its round trip is the shortest of the three —
+// the browser never leaves this tab chain (our start route -> Supabase ->
+// Google -> Supabase -> our redirect_to), so its TTL only needs to outlast
+// that immediate hop, never an e-mail inbox check.
+const OAUTH_VERIFIER_COOKIE = '__Host-dda_oauth_verifier';
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 function configFromEnv(env = process.env) {
@@ -22,7 +37,30 @@ function configFromEnv(env = process.env) {
     sessionAbsoluteMs: Number(env.SESSION_ABSOLUTE_MS || 30 * 24 * 60 * 60 * 1000),
     sessionEncryptionKey: env.SESSION_ENCRYPTION_KEY || null,
     emailRedirectTo: env.EMAIL_REDIRECT_TO || 'http://localhost:8744/access',
-    passwordRecoveryRedirectTo: env.PASSWORD_RECOVERY_REDIRECT_TO || (() => { const u = new URL(env.EMAIL_REDIRECT_TO || 'http://localhost:8744/access'); u.searchParams.set('type', 'recovery'); return u.toString(); })()
+    passwordRecoveryRedirectTo: env.PASSWORD_RECOVERY_REDIRECT_TO || (() => { const u = new URL(env.EMAIL_REDIRECT_TO || 'http://localhost:8744/access'); u.searchParams.set('type', 'recovery'); return u.toString(); })(),
+    // How long this server holds a PKCE code_verifier before it expires —
+    // i.e. how long the learner has, from clicking "forgot password" /
+    // "sign up", to click through the resulting e-mail in the SAME browser.
+    // Recovery is the more sensitive action and gets the shorter window;
+    // signup confirmation e-mails are routinely checked later, so it gets
+    // more room. Both are deliberately short-lived compared to GoTrue's own
+    // link TTL — the verifier only needs to outlive "time to open the inbox
+    // and click", never the full link lifetime.
+    recoveryVerifierTtlMs: Number(env.PASSWORD_RECOVERY_VERIFIER_TTL_MS || 30 * 60 * 1000),
+    signupVerifierTtlMs: Number(env.SIGNUP_VERIFIER_TTL_MS || 60 * 60 * 1000),
+    // Google OAuth (founder directive, 2026-11): where GoTrue sends the
+    // browser back once the Google handshake is done. Derived from
+    // EMAIL_REDIRECT_TO exactly like passwordRecoveryRedirectTo above —
+    // same origin/hash, with its own marker query param (`auth=oauth-google`)
+    // so dist/app.js's handleBffVerificationToken() can tell an OAuth return
+    // apart from a recovery or signup-confirmation one. A dedicated env var
+    // is honored if set, for a project that wants a different landing path.
+    oauthGoogleRedirectTo: env.OAUTH_GOOGLE_REDIRECT_TO || (() => { const u = new URL(env.EMAIL_REDIRECT_TO || 'http://localhost:8744/access'); u.searchParams.set('auth', 'oauth-google'); return u.toString(); })(),
+    // This PKCE verifier only needs to survive one immediate browser
+    // round trip through Supabase and Google, never an e-mail inbox check —
+    // a few minutes is deliberately generous for a slow consent screen
+    // without leaving it valid any longer than that single hop needs.
+    oauthVerifierTtlMs: Number(env.OAUTH_VERIFIER_TTL_MS || 10 * 60 * 1000)
   };
 }
 
@@ -34,6 +72,9 @@ function validateRuntimeConfig(config, env = process.env) {
   if (!Number.isInteger(config.port) || config.port < 1 || config.port > 65535) issues.push('PORT must be an integer from 1 to 65535');
   if (!Number.isFinite(config.sessionIdleMs) || config.sessionIdleMs <= 0 || !Number.isFinite(config.sessionAbsoluteMs) || config.sessionAbsoluteMs < config.sessionIdleMs) {
     issues.push('Session durations are invalid');
+  }
+  if (!Number.isFinite(config.recoveryVerifierTtlMs) || config.recoveryVerifierTtlMs <= 0 || !Number.isFinite(config.signupVerifierTtlMs) || config.signupVerifierTtlMs <= 0 || !Number.isFinite(config.oauthVerifierTtlMs) || config.oauthVerifierTtlMs <= 0) {
+    issues.push('PKCE verifier TTLs (PASSWORD_RECOVERY_VERIFIER_TTL_MS, SIGNUP_VERIFIER_TTL_MS, OAUTH_VERIFIER_TTL_MS) must be positive');
   }
   if (!config.secureCookies) issues.push('BFF_COOKIE_SECURE must be true for __Host- cookies');
   if (Buffer.from(String(config.sessionEncryptionKey || ''), 'base64url').length !== 32) issues.push('SESSION_ENCRYPTION_KEY must decode to exactly 32 bytes');
@@ -69,6 +110,10 @@ function validateRuntimeConfig(config, env = process.env) {
     const recoveryRedirect = new URL(config.passwordRecoveryRedirectTo);
     if (recoveryRedirect.username || recoveryRedirect.password || !config.allowedOrigins.includes(recoveryRedirect.origin) || recoveryRedirect.searchParams.get('type') !== 'recovery') issues.push('PASSWORD_RECOVERY_REDIRECT_TO must be credential-free, use an allowlisted origin and include type=recovery');
   } catch { issues.push('PASSWORD_RECOVERY_REDIRECT_TO must be a valid URL'); }
+  try {
+    const oauthRedirect = new URL(config.oauthGoogleRedirectTo);
+    if (oauthRedirect.username || oauthRedirect.password || !config.allowedOrigins.includes(oauthRedirect.origin) || oauthRedirect.searchParams.get('auth') !== 'oauth-google') issues.push('OAUTH_GOOGLE_REDIRECT_TO must be credential-free, use an allowlisted origin and include auth=oauth-google');
+  } catch { issues.push('OAUTH_GOOGLE_REDIRECT_TO must be a valid URL'); }
   return issues;
 }
 
@@ -84,6 +129,104 @@ function errorBody(code, message, requestId, fieldErrors) {
 
 function sendError(res, status, code, message, requestId, fieldErrors) {
   return json(res, status, errorBody(code, message, requestId, fieldErrors));
+}
+
+// P0 auth reliability audit (2026-11): the login handler used to collapse
+// every failure from Supabase Auth — wrong password, an unconfirmed email,
+// a provider-side rate limit, a transient outage — into the same 401
+// "authentication_failed", and the client showed "E-mail ou mot de passe
+// incorrect." for all of them. A real user who had just set a password that
+// worked was told it was wrong when the actual cause was an unconfirmed
+// email or a momentary Supabase hiccup. This never trusts the client with
+// more than it needs (no stack traces, no provider payloads) but it does
+// tell the four causes apart so the UI can say something true.
+function classifyLoginError(error) {
+  const code = String(error?.code || '').toLowerCase();
+  const message = String(error?.message || '').toLowerCase();
+  const status = Number(error?.status) || 0;
+  if (code === 'email_not_confirmed' || message.includes('email not confirmed') || message.includes('confirm')) {
+    return { status: 403, code: 'email_not_confirmed', message: 'Confirm your email before signing in.' };
+  }
+  if (status === 429 || code === 'over_request_rate_limit' || code === 'too_many_requests' || message.includes('rate limit')) {
+    return { status: 429, code: 'rate_limited', message: 'Too many attempts. Please try again later.' };
+  }
+  if (status === 400 || status === 401 || code === 'invalid_credentials' || code === 'invalid_grant') {
+    return { status: 401, code: 'invalid_credentials', message: 'Invalid email or password.' };
+  }
+  // No HTTP status at all (network/DNS failure) or a 5xx from the provider:
+  // this is not the caller's fault and must never be reported as a wrong
+  // password.
+  return { status: 503, code: 'server_error', message: 'Authentication is temporarily unavailable. Please try again shortly.' };
+}
+
+// Signup reliability audit (P0, 2026-11): the register handler used to let
+// ANY failure from Supabase Auth — a password that fails the project's
+// strength policy, a provider outage, an email the provider refuses, or an
+// account that already exists — fall through to the generic 500 handler at
+// the bottom of this module, which told the learner "Request could not be
+// processed" for every one of these, indistinguishable from a real bug on
+// our side. Two things never happen here: a genuinely actionable problem
+// (weak password, provider outage) is never reported as a fabricated
+// internal_error, and a duplicate-account attempt is never told apart from
+// a first-time signup — "swallow" tells the caller to send back the exact
+// same ambiguous 202 success body the happy path already uses, preserving
+// anti-enumeration even when the provider itself errors instead of faking
+// success.
+function classifyRegisterError(error) {
+  const code = String(error?.code || '').toLowerCase();
+  const message = String(error?.message || '').toLowerCase();
+  const status = Number(error?.status) || 0;
+  if (['user_already_exists', 'email_exists', 'email_address_already_registered'].includes(code) || message.includes('already registered') || message.includes('already exists')) {
+    return { swallow: true, code: 'email_exists' };
+  }
+  if (code === 'weak_password' || message.includes('weak password')) {
+    // GoTrue's own weak_password text never contains the password itself or
+    // any account state, so it is safe to carry in field_errors for an API
+    // caller or a log — the dist/app.js client deliberately shows its own
+    // French message instead of this raw (English, version-specific) text.
+    return { status: 400, code: 'weak_password', message: 'Password does not meet the required strength.', fieldErrors: { password: error.message || 'Password is too weak.' } };
+  }
+  if (code === 'email_address_invalid' || (status === 400 && message.includes('email'))) {
+    return { status: 400, code: 'validation_error', message: 'Request could not be processed.', fieldErrors: { email: 'Enter a valid email address.' } };
+  }
+  if (code === 'signup_disabled') {
+    return { status: 503, code: 'registrations_unavailable', message: 'New registrations are temporarily unavailable. Please try again later.' };
+  }
+  if (status === 429 || code === 'over_email_send_rate_limit' || code === 'too_many_requests' || message.includes('rate limit')) {
+    return { status: 429, code: 'rate_limited', message: 'Too many attempts. Please try again later.' };
+  }
+  // No HTTP status at all (network/DNS failure) or an unrecognized provider
+  // error: this is not the caller's fault and must never be reported as an
+  // internal_error on our side, which would send whoever reads the logs
+  // chasing a bug in our own code instead of the provider.
+  return { status: 503, code: 'server_error', message: 'Registration is temporarily unavailable. Please try again shortly.' };
+}
+
+// Google OAuth exchange reliability: GoTrue never tells a merely-invalid
+// code apart from an already-used one (both come back as the same
+// `invalid_grant`/`flow_state_not_found`-style error) — exactly the same
+// ambiguity the recovery/signup PKCE exchanges already accept and report
+// honestly as a single "this link is invalid or expired" message, rather
+// than inventing a distinction the provider itself does not make. Two
+// causes ARE worth telling apart here, because the honest message differs
+// materially from "the code is dead": a transient provider/network failure
+// (never the caller's fault) and a Google account whose e-mail GoTrue could
+// not treat as verified (rare, but the founder explicitly asked this be
+// handled rather than mis-reported as a dead link).
+function classifyOAuthExchangeError(error) {
+  const code = String(error?.code || '').toLowerCase();
+  const message = String(error?.message || '').toLowerCase();
+  const status = Number(error?.status) || 0;
+  if (message.includes('email') && (message.includes('verif') || message.includes('confirm'))) {
+    return { status: 403, code: 'oauth_email_unverified', message: 'Your Google account has no verified e-mail address on file. Verify it with Google, or continue with e-mail and password instead.' };
+  }
+  if (status === 429 || code === 'over_request_rate_limit' || code === 'too_many_requests' || message.includes('rate limit')) {
+    return { status: 429, code: 'rate_limited', message: 'Too many attempts. Please try again later.' };
+  }
+  if (status === 0 || status >= 500) {
+    return { status: 503, code: 'server_error', message: 'Google sign-in is temporarily unavailable. Please try again shortly.' };
+  }
+  return { status: 400, code: 'invalid_code', message: 'This Google sign-in link is invalid or has expired.' };
 }
 
 function clientIp(req) {
@@ -122,6 +265,50 @@ function cookieHeaders(config, sessionToken, csrfToken, clear = false) {
 }
 
 function setCookies(res, values) { res.setHeader('Set-Cookie', values); }
+
+// PKCE verifier cookie: httpOnly (client JS can never read it, so it can
+// never be exfiltrated by injected/third-party script), Secure + SameSite
+// SameSite=None (same cross-origin requirement as the session cookie,
+// cookieHeaders() above — the BFF and the static site are different
+// origins) and short-lived. Encrypted with the exact same AES-256-GCM
+// primitive already used for provider tokens on the session row (security.js)
+// rather than a new mechanism — this is "a secret this server must be able
+// to read back later", precisely what that primitive is for.
+function appendSetCookie(res, value) {
+  const existing = res.getHeader('Set-Cookie');
+  if (!existing) return res.setHeader('Set-Cookie', [value]);
+  res.setHeader('Set-Cookie', Array.isArray(existing) ? [...existing, value] : [existing, value]);
+}
+
+function setVerifierCookie(res, config, name, codeVerifier, ttlMs) {
+  if (!config.sessionEncryptionKey || !codeVerifier) return;
+  const encrypted = encrypt(codeVerifier, config.sessionEncryptionKey);
+  appendSetCookie(res, serializeCookie(name, encrypted, { secure: config.secureCookies, sameSite: 'None', path: '/', httpOnly: true, maxAge: Math.floor(ttlMs / 1000) }));
+}
+
+function readVerifierCookie(cookies, config, name) {
+  if (!config.sessionEncryptionKey || !cookies[name]) return null;
+  try { return decrypt(cookies[name], config.sessionEncryptionKey); }
+  catch { return null; }
+}
+
+function clearVerifierCookie(res, config, name) {
+  appendSetCookie(res, serializeCookie(name, '', { secure: config.secureCookies, sameSite: 'None', path: '/', httpOnly: true, maxAge: 0 }));
+}
+
+// Generates a fresh PKCE pair when (and only when) this server is able to
+// hold onto the verifier (SESSION_ENCRYPTION_KEY configured) — without a
+// key to encrypt it into the cookie above, sending a code_challenge with no
+// way to ever retrieve the matching verifier would make the resulting link
+// permanently unexchangeable, which is worse than falling back to the
+// legacy (unchallenged) flow. Real production always has the key
+// (validateRuntimeConfig enforces it); this guard only matters for minimal
+// test configs that intentionally omit it to exercise unrelated behavior.
+function newPkcePair(config) {
+  if (!config.sessionEncryptionKey) return { codeVerifier: null, codeChallenge: null };
+  const codeVerifier = generateCodeVerifier();
+  return { codeVerifier, codeChallenge: computeCodeChallenge(codeVerifier) };
+}
 
 function validateOrigin(req, config) {
   const origin = req.headers.origin;
@@ -314,18 +501,136 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         if (!Array.isArray(items)) throw new Error('brvm_publications_store_invalid_shape');
         return json(res, 200, { items });
       }
+      // Google OAuth — start (founder directive, 2026-11): a full-page GET,
+      // never a fetch, because this route's whole job is to hand the
+      // browser off to Supabase/Google and back — exactly the kind of
+      // navigation flow this app otherwise avoids by design (no popups,
+      // mirroring the rest of the site). It always ends in a redirect, even
+      // on failure: the browser got here by `location.href`-style navigation
+      // (see dist/app.js), so answering with a bare JSON error would leave
+      // the learner staring at raw API output with no way back into the
+      // product. `bounceBack` sends them back to the SAME place a
+      // successful flow would land (oauthGoogleRedirectTo), with an
+      // `error`/`error_description` pair dist/app.js already knows how to
+      // read and turn into an honest, specific message.
+      if (method === 'GET' && path === '/v1/auth/oauth/google/start') {
+        const bounceBack = (errorCode, description) => {
+          const target = new URL(config.oauthGoogleRedirectTo);
+          target.searchParams.set('error', errorCode);
+          if (description) target.searchParams.set('error_description', description);
+          res.writeHead(302, { Location: target.toString() });
+          return res.end();
+        };
+        if (typeof auth.getProviderSettings !== 'function' || typeof auth.buildAuthorizeUrl !== 'function') {
+          return bounceBack('oauth_not_configured', 'Google sign-in is not available yet.');
+        }
+        if (!await checkAuthRateLimit(rateLimiter, 'oauth-google-start', { ip: clientIp(req) })) {
+          return bounceBack('rate_limited', 'Too many attempts. Please try again later.');
+        }
+        let settings;
+        try { settings = await auth.getProviderSettings(); }
+        catch (error) {
+          logger('oauth_settings_check_failed', { requestId, status: error.status || 500 });
+          return bounceBack('server_error', 'Google sign-in is temporarily unavailable.');
+        }
+        // Honest, specific reason (P0 of the founder's own directive): the
+        // founder may still be finishing the Google Cloud / Supabase
+        // dashboard setup when a learner clicks this button. Checked via
+        // GoTrue's own public /auth/v1/settings — see supabase-auth.js — so
+        // this is never guessed from this server's own configuration, which
+        // only knows the Supabase project URL, not what is enabled inside it.
+        if (!settings?.external?.google) {
+          logger('oauth_provider_disabled', { requestId, provider: 'google' });
+          return bounceBack('oauth_provider_not_configured', 'Google sign-in has not been enabled yet on this project.');
+        }
+        const { codeVerifier, codeChallenge } = newPkcePair(config);
+        if (!codeVerifier) return bounceBack('oauth_not_configured', 'Google sign-in requires SESSION_ENCRYPTION_KEY to be configured.');
+        const authorizeUrl = auth.buildAuthorizeUrl({ provider: 'google', redirectTo: config.oauthGoogleRedirectTo, codeChallenge });
+        setVerifierCookie(res, config, OAUTH_VERIFIER_COOKIE, codeVerifier, config.oauthVerifierTtlMs);
+        res.writeHead(302, { Location: authorizeUrl });
+        return res.end();
+      }
+      // Google OAuth — exchange (founder directive, 2026-11): back on our
+      // own origin (academy.html), so this one IS an ordinary
+      // credentials:'include' fetch, exactly like
+      // /v1/auth/password-reset/exchange above — same PKCE verifier-cookie
+      // requirement, same session creation, same cookie shape as every other
+      // sign-in path in this file.
+      if (method === 'POST' && path === '/v1/auth/oauth/google/exchange') {
+        if (typeof auth.exchangeOAuthCode !== 'function') return sendError(res, 503, 'oauth_not_configured', 'Google sign-in is not available yet.', requestId);
+        const body = await readJson(req);
+        if (typeof body.code !== 'string' || body.code.length < 10) return sendError(res, 400, 'invalid_code', 'This Google sign-in link is invalid or has expired.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'oauth-google-exchange', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        const cookies = parseCookies(req.headers.cookie || '');
+        const codeVerifier = readVerifierCookie(cookies, config, OAUTH_VERIFIER_COOKIE);
+        if (!codeVerifier) return sendError(res, 400, 'oauth_verifier_expired', 'This Google sign-in must finish in the same browser tab that started it, and the request must not have expired. Please try "Continue with Google" again.', requestId);
+        let provider;
+        try { provider = await auth.exchangeOAuthCode(body.code, codeVerifier); }
+        catch (error) {
+          logger('oauth_google_exchange_failed', { requestId, status: error.status || 400, code: error.code || null });
+          const outcome = classifyOAuthExchangeError(error);
+          return sendError(res, outcome.status, outcome.code, outcome.message, requestId);
+        }
+        if (!provider?.user?.id || !provider.access_token) return sendError(res, 400, 'invalid_code', 'This Google sign-in link is invalid or has expired.', requestId);
+        // Identity linking is GoTrue's own documented behavior, not something
+        // this server decides: if the Google account's (verified) e-mail
+        // matches an existing e-mail/password account, GoTrue automatically
+        // links the new Google identity to that SAME user and returns that
+        // user's id here — this just creates a session for whichever user_id
+        // GoTrue reports, exactly like every other sign-in path in this file.
+        // https://supabase.com/docs/guides/auth/auth-identity-linking
+        const created = await createSession(provider.user.id, provider, req);
+        setCookies(res, cookieHeaders(config, created.token, created.csrf));
+        clearVerifierCookie(res, config, OAUTH_VERIFIER_COOKIE);
+        return json(res, 204);
+      }
       if (method === 'POST' && path === '/v1/auth/register') {
         const body = await readJson(req);
         const validation = validateRegistration(body);
         if (Object.keys(validation.fields).length) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, validation.fields);
         if (!await checkAuthRateLimit(rateLimiter, 'register', { ip: clientIp(req), email: validation.email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
-        await auth.register({ email: validation.email, password: body.password, display_name: body.display_name, ref: validation.ref, redirectTo: config.emailRedirectTo });
+        // PKCE (P0 auth reliability audit, 2026-11): a fresh verifier per
+        // signup attempt, bound to THIS browser via an httpOnly cookie — see
+        // pkce.js. Generated unconditionally (success or failure path below)
+        // so its mere presence never hints at whether the account already
+        // existed, preserving the anti-enumeration guarantee the swallow
+        // path already relies on.
+        const { codeVerifier, codeChallenge } = newPkcePair(config);
+        try {
+          await auth.register({ email: validation.email, password: body.password, display_name: body.display_name, ref: validation.ref, redirectTo: config.emailRedirectTo, codeChallenge });
+        } catch (error) {
+          const outcome = classifyRegisterError(error);
+          // Never log the password or the raw provider error body — only the
+          // status/code classification, which is enough to diagnose a
+          // production incident without exposing credentials.
+          logger('register_failed', { requestId, status: outcome.status, code: outcome.code });
+          if (!outcome.swallow) return sendError(res, outcome.status, outcome.code, outcome.message, requestId, outcome.fieldErrors);
+        }
+        setVerifierCookie(res, config, SIGNUP_VERIFIER_COOKIE, codeVerifier, config.signupVerifierTtlMs);
         return json(res, 202, { message: 'If the registration can be completed, a verification message will be sent.' });
       }
       if (method === 'POST' && path === '/v1/auth/verify-email') {
         const body = await readJson(req);
-        if (typeof body.token !== 'string' || body.token.length < 32) return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId);
+        // New, PKCE-protected confirmation links carry `code` (see register()
+        // above and pkce.js): the e-mail link alone can never confirm the
+        // account — a security scanner's sandboxed browser that pre-visits it
+        // has no way to reach the code_verifier, which exists only in this
+        // browser's own httpOnly cookie, set when THIS browser submitted the
+        // signup form. `token` remains for any confirmation links already
+        // sent before this deploy.
+        const usesCode = typeof body.code === 'string';
+        if (usesCode) { if (body.code.length < 10) return sendError(res, 400, 'invalid_code', 'The confirmation code is invalid or expired.', requestId); }
+        else if (typeof body.token !== 'string' || body.token.length < 32) return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId);
         if (!await checkAuthRateLimit(rateLimiter, 'verify-email', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        if (usesCode) {
+          const cookies = parseCookies(req.headers.cookie || '');
+          const codeVerifier = readVerifierCookie(cookies, config, SIGNUP_VERIFIER_COOKIE);
+          if (!codeVerifier) return sendError(res, 400, 'signup_verifier_expired', 'This confirmation link must be opened in the same browser used to sign up, and the request must not have expired. Please sign up again or request a new confirmation e-mail.', requestId);
+          try { await auth.exchangeSignupCode(body.code, codeVerifier); }
+          catch (error) { logger('verify_email_exchange_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'invalid_code', 'This confirmation link is invalid or expired.', requestId); }
+          clearVerifierCookie(res, config, SIGNUP_VERIFIER_COOKIE);
+          return json(res, 204);
+        }
         await auth.verifyEmail(body.token);
         return json(res, 204);
       }
@@ -333,10 +638,22 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         if (typeof body.code !== 'string' || body.code.length < 10) return sendError(res, 400, 'invalid_code', 'The recovery code is invalid or expired.', requestId);
         if (!await checkAuthRateLimit(rateLimiter, 'password-reset-exchange', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please request a new link later.', requestId);
+        // PKCE exchange — the heart of this fix (P0 auth reliability audit,
+        // 2026-11): without a code_verifier that matches what was sent to
+        // /auth/v1/recover, this call is refused BEFORE ever reaching
+        // GoTrue, so a scanner that merely loaded the redirect page (and so
+        // never has this browser's httpOnly cookie) can never burn the
+        // underlying one-time code — it is left intact for the real learner.
+        const cookies = parseCookies(req.headers.cookie || '');
+        const codeVerifier = readVerifierCookie(cookies, config, RECOVERY_VERIFIER_COOKIE);
+        if (!codeVerifier) return sendError(res, 400, 'recovery_verifier_expired', 'This recovery link must be opened in the same browser used to request it, and the request must not have expired. Please request a new recovery link.', requestId);
         let provider;
-        try { provider = await auth.exchangeRecoveryCode(body.code); } catch (error) { logger('password_reset_exchange_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'invalid_code', 'The recovery link is invalid or expired.', requestId); }
+        try { provider = await auth.exchangeRecoveryCode(body.code, codeVerifier); } catch (error) { logger('password_reset_exchange_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'invalid_code', 'The recovery link is invalid or expired.', requestId); }
         if (!provider?.user?.id || !provider.access_token) return sendError(res, 400, 'invalid_code', 'The recovery link is invalid or expired.', requestId);
-        const created = await createSession(provider.user.id, provider, req); setCookies(res, cookieHeaders(config, created.token, created.csrf)); return json(res, 204);
+        const created = await createSession(provider.user.id, provider, req);
+        setCookies(res, cookieHeaders(config, created.token, created.csrf));
+        clearVerifierCookie(res, config, RECOVERY_VERIFIER_COOKIE);
+        return json(res, 204);
       }
       if (method === 'POST' && path === '/v1/auth/password-reset/verify') {
         const body = await readJson(req);
@@ -357,8 +674,15 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         if (!await checkAuthRateLimit(rateLimiter, 'login', { ip: clientIp(req), email: validation.email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
         let provider;
         try { provider = await auth.login({ email: validation.email, password: body.password }); }
-        catch (error) { logger('login_failed', { requestId, status: error.status || 401 }); return sendError(res, 401, 'authentication_failed', 'Authentication failed.', requestId); }
-        if (!provider?.user?.id || !provider.access_token) return sendError(res, 401, 'authentication_failed', 'Authentication failed.', requestId);
+        catch (error) {
+          const outcome = classifyLoginError(error);
+          // Never log the password or the raw provider error body — only
+          // the status/code classification, which is enough to diagnose a
+          // production incident without exposing credentials.
+          logger('login_failed', { requestId, status: outcome.status, code: outcome.code });
+          return sendError(res, outcome.status, outcome.code, outcome.message, requestId);
+        }
+        if (!provider?.user?.id || !provider.access_token) return sendError(res, 401, 'invalid_credentials', 'Invalid email or password.', requestId);
         const created = await createSession(provider.user.id, provider, req);
         setCookies(res, cookieHeaders(config, created.token, created.csrf));
         return json(res, 204);
@@ -368,7 +692,14 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const email = normalizeEmail(body.email);
         if (!/^\S+@\S+\.\S+$/.test(email)) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId);
         if (!await checkAuthRateLimit(rateLimiter, 'password-reset-request', { ip: clientIp(req), email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
-        try { await auth.requestPasswordReset(email, config.passwordRecoveryRedirectTo || config.emailRedirectTo); } catch (error) { logger('recovery_failed', { requestId, status: error.status || 500 }); }
+        // PKCE (P0 auth reliability audit, 2026-11): a fresh verifier per
+        // recovery attempt, bound to THIS browser via an httpOnly cookie —
+        // generated and stored unconditionally (whether or not the account
+        // exists), so its presence never leaks account existence on top of
+        // the always-202 response this route already gives.
+        const { codeVerifier, codeChallenge } = newPkcePair(config);
+        try { await auth.requestPasswordReset(email, config.passwordRecoveryRedirectTo || config.emailRedirectTo, codeChallenge); } catch (error) { logger('recovery_failed', { requestId, status: error.status || 500 }); }
+        setVerifierCookie(res, config, RECOVERY_VERIFIER_COOKIE, codeVerifier, config.recoveryVerifierTtlMs);
         return json(res, 202, { message: 'If the account can be recovered, a message will be sent.' });
       }
       if (method === 'POST' && path === '/v1/auth/password-reset/confirm') {

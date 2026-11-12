@@ -44,7 +44,7 @@ async function testAsync(name, fn) { await fn(); passed++; console.log('PASS -',
 // One per lesson, plus one correct-quiz-answer marker per lesson so a leak
 // that kept the prose but renamed ids/blocks is still caught.
 const SECRET_MARKERS = [
-  { lesson: 'P2.1', text: 'Before the trade, define the risk.' },
+  { lesson: 'P2.1', text: 'Avant le trade, définis le risque.' },
   { lesson: 'P2.1', text: 'Une invalidation claire permet de définir une limite de risque mesurable' },
   { lesson: 'P2.2', text: 'Un trade contrôlé se construit dans cet ordre' },
   { lesson: 'P2.2', text: 'Une décision contrôlée relie contexte, setup, entrée, invalidation, risque, objectif puis revue.' },

@@ -59,8 +59,10 @@ function startServer() {
 
 let passed = 0;
 const failures = [];
+const testNameFilter = String(process.env.DDA_TEST_ONLY || '').trim().toLowerCase();
 
 async function test(name, fn) {
+  if (testNameFilter && !name.toLowerCase().includes(testNameFilter)) return;
   try {
     await fn();
     passed++;
@@ -109,14 +111,13 @@ async function completeSignupFlow(page, opts) {
   await page.waitForSelector('.view.active#lesson');
 }
 
-async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = 'free') {
-  await context.addInitScript(({ lessons, plan }) => {
-    if (localStorage.getItem('dda-prototype-state-v4')) return;
+async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = 'free', accountId = 'u1') {
+  await context.addInitScript(({ lessons, plan, accountId: seededAccountId }) => {
     const lessonIds = ['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3', 'MBRVM.1', 'P2.1', 'P2.2', 'LAB1', 'LAB2', 'LAB3', 'LAB4', 'LABCAP'];
     const progress = Object.fromEntries(lessonIds.map(id => [id, {
       lessonViewed: false, exerciseComplete: false, quizComplete: false, ...(lessons[id] || {})
     }]));
-    localStorage.setItem('dda-prototype-state-v4', JSON.stringify({
+    const seededState = JSON.stringify({
       schemaVersion: 4,
       user: { id: 'e2e-learner', name: 'Ada', email: 'ada@example.com', mode: 'device-demo' },
       membership: { plan, status: 'demo' },
@@ -128,8 +129,14 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       events: [],
       acquisition: {},
       updatedAt: null
-    }));
-  }, { lessons: lessonProgress, plan: membershipPlan });
+    });
+    const keys = [
+      'dda-prototype-state-v4',
+      'dda-prototype-state-v4:guest',
+      `dda-prototype-state-v4:user:${encodeURIComponent(seededAccountId)}`
+    ];
+    keys.forEach(key => { if (!localStorage.getItem(key)) localStorage.setItem(key, seededState); });
+  }, { lessons: lessonProgress, plan: membershipPlan, accountId });
 }
 
 (async () => {
@@ -310,7 +317,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#premium-track`);
     const freeContent = await page.locator('#lesson-p21-main').innerText();
-    assert.equal(freeContent.includes('Before the trade, define the risk.'), false, 'authored P2 content must not be mounted for Free');
+    assert.equal(freeContent.includes('Avant le trade, définis le risque.'), false, 'authored P2 content must not be mounted for Free');
     await page.click('#gate-unlock');
     await page.waitForTimeout(50);
     assert.equal(await page.evaluate(() => location.hash), '#premium-track');
@@ -322,7 +329,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     // closes, regardless of which hostname happens to load it. So the local
     // demo now honestly says the content needs a real server, instead of
     // mounting the real authored lesson the way it used to.
-    assert.equal((await page.locator('#lesson-p21-main').innerText()).includes('Before the trade, define the risk.'), false, 'the real authored lesson must never be mounted in local/pilot (no BFF) mode, even after the local Premium Demo toggle');
+    assert.equal((await page.locator('#lesson-p21-main').innerText()).includes('Avant le trade, définis le risque.'), false, 'the real authored lesson must never be mounted in local/pilot (no BFF) mode, even after the local Premium Demo toggle');
     assert.match(await page.locator('#lesson-p21-main').innerText(), /indisponible/i, 'an honest "content unavailable without a server" message is shown instead');
     await context.close();
   });
@@ -332,7 +339,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
     await context.route('https://bff.test/v1/me', route => route.fulfill({
       status: 200, contentType: 'application/json',
-      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
     }));
     await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
       status: 200, contentType: 'application/json',
@@ -351,7 +358,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#lesson-p21`);
     await page.waitForSelector('#lesson-p21.view.active');
-    await page.waitForFunction(() => document.querySelector('#lesson-p21-main')?.innerText.includes('Before the trade, define the risk.'));
+    await page.waitForFunction(() => document.querySelector('#lesson-p21-main')?.innerText.includes('Avant le trade, définis le risque.'));
     assert.ok(contentRequests.includes('P2.1'), 'the client actually called the authenticated content route for P2.1');
     assert.ok(contentRequests.includes('P2.2'), 'P2.2 is fetched too (needed once the learner reaches it), never embedded');
     await context.close();
@@ -368,7 +375,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
     await context.route('https://bff.test/v1/me', route => route.fulfill({
       status: 200, contentType: 'application/json',
-      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
     }));
     await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
       status: 200, contentType: 'application/json',
@@ -435,7 +442,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.locator('#premium-lab-form button[type="submit"]').click();
     state = await page.evaluate(() => window.DDA.load());
     assert.equal(state.premium.labs['p2-risk-plan'].status, 'validated');
-    assert.ok((await page.locator('#premium-lab-feedback').textContent()).includes('Good'));
+    assert.ok((await page.locator('#premium-lab-feedback').textContent()).includes('Bien'));
 
     await page.click('#premium-lab [data-view="premium-track"]');
     await page.click('#premium-track [data-view="premium-assessment"]');
@@ -444,7 +451,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await assessmentLabels.filter({ hasText: 'Entrer avec une petite position.' }).click();
     await assessmentLabels.filter({ hasText: 'Ne pas exécuter dans ces conditions' }).click();
     await assessmentLabels.filter({ hasText: 'Le trade peut être perdant tout en étant correctement exécuté.' }).click();
-    await assessmentLabels.filter({ hasText: 'Trader B : perdant, scénario valide' }).click();
+    await assessmentLabels.filter({ hasText: 'Trader B : perdant, setup valide' }).click();
     await page.locator('#premium-assessment-form button[type="submit"]').click();
     state = await page.evaluate(() => window.DDA.load());
     assert.equal(state.premium.assessments['p2-controlled-decision'].passed, false);
@@ -454,7 +461,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     state = await page.evaluate(() => window.DDA.load());
     assert.equal(state.premium.assessments['p2-controlled-decision'].passed, true);
     assert.equal(state.premium.assessments['p2-controlled-decision'].attempts, 2);
-    assert.equal(state.premium.proofs['p2-risk-foundations'].level, 'Niveau 3 — Mise en pratique');
+    assert.equal(state.premium.proofs['p2-risk-foundations'].level, 'Niveau 3 — Appliquer');
 
     await page.reload();
     await page.waitForSelector('#premium-assessment.view.active');
@@ -463,7 +470,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(await page.evaluate(() => location.hash), '#journal');
     assert.equal(await page.locator('#journal-composer').isVisible(), true);
     assert.equal(await page.locator('#journal-market').inputValue(), 'XAUUSD — scénario synthétique');
-    assert.ok((await page.locator('#journal-context').inputValue()).includes('support zone'));
+    assert.ok((await page.locator('#journal-context').inputValue()).includes('zone de support'));
     await page.click('#journal-step-next');
     await page.click('#journal-step-next');
     await page.click('#journal-step-save');
@@ -473,11 +480,13 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(state.journal.entries[0].proofId, 'p2-risk-foundations');
 
     await page.reload();
+    await page.waitForSelector('#journal.view.active');
+    await page.waitForFunction(() => document.querySelectorAll('#journal-list details').length === 1);
     assert.equal(await page.locator('#journal-list details').count(), 1, 'Journal entry survives reload');
     await page.click('.mobile-nav button[data-view="progress"]');
     const proofProgress = await page.locator('#premium-proof-progress').innerText();
     assert.ok(proofProgress.includes('Fondations du risque'));
-    assert.ok(proofProgress.includes('Niveau 3 — Mise en pratique'));
+    assert.ok(proofProgress.includes('Niveau 3 — Appliquer'));
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'Progression must not overflow on mobile');
     await context.close();
   });
@@ -579,6 +588,34 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('a brand-new learner never sees the "a progression already exists, resume or erase it?" nudge on step 2 of their own signup', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#access`);
+    await page.waitForSelector('#signup-form:not([hidden])');
+    await fillSignup(page);
+    await page.waitForSelector('#onboarding-form:not([hidden])');
+    assert.equal(await page.isVisible('#resume-device'), false, 'the resume/erase nudge is false and confusing for a user that was just created by this very step 1 submission');
+    await context.close();
+  });
+
+  await test('a genuinely returning learner with a pre-existing, unfinished session sees the resume/erase nudge on #access', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => {
+      window.localStorage.setItem('dda-prototype-state-v4', JSON.stringify({
+        schemaVersion: 4, user: { id: 'returning', name: 'Awa', email: 'awa@example.com', mode: 'device-demo' },
+        membership: { plan: 'free', status: 'demo' }, onboarding: null,
+        lessons: {}, journal: { entries: [], plan: {} }, preferences: { lowData: false, reminders: false },
+        terminal: {}, events: [], acquisition: {}, updatedAt: null
+      }));
+    });
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#access`);
+    await page.waitForTimeout(200);
+    assert.equal(await page.isVisible('#resume-device'), true, 'a learner who genuinely has a prior, unfinished session must still be offered to resume or erase it');
+    await context.close();
+  });
+
   await test('onboarding_complete event is recorded locally', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
@@ -616,7 +653,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
-  await test('mobile onboarding dropdown bottom sheet stays above the fixed navigation', async () => {
+  await test('mobile onboarding dropdown stays within the viewport while public navigation is hidden', async () => {
     const context = await freshContext(browser, { width: 390, height: 844 });
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#access`);
@@ -625,20 +662,36 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const wrapper = page.locator('[data-select-for="goal"]');
     await wrapper.locator('.dda-select-trigger').click();
     await page.waitForTimeout(220);
+    // The open mobile sheet is reparented to <body> (see the stacking-context
+    // fix below), so it must be found by id, not by a wrapper-scoped query.
     const geometry = await page.evaluate(() => {
-      const menu = document.querySelector('#goal-dda-menu');
+      const menu = document.getElementById('goal-dda-menu');
       const nav = document.querySelector('.mobile-nav');
       const menuBox = menu.getBoundingClientRect();
       const navBox = nav.getBoundingClientRect();
-      return { position: getComputedStyle(menu).position, menuBottom: menuBox.bottom, navTop: navBox.top, visible: getComputedStyle(menu).visibility === 'visible' };
+      return { position: getComputedStyle(menu).position, menuBottom: menuBox.bottom, navTop: navBox.top, navVisible: getComputedStyle(nav).display !== 'none', viewportHeight: window.innerHeight, accessMode: document.body.classList.contains('access-mode'), visible: getComputedStyle(menu).visibility === 'visible', parent: menu.parentNode.tagName };
     });
     assert.equal(geometry.position, 'fixed');
     assert.equal(geometry.visible, true);
-    assert.ok(geometry.menuBottom <= geometry.navTop, `dropdown must stay above mobile navigation: ${JSON.stringify(geometry)}`);
+    assert.equal(geometry.accessMode, true, 'the learner is still in the public onboarding flow');
+    assert.equal(geometry.navVisible, false, 'learner navigation stays hidden before onboarding is complete');
+    assert.equal(geometry.parent, 'BODY', 'an open mobile sheet must be a direct child of <body>, not nested inside its field — see "mobile onboarding dropdown never overlaps a sibling field" below for why');
+    assert.ok(geometry.menuBottom <= geometry.viewportHeight - 20, `dropdown must remain inside the viewport: ${JSON.stringify(geometry)}`);
     await context.close();
   });
 
-  await test('mobile onboarding dropdown never overlaps a sibling field', async () => {
+  // Real bug (founder-reported, reproduced on real-device screenshots at
+  // 360/390px): opening "Niveau" showed "Objectif pédagogique" bleeding on
+  // top of it instead of its own field's options. Root cause — confirmed by
+  // walking document.elementsFromPoint() at the overlapping coordinates
+  // before the fix: #access.view.active carries a CSS fade-in animation
+  // (`animation: dda-access-enter`), which establishes a stacking context.
+  // That traps the mobile sheet's position:fixed/z-index:100 inside its own
+  // field's local stacking order (z-index:2) instead of letting it escape to
+  // the page root the way position:fixed visually promises — so a LATER
+  // field's trigger, sharing the identical z-index, paints on top of an
+  // EARLIER field's open sheet. The fix reparents the open sheet to <body>.
+  await test('mobile onboarding dropdown never overlaps a sibling field (founder-reported overlap bug)', async () => {
     const context = await freshContext(browser, { width: 360, height: 780 });
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#access`);
@@ -650,18 +703,15 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       const goalTrigger = document.querySelector('[data-select-for="goal"] .dda-select-trigger');
       const r = goalTrigger.getBoundingClientRect();
       const topElement = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-      const levelMenu = document.querySelector('#level-dda-menu');
       return {
         topElementIsGoalTrigger: topElement === goalTrigger,
         topElementInsideLevelMenu: Boolean(topElement.closest('#level-dda-menu')),
-        menuParent: levelMenu.parentElement.tagName,
         levelMenuOptionTexts: [...document.querySelectorAll('#level-dda-menu .dda-select-option')].map(o => o.textContent)
       };
     });
-    assert.equal(result.topElementIsGoalTrigger, false, 'the next onboarding field must not paint over the open level sheet');
-    assert.equal(result.topElementInsideLevelMenu, true, 'the open level sheet must cover the sibling field');
-    assert.equal(result.menuParent, 'BODY', 'an open mobile sheet must be reparented to body');
-    assert.deepEqual(result.levelMenuOptionTexts, ['Choisir', 'Débutant', 'Intermédiaire', 'Avancé']);
+    assert.equal(result.topElementIsGoalTrigger, false, '"Objectif pédagogique" must never paint on top of an open "Niveau" sheet');
+    assert.equal(result.topElementInsideLevelMenu, true, 'the open "Niveau" sheet must legitimately cover the rest of the screen while open, like any modal bottom sheet');
+    assert.deepEqual(result.levelMenuOptionTexts, ['Choisir', 'Débutant', 'Intermédiaire', 'Avancé'], 'the open sheet must only ever show its own field\'s options');
     await context.close();
   });
 
@@ -1110,7 +1160,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(productState.m1, 'completed');
     assert.equal(productState.m2, 'coming_soon');
     assert.equal(productState.terminalTitle, 'Toutes les leçons disponibles sont validées.');
-    assert.match(productState.terminalIndex, /PARCOURS .* VALIDÉS/, 'Terminal completion label must reflect both completed authored modules in learner language');
+    assert.ok(productState.terminalIndex.includes('M0') && productState.terminalIndex.includes('M1'), 'Terminal completion label must reflect both completed authored modules');
     assert.equal(productState.primaryView, 'journal', 'with an empty journal, the honest daily action is Journal — not a phantom lesson');
     assert.equal(productState.progressNext, 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.');
 
@@ -1803,7 +1853,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const progressProof = await page.locator('#progress-practice-proof').textContent();
     assert.ok(progressProof.includes('m02-zone-identification'), 'Progression surfaces the same stable practice proof');
     assert.ok(progressProof.includes('Identification de zone'), 'Progression classifies the artifact as practice, not as a quiz result');
-    assert.ok(progressProof.includes('Après la leçon Support & Résistance — Identifier les zones de support et de résistance'), 'Progression preserves the mission source in learner language');
+    assert.ok(progressProof.includes('Après la leçon M0.2 · Support & Résistance'), 'Progression preserves the mission source');
     const lessonProgress = await page.evaluate(() => window.DDA.load().lessons['M0.2']);
     assert.equal(lessonProgress.quizComplete, false, 'a valid Practice Terminal proof does not fabricate lesson mastery');
 
@@ -1811,6 +1861,64 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.locator('#journal-list details summary').click();
     await page.locator('#journal-list .journal-proof-source').click();
     assert.equal(await page.evaluate(() => document.querySelector('.view.active')?.id), 'lesson-m02', 'Journal source link reaches its real M0.2 lesson');
+    await context.close();
+  });
+
+  // Real bug (founder-reported): a system-looking "Impossible d'enregistrer"
+  // toast seen on mobile around the Journal. No such string exists anywhere
+  // in this codebase (verified by search) — the app never generates a raw
+  // native-looking notification. The real, confirmed defect this audit
+  // found: when the underlying localStorage write genuinely fails (quota,
+  // private browsing, a storage-restricted in-app browser), DDA.save()
+  // already catches that silently and never throws, but every Journal save
+  // path still showed its success toast ("Entrée enregistrée localement.")
+  // unconditionally — telling the learner their entry was saved when it was
+  // not. These two tests prove both halves: the previously-missing honest
+  // failure message, and that a healthy save still gets its normal
+  // confirmation (no regression).
+  await test('Journal save failure (storage unavailable) shows an honest in-app message, never a false "saved" toast', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(context, { 'M0.1': { quizComplete: true } });
+    const page = await context.newPage();
+    const pageErrors = [];
+    page.on('pageerror', error => pageErrors.push(String(error)));
+    await page.goto(`${ACADEMY_BASE}#journal`);
+    await page.evaluate(() => {
+      const original = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (key, value) {
+        if (key === 'dda-prototype-state-v4') throw new DOMException('Quota exceeded', 'QuotaExceededError');
+        return original.call(this, key, value);
+      };
+    });
+    await page.click('#journal-new-entry');
+    await page.fill('#journal-market', 'EUR/USD');
+    await page.fill('#journal-context', 'Simulated storage failure.');
+    await page.click('#journal-step-next');
+    await page.click('#journal-step-next');
+    await page.click('#journal-entry-form button[type="submit"]');
+    const toastText = (await page.locator('#toast').textContent()).trim();
+    assert.equal(toastText.includes('Entrée enregistrée localement'), false, 'a failed save must never claim success');
+    assert.match(toastText, /Impossible d.enregistrer/, 'the learner must see an honest, specific failure message');
+    assert.equal(await page.locator('#storage-warning').isHidden(), false, 'the persistent storage banner also reflects the real failure');
+    assert.deepEqual(pageErrors, [], 'a blocked write must never surface as an uncaught, native-looking error');
+    await context.close();
+  });
+
+  await test('Journal save with healthy storage still shows its normal success toast and actually persists', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(context, { 'M0.1': { quizComplete: true } });
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#journal`);
+    await page.click('#journal-new-entry');
+    await page.fill('#journal-market', 'EUR/USD');
+    await page.fill('#journal-context', 'Healthy storage control case.');
+    await page.click('#journal-step-next');
+    await page.click('#journal-step-next');
+    await page.click('#journal-entry-form button[type="submit"]');
+    const toastText = (await page.locator('#toast').textContent()).trim();
+    assert.equal(toastText, 'Entrée enregistrée localement.');
+    assert.equal(await page.locator('#storage-warning').isHidden(), true);
+    assert.equal(await page.evaluate(() => window.DDA.load().journal.entries.length), 1, 'the entry must actually be persisted when storage genuinely works');
     await context.close();
   });
 
@@ -1924,7 +2032,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
     await context.route('https://bff.test/v1/me', route => route.fulfill({
       status: 200, contentType: 'application/json',
-      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
     }));
     await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
       status: 200, contentType: 'application/json',
@@ -2028,7 +2136,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.waitForSelector('#lesson-p22.view.active');
     assert.equal(await page.locator('#lesson-p22 .lesson-quick-nav [data-view="path"]').isVisible(), true);
     assert.equal(await page.locator('#lesson-p22 .lesson-quick-nav [data-view="dashboard"]').isVisible(), true);
-    assert.match(await page.textContent('#lesson-p22 .module-toc-heading'), /Risque et discipline/);
+    assert.match(await page.textContent('#lesson-p22 .module-toc-heading'), /Premium Track/);
     assert.equal(await page.locator('#lesson-p22 .module-toc-item').count(), 2, 'the Premium Track module summary lists P2.1 and P2.2');
     const prevLink = page.locator('#lesson-p22 [data-lesson-prev]');
     await prevLink.click();
@@ -2047,11 +2155,15 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
     const bffContext = await freshContext(browser);
     await bffContext.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await bffContext.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ user_id: 'owner-1', email: 'owner@example.com', display_name: 'Owner', status: 'active' })
+    }));
     await bffContext.route('https://bff.test/v1/admin/overview', route => route.fulfill({
       status: 200, contentType: 'application/json',
       body: JSON.stringify({ contract: 'dda-admin-overview-v1', generated_at: new Date().toISOString(), caller: { user_id: 'owner-1', role: 'owner' }, metrics: {} })
     }));
-    await seedLocalLearner(bffContext, {}, 'free');
+    await seedLocalLearner(bffContext, {}, 'free', 'owner-1');
     const bffPage = await bffContext.newPage();
     await bffPage.goto(`${ACADEMY_BASE}#dashboard`);
     await bffPage.waitForSelector('#dashboard.view.active');
@@ -2124,12 +2236,37 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.waitForSelector('#resource-reader:not([hidden])');
     assert.equal(await page.locator('#reader-content .video-lite-thumb').isVisible(), true, 'a static thumbnail is shown before any click');
     assert.equal(await page.locator('#reader-content iframe').count(), 0, 'no iframe — and so no YouTube request — is created before the learner clicks play');
+    const youtubeFallback = page.locator('#reader-content .video-explainer-caption a');
+    assert.equal(await youtubeFallback.textContent().then(text => text.includes('Ouvrir sur YouTube')), true, 'a direct YouTube fallback is visible without loading the iframe');
+    assert.match(await youtubeFallback.getAttribute('href'), /^https:\/\/www\.youtube\.com\/watch\?v=[\w-]+$/);
+    assert.equal(await youtubeFallback.getAttribute('target'), '_blank');
+    assert.match(await youtubeFallback.getAttribute('rel'), /noopener/);
     assert.equal(cspViolations.length, 0, `the thumbnail must not be silently blocked by CSP (img-src): ${cspViolations.join(' | ')}`);
     await page.locator('#reader-content .video-lite-play').click();
     const iframeSrc = await page.locator('#reader-content iframe').getAttribute('src');
     assert.match(iframeSrc, /^https:\/\/www\.youtube-nocookie\.com\/embed\//, 'the loaded player must use the privacy-enhanced nocookie domain');
+    assert.equal(await youtubeFallback.isVisible(), true, 'direct playback remains available if YouTube embedding fails');
     assert.ok(!/autoplay/.test(iframeSrc), 'no autoplay parameter — the mandate requires no autoplay');
     assert.equal(cspViolations.length, 0, `the YouTube iframe must not be silently blocked by CSP (frame-src): ${cspViolations.join(' | ')}`);
+    await context.close();
+  });
+
+  await test('the membership page\'s Free/Premium plan-card checkmarks (CSS mask data: URI) are not silently blocked by CSP img-src', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    const cspViolations = [];
+    page.on('console', msg => { if (msg.type() === 'error' && /Content Security Policy/i.test(msg.text())) cspViolations.push(msg.text()); });
+    await page.goto(`${ACADEMY_BASE}#membership`);
+    await page.waitForSelector('#membership.view.active');
+    await page.waitForTimeout(200);
+    const checkmarkSize = await page.locator('.plan-card li').first().evaluate(el => {
+      const before = getComputedStyle(el, '::before');
+      return { width: before.width, maskImage: before.webkitMaskImage || before.maskImage };
+    });
+    assert.notEqual(checkmarkSize.width, '0px', 'the checkmark pseudo-element must actually render, not collapse to zero width');
+    assert.ok(/data:/.test(checkmarkSize.maskImage || ''), 'the checkmark uses a data: mask-image, which img-src must explicitly allow');
+    assert.equal(cspViolations.length, 0, `plan-card checkmarks must not be silently blocked by CSP (img-src): ${cspViolations.join(' | ')}`);
     await context.close();
   });
 
@@ -2145,6 +2282,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.locator('#lesson-m03-main .video-lite-play').click();
     const iframeSrc = await page.locator('#lesson-m03-main iframe').getAttribute('src');
     assert.match(iframeSrc, /^https:\/\/www\.youtube-nocookie\.com\/embed\//, 'the lesson video loads through the same privacy-enhanced nocookie player');
+    assert.equal(await page.locator('#lesson-m03-main .video-explainer-caption a').isVisible(), true, 'M0.3 retains a direct YouTube fallback after the iframe is inserted');
     assert.ok(!/autoplay/.test(iframeSrc), 'no autoplay parameter on a lesson video either');
     await page.goto(`${ACADEMY_BASE}#lesson-m02`);
     await page.waitForSelector('#lesson-m02.view.active');
@@ -2185,6 +2323,89 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
   console.log('\n-- R. Paywall Premium honnête, aperçu gratuit et liste d\'attente --');
 
+  await test('the public access screen hides learner navigation on mobile and desktop and has a clear return link', async () => {
+    for (const width of [390, 1440]) {
+      const context = await freshContext(browser, { width, height: 844 });
+      const page = await context.newPage();
+      await page.goto(`${ACADEMY_BASE}#access`);
+      await page.waitForSelector('#access.view.active');
+      assert.equal(await page.locator('body').evaluate(el => el.classList.contains('access-mode')), true);
+      for (const selector of ['.sidebar', '.mobile-nav', '.topbar-user', '.profile-chip']) {
+        assert.equal(await page.locator(selector).isVisible(), false, `${selector} is hidden before identity exists at ${width}px`);
+      }
+      assert.equal(await page.locator('.access-back-link').getAttribute('href'), './index.html');
+      assert.equal(await page.locator('.access-sequence').evaluate(el => getComputedStyle(el).display), 'flex');
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, `no horizontal overflow at ${width}px`);
+      await context.close();
+    }
+  });
+
+  await test('a Free learner can follow the explicitly local Premium preview CTA into the existing Risk Lab', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#resources`);
+    await page.waitForSelector('#resources.view.active');
+    await page.click('.premium-resource .premium-gate');
+    await page.waitForSelector('#gate-layer:not([hidden])');
+    assert.match(await page.locator('#gate-description').textContent(), /Démonstration pédagogique sur cet appareil uniquement/);
+    await page.click('#gate-unlock');
+    await page.waitForSelector('#premium-lab.view.active');
+    assert.equal(await page.evaluate(() => location.hash), '#premium-lab');
+    assert.equal(await page.locator('#premium-lab-form').isVisible(), true, 'the CTA opens the existing Risk Lab instead of only showing a toast');
+    await context.close();
+  });
+
+  await test('BFF Free learner cannot unlock Premium locally from the resource CTA', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
+      status: 403, contentType: 'application/json',
+      body: JSON.stringify({ code: 'premium_required', message: 'An active Premium entitlement is required.' })
+    }));
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    const previewCheck = page.waitForResponse(response => response.url() === 'https://bff.test/v1/premium/preview');
+    await page.goto(`${ACADEMY_BASE}#resources`);
+    await page.waitForSelector('#resources.view.active');
+    await previewCheck;
+    await page.click('.premium-resource .premium-gate');
+    await page.waitForSelector('#gate-layer:not([hidden])');
+    assert.equal(await page.locator('#gate-unlock').isVisible(), false, 'BFF mode never offers a local entitlement toggle');
+    assert.match(await page.locator('#gate-description').textContent(), /droit Premium confirmé par le serveur/);
+    assert.equal(await page.evaluate(() => window.DDA.load().membership.plan), 'free', 'opening the gate does not promote local membership');
+    assert.equal(await page.evaluate(() => location.hash), '#resources', 'the Risk Lab remains closed without the server entitlement');
+    await context.close();
+  });
+
+  await test('BFF server-confirmed Premium lets the resource CTA open the existing Risk Lab', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true })
+    }));
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    const previewCheck = page.waitForResponse(response => response.url() === 'https://bff.test/v1/premium/preview');
+    await page.goto(`${ACADEMY_BASE}#resources`);
+    await page.waitForSelector('#resources.view.active');
+    await previewCheck;
+    await page.click('.premium-resource .premium-gate');
+    await page.waitForSelector('#premium-lab.view.active');
+    assert.equal(await page.locator('#gate-layer').isVisible(), false, 'a positive server confirmation opens the requested Lab');
+    assert.equal(await page.evaluate(() => window.DDA.load().membership.plan), 'free', 'the server entitlement is not copied into a fake local Premium plan');
+    await context.close();
+  });
+
   await test('P2.1 is marked preview=true and stays open for a Free learner despite its premium_track permission', async () => {
     const context = await freshContext(browser);
     await seedLocalLearner(context, {}, 'free');
@@ -2202,7 +2423,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#lesson-p22`);
     await page.waitForSelector('#gate-layer:not([hidden])');
-    assert.match(await page.textContent('#gate-title'), /Construire une décision maîtrisée/, 'the real lesson title is shown, not a generic label');
+    assert.match(await page.textContent('#gate-title'), /anatomie d.un trade contrôlé/, 'the real lesson title is shown, not a generic label');
     assert.match(await page.textContent('#gate-meta'), /18 min/, 'the real duration is shown');
     assert.equal(await page.locator('#gate-objectives li').count(), 2, 'the lesson\'s real objectives are listed');
     await page.click('#gate-continue-free');
@@ -2211,12 +2432,14 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
-  await test('the Premium waitlist requires an explicit consent tick before it can be joined, and the joined state survives a reload', async () => {
+  await test('the Premium interest preference requires consent, makes no notification promise, and survives a reload locally', async () => {
     const context = await freshContext(browser);
     await seedLocalLearner(context, {}, 'free');
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#membership`);
     await page.waitForSelector('#membership.view.active');
+    assert.match(await page.locator('#premium-waitlist-panel').textContent(), /ne crée aucune inscription et n’envoie aucune notification/);
+    assert.equal(await page.locator('#premium-waitlist-join').textContent(), 'Enregistrer mon intérêt sur cet appareil');
     assert.equal(await page.isDisabled('#premium-waitlist-join'), true, 'joining is blocked until consent is given');
     await page.check('#premium-waitlist-consent');
     assert.equal(await page.isDisabled('#premium-waitlist-join'), false);
@@ -2226,6 +2449,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.reload();
     await page.waitForSelector('#membership.view.active');
     assert.equal(await page.locator('#premium-waitlist-confirmation').isVisible(), true, 'the consent is a real local record, not a one-time UI flag');
+    assert.match(await page.locator('#premium-waitlist-confirmation').textContent(), /aucune liste et ne recevras pas de notification/);
     await context.close();
   });
 
@@ -2419,7 +2643,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
     await context.route('https://bff.test/v1/me', route => route.fulfill({
       status: 200, contentType: 'application/json',
-      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
     }));
     await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
       status: 403, contentType: 'application/json',
@@ -2436,7 +2660,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.goto(`${ACADEMY_BASE}#lesson-p22`);
     await page.waitForSelector('#gate-layer:not([hidden])');
     assert.notEqual(await page.evaluate(() => location.hash), '#lesson-p22', 'a locally-forced premium plan is rejected: the Premium lesson never activates without server confirmation');
-    assert.match(await page.textContent('#gate-title'), /Construire une décision maîtrisée/, 'the honest paywall is shown instead, same as a genuine Free learner');
+    assert.match(await page.textContent('#gate-title'), /anatomie d.un trade contrôlé/, 'the honest paywall is shown instead, same as a genuine Free learner');
     await page.waitForTimeout(200);
     assert.equal(await page.locator('#gate-layer').isVisible(), true, 'the gate stays shown once the server confirms there is no entitlement');
     await context.close();
@@ -2447,7 +2671,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
     await context.route('https://bff.test/v1/me', route => route.fulfill({
       status: 200, contentType: 'application/json',
-      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
     }));
     await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
       status: 200, contentType: 'application/json',
@@ -2487,7 +2711,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.route('https://bff.test/v1/security/csrf', route => route.fulfill({ status: 204 }));
     await context.route('https://bff.test/v1/me', route => route.fulfill({
       status: 200, contentType: 'application/json',
-      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
     }));
     let askBody = null;
     await context.route('https://bff.test/v1/ai/ask', route => {
@@ -2517,7 +2741,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.route('https://bff.test/v1/security/csrf', route => route.fulfill({ status: 204 }));
     await context.route('https://bff.test/v1/me', route => route.fulfill({
       status: 200, contentType: 'application/json',
-      body: JSON.stringify({ id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
     }));
     await context.route('https://bff.test/v1/ai/ask', route => route.fulfill({
       status: 429, contentType: 'application/json',
@@ -2690,6 +2914,255 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(progress?.quizComplete, true, 'completing the BRVM lesson records real progress like any other lesson');
     await page.reload();
     assert.equal(await page.evaluate(() => window.DDA.load().lessons['MBRVM.1']?.quizComplete), true, 'BRVM progress survives reload');
+    await context.close();
+  });
+
+  console.log('\n-- AC. Boot structure fix — a returning learner with no hash never sees a blank shell --');
+
+  await test('an already-onboarded local learner opening academy.html with no hash lands on #dashboard, not a blank app shell (fix/design-structure-color-3d-alignment)', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(ACADEMY_BASE); // no hash at all — a bare bookmark/typed URL
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(await page.locator('.dda-app-surface.is-active').count(), 1, 'the learner-app surface is actually shown, not left display:none');
+    assert.match(await page.textContent('#dashboard-title'), /Ada/, 'the real dashboard content renders (greeting), not an empty shell');
+    assert.match(page.url(), /#dashboard$/, 'the URL hash is normalized to #dashboard for an onboarded learner');
+    await context.close();
+  });
+
+  await test('the DDA AI sidebar entry (desktop + mobile drawer) opens the real #intelligence view for a Free learner', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    await page.click('.sidebar .nav-item[data-view="intelligence"]');
+    await page.waitForSelector('#intelligence.view.active');
+    await context.close();
+  });
+
+  console.log('\n-- AD. Academy sidebar restructure — Academy group, Mes Leçons/Exercices & Quiz deep-links, Certificats, Communauté, DDA Premium card (founder reference maquette) --');
+
+  await test('the Academy section opens expanded by default on desktop and collapses/expands on click, without touching routing', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(await page.getAttribute('#nav-academy-toggle', 'aria-expanded'), 'true', 'expanded by default, matching the maquette');
+    assert.equal(await page.isVisible('.sidebar .nav-item[data-view="path"]'), true, 'Mes Parcours is visible without any extra click');
+    await page.click('#nav-academy-toggle');
+    assert.equal(await page.getAttribute('#nav-academy-toggle', 'aria-expanded'), 'false');
+    assert.equal(await page.isVisible('.sidebar .nav-item[data-view="path"]'), false, 'collapsing really hides the sub-items');
+    await page.click('#nav-academy-toggle');
+    assert.equal(await page.getAttribute('#nav-academy-toggle', 'aria-expanded'), 'true');
+    assert.equal(await page.isVisible('.sidebar .nav-item[data-view="path"]'), true, 'expanding again restores them');
+    await context.close();
+  });
+
+  await test('"Mes Leçons" and "Exercices & Quiz" follow the real current lesson, and Exercices & Quiz opens straight on that lesson\'s real Exercice/Quiz tab', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(await page.getAttribute('#nav-current-lesson', 'data-view'), 'lesson', 'Mes Leçons targets the real current lesson (M0.1 for a fresh learner)');
+    assert.equal(await page.getAttribute('#nav-current-exercise', 'data-view'), 'lesson');
+    assert.equal(await page.getAttribute('#nav-current-exercise', 'data-scroll-to'), 'lesson-panel-exercise');
+    await page.click('#nav-current-exercise');
+    await page.waitForSelector('#lesson.view.active');
+    await page.waitForFunction(() => document.getElementById('lesson-tab-exercise')?.getAttribute('aria-selected') === 'true');
+    assert.equal(await page.isVisible('#lesson-panel-exercise'), true, 'the real Exercice/Quiz panel is actually shown, not just targeted');
+    await context.close();
+  });
+
+  await test('"Mes Leçons" and "Exercices & Quiz" advance together once a lesson is completed (no stale M0.1 shortcut)', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, { 'M0.1': { lessonViewed: true, exerciseComplete: true, quizComplete: true } });
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(await page.getAttribute('#nav-current-lesson', 'data-view'), 'lesson-m02', 'Mes Leçons moved on to the real next lesson, M0.2');
+    assert.equal(await page.getAttribute('#nav-current-exercise', 'data-view'), 'lesson-m02');
+    assert.equal(await page.getAttribute('#nav-current-exercise', 'data-scroll-to'), 'lesson-panel-exercise-m2', 'the exercise deep-link uses M0.2\'s real panel id');
+    await context.close();
+  });
+
+  await test('"Certificats" opens the real certification-preview panel inside Progression, honestly — not a fabricated standalone Certificats page', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    await page.click('.sidebar .nav-item[data-view="progress"][data-scroll-to="certificate-panel"]');
+    await page.waitForSelector('#progress.view.active');
+    await page.waitForFunction(() => {
+      const el = document.getElementById('certificate-panel');
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      return r.top < window.innerHeight && r.bottom > 0;
+    }, { timeout: 4000 });
+    await context.close();
+  });
+
+  await test('"Communauté" is a direct, working sidebar entry to the real (honest "coming soon") community view', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    await page.click('.sidebar .nav-item[data-view="community"]');
+    await page.waitForSelector('#community.view.active');
+    await context.close();
+  });
+
+  await test('the sidebar\'s DDA Premium card opens the real Premium preview, and the equivalent mobile-drawer card is reachable and not clipped at 390px', async () => {
+    const context = await freshContext(browser, { width: 1440, height: 900 });
+    await seedLocalLearner(context);
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.match(await page.textContent('.sidebar .sidebar-premium-card'), /DDA Premium/);
+    await page.click('.sidebar .sidebar-premium-card [data-view="membership"]');
+    await page.waitForSelector('#membership.view.active');
+    await context.close();
+
+    const mobileContext = await freshContext(browser, { width: 390, height: 844 });
+    await seedLocalLearner(mobileContext);
+    const mobilePage = await mobileContext.newPage();
+    await mobilePage.goto(`${ACADEMY_BASE}#dashboard`);
+    await mobilePage.waitForSelector('#dashboard.view.active');
+    await mobilePage.click('#mobile-menu-toggle');
+    await mobilePage.waitForSelector('#mobile-drawer:not([hidden])');
+    const card = mobilePage.locator('.mobile-drawer .sidebar-premium-card');
+    await card.scrollIntoViewIfNeeded();
+    assert.equal(await card.isVisible(), true, 'the Premium card is reachable in the mobile drawer, not buried off-screen');
+    const box = await card.boundingBox();
+    assert.ok(box, 'the Premium card has a real, measurable box in the drawer');
+    assert.ok(box.width <= 390, 'the Premium card never forces the drawer wider than the viewport');
+    assert.equal(await mobilePage.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), true, 'no page-level horizontal overflow at 390px with the drawer open');
+    await mobileContext.close();
+  });
+
+  await test('the restructured Academy group and DDA Premium card render with no horizontal overflow at 360/390/1440px, drawer included', async () => {
+    for (const viewport of [{ width: 360, height: 780 }, { width: 390, height: 844 }, { width: 1440, height: 900 }]) {
+      const context = await freshContext(browser, viewport);
+      await seedLocalLearner(context);
+      const page = await context.newPage();
+      await page.goto(`${ACADEMY_BASE}#dashboard`);
+      await page.waitForSelector('#dashboard.view.active');
+      if (viewport.width < 860) {
+        await page.click('#mobile-menu-toggle');
+        await page.waitForSelector('#mobile-drawer:not([hidden])');
+      }
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      assert.ok(overflow <= 1, `no horizontal overflow at ${viewport.width}px (measured ${overflow}px)`);
+      await context.close();
+    }
+  });
+
+  await test('BFF sessions isolate guest data, learner progress and DDA AI history by authenticated user_id', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await context.addInitScript(() => {
+      window.DDA_BFF_BASE_URL = 'https://api.dariusdigitalacademy.com';
+      localStorage.setItem('dda-prototype-state-v4', JSON.stringify({
+        schemaVersion: 4,
+        user: { id: 'old-device-user', name: 'Guest Private', email: 'guest@example.com' },
+        onboarding: { level: 'Avancé', goal: 'Ancien objectif privé', time: '45 minutes, 3 fois par semaine', complete: true },
+        lessons: { 'M0.1': { lessonViewed: true, exerciseComplete: true, quizComplete: true } },
+        journal: { entries: [{ id: 'guest-journal-secret', note: 'DO_NOT_IMPORT_JOURNAL' }], plan: {} },
+        terminal: { observation: 'DO_NOT_IMPORT_TERMINAL' }, preferences: {}, events: [], acquisition: {}
+      }));
+      localStorage.setItem('dda-ai-chat-v1', JSON.stringify([{ role: 'user', content: 'PRIVATE_GUEST_AI_HISTORY' }]));
+      localStorage.setItem('dda-ai-chat-v1:user:account-a', JSON.stringify([{ role: 'assistant', content: 'PRIVATE_ACCOUNT_A_AI_HISTORY' }]));
+    });
+    let currentAccount = 'account-a';
+    const progressImports = [];
+    let logoutRequests = 0;
+    await context.route('https://api.dariusdigitalacademy.com/**', async route => {
+      const pathname = new URL(route.request().url()).pathname;
+      const cors = {
+        'Access-Control-Allow-Origin': BASE,
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Allow-Headers': 'Content-Type, X-CSRF-Token',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, OPTIONS',
+        'Content-Type': 'application/json'
+      };
+      if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
+      if (pathname === '/v1/security/csrf') return route.fulfill({ status: 204, headers: cors });
+      if (pathname === '/v1/auth/logout' && route.request().method() === 'POST') {
+        logoutRequests++;
+        return route.fulfill({ status: 204, headers: cors });
+      }
+      if (['/v1/progress/lesson', '/v1/progress/onboarding'].includes(pathname) && route.request().method() === 'PUT') {
+        const body = route.request().postDataJSON();
+        progressImports.push({ pathname, body });
+        return route.fulfill({ status: 200, headers: cors, body: JSON.stringify({ saved: true }) });
+      }
+      if (pathname === '/v1/me') return route.fulfill({ status: 200, headers: cors, body: JSON.stringify({ user_id: currentAccount, email: `${currentAccount}@example.com`, display_name: `Learner ${currentAccount}`, status: 'active', entitlements: [] }) });
+      if (pathname === '/v1/progress') return route.fulfill({ status: 200, headers: cors, body: JSON.stringify(currentAccount === 'account-a' ? {
+        lessons: { 'M0.1': { lessonViewed: true, exerciseComplete: true, quizComplete: true } },
+        onboarding: { level: 'Débutant', goal: 'Comprendre les marchés', time: '10 minutes par jour', complete: true }
+      } : { lessons: {}, onboarding: null }) });
+      if (pathname === '/v1/premium/preview') return route.fulfill({ status: 403, headers: cors, body: JSON.stringify({ code: 'premium_required' }) });
+      if (pathname === '/v1/admin/overview') return route.fulfill({ status: 403, headers: cors, body: JSON.stringify({ code: 'admin_required' }) });
+      return route.fulfill({ status: 404, headers: cors, body: JSON.stringify({ code: 'not_found' }) });
+    });
+
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(await page.textContent('#dashboard-name'), 'Learner account-a', 'the authenticated name comes from the BFF, not guest localStorage');
+    assert.equal(await page.locator('#profile-storage-scope').textContent(), 'Compte DDA');
+    assert.equal(await page.locator('#profile-first-name').inputValue(), 'Learner account-a');
+    const firstBoot = await page.evaluate(() => ({
+      oldGlobal: localStorage.getItem('dda-prototype-state-v4'),
+      guestScoped: localStorage.getItem('dda-prototype-state-v4:guest'),
+      accountA: JSON.parse(localStorage.getItem('dda-prototype-state-v4:user:account-a') || 'null'),
+      statusHidden: document.getElementById('session-check-status').hidden,
+      transcript: document.getElementById('dda-ai-transcript').innerText
+    }));
+    assert.equal(JSON.parse(firstBoot.oldGlobal).user.name, 'Guest Private', 'historic unscoped data stays untouched');
+    assert.ok(firstBoot.guestScoped, 'BFF guest data is written only to its separate guest key');
+    assert.equal(firstBoot.accountA.user.email, 'account-a@example.com');
+    assert.equal(firstBoot.accountA.lessons['M0.1'].quizComplete, true);
+    assert.equal(firstBoot.statusHidden, true, 'the session-check overlay disappears after hydration');
+    assert.match(firstBoot.transcript, /PRIVATE_ACCOUNT_A_AI_HISTORY/);
+    assert.doesNotMatch(firstBoot.transcript, /PRIVATE_GUEST_AI_HISTORY/);
+    assert.doesNotMatch(await page.locator('#academy-shell').innerText(), /Guest Private|Ancien objectif privé/);
+
+    currentAccount = 'account-b';
+    await page.reload();
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(await page.textContent('#dashboard-name'), 'Learner account-b');
+    const accountB = await page.evaluate(() => JSON.parse(localStorage.getItem('dda-prototype-state-v4:user:account-b') || 'null'));
+    assert.equal(accountB.user.email, 'account-b@example.com');
+    assert.equal(accountB.lessons['M0.1'], undefined, 'account B never sees account A progress');
+    assert.doesNotMatch(await page.locator('#dda-ai-transcript').innerText(), /PRIVATE_ACCOUNT_A_AI_HISTORY|PRIVATE_GUEST_AI_HISTORY/);
+    await page.goto(`${ACADEMY_BASE}#profile`);
+    await page.waitForSelector('#profile.view.active');
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'the account profile actions fit on mobile');
+    assert.equal(await page.locator('#profile-import-notice').isVisible(), true, 'a separately consented import is offered after the account is known');
+    page.on('dialog', dialog => dialog.accept());
+    await page.locator('#profile-import-progress').click();
+    await page.waitForFunction(() => localStorage.getItem('dda-progress-import-v1:user:account-b') === 'done');
+    assert.equal(await page.locator('#profile-import-notice').isHidden(), true, 'successful import is not offered again for the same account');
+    assert.equal(await page.locator('#profile-error').textContent(), '');
+    assert.equal(progressImports.length, 2, 'only one lesson proof and onboarding are sent to the BFF');
+    assert.deepEqual(progressImports.map(item => item.pathname).sort(), ['/v1/progress/lesson', '/v1/progress/onboarding']);
+    assert.equal(progressImports.some(item => JSON.stringify(item.body).includes('DO_NOT_IMPORT')), false, 'journal and terminal data never leave the device during migration');
+    assert.equal(progressImports.some(item => JSON.stringify(item.body).includes('guest@example.com') || JSON.stringify(item.body).includes('Guest Private')), false, 'guest identity is never copied into the account');
+    const importedAccountB = await page.evaluate(() => JSON.parse(localStorage.getItem('dda-prototype-state-v4:user:account-b') || 'null'));
+    assert.equal(importedAccountB.lessons['M0.1'].quizComplete, true, 'the learner-selected lesson completion is merged into this account only');
+    assert.equal(importedAccountB.journal.entries.length, 0, 'local Journal stays outside the imported subset');
+    assert.equal(importedAccountB.terminal.observation, '', 'local Terminal remains outside the imported subset');
+    await page.locator('#profile-logout').click();
+    await page.waitForSelector('#access.view.active');
+    assert.equal(logoutRequests, 1, 'the logout action revokes the BFF session');
+    assert.equal(await page.textContent('#dashboard-name'), 'Apprenant', 'the prior account name is removed from visible UI after logout');
+    assert.equal(await page.locator('#dda-ai-transcript').innerText(), '', 'the prior account chat history is removed from the active transcript');
+    assert.ok(await page.evaluate(() => localStorage.getItem('dda-prototype-state-v4:user:account-b')), 'logout preserves the isolated account storage instead of deleting learner work');
     await context.close();
   });
 

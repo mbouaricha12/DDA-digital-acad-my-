@@ -80,6 +80,41 @@
     if (!result.response.ok) throw resultError(result, 'verification_failed');
     return true;
   }
+  // PKCE signup confirmation (P0 auth reliability audit, 2026-11): the
+  // confirmation link's `code` alone proves nothing — the server pairs it
+  // with the code_verifier it kept in this browser's own httpOnly cookie
+  // (sent automatically via credentials:'include' above), which a security
+  // scanner's sandboxed browser never has. See bff/src/app.js and pkce.js.
+  async function exchangeSignupCode(code) {
+    const result = await request('/v1/auth/verify-email', { method: 'POST', body: { code } });
+    if (!result.enabled) return null;
+    if (!result.response.ok) throw resultError(result, 'verification_failed');
+    return true;
+  }
+
+  // Google OAuth — start (founder directive, 2026-11): deliberately NOT a
+  // fetch. This hands back the BFF's own start URL so the caller can do a
+  // real top-level navigation (`location.href = ...`) — a full page
+  // redirect, the one flow this button needs, and the one kind of request
+  // that reliably carries the httpOnly verifier cookie the BFF sets on its
+  // own 302 response through Supabase and back. A fetch here would run the
+  // whole Google/Supabase hop inside an XHR, which neither follows
+  // cross-origin redirects the way a navigation does nor is what any mobile
+  // browser expects for a sign-in button — no popup, same as the rest of
+  // this site.
+  function oauthGoogleStartUrl() {
+    return enabled() ? `${configuredBase}/v1/auth/oauth/google/start` : null;
+  }
+  // The return leg, once the browser is back on academy.html with Supabase's
+  // one-time `code` in the query string: a plain fetch, same shape as
+  // exchangeRecoveryCode/exchangeSignupCode above, since the verifier cookie
+  // travels automatically via credentials:'include'.
+  async function exchangeOAuthCode(provider, code) {
+    const result = await request(`/v1/auth/oauth/${encodeURIComponent(provider)}/exchange`, { method: 'POST', body: { code } });
+    if (!result.enabled) return null;
+    if (!result.response.ok) throw resultError(result, 'oauth_exchange_failed');
+    return true;
+  }
 
   async function login({ email, password }) {
     const result = await request('/v1/auth/login', { method: 'POST', body: { email, password } });
@@ -102,8 +137,8 @@
     return true;
   }
 
-  async function getMe() {
-    const result = await request('/v1/me');
+  async function getMe(options = {}) {
+    const result = await request('/v1/me', options);
     if (!result.enabled || result.response.status === 401) return null;
     if (!result.response.ok) throw resultError(result, 'bff_me_failed');
     return result.body;
@@ -246,7 +281,8 @@
   }
 
   window.DDABFF = Object.freeze({
-    enabled, register, verifyEmail, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
+    enabled, register, verifyEmail, exchangeSignupCode, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
+    oauthGoogleStartUrl, exchangeOAuthCode,
     getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, fetchPremiumContent, askAI,
     getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }
