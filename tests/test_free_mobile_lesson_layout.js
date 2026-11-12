@@ -49,7 +49,7 @@ async function completeLocalEntry(page, width) {
   });
   try {
     await waitForServer(server);
-    const browser = await chromium.launch({ headless: true, executablePath: '/usr/bin/chromium' });
+    const browser = await chromium.launch({ headless: true });
     try {
       for (const width of [360, 390, 430]) {
         const context = await browser.newContext({
