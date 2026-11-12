@@ -68,7 +68,7 @@ function state(plan = 'premium') {
     assert.deepEqual(curriculum.filter(item => item.module === 'M2').map(item => item.id), []);
 
     await page.goto(`${ACADEMY}#premium-track`);
-    await page.getByRole('button', { name: 'Ouvrir l’atelier', exact: true }).click();
+    await page.locator('button[data-view="premium-lab"]').first().click();
     await page.locator('#p2-direction').selectOption({ label: 'Long' });
     await page.fill('#p2-setup', 'Structure observée et contexte cohérent.');
     await page.fill('#p2-entry', 'Confirmation définie avant toute entrée.');
@@ -80,7 +80,7 @@ function state(plan = 'premium') {
     assert.match(await page.locator('#premium-lab-feedback').innerText(), /limite de risque mesurable|bien/i);
 
     await page.goto(`${ACADEMY}#premium-track`);
-    await page.getByRole('button', { name: 'Ouvrir l’évaluation', exact: true }).click();
+    await page.locator('button[data-view="premium-assessment"]').first().click();
     for (const [name, value] of [['p2-q1', 'wait'], ['p2-q2', 'respect'], ['p2-q3', 'c'], ['p2-q4', 'b']]) await page.locator(`input[name="${name}"][value="${value}"]`).check();
     await page.click('#premium-assessment-form button[type="submit"]');
     assert.match(await page.locator('#premium-assessment-feedback').innerText(), /validée|Validated/i);
