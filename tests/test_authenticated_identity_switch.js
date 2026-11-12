@@ -4,6 +4,12 @@ const assert = require('node:assert/strict');
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
+try {
+  require.resolve('playwright');
+} catch {
+  const { execSync } = require('node:child_process');
+  module.paths.push(execSync('npm root -g').toString().trim());
+}
 const { chromium } = require('playwright');
 
 const DIST = path.join(__dirname, '..', 'dist');
