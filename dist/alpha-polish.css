@@ -3157,3 +3157,25 @@ body.public-shell .prototype-banner{display:none}
 
 .session-check-status{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:24px;background:#060d17;color:#e8edf5;font-family:inherit;font-size:14px;font-weight:600;line-height:1.5;text-align:center}
 .session-check-status[hidden]{display:none}
+
+
+/* Final access-surface polish: keep learner chrome out of signup/login until an identity exists. */
+body.access-mode .sidebar,
+body.access-mode .mobile-nav,
+body.access-mode .mobile-drawer,
+body.access-mode .mobile-drawer-backdrop,
+body.access-mode .topbar .icon-button,
+body.access-mode .topbar-search,
+body.access-mode .topbar-tagline,
+body.access-mode .network-state,
+body.access-mode .topbar-user{display:none!important}
+body.access-mode main{padding-bottom:0}
+@media(min-width:860px){body.access-mode .app-shell{grid-template-columns:1fr}}
+#access .access-sequence{display:flex;align-items:center;gap:10px;margin:18px 0 20px;color:#d5dfed;font-size:12px}
+#access .access-sequence>span{display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap}
+#access .access-sequence>span b{color:#f5c96b;font-size:11px}
+#access .access-sequence>span small{font-size:11px}
+#access .access-sequence>i{display:block;flex:1;min-width:10px;height:1px;background:#c9c1b4}
+#access .access-back-link{display:inline-flex;align-items:center;gap:6px;margin:0 0 16px;color:#f5c96b;font-size:12px;font-weight:700;text-decoration:none}
+#access .access-back-link:hover,#access .access-back-link:focus-visible{text-decoration:underline;text-underline-offset:3px}
+@media(max-width:420px){#access .access-sequence{gap:6px}#access .access-sequence>span{gap:4px}#access .access-sequence>span small{font-size:10px}}

@@ -653,7 +653,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
-  await test('mobile onboarding dropdown bottom sheet stays above the fixed navigation', async () => {
+  await test('mobile onboarding dropdown stays within the viewport while public navigation is hidden', async () => {
     const context = await freshContext(browser, { width: 390, height: 844 });
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#access`);
@@ -669,12 +669,14 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       const nav = document.querySelector('.mobile-nav');
       const menuBox = menu.getBoundingClientRect();
       const navBox = nav.getBoundingClientRect();
-      return { position: getComputedStyle(menu).position, menuBottom: menuBox.bottom, navTop: navBox.top, visible: getComputedStyle(menu).visibility === 'visible', parent: menu.parentNode.tagName };
+      return { position: getComputedStyle(menu).position, menuBottom: menuBox.bottom, navTop: navBox.top, navVisible: getComputedStyle(nav).display !== 'none', viewportHeight: window.innerHeight, accessMode: document.body.classList.contains('access-mode'), visible: getComputedStyle(menu).visibility === 'visible', parent: menu.parentNode.tagName };
     });
     assert.equal(geometry.position, 'fixed');
     assert.equal(geometry.visible, true);
+    assert.equal(geometry.accessMode, true, 'the learner is still in the public onboarding flow');
+    assert.equal(geometry.navVisible, false, 'learner navigation stays hidden before onboarding is complete');
     assert.equal(geometry.parent, 'BODY', 'an open mobile sheet must be a direct child of <body>, not nested inside its field — see "mobile onboarding dropdown never overlaps a sibling field" below for why');
-    assert.ok(geometry.menuBottom <= geometry.navTop, `dropdown must stay above mobile navigation: ${JSON.stringify(geometry)}`);
+    assert.ok(geometry.menuBottom <= geometry.viewportHeight - 20, `dropdown must remain inside the viewport: ${JSON.stringify(geometry)}`);
     await context.close();
   });
 
@@ -2321,6 +2323,89 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
   console.log('\n-- R. Paywall Premium honnête, aperçu gratuit et liste d\'attente --');
 
+  await test('the public access screen hides learner navigation on mobile and desktop and has a clear return link', async () => {
+    for (const width of [390, 1440]) {
+      const context = await freshContext(browser, { width, height: 844 });
+      const page = await context.newPage();
+      await page.goto(`${ACADEMY_BASE}#access`);
+      await page.waitForSelector('#access.view.active');
+      assert.equal(await page.locator('body').evaluate(el => el.classList.contains('access-mode')), true);
+      for (const selector of ['.sidebar', '.mobile-nav', '.topbar-user', '.profile-chip']) {
+        assert.equal(await page.locator(selector).isVisible(), false, `${selector} is hidden before identity exists at ${width}px`);
+      }
+      assert.equal(await page.locator('.access-back-link').getAttribute('href'), './index.html');
+      assert.equal(await page.locator('.access-sequence').evaluate(el => getComputedStyle(el).display), 'flex');
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, `no horizontal overflow at ${width}px`);
+      await context.close();
+    }
+  });
+
+  await test('a Free learner can follow the explicitly local Premium preview CTA into the existing Risk Lab', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#resources`);
+    await page.waitForSelector('#resources.view.active');
+    await page.click('.premium-resource .premium-gate');
+    await page.waitForSelector('#gate-layer:not([hidden])');
+    assert.match(await page.locator('#gate-description').textContent(), /Démonstration pédagogique sur cet appareil uniquement/);
+    await page.click('#gate-unlock');
+    await page.waitForSelector('#premium-lab.view.active');
+    assert.equal(await page.evaluate(() => location.hash), '#premium-lab');
+    assert.equal(await page.locator('#premium-lab-form').isVisible(), true, 'the CTA opens the existing Risk Lab instead of only showing a toast');
+    await context.close();
+  });
+
+  await test('BFF Free learner cannot unlock Premium locally from the resource CTA', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
+      status: 403, contentType: 'application/json',
+      body: JSON.stringify({ code: 'premium_required', message: 'An active Premium entitlement is required.' })
+    }));
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    const previewCheck = page.waitForResponse(response => response.url() === 'https://bff.test/v1/premium/preview');
+    await page.goto(`${ACADEMY_BASE}#resources`);
+    await page.waitForSelector('#resources.view.active');
+    await previewCheck;
+    await page.click('.premium-resource .premium-gate');
+    await page.waitForSelector('#gate-layer:not([hidden])');
+    assert.equal(await page.locator('#gate-unlock').isVisible(), false, 'BFF mode never offers a local entitlement toggle');
+    assert.match(await page.locator('#gate-description').textContent(), /droit Premium confirmé par le serveur/);
+    assert.equal(await page.evaluate(() => window.DDA.load().membership.plan), 'free', 'opening the gate does not promote local membership');
+    assert.equal(await page.evaluate(() => location.hash), '#resources', 'the Risk Lab remains closed without the server entitlement');
+    await context.close();
+  });
+
+  await test('BFF server-confirmed Premium lets the resource CTA open the existing Risk Lab', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true })
+    }));
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    const previewCheck = page.waitForResponse(response => response.url() === 'https://bff.test/v1/premium/preview');
+    await page.goto(`${ACADEMY_BASE}#resources`);
+    await page.waitForSelector('#resources.view.active');
+    await previewCheck;
+    await page.click('.premium-resource .premium-gate');
+    await page.waitForSelector('#premium-lab.view.active');
+    assert.equal(await page.locator('#gate-layer').isVisible(), false, 'a positive server confirmation opens the requested Lab');
+    assert.equal(await page.evaluate(() => window.DDA.load().membership.plan), 'free', 'the server entitlement is not copied into a fake local Premium plan');
+    await context.close();
+  });
+
   await test('P2.1 is marked preview=true and stays open for a Free learner despite its premium_track permission', async () => {
     const context = await freshContext(browser);
     await seedLocalLearner(context, {}, 'free');
@@ -2347,12 +2432,14 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
-  await test('the Premium waitlist requires an explicit consent tick before it can be joined, and the joined state survives a reload', async () => {
+  await test('the Premium interest preference requires consent, makes no notification promise, and survives a reload locally', async () => {
     const context = await freshContext(browser);
     await seedLocalLearner(context, {}, 'free');
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#membership`);
     await page.waitForSelector('#membership.view.active');
+    assert.match(await page.locator('#premium-waitlist-panel').textContent(), /ne crée aucune inscription et n’envoie aucune notification/);
+    assert.equal(await page.locator('#premium-waitlist-join').textContent(), 'Enregistrer mon intérêt sur cet appareil');
     assert.equal(await page.isDisabled('#premium-waitlist-join'), true, 'joining is blocked until consent is given');
     await page.check('#premium-waitlist-consent');
     assert.equal(await page.isDisabled('#premium-waitlist-join'), false);
@@ -2362,6 +2449,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.reload();
     await page.waitForSelector('#membership.view.active');
     assert.equal(await page.locator('#premium-waitlist-confirmation').isVisible(), true, 'the consent is a real local record, not a one-time UI flag');
+    assert.match(await page.locator('#premium-waitlist-confirmation').textContent(), /aucune liste et ne recevras pas de notification/);
     await context.close();
   });
 
