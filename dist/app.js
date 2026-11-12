@@ -218,9 +218,19 @@ const VIDEO_REGISTRY = Object.freeze([
 
 // L’état est chargé avant le montage afin que les leçons Premium authored ne
 // soient jamais injectées dans le DOM d’un utilisateur Free.
-let prototypeState = DDA.load();
+let prototypeState = window.DDABFF?.enabled()
+  ? (DDA.setStorageScope(null) || DDA.load())
+  : DDA.load();
 let remoteUser = null;
 let bffAuthMode = 'signup';
+function progressImportMarkerKey(userId) {
+  return userId ? `dda-progress-import-v1:user:${encodeURIComponent(userId)}` : '';
+}
+function hasImportedUnscopedProgress(userId) {
+  const key = progressImportMarkerKey(userId);
+  if (!key) return false;
+  try { return localStorage.getItem(key) === 'done'; } catch { return false; }
+}
 // Last successful signup's credentials, kept only in memory for this page
 // load — never persisted — so the "resend confirmation" action (signup
 // reliability audit, P0 2026-11) can reuse them without asking the learner
@@ -1098,16 +1108,27 @@ async function revealAdminLinkIfAdmin() {
 async function hydrateRemoteSession() {
   if (!window.DDABFF?.enabled()) return null;
   try {
-    const user = await window.DDABFF.getMe();
-    if (!user) return null;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    let user;
+    try { user = await window.DDABFF.getMe({ signal: controller.signal }); }
+    finally { clearTimeout(timeout); }
+    if (!user) {
+      remoteUser = null;
+      prototypeState = DDA.setStorageScope(null) || DDA.load();
+      window.DDARefreshAiHistory?.();
+      return null;
+    }
+    if (typeof user.user_id !== 'string' || !user.user_id.trim()) throw new Error('bff_user_identity_missing');
+    const accountState = DDA.setStorageScope(user.user_id);
+    if (!accountState) throw new Error('bff_user_identity_invalid');
     remoteUser = user;
-    const localUser = prototypeState.user || {};
     let nextState = {
-      ...prototypeState,
+      ...accountState,
       user: {
-        ...localUser,
-        name: user.display_name || localUser.name || 'Apprenant',
-        email: user.email || localUser.email || ''
+        ...(accountState.user || {}),
+        name: user.display_name || 'Apprenant',
+        email: user.email || ''
       }
     };
     try {
@@ -1117,10 +1138,14 @@ async function hydrateRemoteSession() {
       // Progress sync is best-effort: a failed pull leaves local progress untouched.
     }
     prototypeState = DDA.save(nextState);
-    renderState();
+    window.DDARefreshAiHistory?.();
     return user;
   } catch {
-    // A temporary BFF outage must not destroy the learner's local prototype.
+    // A temporary BFF outage leaves the isolated guest namespace intact. It
+    // must never cause guest data to be attributed to a remote account.
+    remoteUser = null;
+    prototypeState = DDA.setStorageScope(null) || DDA.load();
+    window.DDARefreshAiHistory?.();
     return null;
   }
 }
@@ -1140,6 +1165,7 @@ function setBffAuthMode(mode) {
   const title = document.getElementById('access-form-title');
   const step = document.getElementById('access-step-label');
   const note = document.getElementById('access-form-note');
+  const emailHelp = document.getElementById('access-email-help');
   const submit = document.querySelector('#signup-form button[type="submit"]');
   const forgot = document.getElementById('bff-forgot-password');
   const resend = document.getElementById('bff-resend-confirmation');
@@ -1157,11 +1183,14 @@ function setBffAuthMode(mode) {
   // unlike the local-only prototype mode this label's original wording
   // describes — showing that copy here would tell a real signer-upper
   // something false about where their data goes.
-  if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe). La synchronisation de ma progression sera activée progressivement ; mon état local reste conservé sur cet appareil.';
+  if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe) pour retrouver la progression de mes leçons et mon onboarding après confirmation de mon adresse e-mail. Le Journal, le Terminal, les préférences et mes réponses restent sur cet appareil.';
+  if (emailHelp) emailHelp.textContent = login
+    ? 'Cette adresse e-mail est transmise au service d’authentification pour ouvrir ta session.'
+    : 'Cette adresse e-mail est transmise au service d’authentification pour créer ton compte et t’envoyer le lien de confirmation.';
   if (title) title.textContent = login ? 'Se connecter' : 'Commence ton parcours Free';
   if (step) step.textContent = login ? 'Accès sécurisé' : 'Étape 1 sur 2 · commencer';
   if (note) note.textContent = login
-    ? 'Ouvre ta session serveur. La synchronisation de ta progression sera activée progressivement ; ton état local reste conservé sur cet appareil.'
+    ? 'Ouvre ta session DDA. Les leçons et l’onboarding sont liés à ton compte ; le Journal, le Terminal et les réponses restent sur cet appareil.'
     : 'Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon.';
   if (submit) submit.innerHTML = login ? 'Ouvrir ma session <span>→</span>' : 'Recevoir le lien de vérification <span>→</span>';
   if (forgot) forgot.hidden = !login;
@@ -1244,9 +1273,9 @@ async function handleBffVerificationToken() {
  if(oauthProvider==='oauth-google'){
   showView('access',false,'replace');
   const panel=document.getElementById('bff-verify-panel'),message=document.getElementById('bff-verify-message'),form=document.getElementById('signup-form');
-  if(panel)panel.hidden=false;if(form)form.hidden=true;
-  if(oauthError){if(message)message.textContent=oauthErrorMessage(oauthError);return;}
-  if(!code){if(message)message.textContent='Lien de connexion Google incomplet. Réessaie « Continuer avec Google ».';return;}
+  if(panel)panel.hidden=true;if(form)form.hidden=true;
+  if(oauthError){if(message)message.textContent=oauthErrorMessage(oauthError);if(panel)panel.hidden=false;return;}
+  if(!code){if(message)message.textContent='Lien de connexion Google incomplet. Réessaie « Continuer avec Google ».';if(panel)panel.hidden=false;return;}
   if(message)message.textContent='Connexion avec Google en cours…';
   try{
    await window.DDABFF.exchangeOAuthCode('google',code);
@@ -1849,7 +1878,7 @@ function renderCertificatePreview(lessonProgress) {
   preview.hidden = !eligible || !premium;
   if (!eligible || !premium) return;
 
-  const name = prototypeState.user?.name || 'Richard';
+  const name = prototypeState.user?.name || 'Apprenant';
   const event = [...(prototypeState.events || [])].reverse().find(e => e.name === 'quiz_complete');
   const date = event ? new Date(event.at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
   document.getElementById('certificate-name').textContent = name;
@@ -2757,7 +2786,7 @@ function renderMembershipNextStep(premium) {
   const el = document.getElementById('membership-next-step');
   if (!el) return;
   if (premium) {
-    el.textContent = 'Ton accès Premium est en aperçu sur cet appareil — ouvre l’atelier Ressources Premium ou l’aperçu de certification pour voir ce qu’il débloque réellement dès aujourd’hui.';
+    el.textContent = 'Ton accès Premium est présenté en démonstration — ouvre l’atelier Ressources Premium ou l’aperçu de certification pour voir ce qu’il débloque réellement dès aujourd’hui.';
     return;
   }
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
@@ -2767,8 +2796,10 @@ function renderMembershipNextStep(premium) {
 }
 
 function renderState() {
-  const name = prototypeState.user?.name || 'Richard';
-  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'RD';
+  const name = prototypeState.user?.name || 'Apprenant';
+  const initials = prototypeState.user?.name
+    ? name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase()
+    : 'A';
   const activeLessonProgress = DDALearning.getLessonProgress(prototypeState, activeLessonId);
   const xp = DDALearning.totalXp(DDA.curriculum, prototypeState);
   // Deliberately out of scope for the Daily Value Loop correction: `complete`
@@ -2874,23 +2905,38 @@ function renderState() {
   document.getElementById('profile-form').hidden = !hasProfile;
   document.querySelector('.preference-panel').hidden = !hasProfile;
   document.getElementById('empty-profile').hidden = hasProfile;
+  document.getElementById('profile-large-avatar').textContent = initials;
+  document.getElementById('profile-heading-name').textContent = name;
+  document.getElementById('profile-heading-email').textContent = remoteUser?.email || prototypeState.user?.email || 'Compte local';
+  document.getElementById('profile-storage-scope').textContent = remoteUser ? 'Compte DDA' : 'Profil sur cet appareil';
+  document.querySelector('.profile-chip small').textContent = remoteUser ? 'Mon profil (compte)' : 'Mon profil (appareil)';
+  document.getElementById('profile-storage-disclosure').textContent = remoteUser
+    ? 'Les informations de profil et la progression des leçons sont rattachées à ton compte DDA. Le Journal, le Terminal, les préférences et l’historique DDA AI restent sur cet appareil, isolés par compte et non synchronisés.'
+    : 'Sans compte connecté, tes données restent sur cet appareil. Une mesure d’audience pseudonyme peut aider à comprendre comment les visiteurs découvrent DDA ; elle ne contient ni ton nom ni ton e-mail.';
+  const importNotice = document.getElementById('profile-import-notice');
+  if (importNotice) {
+    const candidate = remoteUser ? DDA.readUnscopedProgressCandidate?.() : null;
+    importNotice.hidden = !candidate || hasImportedUnscopedProgress(remoteUser?.user_id);
+  }
+  const logoutButton = document.getElementById('profile-logout');
+  if (logoutButton) logoutButton.hidden = !remoteUser;
+  document.getElementById('profile-first-name').value = hasProfile ? name : '';
+  document.getElementById('profile-error').textContent = '';
   if (hasProfile) {
-    document.getElementById('profile-large-avatar').textContent = initials;
-    const identityLabel = document.getElementById('profile-identity-label');
     const persistenceStatus = document.getElementById('profile-persistence-status');
     const remoteAccount = Boolean(window.DDABFF?.enabled() && remoteUser);
-    if (identityLabel) identityLabel.textContent = remoteAccount ? 'Mon profil · compte connecté' : 'Mon profil · local';
-    document.getElementById('profile-heading-name').textContent = name;
-    document.getElementById('profile-heading-email').textContent = prototypeState.user.email || 'Compte local';
     if (persistenceStatus) {
       const storageReady = DDA.storageAvailable();
-      persistenceStatus.textContent = storageReady
-        ? (remoteAccount ? 'Progression locale · compte connecté, synchronisation non activée' : 'Progression locale · enregistrée sur cet appareil')
-        : 'Progression en mémoire · stockage local indisponible';
+      persistenceStatus.textContent = remoteAccount
+        ? (storageReady
+            ? 'Leçons et onboarding liés à ton compte · Journal, Terminal, préférences et réponses sur cet appareil'
+            : 'Leçons et onboarding liés à ton compte · stockage local indisponible pour tes autres données')
+        : (storageReady
+            ? 'Progression locale · enregistrée sur cet appareil'
+            : 'Progression en mémoire · stockage local indisponible');
       persistenceStatus.classList.toggle('is-warning', !storageReady);
     }
     document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
-    document.getElementById('profile-first-name').value = name;
     document.getElementById('profile-level').value = prototypeState.onboarding?.level || 'Débutant';
     document.getElementById('profile-goal').value = prototypeState.onboarding?.goal || 'Comprendre les marchés';
     document.getElementById('profile-time').value = prototypeState.onboarding?.time || '10 minutes par jour';
@@ -2902,9 +2948,9 @@ function renderState() {
 
   document.getElementById('sidebar-plan').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
   document.querySelectorAll('[data-profile-role]').forEach(node => { node.textContent = premium ? 'Apprenant Premium' : 'Apprenant'; });
-  document.getElementById('membership-status').textContent = premium ? 'DDA Premium · aperçu local' : 'DDA Free';
+  document.getElementById('membership-status').textContent = premium ? 'DDA Premium · démonstration' : 'DDA Free';
   const membershipStatusNote = document.getElementById('membership-status-note');
-  if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Démonstration sur cet appareil · aucun achat actif' : 'Disponible maintenant · aucun achat actif';
+  if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Démonstration pédagogique · aucun achat actif' : 'Disponible maintenant · aucun achat actif';
   document.getElementById('free-plan-state').textContent = premium ? 'Inclus avec Premium' : 'Formule active';
   document.getElementById('preview-premium').hidden = premium;
   document.getElementById('revert-free').hidden = !premium;
@@ -3529,16 +3575,30 @@ function closeReader() {
 document.getElementById('reader-close').addEventListener('click', closeReader);
 
 document.querySelectorAll('.premium-gate').forEach(button => button.addEventListener('click', () => {
-  if (canUnlock(button.dataset.permission)) { showToast('Atelier Premium débloqué en aperçu.'); return; }
+  const target = button.dataset.premiumTarget;
+  if (canUnlock(button.dataset.permission)) {
+    if (target && viewPermissions[target] && !canUnlock(viewPermissions[target])) {
+      showView('membership');
+      showToast('L’aperçu local ne remplace pas un droit Premium confirmé par le serveur.');
+      return;
+    }
+    if (target) { showView(target); return; }
+    showToast('Atelier Premium débloqué en aperçu.');
+    return;
+  }
   gateTrigger = button;
   prototypeState = DDA.track(prototypeState, 'access_denied', { permission: button.dataset.permission, plan: 'free' });
+  const localPreviewAvailable = !window.DDABFF?.enabled();
   openGate({
     eyebrow: 'DDA Premium',
     title: 'Cette expérience sera disponible avec Premium.',
-    description: 'Aucun achat ni paiement réel n’est proposé ici.',
-    canUnlock: true,
-    unlockText: 'Simuler l’accès Premium sur cet appareil',
-    previewText: 'Voir la formule Premium'
+    description: localPreviewAvailable
+      ? 'Démonstration pédagogique sur cet appareil uniquement. Aucun achat ni paiement réel n’est proposé.'
+      : 'L’accès à cet atelier exige un droit Premium confirmé par le serveur. Aucun paiement réel n’est activé.',
+    canUnlock: localPreviewAvailable,
+    unlockText: localPreviewAvailable ? 'Essayer la démonstration sur cet appareil' : undefined,
+    previewText: 'Voir la formule Premium',
+    targetView: target
   });
 }));
 document.getElementById('gate-unlock')?.addEventListener('click', () => {
@@ -3821,7 +3881,7 @@ bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business'
 /* DDA AI Academy chat — a thin UI bridge over the authenticated BFF client.
    The browser never receives a provider key and never invents a reply when the
    BFF is disabled, unauthenticated or not configured. Only the last 12 turns
-   are kept locally so the learner can continue a short pedagogical thread. */
+   are kept locally, under the authenticated account's own storage namespace. */
 (function initDdaAiChat() {
   const form = document.getElementById('dda-ai-form');
   const input = document.getElementById('dda-ai-input');
@@ -3831,16 +3891,37 @@ bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business'
   const error = document.getElementById('dda-ai-error');
   const submit = document.getElementById('dda-ai-submit');
   if (!form || !input || !transcript || !status || !window.DDABFF) return;
-  const storageKey = 'dda-ai-chat-v1';
+  const guestStorageKey = 'dda-ai-chat-v1';
   const maxTurns = 12;
   let history = [];
+  let historyStorageKey = null;
   let pending = false;
-  try {
-    const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    if (Array.isArray(saved)) history = saved.filter(turn => ['user', 'assistant'].includes(turn?.role) && typeof turn.content === 'string').slice(-maxTurns);
-  } catch { history = []; }
+  function currentHistoryStorageKey() {
+    if (!window.DDABFF.enabled()) return guestStorageKey;
+    return remoteUser?.user_id
+      ? `dda-ai-chat-v1:user:${encodeURIComponent(remoteUser.user_id)}`
+      : null;
+  }
+  function loadHistoryForScope() {
+    const nextKey = currentHistoryStorageKey();
+    if (nextKey === historyStorageKey) return;
+    historyStorageKey = nextKey;
+    history = [];
+    transcript.replaceChildren();
+    empty.hidden = false;
+    if (historyStorageKey) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(historyStorageKey) || '[]');
+        if (Array.isArray(saved)) history = saved.filter(turn => ['user', 'assistant'].includes(turn?.role) && typeof turn.content === 'string').slice(-maxTurns);
+      } catch { history = []; }
+    }
+    history.forEach(turn => appendMessage(turn.role, turn.content));
+  }
+  loadHistoryForScope();
+  window.DDARefreshAiHistory = loadHistoryForScope;
   const saveHistory = () => {
-    try { localStorage.setItem(storageKey, JSON.stringify(history.slice(-maxTurns))); } catch { /* storage is optional */ }
+    if (!historyStorageKey) return;
+    try { localStorage.setItem(historyStorageKey, JSON.stringify(history.slice(-maxTurns))); } catch { /* storage is optional */ }
   };
   function appendMessage(role, text, options = {}) {
     const item = document.createElement('div');
@@ -3858,7 +3939,6 @@ bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business'
     transcript.scrollTop = transcript.scrollHeight;
     return item;
   }
-  history.forEach(turn => appendMessage(turn.role, turn.content));
   if (!window.DDABFF.enabled()) {
     status.textContent = 'Service en attente de configuration';
     status.dataset.state = 'offline';
@@ -3889,7 +3969,9 @@ bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business'
     const message = input.value.trim();
     if (!message) { error.textContent = 'Écris une question avant d’envoyer.'; input.focus(); return; }
     error.textContent = '';
+    loadHistoryForScope();
     const priorHistory = history.slice(-maxTurns);
+    const requestScope = historyStorageKey;
     appendMessage('user', message);
     history.push({ role: 'user', content: message });
     saveHistory();
@@ -3899,6 +3981,7 @@ bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business'
     try {
       const result = await window.DDABFF.askAI(message, priorHistory);
       pendingMessage.remove();
+      if (requestScope !== historyStorageKey) return;
       if (!result.available) {
         showUnavailable();
       } else if (result.error) {
@@ -4651,6 +4734,66 @@ function resetPilot() {
 
 document.getElementById('reset-session').addEventListener('click', resetPilot);
 document.getElementById('profile-reset').addEventListener('click', resetPilot);
+document.getElementById('profile-logout')?.addEventListener('click', async event => {
+  const email = remoteUser?.email || '';
+  if (!remoteUser) return;
+  event.currentTarget.disabled = true;
+  let serverConfirmed = false;
+  try {
+    await window.DDABFF.logout();
+    serverConfirmed = true;
+  } catch { /* Hide local account data even if revocation cannot be confirmed. */ }
+  remoteUser = null;
+  serverPremiumConfirmed = null;
+  prototypeState = DDA.setStorageScope(null) || DDA.load();
+  window.DDARefreshAiHistory?.();
+  renderState();
+  setBffAuthMode('login');
+  document.getElementById('email').value = email;
+  document.getElementById('access-password').value = '';
+  document.getElementById('signup-form').hidden = false;
+  document.getElementById('onboarding-form').hidden = true;
+  showView('access', false);
+  if (serverConfirmed) showToast('Session fermée. Les données du compte restent isolées sur cet appareil.');
+  else document.getElementById('bff-auth-status').textContent = 'Les données du compte sont masquées sur cet appareil, mais le serveur n’a pas confirmé la fermeture. Vérifie ta connexion avant de quitter le navigateur.';
+});
+
+document.getElementById('profile-import-progress')?.addEventListener('click', async event => {
+  if (!remoteUser || !window.DDABFF?.enabled()) return;
+  const candidate = DDA.readUnscopedProgressCandidate?.();
+  if (!candidate) return;
+  const accepted = window.confirm('Importer dans ce compte uniquement les étapes de leçon et les préférences d’onboarding trouvées sur cet appareil ? Le Journal, le Terminal, le profil historique et les conversations IA ne seront pas importés.');
+  if (!accepted) return;
+
+  const button = event.currentTarget;
+  button.disabled = true;
+  const importedState = mergeProgressNeverDowngrade(prototypeState, candidate);
+  prototypeState = DDA.save(importedState);
+  renderState();
+  try {
+    const lessonWrites = Object.entries(candidate.lessons || {}).map(([lessonId, progress]) =>
+      window.DDABFF.saveLessonProgress(lessonId, progress).then(result => {
+        if (!result) throw new Error('progress_import_session_expired');
+        return result;
+      }));
+    const onboardingWrite = candidate.onboarding
+      ? window.DDABFF.saveOnboardingProgress(candidate.onboarding).then(result => {
+          if (!result) throw new Error('onboarding_import_session_expired');
+          return result;
+        })
+      : Promise.resolve();
+    await Promise.all([...lessonWrites, onboardingWrite]);
+    localStorage.setItem(progressImportMarkerKey(remoteUser.user_id), 'done');
+    document.getElementById('profile-error').textContent = '';
+    renderState();
+    showToast('Progression importée et rattachée à ton compte DDA.');
+  } catch {
+    document.getElementById('profile-error').textContent = 'La progression importée est conservée dans cet espace de compte sur cet appareil, mais le serveur n’a pas confirmé toutes les étapes. Tu pourras réessayer.';
+    renderState();
+  } finally {
+    button.disabled = false;
+  }
+});
 
 document.getElementById('profile-form').addEventListener('submit', async event => {
   event.preventDefault();
@@ -4703,22 +4846,16 @@ document.getElementById('profile-reminders').addEventListener('change', event =>
 window.addEventListener('online', updateNetworkState);
 window.addEventListener('offline', updateNetworkState);
 updateNetworkState();
-initDariusAnalysisTerminal();
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
-renderState();
 initBffAuthUi();
-hydrateRemoteSession().then(refreshServerPremiumEntitlement);
-revealAdminLinkIfAdmin();
-handleBffVerificationToken();
-renderMarketIntelligence();
 
 // A first-time visitor (no local profile yet, no deep-link hash) must land on
 // the real entry point — Access/onboarding — never on the Terminal's static
-// default-active markup, which would otherwise show a placeholder "Richard"
+// default-active markup, which would otherwise show a placeholder "Apprenant"
 // dashboard as if already signed in before anyone has actually onboarded.
 //
 // Structure fix (fix/design-structure-color-3d-alignment): a RETURNING,
@@ -4728,24 +4865,44 @@ renderMarketIntelligence();
 // the learner saw a blank app shell (sidebar/topbar only, no content). The
 // final `else` makes the same real entry point this comment already
 // describes for every other case: dashboard for an onboarded learner.
-const initialView = BOOT_HASH_VIEW;
-if (initialView && document.getElementById(initialView)) {
-  // Pre-seed currentView to the view we're actually booting into so showView()'s
-  // own "record previous" logic below doesn't treat this restore as a real
-  // transition and clobber the previousView just restored from sessionStorage
-  // above (see V1.1 correction) with the hardcoded 'dashboard' default.
-  currentView = initialView;
-  showView(initialView);
-} else if (!prototypeState.user) {
-  showView('access');
-} else {
-  showView(prototypeState.onboarding?.complete ? 'dashboard' : 'access');
-}
+async function bootAcademyAfterSessionCheck() {
+  try {
+    await hydrateRemoteSession();
+    const savedLessons = Object.keys(prototypeState.lessons || {});
+    if (savedLessons.some(id => /^M1\./.test(id))) await window.DDALazyModules?.ensure('lesson-m11');
+    if (savedLessons.some(id => /^MBRVM\./.test(id))) await window.DDALazyModules?.ensure('lesson-mbrvm1');
+    await refreshServerPremiumEntitlement();
+  } catch {
+    // Fail closed: a failed identity/entitlement check never unlocks Premium.
+    serverPremiumConfirmed = null;
+  }
+  const sessionStatus = document.getElementById('session-check-status');
+  if (sessionStatus) sessionStatus.hidden = true;
+  initDariusAnalysisTerminal();
+  window.DDARefreshAiHistory?.();
+  renderState();
+  renderMarketIntelligence();
+  revealAdminLinkIfAdmin();
 
-if (!appHistoryInitialized) {
-  const activeViewId = document.querySelector('.view.active')?.id || 'dashboard';
-  writeDdaHistory(activeViewId, 'replace');
+  const initialView = BOOT_HASH_VIEW;
+  if (initialView && document.getElementById(initialView)) {
+    // Pre-seed currentView so restoring a deep link does not clobber the
+    // previously saved view in this tab's session history.
+    currentView = initialView;
+    showView(initialView);
+  } else if (!prototypeState.user) {
+    showView('access');
+  } else {
+    showView(prototypeState.onboarding?.complete ? 'dashboard' : 'access');
+  }
+
+  if (!appHistoryInitialized) {
+    const activeViewId = document.querySelector('.view.active')?.id || 'dashboard';
+    writeDdaHistory(activeViewId, 'replace');
+  }
+  await handleBffVerificationToken();
 }
+bootAcademyAfterSessionCheck();
 
 
 /* DDA Visual Identity V2 — progressive reveals for Academy surfaces only.
