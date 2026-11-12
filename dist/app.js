@@ -1935,7 +1935,7 @@ function renderJournalList() {
       .map(([field, label]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(entry[field])}</dd></div>`)
       .join('');
     const sourceView = entry.sourceLesson === 'M0.2' ? 'lesson-m02' : '';
-    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve ${escapeHtml(entry.proofId || 'locale')}</strong><span>${escapeHtml(entry.sourceLesson || 'M0.2')} · ${escapeHtml(entry.proofType || 'zone_identification')}</span>${sourceView ? `<button type="button" class="text-action journal-proof-source" data-view="${sourceView}">Revoir la leçon <span>→</span></button>` : ''}</div>` : '';
+    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve pédagogique</strong><span>${escapeHtml(learnerLessonTitle(entry.sourceLesson))} · ${escapeHtml(entry.proofType === 'zone_identification' ? 'Identification de zone' : 'Pratique guidée')}</span>${sourceView ? `<button type="button" class="text-action journal-proof-source" data-view="${sourceView}">Revoir la leçon <span>→</span></button>` : ''}</div>` : '';
     const snippet = entry.decision || entry.scenario || entry.context || 'Aucun détail renseigné.';
     const entryNumber = String(entries.length - idx).padStart(2, '0');
     return `
@@ -2394,9 +2394,7 @@ function renderTerminalLeadComplete() {
   const indexEl = document.getElementById('lesson-index-label');
   if (indexEl) {
     const completedIds = completedModuleIds();
-    indexEl.textContent = completedIds.length
-      ? `PARCOURS DISPONIBLE COMPLÉTÉ${completedIds.length > 1 ? 'S' : ''}`
-      : 'PARCOURS DISPONIBLE COMPLÉTÉ';
+    indexEl.textContent = 'PARCOURS DISPONIBLE · LEÇONS VALIDÉES';
   }
   const moduleEl = document.getElementById('terminal-lead-module');
   if (moduleEl) moduleEl.textContent = last ? last.module.title : 'DDA';

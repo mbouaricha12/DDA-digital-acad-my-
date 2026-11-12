@@ -10,8 +10,10 @@ assert.doesNotMatch(app, /Continuer \$\{next\.lesson\.title\} \(\$\{next\.lesson
 assert.doesNotMatch(app, /<span class="module-id">\$\{module\.id\}<\/span>/, 'module recap must use a learner-facing sequence label');
 assert.doesNotMatch(app, /<p class="mastery-lesson">\$\{lesson\.id\} —/, 'mastery list must show the authored lesson title, not its code');
 assert.doesNotMatch(app, /terminal-meta-module.*textContent = continueTarget\.lesson\.id/, 'Terminal metadata must show a module title, not a lesson code');
+assert.doesNotMatch(app, /<strong>Preuve \$\{escapeHtml\(entry\.proofId/, 'Journal proof metadata must not expose an internal proof ID');
+assert.doesNotMatch(app, /<span>\$\{escapeHtml\(entry\.sourceLesson \|\| 'M0\.2'\)\}/, 'Journal proof metadata must not expose an internal lesson ID');
 assert.match(app, /function learnerLessonTitle\(lessonOrId\)/, 'a single helper must translate internal lesson records into learner-facing labels');
-assert.match(app, /PARCOURS DISPONIBLE COMPLÉTÉ/, 'completed curriculum copy must not expose module codes');
+assert.match(app, /PARCOURS DISPONIBLE · LEÇONS VALIDÉES/, 'completed curriculum copy must not expose module codes');
 assert.doesNotMatch(academy, /class="prototype-banner"/, 'technical prototype banner must remain absent');
 
 console.log('UX-2 dashboard orientation contract: PASS');
