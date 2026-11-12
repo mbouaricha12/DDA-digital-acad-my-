@@ -115,13 +115,13 @@
       <symbol id="icon-crown" viewBox="0 0 24 24"><path d="M4 18h16l1.4-8.6-4.9 3.2L12 6l-4.5 6.6-4.9-3.2Z"/><path d="M5.5 20.5h13"/></symbol>
       <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></symbol>
       <symbol id="icon-journal" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M4 7h2M4 17h2M8 8h8M8 12h8M8 16h5"/></symbol>
+      <symbol id="icon-edit" viewBox="0 0 24 24"><path d="m4 16.5-.8 3.3 3.3-.8L18.8 6.7a2.3 2.3 0 0 0-3.3-3.3Z"/><path d="m14.5 5.5 4 4"/></symbol>
       <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
       <symbol id="icon-chevron-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
       <symbol id="icon-chat" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8A2.5 2.5 0 0 1 17.5 16H10l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 13.5Z"/></symbol>
       <symbol id="icon-users" viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3"/><circle cx="16" cy="9" r="2.5"/><path d="M3 20a5.5 5.5 0 0 1 11 0"/><path d="M14 20a4.5 4.5 0 0 1 7-3.7"/></symbol>
     </defs>
   </svg>
-  <div class="prototype-banner">Version d’apprentissage DDA — aucune donnée de marché réelle</div>
   <div id="session-check-status" class="session-check-status" role="status" aria-live="polite" hidden>Vérification sécurisée de ton espace DDA…</div>
   <div class="app-shell" id="academy-shell" data-layer="academy">
     <aside class="sidebar" aria-label="Navigation principale">
@@ -160,7 +160,7 @@
       <div class="sidebar-foot">
         <a class="nav-item academy-public-exit" href="index.html">← Site public</a>
         <span class="plan-label" id="sidebar-plan">DDA Free</span>
-        <button class="profile-chip" data-view="profile"><span class="avatar" id="profile-avatar">A</span><span><b id="profile-name">Apprenant</b><br><small>Mon profil</small></span></button>
+        <button class="profile-chip" data-view="profile"><span class="avatar" id="profile-avatar">A</span><span><b id="profile-name">Apprenant</b><br><small>Profil d’apprentissage</small></span></button>
         <div class="sidebar-premium-card">
           <svg class="icon sidebar-premium-icon" aria-hidden="true"><use href="#icon-crown"/></svg>
           <strong>DDA Premium</strong>
@@ -230,7 +230,7 @@
         <button class="icon-button" aria-label="Aide et support" data-view="support"><svg class="icon"><use href="#icon-help"/></svg></button>
         <button class="icon-button" type="button" aria-label="Notifications" title="Aucune notification pour le moment"><svg class="icon"><use href="#icon-bell"/></svg></button>
         <button class="topbar-user" type="button" data-view="profile" aria-label="Mon profil">
-          <span class="avatar" data-profile-avatar id="topbar-profile-avatar">RD</span>
+          <span class="avatar" data-profile-avatar id="topbar-profile-avatar">A</span>
           <span class="topbar-user-meta"><strong data-profile-name id="topbar-profile-name">Apprenant</strong><small data-profile-role>Apprenant</small></span>
         </button>
       </header>
@@ -291,9 +291,10 @@
             </div>
             <form id="signup-form" data-js-submit method="dialog">
               <p class="eyebrow" id="access-step-label">Étape 1 sur 2 · commencer</p><h2 id="access-form-title">Commence ton parcours Free</h2>
-              <p class="access-form-note" id="access-form-note">Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon. Sans compte serveur, ta progression reste sur cet appareil.</p>
-              <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ton prénom"></label>
+              <p class="access-form-note" id="access-form-note">Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon. Cette version conserve ta progression sur cet appareil.</p>
+              <label>Prénom<input id="first-name" name="firstName" autocomplete="given-name" required placeholder="Ex. Awa"></label>
               <label>Adresse e-mail<input id="email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"><small class="field-help" id="access-email-help">Sans compte serveur, cette adresse reste sur cet appareil et n’est pas transmise.</small></label>
+
               <label id="access-password-field" hidden>Mot de passe<span class="password-field-wrap"><input id="access-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128"><button class="text-action password-toggle" id="toggle-access-password" type="button" aria-pressed="false">Afficher</button></span><small class="field-help" id="access-password-help" hidden>12 caractères minimum.</small></label>
               <label class="consent" id="access-consent-field"><input id="consent" type="checkbox" required><span id="access-consent-label">Je comprends que ma progression est stockée uniquement sur cet appareil pendant ce pilote, et qu'elle peut être perdue définitivement (changement d'appareil, cache vidé, incident technique) — il n'existe pas de sauvegarde serveur.</span></label>
               <p class="form-error" id="signup-error" role="alert"></p>
@@ -416,7 +417,7 @@
               <h2 id="analysis-terminal-title">Observer avant de décider.</h2>
               <p>Un espace de démonstration local pour manipuler une série historique contrôlée, annoter ton observation et la conserver sur cet appareil.</p>
             </div>
-            <span class="demo-data-badge"><span class="status-dot"></span>Données pédagogiques locales</span>
+            <span class="demo-data-badge"><span class="status-dot"></span>Données pédagogiques</span>
           </div>
 
           <div class="analysis-terminal-toolbar" role="group" aria-label="Marché et unité de temps">
@@ -437,7 +438,7 @@
                 <option value="1M">1M</option>
               </select>
             </label>
-            <span class="terminal-data-mark"><span class="status-dot"></span> Série synthétique · locale</span>
+            <span class="terminal-data-mark"><span class="status-dot"></span> Série synthétique · pédagogique</span>
           </div>
 
           <div class="analysis-chart-workspace">
@@ -484,7 +485,7 @@
                 <svg id="terminal-chart" class="analysis-chart" viewBox="0 0 900 420" preserveAspectRatio="none" tabindex="0" role="img" aria-label="Graphique de chandeliers pédagogiques interactif — valeurs synthétiques normalisées" aria-describedby="terminal-chart-caption"></svg>
               </div>
               <div class="analysis-chart-footer">
-                <p class="analysis-chart-caption" id="terminal-chart-caption">Série historique locale contrôlée · valeurs normalisées · aucune cotation en temps réel.</p>
+                <p class="analysis-chart-caption" id="terminal-chart-caption">Série historique contrôlée · valeurs normalisées · aucune cotation en temps réel.</p>
                 <span class="terminal-tool-hint" id="terminal-tool-hint" role="status" aria-live="polite">Déplace le pointeur sur le graphique.</span>
               </div>
             </div>
@@ -933,7 +934,7 @@
 
         <div class="plan-grid">
           <article class="plan-card current-plan"><p class="eyebrow">Ce que tu as aujourd’hui</p><h2>DDA Free</h2><p class="plan-tagline">Pour démarrer sérieusement, sans rien débourser.</p><ul><li>Parcours M0 Fondations et ses leçons</li><li>Exercices, quiz et Fil de maîtrise réel</li><li>Journal &amp; Plan</li><li>Market Intelligence (aperçu)</li></ul><span class="plan-state" id="free-plan-state">Formule active</span></article>
-          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">DDA Premium · aperçu local</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><p class="premium-local-status">Tu explores une démonstration pédagogique sur cet appareil, pas un abonnement actif.</p><ul><li>Leçons Premium P2 : risque avant entrée et trade contrôlé</li><li>Risk Plan Lab avec validation du scénario et conditions de non-trade</li><li>Assessment Controlled Decision et preuve locale de compétence</li><li>Revue hebdomadaire, ressources avancées et pont vers le Journal</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aucun paiement · aucun renouvellement · aucun entitlement serveur</small><a class="text-action membership-preparation-link" href="launch/">Comprendre la préparation commerciale <span>→</span></a></article>
+          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">DDA Premium · démonstration pédagogique</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><p class="premium-local-status">Tu explores ici les briques pédagogiques Premium disponibles : ce n’est pas un abonnement actif.</p><ul><li>Leçons Premium P2 : risque avant entrée et trade contrôlé</li><li>Risk Plan Lab avec validation du scénario et conditions de non-trade</li><li>Assessment Controlled Decision et preuve de compétence</li><li>Revue hebdomadaire, ressources avancées et pont vers le Journal</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aucun paiement · aucun renouvellement · aucun accès commercial activé</small><a class="text-action membership-preparation-link" href="launch/">Comprendre la préparation commerciale <span>→</span></a></article>
         </div>
 
         <section class="panel premium-waitlist-panel" id="premium-waitlist-panel" aria-labelledby="premium-waitlist-title">
@@ -951,7 +952,7 @@
           <p class="access-model-intro">Free doit rester utile. Premium doit apporter une profondeur réellement construite. Access préparera plus tard des bourses ou accès sponsorisés — rien n’est encore ouvert ni financé.</p>
           <div class="access-model-grid">
             <article><span class="access-model-kicker">Disponible maintenant</span><h3>DDA Free</h3><p>M0, exercices, feedback, progression, Journal &amp; Plan local et ressources Free.</p><strong>Valeur autonome</strong></article>
-            <article><span class="access-model-kicker gold">Démonstration locale</span><h3>DDA Premium</h3><p>P2 Risque et discipline, leçons authored, Risk Plan Lab, assessment et preuve locale.</p><strong>Aucun paiement actif</strong></article>
+            <article><span class="access-model-kicker gold">Démonstration pédagogique</span><h3>DDA Premium</h3><p>P2 Risque et discipline, leçons authored, Risk Plan Lab, assessment et preuve de compétence.</p><strong>Aucun paiement actif</strong></article>
             <article><span class="access-model-kicker muted">À préparer</span><h3>DDA Access</h3><p>Bourses, tarifs réduits ou accès sponsorisés selon des règles publiées et validées côté serveur.</p><strong>Non disponible aujourd’hui</strong></article>
           </div>
           <div class="access-model-rules"><strong>Conditions actuelles :</strong> aucun prix, checkout, abonnement ou renouvellement automatique n’est activé. Une modification de l’état local ne pourra jamais constituer un achat ou un droit Premium serveur.</div>
@@ -969,7 +970,7 @@
             <li class="status-future">Trading Lab <small>À construire</small></li>
             <li class="status-future">Trader DNA <small>À construire</small></li>
           </ol>
-          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Aujourd’hui : P2, Risk Plan Lab, Controlled Decision, preuve locale et Revue hebdomadaire sont utilisables en aperçu Premium sur cet appareil. Les futures briques restent clairement signalées.</span>
+          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Aujourd’hui : P2, Risk Plan Lab, Controlled Decision, preuve de compétence et Revue hebdomadaire sont utilisables en aperçu Premium sur cet appareil. Les futures briques restent clairement signalées.</span>
         </section>
 
         <section class="panel family-panel" aria-labelledby="family-title">
@@ -1024,7 +1025,7 @@
             <article class="premium-value-card"><span class="premium-value-number">02</span><h3>Tester</h3><p>Le Risk Plan Lab transforme une idée en plan contrôlable dans un scénario synthétique, avec feedback et tentatives conservées localement.</p><button class="text-action" type="button" data-view="premium-lab">Ouvrir le Lab <span>→</span></button></article>
             <article class="premium-value-card"><span class="premium-value-number">03</span><h3>Valider</h3><p>Controlled Decision vérifie la discipline du processus, puis crée une preuve de compétence reliée au Journal.</p><button class="text-action" type="button" data-view="premium-assessment">Voir l’assessment <span>→</span></button></article>
             <article class="premium-value-card"><span class="premium-value-number">04</span><h3>Revoir</h3><p>La Revue hebdomadaire transforme tes observations en points forts, schémas récurrents et prochaine action.</p><button class="text-action" type="button" data-view="journal">Ouvrir la Revue <span>→</span></button></article>
-            <article class="premium-value-card"><span class="premium-value-number">05</span><h3>Conserver</h3><p>La preuve locale, le Journal et la Progression rendent le travail visible sans promettre de rendement ni de certification officielle.</p><button class="text-action" type="button" data-view="progress">Voir les preuves <span>→</span></button></article>
+            <article class="premium-value-card"><span class="premium-value-number">05</span><h3>Conserver</h3><p>La preuve de compétence, le Journal et la Progression rendent le travail visible sans promettre de rendement ni de certification officielle.</p><button class="text-action" type="button" data-view="progress">Voir les preuves <span>→</span></button></article>
             <article class="premium-value-card"><span class="premium-value-number">06</span><h3>Approfondir</h3><p>Les Ressources Premium donnent un atelier supplémentaire pour relier la méthode, le risque et tes traces de travail.</p><button class="text-action" type="button" data-view="resources">Voir les ressources <span>→</span></button></article>
           </div>
         </section>
@@ -1538,7 +1539,7 @@
           <p class="eyebrow">Ce qui existe déjà</p>
           <article class="community-featured-card">
             <div class="community-featured-copy">
-              <h2 id="business-featured-title">DDA Premium — aperçu local</h2>
+              <h2 id="business-featured-title">DDA Premium — aperçu pédagogique</h2>
               <p>L’offre individuelle déjà présentée, en aperçu pédagogique sans paiement réel.</p>
               <button class="primary-action" data-view="membership">Voir l’aperçu Premium <span>→</span></button>
             </div>
@@ -1554,7 +1555,7 @@
 
       <section class="view" id="profile" aria-labelledby="profile-title">
         <div class="section-intro profile-intro"><p class="eyebrow gold">Espace personnel</p><h1 id="profile-title">Ton profil d’apprentissage.</h1><p>Modifie uniquement ce qui aide DDA à te proposer la prochaine étape utile.</p></div>
-        <div class="page-mission" data-mission="profile"><div><p class="eyebrow">Mission de cette page</p><strong>Ajuster ton environnement, pas refaire ton parcours.</strong><span>Le Profil garde tes préférences locales ; ta progression détaillée vit dans Progression.</span></div><button class="text-action" data-view="progress">Voir mes preuves <span>→</span></button></div>
+        <div class="page-mission" data-mission="profile"><div><p class="eyebrow">Mission de cette page</p><strong>Ajuster ton environnement, pas refaire ton parcours.</strong><span>Retrouve ici tes préférences, ton identité et les repères utiles pour la suite.</span></div><button class="text-action" data-view="progress">Voir mes preuves <span>→</span></button></div>
         <div class="profile-layout">
           <form class="profile-panel" id="profile-form" data-js-submit method="dialog">
             <!-- "local" here is accurate for the current default (no BFF/server auth enabled). If a future
@@ -1582,7 +1583,7 @@
             <label class="preference-row"><span><b>Économie de données</b><small>Réduit mouvements et médias non essentiels.</small></span><input id="profile-low-data" type="checkbox"></label>
             <label class="preference-row"><span><b>Rappels pédagogiques</b><small>Préférence enregistrée seulement ; aucun message n’est envoyé.</small></span><input id="profile-reminders" type="checkbox"></label>
             <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité.</strong> <span id="profile-storage-disclosure">Tes données sont enregistrées sur cet appareil. Une mesure d’audience pseudonyme peut aider à comprendre comment les visiteurs découvrent DDA ; elle ne contient ni ton nom ni ton e-mail.</span> Aucun courtier ni service publicitaire n’accède à tes réponses.</span></p>
-            <div class="activity-summary"><span>Activité locale</span><strong id="event-count">0 événement</strong><small>Mesure pédagogique anonyme sur cet appareil — ta relation avec l’écosystème DDA, jamais partagée.</small></div>
+            <div class="activity-summary"><span>Activité d’apprentissage</span><strong id="event-count">0 événement</strong><small>Un résumé pédagogique de ton parcours, uniquement pour t’aider à reprendre au bon endroit.</small></div>
           </aside>
         </div>
         <div class="empty-profile" id="empty-profile" hidden><span><svg class="icon"><use href="#icon-user"/></svg></span><h2>Aucun compte sur cet appareil.</h2><p>Commence l’inscription pour créer ton premier parcours.</p><button class="primary-action" data-view="access">Commencer</button></div>
