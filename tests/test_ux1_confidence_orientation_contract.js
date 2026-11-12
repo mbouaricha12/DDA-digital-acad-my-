@@ -10,6 +10,7 @@ const styles = fs.readFileSync('dist/styles.css', 'utf8');
 assert(!academy.includes('class="prototype-banner"'), 'La bannière de version ne doit plus dominer l’Academy');
 assert(academy.includes('id="profile-name">Apprenant'), 'Le shell doit avoir une identité neutre avant onboarding');
 assert(academy.includes('id="dashboard-name">Apprenant'), 'Le dashboard ne doit pas afficher un prénom codé en dur');
+assert(academy.includes('id="topbar-profile-avatar">A</span>'), 'Le topbar doit afficher l’avatar neutre avant le rendu de l’identité réelle');
 assert(!/\bRichard\b/.test(academy), 'Aucun prénom de démonstration ne doit rester dans Academy');
 assert(!/\bRichard\b/.test(app), 'Le runtime ne doit pas utiliser un fallback d’identité fictif');
 assert(academy.includes('Profil d’apprentissage'), 'Le profil doit être présenté comme une surface produit');
