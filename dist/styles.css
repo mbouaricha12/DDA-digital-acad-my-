@@ -169,6 +169,11 @@ body.public-shell .topbar,
 body.public-shell .sidebar,
 body.public-shell .mobile-nav{display:none!important}
 body.public-shell main{padding-bottom:0}
+html[data-boot-view="access"] .prototype-banner,
+html[data-boot-view="access"] .topbar,
+html[data-boot-view="access"] .sidebar,
+html[data-boot-view="access"] .mobile-nav{display:none!important}
+html[data-boot-view="access"] main{padding-bottom:0}
 .notification-dot{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--gold);right:8px;top:8px;box-shadow:0 0 0 2px var(--navy-950)}
 
 /* ---------- Views ---------- */
@@ -1363,6 +1368,7 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
      sole grid item and is auto-placed into the sidebar's leftover 260px
      track instead of spanning the row, collapsing the whole page width. */
   body.public-shell .app-shell{grid-template-columns:1fr}
+  html[data-boot-view="access"] .app-shell{grid-template-columns:1fr}
   .sidebar{
     display:flex;flex-direction:column;position:sticky;top:var(--banner-h,0px);height:calc(100vh - var(--banner-h,0px));overflow-y:auto;
     padding:32px 20px 22px;border-right:1px solid var(--line-soft);background:var(--navy-900);
