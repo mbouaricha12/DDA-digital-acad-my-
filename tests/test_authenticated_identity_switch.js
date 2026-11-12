@@ -55,7 +55,10 @@ function startStaticServer() {
     activeUser = null;
     await page.locator('#profile-logout').click();
     await page.waitForFunction(() => location.hash === '#access');
-    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('dda-prototype-state-v4')).user), null);
+    assert.equal(await page.evaluate(() => {
+      const raw = localStorage.getItem('dda-prototype-state-v4');
+      return raw ? JSON.parse(raw).user : null;
+    }), null);
     activeUser = userB;
     await page.evaluate(() => window.DDABFF.login({ email: 'b@example.com', password: 'long-enough-password' }));
     await page.reload();

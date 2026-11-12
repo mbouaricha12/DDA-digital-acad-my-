@@ -36,13 +36,13 @@
   ]);
 
   const bondOptions = Object.freeze([
-    Object.freeze({ text: 'Un prêt que l’investisseur consent à l’émetteur (entreprise ou État), remboursé à une échéance avec des intérêts prévus.', correct: true, feedback: 'Exact. L’obligataire est créancier, pas propriétaire : il prête, et le contrat fixe l’échéance et les intérêts.' }),
+    Object.freeze({ text: 'Un prêt que l’investisseur consent à l’émetteur (entreprise ou État), avec une échéance et des intérêts prévus au contrat.', correct: true, feedback: 'Exact. L’obligataire est créancier, pas propriétaire : le contrat prévoit l’échéance et les intérêts, mais le remboursement n’est pas garanti — l’émetteur peut faire défaut.' }),
     Object.freeze({ text: 'Une part de propriété de l’entreprise, comme une action.', correct: false, feedback: 'Non — c’est la définition d’une action. Une obligation ne donne aucun droit de propriété.' }),
     Object.freeze({ text: 'Un pari sur la hausse ou la baisse du prix d’une action.', correct: false, feedback: 'Non. Une obligation n’est pas un pari sur un prix : c’est un contrat de prêt avec des conditions fixées à l’avance.' })
   ]);
 
   const capOptions = Object.freeze([
-    Object.freeze({ text: 'Le nombre total d’actions émises multiplié par le prix d’une action.', correct: true, feedback: 'Exact. La capitalisation boursière mesure la valeur totale attribuée par le marché à l’ensemble des actions d’une entreprise, à cet instant.' }),
+    Object.freeze({ text: 'Le nombre d’actions en circulation multiplié par le prix d’une action.', correct: true, feedback: 'Exact. La capitalisation mesure la valeur de marché des actions en circulation (les fonds propres cotés), pas la valeur totale de l’entreprise ou de ses actifs.' }),
     Object.freeze({ text: 'Le montant des bénéfices annuels de l’entreprise.', correct: false, feedback: 'Non — ce sont deux notions différentes. Les bénéfices mesurent un résultat ; la capitalisation mesure la valeur de marché des actions.' }),
     Object.freeze({ text: 'Le montant total des dettes de l’entreprise.', correct: false, feedback: 'Non. La capitalisation boursière ne mesure pas l’endettement, seulement la valeur de marché attribuée aux actions.' })
   ]);
@@ -93,7 +93,7 @@
     Object.freeze({
       type: 'text_short', id: 'mbrvm1-instruments', step: 'lesson', outline: 'Deux grandes familles de titres', eyebrow: 'Ce qui s’échange',
       heading: 'Actions et obligations : deux contrats très différents.',
-      body: 'Une action fait de l’investisseur un copropriétaire de l’entreprise — sans échéance ni remboursement garanti, sa valeur suit la valorisation du marché. Une obligation fait de l’investisseur un créancier — il prête à l’émetteur, qui s’engage à rembourser à une échéance fixée, avec des intérêts prévus au contrat. Les deux se négocient à la BRVM, mais elles n’offrent ni les mêmes droits, ni les mêmes risques.'
+      body: 'Une action fait de l’investisseur un copropriétaire de l’entreprise — sans échéance ni remboursement promis, sa valeur varie avec le marché. Une obligation fait de l’investisseur un créancier : le contrat prévoit une échéance et des intérêts, mais le remboursement n’est pas garanti; l’émetteur peut faire défaut. Les deux se négocient à la BRVM, mais elles n’offrent ni les mêmes droits, ni les mêmes risques.'
     }),
     Object.freeze({
       type: 'decision_choice', id: 'mbrvm1-identify-action', step: 'lesson', outline: 'Reconnaître une action', eyebrow: 'À toi de situer',
@@ -106,8 +106,8 @@
     Object.freeze({
       type: 'text_short', id: 'mbrvm1-capitalization', step: 'lesson', outline: 'La capitalisation boursière', eyebrow: 'Une mesure de référence',
       heading: 'La capitalisation boursière, en une formule.',
-      body: 'La capitalisation boursière d’une entreprise cotée se calcule en multipliant le nombre total d’actions émises par le prix auquel une action se négocie à cet instant. Elle mesure la valeur que le marché attribue à l’ensemble de l’entreprise — ni ses bénéfices, ni ses dettes, seulement la valeur de ses actions au prix du marché.',
-      principle: Object.freeze({ label: 'Principe essentiel', text: 'Capitalisation = nombre d’actions × prix d’une action. Rien de plus, rien de moins — et jamais une mesure figée : elle varie avec le prix.' })
+      body: 'La capitalisation boursière des actions d’une entreprise cotée se calcule en multipliant le nombre d’actions en circulation par le cours d’une action à cet instant. Elle mesure la valeur de marché des fonds propres cotés — pas la valeur totale de l’entreprise, de ses actifs ou de son activité. Elle ne retranche pas non plus les dettes : c’est un indicateur distinct de la valeur d’entreprise.',
+      principle: Object.freeze({ label: 'Principe essentiel', text: 'Capitalisation boursière = actions en circulation × cours de l’action. Elle valorise les actions cotées et varie avec le cours.' })
     }),
     Object.freeze({
       type: 'decision_choice', id: 'mbrvm1-cap-check', step: 'lesson', outline: 'Vérifier la formule', eyebrow: 'Comprendre',

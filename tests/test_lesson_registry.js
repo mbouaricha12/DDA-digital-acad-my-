@@ -199,6 +199,37 @@ test('lessonUiIds-derived ids are ids the REAL renderer emits for each lesson', 
   });
 });
 
+test('M1.3 renders the authored market-actor flow diagram as a real local asset', () => {
+  const lesson = coreCtx.DDAM13GoldenLesson;
+  const block = lesson.blocks.find(item => item.id === 'm13-market-actors');
+  assert.ok(block, 'M1.3 has an authored actor diagram block');
+  assert.equal(block.type, 'image_explainer');
+  assert.match(block.src, /images\/lessons\/m13-market-actors\.svg$/);
+  assert.match(block.alt, /marché primaire[\s\S]*marché secondaire/i);
+  const entry = REGISTRY.find(item => item.id === 'M1.3');
+  const { module } = authored.find(item => item.lesson.id === 'M1.3');
+  const markup = Renderer.renderLessonMain(module, lesson, entry.suffix);
+  assert.ok(markup.includes(block.src), 'the rendered M1.3 markup references the real SVG');
+  assert.ok(fs.existsSync(path.join(root, 'dist', block.src)), 'the diagram asset exists in the static deployment');
+  const svg = fs.readFileSync(path.join(root, 'dist', block.src), 'utf8');
+  assert.match(svg, /L’ÉMETTEUR LÈVE DES FONDS/);
+  assert.match(svg, /Les fonds souscrits reviennent à l’émetteur/);
+  assert.match(svg, /Le paiement de la revente va au vendeur, pas à l’émetteur/);
+});
+
+test('BRVM capitalization and bond copy use precise, non-guaranteed definitions', () => {
+  const lesson = coreCtx.DDAMBRVM1Lesson;
+  const capitalization = lesson.blocks.find(block => block.id === 'mbrvm1-capitalization');
+  const instruments = lesson.blocks.find(block => block.id === 'mbrvm1-instruments');
+  const bond = lesson.blocks.find(block => block.id === 'mbrvm1-identify-bond');
+  assert.match(capitalization.body, /actions en circulation/i);
+  assert.match(capitalization.body, /pas la valeur totale de l’entreprise/i);
+  assert.match(capitalization.principle.text, /actions en circulation.*cours de l’action/i);
+  assert.match(instruments.body, /remboursement n’est pas garanti/i);
+  assert.match(instruments.body, /peut faire défaut/i);
+  assert.match(bond.options.find(option => option.correct).feedback, /remboursement n’est pas garanti/i);
+});
+
 test('app.js actually derives its maps from the registry (no parallel hand-written lists)', () => {
   [
     'const LESSON_VIEW_ID = Object.freeze(Object.fromEntries(LESSON_REGISTRY.map(',

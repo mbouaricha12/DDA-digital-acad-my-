@@ -137,8 +137,8 @@
     return true;
   }
 
-  async function getMe() {
-    const result = await request('/v1/me');
+  async function getMe(options = {}) {
+    const result = await request('/v1/me', options);
     if (!result.enabled || result.response.status === 401) return null;
     if (!result.response.ok) throw resultError(result, 'bff_me_failed');
     return result.body;
