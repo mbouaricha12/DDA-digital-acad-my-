@@ -2891,7 +2891,7 @@ body.public-shell .prototype-banner{display:none}
 
 /* ======================================================================
    Dashboard ecosystem strip — an honest scrolling marquee of DDA's real
-   spaces and their real status (Actif / Aperçu local / En préparation),
+   spaces and their real status (Actif / Aperçu pédagogique / En préparation),
    the same labels already used as nav badges elsewhere. No invented
    numbers, no market ticker dressed up as live data: every chip links to
    a real view. Reuses the BRVM ticker's exact marquee technique

@@ -1273,9 +1273,9 @@ async function handleBffVerificationToken() {
  if(oauthProvider==='oauth-google'){
   showView('access',false,'replace');
   const panel=document.getElementById('bff-verify-panel'),message=document.getElementById('bff-verify-message'),form=document.getElementById('signup-form');
-  if(panel)panel.hidden=false;if(form)form.hidden=true;
-  if(oauthError){if(message)message.textContent=oauthErrorMessage(oauthError);return;}
-  if(!code){if(message)message.textContent='Lien de connexion Google incomplet. Réessaie « Continuer avec Google ».';return;}
+  if(panel)panel.hidden=true;if(form)form.hidden=true;
+  if(oauthError){if(message)message.textContent=oauthErrorMessage(oauthError);if(panel)panel.hidden=false;return;}
+  if(!code){if(message)message.textContent='Lien de connexion Google incomplet. Réessaie « Continuer avec Google ».';if(panel)panel.hidden=false;return;}
   if(message)message.textContent='Connexion avec Google en cours…';
   try{
    await window.DDABFF.exchangeOAuthCode('google',code);
@@ -2786,7 +2786,7 @@ function renderMembershipNextStep(premium) {
   const el = document.getElementById('membership-next-step');
   if (!el) return;
   if (premium) {
-    el.textContent = 'Ton accès Premium est en aperçu sur cet appareil — ouvre l’atelier Ressources Premium ou l’aperçu de certification pour voir ce qu’il débloque réellement dès aujourd’hui.';
+    el.textContent = 'Ton accès Premium est présenté en démonstration — ouvre l’atelier Ressources Premium ou l’aperçu de certification pour voir ce qu’il débloque réellement dès aujourd’hui.';
     return;
   }
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
@@ -2797,7 +2797,9 @@ function renderMembershipNextStep(premium) {
 
 function renderState() {
   const name = prototypeState.user?.name || 'Apprenant';
-  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'A';
+  const initials = prototypeState.user?.name
+    ? name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase()
+    : 'A';
   const activeLessonProgress = DDALearning.getLessonProgress(prototypeState, activeLessonId);
   const xp = DDALearning.totalXp(DDA.curriculum, prototypeState);
   // Deliberately out of scope for the Daily Value Loop correction: `complete`
@@ -2921,6 +2923,7 @@ function renderState() {
   document.getElementById('profile-first-name').value = hasProfile ? name : '';
   document.getElementById('profile-error').textContent = '';
   if (hasProfile) {
+
     document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
     document.getElementById('profile-level').value = prototypeState.onboarding?.level || 'Débutant';
     document.getElementById('profile-goal').value = prototypeState.onboarding?.goal || 'Comprendre les marchés';
@@ -2933,9 +2936,9 @@ function renderState() {
 
   document.getElementById('sidebar-plan').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
   document.querySelectorAll('[data-profile-role]').forEach(node => { node.textContent = premium ? 'Apprenant Premium' : 'Apprenant'; });
-  document.getElementById('membership-status').textContent = premium ? 'DDA Premium · aperçu local' : 'DDA Free';
+  document.getElementById('membership-status').textContent = premium ? 'DDA Premium · démonstration' : 'DDA Free';
   const membershipStatusNote = document.getElementById('membership-status-note');
-  if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Démonstration sur cet appareil · aucun achat actif' : 'Disponible maintenant · aucun achat actif';
+  if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Démonstration pédagogique · aucun achat actif' : 'Disponible maintenant · aucun achat actif';
   document.getElementById('free-plan-state').textContent = premium ? 'Inclus avec Premium' : 'Formule active';
   document.getElementById('preview-premium').hidden = premium;
   document.getElementById('revert-free').hidden = !premium;
@@ -4840,7 +4843,8 @@ initBffAuthUi();
 
 // A first-time visitor (no local profile yet, no deep-link hash) must land on
 // the real entry point — Access/onboarding — never on the Terminal's static
-// default-active markup, which could imply a signed-in profile before one exists.
+// default-active markup, which would otherwise show a placeholder "Apprenant"
+// dashboard as if already signed in before anyone has actually onboarded.
 //
 // Structure fix (fix/design-structure-color-3d-alignment): a RETURNING,
 // already-onboarded learner opening academy.html with no hash (a bare
