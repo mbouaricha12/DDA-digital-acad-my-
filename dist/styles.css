@@ -2473,7 +2473,10 @@ body.public-shell{background:var(--dda-ivory);color:#15243a}
 @media(max-width:859px){
   .lesson-actions{
     position:sticky;
-    bottom:calc(70px + var(--safe-b));
+    /* Keep the sticky action bar clear of the fixed mobile navigation. The
+       rendered nav is 68px high; the extra 12px preserves a visible breathing
+       gap after scrollIntoView on narrow phones. */
+    bottom:calc(82px + var(--safe-b));
     z-index:12;
     display:grid;
     grid-template-columns:auto minmax(0,1fr);
