@@ -2924,7 +2924,7 @@ function renderState() {
   document.getElementById('profile-error').textContent = '';
   if (hasProfile) {
 
-    document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
+    document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · démonstration locale' : 'DDA Free';
     document.getElementById('profile-level').value = prototypeState.onboarding?.level || 'Débutant';
     document.getElementById('profile-goal').value = prototypeState.onboarding?.goal || 'Comprendre les marchés';
     document.getElementById('profile-time').value = prototypeState.onboarding?.time || '10 minutes par jour';
@@ -2934,11 +2934,11 @@ function renderState() {
   const count = prototypeState.events?.length || 0;
   document.getElementById('event-count').textContent = `${count} événement${count > 1 ? 's' : ''}`;
 
-  document.getElementById('sidebar-plan').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
+  document.getElementById('sidebar-plan').textContent = premium ? 'Premium · démo locale' : 'DDA Free';
   document.querySelectorAll('[data-profile-role]').forEach(node => { node.textContent = premium ? 'Apprenant Premium' : 'Apprenant'; });
-  document.getElementById('membership-status').textContent = premium ? 'DDA Premium · démonstration' : 'DDA Free';
+  document.getElementById('membership-status').textContent = premium ? 'DDA Premium · démonstration locale' : 'DDA Free';
   const membershipStatusNote = document.getElementById('membership-status-note');
-  if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Démonstration pédagogique · aucun achat actif' : 'Disponible maintenant · aucun achat actif';
+  if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Sur cet appareil uniquement · aucun abonnement ni droit serveur' : 'Disponible maintenant · aucun achat actif';
   document.getElementById('free-plan-state').textContent = premium ? 'Inclus avec Premium' : 'Formule active';
   document.getElementById('preview-premium').hidden = premium;
   document.getElementById('revert-free').hidden = !premium;
@@ -3597,7 +3597,7 @@ document.getElementById('gate-unlock')?.addEventListener('click', () => {
   mountPremiumLabLessons();
   renderState();
   closeGate();
-  showToast('Accès Premium débloqué en aperçu.');
+  showToast('Démonstration Premium locale activée · aucun droit serveur.');
   if (target) showView(target);
 });
 document.getElementById('gate-close')?.addEventListener('click', closeGate);
@@ -3638,7 +3638,7 @@ document.getElementById('preview-premium').addEventListener('click', () => {
   mountPremiumLessons();
   mountPremiumLabLessons();
   renderState();
-  showToast('Accès Premium simulé sur cet appareil.');
+  showToast('Démonstration Premium locale activée · aucun abonnement actif.');
 });
 document.getElementById('revert-free').addEventListener('click', () => {
   prototypeState = DDA.setPlan(prototypeState, 'free');
