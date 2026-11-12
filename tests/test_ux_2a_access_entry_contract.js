@@ -20,7 +20,7 @@ assert.match(academy, /Je comprends que ma progression est stockée uniquement s
 assert.match(academy, /id="onboarding-form-note"/, 'onboarding explains why calibration fields are requested');
 assert.match(academy, /aria-describedby="onboarding-form-note onboarding-error"/, 'onboarding fields expose accessible context and errors');
 assert.match(academy, /id="progress-next-action"/, 'progression exposes a dedicated next-action control');
-assert.match(academy, /DDA Premium · aperçu local/, 'membership labels Premium as a local preview');
+assert.match(academy, /DDA Premium · démonstration pédagogique/, 'membership labels Premium as a local preview');
 assert.match(academy, /pas un abonnement actif/, 'membership explicitly denies an active subscription');
 assert.match(academy, /href="launch\/"/, 'membership links to commercial preparation');
 assert.match(app, /getElementById\('access-form-note'\)/, 'BFF auth mode updates the access note');
@@ -33,7 +33,7 @@ assert.match(app, /Relis le raisonnement présenté, puis choisis une autre rép
 assert.match(app, /Le quiz de vérification est maintenant accessible/, 'correct exercises explain the quiz transition');
 assert.match(app, /Cette validation est conservée localement sur cet appareil/, 'correct quizzes explain local persistence');
 assert.match(app, /getElementById\('progress-next-action'\)/, 'progression updates a dedicated next-action control');
-assert.match(app, /DDA Premium · aperçu local/, 'membership runtime keeps the local preview status');
+assert.match(app, /DDA Premium · démonstration/, 'membership runtime keeps the pedagogical demo status');
 assert.match(polish, /\.landing-free-proof\{/, 'Free value block has dedicated styling');
 assert.match(polish, /#access \.access-form-note\{/, 'access note has dedicated styling');
 assert.match(polish, /#access \.onboarding-form-note\{/, 'onboarding note has dedicated styling');
