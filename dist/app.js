@@ -2924,7 +2924,7 @@ function renderState() {
   document.getElementById('profile-error').textContent = '';
   if (hasProfile) {
 
-    document.getElementById('profile-plan-badge').textContent = premium ? 'Premium · démonstration locale' : 'DDA Free';
+    document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · démonstration locale' : 'DDA Free';
     document.getElementById('profile-level').value = prototypeState.onboarding?.level || 'Débutant';
     document.getElementById('profile-goal').value = prototypeState.onboarding?.goal || 'Comprendre les marchés';
     document.getElementById('profile-time').value = prototypeState.onboarding?.time || '10 minutes par jour';
@@ -2936,7 +2936,7 @@ function renderState() {
 
   document.getElementById('sidebar-plan').textContent = premium ? 'Premium · démo locale' : 'DDA Free';
   document.querySelectorAll('[data-profile-role]').forEach(node => { node.textContent = premium ? 'Apprenant Premium' : 'Apprenant'; });
-  document.getElementById('membership-status').textContent = premium ? 'Premium · démonstration locale' : 'DDA Free';
+  document.getElementById('membership-status').textContent = premium ? 'DDA Premium · démonstration locale' : 'DDA Free';
   const membershipStatusNote = document.getElementById('membership-status-note');
   if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Sur cet appareil uniquement · aucun abonnement ni droit serveur' : 'Disponible maintenant · aucun achat actif';
   document.getElementById('free-plan-state').textContent = premium ? 'Inclus avec Premium' : 'Formule active';
