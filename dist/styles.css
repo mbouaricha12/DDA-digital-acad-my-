@@ -994,6 +994,13 @@ a.nav-item[hidden]{display:none}
 .membership-status-line span{color:rgba(244,247,252,.65);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:800}
 .membership-status-line strong{font-family:Georgia,serif;font-size:19px;color:#f4f7fc}
 .membership-status-line small{color:rgba(244,247,252,.65);font-size:12px}
+.trust-orientation-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,1.1fr);gap:24px;align-items:center;margin-bottom:24px;padding:20px;border:1px solid rgba(201,190,170,.28);border-radius:var(--r-lg);background:rgba(255,255,255,.035)}
+.trust-orientation-panel h2{margin:4px 0 8px;color:#f4f7fc;font-size:25px}
+.trust-orientation-panel p:not(.eyebrow){margin:0;color:rgba(244,247,252,.68);font-size:14px;max-width:560px}
+.trust-orientation-steps{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.trust-orientation-steps li{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(8,20,38,.22)}
+.trust-orientation-steps li>span{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;background:rgba(217,164,65,.15);color:var(--gold-soft);font-size:10px;font-weight:900}
+.trust-orientation-steps strong,.trust-orientation-steps small{display:block}.trust-orientation-steps strong{color:#f4f7fc;font-size:13px}.trust-orientation-steps small{margin-top:2px;color:rgba(244,247,252,.6);font-size:11px}
 
 .plan-grid{display:grid;grid-template-columns:1fr;gap:16px}
 .plan-card{padding:24px;border:1px solid rgba(255,255,255,.14);border-radius:var(--r-lg);background:rgba(255,255,255,.04)}
@@ -1131,6 +1138,7 @@ a.nav-item[hidden]{display:none}
 .brvm-publications-note .icon{color:var(--gold-soft);flex:none;margin-top:2px}
 .brvm-publications-head .data-badge{flex:none}
 @media(max-width:760px){
+  .trust-orientation-panel{grid-template-columns:1fr;gap:16px;padding:16px}
   .market-zone-publications{padding:18px}
   .brvm-publications-head{display:grid;gap:12px}
   .brvm-publications-head .data-badge{justify-self:start}
