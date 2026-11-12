@@ -53,7 +53,8 @@ assert.match(polish, /\.lesson-main \.feedback-next\{/, 'feedback next action ha
 assert.match(polish, /#progress \.progress-next-action\{/, 'progression next action has dedicated styling');
 assert.match(polish, /#membership \.premium-local-status\{/, 'premium local status has dedicated styling');
 assert.match(polish, /body\.access-mode \.mobile-nav/, 'visitor access does not show the learner mobile navigation');
-assert.match(polish, /#access \.access-sequence\{display:flex/, 'the three-step entry guide is deliberately spaced');
+assert.match(polish, /#access \.access-sequence\{display:flex[^}]*color:#d5dfed/, 'the three-step entry guide is spaced and high-contrast on the dark background');
+assert.match(polish, /#access \.access-sequence>span b\{color:#f5c96b/, 'the step numbers use a high-contrast accent');
 assert.match(polish, /#access \.access-back-link\{[^}]*color:#f5c96b/, 'the public return link has visible, high-contrast styling on the dark access card');
 assert.match(core, /id: 'lesson', label: 'Comprendre'[\s\S]*id: 'exercise', label: 'Essayer'[\s\S]*id: 'quiz', label: 'Vérifier'[\s\S]*id: 'review', label: 'Continuer'/, 'M0.1 exposes the four pedagogical stages');
 assert.match(core, /id: 'exercise', outline: practice\.heading, step: 'exercise'/, 'M0.1 keeps the exercise gate in the exercise stage');
