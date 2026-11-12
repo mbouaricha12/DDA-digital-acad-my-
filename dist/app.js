@@ -1037,8 +1037,9 @@ function normalizeDisplayName(value) {
 }
 
 function remoteLearnerUser(user) {
+  const remoteId = user?.user_id || user?.id;
   return {
-    id: user.user_id,
+    id: remoteId,
     name: normalizeDisplayName(user.display_name),
     email: typeof user.email === 'string' ? user.email : '',
     mode: 'server'
@@ -1124,7 +1125,8 @@ async function hydrateRemoteSession() {
       return null;
     }
     remoteUser = user;
-    const sameRemoteUser = prototypeState.user?.mode === 'server' && prototypeState.user.id === user.user_id;
+    const remoteId = user?.user_id || user?.id;
+    const sameRemoteUser = prototypeState.user?.mode === 'server' && prototypeState.user.id === remoteId;
     const nextStateBase = sameRemoteUser
       ? prototypeState
       : { ...DDA.clear(), acquisition: prototypeState.acquisition };
@@ -1867,7 +1869,7 @@ function renderCertificatePreview(lessonProgress) {
   preview.hidden = !eligible || !premium;
   if (!eligible || !premium) return;
 
-  const name = prototypeState.user?.name || 'Richard';
+  const name = normalizeDisplayName(prototypeState.user?.name);
   const event = [...(prototypeState.events || [])].reverse().find(e => e.name === 'quiz_complete');
   const date = event ? new Date(event.at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
   document.getElementById('certificate-name').textContent = name;
@@ -2785,8 +2787,8 @@ function renderMembershipNextStep(premium) {
 }
 
 function renderState() {
-  const name = prototypeState.user?.name || 'Richard';
-  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'RD';
+  const name = normalizeDisplayName(prototypeState.user?.name);
+  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'AP';
   const activeLessonProgress = DDALearning.getLessonProgress(prototypeState, activeLessonId);
   const xp = DDALearning.totalXp(DDA.curriculum, prototypeState);
   // Deliberately out of scope for the Daily Value Loop correction: `complete`
@@ -4746,7 +4748,7 @@ renderMarketIntelligence();
 
 // A first-time visitor (no local profile yet, no deep-link hash) must land on
 // the real entry point — Access/onboarding — never on the Terminal's static
-// default-active markup, which would otherwise show a placeholder "Richard"
+// default-active markup, which would otherwise show a placeholder learner
 // dashboard as if already signed in before anyone has actually onboarded.
 //
 // Structure fix (fix/design-structure-color-3d-alignment): a RETURNING,

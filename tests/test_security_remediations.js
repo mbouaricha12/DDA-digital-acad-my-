@@ -24,6 +24,14 @@ function request(server, method, path, { body, cookies = {} } = {}) {
 (async () => {
   let accountStatus = 'active';
   const sessions = new MemorySessionStore();
+  const rateLimiter = {
+    counts: new Map(),
+    async allow(key) {
+      const next = (this.counts.get(key) || 0) + 1;
+      this.counts.set(key, next);
+      return next <= 2;
+    }
+  };
   const auth = {
     async login() { return { user: { id: '11111111-1111-4111-8111-111111111111' }, access_token: 'access' }; },
     async getUser(userId) { return { user_id: userId, email: 'learner@example.com', email_verified: true, display_name: 'Learner', status: accountStatus, entitlements: [] }; }
@@ -31,7 +39,8 @@ function request(server, method, path, { body, cookies = {} } = {}) {
   const handler = createBff({
     auth,
     sessions,
-    config: { allowedOrigins: ['http://localhost:8744'], secureCookies: false, sessionIdleMs: 60 * 60 * 1000, sessionAbsoluteMs: 24 * 60 * 60 * 1000, authRateLimitWindowMs: 60_000, authRateLimitMax: 2 },
+    config: { allowedOrigins: ['http://localhost:8744'], secureCookies: false, sessionIdleMs: 60 * 60 * 1000, sessionAbsoluteMs: 24 * 60 * 60 * 1000 },
+    rateLimiter,
     clock: () => new Date('2026-11-10T00:00:00.000Z')
   });
   const server = http.createServer(handler);

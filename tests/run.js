@@ -109,8 +109,8 @@ async function completeSignupFlow(page, opts) {
   await page.waitForSelector('.view.active#lesson');
 }
 
-async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = 'free') {
-  await context.addInitScript(({ lessons, plan }) => {
+async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = 'free', identity = null) {
+  await context.addInitScript(({ lessons, plan, user }) => {
     if (localStorage.getItem('dda-prototype-state-v4')) return;
     const lessonIds = ['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3', 'MBRVM.1', 'P2.1', 'P2.2', 'LAB1', 'LAB2', 'LAB3', 'LAB4', 'LABCAP'];
     const progress = Object.fromEntries(lessonIds.map(id => [id, {
@@ -118,7 +118,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     }]));
     localStorage.setItem('dda-prototype-state-v4', JSON.stringify({
       schemaVersion: 4,
-      user: { id: 'e2e-learner', name: 'Ada', email: 'ada@example.com', mode: 'device-demo' },
+      user: user || { id: 'e2e-learner', name: 'Ada', email: 'ada@example.com', mode: 'device-demo' },
       membership: { plan, status: 'demo' },
       onboarding: { level: 'Débutant', goal: 'Comprendre les marchés', time: '10 minutes par jour', complete: true },
       lessons: progress,
@@ -129,7 +129,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       acquisition: {},
       updatedAt: null
     }));
-  }, { lessons: lessonProgress, plan: membershipPlan });
+  }, { lessons: lessonProgress, plan: membershipPlan, user: identity });
 }
 
 (async () => {
@@ -2030,7 +2030,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const contentRequests = [];
     await context.route('https://bff.test/v1/premium/content/LAB4', route => { contentRequests.push('LAB4'); return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lesson: PREMIUM_CONTENT.LAB4 }) }); });
     await context.route('https://bff.test/v1/premium/content/LABCAP', route => { contentRequests.push('LABCAP'); return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lesson: PREMIUM_CONTENT.LABCAP }) }); });
-    await seedLocalLearner(context, { LAB1: { quizComplete: true }, LAB2: { quizComplete: true }, LAB3: { quizComplete: true } }, 'free');
+    await seedLocalLearner(context, { LAB1: { quizComplete: true }, LAB2: { quizComplete: true }, LAB3: { quizComplete: true } }, 'free', { id: 'u1', name: 'Ada', email: 'ada@example.com', mode: 'server' });
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#lesson-lab4`);
     await page.waitForSelector('#lesson-lab4.view.active');
@@ -2569,7 +2569,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       status: 200, contentType: 'application/json',
       body: JSON.stringify({ resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true })
     }));
-    await seedLocalLearner(context, { 'P2.1': { quizComplete: true } }, 'premium');
+    await seedLocalLearner(context, { 'P2.1': { quizComplete: true } }, 'premium', { id: 'u1', name: 'Ada', email: 'ada@example.com', mode: 'server' });
     const page = await context.newPage();
     // Same deep-link, same initial fail-closed gate — but this time the
     // server genuinely confirms the entitlement, so the app must finish the

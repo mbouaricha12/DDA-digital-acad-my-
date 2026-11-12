@@ -30,14 +30,14 @@ function startStaticServer() {
   try {
     const page = await browser.newPage();
     await page.addInitScript(() => {
-      window.DDA_BFF_BASE_URL = 'http://bff.test';
+      window.DDA_BFF_BASE_URL = 'https://bff.test';
       localStorage.setItem('dda-prototype-state-v4', JSON.stringify({
         schemaVersion: 4, user: { name: 'Ancien compte', email: 'old@example.com' }, membership: { plan: 'free', status: 'demo' },
         onboarding: { complete: true, level: 'Débutant', goal: 'Comprendre les marchés', time: '10 minutes par jour' }, lessons: {}, terminal: { instrument: 'BRVM Composite', timeframe: '1D', zoom: 1, pan: 0, drawings: [], observation: '', practice: null },
         journal: { entries: [], plan: {} }, premium: { trackId: null, modules: {}, labs: {}, assessments: {}, proofs: {}, reviews: {} }, preferences: { lowData: false, reminders: false }, events: [], acquisition: {}, updatedAt: null
       }));
     });
-    await page.route('http://bff.test/**', async route => {
+    await page.route('https://bff.test/**', async route => {
       const request = route.request();
       const url = new URL(request.url());
       const cors = { 'access-control-allow-origin': 'http://127.0.0.1:' + server.address().port, 'access-control-allow-credentials': 'true' };
