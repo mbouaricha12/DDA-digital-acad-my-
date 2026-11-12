@@ -10,12 +10,16 @@ const polish = fs.readFileSync(path.join(root, 'dist/alpha-polish.css'), 'utf8')
 const core = fs.readFileSync(path.join(root, 'dist/dda-core.js'), 'utf8');
 
 assert.match(landing, /class="landing-free-proof"/, 'landing exposes a concrete Free value block near the hero CTA');
-assert.match(landing, /6 leçons/, 'landing names the six Free foundation lessons');
+assert.match(landing, /3 leçons M0/, 'landing names the three genuinely Free foundation lessons');
+assert.doesNotMatch(landing, /6 leçons/, 'landing does not promise locked M1 lessons as Free content');
 assert.match(landing, /Exercices &amp; quiz/, 'landing names exercises and quizzes');
 assert.match(landing, /Progression &amp; Journal/, 'landing names local progression and Journal');
 assert.match(landing, /sans carte bancaire/, 'landing removes payment anxiety near the CTA');
 assert.match(academy, /id="access-form-title">Commence ton parcours Free/, 'access form names the Free journey');
 assert.match(academy, /id="access-form-note"/, 'access form explains the local journey');
+assert.match(academy, /Sans compte serveur, tes données restent sur cet appareil/, 'local storage is described conditionally, not as the only account mode');
+assert.match(academy, /class="access-back-link" href="\.\/index\.html"/, 'the public access screen has a clear route back to the site');
+assert.match(academy, /id="access-email-help"/, 'email handling has a dedicated disclosure target');
 assert.match(academy, /Je comprends que ma progression est stockée uniquement sur cet appareil/, 'local storage consent is explicit');
 assert.match(academy, /id="onboarding-form-note"/, 'onboarding explains why calibration fields are requested');
 assert.match(academy, /aria-describedby="onboarding-form-note onboarding-error"/, 'onboarding fields expose accessible context and errors');
@@ -23,8 +27,16 @@ assert.match(academy, /id="progress-next-action"/, 'progression exposes a dedica
 assert.match(academy, /DDA Premium · aperçu local/, 'membership labels Premium as a local preview');
 assert.match(academy, /pas un abonnement actif/, 'membership explicitly denies an active subscription');
 assert.match(academy, /href="launch\/"/, 'membership links to commercial preparation');
+assert.match(academy, /data-permission="premium_track" data-premium-target="premium-lab"/, 'the resource CTA points to the protected Risk Lab, not a dead-end toast');
+assert.match(academy, /Intérêt pour Premium/, 'the local interest preference is not presented as a real waiting list');
+assert.match(academy, /aucune inscription et n’envoie aucune notification/, 'the interest preference discloses that it creates no signup or notification');
+assert.match(academy, /Enregistrer mon intérêt sur cet appareil/, 'the action label accurately describes a local preference');
+assert.match(academy, /ne recevras pas de notification/, 'the confirmation does not claim a future contact');
 assert.match(app, /getElementById\('access-form-note'\)/, 'BFF auth mode updates the access note');
+assert.match(app, /if \(emailHelp\) emailHelp\.textContent = login/, 'BFF login/signup dynamically explains email transmission');
 assert.match(app, /login \? 'Se connecter' : 'Commence ton parcours Free'/, 'login and local signup copy remain distinct');
+assert.match(app, /const localPreviewAvailable = !window\.DDABFF\?\.enabled\(\)/, 'a local Premium preview cannot create server entitlement');
+assert.match(app, /targetView: target/, 'the gated resource carries its real destination through the preview dialog');
 assert.match(app, /Choisis ton niveau pour construire ton parcours/, 'onboarding gives a level-specific validation message');
 assert.match(app, /Choisis ton objectif pour construire ton parcours/, 'onboarding gives a goal-specific validation message');
 assert.match(app, /Choisis ton rythme pour construire ton parcours/, 'onboarding gives a time-specific validation message');
@@ -40,6 +52,10 @@ assert.match(polish, /#access \.onboarding-form-note\{/, 'onboarding note has de
 assert.match(polish, /\.lesson-main \.feedback-next\{/, 'feedback next action has dedicated styling');
 assert.match(polish, /#progress \.progress-next-action\{/, 'progression next action has dedicated styling');
 assert.match(polish, /#membership \.premium-local-status\{/, 'premium local status has dedicated styling');
+assert.match(polish, /body\.access-mode \.mobile-nav/, 'visitor access does not show the learner mobile navigation');
+assert.match(polish, /#access \.access-sequence\{display:flex[^}]*color:#d5dfed/, 'the three-step entry guide is spaced and high-contrast on the dark background');
+assert.match(polish, /#access \.access-sequence>span b\{color:#f5c96b/, 'the step numbers use a high-contrast accent');
+assert.match(polish, /#access \.access-back-link\{[^}]*color:#f5c96b/, 'the public return link has visible, high-contrast styling on the dark access card');
 assert.match(core, /id: 'lesson', label: 'Comprendre'[\s\S]*id: 'exercise', label: 'Essayer'[\s\S]*id: 'quiz', label: 'Vérifier'[\s\S]*id: 'review', label: 'Continuer'/, 'M0.1 exposes the four pedagogical stages');
 assert.match(core, /id: 'exercise', outline: practice\.heading, step: 'exercise'/, 'M0.1 keeps the exercise gate in the exercise stage');
 assert.match(core, /id: 'quiz', outline: evaluation\.heading, step: 'quiz', locked: true/, 'M0.1 keeps the quiz locked until the exercise is completed');

@@ -1165,6 +1165,7 @@ function setBffAuthMode(mode) {
   const title = document.getElementById('access-form-title');
   const step = document.getElementById('access-step-label');
   const note = document.getElementById('access-form-note');
+  const emailHelp = document.getElementById('access-email-help');
   const submit = document.querySelector('#signup-form button[type="submit"]');
   const forgot = document.getElementById('bff-forgot-password');
   const resend = document.getElementById('bff-resend-confirmation');
@@ -1183,6 +1184,9 @@ function setBffAuthMode(mode) {
   // describes — showing that copy here would tell a real signer-upper
   // something false about where their data goes.
   if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe) pour retrouver ma progression sur n’importe quel appareil, après avoir confirmé mon adresse e-mail.';
+  if (emailHelp) emailHelp.textContent = login
+    ? 'Cette adresse e-mail est transmise au service d’authentification pour ouvrir ta session.'
+    : 'Cette adresse e-mail est transmise au service d’authentification pour créer ton compte et t’envoyer le lien de confirmation.';
   if (title) title.textContent = login ? 'Se connecter' : 'Commence ton parcours Free';
   if (step) step.textContent = login ? 'Accès sécurisé' : 'Étape 1 sur 2 · commencer';
   if (note) note.textContent = login
@@ -3556,16 +3560,30 @@ function closeReader() {
 document.getElementById('reader-close').addEventListener('click', closeReader);
 
 document.querySelectorAll('.premium-gate').forEach(button => button.addEventListener('click', () => {
-  if (canUnlock(button.dataset.permission)) { showToast('Atelier Premium débloqué en aperçu.'); return; }
+  const target = button.dataset.premiumTarget;
+  if (canUnlock(button.dataset.permission)) {
+    if (target && viewPermissions[target] && !canUnlock(viewPermissions[target])) {
+      showView('membership');
+      showToast('L’aperçu local ne remplace pas un droit Premium confirmé par le serveur.');
+      return;
+    }
+    if (target) { showView(target); return; }
+    showToast('Atelier Premium débloqué en aperçu.');
+    return;
+  }
   gateTrigger = button;
   prototypeState = DDA.track(prototypeState, 'access_denied', { permission: button.dataset.permission, plan: 'free' });
+  const localPreviewAvailable = !window.DDABFF?.enabled();
   openGate({
     eyebrow: 'DDA Premium',
     title: 'Cette expérience sera disponible avec Premium.',
-    description: 'Aucun achat ni paiement réel n’est proposé ici.',
-    canUnlock: true,
-    unlockText: 'Simuler l’accès Premium sur cet appareil',
-    previewText: 'Voir la formule Premium'
+    description: localPreviewAvailable
+      ? 'Démonstration pédagogique sur cet appareil uniquement. Aucun achat ni paiement réel n’est proposé.'
+      : 'L’accès à cet atelier exige un droit Premium confirmé par le serveur. Aucun paiement réel n’est activé.',
+    canUnlock: localPreviewAvailable,
+    unlockText: localPreviewAvailable ? 'Essayer la démonstration sur cet appareil' : undefined,
+    previewText: 'Voir la formule Premium',
+    targetView: target
   });
 }));
 document.getElementById('gate-unlock')?.addEventListener('click', () => {
