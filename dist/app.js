@@ -1119,9 +1119,8 @@ async function hydrateRemoteSession() {
       window.DDARefreshAiHistory?.();
       return null;
     }
-    const remoteId = user?.user_id || user?.id;
-    if (typeof remoteId !== 'string' || !remoteId.trim()) throw new Error('bff_user_identity_missing');
-    const accountState = DDA.setStorageScope(remoteId);
+    if (typeof user.user_id !== 'string' || !user.user_id.trim()) throw new Error('bff_user_identity_missing');
+    const accountState = DDA.setStorageScope(user.user_id);
     if (!accountState) throw new Error('bff_user_identity_invalid');
     remoteUser = user;
     let nextState = {
@@ -4771,7 +4770,7 @@ document.getElementById('profile-import-progress')?.addEventListener('click', as
         })
       : Promise.resolve();
     await Promise.all([...lessonWrites, onboardingWrite]);
-    localStorage.setItem(progressImportMarkerKey(remoteUser.user_id || remoteUser.id), 'done');
+    localStorage.setItem(progressImportMarkerKey(remoteUser.user_id), 'done');
     document.getElementById('profile-error').textContent = '';
     renderState();
     showToast('Progression importée et rattachée à ton compte DDA.');
