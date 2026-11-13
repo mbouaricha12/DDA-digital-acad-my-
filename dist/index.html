@@ -89,8 +89,9 @@
       if (location.search || location.hash !== safeHash) history.replaceState(history.state, '', location.pathname + safeHash);
     })();
   </script>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="alpha-polish.css">
+  <link rel="preload" as="image" href="images/photos/hero-market-woman.jpg" fetchpriority="high">
+  <link rel="stylesheet" href="styles.min.css">
+  <link rel="stylesheet" href="alpha-polish.min.css">
 </head>
 <body class="public-document">
   <a class="skip-link" href="#public-shell">Aller au contenu</a>
