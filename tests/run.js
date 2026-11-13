@@ -79,6 +79,44 @@ async function freshContext(browser, viewport) {
   return browser.newContext(viewport ? { viewport } : undefined);
 }
 
+async function waitForText(page, selector, { includes, expected, timeout = 10000 } = {}) {
+  const locator = page.locator(selector);
+  await locator.waitFor({ state: 'attached', timeout });
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    const text = (await locator.textContent()) || '';
+    if (text.trim() && (!includes || text.includes(includes)) && (!expected || text === expected)) return text;
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  throw new Error(`Timed out waiting for text in ${selector}`);
+}
+
+async function waitForPageState(page, predicate, { timeout = 10000, description = 'page state' } = {}) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    if (await page.evaluate(predicate)) return;
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  throw new Error(`Timed out waiting for ${description}`);
+}
+
+async function waitForElementInViewport(page, selector, { timeout = 10000, allowPartial = false } = {}) {
+  await page.locator(selector).waitFor({ state: 'attached', timeout });
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    const box = await page.evaluate((target) => {
+      const element = document.querySelector(target);
+      if (!element) return null;
+      const rect = element.getBoundingClientRect();
+      return { top: rect.top, bottom: rect.bottom };
+    }, selector);
+    const viewportHeight = await page.evaluate(() => innerHeight);
+    if (box && (allowPartial ? box.bottom > 0 && box.top < viewportHeight : box.top >= 0 && box.top < viewportHeight)) return box;
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  throw new Error(`Timed out waiting for ${selector} in the viewport`);
+}
+
 async function fillSignup(page, { firstName = 'Ada', email = 'ada@example.com' } = {}) {
   await page.fill('#first-name', firstName);
   await page.fill('#email', email);
@@ -358,7 +396,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#lesson-p21`);
     await page.waitForSelector('#lesson-p21.view.active');
-    await page.waitForFunction(() => document.querySelector('#lesson-p21-main')?.innerText.includes('Avant le trade, définis le risque.'));
+    await waitForText(page, '#lesson-p21-main', { includes: 'Avant le trade, définis le risque.' });
     assert.ok(contentRequests.includes('P2.1'), 'the client actually called the authenticated content route for P2.1');
     assert.ok(contentRequests.includes('P2.2'), 'P2.2 is fetched too (needed once the learner reaches it), never embedded');
     await context.close();
@@ -481,7 +519,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
     await page.reload();
     await page.waitForSelector('#journal.view.active');
-    await page.waitForFunction(() => document.querySelectorAll('#journal-list details').length === 1);
+    await page.locator('#journal-list details').first().waitFor();
     assert.equal(await page.locator('#journal-list details').count(), 1, 'Journal entry survives reload');
     await page.click('.mobile-nav button[data-view="progress"]');
     const proofProgress = await page.locator('#premium-proof-progress').innerText();
@@ -638,7 +676,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.keyboard.press('ArrowDown');
     await page.waitForSelector('#level-dda-menu[role="listbox"]');
     assert.equal(await wrapper.locator('.dda-select-menu').isVisible(), true);
-    await page.waitForFunction(() => document.activeElement?.matches('.dda-select-option'));
+    await page.locator('.dda-select-option:focus').waitFor();
     assert.equal(await page.evaluate(() => document.activeElement?.textContent), 'Débutant', 'ArrowDown opens the list and focuses the next option');
     await page.keyboard.press('Enter');
     assert.equal(await page.locator('#level').inputValue(), 'Débutant', 'custom option updates the native select used by form validation');
@@ -648,7 +686,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.keyboard.press('Enter');
     await page.keyboard.press('Escape');
     assert.equal(await trigger.getAttribute('aria-expanded'), 'false', 'Escape closes the listbox');
-    await page.waitForFunction(() => getComputedStyle(document.querySelector('#level-dda-menu')).visibility === 'hidden');
+    await page.locator('#level-dda-menu').waitFor({ state: 'hidden' });
     assert.equal(await wrapper.locator('.dda-select-menu').isVisible(), false);
     await context.close();
   });
@@ -912,7 +950,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       });
     });
     await page.goto(`${BASE}/?utm_source=ada%40example.com&utm_medium=email#landing`);
-    await page.waitForFunction(() => window.DDAAnalytics?.getTransport() === 'posthog');
+    await waitForPageState(page, () => window.DDAAnalytics?.getTransport() === 'posthog', { description: 'PostHog analytics transport' });
     await page.evaluate(() => window.DDAAnalytics.send('landing_visit', {
       source: 'ada@example.com',
       medium: '+225 07 00 00 00 00',
@@ -1216,7 +1254,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.goto(`${BASE}/#landing`);
     assert.equal(await page.locator('.landing-market-card').count(), 5);
     await page.locator('.landing-market-card').first().click();
-    await page.waitForFunction(() => document.querySelector('#access')?.classList.contains('active'));
+    await page.locator('#access.view.active').waitFor();
     assert.equal(await page.locator('#markets').evaluate(node => node.classList.contains('active')), false, 'anonymous visitors must not bypass the existing access gate');
     assert.equal(await page.locator('#access').isVisible(), true, 'the existing signup/access view is the visitor destination');
     await context.close();
@@ -1338,7 +1376,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       await seedLocalLearner(context);
       const page = await context.newPage();
       await page.goto(`${ACADEMY_BASE}#markets`);
-      await page.waitForFunction(() => document.querySelector('#markets')?.classList.contains('active'));
+      await page.locator('#markets.view.active').waitFor();
       await page.getByText('Aucune publication vérifiée disponible').waitFor();
       const result = await page.evaluate(() => ({
         viewport: document.documentElement.clientWidth,
@@ -1418,7 +1456,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await seedLocalLearner(context);
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#progress`);
-    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
+    await page.locator('#progress.view.active').waitFor();
     const theme = await page.evaluate(() => {
       const deepNavy = [6, 27, 71];
       const views = [...document.querySelectorAll('.view')].map(node => ({
@@ -1446,10 +1484,8 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     }
     assert.match(theme.progressPhotoFilter, /saturate\(0\.68\)/, 'the Progress poster keeps an atmospheric feel while DDA color remains visible');
     await page.locator('.sidebar .nav-item[data-scroll-to="analysis-terminal"]').click();
-    await page.waitForFunction(() => {
-      const chart = document.querySelector('#terminal-chart')?.getBoundingClientRect();
-      return document.querySelector('.view.active')?.id === 'dashboard' && chart && chart.top >= 0 && chart.top < innerHeight;
-    });
+    await page.locator('#dashboard.view.active').waitFor();
+    await waitForElementInViewport(page, '#terminal-chart');
     assert.equal(await page.locator('.view.active').getAttribute('id'), 'dashboard', 'the desktop shortcut scrolls to the existing Terminal inside Dashboard');
     await context.close();
   });
@@ -1476,7 +1512,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     });
     const academyPage = await context.newPage();
     await academyPage.goto(`${ACADEMY_BASE}#dashboard`);
-    await academyPage.waitForFunction(() => document.querySelector('.view.active')?.id === 'dashboard');
+    await academyPage.locator('#dashboard.view.active').waitFor();
     const academyLightFields = await academyPage.evaluate(() => [...document.querySelectorAll('.view')].filter(node => getComputedStyle(node).backgroundImage.includes('radial-gradient')).length);
     assert.ok(academyLightFields >= 24, 'the route light field should apply throughout the Academy views');
     assert.match(visuals.apertureLight, /radial-gradient/, 'the DDA Aperture has a custom instrument-light treatment');
@@ -1504,30 +1540,30 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await seedLocalLearner(context);
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#dashboard`);
-    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'dashboard');
+    await page.locator('#dashboard.view.active').waitFor();
 
     await page.locator('.mobile-nav button[data-view="path"]').click();
-    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'path');
+    await page.locator('#path.view.active').waitFor();
     await page.locator('.mobile-nav button[data-view="progress"]').click();
-    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
+    await page.locator('#progress.view.active').waitFor();
 
     await page.goBack();
-    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'path');
+    await page.locator('#path.view.active').waitFor();
     assert.equal(await page.evaluate(() => history.state?.__ddaAppView), 'path');
     await page.goForward();
-    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
+    await page.locator('#progress.view.active').waitFor();
 
     await page.locator('.mobile-nav button[data-view="journal"]').click();
-    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'journal');
+    await page.locator('#journal.view.active').waitFor();
     await page.locator('#journal .back-link[data-view="back"]').click();
-    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'progress');
+    await page.locator('#progress.view.active').waitFor();
     assert.equal(await page.evaluate(() => location.hash), '#progress', 'the in-app back button returns to the previous route');
     await page.goForward();
-    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'journal');
+    await page.locator('#journal.view.active').waitFor();
     assert.equal(await page.evaluate(() => location.origin), new URL(BASE).origin, 'mobile Back/Forward stays in the DDA document');
 
     await page.locator('.mobile-nav button[data-view="dashboard"]').click();
-    await page.waitForFunction(() => document.querySelector('.view.active')?.id === 'dashboard');
+    await page.locator('#dashboard.view.active').waitFor();
     await page.locator('.terminal-divider-go').click();
     await page.waitForTimeout(500);
     assert.equal(await page.locator('.terminal-practice-mission').count(), 1, 'the Dashboard keeps the guided Terminal mission mounted after the shortcut');
@@ -1552,7 +1588,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       await seedLocalLearner(context);
       const page = await context.newPage();
       await page.goto(`${ACADEMY_BASE}#dashboard`);
-      await page.waitForFunction(() => document.querySelector('#dashboard')?.classList.contains('active'));
+      await page.locator('#dashboard.view.active').waitFor();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       assert.ok(overflow <= 1, `#dashboard must not overflow horizontally at ${width}px (got ${overflow}px)`);
       await context.close();
@@ -1596,7 +1632,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.ok(cards[1].top - cards[0].bottom >= 10, 'cards should have consistent breathing room');
 
     await page.evaluate(() => window.scrollTo({ top: 960, behavior: 'instant' }));
-    await page.waitForFunction(() => document.body.classList.contains('landing-has-scrolled'));
+    await page.locator('body.landing-has-scrolled').waitFor();
     await page.waitForTimeout(40);
     assert.equal(await page.locator('.landing-mobile-cta').isVisible(), true, 'CTA should appear in a safe mobile scroll interval');
     const touchTargetMinHeight = await page.locator('.landing-mobile-cta button').evaluate(node => parseFloat(getComputedStyle(node).minHeight));
@@ -1608,7 +1644,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       window.scrollTo({ top: top - (window.innerHeight - cta.getBoundingClientRect().height / 2), behavior: 'instant' });
     });
     await page.waitForTimeout(40);
-    await page.waitForFunction(() => document.body.classList.contains('landing-cta-covering-content'));
+    await page.locator('body.landing-cta-covering-content').waitFor();
     assert.equal(await page.locator('.landing-mobile-cta').isVisible(), false, 'sticky CTA must yield while it geometrically overlaps card 04');
     const overlap = await page.evaluate(() => {
       const card = document.querySelector('.landing-free-grid article:last-child').getBoundingClientRect();
@@ -1647,12 +1683,12 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(await page.locator('.landing-mobile-cta').isVisible(), false, 'sticky CTA must not cover the first landing decision');
 
     await page.evaluate(() => window.scrollTo({ top: 960, behavior: 'instant' }));
-    await page.waitForFunction(() => document.body.classList.contains('landing-has-scrolled'));
+    await page.locator('body.landing-has-scrolled').waitFor();
     await page.waitForTimeout(40);
     assert.equal(await page.locator('.landing-mobile-cta').isVisible(), true, 'sticky CTA should appear in a safe interval after the hero');
 
     await page.locator('[data-funnel-section="free"]').scrollIntoViewIfNeeded();
-    await page.waitForFunction(() => window.DDA.load().events.some(event => event.name === 'landing_section_reached' && event.metadata?.section === 'free'));
+    await waitForPageState(page, () => window.DDA.load().events.some(event => event.name === 'landing_section_reached' && event.metadata?.section === 'free'), { description: 'free landing section event' });
     await page.waitForTimeout(40);
     const freeCardOverlap = await page.evaluate(() => document.body.classList.contains('landing-cta-covering-content'));
     assert.equal(await page.locator('.landing-mobile-cta').isVisible(), !freeCardOverlap, 'sticky CTA should yield whenever readable content intersects its bounds');
@@ -1694,7 +1730,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
           const sticky = cta.getBoundingClientRect();
           return { intersects: rect.bottom > sticky.top && rect.top < sticky.bottom };
         }, selector);
-        await page.waitForFunction(() => document.body.classList.contains('landing-cta-covering-content'));
+        await page.locator('body.landing-cta-covering-content').waitFor();
         assert.equal(geometry.intersects, true, `${selector} must intersect sticky bounds at ${width}px`);
         assert.equal(await page.locator('.landing-mobile-cta').isVisible(), false, `sticky CTA must yield over ${selector} at ${width}px`);
       }
@@ -2491,7 +2527,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.fill('#access-password', 'a-long-enough-password');
     await page.check('#consent');
     await page.click('#signup-form button[type=submit]');
-    await page.waitForFunction(() => document.getElementById('bff-auth-status')?.textContent.includes('vérification'));
+    await waitForText(page, '#bff-auth-status', { includes: 'vérification' });
     assert.equal(capturedBody?.ref, 'ambassador-7', 'the BFF registration request carries the partner ref captured at first visit');
     await context.close();
   });
@@ -2539,7 +2575,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const page = await context.newPage();
     await page.goto(`${BASE}/admin.html`);
     await page.waitForSelector('#admin-topbar-name');
-    await page.waitForFunction(() => document.getElementById('admin-topbar-name').textContent === 'Richard Owner');
+    await waitForText(page, '#admin-topbar-name', { expected: 'Richard Owner' });
     assert.equal(await page.textContent('#admin-topbar-role'), 'owner', 'the role shown is the real server-derived caller role, never a client guess');
     assert.equal(await page.textContent('#admin-topbar-avatar'), 'RO');
 
@@ -2802,12 +2838,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     // never invent one.
     assert.doesNotMatch((await card.locator('.lesson-sidecard-recap-facts').textContent()).trim(), /min au total/);
     await card.locator('[data-scroll-anchor]').click();
-    await page.waitForFunction(() => {
-      const el = document.getElementById('m2-quiz-block');
-      if (!el) return false;
-      const rect = el.getBoundingClientRect();
-      return rect.top >= 0 && rect.top < window.innerHeight;
-    });
+    await waitForElementInViewport(page, '#m2-quiz-block');
     assert.match(await card.locator('.lesson-sidecard-next').textContent(), /Lire une tendance/, 'the real next lesson title, never a generic label');
     await card.locator('.lesson-sidecard-next').click();
     await page.waitForSelector('#lesson-m03.view.active');
@@ -2972,7 +3003,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(await page.getAttribute('#nav-current-exercise', 'data-scroll-to'), 'lesson-panel-exercise');
     await page.click('#nav-current-exercise');
     await page.waitForSelector('#lesson.view.active');
-    await page.waitForFunction(() => document.getElementById('lesson-tab-exercise')?.getAttribute('aria-selected') === 'true');
+    await page.locator('#lesson-tab-exercise[aria-selected="true"]').waitFor();
     assert.equal(await page.isVisible('#lesson-panel-exercise'), true, 'the real Exercice/Quiz panel is actually shown, not just targeted');
     await context.close();
   });
@@ -2997,12 +3028,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.waitForSelector('#dashboard.view.active');
     await page.click('.sidebar .nav-item[data-view="progress"][data-scroll-to="certificate-panel"]');
     await page.waitForSelector('#progress.view.active');
-    await page.waitForFunction(() => {
-      const el = document.getElementById('certificate-panel');
-      if (!el) return false;
-      const r = el.getBoundingClientRect();
-      return r.top < window.innerHeight && r.bottom > 0;
-    }, { timeout: 4000 });
+    await waitForElementInViewport(page, '#certificate-panel', { timeout: 4000, allowPartial: true });
     await context.close();
   });
 
@@ -3146,7 +3172,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(await page.locator('#profile-import-notice').isVisible(), true, 'a separately consented import is offered after the account is known');
     page.on('dialog', dialog => dialog.accept());
     await page.locator('#profile-import-progress').click();
-    await page.waitForFunction(() => localStorage.getItem('dda-progress-import-v1:user:account-b') === 'done');
+    await waitForPageState(page, () => localStorage.getItem('dda-progress-import-v1:user:account-b') === 'done', { description: 'account progress import completion' });
     assert.equal(await page.locator('#profile-import-notice').isHidden(), true, 'successful import is not offered again for the same account');
     assert.equal(await page.locator('#profile-error').textContent(), '');
     assert.equal(progressImports.length, 2, 'only one lesson proof and onboarding are sent to the BFF');
