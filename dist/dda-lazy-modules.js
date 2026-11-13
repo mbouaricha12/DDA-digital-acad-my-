@@ -48,13 +48,6 @@
   // phase, preload only that feature's scripts so reloads remain deterministic
   // without paying the cost on the default Access/Dashboard route.
   const initialGroups = groupForView(location.hash.slice(1));
-  try {
-    const saved = JSON.parse(localStorage.getItem('dda-prototype-state-v4') || 'null');
-    const hasM1Progress = Object.keys(saved?.lessons || {}).some(id => /^M1\./.test(id));
-    if (hasM1Progress && !initialGroups.includes('lessons')) initialGroups.push('lessons');
-    const hasBrvmProgress = Object.keys(saved?.lessons || {}).some(id => /^MBRVM\./.test(id));
-    if (hasBrvmProgress && !initialGroups.includes('brvm')) initialGroups.push('brvm');
-  } catch { /* malformed or unavailable storage must never block the shell */ }
   if (initialGroups.length && document.readyState === 'loading') {
     const tags = initialGroups.flatMap(group => groups[group]).map(src => `<script src="${src}" data-dda-lazy="bootstrap"><\/script>`).join('');
     document.write(tags);
