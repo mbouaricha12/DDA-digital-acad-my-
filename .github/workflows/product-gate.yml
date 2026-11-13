@@ -13,6 +13,7 @@ on:
       - 'bff/**'
       - 'docs/**'
       - 'supabase/**'
+      - 'scripts/verify-performance.js'
       - 'scripts/check_production_availability.sh'
       - '.github/workflows/production-availability.yml'
       - '.github/workflows/product-gate.yml'
@@ -46,6 +47,7 @@ jobs:
 
       - name: Run all committed contract checks
         run: |
+          export NODE_PATH="$(npm root -g)"
           for test in tests/test_*.js; do
             node "$test"
           done
