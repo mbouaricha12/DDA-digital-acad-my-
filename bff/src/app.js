@@ -5,7 +5,7 @@ const { randomToken, sha256, timingSafeEqualText, parseCookies, serializeCookie,
 const { generateCodeVerifier, computeCodeChallenge } = require('./pkce');
 const { executeIdempotentMutation, validateClientMutationId } = require('./idempotency');
 const { checkAuthRateLimit } = require('./rate-limiter');
-const { VALID_ROLES: VALID_ADMIN_ROLES } = require('./admin-roles-store');
+const { VALID_ROLES: VALID_ADMIN_ROLES, CONTROL_PLANE_ROLES } = require('./admin-roles-store');
 const { validateAskRequest } = require('./ai-assistant');
 const { PREMIUM_CONTENT, FREE_PREVIEW_IDS } = require('./premium-content');
 
@@ -370,12 +370,17 @@ function parsePageParams(url, { maxPerPage = 200 } = {}) {
   return { page, perPage };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, rateLimiter = null, progressStore = null, aiAssistant = null, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, accessAudit = null, rateLimiter = null, progressStore = null, aiAssistant = null, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   businessStore = businessStore || {
     exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
     deleteUserData: async () => {}
   };
+  async function recordAccessAudit(input) {
+    if (!accessAudit || typeof accessAudit.record !== 'function') return;
+    try { await accessAudit.record(input); }
+    catch { logger('access_audit_write_failed', { requestId: input.requestId, eventName: input.eventName }); }
+  }
 
   async function currentEntitlements(userId) {
     if (!entitlements || typeof entitlements.getForUser !== 'function') return { membership: null, entitlements: [] };
@@ -451,10 +456,12 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       sendError(res, 500, 'internal_error', 'Request could not be processed.', requestId);
       return null;
     }
-    if (role !== 'owner' && role !== 'admin') {
+    if (!CONTROL_PLANE_ROLES.includes(role)) {
+      await recordAccessAudit({ actorUserId: current.user.user_id, eventName: 'admin_access_denied', resourceType: 'admin_route', requestId, metadata: { route: new URL(req.url, 'http://bff.local').pathname, method: req.method || 'GET', role: role || 'none' } });
       sendError(res, 403, 'admin_role_required', 'An owner or admin role is required.', requestId);
       return null;
     }
+    await recordAccessAudit({ actorUserId: current.user.user_id, eventName: 'admin_access_granted', resourceType: 'admin_route', requestId, metadata: { route: new URL(req.url, 'http://bff.local').pathname, method: req.method || 'GET', role } });
     return { ...current, role };
   }
 
@@ -895,9 +902,10 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         const targetUserId = typeof body.user_id === 'string' ? body.user_id.trim() : '';
         if (!targetUserId) return sendError(res, 400, 'validation_error', 'user_id is required.', requestId, { user_id: 'Required.' });
-        if (!VALID_ADMIN_ROLES.includes(body.role)) return sendError(res, 400, 'validation_error', 'role must be owner or admin.', requestId, { role: 'Must be owner or admin.' });
+        if (!VALID_ADMIN_ROLES.includes(body.role)) return sendError(res, 400, 'validation_error', 'role is not supported.', requestId, { role: 'Unsupported role.' });
         try {
           const result = await adminRoles.assignRole(targetUserId, body.role, admin.user.user_id);
+          await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: 'role_assigned', resourceType: 'admin_role', resourceId: targetUserId, requestId, metadata: { route: path, method, role: admin.role, target_user_id: targetUserId, granted_role: body.role } });
           return json(res, 200, { contract: 'dda-admin-roles-v1', ...result });
         } catch (error) {
           if (error.code === 'owner_required') return sendError(res, 403, 'owner_required', error.message, requestId);
@@ -913,6 +921,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const targetUserId = decodeURIComponent(revokeRoleMatch[1]);
         try {
           await adminRoles.revokeRole(targetUserId, admin.user.user_id);
+          await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: 'role_revoked', resourceType: 'admin_role', resourceId: targetUserId, requestId, metadata: { route: path, method, role: admin.role, target_user_id: targetUserId } });
           return json(res, 204);
         } catch (error) {
           if (error.code === 'owner_required') return sendError(res, 403, 'owner_required', error.message, requestId);
