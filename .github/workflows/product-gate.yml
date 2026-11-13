@@ -4,6 +4,7 @@ name: DDA Product Gate
 # it (e.g. a comment-only change) is a reliable way to force the required
 # "product-gate" check to run on a PR that doesn't otherwise touch a
 # matched path (e.g. a .claude/ config-only PR).
+# (touched to force product-gate on PR #239, which only adds reports/*.md)
 on:
   pull_request:
     branches: [main]
