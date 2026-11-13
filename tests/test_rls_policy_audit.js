@@ -13,6 +13,7 @@ assert.deepEqual(good.tables.sort(), [
   'public.dda_admin_roles',
   'public.dda_billing_deliveries',
   'public.dda_billing_memberships',
+
   'public.dda_brvm_audit_events',
   'public.dda_brvm_documents',
   'public.dda_brvm_sources',

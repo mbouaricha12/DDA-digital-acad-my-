@@ -173,6 +173,19 @@
   // page is shown as-is, honestly, rather than papered over.
   const knownEmailsById = new Map();
   const roleFeedback = document.getElementById('admin-role-feedback');
+  function setDataFeedback(id, message, kind = 'error') {
+    const feedback = document.getElementById(id);
+    if (!feedback) return;
+    feedback.textContent = message || '';
+    feedback.dataset.kind = kind;
+    feedback.hidden = !message;
+  }
+  function apiDataError(status, label) {
+    if (status === 401) return `${label} indisponibles : ta session administrateur a expiré.`;
+    if (status === 403) return `${label} indisponibles : ton rôle ne permet pas cette consultation.`;
+    if (status === 503) return `${label} indisponibles : le service serveur n’est pas configuré.`;
+    return `${label} indisponibles pour le moment. Réessaie plus tard.`;
+  }
 
   function showRoleFeedback(message, kind) {
     roleFeedback.textContent = message;
@@ -229,9 +242,20 @@
 
   async function loadUsers(page) {
     usersState.page = page;
-    const result = await window.DDABFF.getAdminUsers({ page, perPage: usersState.perPage });
+    let result;
+    try {
+      result = await window.DDABFF.getAdminUsers({ page, perPage: usersState.perPage });
+    } catch {
+      usersState.loaded = true;
+      setDataFeedback('admin-users-feedback', 'Utilisateurs indisponibles pour le moment. Réessaie plus tard.');
+      return;
+    }
     usersState.loaded = true;
-    if (result.status !== 200) return; // gate already shown at boot; nothing more to render
+    if (result.status !== 200) {
+      setDataFeedback('admin-users-feedback', apiDataError(result.status, 'Utilisateurs'));
+      return;
+    }
+    setDataFeedback('admin-users-feedback', '');
     const { users, total } = result.data;
     usersState.lastUsers = users;
     users.forEach(user => { if (user.user_id && user.email) knownEmailsById.set(user.user_id, user.email); });
@@ -277,9 +301,20 @@
   const membershipsState = { page: 1, perPage: 20, loaded: false };
   async function loadMemberships(page) {
     membershipsState.page = page;
-    const result = await window.DDABFF.getAdminMemberships({ page, perPage: membershipsState.perPage });
+    let result;
+    try {
+      result = await window.DDABFF.getAdminMemberships({ page, perPage: membershipsState.perPage });
+    } catch {
+      membershipsState.loaded = true;
+      setDataFeedback('admin-memberships-feedback', 'Abonnements indisponibles pour le moment. Réessaie plus tard.');
+      return;
+    }
     membershipsState.loaded = true;
-    if (result.status !== 200) return;
+    if (result.status !== 200) {
+      setDataFeedback('admin-memberships-feedback', apiDataError(result.status, 'Abonnements'));
+      return;
+    }
+    setDataFeedback('admin-memberships-feedback', '');
     const items = result.data.items || [];
     document.getElementById('admin-memberships-body').innerHTML = items.map(item => `
       <tr>

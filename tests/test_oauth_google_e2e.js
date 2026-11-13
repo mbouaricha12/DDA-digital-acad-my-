@@ -377,6 +377,7 @@ async function initPage(context, bffBase) {
         // a missing verifier.
         await page.click('#bff-oauth-google');
         await page.waitForFunction(() => !document.getElementById('bff-verify-panel').hidden);
+        await page.waitForFunction(() => !/en cours/i.test(document.getElementById('bff-verify-message')?.textContent || ''), null, { timeout: 5000 });
         const message = await page.textContent('#bff-verify-message');
         assert.doesNotMatch(message, /même onglet/i, 'this must be reported as a bad code, not a missing/expired verifier');
         assert.match(message, /échoué|expiré/i, `expected an honest "sign-in failed/expired" message, got: "${message}"`);

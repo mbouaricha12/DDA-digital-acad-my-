@@ -14,6 +14,20 @@
    Ce littéral reste volontairement des données pures (aucune référence
    externe) : le test le réévalue tel quel avec vm.
    ========================================================================== */
+const DDA_VISIBLE_LESSON_TITLES = Object.freeze({
+  'M0.1': 'Leçon en cours — Le trading comme commerce',
+  'M0.2': 'Support & Résistance — Identifier les zones de support et de résistance',
+  'M0.3': 'Lire une tendance — Comprendre les tendances du marché',
+  'M1.1': 'Pourquoi les prix évoluent ? — Comprendre la formation des prix',
+  'M1.2': 'Comment les ordres s’exécutent ? — Comprendre l’exécution des ordres',
+  'M1.3': 'Comment les marchés s’organisent ? — Découvrir les acteurs des marchés financiers',
+  'MBRVM.1': 'Introduction à la BRVM',
+  'P2.1': 'Définir son risque avant une décision',
+  'P2.2': 'Construire une décision maîtrisée'
+});
+function displayLessonTitle(id, fallback = '') {
+  return DDA_VISIBLE_LESSON_TITLES[id] || fallback || 'Leçon';
+}
 const LESSON_REGISTRY = Object.freeze([
   {
     id: 'M0.1', viewId: 'lesson', suffix: '', title: 'Leçon en cours',
@@ -1183,14 +1197,14 @@ function setBffAuthMode(mode) {
   // unlike the local-only prototype mode this label's original wording
   // describes — showing that copy here would tell a real signer-upper
   // something false about where their data goes.
-  if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe) pour retrouver ma progression sur n’importe quel appareil, après avoir confirmé mon adresse e-mail.';
+  if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe) pour retrouver la progression de mes leçons et mon onboarding après confirmation de mon adresse e-mail. Le Journal, le Terminal, les préférences et mes réponses restent sur cet appareil.';
   if (emailHelp) emailHelp.textContent = login
     ? 'Cette adresse e-mail est transmise au service d’authentification pour ouvrir ta session.'
     : 'Cette adresse e-mail est transmise au service d’authentification pour créer ton compte et t’envoyer le lien de confirmation.';
   if (title) title.textContent = login ? 'Se connecter' : 'Commence ton parcours Free';
   if (step) step.textContent = login ? 'Accès sécurisé' : 'Étape 1 sur 2 · commencer';
   if (note) note.textContent = login
-    ? 'Retrouve ton parcours avec ton compte serveur sécurisé.'
+    ? 'Ouvre ta session DDA. Les leçons et l’onboarding sont liés à ton compte ; le Journal, le Terminal et les réponses restent sur cet appareil.'
     : 'Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon.';
   if (submit) submit.innerHTML = login ? 'Ouvrir ma session <span>→</span>' : 'Recevoir le lien de vérification <span>→</span>';
   if (forgot) forgot.hidden = !login;
@@ -1588,7 +1602,8 @@ function renderModulesRecap() {
 }
 
 function renderMarketIntelligence() {
-  const indices = document.getElementById('market-indices');
+  // Keep the public section anchor intact; only the inner grid is data-driven.
+  const indices = document.getElementById('market-index-grid');
   if (indices) {
     indices.innerHTML = marketDemo().indices.map((item, i) => `
       <article class="index-card">
@@ -2795,6 +2810,21 @@ function renderMembershipNextStep(premium) {
     : 'Tu as validé les leçons disponibles sur DDA Free — ouvre l’aperçu Premium ci-dessus pour voir ce qu’il débloque dès aujourd’hui.';
 }
 
+// M0 completion must distinguish a real Free → Premium handoff from a normal
+// next-lesson transition. The destination remains the same guarded M1.1 view;
+// only the action language changes so a Free learner knows M0 is complete and
+// that the next click opens an honest Premium preview rather than a broken
+// lesson.
+function renderM0CompletionCta() {
+  const cta = document.querySelector('#result-card-m3 .result-action[data-view="lesson-m11"]');
+  if (!cta) return;
+  const premium = canUnlock('premium_track');
+  cta.innerHTML = premium
+    ? 'Continuer vers Pourquoi les prix évoluent ? <span>→</span>'
+    : 'Découvrir l’aperçu Premium : Pourquoi les prix évoluent ? <span>→</span>';
+  cta.dataset.m0CompletionAccess = premium ? 'premium' : 'free';
+}
+
 function renderState() {
   const name = prototypeState.user?.name || 'Apprenant';
   const initials = prototypeState.user?.name
@@ -2886,8 +2916,9 @@ function renderState() {
   renderNavCurrentExercise(continueTarget);
 
   // Restore every mounted lesson's progress UI from stored state — one
-  // registry-driven loop covers all of them, ids derived by lessonUiIds.
+  // registry-driven loop covers all of them, ids derived from lessonUiIds.
   mountedLessons.forEach(entry => renderLessonProgressUI(entry.id, entry.meta.lesson, lessonUiIds(entry)));
+  renderM0CompletionCta();
 
   // Lot — Signup coherence: the resume/erase nudge is for a RETURNING
   // learner who opens #access while a prior session already exists. Once
@@ -2923,7 +2954,19 @@ function renderState() {
   document.getElementById('profile-first-name').value = hasProfile ? name : '';
   document.getElementById('profile-error').textContent = '';
   if (hasProfile) {
-
+    const persistenceStatus = document.getElementById('profile-persistence-status');
+    const remoteAccount = Boolean(window.DDABFF?.enabled() && remoteUser);
+    if (persistenceStatus) {
+      const storageReady = DDA.storageAvailable();
+      persistenceStatus.textContent = remoteAccount
+        ? (storageReady
+            ? 'Leçons et onboarding liés à ton compte · Journal, Terminal, préférences et réponses sur cet appareil'
+            : 'Leçons et onboarding liés à ton compte · stockage local indisponible pour tes autres données')
+        : (storageReady
+            ? 'Progression locale · enregistrée sur cet appareil'
+            : 'Progression en mémoire · stockage local indisponible');
+      persistenceStatus.classList.toggle('is-warning', !storageReady);
+    }
     document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · démonstration locale' : 'DDA Free';
     document.getElementById('profile-level').value = prototypeState.onboarding?.level || 'Débutant';
     document.getElementById('profile-goal').value = prototypeState.onboarding?.goal || 'Comprendre les marchés';
@@ -4743,7 +4786,9 @@ document.getElementById('profile-logout')?.addEventListener('click', async event
   } catch { /* Hide local account data even if revocation cannot be confirmed. */ }
   remoteUser = null;
   serverPremiumConfirmed = null;
-  prototypeState = DDA.setStorageScope(null) || DDA.load();
+  try { localStorage.removeItem('dda-prototype-state-v4'); } catch { /* storage may be unavailable */ }
+  DDA.setStorageScope(null);
+  prototypeState = DDA.clear();
   window.DDARefreshAiHistory?.();
   renderState();
   setBffAuthMode('login');
