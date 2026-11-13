@@ -1588,7 +1588,8 @@ function renderModulesRecap() {
 }
 
 function renderMarketIntelligence() {
-  const indices = document.getElementById('market-indices');
+  // Keep the public section anchor intact; only the inner grid is data-driven.
+  const indices = document.getElementById('market-index-grid');
   if (indices) {
     indices.innerHTML = marketDemo().indices.map((item, i) => `
       <article class="index-card">
@@ -2795,6 +2796,21 @@ function renderMembershipNextStep(premium) {
     : 'Tu as validé les leçons disponibles sur DDA Free — ouvre l’aperçu Premium ci-dessus pour voir ce qu’il débloque dès aujourd’hui.';
 }
 
+// M0 completion must distinguish a real Free → Premium handoff from a normal
+// next-lesson transition. The destination remains the same guarded M1.1 view;
+// only the action language changes so a Free learner knows M0 is complete and
+// that the next click opens an honest Premium preview rather than a broken
+// lesson.
+function renderM0CompletionCta() {
+  const cta = document.querySelector('#result-card-m3 .result-action[data-view="lesson-m11"]');
+  if (!cta) return;
+  const premium = canUnlock('premium_track');
+  cta.innerHTML = premium
+    ? 'Continuer vers Pourquoi les prix évoluent ? <span>→</span>'
+    : 'Découvrir l’aperçu Premium : Pourquoi les prix évoluent ? <span>→</span>';
+  cta.dataset.m0CompletionAccess = premium ? 'premium' : 'free';
+}
+
 function renderState() {
   const name = prototypeState.user?.name || 'Apprenant';
   const initials = prototypeState.user?.name
@@ -2886,8 +2902,9 @@ function renderState() {
   renderNavCurrentExercise(continueTarget);
 
   // Restore every mounted lesson's progress UI from stored state — one
-  // registry-driven loop covers all of them, ids derived by lessonUiIds.
+  // registry-driven loop covers all of them, ids derived from lessonUiIds.
   mountedLessons.forEach(entry => renderLessonProgressUI(entry.id, entry.meta.lesson, lessonUiIds(entry)));
+  renderM0CompletionCta();
 
   // Lot — Signup coherence: the resume/erase nudge is for a RETURNING
   // learner who opens #access while a prior session already exists. Once
