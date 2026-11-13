@@ -249,7 +249,7 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true });
       const page = await initPage(context, bffBase);
       await signUp(page, { email: 'learner1@example.com', password: 'CorrectHorse123!' });
-      await page.waitForFunction(() => document.getElementById('bff-auth-status').textContent.length > 0);
+      await page.locator('#bff-auth-status:not(:empty)').waitFor();
       const status = await page.textContent('#bff-auth-status');
       assert.match(status, /vérification/i);
       // The form switched to login mode and the resend-confirmation action
@@ -271,7 +271,7 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true });
       const page = await initPage(context, bffBase);
       await signUp(page, { email: 'learner1@example.com', password: 'AnotherPassword123!' });
-      await page.waitForFunction(() => document.getElementById('bff-auth-status').textContent.length > 0);
+      await page.locator('#bff-auth-status:not(:empty)').waitFor();
       const status = await page.textContent('#bff-auth-status');
       assert.match(status, /vérification/i, 'the generic "check your email" message is shown either way');
       await context.close();
@@ -287,7 +287,7 @@ async function login(page, { email, password }) {
       // swallow into the same ambiguous 202, proving the fix is real and
       // not just "the fake adapter never errors on a repeat signup".
       await signUp(page, { email: 'learner1@example.com', password: 'YetAnotherPassword123!' });
-      await page.waitForFunction(() => document.getElementById('bff-auth-status').textContent.length > 0);
+      await page.locator('#bff-auth-status:not(:empty)').waitFor();
       const status = await page.textContent('#bff-auth-status');
       assert.match(status, /vérification/i, 'a duplicate, already-confirmed account must get the exact same message as a new signup');
       assert.doesNotMatch(status, /existe|déjà|already/i, 'must never hint that the account already exists');
@@ -325,7 +325,7 @@ async function login(page, { email, password }) {
       await page.fill('#access-password', 'LongEnoughPassword1!');
       await page.check('#consent');
       await page.click('#signup-form button[type=submit]');
-      await page.waitForFunction(() => document.getElementById('signup-error').textContent.length > 0);
+      await page.locator('#signup-error:not(:empty)').waitFor();
       const message = await page.textContent('#signup-error');
       assert.match(message, /e-mail/i, `expected a message naming the e-mail field, got: "${message}"`);
       assert.doesNotMatch(message, /Impossible de terminer cette étape/i, 'a malformed e-mail must never be reported as a generic/transient failure');
@@ -337,7 +337,7 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true });
       const page = await initPage(context, bffBase);
       await signUp(page, { email: 'weakpw-learner+weakpw@example.com', password: 'longenoughpassword1' });
-      await page.waitForFunction(() => document.getElementById('signup-error').textContent.length > 0);
+      await page.locator('#signup-error:not(:empty)').waitFor();
       const message = await page.textContent('#signup-error');
       assert.match(message, /mot de passe/i, `expected a password-specific message, got: "${message}"`);
       assert.doesNotMatch(message, /Impossible de terminer cette étape/i, 'a weak password rejected by the provider must never look like an unrelated server failure');
@@ -356,7 +356,7 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true });
       const page = await initPage(context, bffBase);
       await signUp(page, { email: 'weakpw-learner2+weakpw@example.com', password: 'longenoughpassword1' });
-      await page.waitForFunction(() => document.getElementById('signup-error').textContent.length > 0);
+      await page.locator('#signup-error:not(:empty)').waitFor();
       const isDisabled = await page.evaluate(() => document.querySelector('#signup-form button[type=submit]').disabled);
       assert.equal(isDisabled, false, 'the submit button must re-enable after a failed registration');
       await context.close();
@@ -367,7 +367,7 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true });
       const page = await initPage(context, bffBase);
       await login(page, { email: 'learner1@example.com', password: 'TotallyWrongPassword1!' });
-      await page.waitForFunction(() => document.getElementById('signup-error').textContent.length > 0);
+      await page.locator('#signup-error:not(:empty)').waitFor();
       const message = await page.textContent('#signup-error');
       assert.match(message, /mot de passe incorrect/i);
       await context.close();
@@ -382,11 +382,11 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true });
       const page = await initPage(context, bffBase);
       await signUp(page, { email: 'unconfirmed-learner@example.com', password: 'NeverConfirmed123!' });
-      await page.waitForFunction(() => document.getElementById('bff-auth-status').textContent.length > 0);
+      await page.locator('#bff-auth-status:not(:empty)').waitFor();
       const loginContext = await browser.newContext({ ignoreHTTPSErrors: true });
       const loginPage = await initPage(loginContext, bffBase);
       await login(loginPage, { email: 'unconfirmed-learner@example.com', password: 'NeverConfirmed123!' });
-      await loginPage.waitForFunction(() => document.getElementById('signup-error').textContent.length > 0);
+      await loginPage.locator('#signup-error:not(:empty)').waitFor();
       const message = await loginPage.textContent('#signup-error');
       assert.match(message, /confirme ton adresse e-mail/i, `expected the email-not-confirmed message, got: "${message}"`);
       assert.doesNotMatch(message, /mot de passe incorrect/i, 'must never say "wrong password" when the real cause is an unconfirmed email — this was the PR #222 production bug');
@@ -402,7 +402,7 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true });
       const page = await initPage(context, bffBase);
       await page.goto(`${SITE_BASE}/academy.html?token=${encodeURIComponent(token)}#access`);
-      await page.waitForFunction(() => !document.getElementById('bff-verify-panel').hidden);
+      await page.locator('#bff-verify-panel').waitFor({ state: 'visible' });
       const message = await page.textContent('#bff-verify-message');
       assert.match(message, /confirmée/i);
       assert.equal(auth.users.get(key).confirmed, true, 'the server-side record is actually confirmed, not just the UI text');
@@ -435,7 +435,7 @@ async function login(page, { email, password }) {
       await page.click('#bff-forgot-password');
       await page.fill('#recovery-email', 'learner1@example.com');
       await page.click('#bff-recovery-form button[type=submit]');
-      await page.waitForFunction(() => document.getElementById('recovery-error').textContent.length > 0);
+      await page.locator('#recovery-error:not(:empty)').waitFor();
       assert.ok(auth.lastRecoveryToken, 'a real recovery token was actually issued server-side');
 
       const resetContext = await browser.newContext({ ignoreHTTPSErrors: true });
@@ -445,7 +445,7 @@ async function login(page, { email, password }) {
       await resetPage.fill('#reset-password', 'BrandNewPassword99!');
       await resetPage.fill('#reset-password-confirm', 'BrandNewPassword99!');
       await resetPage.click('#bff-reset-password-form button[type=submit]');
-      await resetPage.waitForFunction(() => document.getElementById('bff-auth-status').textContent.includes('modifié'));
+      await resetPage.locator('#bff-auth-status', { hasText: 'modifié' }).waitFor();
 
       await login(resetPage, { email: 'learner1@example.com', password: 'BrandNewPassword99!' });
       await resetPage.waitForSelector('#onboarding-form:not([hidden]), .view.active#lesson', { timeout: 10000 });
@@ -470,11 +470,11 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 390, height: 844 } });
       const page = await initPage(context, bffBase);
       await signUp(page, { email: 'mobile-learner@example.com', password: 'MobilePassword123!' });
-      await page.waitForFunction(() => document.getElementById('bff-auth-status').textContent.length > 0);
+      await page.locator('#bff-auth-status:not(:empty)').waitFor();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       assert.ok(overflow <= 1, `signup card must not cause horizontal overflow at 390px, got ${overflow}px`);
       await page.goto(`${SITE_BASE}/academy.html?token=signup-token-mobile-learner@example.com#access`);
-      await page.waitForFunction(() => !document.getElementById('bff-verify-panel').hidden);
+      await page.locator('#bff-verify-panel').waitFor({ state: 'visible' });
       const mobileContext = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 390, height: 844 } });
       const mobilePage = await initPage(mobileContext, bffBase);
       await login(mobilePage, { email: 'mobile-learner@example.com', password: 'MobilePassword123!' });
@@ -488,7 +488,7 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true });
       const page = await initPage(context, bffBase);
       await signUp(page, { email: 'outage-learner+serverdown@example.com', password: 'LongEnoughPassword1!' });
-      await page.waitForFunction(() => document.getElementById('signup-error').textContent.length > 0);
+      await page.locator('#signup-error:not(:empty)').waitFor();
       const message = await page.textContent('#signup-error');
       assert.match(message, /indisponible|instant/i, `expected an honest "temporarily unavailable" message, got: "${message}"`);
       assert.equal(auth.users.has('outage-learner+serverdown@example.com'), false, 'no account was created when the provider itself failed');
@@ -501,10 +501,10 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true });
       const page = await initPage(context, bffBase);
       await signUp(page, { email: 'resend-learner@example.com', password: 'ResendPassword123!' });
-      await page.waitForFunction(() => document.getElementById('bff-auth-status').textContent.length > 0);
+      await page.locator('#bff-auth-status:not(:empty)').waitFor();
       const before = auth.lastSignupToken;
       await page.click('#bff-resend-confirmation');
-      await page.waitForFunction(() => document.getElementById('bff-auth-status').textContent.includes('Nouveau lien'));
+      await page.locator('#bff-auth-status', { hasText: 'Nouveau lien' }).waitFor();
       assert.notEqual(auth.lastSignupToken, before, 'a fresh signup token must actually be issued server-side by the resend action');
       await context.close();
     });
@@ -532,7 +532,7 @@ async function login(page, { email, password }) {
       await page.check('#consent');
       const [disabledDuring] = await Promise.all([
         page.click('#signup-form button[type=submit]').then(() => page.evaluate(() => document.querySelector('#signup-form button[type=submit]').disabled)),
-        page.waitForFunction(() => document.getElementById('bff-auth-status').textContent.length > 0)
+        page.locator('#bff-auth-status:not(:empty)').waitFor()
       ]);
       const disabledAfter = await page.evaluate(() => document.querySelector('#signup-form button[type=submit]').disabled);
       assert.equal(disabledAfter, false, 'the submit button must re-enable once the request settles');

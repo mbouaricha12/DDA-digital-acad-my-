@@ -47,6 +47,7 @@ jobs:
 
       - name: Run all committed contract checks
         run: |
+          export NODE_PATH="$(npm root -g)"
           for test in tests/test_*.js; do
             node "$test"
           done
