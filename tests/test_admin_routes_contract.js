@@ -5,6 +5,7 @@ const http = require('node:http');
 const { createBff, CSRF_COOKIE } = require('../bff/src/app');
 const { MemorySessionStore } = require('../bff/src/session-store');
 const { MemoryAdminRolesStore } = require('../bff/src/admin-roles-store');
+const { MemoryAccessAuditStore } = require('../bff/src/access-audit-store');
 const { sha256, randomToken } = require('../bff/src/security');
 
 function request(server, method, path, { body, headers = {}, cookies = {} } = {}) {
@@ -65,6 +66,7 @@ function makeAuth(users) {
   const auth = makeAuth(users);
   const sessions = new MemorySessionStore();
   const adminRoles = new MemoryAdminRolesStore({ [OWNER]: 'owner', [ADMIN]: 'admin' });
+  const accessAudit = new MemoryAccessAuditStore();
   const billingStore = {
     async countMembershipsByStatus() { return { active: 2, trial: 0, expired: 1, revoked: 0 }; },
     async listMemberships({ page, perPage }) { return [{ user_id: OWNER, provider: 'chariow', status: 'active', product_id: 'prd_premium', starts_at: '2026-10-01T00:00:00.000Z', ends_at: null, updated_at: '2026-10-20T00:00:00.000Z' }].slice((page - 1) * perPage, (page - 1) * perPage + perPage); }
@@ -73,7 +75,7 @@ function makeAuth(users) {
 
   // --- 1. Fully wired: owner and admin can reach all three routes, a plain user cannot ---
   {
-    const handler = createBff({ auth, sessions, adminRoles, billingStore, config: baseConfig, clock: () => new Date('2026-10-24T00:00:00.000Z') });
+    const handler = createBff({ auth, sessions, adminRoles, accessAudit, billingStore, config: baseConfig, clock: () => new Date('2026-10-24T00:00:00.000Z') });
     const server = http.createServer(handler);
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
     try {
@@ -107,6 +109,13 @@ function makeAuth(users) {
       response = await request(server, 'GET', '/v1/admin/overview');
       assert.equal(response.status, 401, 'no session at all is refused, not defaulted to any role');
       assert.equal(response.body.code, 'unauthenticated');
+
+      const granted = accessAudit.list().filter(event => event.event_name === 'admin_access_granted');
+      const denied = accessAudit.list().filter(event => event.event_name === 'admin_access_denied');
+      assert.ok(granted.length >= 2, 'successful admin access is recorded server-side');
+      assert.equal(denied.length, 1, 'a non-admin access attempt is recorded once');
+      assert.equal(denied[0].metadata.route, '/v1/admin/overview');
+      assert.equal(Object.hasOwn(denied[0].metadata, 'email'), false, 'audit metadata contains no email');
 
       response = await request(server, 'GET', '/v1/admin/users', { cookies: { '__Host-dda_session': ownerToken } });
       assert.equal(response.status, 200);
@@ -160,6 +169,16 @@ function makeAuth(users) {
       response = await request(server, 'DELETE', `/v1/admin/roles/${encodeURIComponent(PLAIN)}`, { ...withCsrf(ownerToken) });
       assert.equal(response.status, 204, 'the owner can revoke the role they just granted');
       assert.equal(await adminRoles.getRole(PLAIN), null);
+      assert.equal(accessAudit.list().filter(event => event.event_name === 'role_assigned').length, 1, 'role assignment is audited');
+      assert.equal(accessAudit.list().filter(event => event.event_name === 'role_revoked').length, 1, 'role revocation is audited');
+
+      response = await request(server, 'POST', '/v1/admin/roles', { ...withCsrf(ownerToken), body: { user_id: PLAIN, role: 'instructor' } });
+      assert.equal(response.status, 200, 'the owner can store a future instructor role');
+      assert.equal(await adminRoles.getRole(PLAIN), 'instructor');
+      response = await request(server, 'GET', '/v1/admin/overview', { cookies: { '__Host-dda_session': plainToken } });
+      assert.equal(response.status, 403, 'a future instructor role does not silently become an admin role');
+      assert.equal(response.body.code, 'admin_role_required');
+      await adminRoles.revokeRole(PLAIN, OWNER);
 
       response = await request(server, 'DELETE', `/v1/admin/roles/${encodeURIComponent(OWNER)}`, { ...withCsrf(ownerToken) });
       assert.equal(response.status, 409, 'the last remaining owner cannot revoke themselves via this route either');
