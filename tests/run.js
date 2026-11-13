@@ -2091,6 +2091,74 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('in BFF mode, a server-confirmed Premium entitlement fetches and mounts the real LABCAP capstone, and its self-check quiz completes the project (Lot F follow-up, DDA Lab)', async () => {
+    const context = await freshContext(browser, { width: 1024, height: 900 });
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true })
+    }));
+    await context.route('https://bff.test/v1/premium/content/LAB4', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lesson: PREMIUM_CONTENT.LAB4 }) }));
+    const contentRequests = [];
+    await context.route('https://bff.test/v1/premium/content/LABCAP', route => { contentRequests.push('LABCAP'); return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lesson: PREMIUM_CONTENT.LABCAP }) }); });
+    await seedLocalLearner(context, { LAB1: { quizComplete: true }, LAB2: { quizComplete: true }, LAB3: { quizComplete: true }, LAB4: { quizComplete: true } }, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#lesson-lab-capstone`);
+    await page.waitForSelector('#lesson-lab-capstone.view.active');
+    await page.waitForSelector('[data-question="labcap-quiz"]', { state: 'attached' });
+    assert.ok(contentRequests.includes('LABCAP'), 'the client actually called the authenticated content route for LABCAP');
+    await openLessonExerciseTab(page, '-labcap');
+    assert.equal(await page.locator('[data-question="labcap-exercise"]').count(), 0, 'the capstone has no server-graded exercise — only a self-check quiz against the rubric');
+    await page.locator('[data-question="labcap-quiz"] button[data-correct="true"]').first().click();
+    const state = await page.evaluate(() => window.DDA.load());
+    assert.equal(state.lessons['LABCAP'].quizComplete, true, 'the capstone is marked complete locally once the learner self-declares against the rubric');
+
+    await page.goto(`${ACADEMY_BASE}#lab`);
+    await page.waitForSelector('#lab.view.active');
+    assert.equal((await page.locator('#lab-LABCAP-status').textContent()).trim(), 'Terminé', 'the Lab catalog reflects the finished capstone, same status label as any other completed lesson');
+    await context.close();
+  });
+
+  await test('LAB4 and the LABCAP capstone, once their real Premium content is fetched from the BFF, render with no horizontal overflow at 360/390px (mobile)', async () => {
+    for (const width of [360, 390]) {
+      const context = await freshContext(browser, { width, height: 844 });
+      await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+      await context.route('https://bff.test/v1/me', route => route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+      }));
+      await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify({ resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true })
+      }));
+      await context.route('https://bff.test/v1/premium/content/LAB4', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lesson: PREMIUM_CONTENT.LAB4 }) }));
+      await context.route('https://bff.test/v1/premium/content/LABCAP', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lesson: PREMIUM_CONTENT.LABCAP }) }));
+      // LABCAP's prerequisite is LAB4 — without it quiz-complete, the router
+      // sends a direct #lesson-lab-capstone navigation back to LAB4 instead
+      // of mounting the capstone, exactly like the main curriculum's chain.
+      await seedLocalLearner(context, { LAB1: { quizComplete: true }, LAB2: { quizComplete: true }, LAB3: { quizComplete: true }, LAB4: { quizComplete: true } }, 'free');
+      const page = await context.newPage();
+
+      await page.goto(`${ACADEMY_BASE}#lesson-lab4`);
+      await page.waitForSelector('#lesson-lab4.view.active');
+      await page.waitForSelector('[data-question="lab4-exercise"]', { state: 'attached' });
+      await openLessonExerciseTab(page, '-lab4');
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `LAB4 real content must not overflow at ${width}px`);
+
+      await page.goto(`${ACADEMY_BASE}#lesson-lab-capstone`);
+      await page.waitForSelector('#lesson-lab-capstone.view.active');
+      await page.waitForSelector('[data-question="labcap-quiz"]', { state: 'attached' });
+      await openLessonExerciseTab(page, '-labcap');
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `LABCAP real content must not overflow at ${width}px`);
+
+      await context.close();
+    }
+  });
+
   console.log('\n-- O. Navigation — sommaire de module, sorties Lab/Premium, lien back-office --');
 
   await test('a lesson\'s module summary (.module-toc) lists its sibling lessons with live status, and clicking a sibling navigates there — the mobile/tablet rendering below the 860px breakpoint, where the right-hand sidecard is display:none', async () => {
