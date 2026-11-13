@@ -3417,6 +3417,14 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
   document.querySelectorAll('.dda-surface').forEach(surface => {
     surface.classList.toggle('is-active', Boolean(surface.querySelector('.view.active')));
   });
+  // The inline boot script sets data-boot-view once, from the URL hash present
+  // at initial parse, purely to hide chrome during the access-page flash. It
+  // never updates again on its own, so once the SPA router takes over it must
+  // keep this attribute in sync — otherwise a learner who starts at #access
+  // and signs up straight into a lesson keeps the access-only CSS (which hides
+  // .mobile-nav/.sidebar/.topbar) applied to every later view for that whole
+  // session, with no mobile bottom nav until a full page reload.
+  document.documentElement.setAttribute('data-boot-view', id);
   [...desktopItems, ...mobileItems].forEach(item => {
     const isActive = item.dataset.view === id;
     item.classList.toggle('active', isActive);
