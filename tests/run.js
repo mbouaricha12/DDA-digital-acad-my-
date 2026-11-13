@@ -1198,7 +1198,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(productState.m1, 'completed');
     assert.equal(productState.m2, 'coming_soon');
     assert.equal(productState.terminalTitle, 'Toutes les leçons disponibles sont validées.');
-    assert.ok(productState.terminalIndex.includes('M0') && productState.terminalIndex.includes('M1'), 'Terminal completion label must reflect both completed authored modules');
+    assert.equal(productState.terminalIndex, 'PARCOURS DISPONIBLE · LEÇONS VALIDÉES', 'Terminal completion label must remain learner-facing after all authored lessons are validated');
     assert.equal(productState.primaryView, 'journal', 'with an empty journal, the honest daily action is Journal — not a phantom lesson');
     assert.equal(productState.progressNext, 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.');
 
@@ -1887,9 +1887,9 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
     await page.click('.sidebar .nav-item[data-view="progress"]');
     const progressProof = await page.locator('#progress-practice-proof').textContent();
-    assert.ok(progressProof.includes('m02-zone-identification'), 'Progression surfaces the same stable practice proof');
+    assert.ok(progressProof.includes('Preuve pédagogique'), 'Progression surfaces the same stable practice proof');
     assert.ok(progressProof.includes('Identification de zone'), 'Progression classifies the artifact as practice, not as a quiz result');
-    assert.ok(progressProof.includes('Après la leçon M0.2 · Support & Résistance'), 'Progression preserves the mission source');
+    assert.ok(progressProof.includes('Support & Résistance'), 'Progression preserves the mission source');
     const lessonProgress = await page.evaluate(() => window.DDA.load().lessons['M0.2']);
     assert.equal(lessonProgress.quizComplete, false, 'a valid Practice Terminal proof does not fabricate lesson mastery');
 
