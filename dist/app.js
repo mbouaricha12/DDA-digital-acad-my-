@@ -1183,14 +1183,14 @@ function setBffAuthMode(mode) {
   // unlike the local-only prototype mode this label's original wording
   // describes — showing that copy here would tell a real signer-upper
   // something false about where their data goes.
-  if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe) pour retrouver ma progression sur n’importe quel appareil, après avoir confirmé mon adresse e-mail.';
+  if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe) pour retrouver la progression de mes leçons et mon onboarding après confirmation de mon adresse e-mail. Le Journal, le Terminal, les préférences et mes réponses restent sur cet appareil.';
   if (emailHelp) emailHelp.textContent = login
     ? 'Cette adresse e-mail est transmise au service d’authentification pour ouvrir ta session.'
     : 'Cette adresse e-mail est transmise au service d’authentification pour créer ton compte et t’envoyer le lien de confirmation.';
   if (title) title.textContent = login ? 'Se connecter' : 'Commence ton parcours Free';
   if (step) step.textContent = login ? 'Accès sécurisé' : 'Étape 1 sur 2 · commencer';
   if (note) note.textContent = login
-    ? 'Retrouve ton parcours avec ton compte serveur sécurisé.'
+    ? 'Ouvre ta session DDA. Les leçons et l’onboarding sont liés à ton compte ; le Journal, le Terminal et les réponses restent sur cet appareil.'
     : 'Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon.';
   if (submit) submit.innerHTML = login ? 'Ouvrir ma session <span>→</span>' : 'Recevoir le lien de vérification <span>→</span>';
   if (forgot) forgot.hidden = !login;
@@ -2923,7 +2923,19 @@ function renderState() {
   document.getElementById('profile-first-name').value = hasProfile ? name : '';
   document.getElementById('profile-error').textContent = '';
   if (hasProfile) {
-
+    const persistenceStatus = document.getElementById('profile-persistence-status');
+    const remoteAccount = Boolean(window.DDABFF?.enabled() && remoteUser);
+    if (persistenceStatus) {
+      const storageReady = DDA.storageAvailable();
+      persistenceStatus.textContent = remoteAccount
+        ? (storageReady
+            ? 'Leçons et onboarding liés à ton compte · Journal, Terminal, préférences et réponses sur cet appareil'
+            : 'Leçons et onboarding liés à ton compte · stockage local indisponible pour tes autres données')
+        : (storageReady
+            ? 'Progression locale · enregistrée sur cet appareil'
+            : 'Progression en mémoire · stockage local indisponible');
+      persistenceStatus.classList.toggle('is-warning', !storageReady);
+    }
     document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · démonstration locale' : 'DDA Free';
     document.getElementById('profile-level').value = prototypeState.onboarding?.level || 'Débutant';
     document.getElementById('profile-goal').value = prototypeState.onboarding?.goal || 'Comprendre les marchés';
