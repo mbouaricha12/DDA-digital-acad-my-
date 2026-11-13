@@ -27,3 +27,63 @@ jobs:
           DDA_SITE_URL: https://dariusdigitalacademy.com
           DDA_BFF_URL: https://api.dariusdigitalacademy.com
         run: bash scripts/check_production_availability.sh
+
+  alert:
+    name: Email alert via Resend
+    if: ${{ needs.availability.result == 'failure' }}
+    needs: availability
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Send health check failure email
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+          ALERT_TO: dariusdigitalacademy@gmail.com
+        run: |
+          set -Eeuo pipefail
+          if [[ -z "${RESEND_API_KEY}" || -z "${RESEND_FROM_EMAIL}" ]]; then
+            echo "Missing GitHub Actions secrets: RESEND_API_KEY and/or RESEND_FROM_EMAIL" >&2
+            exit 1
+          fi
+
+          payload="$(python3 - <<'PY'
+          import json
+          import os
+
+          run_url = f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}"
+          subject = "[DDA] Échec du health check de production"
+          text = (
+              "Le health check de production DDA a échoué.\n\n"
+              f"Dépôt : {os.environ['GITHUB_REPOSITORY']}\n"
+              f"Branche : {os.environ.get('GITHUB_REF_NAME', 'main')}\n"
+              f"Commit : {os.environ.get('GITHUB_SHA', 'inconnu')}\n"
+              f"Run GitHub Actions : {run_url}\n\n"
+              "Consulter les logs avant toute action corrective."
+          )
+          html = (
+              "<h2>Échec du health check de production DDA</h2>"
+              "<p>Le health check de production DDA a échoué.</p>"
+              "<ul>"
+              f"<li>Dépôt : {os.environ['GITHUB_REPOSITORY']}</li>"
+              f"<li>Branche : {os.environ.get('GITHUB_REF_NAME', 'main')}</li>"
+              f"<li>Commit : {os.environ.get('GITHUB_SHA', 'inconnu')}</li>"
+              f"<li><a href=\"{run_url}\">Voir les logs GitHub Actions</a></li>"
+              "</ul>"
+              "<p>Consulter les logs avant toute action corrective.</p>"
+          )
+          print(json.dumps({
+              "from": os.environ["RESEND_FROM_EMAIL"],
+              "to": [os.environ["ALERT_TO"]],
+              "subject": subject,
+              "text": text,
+              "html": html,
+          }))
+          PY
+          )"
+
+          curl --fail-with-body --silent --show-error \
+            --request POST 'https://api.resend.com/emails' \
+            --header "Authorization: Bearer ${RESEND_API_KEY}" \
+            --header 'Content-Type: application/json' \
+            --data "${payload}"
