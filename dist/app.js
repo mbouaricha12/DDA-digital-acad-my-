@@ -4786,7 +4786,9 @@ document.getElementById('profile-logout')?.addEventListener('click', async event
   } catch { /* Hide local account data even if revocation cannot be confirmed. */ }
   remoteUser = null;
   serverPremiumConfirmed = null;
-  prototypeState = DDA.setStorageScope(null) || DDA.load();
+  try { localStorage.removeItem('dda-prototype-state-v4'); } catch { /* storage may be unavailable */ }
+  DDA.setStorageScope(null);
+  prototypeState = DDA.clear();
   window.DDARefreshAiHistory?.();
   renderState();
   setBffAuthMode('login');

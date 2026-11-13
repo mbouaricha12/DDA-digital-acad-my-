@@ -5,6 +5,21 @@ const { sha256 } = require('./security');
 const USER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ENTITLEMENTS = ['premium_track', 'resources_premium', 'certificate_preview', 'advanced_modules'];
 
+function eventTime(value) {
+  if (!value) return null;
+  const time = new Date(value).getTime();
+  return Number.isFinite(time) ? time : null;
+}
+
+function acceptsTransition(current, transition) {
+  if (!current) return true;
+  const incomingTime = eventTime(transition.occurredAt);
+  const currentTime = eventTime(current.provider_event_at);
+  if (incomingTime !== null && currentTime !== null && incomingTime <= currentTime) return false;
+  if (['expired', 'revoked'].includes(current.status) && transition.status !== 'revoked') return false;
+  return true;
+}
+
 class PostgrestBillingStore {
   constructor({ supabaseUrl, serviceRoleKey, fetchImpl = fetch }) {
     if (!supabaseUrl || !serviceRoleKey) throw new Error('Supabase billing store requires URL and service role key');
@@ -95,6 +110,9 @@ class PostgrestBillingStore {
   async applyChariowTransition(transition) {
     if (!transition || transition.kind !== 'membership_transition') return null;
     if (!USER_ID.test(String(transition.userReference || ''))) throw new Error('Chariow transition requires a server-owned DDA UUID');
+    const existingRows = await this.request('dda_billing_memberships', `?provider=eq.chariow&external_id=eq.${encodeURIComponent(transition.externalId)}&select=status,provider_event_at&limit=1`, { method: 'GET' });
+    const current = existingRows[0] || null;
+    if (!acceptsTransition(current, transition)) return current;
     const active = transition.status === 'active';
     const row = {
       user_id: transition.userReference,
@@ -107,6 +125,7 @@ class PostgrestBillingStore {
       status: transition.status,
       entitlement_snapshot: active ? ENTITLEMENTS : [],
       source_event: transition.event,
+      provider_event_at: transition.occurredAt || null,
       starts_at: active ? (transition.occurredAt || new Date().toISOString()) : null,
       ends_at: transition.status === 'expired' ? (transition.occurredAt || new Date().toISOString()) : null,
       updated_at: new Date().toISOString()
@@ -168,4 +187,4 @@ class PostgrestBillingStore {
   }
 }
 
-module.exports = { PostgrestBillingStore, ENTITLEMENTS };
+module.exports = { PostgrestBillingStore, ENTITLEMENTS, acceptsTransition };

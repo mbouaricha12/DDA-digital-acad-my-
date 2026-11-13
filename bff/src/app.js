@@ -127,8 +127,12 @@ function errorBody(code, message, requestId, fieldErrors) {
   return { code, message, request_id: requestId, ...(fieldErrors ? { field_errors: fieldErrors } : {}) };
 }
 
-function sendError(res, status, code, message, requestId, fieldErrors) {
-  return json(res, status, errorBody(code, message, requestId, fieldErrors));
+function sendError(res, status, code, message, requestId, fieldErrors, headers) {
+  return json(res, status, errorBody(code, message, requestId, fieldErrors), headers);
+}
+
+function sendRateLimited(res, requestId, message = 'Too many attempts. Please try again later.') {
+  return sendError(res, 429, 'rate_limited', message, requestId, undefined, { 'Retry-After': '60' });
 }
 
 // P0 auth reliability audit (2026-11): the login handler used to collapse
@@ -433,7 +437,17 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
   async function withUser(req, res, requestId) {
     const state = await currentSession(req);
     if (!state.session) { sendError(res, 401, 'unauthenticated', 'Authentication required.', requestId); return null; }
-    try { return { ...state, user: await auth.getUser(state.session.user_id) }; }
+    try {
+      const user = await auth.getUser(state.session.user_id);
+      if (!user || user.status !== 'active') {
+        try { await sessions.revoke(state.session.session_id, clock()); }
+        catch (error) { logger('inactive_session_revoke_failed', { requestId, status: error.status || 500 }); }
+        setCookies(res, cookieHeaders(config, '', '', true));
+        sendError(res, 401, 'unauthenticated', 'Authentication required.', requestId);
+        return null;
+      }
+      return { ...state, user };
+    }
     catch (error) { logger('get_user_failed', { requestId, status: error.status || 500 }); sendError(res, 401, 'unauthenticated', 'Authentication required.', requestId); return null; }
   }
 
@@ -560,7 +574,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         if (typeof auth.exchangeOAuthCode !== 'function') return sendError(res, 503, 'oauth_not_configured', 'Google sign-in is not available yet.', requestId);
         const body = await readJson(req);
         if (typeof body.code !== 'string' || body.code.length < 10) return sendError(res, 400, 'invalid_code', 'This Google sign-in link is invalid or has expired.', requestId);
-        if (!await checkAuthRateLimit(rateLimiter, 'oauth-google-exchange', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'oauth-google-exchange', { ip: clientIp(req) })) return sendRateLimited(res, requestId);
         const cookies = parseCookies(req.headers.cookie || '');
         const codeVerifier = readVerifierCookie(cookies, config, OAUTH_VERIFIER_COOKIE);
         if (!codeVerifier) return sendError(res, 400, 'oauth_verifier_expired', 'This Google sign-in must finish in the same browser tab that started it, and the request must not have expired. Please try "Continue with Google" again.', requestId);
@@ -588,7 +602,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         const validation = validateRegistration(body);
         if (Object.keys(validation.fields).length) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, validation.fields);
-        if (!await checkAuthRateLimit(rateLimiter, 'register', { ip: clientIp(req), email: validation.email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'register', { ip: clientIp(req), email: validation.email })) return sendRateLimited(res, requestId);
         // PKCE (P0 auth reliability audit, 2026-11): a fresh verifier per
         // signup attempt, bound to THIS browser via an httpOnly cookie — see
         // pkce.js. Generated unconditionally (success or failure path below)
@@ -621,7 +635,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const usesCode = typeof body.code === 'string';
         if (usesCode) { if (body.code.length < 10) return sendError(res, 400, 'invalid_code', 'The confirmation code is invalid or expired.', requestId); }
         else if (typeof body.token !== 'string' || body.token.length < 32) return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId);
-        if (!await checkAuthRateLimit(rateLimiter, 'verify-email', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'verify-email', { ip: clientIp(req) })) return sendRateLimited(res, requestId);
         if (usesCode) {
           const cookies = parseCookies(req.headers.cookie || '');
           const codeVerifier = readVerifierCookie(cookies, config, SIGNUP_VERIFIER_COOKIE);
@@ -637,7 +651,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       if (method === 'POST' && path === '/v1/auth/password-reset/exchange') {
         const body = await readJson(req);
         if (typeof body.code !== 'string' || body.code.length < 10) return sendError(res, 400, 'invalid_code', 'The recovery code is invalid or expired.', requestId);
-        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-exchange', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please request a new link later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-exchange', { ip: clientIp(req) })) return sendRateLimited(res, requestId, 'Too many attempts. Please request a new link later.');
         // PKCE exchange — the heart of this fix (P0 auth reliability audit,
         // 2026-11): without a code_verifier that matches what was sent to
         // /auth/v1/recover, this call is refused BEFORE ever reaching
@@ -658,7 +672,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       if (method === 'POST' && path === '/v1/auth/password-reset/verify') {
         const body = await readJson(req);
         if (typeof body.token !== 'string' || body.token.length < 20) return sendError(res, 400, 'invalid_token', 'The recovery link is invalid or expired.', requestId);
-        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-verify', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please request a new link later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-verify', { ip: clientIp(req) })) return sendRateLimited(res, requestId, 'Too many attempts. Please request a new link later.');
         let provider;
         try { provider = await auth.verifyRecoveryToken(body.token); }
         catch (error) { logger('password_reset_verify_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'invalid_token', 'The recovery link is invalid or expired.', requestId); }
@@ -671,7 +685,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         const validation = validateRegistration({ email: body.email, password: body.password });
         if (Object.keys(validation.fields).length) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId);
-        if (!await checkAuthRateLimit(rateLimiter, 'login', { ip: clientIp(req), email: validation.email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'login', { ip: clientIp(req), email: validation.email })) return sendRateLimited(res, requestId);
         let provider;
         try { provider = await auth.login({ email: validation.email, password: body.password }); }
         catch (error) {
@@ -691,7 +705,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         const email = normalizeEmail(body.email);
         if (!/^\S+@\S+\.\S+$/.test(email)) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId);
-        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-request', { ip: clientIp(req), email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-request', { ip: clientIp(req), email })) return sendRateLimited(res, requestId);
         // PKCE (P0 auth reliability audit, 2026-11): a fresh verifier per
         // recovery attempt, bound to THIS browser via an httpOnly cookie —
         // generated and stored unconditionally (whether or not the account
@@ -705,7 +719,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       if (method === 'POST' && path === '/v1/auth/password-reset/confirm') {
         const body = await readJson(req);
         if (typeof body.password !== 'string' || body.password.length < 12) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, { password: 'too_short' });
-        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-confirm', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-confirm', { ip: clientIp(req) })) return sendRateLimited(res, requestId);
         const current = await withUser(req, res, requestId); if (!current) return;
         if (!config.sessionEncryptionKey || !current.session.provider_access_token_enc) return sendError(res, 401, 'recovery_session_expired', 'The recovery session has expired. Request a new link.', requestId);
         try { await auth.confirmPasswordReset(decrypt(current.session.provider_access_token_enc, config.sessionEncryptionKey), body.password); }
