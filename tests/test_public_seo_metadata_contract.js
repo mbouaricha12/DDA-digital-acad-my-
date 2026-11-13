@@ -40,11 +40,11 @@ for (const slug of publicPages) {
   assert.match(html, /<meta name="twitter:card" content="summary_large_image">/);
   assert.match(html, /<meta name="twitter:image" content="https:\/\/dariusdigitalacademy\.com\/images\/dda-og-image\.jpg">/);
   assert.match(html, /<link rel="icon" href="\.\.\/images\/favicon-32\.png"/);
-  assert.match(html, /<html lang="fr">/i);
+  assert.match(html, /<html lang="fr-FR">/i);
 }
 
 const launch = fs.readFileSync(path.join(dist, 'launch', 'index.html'), 'utf8');
-assert.match(launch, /M0 rassemble trois fondations \(M0\.1 à M0\.3\) et M1 ajoute trois leçons \(M1\.1 à M1\.3\)/);
+assert.match(launch, /Le parcours Free commence par les trois fondations M0\.1, M0\.2 et M0\.3/);
 const landing = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
 assert.match(landing, /M0 comprend 3 fondations\. M1 ajoute 3 leçons supplémentaires/);
 const academy = fs.readFileSync(path.join(dist, 'academy.html'), 'utf8');
