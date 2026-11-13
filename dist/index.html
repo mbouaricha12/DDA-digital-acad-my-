@@ -89,8 +89,9 @@
       if (location.search || location.hash !== safeHash) history.replaceState(history.state, '', location.pathname + safeHash);
     })();
   </script>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="alpha-polish.css">
+  <link rel="preload" as="image" href="images/photos/hero-market-woman.jpg" fetchpriority="high">
+  <link rel="stylesheet" href="styles.min.css">
+  <link rel="stylesheet" href="alpha-polish.min.css">
 </head>
 <body class="public-document">
   <a class="skip-link" href="#public-shell">Aller au contenu</a>
@@ -291,7 +292,7 @@
             <div class="product-window" aria-label="Aperçu visuel du Terminal DDA">
               <div class="product-window-bar"><span class="window-brand">DDA / TODAY</span><span class="window-state"><i></i> Private Alpha</span></div>
               <div class="product-window-body">
-                <div class="product-window-lead"><span class="eyebrow gold">Prochaine action</span><h3>Comprendre le rôle des zones.</h3><p>M0.2 · Support &amp; Résistance</p>
+                <div class="product-window-lead"><span class="eyebrow gold">Prochaine action</span><h3>Comprendre le rôle des zones.</h3><p>Identifier les zones de support et de résistance</p>
                   <div class="product-window-chart" aria-hidden="true">
                     <svg viewBox="0 0 320 110" preserveAspectRatio="none">
                       <path class="chart-grid" d="M0 28H320M0 55H320M0 82H320"/>

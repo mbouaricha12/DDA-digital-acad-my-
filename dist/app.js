@@ -14,6 +14,20 @@
    Ce littéral reste volontairement des données pures (aucune référence
    externe) : le test le réévalue tel quel avec vm.
    ========================================================================== */
+const DDA_VISIBLE_LESSON_TITLES = Object.freeze({
+  'M0.1': 'Leçon en cours — Le trading comme commerce',
+  'M0.2': 'Support & Résistance — Identifier les zones de support et de résistance',
+  'M0.3': 'Lire une tendance — Comprendre les tendances du marché',
+  'M1.1': 'Pourquoi les prix évoluent ? — Comprendre la formation des prix',
+  'M1.2': 'Comment les ordres s’exécutent ? — Comprendre l’exécution des ordres',
+  'M1.3': 'Comment les marchés s’organisent ? — Découvrir les acteurs des marchés financiers',
+  'MBRVM.1': 'Introduction à la BRVM',
+  'P2.1': 'Définir son risque avant une décision',
+  'P2.2': 'Construire une décision maîtrisée'
+});
+function displayLessonTitle(id, fallback = '') {
+  return DDA_VISIBLE_LESSON_TITLES[id] || fallback || 'Leçon';
+}
 const LESSON_REGISTRY = Object.freeze([
   {
     id: 'M0.1', viewId: 'lesson', suffix: '', title: 'Leçon en cours',
@@ -1183,14 +1197,14 @@ function setBffAuthMode(mode) {
   // unlike the local-only prototype mode this label's original wording
   // describes — showing that copy here would tell a real signer-upper
   // something false about where their data goes.
-  if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe) pour retrouver ma progression sur n’importe quel appareil, après avoir confirmé mon adresse e-mail.';
+  if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe) pour retrouver la progression de mes leçons et mon onboarding après confirmation de mon adresse e-mail. Le Journal, le Terminal, les préférences et mes réponses restent sur cet appareil.';
   if (emailHelp) emailHelp.textContent = login
     ? 'Cette adresse e-mail est transmise au service d’authentification pour ouvrir ta session.'
     : 'Cette adresse e-mail est transmise au service d’authentification pour créer ton compte et t’envoyer le lien de confirmation.';
   if (title) title.textContent = login ? 'Se connecter' : 'Commence ton parcours Free';
   if (step) step.textContent = login ? 'Accès sécurisé' : 'Étape 1 sur 2 · commencer';
   if (note) note.textContent = login
-    ? 'Retrouve ton parcours avec ton compte serveur sécurisé.'
+    ? 'Ouvre ta session DDA. Les leçons et l’onboarding sont liés à ton compte ; le Journal, le Terminal et les réponses restent sur cet appareil.'
     : 'Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon.';
   if (submit) submit.innerHTML = login ? 'Ouvrir ma session <span>→</span>' : 'Recevoir le lien de vérification <span>→</span>';
   if (forgot) forgot.hidden = !login;
@@ -1508,6 +1522,16 @@ function moduleActionLabel(status, renderable) {
   return renderable ? 'Continuer' : 'Ouvrir';
 }
 
+// Internal curriculum IDs remain useful to the engine and analytics, but they
+// are not learner-facing language. Every surface below uses the authored title
+// or a plain sequence label instead of exposing M0.1, P2.2, LAB1, etc.
+function learnerLessonTitle(lessonOrId) {
+  if (lessonOrId && typeof lessonOrId === 'object') return lessonOrId.title || 'cette leçon';
+  const match = DDA.curriculum.modules.flatMap(module => module.lessons.map(lesson => ({ module, lesson })))
+    .find(entry => entry.lesson.id === lessonOrId);
+  return match?.lesson.title || 'cette leçon';
+}
+
 // The Parcours screen is a journey, not a stack of identical cards: one rich
 // "current chapter" for the single authored module, then a compact connected
 // rail for the honestly-labeled modules still to come (never a fake card per
@@ -1581,14 +1605,15 @@ function renderModulesRecap() {
   const visibleModules = modules.slice(0, Math.min(modules.length, Math.max(3, activeIndex + 2)));
   container.innerHTML = visibleModules.map(module => {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
-    return `<li><span class="module-id">${module.id}</span><strong>${module.title}</strong><span class="module-pill ${status}">${MODULE_STATUS_LABEL[status] || status}</span></li>`;
+    return `<li><span class="module-id">Étape ${visibleModules.indexOf(module) + 1}</span><strong>${module.title}</strong><span class="module-pill ${status}">${MODULE_STATUS_LABEL[status] || status}</span></li>`;
   }).join('');
   const hidden = modules.length - visibleModules.length;
   if (hidden > 0) container.insertAdjacentHTML('beforeend', `<li class="modules-recap-more"><span class="module-id">…</span><strong>${hidden} modules plus loin</strong><span class="module-pill coming_soon">Progressif</span></li>`);
 }
 
 function renderMarketIntelligence() {
-  const indices = document.getElementById('market-indices');
+  // Keep the public section anchor intact; only the inner grid is data-driven.
+  const indices = document.getElementById('market-index-grid');
   if (indices) {
     indices.innerHTML = marketDemo().indices.map((item, i) => `
       <article class="index-card">
@@ -1673,7 +1698,7 @@ function renderMasteryList() {
     return `
       <article class="mastery-row mastery-row-focused" data-mastery-level="${level}" data-proof-state="${level >= 4 ? 'confirmed' : level >= 3 ? 'practiced' : 'learning'}">
         <div class="mastery-row-head">
-          <div><p class="mastery-lesson">${lesson.id} — ${lesson.title}</p><strong>${lesson.competency.label}</strong></div>
+          <div><p class="mastery-lesson">${lesson.title}</p><strong>${lesson.competency.label}</strong></div>
           <div class="mastery-level">
             <div class="terminal-thread-beads" role="img" aria-label="${beadsAriaLabel(level)}">${renderBeads(level)}</div>
             <span>${COMPETENCY_LEVEL_LABEL[level]}</span>
@@ -1702,9 +1727,9 @@ function renderPracticeProof() {
   }
   const validated = practice.status === 'validated';
   const proof = practice.proof || {};
-  const source = practice.sourceLessonTitle ? `Après la leçon ${practice.sourceLesson} · ${practice.sourceLessonTitle}` : 'Practice Terminal autonome';
+  const source = practice.sourceLessonTitle ? `Après la leçon « ${practice.sourceLessonTitle} »` : 'Practice Terminal autonome';
   const proofType = proof.type === 'zone_identification' ? 'Identification de zone' : 'Mission Practice';
-  container.innerHTML = `<div class="practice-proof-row ${validated ? 'is-validated' : 'is-retry'}"><span class="practice-proof-icon">${validated ? '✓' : '↻'}</span><div><strong>${escapeHtml(proofType)} — Practice Terminal</strong><p>${escapeHtml(source)}</p><p>${escapeHtml(practice.feedback || 'Mission tentée localement.')}</p><small>Preuve ${escapeHtml(proof.id || 'locale')} · ${validated ? 'conservée sur cet appareil.' : 'à reprendre — elle ne compte pas comme compétence acquise.'}</small></div></div>`;
+  container.innerHTML = `<div class="practice-proof-row ${validated ? 'is-validated' : 'is-retry'}"><span class="practice-proof-icon">${validated ? '✓' : '↻'}</span><div><strong>${escapeHtml(proofType)} — Practice Terminal</strong><p>${escapeHtml(source)}</p><p>${escapeHtml(practice.feedback || 'Mission tentée localement.')}</p><small>Preuve pédagogique · ${validated ? 'conservée sur cet appareil.' : 'à reprendre — elle ne compte pas comme compétence acquise.'}</small></div></div>`;
 }
 
 // Dashboard orientation layer: expose one recent, auditable proof without
@@ -1733,7 +1758,7 @@ function renderDashboardProof(continueTarget, curriculumComplete) {
   } else {
     const event = [...(prototypeState.events || [])].reverse().find(item => ['quiz_complete', 'exercise_complete', 'lesson_understood'].includes(item.name));
     if (event) {
-      const lesson = event.metadata?.lesson || 'une leçon';
+      const lesson = learnerLessonTitle(event.metadata?.lesson);
       const labels = { quiz_complete: 'Quiz validé', exercise_complete: 'Exercice complété', lesson_understood: 'Leçon comprise' };
       title = `${labels[event.name]} — ${lesson}.`;
       meta = 'Preuve pédagogique enregistrée dans l’état local de cet appareil.';
@@ -1749,7 +1774,7 @@ function renderDashboardProof(continueTarget, curriculumComplete) {
   if (curriculumComplete) {
     actionEl.textContent = (prototypeState.journal?.entries || []).length === 0 ? 'Ouvrir le Journal' : 'Explorer les marchés';
   } else if (continueTarget) {
-    actionEl.textContent = `Reprendre ${continueTarget.lesson.id}`;
+    actionEl.textContent = `Reprendre « ${learnerLessonTitle(continueTarget.lesson)} »`;
   } else {
     actionEl.textContent = '—';
   }
@@ -1773,14 +1798,14 @@ function renderProgressNextStep() {
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   if (el) {
     el.textContent = next
-      ? `Continuer ${next.lesson.title} (${next.lesson.id}) — ${NEXT_STEP_PHRASE[next.step] || 'continuer'}.`
+      ? `Continuer « ${learnerLessonTitle(next.lesson)} » — ${NEXT_STEP_PHRASE[next.step] || 'continuer'}.`
       : 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.';
   }
   if (action) {
     action.hidden = !next;
     if (next) {
       action.dataset.view = LESSON_VIEW_ID[next.lesson.id] || 'lesson';
-      action.innerHTML = `${next.step === 'lesson' ? 'Commencer' : 'Reprendre'} ${next.lesson.id} · ${next.lesson.title} <span>→</span>`;
+      action.innerHTML = `${next.step === 'lesson' ? 'Commencer' : 'Reprendre'} « ${learnerLessonTitle(next.lesson)} » <span>→</span>`;
     }
   }
   const noteEl = document.getElementById('progress-journal-note');
@@ -1925,7 +1950,7 @@ function renderJournalList() {
       .map(([field, label]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(entry[field])}</dd></div>`)
       .join('');
     const sourceView = entry.sourceLesson === 'M0.2' ? 'lesson-m02' : '';
-    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve ${escapeHtml(entry.proofId || 'locale')}</strong><span>${escapeHtml(entry.sourceLesson || 'M0.2')} · ${escapeHtml(entry.proofType || 'zone_identification')}</span>${sourceView ? `<button type="button" class="text-action journal-proof-source" data-view="${sourceView}">Revoir la leçon <span>→</span></button>` : ''}</div>` : '';
+    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve pédagogique</strong><span>${escapeHtml(learnerLessonTitle(entry.sourceLesson))} · ${escapeHtml(entry.proofType === 'zone_identification' ? 'Identification de zone' : 'Pratique guidée')}</span>${sourceView ? `<button type="button" class="text-action journal-proof-source" data-view="${sourceView}">Revoir la leçon <span>→</span></button>` : ''}</div>` : '';
     const snippet = entry.decision || entry.scenario || entry.context || 'Aucun détail renseigné.';
     const entryNumber = String(entries.length - idx).padStart(2, '0');
     return `
@@ -2337,7 +2362,7 @@ function renderTerminalMeta(continueTarget) {
   const lessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
   const step = DDALearning.lessonNextStep(lessonProgress);
   stepEl.textContent = step === 'review' ? 'leçon terminée' : (NEXT_STEP_PHRASE[step] || '—');
-  document.getElementById('terminal-meta-module').textContent = continueTarget.lesson.id;
+  document.getElementById('terminal-meta-module').textContent = continueTarget.module.title;
   const xpKey = step === 'lesson' ? 'lessonViewed' : step === 'exercise' ? 'exerciseComplete' : step === 'quiz' ? 'quizComplete' : null;
   const nextXp = xpKey && continueTarget.lesson.xp ? continueTarget.lesson.xp[xpKey] : null;
   document.getElementById('terminal-meta-xp').textContent = nextXp ? `+${nextXp} XP` : '—';
@@ -2384,9 +2409,7 @@ function renderTerminalLeadComplete() {
   const indexEl = document.getElementById('lesson-index-label');
   if (indexEl) {
     const completedIds = completedModuleIds();
-    indexEl.textContent = completedIds.length
-      ? `CURRICULUM ${completedIds.join(' + ')} COMPLÉTÉ${completedIds.length > 1 ? 'S' : ''}`
-      : 'CURRICULUM DISPONIBLE COMPLÉTÉ';
+    indexEl.textContent = 'PARCOURS DISPONIBLE · LEÇONS VALIDÉES';
   }
   const moduleEl = document.getElementById('terminal-lead-module');
   if (moduleEl) moduleEl.textContent = last ? last.module.title : 'DDA';
@@ -2412,7 +2435,7 @@ function renderTerminalLeadComplete() {
     if (last) {
       secondary.hidden = false;
       secondary.dataset.view = LESSON_VIEW_ID[last.lesson.id] || 'lesson';
-      secondary.innerHTML = `Revoir ${last.lesson.id} <span>→</span>`;
+      secondary.innerHTML = `Revoir « ${learnerLessonTitle(last.lesson)} » <span>→</span>`;
     } else {
       secondary.hidden = true;
     }
@@ -2791,8 +2814,23 @@ function renderMembershipNextStep(premium) {
   }
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   el.textContent = next
-    ? `Continuer ${next.lesson.title} (${next.lesson.id}) sur DDA Free — Premium reste disponible en aperçu quand tu voudras l’explorer.`
+    ? `Continuer « ${learnerLessonTitle(next.lesson)} » sur DDA Free — Premium reste disponible en aperçu quand tu voudras l’explorer.`
     : 'Tu as validé les leçons disponibles sur DDA Free — ouvre l’aperçu Premium ci-dessus pour voir ce qu’il débloque dès aujourd’hui.';
+}
+
+// M0 completion must distinguish a real Free → Premium handoff from a normal
+// next-lesson transition. The destination remains the same guarded M1.1 view;
+// only the action language changes so a Free learner knows M0 is complete and
+// that the next click opens an honest Premium preview rather than a broken
+// lesson.
+function renderM0CompletionCta() {
+  const cta = document.querySelector('#result-card-m3 .result-action[data-view="lesson-m11"]');
+  if (!cta) return;
+  const premium = canUnlock('premium_track');
+  cta.innerHTML = premium
+    ? 'Continuer vers Pourquoi les prix évoluent ? <span>→</span>'
+    : 'Découvrir l’aperçu Premium : Pourquoi les prix évoluent ? <span>→</span>';
+  cta.dataset.m0CompletionAccess = premium ? 'premium' : 'free';
 }
 
 function renderState() {
@@ -2848,7 +2886,7 @@ function renderState() {
   document.getElementById('personalized-next').textContent = curriculumComplete
     ? 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.'
     : prototypeState.onboarding?.goal
-      ? `Objectif : ${prototypeState.onboarding.goal}. Prochaine étape : terminer ${continueTarget.lesson.id}.`
+      ? `Objectif : ${prototypeState.onboarding.goal}. Prochaine étape : terminer « ${learnerLessonTitle(continueTarget.lesson)} ».`
       : 'Une étape claire pour continuer à progresser.';
 
   if (continueTarget) {
@@ -2886,8 +2924,9 @@ function renderState() {
   renderNavCurrentExercise(continueTarget);
 
   // Restore every mounted lesson's progress UI from stored state — one
-  // registry-driven loop covers all of them, ids derived by lessonUiIds.
+  // registry-driven loop covers all of them, ids derived from lessonUiIds.
   mountedLessons.forEach(entry => renderLessonProgressUI(entry.id, entry.meta.lesson, lessonUiIds(entry)));
+  renderM0CompletionCta();
 
   // Lot — Signup coherence: the resume/erase nudge is for a RETURNING
   // learner who opens #access while a prior session already exists. Once
@@ -2923,7 +2962,19 @@ function renderState() {
   document.getElementById('profile-first-name').value = hasProfile ? name : '';
   document.getElementById('profile-error').textContent = '';
   if (hasProfile) {
-
+    const persistenceStatus = document.getElementById('profile-persistence-status');
+    const remoteAccount = Boolean(window.DDABFF?.enabled() && remoteUser);
+    if (persistenceStatus) {
+      const storageReady = DDA.storageAvailable();
+      persistenceStatus.textContent = remoteAccount
+        ? (storageReady
+            ? 'Leçons et onboarding liés à ton compte · Journal, Terminal, préférences et réponses sur cet appareil'
+            : 'Leçons et onboarding liés à ton compte · stockage local indisponible pour tes autres données')
+        : (storageReady
+            ? 'Progression locale · enregistrée sur cet appareil'
+            : 'Progression en mémoire · stockage local indisponible');
+      persistenceStatus.classList.toggle('is-warning', !storageReady);
+    }
     document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · démonstration locale' : 'DDA Free';
     document.getElementById('profile-level').value = prototypeState.onboarding?.level || 'Débutant';
     document.getElementById('profile-goal').value = prototypeState.onboarding?.goal || 'Comprendre les marchés';
@@ -4743,7 +4794,9 @@ document.getElementById('profile-logout')?.addEventListener('click', async event
   } catch { /* Hide local account data even if revocation cannot be confirmed. */ }
   remoteUser = null;
   serverPremiumConfirmed = null;
-  prototypeState = DDA.setStorageScope(null) || DDA.load();
+  try { localStorage.removeItem('dda-prototype-state-v4'); } catch { /* storage may be unavailable */ }
+  DDA.setStorageScope(null);
+  prototypeState = DDA.clear();
   window.DDARefreshAiHistory?.();
   renderState();
   setBffAuthMode('login');

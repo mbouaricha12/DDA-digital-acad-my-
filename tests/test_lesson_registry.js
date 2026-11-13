@@ -33,11 +33,18 @@ const html = fs.readFileSync(path.join(root, 'dist', 'academy.html'), 'utf8');
 let pass = 0;
 function test(name, fn) { fn(); pass++; console.log('PASS -', name); }
 
-// --- Load the registry literal exactly as data -----------------------------
+// --- Load the visible title map and registry literal exactly as data --------
+
+// The registry keeps internal ids stable while reading learner-facing titles
+// from the centralized map. Load that dependency in the same VM context as
+// the registry instead of pretending the registry is dependency-free.
+const titleMapMatch = app.match(/const DDA_VISIBLE_LESSON_TITLES = Object\.freeze\(\{([\s\S]*?)\n\}\);/);
+assert.ok(titleMapMatch, 'DDA_VISIBLE_LESSON_TITLES map must exist in app.js');
+const VISIBLE_TITLES = vm.runInNewContext(`({${titleMapMatch[1]}})`, {});
 
 const registryMatch = app.match(/const LESSON_REGISTRY = Object\.freeze\(\[([\s\S]*?)\n\]\);/);
 assert.ok(registryMatch, 'LESSON_REGISTRY literal must exist in app.js');
-const REGISTRY = vm.runInNewContext(`[${registryMatch[1]}]`, {});
+const REGISTRY = vm.runInNewContext(`[${registryMatch[1]}]`, { DDA_VISIBLE_LESSON_TITLES: VISIBLE_TITLES });
 
 // --- Load the real curriculum the way dda-core.js builds it ----------------
 
