@@ -1567,10 +1567,8 @@
         <div class="page-mission" data-mission="profile"><div><p class="eyebrow">Mission de cette page</p><strong>Ajuster ton environnement, pas refaire ton parcours.</strong><span>Retrouve ici tes préférences, ton identité et les repères utiles pour la suite.</span></div><button class="text-action" data-view="progress">Voir mes preuves <span>→</span></button></div>
         <div class="profile-layout">
           <form class="profile-panel" id="profile-form" data-js-submit method="dialog">
-            <!-- "local" here is accurate for the current default (no BFF/server auth enabled). If a future
-                 pass activates real BFF accounts, this copy needs a dynamic check (window.DDABFF?.enabled())
-                 rather than being hardcoded to "local" for every visitor. -->
-            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">A</span><div><p class="eyebrow" id="profile-storage-scope">Profil sur cet appareil</p><h2 id="profile-heading-name">Apprenant</h2><p id="profile-heading-email">Compte local</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
+            <!-- Profile identity, persistence scope and progress import are populated from the active account state. -->
+            <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">A</span><div><p class="eyebrow" id="profile-storage-scope">Profil sur cet appareil</p><h2 id="profile-heading-name">Apprenant</h2><p id="profile-heading-email">Compte local</p><p class="persistence-status" id="profile-persistence-status" role="status">Progression locale · enregistrée sur cet appareil</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
             <div class="profile-import-notice" id="profile-import-notice" hidden><p><strong>Progression de cet appareil trouvée.</strong> Son propriétaire ne peut pas être vérifié. Si elle t’appartient, tu peux transférer uniquement l’onboarding et les étapes de leçon dans ce compte.</p><button class="secondary-action dark-action" id="profile-import-progress" type="button">Importer cette progression dans mon compte</button></div>
             <div class="profile-progress-strip">
               <div><span>XP total</span><strong id="profile-total-xp">0</strong></div>
@@ -1591,7 +1589,7 @@
             <p class="eyebrow gold">Préférences</p><h3>Une expérience adaptée à ton appareil.</h3>
             <label class="preference-row"><span><b>Économie de données</b><small>Réduit mouvements et médias non essentiels.</small></span><input id="profile-low-data" type="checkbox"></label>
             <label class="preference-row"><span><b>Rappels pédagogiques</b><small>Préférence enregistrée seulement ; aucun message n’est envoyé.</small></span><input id="profile-reminders" type="checkbox"></label>
-            <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité.</strong> <span id="profile-storage-disclosure">Tes données sont enregistrées sur cet appareil. Une mesure d’audience pseudonyme peut aider à comprendre comment les visiteurs découvrent DDA ; elle ne contient ni ton nom ni ton e-mail.</span> Aucun courtier ni service publicitaire n’accède à tes réponses.</span></p>
+            <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité.</strong> <span id="profile-storage-disclosure">Sans compte connecté, tes données restent sur cet appareil — pas encore de synchronisation multi-appareils. Une mesure d’audience pseudonyme peut aider à comprendre comment les visiteurs découvrent DDA ; elle ne contient ni ton nom ni ton e-mail.</span> Aucun courtier ni service publicitaire n’accède à tes réponses.</span></p>
             <div class="activity-summary"><span>Activité d’apprentissage</span><strong id="event-count">0 événement</strong><small>Un résumé pédagogique de ton parcours, uniquement pour t’aider à reprendre au bon endroit.</small></div>
           </aside>
         </div>
