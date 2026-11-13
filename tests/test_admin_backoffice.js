@@ -269,6 +269,26 @@ async function withBffContext(browser) {
     await context.close();
   });
 
+  await test('data service failures are visible in Users and Memberships instead of empty tables', async () => {
+    const context = await withBffContext(browser);
+    await context.route('https://bff.test/v1/admin/overview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-overview-v1', generated_at: new Date().toISOString(), caller: { user_id: 'admin-1', role: 'admin' }, metrics: {} })
+    }));
+    await context.route(/https:\/\/bff\.test\/v1\/admin\/users/, route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ code: 'admin_not_configured' }) }));
+    await context.route(/https:\/\/bff\.test\/v1\/admin\/memberships/, route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ code: 'admin_not_configured' }) }));
+    const page = await context.newPage();
+    await page.goto(ADMIN_BASE);
+    await page.waitForSelector('.admin-metrics');
+    await page.click('.sidebar .nav-item[data-admin-view="users"]');
+    await page.waitForSelector('#admin-users-feedback:not([hidden])');
+    assert.match(await page.textContent('#admin-users-feedback'), /indisponibles.*service serveur/i);
+    await page.click('.sidebar .nav-item[data-admin-view="memberships"]');
+    await page.waitForSelector('#admin-memberships-feedback:not([hidden])');
+    assert.match(await page.textContent('#admin-memberships-feedback'), /indisponibles.*service serveur/i);
+    await context.close();
+  });
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 
