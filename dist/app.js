@@ -14,6 +14,20 @@
    Ce littéral reste volontairement des données pures (aucune référence
    externe) : le test le réévalue tel quel avec vm.
    ========================================================================== */
+const DDA_VISIBLE_LESSON_TITLES = Object.freeze({
+  'M0.1': 'Leçon en cours — Le trading comme commerce',
+  'M0.2': 'Support & Résistance — Identifier les zones de support et de résistance',
+  'M0.3': 'Lire une tendance — Comprendre les tendances du marché',
+  'M1.1': 'Pourquoi les prix évoluent ? — Comprendre la formation des prix',
+  'M1.2': 'Comment les ordres s’exécutent ? — Comprendre l’exécution des ordres',
+  'M1.3': 'Comment les marchés s’organisent ? — Découvrir les acteurs des marchés financiers',
+  'MBRVM.1': 'Introduction à la BRVM',
+  'P2.1': 'Définir son risque avant une décision',
+  'P2.2': 'Construire une décision maîtrisée'
+});
+function displayLessonTitle(id, fallback = '') {
+  return DDA_VISIBLE_LESSON_TITLES[id] || fallback || 'Leçon';
+}
 const LESSON_REGISTRY = Object.freeze([
   {
     id: 'M0.1', viewId: 'lesson', suffix: '', title: 'Leçon en cours',
@@ -4772,7 +4786,9 @@ document.getElementById('profile-logout')?.addEventListener('click', async event
   } catch { /* Hide local account data even if revocation cannot be confirmed. */ }
   remoteUser = null;
   serverPremiumConfirmed = null;
-  prototypeState = DDA.setStorageScope(null) || DDA.load();
+  try { localStorage.removeItem('dda-prototype-state-v4'); } catch { /* storage may be unavailable */ }
+  DDA.setStorageScope(null);
+  prototypeState = DDA.clear();
   window.DDARefreshAiHistory?.();
   renderState();
   setBffAuthMode('login');
