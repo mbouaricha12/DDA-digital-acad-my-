@@ -211,7 +211,7 @@ async function signUp(page, { name = 'Ada', email, password }) {
   await page.fill('#access-password', password);
   await page.check('#consent');
   await page.click('#signup-form button[type=submit]');
-  await page.waitForFunction(() => document.getElementById('bff-auth-status').textContent.length > 0);
+  await waitForText(page, '#bff-auth-status');
 }
 
 async function login(page, { email, password }) {
@@ -219,6 +219,18 @@ async function login(page, { email, password }) {
   await page.fill('#email', email);
   await page.fill('#access-password', password);
   await page.click('#signup-form button[type=submit]');
+}
+
+async function waitForText(page, selector, { includes, timeout = 10000 } = {}) {
+  const locator = page.locator(selector);
+  await locator.waitFor({ state: 'attached', timeout });
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    const text = (await locator.textContent()) || '';
+    if (text.trim() && (!includes || text.includes(includes))) return text;
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  throw new Error(`Timed out waiting for text in ${selector}${includes ? ` including "${includes}"` : ''}`);
 }
 
 (async () => {
@@ -250,7 +262,7 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true });
       const page = await initPage(context, bffBase);
       await login(page, { email: 'learner1@example.com', password: 'CorrectHorse123!' });
-      await page.waitForFunction(() => document.getElementById('signup-error').textContent.length > 0);
+      await waitForText(page, '#signup-error');
       const message = await page.textContent('#signup-error');
       assert.match(message, /confirme ton adresse e-mail/i, `expected the email-not-confirmed message, got: "${message}"`);
       assert.doesNotMatch(message, /mot de passe incorrect/i, 'must never say "wrong password" when the real cause is an unconfirmed email — this was the production bug');
@@ -261,8 +273,7 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true });
       const page = await initPage(context, bffBase);
       await page.goto(`${SITE_BASE}/academy.html?token=signup-token-learner1@example.com#access`);
-      await page.waitForFunction(() => !document.getElementById('bff-verify-panel').hidden);
-      const message = await page.textContent('#bff-verify-message');
+      const message = await waitForText(page, '#bff-verify-message', { includes: 'confirmée' });
       assert.match(message, /confirmée/i);
       assert.equal(auth.users.get('learner1@example.com').confirmed, true, 'the server-side user record is actually confirmed, not just the UI text');
       await context.close();
@@ -287,7 +298,7 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true });
       const page = await initPage(context, bffBase);
       await login(page, { email: 'learner1@example.com', password: 'TotallyWrongPassword1!' });
-      await page.waitForFunction(() => document.getElementById('signup-error').textContent.length > 0);
+      await waitForText(page, '#signup-error');
       const message = await page.textContent('#signup-error');
       assert.match(message, /mot de passe incorrect/i);
       await context.close();
@@ -297,7 +308,7 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true });
       const page = await initPage(context, bffBase);
       await login(page, { email: 'nobody-here@example.com', password: 'WhateverPassword1!' });
-      await page.waitForFunction(() => document.getElementById('signup-error').textContent.length > 0);
+      await waitForText(page, '#signup-error');
       const message = await page.textContent('#signup-error');
       assert.match(message, /mot de passe incorrect/i);
       await context.close();
@@ -328,7 +339,7 @@ async function login(page, { email, password }) {
       await page.click('#bff-forgot-password');
       await page.fill('#recovery-email', 'learner1@example.com');
       await page.click('#bff-recovery-form button[type=submit]');
-      await page.waitForFunction(() => document.getElementById('recovery-error').textContent.length > 0);
+      await waitForText(page, '#recovery-error');
       assert.ok(auth.lastRecoveryToken, 'a real recovery token was actually issued server-side');
 
       const resetContext = await browser.newContext({ ignoreHTTPSErrors: true });
@@ -338,10 +349,10 @@ async function login(page, { email, password }) {
       await resetPage.fill('#reset-password', 'BrandNewPassword99!');
       await resetPage.fill('#reset-password-confirm', 'BrandNewPassword99!');
       await resetPage.click('#bff-reset-password-form button[type=submit]');
-      await resetPage.waitForFunction(() => document.getElementById('bff-auth-status').textContent.includes('modifié'));
+      await waitForText(resetPage, '#bff-auth-status', { includes: 'modifié' });
 
       await login(resetPage, { email: 'learner1@example.com', password: 'CorrectHorse123!' });
-      await resetPage.waitForFunction(() => document.getElementById('signup-error').textContent.length > 0);
+      await waitForText(resetPage, '#signup-error');
       assert.match(await resetPage.textContent('#signup-error'), /mot de passe incorrect/i, 'the old password must no longer work after a reset');
 
       await login(resetPage, { email: 'learner1@example.com', password: 'BrandNewPassword99!' });
@@ -356,7 +367,7 @@ async function login(page, { email, password }) {
       await login(page, { email: 'learner1@example.com', password: 'BrandNewPassword99!' });
       await page.waitForSelector('#onboarding-form:not([hidden]), .view.active#lesson');
       await page.reload();
-      await page.waitForFunction(() => window.DDABFF !== undefined);
+      await page.locator('#access').waitFor({ state: 'visible' });
       const meStatus = await page.evaluate(async base => (await fetch(`${base}/v1/me`, { credentials: 'include' })).status, bffBase);
       assert.equal(meStatus, 200, 'the session cookie survives a full page reload');
       await context.close();
@@ -366,9 +377,9 @@ async function login(page, { email, password }) {
       const context = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 390, height: 844 } });
       const page = await initPage(context, bffBase);
       await signUp(page, { email: 'mobile-learner@example.com', password: 'MobilePassword123!' });
-      await page.waitForFunction(() => document.getElementById('bff-auth-status').textContent.length > 0);
+      await waitForText(page, '#bff-auth-status');
       await page.goto(`${SITE_BASE}/academy.html?token=signup-token-mobile-learner@example.com#access`);
-      await page.waitForFunction(() => !document.getElementById('bff-verify-panel').hidden);
+      await waitForText(page, '#bff-verify-message', { includes: 'confirmée' });
       const mobileContext = await browser.newContext({ ignoreHTTPSErrors: true, viewport: { width: 390, height: 844 } });
       const mobilePage = await initPage(mobileContext, bffBase);
       await login(mobilePage, { email: 'mobile-learner@example.com', password: 'MobilePassword123!' });
@@ -399,7 +410,7 @@ async function login(page, { email, password }) {
       // long enough to actually reach the network request this test means
       // to exercise.
       await login(page, { email: 'learner1@example.com', password: 'LongEnoughButWrong1!' });
-      await page.waitForFunction(() => document.getElementById('signup-error').textContent.length > 0);
+      await waitForText(page, '#signup-error');
       const disabled = await page.evaluate(() => document.querySelector('#signup-form button[type=submit]').disabled);
       assert.equal(disabled, false, 'the submit button must re-enable after a failed request');
       await context.close();
