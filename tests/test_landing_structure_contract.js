@@ -12,7 +12,7 @@ assert.match(html, /data-layer="public"/, 'landing must be an independently addr
 assert.match(html, /id="landing"/, 'public shell must mount the landing');
 const headerNav = landing.match(/<nav class="public-header-nav"[^>]*>[\s\S]*?<\/nav>/)?.[0] || '';
 const mobileMenu = landing.match(/<details class="public-menu"[\s\S]*?<\/details>/)?.[0] || '';
-assert.match(headerNav, /href="#landing-experience"/, 'public nav must use internal landing anchors');
+assert.match(headerNav, /href="#landing-lab"/, 'public nav must use internal landing anchors');
 assert.doesNotMatch(`${headerNav}${mobileMenu}`, /data-view="(dashboard|path|progress|journal|resources|markets|community|intelligence|profile)"/, 'public nav must not expose protected app routes');
 assert.match(html, /id="landing-experience"/, 'landing must expose a method anchor');
 assert.match(html, /id="landing-product"/, 'landing must expose a product anchor');

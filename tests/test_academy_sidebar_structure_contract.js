@@ -5,8 +5,9 @@
  * collapsible Academy section with its 4 sub-items / DDA Lab / DDA AI /
  * Ressources / Communauté / Marchés / Mes progrès / Profil), the
  * bottom-of-sidebar "DDA Premium" card, and the public landing header's
- * relabeled navigation (Accueil/Apprendre/Parcours/Formations/Ressources/
- * Market Intelligence/Communauté).
+ * relabeled navigation (Accueil/Academy/DDA Lab/DDA AI/Ressources/Tarifs/
+ * Communauté — updated 2026-11-14 per the founder's marketing-orientation
+ * directive).
  *
  * Updated 2026-11-14 for the founder's full product maquette set (Lot 1 —
  * navigation): Accueil (was "Mon Espace"), Ressources and Profil promoted
@@ -104,20 +105,23 @@ assert.match(app, /renderNavCurrentLesson\(continueTarget\);\s*\n\s*renderNavCur
 assert.match(app, /\['nav-academy', 'drawer-academy'\]\.forEach/, 'the Academy section toggle is wired on both rails');
 
 // ---------------------------------------------------------------------
-// Public landing header (index.html): founder-confirmed relabeling —
-// Accueil/Apprendre/Parcours/Formations/Ressources/Market Intelligence/
-// Communauté — each pointed at the closest REAL section, never a blank page.
+// Public landing header (index.html): founder-confirmed relabeling
+// (2026-11-14, "orientation marketing") — Accueil/Academy/DDA Lab/DDA AI/
+// Ressources/Tarifs/Communauté — each pointed at a real, public landing
+// section (never a protected app route, never a blank page). The founder
+// explicitly asked for product-named nav items while keeping "Commencer
+// gratuitement" as the only gateway into the gated app.
 // ---------------------------------------------------------------------
 const headerNavMatch = indexHtml.match(/<nav class="public-header-nav"[^>]*>[\s\S]*?<\/nav>/);
 assert.ok(headerNavMatch, 'the public header nav is present');
 const headerNav = headerNavMatch[0];
 const expectedPublicLabels = [
   ['Accueil', '#landing'],
-  ['Apprendre', '#landing-experience'],
-  ['Parcours', '#landing-product'],
-  ['Formations', '#landing-free'],
-  ['Ressources', '#landing-faq'],
-  ['Market Intelligence', '#landing-markets'],
+  ['Academy', '#landing-product'],
+  ['DDA Lab', '#landing-lab'],
+  ['DDA AI', '#landing-ai'],
+  ['Ressources', '#landing-resources'],
+  ['Tarifs', '#landing-free'],
   ['Communauté', 'community/'],
 ];
 for (const [label, href] of expectedPublicLabels) {
@@ -126,7 +130,7 @@ for (const [label, href] of expectedPublicLabels) {
 }
 // Every anchor target must actually exist as a real section on the landing
 // page (never a dangling link to a section that was renamed/removed).
-for (const anchor of ['landing', 'landing-experience', 'landing-product', 'landing-free', 'landing-faq', 'landing-markets']) {
+for (const anchor of ['landing', 'landing-product', 'landing-lab', 'landing-ai', 'landing-resources', 'landing-free']) {
   assert.match(indexHtml, new RegExp(`id="${anchor}"`), `landing exposes a real id="${anchor}" target for the public nav`);
 }
 // Communauté is a real, separately-served public page (not a 404 placeholder).
