@@ -4098,7 +4098,10 @@ function bindNotifyButton(viewId, buttonId, prefKey, label) {
     showToast(`Tu seras averti localement quand ${label} sera activé.`);
   });
 }
-bindNotifyButton('community', 'community-notify', 'communityNotify', 'la Communauté');
+// 'community' was removed from this list (Lot 7, 2026-11-14): the real
+// posts feed is now built and live on the same view — see initCommunityFeed
+// below — so a "notify me at launch" CTA would contradict a feature that
+// already works, the same incoherence already fixed for DDA AI (Lot 5).
 bindNotifyButton('practice', 'practice-notify', 'practiceNotify', 'la Pratique avancée');
 // 'intelligence' (DDA AI) was removed from this list (Lot 5, 2026-11-14): the
 // real chat is already built and live just above this button on the same
@@ -4240,6 +4243,85 @@ bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business'
     input.value = button.dataset.aiPrompt || '';
     input.focus();
   }));
+})();
+
+/* Lot 7 (Communauté — fil de posts) : un pont fin vers le BFF authentifié,
+   même principe que le chat DDA AI ci-dessus. Jamais un post simulé —
+   si le service n'est pas configuré ou si la session n'est pas active,
+   le fil l'affiche honnêtement plutôt que d'inventer une activité. */
+(function initCommunityFeed() {
+  const list = document.getElementById('community-feed-list');
+  const empty = document.getElementById('community-feed-empty');
+  const form = document.getElementById('community-post-form');
+  const input = document.getElementById('community-post-input');
+  const errorEl = document.getElementById('community-post-error');
+  const submit = document.getElementById('community-post-submit');
+  if (!list || !form || !window.DDABFF) return;
+
+  function renderPosts(posts) {
+    list.querySelectorAll('.community-feed-post').forEach(node => node.remove());
+    if (!posts.length) {
+      empty.hidden = false;
+      empty.innerHTML = '<strong>Aucun post pour le moment.</strong><span>Sois le ou la première à partager une observation.</span>';
+      return;
+    }
+    empty.hidden = true;
+    posts.forEach(post => {
+      const item = document.createElement('div');
+      item.className = 'community-feed-post';
+      const when = new Date(post.createdAt);
+      const whenLabel = Number.isNaN(when.getTime()) ? '' : when.toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      item.innerHTML = `<div class="community-feed-post-head"><strong>${escapeHtml(post.authorDisplayName)}</strong><time>${escapeHtml(whenLabel)}</time></div><p>${escapeHtml(post.body)}</p>`;
+      list.appendChild(item);
+    });
+  }
+
+  async function loadFeed() {
+    if (!window.DDABFF.enabled()) {
+      empty.innerHTML = '<strong>Connecte-toi pour voir le fil.</strong><span>Le fil de la communauté est réservé aux apprenants DDA.</span>';
+      return;
+    }
+    try {
+      const result = await window.DDABFF.getCommunityPosts();
+      if (!result || !result.available) {
+        empty.innerHTML = '<strong>Fil indisponible pour le moment.</strong><span>Réessaie un peu plus tard.</span>';
+        return;
+      }
+      renderPosts(result.posts);
+    } catch {
+      empty.innerHTML = '<strong>Fil indisponible pour le moment.</strong><span>Réessaie un peu plus tard.</span>';
+    }
+  }
+  loadFeed();
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const body = input.value.trim();
+    errorEl.textContent = '';
+    if (!body) { errorEl.textContent = 'Écris un message avant de publier.'; return; }
+    submit.disabled = true;
+    const originalLabel = submit.innerHTML;
+    submit.innerHTML = 'Publication…';
+    try {
+      const result = await window.DDABFF.createCommunityPost(body);
+      if (!result.ok) {
+        errorEl.textContent = result.reason === 'rate_limited'
+          ? 'Trop de posts récemment — réessaie dans un instant.'
+          : result.reason === 'not_configured'
+            ? 'Le fil de la communauté n’est pas encore activé sur ce serveur.'
+            : 'Impossible de publier pour le moment. Réessaie.';
+        return;
+      }
+      input.value = '';
+      await loadFeed();
+      trackEvent('community_post_created', {});
+    } catch {
+      errorEl.textContent = 'Impossible de publier pour le moment. Réessaie.';
+    } finally {
+      submit.disabled = false;
+      submit.innerHTML = originalLabel;
+    }
+  });
 })();
 
 document.getElementById('play-demo').addEventListener('click', event => {

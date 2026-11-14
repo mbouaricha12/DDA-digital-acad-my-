@@ -17,6 +17,7 @@ assert.deepEqual(good.tables.sort(), [
   'public.dda_brvm_audit_events',
   'public.dda_brvm_documents',
   'public.dda_brvm_sources',
+  'public.dda_community_posts',
   'public.dda_profiles',
   'public.dda_rate_limit_counters',
   'public.dda_sessions',

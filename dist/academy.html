@@ -70,7 +70,7 @@
       if (oauthProvider) window.DDA_OAUTH_PROVIDER = oauthProvider;
       var oauthError = params.get('error') || hashParams.get('error');
       if (oauthError) window.DDA_OAUTH_ERROR = oauthError;
-      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone']);
+      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone', 'forex', 'stocks', 'indices', 'crypto']);
       var route = location.hash.slice(1);
       document.documentElement.setAttribute('data-boot-view', knownRoutes.has(route) ? route : 'dashboard');
       var safeHash = knownRoutes.has(route) ? '#' + route : '';
@@ -979,7 +979,7 @@
 
       <section class="view" id="membership" aria-labelledby="membership-title">
         <div class="section-intro"><p class="eyebrow gold">Accès DDA</p><h1 id="membership-title">Grandir à ton rythme.</h1><p>DDA Free pose les fondations. Approfondis ton apprentissage avec DDA Premium : accède à un parcours plus approfondi, développe tes compétences et renforce ta maîtrise des marchés financiers, pour 12 000 FCFA par mois.</p></div>
-        <div class="membership-status-line"><span>État de l’accès</span><strong id="membership-status">DDA Free</strong><small id="membership-status-note">Disponible maintenant · aucun achat actif</small></div>
+        <div class="membership-status-line"><span>État de l’accès</span><strong id="membership-status">DDA Free</strong><small id="membership-status-note">Disponible maintenant · Aucun paiement actif</small></div>
         <section class="trust-orientation-panel" aria-labelledby="trust-orientation-title">
           <div><p class="eyebrow gold">Avant de choisir</p><h2 id="trust-orientation-title">Lis l’état réel de chaque niveau.</h2><p>Cette page oriente ; elle ne crée ni achat ni droit Premium. Le statut affiché dépend de ce qui est réellement opérationnel aujourd’hui.</p></div>
           <ol class="trust-orientation-steps">
@@ -1018,7 +1018,7 @@
             <article><span class="access-model-kicker gold">Premium</span><h3>DDA Premium</h3><p>P2 Risque et discipline, leçons authored, Risk Plan Lab, assessment et preuve de compétence.</p><strong>12 000 FCFA/mois · Paiement en cours d’activation</strong></article>
             <article><span class="access-model-kicker muted">À préparer</span><h3>DDA Access</h3><p>Bourses, tarifs réduits ou accès sponsorisés selon des règles publiées et validées côté serveur.</p><strong>Non disponible aujourd’hui</strong></article>
           </div>
-          <div class="access-model-rules"><strong>Conditions actuelles :</strong> DDA Premium est une offre réelle à 12 000 FCFA/mois ; le paiement en ligne est en cours d’activation technique et sera suivi d’un renouvellement automatique une fois confirmé. Une modification de l’état local ne pourra jamais constituer un achat ou un droit Premium serveur.</div>
+          <div class="access-model-rules"><strong>Conditions actuelles :</strong> DDA Premium est une offre réelle à 12 000 FCFA/mois ; aucun checkout, abonnement ou renouvellement automatique n’est activé avant la fin de l’activation technique du paiement en ligne. Une modification de l’état local ne pourra jamais constituer un achat ou un droit Premium serveur.</div>
         </section>
 
         <section class="panel membership-roadmap">
@@ -1309,19 +1309,31 @@
           <img class="photo-fill" src="images/photos/community-hero-handshake.jpg" alt="" loading="lazy">
           <div class="photo-scrim"></div>
           <div class="community-hero-copy">
-            <p class="eyebrow gold">Aperçu — bientôt disponible</p>
+            <p class="eyebrow gold">Fil de posts · actif</p>
             <h1 id="community-title">La communauté DDA</h1>
-            <p>Apprendre, échanger et progresser avec d’autres apprenants DDA — une fois cette brique activée.</p>
+            <p>Partage une observation, une question ou une avancée avec d’autres apprenants DDA.</p>
           </div>
         </div>
 
-        <div class="page-mission" data-mission="community"><div><p class="eyebrow">Mission de cette page</p><strong>Comprendre les futurs espaces d’échange, sans faux flux.</strong><span>La Communauté prépare les usages collectifs ; elle ne duplique ni le Marché ni le Journal.</span></div><button class="text-action" data-view="path">Revenir au parcours actif <span>→</span></button></div>
+        <div class="page-mission" data-mission="community"><div><p class="eyebrow">Mission de cette page</p><strong>Un fil utile, jamais un flux de bruit.</strong><span>Chaque post reste relié à l’apprentissage ; la Communauté ne duplique ni le Marché ni le Journal.</span></div><button class="text-action" data-view="path">Revenir au parcours actif <span>→</span></button></div>
+
+        <section class="panel community-feed-panel dda-ai-chat-shell" aria-labelledby="community-feed-title">
+          <div class="panel-heading"><div><p class="eyebrow gold">Fil de la communauté</p><h2 id="community-feed-title">Partage une observation, une question ou une avancée.</h2></div></div>
+          <div class="community-feed-list dda-ai-transcript" id="community-feed-list" role="log" aria-live="polite"><div class="community-feed-empty dda-ai-empty" id="community-feed-empty"><strong>Chargement du fil…</strong></div></div>
+          <form id="community-post-form" class="community-post-form dda-ai-composer">
+            <label for="community-post-input">Ton message</label>
+            <textarea id="community-post-input" maxlength="1000" rows="3" placeholder="Ex. J’ai terminé M0.2 aujourd’hui — la notion de support/résistance est plus claire." required></textarea>
+            <div class="community-post-footer dda-ai-composer-footer"><small>1000 caractères maximum · visible par les autres apprenants DDA · aucun signal ni recommandation</small><button class="primary-action" type="submit" id="community-post-submit">Publier <span>→</span></button></div>
+            <p class="form-error" id="community-post-error" role="alert"></p>
+          </form>
+        </section>
+
         <div class="community-tiles">
-          <div class="community-tile"><svg class="icon"><use href="#icon-chat"/></svg><span>Discussions</span></div>
+          <div class="community-tile"><svg class="icon"><use href="#icon-chat"/></svg><span>Discussions par sujet</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-play"/></svg><span>Sessions en direct</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-users"/></svg><span>Groupes d’étude</span></div>
         </div>
-        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Ces espaces ne sont pas encore actifs — DDA ne simule jamais une conversation qui n’existe pas.</p>
+        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Ces espaces plus structurés ne sont pas encore actifs — seul le fil de posts ci-dessus l’est aujourd’hui. DDA ne simule jamais une conversation qui n’existe pas.</p>
 
         <section class="future-principles" aria-labelledby="community-principles-title">
           <p class="eyebrow gold">Le principe de construction</p>
@@ -1354,10 +1366,6 @@
           </div>
         </section>
 
-        <div class="community-cta">
-          <button class="primary-action" id="community-notify" type="button">Être informé au lancement <span>→</span></button>
-          <p class="disclosure" id="community-notify-note">Aucune inscription réelle — juste une préférence locale sur cet appareil.</p>
-        </div>
       </section>
 
       <section class="view community-view" id="practice" aria-labelledby="practice-title">

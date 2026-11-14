@@ -840,6 +840,11 @@ a.nav-item[hidden]{display:none}
 .badge-slot.is-unlocked{opacity:1;border-style:solid;border-color:rgba(217,164,65,.5);background:rgba(217,164,65,.08)}
 .badge-slot.is-unlocked .icon{color:#d9a441}
 .badge-slot.is-unlocked span{color:#f4f7fc}
+.community-feed-post{padding:12px 13px;border:1px solid rgba(174,191,213,.14);border-radius:10px;background:rgba(10,20,36,.5)}
+.community-feed-post-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.community-feed-post-head strong{color:#f4f7fc;font-size:13px}
+.community-feed-post-head time{color:#8998aa;font-size:10.5px;white-space:nowrap}
+.community-feed-post p{margin:5px 0 0;color:#dbe4ee;font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
 
 .modules-track{margin-top:16px}
 .modules-track ol{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:8px}
