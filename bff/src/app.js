@@ -9,6 +9,7 @@ const { VALID_ROLES: VALID_ADMIN_ROLES, CONTROL_PLANE_ROLES } = require('./admin
 const { validateAskRequest } = require('./ai-assistant');
 const { PREMIUM_CONTENT, FREE_PREVIEW_IDS } = require('./premium-content');
 const { chariowConfigFromEnv, createChariowCheckout } = require('./chariow');
+const { marketDataConfigFromEnv, fetchMarketQuotes } = require('./market-data');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
@@ -375,8 +376,9 @@ function parsePageParams(url, { maxPerPage = 200 } = {}) {
   return { page, perPage };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, accessAudit = null, rateLimiter = null, progressStore = null, aiAssistant = null, chariowConfig = chariowConfigFromEnv(), clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, accessAudit = null, rateLimiter = null, progressStore = null, aiAssistant = null, chariowConfig = chariowConfigFromEnv(), marketDataConfig = marketDataConfigFromEnv(), clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
+  let marketQuotesCache = null;
   businessStore = businessStore || {
     exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
     deleteUserData: async () => {}
@@ -515,6 +517,19 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const items = await brvmPublicationStore.listPublished();
         if (!Array.isArray(items)) throw new Error('brvm_publications_store_invalid_shape');
         return json(res, 200, { items });
+      }
+      // Lot 8 (cahier des charges — instruments de marché) : lecture publique,
+      // jamais de secret exposé, et jamais une cotation non vérifiée par le
+      // serveur. fetchMarketQuotes() renvoie `not_configured`/`unavailable`
+      // par instrument plutôt que de risquer une valeur fabriquée.
+      if (method === 'GET' && path === '/v1/market/quotes') {
+        const cached = marketQuotesCache;
+        if (cached && clock().getTime() - cached.fetchedAt < marketDataConfig.maxAgeMs) {
+          return json(res, 200, { instruments: cached.instruments });
+        }
+        const instruments = await fetchMarketQuotes({ config: marketDataConfig, clock });
+        marketQuotesCache = { instruments, fetchedAt: clock().getTime() };
+        return json(res, 200, { instruments });
       }
       // Google OAuth — start (founder directive, 2026-11): a full-page GET,
       // never a fetch, because this route's whole job is to hand the
