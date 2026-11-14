@@ -198,6 +198,33 @@
     return result.body.items;
   }
 
+  async function getMarketQuotes() {
+    const result = await request('/v1/market/quotes');
+    if (!result.enabled) return null;
+    if (!result.response.ok) throw resultError(result, 'market_quotes_failed');
+    if (!result.body || typeof result.body.instruments !== 'object') throw new Error('market_quotes_invalid_response');
+    return result.body.instruments;
+  }
+
+  async function getCommunityPosts() {
+    const result = await request('/v1/community/posts');
+    if (!result.enabled) return null;
+    if (result.response.status === 503) return { available: false };
+    if (!result.response.ok) throw resultError(result, 'community_posts_failed');
+    if (!Array.isArray(result.body?.posts)) throw new Error('community_posts_invalid_response');
+    return { available: true, posts: result.body.posts };
+  }
+
+  async function createCommunityPost(body) {
+    const result = await request('/v1/community/posts', { method: 'POST', body: { body } });
+    if (!result.enabled || result.response.status === 401) return { ok: false, reason: 'unavailable' };
+    if (result.response.status === 503) return { ok: false, reason: 'not_configured' };
+    if (result.response.status === 429) return { ok: false, reason: 'rate_limited' };
+    if (result.response.status === 400) return { ok: false, reason: 'invalid_body' };
+    if (!result.response.ok) return { ok: false, reason: result.body?.code || 'failed' };
+    return { ok: true, post: result.body.post };
+  }
+
   async function updateMe(patch) {
     const result = await request('/v1/me', { method: 'PATCH', body: patch });
     if (!result.enabled || result.response.status === 401) return null;
@@ -298,9 +325,10 @@
   }
 
   window.DDABFF = Object.freeze({
-    enabled, register, verifyEmail, exchangeSignupCode, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
+    enabled, register, verifyEmail, exchangeSignupCode, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, getMarketQuotes, updateMe, logout, issueCsrf,
     oauthGoogleStartUrl, exchangeOAuthCode,
     getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, fetchPremiumContent, askAI, startPremiumCheckout,
+    getCommunityPosts, createCommunityPost,
     getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }
   });

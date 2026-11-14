@@ -70,7 +70,7 @@
       if (oauthProvider) window.DDA_OAUTH_PROVIDER = oauthProvider;
       var oauthError = params.get('error') || hashParams.get('error');
       if (oauthError) window.DDA_OAUTH_ERROR = oauthError;
-      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone']);
+      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone', 'forex', 'stocks', 'indices', 'crypto']);
       var route = location.hash.slice(1);
       document.documentElement.setAttribute('data-boot-view', knownRoutes.has(route) ? route : 'dashboard');
       var safeHash = knownRoutes.has(route) ? '#' + route : '';
@@ -719,7 +719,7 @@
             <span>Modules amorcés</span>
           </div>
           <div class="progress-stat"><span>XP total</span><strong id="progress-total-xp">0</strong></div>
-          <div class="progress-stat"><span>Jours actifs (7 j)</span><strong id="progress-active-days">0</strong></div>
+          <div class="progress-stat"><span>Jours actifs (7 j)</span><strong id="progress-active-days">0</strong><small id="progress-streak-note"></small></div>
         </div>
         <button class="text-action" id="progress-share-open" type="button"><svg class="icon"><use href="#icon-spark"/></svg> Partager ma progression <span>→</span></button>
 
@@ -768,11 +768,11 @@
         <section class="panel badges-panel">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> Badges</p><h3>Les prochaines preuves à débloquer</h3></div></div>
           <div class="badge-row">
-            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Fondations validées</span></div>
-            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Risque maîtrisé</span></div>
-            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Discipline confirmée</span></div>
+            <div class="badge-slot" id="badge-foundations"><svg class="icon"><use href="#icon-lock"/></svg><span>Fondations validées</span></div>
+            <div class="badge-slot" id="badge-risk"><svg class="icon"><use href="#icon-lock"/></svg><span>Risque maîtrisé</span></div>
+            <div class="badge-slot" id="badge-discipline"><svg class="icon"><use href="#icon-lock"/></svg><span>Discipline confirmée</span></div>
           </div>
-          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Valide tes premières missions pour débloquer tes badges de progression</span>
+          <span class="future-label" id="badges-note"><svg class="icon"><use href="#icon-compass"/></svg> Valide tes premières missions pour débloquer tes badges de progression</span>
         </section>
       </section>
 
@@ -987,20 +987,20 @@
       </section>
 
       <section class="view" id="membership" aria-labelledby="membership-title">
-        <div class="section-intro"><p class="eyebrow gold">Accès DDA</p><h1 id="membership-title">Grandir à ton rythme.</h1><p>DDA Free pose les fondations. Premium approfondit la pratique, l’évaluation et la preuve de progression, pour 12 000 FCFA par mois. Le paiement en ligne n’est pas encore activé — ton intérêt reste enregistré sur cet appareil en attendant.</p></div>
-        <div class="membership-status-line"><span>État de l’accès</span><strong id="membership-status">DDA Free</strong><small id="membership-status-note">Disponible maintenant · aucun achat actif</small></div>
+        <div class="section-intro"><p class="eyebrow gold">Accès DDA</p><h1 id="membership-title">Grandir à ton rythme.</h1><p>DDA Free pose les fondations. Approfondis ton apprentissage avec DDA Premium : accède à un parcours plus approfondi, développe tes compétences et renforce ta maîtrise des marchés financiers, pour 12 000 FCFA par mois.</p></div>
+        <div class="membership-status-line"><span>État de l’accès</span><strong id="membership-status">DDA Free</strong><small id="membership-status-note">Disponible maintenant · Aucun paiement actif</small></div>
         <section class="trust-orientation-panel" aria-labelledby="trust-orientation-title">
           <div><p class="eyebrow gold">Avant de choisir</p><h2 id="trust-orientation-title">Lis l’état réel de chaque niveau.</h2><p>Cette page oriente ; elle ne crée ni achat ni droit Premium. Le statut affiché dépend de ce qui est réellement opérationnel aujourd’hui.</p></div>
           <ol class="trust-orientation-steps">
             <li><span>01</span><div><strong>Free</strong><small>Disponible maintenant · progression locale</small></div></li>
-            <li><span>02</span><div><strong>Premium</strong><small>Démonstration locale · aucun abonnement actif</small></div></li>
+            <li><span>02</span><div><strong>Premium</strong><small>12 000 FCFA/mois · Paiement en cours d’activation</small></div></li>
             <li><span>03</span><div><strong>Access</strong><small>Bourses et accès sponsorisés · à préparer</small></div></li>
           </ol>
         </section>
 
         <div class="plan-grid">
           <article class="plan-card current-plan"><p class="eyebrow">Ce que tu as aujourd’hui</p><h2>DDA Free</h2><p class="plan-tagline">Pour démarrer sérieusement, sans rien débourser.</p><ul><li>Parcours M0 Fondations et ses leçons</li><li>Exercices, quiz et Fil de maîtrise réel</li><li>Journal &amp; Plan</li><li>Market Intelligence (aperçu)</li></ul><span class="plan-state" id="free-plan-state">Formule active</span></article>
-          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">DDA Premium</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><div class="plan-price"><strong>12 000 FCFA</strong><span>/ mois</span></div><p class="premium-local-status">Prix prévu au lancement. Le paiement en ligne n’est pas encore activé : tu explores ici les briques pédagogiques Premium disponibles, ce n’est pas un abonnement actif.</p><ul><li>Leçons Premium P2 : risque avant entrée et trade contrôlé</li><li>Risk Plan Lab avec validation du scénario et conditions de non-trade</li><li>Assessment Controlled Decision et preuve de compétence</li><li>Revue hebdomadaire, ressources avancées et pont vers le Journal</li></ul><button type="button" class="primary-action" id="premium-subscribe-cta">S’abonner — 12 000 FCFA/mois <span>→</span></button><button class="secondary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Paiement en ligne pas encore activé · aucun renouvellement automatique aujourd’hui</small><a class="text-action membership-preparation-link" href="launch/">Comprendre la préparation commerciale <span>→</span></a></article>
+          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">DDA Premium</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><div class="plan-price"><strong>12 000 FCFA</strong><span>/ mois</span></div><p class="premium-local-status">Abonnement DDA Premium à 12 000 FCFA par mois. Le paiement en ligne est en cours d’activation technique : inscris-toi ci-dessous pour être averti(e) dès l’ouverture — cette page n’est pas un abonnement actif tant que le paiement réel n’est pas confirmé.</p><ul><li>Leçons Premium P2 : risque avant entrée et trade contrôlé</li><li>Risk Plan Lab avec validation du scénario et conditions de non-trade</li><li>Assessment Controlled Decision et preuve de compétence</li><li>Revue hebdomadaire, ressources avancées et pont vers le Journal</li></ul><button type="button" class="primary-action" id="premium-subscribe-cta">S’abonner — 12 000 FCFA/mois <span>→</span></button><button class="secondary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Paiement en ligne en cours d’activation · inscription d’intérêt disponible ci-dessous</small><a class="text-action membership-preparation-link" href="launch/">Comprendre la préparation commerciale <span>→</span></a></article>
         </div>
 
         <section class="panel founder-pack-panel" aria-labelledby="founder-pack-title">
@@ -1010,8 +1010,8 @@
         </section>
 
         <section class="panel premium-waitlist-panel" id="premium-waitlist-panel" aria-labelledby="premium-waitlist-title">
-          <div class="panel-heading"><div><p class="eyebrow gold">Avant l’activation du paiement</p><h2 id="premium-waitlist-title">Intérêt pour Premium</h2></div></div>
-          <p>Le paiement Premium n’est pas encore activé. Tu peux noter ton intérêt sur cet appareil. Cette préférence reste dans ce navigateur : elle ne crée aucune inscription et n’envoie aucune notification.</p>
+          <div class="panel-heading"><div><p class="eyebrow gold">Avant l’ouverture du paiement</p><h2 id="premium-waitlist-title">Intérêt pour Premium</h2></div></div>
+          <p>Le paiement en ligne de DDA Premium est en cours d’activation technique. Tu peux déjà noter ton intérêt sur cet appareil pour être informé(e) dès l’ouverture. Cette préférence reste dans ce navigateur : elle ne crée aucune inscription et n’envoie aucune notification.</p>
           <div id="premium-waitlist-form">
             <label class="premium-waitlist-consent"><input type="checkbox" id="premium-waitlist-consent"> Je comprends que cette préférence reste enregistrée sur cet appareil et ne déclenche aucune notification.</label>
             <button class="secondary-action" id="premium-waitlist-join" disabled>Enregistrer mon intérêt sur cet appareil</button>
@@ -1024,10 +1024,10 @@
           <p class="access-model-intro">Free doit rester utile. Premium doit apporter une profondeur réellement construite. Access préparera plus tard des bourses ou accès sponsorisés — rien n’est encore ouvert ni financé.</p>
           <div class="access-model-grid">
             <article><span class="access-model-kicker">Disponible maintenant</span><h3>DDA Free</h3><p>M0, exercices, feedback, progression, Journal &amp; Plan local et ressources Free.</p><strong>Valeur autonome</strong></article>
-            <article><span class="access-model-kicker gold">Premium</span><h3>DDA Premium</h3><p>P2 Risque et discipline, leçons authored, Risk Plan Lab, assessment et preuve de compétence.</p><strong>12 000 FCFA/mois · Aucun paiement actif pour l’instant</strong></article>
+            <article><span class="access-model-kicker gold">Premium</span><h3>DDA Premium</h3><p>P2 Risque et discipline, leçons authored, Risk Plan Lab, assessment et preuve de compétence.</p><strong>12 000 FCFA/mois · Paiement en cours d’activation</strong></article>
             <article><span class="access-model-kicker muted">À préparer</span><h3>DDA Access</h3><p>Bourses, tarifs réduits ou accès sponsorisés selon des règles publiées et validées côté serveur.</p><strong>Non disponible aujourd’hui</strong></article>
           </div>
-          <div class="access-model-rules"><strong>Conditions actuelles :</strong> un prix de lancement est annoncé pour Premium (12 000 FCFA/mois) ; aucun checkout, abonnement ou renouvellement automatique n’est activé aujourd’hui. Une modification de l’état local ne pourra jamais constituer un achat ou un droit Premium serveur.</div>
+          <div class="access-model-rules"><strong>Conditions actuelles :</strong> DDA Premium est une offre réelle à 12 000 FCFA/mois ; aucun checkout, abonnement ou renouvellement automatique n’est activé avant la fin de l’activation technique du paiement en ligne. Une modification de l’état local ne pourra jamais constituer un achat ou un droit Premium serveur.</div>
         </section>
 
         <section class="panel membership-roadmap">
@@ -1139,9 +1139,14 @@
       <section class="view" id="markets" aria-labelledby="markets-title">
         <div class="section-intro"><p class="eyebrow gold">Market Intelligence · BRVM</p><h1 id="markets-title">Comprendre avant d’agir.</h1><p>Le pôle BRVM de DDA commence par une information vérifiable : contexte institutionnel, sources officielles et parcours d’apprentissage. Aucun cours n’est inventé et aucune série n’est présentée comme temps réel.</p></div>
         <div class="page-mission" data-mission="markets"><div><p class="eyebrow">Mission de cette page</p><strong>Lire un contexte régional sans le confondre avec un signal.</strong><span>Market Intelligence donne le cadre éditorial ; le Terminal reste l’espace où tu manipules et documentes.</span></div><button class="text-action" data-view="dashboard" data-scroll-to="analysis-terminal">Manipuler une série pédagogique <span>→</span></button></div>
-        <nav class="market-section-rail" aria-label="Accès rapide Market Intelligence"><span>Lire par étape</span><a href="#market-indices">Repères</a><a href="#market-context">Contexte</a><a href="#market-sources">Sources BRVM</a><a href="#market-publications">Publications</a></nav>
+        <nav class="market-section-rail" aria-label="Accès rapide Market Intelligence"><span>Lire par étape</span><a href="#market-global">Instruments suivis</a><a href="#market-indices">Repères</a><a href="#market-context">Contexte</a><a href="#market-sources">Sources BRVM</a><a href="#market-publications">Publications</a></nav>
 
         <div class="market-visit-cue"><svg class="icon"><use href="#icon-compass"/></svg><p>Tu as suivi cet espace <strong id="market-visit-days">1</strong> <span id="market-visit-days-suffix">jour</span> sur cet appareil.</p></div>
+
+        <section class="market-zone" id="market-global">
+          <p class="eyebrow gold zone-label">Instruments suivis</p>
+          <div class="index-grid" id="market-global-grid" aria-label="Instruments de marché suivis (Or, devises, indice, Bitcoin)"></div>
+        </section>
 
         <section class="market-zone" id="market-indices">
           <p class="eyebrow gold zone-label">Vue marché</p>
@@ -1210,6 +1215,17 @@
         <section class="market-zone market-zone-reflect">
           <p class="eyebrow gold zone-label">Réfléchir / documenter</p>
           <div class="journal-link-block"><svg class="icon"><use href="#icon-journal"/></svg><p>Un mouvement de marché t’interpelle ? Documente ton observation avant d’agir.</p><button class="secondary-action" data-view="journal">Ouvrir le Journal <span>→</span></button></div>
+        </section>
+
+        <section class="market-zone" aria-labelledby="market-other-universes-title">
+          <p class="eyebrow gold zone-label">Autres univers · en préparation</p>
+          <h2 id="market-other-universes-title">DDA prépare d’autres marchés, un à la fois.</h2>
+          <div class="brvm-pole-grid">
+            <button type="button" class="brvm-pole-item is-planned" data-view="forex"><span>FX</span><div><strong>Forex</strong><small>Univers pédagogique · en préparation</small></div></button>
+            <button type="button" class="brvm-pole-item is-planned" data-view="stocks"><span>ACT</span><div><strong>Actions</strong><small>Univers pédagogique · en préparation</small></div></button>
+            <button type="button" class="brvm-pole-item is-planned" data-view="indices"><span>IDX</span><div><strong>Indices</strong><small>Univers pédagogique · en préparation</small></div></button>
+            <button type="button" class="brvm-pole-item is-planned" data-view="crypto"><span>CRY</span><div><strong>Crypto</strong><small>Univers pédagogique · en préparation</small></div></button>
+          </div>
         </section>
       </section>
 
@@ -1302,19 +1318,31 @@
           <img class="photo-fill" src="images/photos/community-hero-handshake.jpg" alt="" loading="lazy">
           <div class="photo-scrim"></div>
           <div class="community-hero-copy">
-            <p class="eyebrow gold">Aperçu — bientôt disponible</p>
+            <p class="eyebrow gold">Fil de posts · actif</p>
             <h1 id="community-title">La communauté DDA</h1>
-            <p>Apprendre, échanger et progresser avec d’autres apprenants DDA — une fois cette brique activée.</p>
+            <p>Partage une observation, une question ou une avancée avec d’autres apprenants DDA.</p>
           </div>
         </div>
 
-        <div class="page-mission" data-mission="community"><div><p class="eyebrow">Mission de cette page</p><strong>Comprendre les futurs espaces d’échange, sans faux flux.</strong><span>La Communauté prépare les usages collectifs ; elle ne duplique ni le Marché ni le Journal.</span></div><button class="text-action" data-view="path">Revenir au parcours actif <span>→</span></button></div>
+        <div class="page-mission" data-mission="community"><div><p class="eyebrow">Mission de cette page</p><strong>Un fil utile, jamais un flux de bruit.</strong><span>Chaque post reste relié à l’apprentissage ; la Communauté ne duplique ni le Marché ni le Journal.</span></div><button class="text-action" data-view="path">Revenir au parcours actif <span>→</span></button></div>
+
+        <section class="panel community-feed-panel dda-ai-chat-shell" aria-labelledby="community-feed-title">
+          <div class="panel-heading"><div><p class="eyebrow gold">Fil de la communauté</p><h2 id="community-feed-title">Partage une observation, une question ou une avancée.</h2></div></div>
+          <div class="community-feed-list dda-ai-transcript" id="community-feed-list" role="log" aria-live="polite"><div class="community-feed-empty dda-ai-empty" id="community-feed-empty"><strong>Chargement du fil…</strong></div></div>
+          <form id="community-post-form" class="community-post-form dda-ai-composer">
+            <label for="community-post-input">Ton message</label>
+            <textarea id="community-post-input" maxlength="1000" rows="3" placeholder="Ex. J’ai terminé M0.2 aujourd’hui — la notion de support/résistance est plus claire." required></textarea>
+            <div class="community-post-footer dda-ai-composer-footer"><small>1000 caractères maximum · visible par les autres apprenants DDA · aucun signal ni recommandation</small><button class="primary-action" type="submit" id="community-post-submit">Publier <span>→</span></button></div>
+            <p class="form-error" id="community-post-error" role="alert"></p>
+          </form>
+        </section>
+
         <div class="community-tiles">
-          <div class="community-tile"><svg class="icon"><use href="#icon-chat"/></svg><span>Discussions</span></div>
+          <div class="community-tile"><svg class="icon"><use href="#icon-chat"/></svg><span>Discussions par sujet</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-play"/></svg><span>Sessions en direct</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-users"/></svg><span>Groupes d’étude</span></div>
         </div>
-        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Ces espaces ne sont pas encore actifs — DDA ne simule jamais une conversation qui n’existe pas.</p>
+        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Ces espaces plus structurés ne sont pas encore actifs — seul le fil de posts ci-dessus l’est aujourd’hui. DDA ne simule jamais une conversation qui n’existe pas.</p>
 
         <section class="future-principles" aria-labelledby="community-principles-title">
           <p class="eyebrow gold">Le principe de construction</p>
@@ -1347,10 +1375,6 @@
           </div>
         </section>
 
-        <div class="community-cta">
-          <button class="primary-action" id="community-notify" type="button">Être informé au lancement <span>→</span></button>
-          <p class="disclosure" id="community-notify-note">Aucune inscription réelle — juste une préférence locale sur cet appareil.</p>
-        </div>
       </section>
 
       <section class="view community-view" id="practice" aria-labelledby="practice-title">
@@ -1414,7 +1438,7 @@
 
       <section class="view community-view" id="intelligence" aria-labelledby="intelligence-title">
         <div class="community-hero" role="img" aria-label="Intelligence DDA — aperçu">
-          <img class="photo-fill" src="images/photos/hero-market-woman.jpg" alt="" loading="eager" fetchpriority="high">
+          <img class="photo-fill" src="images/photos/lab-ai-collaboration.jpg" alt="" loading="eager" fetchpriority="high">
           <div class="photo-scrim"></div>
           <div class="community-hero-copy">
             <p class="eyebrow gold">Assistant pédagogique · accès conditionnel</p>
@@ -1425,7 +1449,7 @@
 
         <div class="page-mission" data-mission="intelligence"><div><p class="eyebrow">Mission de cette page</p><strong>Obtenir une aide qui explique, jamais qui décide.</strong><span>Le chat DDA AI s’active avec une session et un BFF configuré ; il ne remplace pas tes validations.</span></div><button class="text-action" data-view="path">Voir le socle de personnalisation <span>→</span></button></div>
         <div class="community-tiles">
-          <div class="community-tile"><svg class="icon"><use href="#icon-compass"/></svg><span>Darius AI</span></div>
+          <div class="community-tile"><svg class="icon"><use href="#icon-compass"/></svg><span>DDA AI</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-path"/></svg><span>Personnalisation</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-progress"/></svg><span>Outils intelligents</span></div>
         </div>
@@ -1481,10 +1505,6 @@
           </article>
         </section>
 
-        <div class="community-cta">
-          <button class="primary-action" id="intelligence-notify" type="button">Être informé au lancement <span>→</span></button>
-          <p class="disclosure" id="intelligence-notify-note">Aucune inscription réelle — juste une préférence locale sur cet appareil.</p>
-        </div>
       </section>
 
       <section class="view community-view" id="experts" aria-labelledby="experts-title">

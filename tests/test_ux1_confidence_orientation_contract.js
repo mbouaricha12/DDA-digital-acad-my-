@@ -18,7 +18,10 @@ assert(academy.includes('Profil d’apprentissage'), 'Le profil doit être prés
 // pédagogique" was removed from Premium's public-facing labels as devaluing
 // jargon — the honesty it stood for is still asserted, just in plainer words.
 assert(academy.includes('pas un abonnement actif'), 'La limite Premium doit rester honnête sans jargon local');
-assert(landing.includes('Aperçu pédagogique'), 'La landing doit qualifier Premium comme aperçu pédagogique');
+// Commercial positioning correction (2026-11-14): Premium is a real offer to
+// launch, not a future/preview feature — "Aperçu pédagogique" was retired in
+// favour of the real price, so Premium is never presented as devalued.
+assert(landing.includes('12 000 FCFA/mois'), 'La landing doit afficher le prix réel de Premium, pas une étiquette dévalorisante');
 assert(styles.includes('top:var(--banner-h,0px)'), 'Le shell ne doit pas réserver 29px à une bannière absente');
 assert(styles.includes('scroll-margin-top:calc(var(--banner-h,0px)'), 'Les ancres doivent utiliser la hauteur réelle du shell');
 console.log('RESULT: UX-1 confidence and orientation contract passed');

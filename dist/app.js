@@ -844,6 +844,8 @@ const titles = {
   progress: 'Mes progrès', journal: 'Journal', resources: 'Ressources', markets: 'Marchés', brokers: 'Broker Hub',
   membership: 'DDA Premium', 'premium-track': 'Premium Track · P2', 'premium-lab': 'Premium Lab · Risk Plan', 'premium-assessment': 'Premium Assessment · Controlled Decision', support: 'Aide & support', profile: 'Mon profil', community: 'Communauté',
   practice: 'Pratique avancée', intelligence: 'Intelligence DDA', lab: 'DDA Lab',
+  forex: 'Forex', stocks: 'Actions', indices: 'Indices', crypto: 'Crypto',
+  live: 'DDA Live', business: 'DDA Business', experts: 'DDA Experts',
   // Lesson screen titles are declared once, in LESSON_REGISTRY — never a
   // second hand-maintained list to keep in sync.
   ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.title])),
@@ -1070,6 +1072,27 @@ function countActiveDays(events, now = Date.now()) {
     .map(event => ({ event, timestamp: Date.parse(event.at) }))
     .filter(({ timestamp }) => Number.isFinite(timestamp) && timestamp >= windowStart && timestamp <= now)
     .map(({ event }) => new Date(event.at).toISOString().slice(0, 10))).size;
+}
+
+// Lot 9 (maquette "Mes progrès" — badges/séries) : la vraie série de jours
+// consécutifs, calculée depuis le même journal d'événements que
+// countActiveDays — jamais un second chiffre inventé. Si aujourd'hui n'a
+// pas encore d'activité, la série reste comptée depuis hier (elle n'est
+// rompue qu'après une journée entière sans aucune activité réelle).
+function countCurrentStreak(events, now = Date.now()) {
+  const activeDays = new Set((events || [])
+    .filter(event => LEARNING_ACTIVITY_EVENTS.has(event.name))
+    .map(event => Date.parse(event.at))
+    .filter(Number.isFinite)
+    .map(timestamp => new Date(timestamp).toISOString().slice(0, 10)));
+  const cursor = new Date(now);
+  if (!activeDays.has(cursor.toISOString().slice(0, 10))) cursor.setUTCDate(cursor.getUTCDate() - 1);
+  let streak = 0;
+  while (activeDays.has(cursor.toISOString().slice(0, 10))) {
+    streak += 1;
+    cursor.setUTCDate(cursor.getUTCDate() - 1);
+  }
+  return streak;
 }
 
 // Real, computed from the same event log as countActiveDays — never fabricated —
@@ -1641,7 +1664,53 @@ function renderModulesRecap() {
   if (hidden > 0) container.insertAdjacentHTML('beforeend', `<li class="modules-recap-more"><span class="module-id">…</span><strong>${hidden} modules plus loin</strong><span class="module-pill coming_soon">Progressif</span></li>`);
 }
 
+// Lot 8 (cahier des charges — instruments de marché) : XAUUSD, EURUSD,
+// GBPUSD, USDJPY, US30, BTCUSD. Toujours une lecture serveur fraîche —
+// jamais un chiffre fabriqué ou mis en cache côté client au-delà de cet
+// appel — et jamais bloquant si le BFF ou les fournisseurs ne sont pas
+// configurés : chaque carte retombe honnêtement sur "Bientôt disponible".
+const GLOBAL_MARKET_SYMBOLS = ['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'US30', 'BTCUSD'];
+
+function renderGlobalMarketQuotesSkeleton(grid) {
+  grid.innerHTML = GLOBAL_MARKET_SYMBOLS.map(symbol => `
+    <article class="index-card" data-symbol="${symbol}">
+      <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Bientôt disponible</span></div>
+      <p>Cotation en attente de connexion à un fournisseur de données vérifié.</p>
+    </article>
+  `).join('');
+}
+
+async function renderGlobalMarketQuotes() {
+  const grid = document.getElementById('market-global-grid');
+  if (!grid) return;
+  renderGlobalMarketQuotesSkeleton(grid);
+  if (!window.DDABFF?.enabled()) return;
+  try {
+    const instruments = await window.DDABFF.getMarketQuotes();
+    if (!instruments) return;
+    grid.innerHTML = GLOBAL_MARKET_SYMBOLS.map(symbol => {
+      const quote = instruments[symbol];
+      if (!quote) return '';
+      if (quote.status === 'ok') {
+        const isDown = String(quote.price).trim().startsWith('-');
+        return `<article class="index-card" data-symbol="${symbol}">
+          <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge is-live"><span class="status-dot"></span>Cotation vérifiée</span></div>
+          <div class="index-card-example"><strong class="index-card-example-value">${quote.price}</strong></div>
+          <p>${quote.label} · mis à jour le ${new Date(quote.asOf).toLocaleString('fr-FR')}</p>
+        </article>`;
+      }
+      return `<article class="index-card" data-symbol="${symbol}">
+        <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>${quote.status === 'unavailable' ? 'Indisponible pour le moment' : 'Bientôt disponible'}</span></div>
+        <p>${quote.label || symbol} — cotation en attente de connexion à un fournisseur de données vérifié.</p>
+      </article>`;
+    }).join('');
+  } catch {
+    // Keep the honest "Bientôt disponible" skeleton on any failure — never a stale or fabricated value.
+  }
+}
+
 function renderMarketIntelligence() {
+  renderGlobalMarketQuotes();
   // Keep the public section anchor intact; only the inner grid is data-driven.
   const indices = document.getElementById('market-index-grid');
   if (indices) {
@@ -1926,9 +1995,12 @@ function renderProgressHero() {
   const startedLabel = `${started}/${totalModules}`;
   const totalXp = DDALearning.totalXp(DDA.curriculum, prototypeState);
   const activeDays = countActiveDays(prototypeState.events);
+  const streak = countCurrentStreak(prototypeState.events);
   startedEl.textContent = startedLabel;
   document.getElementById('progress-total-xp').textContent = String(totalXp);
   document.getElementById('progress-active-days').textContent = String(activeDays);
+  const streakNote = document.getElementById('progress-streak-note');
+  if (streakNote) streakNote.textContent = streak > 0 ? `Série actuelle : ${streak} jour${streak > 1 ? 's' : ''}` : 'Série actuelle : 0 jour';
   const ring = document.getElementById('progress-modules-ring');
   if (ring) ring.style.setProperty('--progress', String(totalModules ? Math.round((started / totalModules) * 100) : 0));
   // Profil mirrors the exact same real values as Progression — never a second,
@@ -1945,6 +2017,36 @@ function renderProgressHero() {
   if (shareModules) shareModules.textContent = `${startedLabel} modules`;
   const shareDays = document.getElementById('share-card-days');
   if (shareDays) shareDays.textContent = `${activeDays} jour${activeDays === 1 ? '' : 's'} actif${activeDays === 1 ? '' : 's'}`;
+}
+
+// Lot 9 (maquette "Mes progrès") : les 3 badges existaient déjà dans le
+// HTML mais n'étaient reliés à aucune logique — ils restaient verrouillés
+// pour toujours, quoi que l'apprenant fasse. Chaque condition ci-dessous
+// réutilise un signal déjà réel et déjà affiché ailleurs (statut de module,
+// quiz validé, entrées de Journal) — jamais une progression inventée.
+function renderBadges() {
+  const row = document.getElementById('badge-foundations')?.closest('.badge-row');
+  if (!row) return;
+  const badges = [
+    { id: 'badge-foundations', unlocked: DDALearning.moduleStatus(DDA.curriculum, 'M0', prototypeState) === DDALearning.MODULE_STATUS.COMPLETED },
+    { id: 'badge-risk', unlocked: DDALearning.getLessonProgress(prototypeState, 'P2.1').quizComplete && DDALearning.getLessonProgress(prototypeState, 'P2.2').quizComplete },
+    { id: 'badge-discipline', unlocked: (prototypeState.journal?.entries || []).length >= 3 }
+  ];
+  let unlockedCount = 0;
+  badges.forEach(badge => {
+    const el = document.getElementById(badge.id);
+    if (!el) return;
+    el.classList.toggle('is-unlocked', badge.unlocked);
+    const use = el.querySelector('.icon use');
+    if (use) use.setAttribute('href', badge.unlocked ? '#icon-award' : '#icon-lock');
+    if (badge.unlocked) unlockedCount += 1;
+  });
+  const note = document.getElementById('badges-note');
+  if (note) {
+    note.innerHTML = unlockedCount === badges.length
+      ? '<svg class="icon"><use href="#icon-award"/></svg> Les 3 badges sont débloqués — bravo pour cette régularité.'
+      : `<svg class="icon"><use href="#icon-compass"/></svg> ${unlockedCount}/${badges.length} badge${unlockedCount > 1 ? 's' : ''} débloqué${unlockedCount > 1 ? 's' : ''} · valide tes prochaines missions pour débloquer les autres`;
+  }
 }
 
 function shareCardText() {
@@ -3017,6 +3119,7 @@ function renderState() {
   renderPracticeProof();
   renderProgressNextStep();
   renderProgressHero();
+  renderBadges();
   renderCertificatePreview(activeLessonProgress);
   renderJournalList();
   renderWeeklyReview();
@@ -4055,9 +4158,15 @@ function bindNotifyButton(viewId, buttonId, prefKey, label) {
     showToast(`Tu seras averti localement quand ${label} sera activé.`);
   });
 }
-bindNotifyButton('community', 'community-notify', 'communityNotify', 'la Communauté');
+// 'community' was removed from this list (Lot 7, 2026-11-14): the real
+// posts feed is now built and live on the same view — see initCommunityFeed
+// below — so a "notify me at launch" CTA would contradict a feature that
+// already works, the same incoherence already fixed for DDA AI (Lot 5).
 bindNotifyButton('practice', 'practice-notify', 'practiceNotify', 'la Pratique avancée');
-bindNotifyButton('intelligence', 'intelligence-notify', 'intelligenceNotify', 'l’Intelligence DDA');
+// 'intelligence' (DDA AI) was removed from this list (Lot 5, 2026-11-14): the
+// real chat is already built and live just above this button on the same
+// view — a "notify me at launch" CTA under a feature that already works
+// was a leftover from before the chat existed, not an honest pending state.
 bindNotifyButton('experts', 'experts-notify', 'expertsNotify', 'DDA Experts');
 bindNotifyButton('live', 'live-notify', 'liveNotify', 'DDA Live');
 bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business');
@@ -4194,6 +4303,85 @@ bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business'
     input.value = button.dataset.aiPrompt || '';
     input.focus();
   }));
+})();
+
+/* Lot 7 (Communauté — fil de posts) : un pont fin vers le BFF authentifié,
+   même principe que le chat DDA AI ci-dessus. Jamais un post simulé —
+   si le service n'est pas configuré ou si la session n'est pas active,
+   le fil l'affiche honnêtement plutôt que d'inventer une activité. */
+(function initCommunityFeed() {
+  const list = document.getElementById('community-feed-list');
+  const empty = document.getElementById('community-feed-empty');
+  const form = document.getElementById('community-post-form');
+  const input = document.getElementById('community-post-input');
+  const errorEl = document.getElementById('community-post-error');
+  const submit = document.getElementById('community-post-submit');
+  if (!list || !form || !window.DDABFF) return;
+
+  function renderPosts(posts) {
+    list.querySelectorAll('.community-feed-post').forEach(node => node.remove());
+    if (!posts.length) {
+      empty.hidden = false;
+      empty.innerHTML = '<strong>Aucun post pour le moment.</strong><span>Sois le ou la première à partager une observation.</span>';
+      return;
+    }
+    empty.hidden = true;
+    posts.forEach(post => {
+      const item = document.createElement('div');
+      item.className = 'community-feed-post';
+      const when = new Date(post.createdAt);
+      const whenLabel = Number.isNaN(when.getTime()) ? '' : when.toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      item.innerHTML = `<div class="community-feed-post-head"><strong>${escapeHtml(post.authorDisplayName)}</strong><time>${escapeHtml(whenLabel)}</time></div><p>${escapeHtml(post.body)}</p>`;
+      list.appendChild(item);
+    });
+  }
+
+  async function loadFeed() {
+    if (!window.DDABFF.enabled()) {
+      empty.innerHTML = '<strong>Connecte-toi pour voir le fil.</strong><span>Le fil de la communauté est réservé aux apprenants DDA.</span>';
+      return;
+    }
+    try {
+      const result = await window.DDABFF.getCommunityPosts();
+      if (!result || !result.available) {
+        empty.innerHTML = '<strong>Fil indisponible pour le moment.</strong><span>Réessaie un peu plus tard.</span>';
+        return;
+      }
+      renderPosts(result.posts);
+    } catch {
+      empty.innerHTML = '<strong>Fil indisponible pour le moment.</strong><span>Réessaie un peu plus tard.</span>';
+    }
+  }
+  loadFeed();
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const body = input.value.trim();
+    errorEl.textContent = '';
+    if (!body) { errorEl.textContent = 'Écris un message avant de publier.'; return; }
+    submit.disabled = true;
+    const originalLabel = submit.innerHTML;
+    submit.innerHTML = 'Publication…';
+    try {
+      const result = await window.DDABFF.createCommunityPost(body);
+      if (!result.ok) {
+        errorEl.textContent = result.reason === 'rate_limited'
+          ? 'Trop de posts récemment — réessaie dans un instant.'
+          : result.reason === 'not_configured'
+            ? 'Le fil de la communauté n’est pas encore activé sur ce serveur.'
+            : 'Impossible de publier pour le moment. Réessaie.';
+        return;
+      }
+      input.value = '';
+      await loadFeed();
+      trackEvent('community_post_created', {});
+    } catch {
+      errorEl.textContent = 'Impossible de publier pour le moment. Réessaie.';
+    } finally {
+      submit.disabled = false;
+      submit.innerHTML = originalLabel;
+    }
+  });
 })();
 
 document.getElementById('play-demo').addEventListener('click', event => {
