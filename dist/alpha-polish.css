@@ -2672,6 +2672,63 @@ body.public-shell .prototype-banner{display:none}
   .brvm-ticker-track{padding:0 16px;gap:18px}
   .brvm-ticker-item{font-size:.6rem}
 }
+
+/* Crypto ticker (maquette — 2026-11-14) : même contrat et même mécanique
+   de défilement que .brvm-ticker (dda-ticker-scroll, pause au survol,
+   désactivé sous prefers-reduced-motion) — masqué tant qu'aucune clé de
+   fournisseur n'est configurée (état réel aujourd'hui), jamais un prix
+   fabriqué ou périmé. */
+.crypto-ticker{
+  overflow:hidden;min-height:34px;display:flex;align-items:center;
+  border-bottom:1px solid rgba(201,154,69,.14);background:#060c16;
+}
+.crypto-ticker-track{display:flex;align-items:center;gap:28px;padding:0 clamp(20px,5vw,72px);white-space:nowrap;will-change:transform}
+.crypto-ticker.crypto-ticker-animated .crypto-ticker-track{animation:dda-ticker-scroll 32s linear infinite}
+.crypto-ticker.crypto-ticker-animated:hover .crypto-ticker-track,
+.crypto-ticker.crypto-ticker-animated:focus-within .crypto-ticker-track{animation-play-state:paused}
+.crypto-ticker:not(.crypto-ticker-animated){overflow-x:auto}
+@media(prefers-reduced-motion:reduce){
+  .crypto-ticker.crypto-ticker-animated .crypto-ticker-track{animation:none}
+}
+.crypto-ticker-item{display:inline-flex;align-items:center;gap:8px;color:#c4ced9;font-size:.68rem;letter-spacing:.02em}
+.crypto-ticker-icon{
+  flex:none;display:inline-flex;align-items:center;justify-content:center;
+  width:20px;height:20px;border-radius:999px;font-size:.62rem;font-weight:800;
+  color:#0b0f16;line-height:1;
+}
+.crypto-icon-btc{background:#F7931A}
+.crypto-icon-eth{background:#8FA3C8;color:#0b0f16}
+.crypto-icon-sol{background:linear-gradient(135deg,#9945FF,#14F195)}
+.crypto-icon-bnb{background:#F3BA2F}
+.crypto-icon-xrp{background:#3AA6D9}
+.crypto-ticker-name{color:#c9d3de;font-weight:700}
+.crypto-ticker-price{color:#e7c878;font-weight:800;font-variant-numeric:tabular-nums}
+@media(max-width:639px){
+  .crypto-ticker-track{padding:0 16px;gap:18px}
+  .crypto-ticker-item{font-size:.64rem}
+}
+
+/* Market Intelligence grid — same icon motif as the crypto ticker above,
+   extended to all 11 instruments (maquette chantier, 2026-11-14). A
+   colored circle + CSS glyph per symbol, never an external brand logo
+   asset. */
+.market-symbol-icon{
+  flex:none;display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:999px;font-size:.62rem;font-weight:800;
+  color:#0b0f16;line-height:1;margin-right:2px;
+}
+.market-symbol-icon-brvm{background:#2FB5A6;font-size:.5rem}
+.market-symbol-icon-xau{background:#D4AF37}
+.market-symbol-icon-eur{background:#5B8DEF}
+.market-symbol-icon-gbp{background:#A463F2}
+.market-symbol-icon-jpy{background:#E8604C}
+.market-symbol-icon-us30{background:#8B98AC}
+.market-symbol-icon-nas100{background:#2FB5A6}
+.market-symbol-icon-btc{background:#F7931A}
+.market-symbol-icon-eth{background:#8FA3C8;color:#0b0f16}
+.market-symbol-icon-sol{background:linear-gradient(135deg,#9945FF,#14F195)}
+.market-symbol-icon-bnb{background:#F3BA2F}
+.market-symbol-icon-xrp{background:#3AA6D9}
 #landing .utility-pulse{width:6px;height:6px;border-radius:50%;background:var(--blue-2);box-shadow:0 0 0 4px rgba(41,197,207,.12)}
 #landing .public-header{background:rgba(6,13,23,.72);backdrop-filter:blur(16px)}
 #landing .landing-presentation-video{max-width:1200px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,72px)}
@@ -2693,7 +2750,8 @@ body.public-shell .prototype-banner{display:none}
 #landing .market-strip-heading b{padding-left:6px}
 #landing .market-strip-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
 #landing .market-strip-grid article{position:relative;overflow:hidden;min-height:100px;padding:13px 12px 11px;border:1px solid rgba(174,191,213,.13);border-radius:7px;background:linear-gradient(150deg,#101d2d,#09131f);box-shadow:inset 0 1px rgba(255,255,255,.03)}
-#landing .market-strip-grid article>span{display:block;color:#9baabc;font-size:.56rem;letter-spacing:.09em;font-weight:800}
+#landing .market-strip-head{display:flex;align-items:center;gap:7px}
+#landing .market-strip-head span:last-child{display:block;color:#9baabc;font-size:.56rem;letter-spacing:.09em;font-weight:800}
 #landing .market-strip-grid strong{display:block;margin-top:12px;color:#eef2f4;font-size:.78rem}
 #landing .market-strip-grid small{display:block;margin-top:8px;color:#7f92a6;font-size:.57rem}
 #landing .market-strip-chart{position:absolute;right:9px;bottom:13px;width:58px;height:20px;overflow:visible;fill:none;stroke:var(--blue-2);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.72}

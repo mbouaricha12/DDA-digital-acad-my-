@@ -1672,10 +1672,34 @@ function renderModulesRecap() {
 // configurés : chaque carte retombe honnêtement sur "Bientôt disponible".
 const GLOBAL_MARKET_SYMBOLS = ['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'US30', 'NAS100', 'BTCUSD', 'ETHUSD', 'SOLUSD', 'BNBUSD', 'XRPUSD'];
 
+// Maquette chantier (2026-11-14) : même traitement d'icône que le ticker
+// crypto de la landing (cercle coloré + glyphe CSS, pas de logo de marque
+// externe) étendu aux 11 instruments de la grille Market Intelligence, pour
+// que l'icône d'un symbole soit identique partout sur le site.
+const MARKET_SYMBOL_ICON = {
+  XAUUSD: { glyph: 'Au', cssClass: 'market-symbol-icon-xau' },
+  EURUSD: { glyph: '€', cssClass: 'market-symbol-icon-eur' },
+  GBPUSD: { glyph: '£', cssClass: 'market-symbol-icon-gbp' },
+  USDJPY: { glyph: '¥', cssClass: 'market-symbol-icon-jpy' },
+  US30: { glyph: 'DJ', cssClass: 'market-symbol-icon-us30' },
+  NAS100: { glyph: 'ND', cssClass: 'market-symbol-icon-nas100' },
+  BTCUSD: { glyph: '₿', cssClass: 'market-symbol-icon-btc' },
+  ETHUSD: { glyph: 'Ξ', cssClass: 'market-symbol-icon-eth' },
+  SOLUSD: { glyph: 'S', cssClass: 'market-symbol-icon-sol' },
+  BNBUSD: { glyph: 'B', cssClass: 'market-symbol-icon-bnb' },
+  XRPUSD: { glyph: 'X', cssClass: 'market-symbol-icon-xrp' }
+};
+
+function marketSymbolIconHtml(symbol) {
+  const meta = MARKET_SYMBOL_ICON[symbol];
+  if (!meta) return '';
+  return `<span class="market-symbol-icon ${meta.cssClass}" aria-hidden="true">${meta.glyph}</span>`;
+}
+
 function renderGlobalMarketQuotesSkeleton(grid) {
   grid.innerHTML = GLOBAL_MARKET_SYMBOLS.map(symbol => `
     <article class="index-card" data-symbol="${symbol}">
-      <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Bientôt disponible</span></div>
+      <div class="index-card-head">${marketSymbolIconHtml(symbol)}<strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Bientôt disponible</span></div>
       <p>Cotation en attente de connexion à un fournisseur de données vérifié.</p>
     </article>
   `).join('');
@@ -1695,13 +1719,13 @@ async function renderGlobalMarketQuotes() {
       if (quote.status === 'ok') {
         const isDown = String(quote.price).trim().startsWith('-');
         return `<article class="index-card" data-symbol="${symbol}">
-          <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge is-live"><span class="status-dot"></span>Cotation vérifiée</span></div>
+          <div class="index-card-head">${marketSymbolIconHtml(symbol)}<strong>${symbol}</strong><span class="data-badge is-live"><span class="status-dot"></span>Cotation vérifiée</span></div>
           <div class="index-card-example"><strong class="index-card-example-value">${quote.price}</strong></div>
           <p>${quote.label} · mis à jour le ${new Date(quote.asOf).toLocaleString('fr-FR')}</p>
         </article>`;
       }
       return `<article class="index-card" data-symbol="${symbol}">
-        <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>${quote.status === 'unavailable' ? 'Indisponible pour le moment' : 'Bientôt disponible'}</span></div>
+        <div class="index-card-head">${marketSymbolIconHtml(symbol)}<strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>${quote.status === 'unavailable' ? 'Indisponible pour le moment' : 'Bientôt disponible'}</span></div>
         <p>${quote.label || symbol} — cotation en attente de connexion à un fournisseur de données vérifié.</p>
       </article>`;
     }).join('');
