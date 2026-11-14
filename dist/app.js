@@ -1886,11 +1886,21 @@ function quickSkillStatus(skill) {
   return { key: 'ready', label: 'À commencer', action: 'Commencer' };
 }
 
-function renderQuickSkills() {
+function renderQuickSkills(firstLessonComplete) {
   const container = document.getElementById('quick-skills-list');
+  const section = document.getElementById('dashboard-quick-skills');
   if (!container) return;
-  container.innerHTML = QUICK_SKILLS_REGISTRY.map(skill => {
-    const status = quickSkillStatus(skill);
+  const statuses = QUICK_SKILLS_REGISTRY.map(skill => ({ skill, status: quickSkillStatus(skill) }));
+  // Priorité 2 — découverte/parcours : pour un tout nouvel apprenant qui n'a
+  // encore validé aucune leçon, cette grille ajoute 4 boutons concurrents au
+  // seul CTA qui compte ("Reprendre la leçon"). Elle n'apparaît donc qu'une
+  // fois la première leçon validée — sauf si une Quick Skill est déjà en
+  // cours ou validée, pour ne jamais faire disparaître un accès déjà pris.
+  const anySkillAlreadyUnlocked = statuses.some(({ status }) => status.key === 'done');
+  const shouldShow = Boolean(firstLessonComplete) || anySkillAlreadyUnlocked;
+  if (section) section.hidden = !shouldShow;
+  if (!shouldShow) return;
+  container.innerHTML = statuses.map(({ skill, status }) => {
     const target = status.key === 'locked' ? 'path' : skill.viewId;
     return `<article class="quick-skill-card quick-skill-${skill.tone} quick-skill-${status.key}">
       <div class="quick-skill-top"><span class="quick-skill-pillar">${escapeHtml(skill.pillar)}</span><span class="quick-skill-status">${escapeHtml(status.label)}</span></div>
@@ -2742,6 +2752,41 @@ function renderTerminalCrosshair() {
   yLabel.textContent = value.toFixed(1);
   if (readout) readout.textContent = `Séquence ${String(candle.index + 1).padStart(2, '0')} · O ${candle.open.toFixed(1)} · H ${candle.high.toFixed(1)} · B ${candle.low.toFixed(1)} · C ${candle.close.toFixed(1)} · indices sans unité`;
 }
+// Priorité 2 — découverte/parcours : le Terminal d'analyse (chandeliers,
+// Fibonacci, zoom/pan) est un outil avancé, pas la première chose qu'un
+// nouvel apprenant doit affronter. Il reste entièrement fonctionnel et
+// accessible en un clic — seule sa visibilité par défaut change, et
+// uniquement tant que l'apprenant n'a validé aucune leçon. Un apprenant qui
+// l'a déjà ouvert voit son choix explicite respecté à chaque visite.
+const ANALYSIS_TERMINAL_PREF_KEY = 'dda_terminal_expanded_v1';
+
+function isAnalysisTerminalExpanded() {
+  const body = document.getElementById('analysis-terminal-body');
+  return body ? !body.hidden : true;
+}
+
+function setAnalysisTerminalExpanded(expanded, { persist = true } = {}) {
+  const body = document.getElementById('analysis-terminal-body');
+  const toggle = document.getElementById('analysis-terminal-toggle');
+  if (body) body.hidden = !expanded;
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', String(expanded));
+    toggle.innerHTML = expanded
+      ? 'Replier <span class="analysis-terminal-toggle-icon" aria-hidden="true">▲</span>'
+      : 'Déplier <span class="analysis-terminal-toggle-icon" aria-hidden="true">▼</span>';
+  }
+  if (persist) {
+    try { localStorage.setItem(ANALYSIS_TERMINAL_PREF_KEY, expanded ? '1' : '0'); } catch { /* storage is optional */ }
+  }
+}
+
+function applyAnalysisTerminalDefaultState(firstLessonComplete) {
+  let override = null;
+  try { override = localStorage.getItem(ANALYSIS_TERMINAL_PREF_KEY); } catch { /* storage is optional */ }
+  const expanded = override === '1' ? true : override === '0' ? false : Boolean(firstLessonComplete);
+  setAnalysisTerminalExpanded(expanded, { persist: false });
+}
+
 function renderDariusAnalysisTerminal() {
   const svg = document.getElementById('terminal-chart');
   if (!svg) return;
@@ -2918,6 +2963,9 @@ function initDariusAnalysisTerminal() {
     }
     update({ observation });
     showToast('Observation conservée sur cet appareil.');
+  });
+  document.getElementById('analysis-terminal-toggle')?.addEventListener('click', () => {
+    setAnalysisTerminalExpanded(!isAnalysisTerminalExpanded());
   });
   document.getElementById('terminal-practice-validate').addEventListener('click', () => {
     const state = getTerminalState();
@@ -3110,8 +3158,9 @@ function renderState() {
   renderTerminalMeta(continueTarget);
   renderDashboardProof(continueTarget, curriculumComplete);
   renderDashboardWeekAhead(continueTarget);
-  renderQuickSkills();
+  renderQuickSkills(complete);
   renderDariusAnalysisTerminal();
+  applyAnalysisTerminalDefaultState(complete);
   renderTerminalJournalNote();
   renderTerminalSkillmap(continueTarget);
 
@@ -3465,7 +3514,18 @@ function renderLessonSidecard(viewId) {
     ? `<button type="button" class="primary-action lesson-sidecard-next" data-sidecard-view="${next.viewId}">Leçon suivante : ${escapeHtml(next.title)} <span>→</span></button>`
     : `<button type="button" class="secondary-action lesson-sidecard-next" data-sidecard-view="path">Retourner à mon parcours <span>→</span></button>`;
 
-  card.innerHTML = `${recap}${quiz}${premium}${nextButton}`;
+  // Priorité 2 — découverte : un rappel discret, affiché une seule fois,
+  // juste après que l'apprenant a validé sa toute première leçon (jamais
+  // une pop-up) — pas sur chaque leçon, pour ne pas devenir du bruit.
+  const isFirstLesson = current?.id === activeLessonId;
+  const firstLessonQuizDone = isFirstLesson && DDALearning.getLessonProgress(prototypeState, current.id).quizComplete;
+  const discovery = firstLessonQuizDone ? `
+    <div class="lesson-sidecard-discover">
+      <p class="eyebrow">Pour continuer</p>
+      <p>Découvre aussi <button type="button" class="text-action" data-sidecard-view="lab">DDA Lab</button>, <button type="button" class="text-action" data-sidecard-view="resources">Ressources</button> et <button type="button" class="text-action" data-sidecard-view="community">Communauté</button>.</p>
+    </div>` : '';
+
+  card.innerHTML = `${recap}${quiz}${premium}${nextButton}${discovery}`;
   // Deliberately data-sidecard-view, not the generic [data-view] bindViewButton
   // wires everywhere else: academy.html's static .module-toc (hidden by CSS
   // at this breakpoint, but still physically present in the DOM for narrower
