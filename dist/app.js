@@ -845,7 +845,7 @@ const titles = {
   membership: 'DDA Premium', 'premium-track': 'Premium Track · P2', 'premium-lab': 'Premium Lab · Risk Plan', 'premium-assessment': 'Premium Assessment · Controlled Decision', support: 'Aide & support', profile: 'Mon profil', community: 'Communauté',
   practice: 'Pratique avancée', intelligence: 'Intelligence DDA', lab: 'DDA Lab',
   forex: 'Forex', stocks: 'Actions', indices: 'Indices', crypto: 'Crypto',
-  live: 'DDA Live', business: 'DDA Business', experts: 'DDA Experts',
+  live: 'DDA Live', business: 'DDA Business', experts: 'DDA Experts', 'produits-digitaux': 'Produits Digitaux',
   // Lesson screen titles are declared once, in LESSON_REGISTRY — never a
   // second hand-maintained list to keep in sync.
   ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.title])),
@@ -1672,10 +1672,34 @@ function renderModulesRecap() {
 // configurés : chaque carte retombe honnêtement sur "Bientôt disponible".
 const GLOBAL_MARKET_SYMBOLS = ['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'US30', 'NAS100', 'BTCUSD', 'ETHUSD', 'SOLUSD', 'BNBUSD', 'XRPUSD'];
 
+// Maquette chantier (2026-11-14) : même traitement d'icône que le ticker
+// crypto de la landing (cercle coloré + glyphe CSS, pas de logo de marque
+// externe) étendu aux 11 instruments de la grille Market Intelligence, pour
+// que l'icône d'un symbole soit identique partout sur le site.
+const MARKET_SYMBOL_ICON = {
+  XAUUSD: { glyph: 'Au', cssClass: 'market-symbol-icon-xau' },
+  EURUSD: { glyph: '€', cssClass: 'market-symbol-icon-eur' },
+  GBPUSD: { glyph: '£', cssClass: 'market-symbol-icon-gbp' },
+  USDJPY: { glyph: '¥', cssClass: 'market-symbol-icon-jpy' },
+  US30: { glyph: 'DJ', cssClass: 'market-symbol-icon-us30' },
+  NAS100: { glyph: 'ND', cssClass: 'market-symbol-icon-nas100' },
+  BTCUSD: { glyph: '₿', cssClass: 'market-symbol-icon-btc' },
+  ETHUSD: { glyph: 'Ξ', cssClass: 'market-symbol-icon-eth' },
+  SOLUSD: { glyph: 'S', cssClass: 'market-symbol-icon-sol' },
+  BNBUSD: { glyph: 'B', cssClass: 'market-symbol-icon-bnb' },
+  XRPUSD: { glyph: 'X', cssClass: 'market-symbol-icon-xrp' }
+};
+
+function marketSymbolIconHtml(symbol) {
+  const meta = MARKET_SYMBOL_ICON[symbol];
+  if (!meta) return '';
+  return `<span class="market-symbol-icon ${meta.cssClass}" aria-hidden="true">${meta.glyph}</span>`;
+}
+
 function renderGlobalMarketQuotesSkeleton(grid) {
   grid.innerHTML = GLOBAL_MARKET_SYMBOLS.map(symbol => `
     <article class="index-card" data-symbol="${symbol}">
-      <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Bientôt disponible</span></div>
+      <div class="index-card-head">${marketSymbolIconHtml(symbol)}<strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Bientôt disponible</span></div>
       <p>Cotation en attente de connexion à un fournisseur de données vérifié.</p>
     </article>
   `).join('');
@@ -1695,13 +1719,13 @@ async function renderGlobalMarketQuotes() {
       if (quote.status === 'ok') {
         const isDown = String(quote.price).trim().startsWith('-');
         return `<article class="index-card" data-symbol="${symbol}">
-          <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge is-live"><span class="status-dot"></span>Cotation vérifiée</span></div>
+          <div class="index-card-head">${marketSymbolIconHtml(symbol)}<strong>${symbol}</strong><span class="data-badge is-live"><span class="status-dot"></span>Cotation vérifiée</span></div>
           <div class="index-card-example"><strong class="index-card-example-value">${quote.price}</strong></div>
           <p>${quote.label} · mis à jour le ${new Date(quote.asOf).toLocaleString('fr-FR')}</p>
         </article>`;
       }
       return `<article class="index-card" data-symbol="${symbol}">
-        <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>${quote.status === 'unavailable' ? 'Indisponible pour le moment' : 'Bientôt disponible'}</span></div>
+        <div class="index-card-head">${marketSymbolIconHtml(symbol)}<strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>${quote.status === 'unavailable' ? 'Indisponible pour le moment' : 'Bientôt disponible'}</span></div>
         <p>${quote.label || symbol} — cotation en attente de connexion à un fournisseur de données vérifié.</p>
       </article>`;
     }).join('');
@@ -1857,6 +1881,15 @@ function renderDashboardWeekAhead(continueTarget) {
   const all = authoredLessons();
   const currentIndex = continueTarget ? all.findIndex(entry => entry.lesson.id === continueTarget.lesson.id) : -1;
   const upcoming = currentIndex === -1 ? [] : all.slice(currentIndex + 1, currentIndex + 3);
+  // Maquette chantier (2026-11-14) — carte "Agenda" du résumé bas de page :
+  // même liste `upcoming` déjà calculée pour le rail de la semaine, jamais
+  // un second calcul d'avancement qui pourrait diverger.
+  const agendaCountEl = document.getElementById('dashboard-card-agenda-count');
+  if (agendaCountEl) {
+    agendaCountEl.textContent = upcoming.length
+      ? `${upcoming.length} leçon${upcoming.length > 1 ? 's' : ''} à venir`
+      : 'Parcours à jour';
+  }
   if (!upcoming.length) {
     section.hidden = true;
     rail.innerHTML = '';
@@ -3132,6 +3165,13 @@ function renderState() {
   document.getElementById('module-percent').textContent = `${progress}%`;
   document.getElementById('module-ring').style.setProperty('--progress', progress);
   document.getElementById('week-xp').textContent = `+${xp} XP`;
+  // Maquette chantier (2026-11-14) — nouvelle carte "Progression" du résumé
+  // bas de page : mêmes valeurs déjà calculées ci-dessus, jamais un second
+  // calcul qui pourrait diverger de module-percent/week-xp.
+  const summaryProgressPercent = document.getElementById('dashboard-card-progress-percent');
+  if (summaryProgressPercent) summaryProgressPercent.textContent = `${progress}%`;
+  const summaryProgressXp = document.getElementById('dashboard-card-progress-xp');
+  if (summaryProgressXp) summaryProgressXp.textContent = `+${xp} XP`;
   const activeDays = countActiveDays(prototypeState.events);
   document.getElementById('active-days').textContent = `${activeDays} jour${activeDays > 1 ? 's' : ''}`;
   const marketVisitDays = countActiveDaysForView(prototypeState.events, 'markets');
@@ -3167,6 +3207,21 @@ function renderState() {
     document.getElementById('terminal-lead-summary').textContent = continueTarget.lesson.summary;
   } else {
     renderTerminalLeadComplete();
+  }
+  // Maquette chantier (2026-11-14) — carte "Prochaine leçon" du résumé bas
+  // de page : mirroir exact de ce que terminal-lead/lesson-primary-action
+  // affichent déjà juste au-dessus (branche "en cours" ou "curriculum
+  // complet" via renderTerminalLeadComplete ci-dessus), jamais une deuxième
+  // logique de calcul qui pourrait diverger de la source déjà affichée.
+  const summaryNextTitle = document.getElementById('dashboard-card-next-lesson-title');
+  const summaryNextModule = document.getElementById('dashboard-card-next-lesson-module');
+  const summaryNextGo = document.getElementById('dashboard-card-next-lesson-go');
+  const primaryActionEl = document.getElementById('lesson-primary-action');
+  if (summaryNextTitle) summaryNextTitle.textContent = document.getElementById('terminal-lead-title').textContent;
+  if (summaryNextModule) summaryNextModule.textContent = document.getElementById('terminal-lead-module').textContent;
+  if (summaryNextGo && primaryActionEl) {
+    summaryNextGo.dataset.view = primaryActionEl.dataset.view;
+    summaryNextGo.innerHTML = primaryActionEl.innerHTML;
   }
   renderTerminalThread(continueTarget);
   renderTerminalMeta(continueTarget);
@@ -4244,6 +4299,7 @@ bindNotifyButton('practice', 'practice-notify', 'practiceNotify', 'la Pratique a
 bindNotifyButton('experts', 'experts-notify', 'expertsNotify', 'DDA Experts');
 bindNotifyButton('live', 'live-notify', 'liveNotify', 'DDA Live');
 bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business');
+bindNotifyButton('produits-digitaux', 'produits-digitaux-notify', 'produitsDigitauxNotify', 'Produits Digitaux');
 
 /* DDA AI Academy chat — a thin UI bridge over the authenticated BFF client.
    The browser never receives a provider key and never invents a reply when the

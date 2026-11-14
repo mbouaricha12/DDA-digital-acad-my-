@@ -24,7 +24,13 @@ assert.match(app, /data-quick-skill-view="\$\{target\}"/);
 assert.match(app, /button\.dataset\.quickSkillView/);
 assert.doesNotMatch(app, /quick-skill-view="[^"]+"[^>]*data-view=/);
 assert.match(app, /renderQuickSkills\(complete\);/);
-assert.doesNotMatch(app, /Produits Digitaux.*data-view/si, 'no inactive digital-products route is presented');
+// Maquette chantier (2026-11-14) — Accueil restructuré : une carte "parcours"
+// peut désormais pointer vers Produits Digitaux, mais seulement vers une
+// page honnête "pilier en préparation" (même famille que business/live/
+// experts) — jamais une fausse leçon PD0-PD3 présentée comme publiée.
+assert.doesNotMatch(app, /'PD0|'PD1|'PD2|'PD3|PDCAP/, 'no fabricated Produits Digitaux lesson entries exist in LESSON_REGISTRY yet');
+assert.match(html, /id="produits-digitaux"[\s\S]*?Pilier en préparation/, 'Produits Digitaux route leads to an honest "coming soon" placeholder');
+assert.match(html, /id="produits-digitaux"[\s\S]{0,4000}Rien ici n.est actif/, 'the placeholder discloses that nothing is active yet');
 
 for (const view of ['lesson', 'lesson-m02', 'lesson-mbrvm1', 'lesson-lab1']) {
   assert.match(html, new RegExp(`id="${view}"`), `${view} mount exists`);
