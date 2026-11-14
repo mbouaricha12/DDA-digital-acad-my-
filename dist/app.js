@@ -1618,6 +1618,7 @@ function renderMarketIntelligence() {
     indices.innerHTML = marketDemo().indices.map((item, i) => `
       <article class="index-card">
         <div class="index-card-head"><strong>${item.label}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Mode pédagogique</span></div>
+        ${item.exampleValue ? `<div class="index-card-example"><strong class="index-card-example-value">${item.exampleValue}</strong><span class="index-card-example-change${String(item.exampleChange).trim().startsWith('-') ? ' is-down' : ' is-up'}">${item.exampleChange}</span><small class="index-card-example-tag">Exemple pédagogique — pas une cotation réelle</small></div>` : ''}
         ${candlestickSpark(i)}
         <p>${item.description}</p>
       </article>
@@ -4617,7 +4618,7 @@ function renderLabCatalog() {
     const label = status === 'locked' && entry.permission === 'premium_track' && canUnlock('premium_track') === false
       ? 'DDA Premium'
       : LAB_STATUS_LABEL[status];
-    [`lab-${entry.id}-status`, `lab-progress-${entry.id}-status`].forEach(id => {
+    [`lab-${entry.id}-status`, `lab-progress-${entry.id}-status`, `lab-photo-${entry.id}-status`].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.textContent = label;
     });
