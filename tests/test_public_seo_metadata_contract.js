@@ -44,7 +44,9 @@ for (const slug of publicPages) {
 }
 
 const launch = fs.readFileSync(path.join(dist, 'launch', 'index.html'), 'utf8');
-assert.match(launch, /Le parcours Free commence par les trois fondations M0\.1, M0\.2 et M0\.3/);
+// Keep this proof aligned with the authored curriculum now presented by the
+// launch page: six published Free lessons across M0 and M1.
+assert.match(launch, /Le parcours Free disponible comprend six leçons authored/);
 const landing = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
 assert.match(landing, /M0 comprend 3 fondations\. M1 ajoute 3 leçons supplémentaires/);
 const academy = fs.readFileSync(path.join(dist, 'academy.html'), 'utf8');

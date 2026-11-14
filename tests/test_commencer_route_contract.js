@@ -7,7 +7,9 @@ const page = fs.readFileSync(path.join(root, 'dist', 'commencer', 'index.html'),
 const css = fs.readFileSync(path.join(root, 'dist', 'commencer', 'commencer.css'), 'utf8');
 const landing = fs.readFileSync(path.join(root, 'dist', 'index.html'), 'utf8');
 
-assert.match(page, /<html lang="fr">/);
+// Both the base French locale and the precise French-France locale are valid
+// HTML language tags. Public SEO pages use the latter consistently.
+assert.match(page, /<html lang="fr(?:-FR)?">/);
 assert.match(page, /<title>Commencer avec DDA Free/);
 assert.match(page, /href="\.\.\/academy\.html#access"/);
 assert.match(page, /Commencer gratuitement/);
