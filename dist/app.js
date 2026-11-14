@@ -814,6 +814,8 @@ const titles = {
   progress: 'Mes progrès', journal: 'Journal', resources: 'Ressources', markets: 'Marchés', brokers: 'Broker Hub',
   membership: 'DDA Premium', 'premium-track': 'Premium Track · P2', 'premium-lab': 'Premium Lab · Risk Plan', 'premium-assessment': 'Premium Assessment · Controlled Decision', support: 'Aide & support', profile: 'Mon profil', community: 'Communauté',
   practice: 'Pratique avancée', intelligence: 'Intelligence DDA', lab: 'DDA Lab',
+  forex: 'Forex', stocks: 'Actions', indices: 'Indices', crypto: 'Crypto',
+  live: 'DDA Live', business: 'DDA Business', experts: 'DDA Experts',
   // Lesson screen titles are declared once, in LESSON_REGISTRY — never a
   // second hand-maintained list to keep in sync.
   ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.title])),

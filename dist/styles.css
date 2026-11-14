@@ -3064,6 +3064,8 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
 .brvm-data-facts dd{margin:7px 0 0;color:#f4f7fc;font-size:13px;line-height:1.45}
 .brvm-pole-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:20px}
 .brvm-pole-item{display:flex;gap:12px;align-items:flex-start;min-height:76px;padding:14px;border:1px solid rgba(255,255,255,.12);background:rgba(7,17,31,.52)}
+button.brvm-pole-item{width:100%;text-align:left;font:inherit;cursor:pointer}
+button.brvm-pole-item:hover,button.brvm-pole-item:focus-visible{border-color:rgba(217,164,65,.5)}
 .brvm-pole-item>span{color:var(--gold-soft);font:700 11px/1 ui-monospace,monospace;letter-spacing:.08em}
 .brvm-pole-item strong{display:block;color:#f4f7fc;font-size:13px}
 .brvm-pole-item small{display:block;margin-top:5px;color:rgba(244,247,252,.58);font-size:11px;line-height:1.4}
