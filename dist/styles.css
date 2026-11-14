@@ -791,6 +791,7 @@ a.nav-item[hidden]{display:none}
 .progress-stat{padding:18px 16px;background:rgba(255,255,255,.04);display:grid;gap:4px}
 .progress-stat span{color:rgba(244,247,252,.65);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:800}
 .progress-stat strong{font-family:Georgia,serif;font-size:24px;color:#f4f7fc;font-variant-numeric:tabular-nums}
+.progress-stat small{color:rgba(217,164,65,.85);font-size:10.5px;font-weight:700;letter-spacing:.02em}
 .progress-stat.featured{grid-column:1/-1;background:linear-gradient(160deg,var(--navy-950),var(--navy-900));padding:22px 20px}
 .progress-stat.featured span{color:var(--gold-soft)}
 .progress-stat.featured strong{font-size:34px;color:var(--ivory)}
@@ -836,6 +837,9 @@ a.nav-item[hidden]{display:none}
 .badge-slot{display:grid;justify-items:center;gap:8px;padding:18px 10px;border:1px dashed rgba(255,255,255,.14);border-radius:var(--r-md);text-align:center;opacity:.7}
 .badge-slot .icon{color:rgba(244,247,252,.65);width:22px;height:22px}
 .badge-slot span{font-size:11px;color:rgba(244,247,252,.65);font-weight:700}
+.badge-slot.is-unlocked{opacity:1;border-style:solid;border-color:rgba(217,164,65,.5);background:rgba(217,164,65,.08)}
+.badge-slot.is-unlocked .icon{color:#d9a441}
+.badge-slot.is-unlocked span{color:#f4f7fc}
 
 .modules-track{margin-top:16px}
 .modules-track ol{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:8px}

@@ -710,7 +710,7 @@
             <span>Modules amorcés</span>
           </div>
           <div class="progress-stat"><span>XP total</span><strong id="progress-total-xp">0</strong></div>
-          <div class="progress-stat"><span>Jours actifs (7 j)</span><strong id="progress-active-days">0</strong></div>
+          <div class="progress-stat"><span>Jours actifs (7 j)</span><strong id="progress-active-days">0</strong><small id="progress-streak-note"></small></div>
         </div>
         <button class="text-action" id="progress-share-open" type="button"><svg class="icon"><use href="#icon-spark"/></svg> Partager ma progression <span>→</span></button>
 
@@ -759,11 +759,11 @@
         <section class="panel badges-panel">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> Badges</p><h3>Les prochaines preuves à débloquer</h3></div></div>
           <div class="badge-row">
-            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Fondations validées</span></div>
-            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Risque maîtrisé</span></div>
-            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Discipline confirmée</span></div>
+            <div class="badge-slot" id="badge-foundations"><svg class="icon"><use href="#icon-lock"/></svg><span>Fondations validées</span></div>
+            <div class="badge-slot" id="badge-risk"><svg class="icon"><use href="#icon-lock"/></svg><span>Risque maîtrisé</span></div>
+            <div class="badge-slot" id="badge-discipline"><svg class="icon"><use href="#icon-lock"/></svg><span>Discipline confirmée</span></div>
           </div>
-          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Valide tes premières missions pour débloquer tes badges de progression</span>
+          <span class="future-label" id="badges-note"><svg class="icon"><use href="#icon-compass"/></svg> Valide tes premières missions pour débloquer tes badges de progression</span>
         </section>
       </section>
 

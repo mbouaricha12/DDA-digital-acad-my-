@@ -1044,6 +1044,27 @@ function countActiveDays(events, now = Date.now()) {
     .map(({ event }) => new Date(event.at).toISOString().slice(0, 10))).size;
 }
 
+// Lot 9 (maquette "Mes progrès" — badges/séries) : la vraie série de jours
+// consécutifs, calculée depuis le même journal d'événements que
+// countActiveDays — jamais un second chiffre inventé. Si aujourd'hui n'a
+// pas encore d'activité, la série reste comptée depuis hier (elle n'est
+// rompue qu'après une journée entière sans aucune activité réelle).
+function countCurrentStreak(events, now = Date.now()) {
+  const activeDays = new Set((events || [])
+    .filter(event => LEARNING_ACTIVITY_EVENTS.has(event.name))
+    .map(event => Date.parse(event.at))
+    .filter(Number.isFinite)
+    .map(timestamp => new Date(timestamp).toISOString().slice(0, 10)));
+  const cursor = new Date(now);
+  if (!activeDays.has(cursor.toISOString().slice(0, 10))) cursor.setUTCDate(cursor.getUTCDate() - 1);
+  let streak = 0;
+  while (activeDays.has(cursor.toISOString().slice(0, 10))) {
+    streak += 1;
+    cursor.setUTCDate(cursor.getUTCDate() - 1);
+  }
+  return streak;
+}
+
 // Real, computed from the same event log as countActiveDays — never fabricated —
 // scoped to a single view's own "view_opened" events (e.g. how many distinct days
 // this device has opened Market Intelligence).
@@ -1915,9 +1936,12 @@ function renderProgressHero() {
   const startedLabel = `${started}/${totalModules}`;
   const totalXp = DDALearning.totalXp(DDA.curriculum, prototypeState);
   const activeDays = countActiveDays(prototypeState.events);
+  const streak = countCurrentStreak(prototypeState.events);
   startedEl.textContent = startedLabel;
   document.getElementById('progress-total-xp').textContent = String(totalXp);
   document.getElementById('progress-active-days').textContent = String(activeDays);
+  const streakNote = document.getElementById('progress-streak-note');
+  if (streakNote) streakNote.textContent = streak > 0 ? `Série actuelle : ${streak} jour${streak > 1 ? 's' : ''}` : 'Série actuelle : 0 jour';
   const ring = document.getElementById('progress-modules-ring');
   if (ring) ring.style.setProperty('--progress', String(totalModules ? Math.round((started / totalModules) * 100) : 0));
   // Profil mirrors the exact same real values as Progression — never a second,
@@ -1934,6 +1958,36 @@ function renderProgressHero() {
   if (shareModules) shareModules.textContent = `${startedLabel} modules`;
   const shareDays = document.getElementById('share-card-days');
   if (shareDays) shareDays.textContent = `${activeDays} jour${activeDays === 1 ? '' : 's'} actif${activeDays === 1 ? '' : 's'}`;
+}
+
+// Lot 9 (maquette "Mes progrès") : les 3 badges existaient déjà dans le
+// HTML mais n'étaient reliés à aucune logique — ils restaient verrouillés
+// pour toujours, quoi que l'apprenant fasse. Chaque condition ci-dessous
+// réutilise un signal déjà réel et déjà affiché ailleurs (statut de module,
+// quiz validé, entrées de Journal) — jamais une progression inventée.
+function renderBadges() {
+  const row = document.getElementById('badge-foundations')?.closest('.badge-row');
+  if (!row) return;
+  const badges = [
+    { id: 'badge-foundations', unlocked: DDALearning.moduleStatus(DDA.curriculum, 'M0', prototypeState) === DDALearning.MODULE_STATUS.COMPLETED },
+    { id: 'badge-risk', unlocked: DDALearning.getLessonProgress(prototypeState, 'P2.1').quizComplete && DDALearning.getLessonProgress(prototypeState, 'P2.2').quizComplete },
+    { id: 'badge-discipline', unlocked: (prototypeState.journal?.entries || []).length >= 3 }
+  ];
+  let unlockedCount = 0;
+  badges.forEach(badge => {
+    const el = document.getElementById(badge.id);
+    if (!el) return;
+    el.classList.toggle('is-unlocked', badge.unlocked);
+    const use = el.querySelector('.icon use');
+    if (use) use.setAttribute('href', badge.unlocked ? '#icon-award' : '#icon-lock');
+    if (badge.unlocked) unlockedCount += 1;
+  });
+  const note = document.getElementById('badges-note');
+  if (note) {
+    note.innerHTML = unlockedCount === badges.length
+      ? '<svg class="icon"><use href="#icon-award"/></svg> Les 3 badges sont débloqués — bravo pour cette régularité.'
+      : `<svg class="icon"><use href="#icon-compass"/></svg> ${unlockedCount}/${badges.length} badge${unlockedCount > 1 ? 's' : ''} débloqué${unlockedCount > 1 ? 's' : ''} · valide tes prochaines missions pour débloquer les autres`;
+  }
 }
 
 function shareCardText() {
@@ -3005,6 +3059,7 @@ function renderState() {
   renderPracticeProof();
   renderProgressNextStep();
   renderProgressHero();
+  renderBadges();
   renderCertificatePreview(activeLessonProgress);
   renderJournalList();
   renderWeeklyReview();
