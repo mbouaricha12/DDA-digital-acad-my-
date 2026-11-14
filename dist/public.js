@@ -98,6 +98,41 @@
     document.querySelectorAll('[data-funnel-section]').forEach(node => observer.observe(node));
   }
 
+  // Motion design pass — hero visual: a very subtle pointer-move tilt
+  // (desktop/mouse only) and a capped scroll parallax. Both are pure
+  // enhancement on top of a fully-visible, static-by-default visual —
+  // neither can ever hide or block the hero content, and both are skipped
+  // entirely under prefers-reduced-motion or on touch/low-data devices.
+  const heroVisual = document.querySelector('#landing .landing-aperture');
+  const finePointer = window.matchMedia?.('(pointer: fine)').matches;
+  const lowData = document.body.classList.contains('low-data');
+  if (heroVisual && !reducedMotion && !lowData) {
+    if (finePointer) {
+      heroVisual.addEventListener('mousemove', event => {
+        const rect = heroVisual.getBoundingClientRect();
+        const px = (event.clientX - rect.left) / rect.width - 0.5;
+        const py = (event.clientY - rect.top) / rect.height - 0.5;
+        const img = heroVisual.querySelector('.photo-fill');
+        if (img) img.style.transform = `scale(1.03) translate(${px * -8}px, ${py * -8}px)`;
+      });
+      heroVisual.addEventListener('mouseleave', () => {
+        const img = heroVisual.querySelector('.photo-fill');
+        if (img) img.style.transform = '';
+      });
+    }
+    let ticking = false;
+    const applyParallax = () => {
+      ticking = false;
+      const rect = heroVisual.getBoundingClientRect();
+      if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+      const offset = Math.max(-16, Math.min(16, rect.top * -0.04));
+      heroVisual.style.setProperty('--dda-parallax', `${offset}px`);
+    };
+    window.addEventListener('scroll', () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(applyParallax); }
+    }, { passive: true });
+  }
+
   const flow = [...document.querySelectorAll('[data-experience-step]')];
   const status = document.querySelector('[data-experience-status]');
   const labels = ['Discover — commencer par une question claire.', 'Learn — donner un cadre à ce que tu observes.', 'Practice — essayer avec le droit au retry.', 'Analyze — comprendre ce qui a changé.', 'Improve — choisir la prochaine action utile.'];
