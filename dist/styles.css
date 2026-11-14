@@ -3242,9 +3242,24 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
 #dashboard .dda-ecosystem-strip,
 #dashboard .dashboard-mission,
 #dashboard .dashboard-mastery-thread,
-#dashboard .dashboard-kpi-row,
 #dashboard .dashboard-proof-strip,
 #dashboard .dashboard-operating-line{display:none!important}
+/* Lot 2 (founder's full product maquette set, 2026-11-14): the KPI row
+   returns — it was hidden here by UX pass 07 as "product noise", but every
+   value it shows is real (XP, active days, action du jour, preuve récente),
+   never fabricated, and the maquette explicitly asks for a KPI strip under
+   the greeting. Styled fresh below: it never had its own CSS before (only a
+   mobile gap rule), hidden before it was finished. */
+#dashboard .dashboard-kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 0}
+#dashboard .dashboard-kpi-card{display:flex;align-items:center;gap:10px;min-width:0;padding:14px 16px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.025)}
+#dashboard .dashboard-kpi-card.dashboard-kpi-gold{border-color:rgba(224,184,94,.35);background:rgba(224,184,94,.06)}
+#dashboard .dashboard-kpi-icon{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.06);color:#e7c77e}
+#dashboard .dashboard-kpi-card>div{min-width:0}
+#dashboard .dashboard-kpi-card strong{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font-size:14px;line-height:1.3}
+#dashboard .dashboard-kpi-card span:last-child{display:block;margin-top:2px;font-size:11px;color:#aab8c8}
+@media(max-width:760px){
+  #dashboard .dashboard-kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 #dashboard .dashboard-command-head{margin:0 0 18px;padding:22px 0 8px;border:0;background:transparent}
 #dashboard .dashboard-command-head .eyebrow{display:none}
 #dashboard .dashboard-command-head h1{font-size:clamp(1.8rem,5vw,3rem);font-weight:650;letter-spacing:-.045em}
