@@ -20,6 +20,9 @@ for (const marker of ['quick-observe', 'quick-zones', 'quick-brvm', 'quick-ai', 
 assert.match(app, /function quickSkillStatus\(skill\)/);
 assert.match(app, /progress\.quizComplete/);
 assert.match(app, /status\.key === 'locked' \? 'path' : skill\.viewId/);
+assert.match(app, /data-quick-skill-view="\$\{target\}"/);
+assert.match(app, /button\.dataset\.quickSkillView/);
+assert.doesNotMatch(app, /quick-skill-view="[^"]+"[^>]*data-view=/);
 assert.match(app, /renderQuickSkills\(\);/);
 assert.doesNotMatch(app, /Produits Digitaux.*data-view/si, 'no inactive digital-products route is presented');
 

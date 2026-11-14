@@ -1827,10 +1827,12 @@ function renderQuickSkills() {
       <div class="quick-skill-top"><span class="quick-skill-pillar">${escapeHtml(skill.pillar)}</span><span class="quick-skill-status">${escapeHtml(status.label)}</span></div>
       <h3>${escapeHtml(skill.title)}</h3>
       <p>${escapeHtml(skill.outcome)}</p>
-      <div class="quick-skill-footer"><span>${skill.minutes} min · objectif concret</span><button type="button" class="text-action" data-view="${target}">${escapeHtml(status.action)} <span>→</span></button></div>
+      <div class="quick-skill-footer"><span>${skill.minutes} min · objectif concret</span><button type="button" class="text-action" data-quick-skill-view="${target}">${escapeHtml(status.action)} <span>→</span></button></div>
     </article>`;
   }).join('');
-  container.querySelectorAll('[data-view]').forEach(bindViewButton);
+  container.querySelectorAll('[data-quick-skill-view]').forEach(button => {
+    button.addEventListener('click', () => showView(button.dataset.quickSkillView));
+  });
 }
 
 function renderDashboardProof(continueTarget, curriculumComplete) {
