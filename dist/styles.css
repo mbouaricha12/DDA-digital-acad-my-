@@ -3255,6 +3255,9 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
 #dashboard .terminal-lead-meta{margin-top:18px}
 #dashboard .terminal-lead-photo{min-height:260px}
 #dashboard .terminal-divider{margin:22px 0}
+#dashboard .dashboard-week-ahead{margin:26px 0}
+#dashboard .dashboard-week-ahead .eyebrow{margin:0 0 12px}
+#dashboard .dashboard-week-rail .lab-photo-card-media{aspect-ratio:16/10}
 @media(max-width:640px){
  #dashboard .dashboard-command-head{padding:18px 0 12px}
  #dashboard .terminal-lead{display:flex;flex-direction:column}

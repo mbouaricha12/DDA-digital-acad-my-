@@ -1736,6 +1736,46 @@ function renderPracticeProof() {
 // Dashboard orientation layer: expose one recent, auditable proof without
 // creating a second progress engine. Practice state and the existing event log
 // remain the only sources; a view opening is never presented as proof.
+// Real photos only, reused from the existing pool (same assets as the Lab
+// photo rail) — picked by module prefix so a lesson's card matches its real
+// module, never a generic stock image unrelated to the content.
+const DASHBOARD_WEEK_PHOTO_BY_MODULE = Object.freeze({
+  M0: 'images/photos/m0-foundations-observe.jpg',
+  M1: 'images/photos/m1-terminal-analysis.jpg',
+  P2: 'images/photos/p2-discipline-review.jpg',
+  MBRVM: 'images/photos/brvm-market-fruits.jpg'
+});
+
+// Founder mockup's "À faire cette semaine" row — the real next 1-2 authored
+// lessons after the current one (authoredLessons() order, same source the
+// Fil de maîtrise and nav shortcuts already use), never a fabricated weekly
+// plan. Hidden entirely once the curriculum is complete (nothing left to do).
+function renderDashboardWeekAhead(continueTarget) {
+  const section = document.getElementById('dashboard-week-ahead');
+  const rail = document.getElementById('dashboard-week-rail');
+  if (!section || !rail) return;
+  const all = authoredLessons();
+  const currentIndex = continueTarget ? all.findIndex(entry => entry.lesson.id === continueTarget.lesson.id) : -1;
+  const upcoming = currentIndex === -1 ? [] : all.slice(currentIndex + 1, currentIndex + 3);
+  if (!upcoming.length) {
+    section.hidden = true;
+    rail.innerHTML = '';
+    return;
+  }
+  section.hidden = false;
+  rail.innerHTML = upcoming.map(({ module, lesson }) => {
+    const moduleKey = lesson.id.split('.')[0];
+    const photo = DASHBOARD_WEEK_PHOTO_BY_MODULE[moduleKey] || DASHBOARD_WEEK_PHOTO_BY_MODULE.M0;
+    const viewId = LESSON_VIEW_ID[lesson.id] || 'lesson';
+    return `
+      <button type="button" class="lab-photo-card" data-view="${viewId}">
+        <div class="lab-photo-card-media"><img class="photo-fill" src="${photo}" alt="" loading="lazy"><div class="photo-scrim"></div></div>
+        <strong>${escapeHtml(learnerLessonTitle(lesson))}</strong>
+        <small>${escapeHtml(module.title)}</small>
+      </button>`;
+  }).join('');
+}
+
 function renderDashboardProof(continueTarget, curriculumComplete) {
   const titleEl = document.getElementById('dashboard-proof-title');
   const metaEl = document.getElementById('dashboard-proof-meta');
@@ -2908,6 +2948,7 @@ function renderState() {
   renderTerminalThread(continueTarget);
   renderTerminalMeta(continueTarget);
   renderDashboardProof(continueTarget, curriculumComplete);
+  renderDashboardWeekAhead(continueTarget);
   renderDariusAnalysisTerminal();
   renderTerminalJournalNote();
   renderTerminalSkillmap(continueTarget);
