@@ -1,12 +1,18 @@
 'use strict';
 /*
  * feat/academy-sidebar-structure-premium-card — contract for the founder's
- * second reference maquette (lesson-reader screenshot): the restructured
- * Academy sidebar (Mon Espace / collapsible Academy section with its 5
- * sub-items / DDA Lab / DDA AI / Journal de trading / Progression /
- * Communauté), the bottom-of-sidebar "DDA Premium" card, and the public
- * landing header's relabeled navigation (Accueil/Apprendre/Parcours/
- * Formations/Ressources/Market Intelligence/Communauté).
+ * reference maquettes: the restructured Academy sidebar (Accueil /
+ * collapsible Academy section with its 4 sub-items / DDA Lab / DDA AI /
+ * Ressources / Communauté / Marchés / Mes progrès / Profil), the
+ * bottom-of-sidebar "DDA Premium" card, and the public landing header's
+ * relabeled navigation (Accueil/Apprendre/Parcours/Formations/Ressources/
+ * Market Intelligence/Communauté).
+ *
+ * Updated 2026-11-14 for the founder's full product maquette set (Lot 1 —
+ * navigation): Accueil (was "Mon Espace"), Ressources and Profil promoted
+ * to top-level items, Marchés/Mes progrès relabeled — every change is a
+ * label/position change onto the exact same real destinations, never a
+ * new or fabricated route.
  *
  * Every mockup label here is wired to a real, already-built destination —
  * this file checks that wiring stays real, not just that the label text
@@ -35,29 +41,32 @@ const sidebar = sidebarMatch[0];
 const drawer = drawerMatch[0];
 
 for (const [label, rail] of [['desktop sidebar', sidebar], ['mobile drawer', drawer]]) {
-  assert.match(rail, /data-view="dashboard">[\s\S]*?Mon Espace/, `${label}: "Mon Espace" opens the real dashboard view`);
+  assert.match(rail, /data-view="dashboard">[\s\S]*?Accueil/, `${label}: "Accueil" opens the real dashboard view`);
   assert.match(rail, /nav-section-toggle[\s\S]*?Academy/, `${label}: the Academy section header is present`);
   assert.match(rail, /aria-expanded="true"/, `${label}: the Academy section is expanded by default, matching the maquette`);
 
-  // The 5 real sub-items, each routed to its real, already-built destination.
+  // The 4 real sub-items, each routed to its real, already-built destination.
+  // Ressources moved out to a top-level item below (founder's full product
+  // maquette set, 2026-11-14) — it is no longer nested under Academy.
   assert.match(rail, /data-view="path">[\s\S]*?Mes Parcours/, `${label}: Mes Parcours routes to the real ordered curriculum (path view)`);
   assert.match(rail, /data-view="lesson">[\s\S]*?Mes Leçons/, `${label}: Mes Leçons routes to the real current/continue lesson`);
   assert.match(rail, /data-scroll-to="lesson-panel-exercise"[\s\S]*?Exercices/, `${label}: Exercices & Quiz deep-links into the lesson's real Exercice/Quiz tab`);
-  assert.match(rail, /data-view="resources">[\s\S]*?Ressources/, `${label}: Ressources routes to the real resources view`);
   assert.match(rail, /data-view="progress" data-scroll-to="certificate-panel"[\s\S]*?Certificats/, `${label}: Certificats routes to the real certification-preview panel inside Progression — DDA has no standalone Certificats page, so this is an honest deep link, not a fabricated route`);
 
   // Standalone items (unchanged real destinations, just relocated/relabeled
   // per the maquette).
   assert.match(rail, /data-view="lab">[\s\S]*?DDA Lab/, `${label}: DDA Lab stays reachable`);
   assert.match(rail, /data-view="intelligence">[\s\S]*?DDA AI<span class="nav-status-tag">Beta/, `${label}: DDA AI keeps its real Beta badge`);
+  assert.match(rail, /data-view="resources">[\s\S]*?Ressources/, `${label}: Ressources is now a direct top-level nav entry to the real resources view`);
   assert.match(rail, /data-view="journal">[\s\S]*?Journal de trading/, `${label}: Journal de trading stays reachable`);
-  assert.match(rail, /data-view="progress">[\s\S]*?Progression/, `${label}: Progression stays reachable`);
-  assert.match(rail, /data-view="community">[\s\S]*?Communauté/, `${label}: Communauté is now a direct nav entry to the real (honest "coming soon") community view, not just a buried future-label link`);
+  assert.match(rail, /data-view="progress">[\s\S]*?Mes progrès/, `${label}: Progression is relabeled "Mes progrès" per the founder's full product maquette set, routing stays unchanged`);
+  assert.match(rail, /data-view="community">[\s\S]*?Communauté/, `${label}: Communauté is a direct nav entry to the real (honest "coming soon") community view, not just a buried future-label link`);
+  assert.match(rail, /data-view="profile">[\s\S]*?Profil/, `${label}: Profil is now a direct top-level nav entry, no longer confined to the "Compte" section`);
 
   // Real, non-mockup functionality (Terminal, BRVM, Broker Hub, Premium
   // demo tools) must never be deleted by this restructure.
   assert.match(rail, /data-scroll-to="analysis-terminal"/, `${label}: the Darius Analysis Terminal shortcut survives the restructure`);
-  assert.match(rail, /data-view="markets">[\s\S]*?Marchés/, `${label}: Marchés & BRVM survives the restructure`);
+  assert.match(rail, /data-view="markets">[\s\S]*?Marchés/, `${label}: Marchés & BRVM survives the restructure (relabeled "Marchés" per the founder's maquette, same real view)`);
   assert.match(rail, /data-view="brokers">[\s\S]*?Broker Hub/, `${label}: Broker Hub survives the restructure`);
   assert.match(rail, /data-view="practice">[\s\S]*?Pratique avancée/, `${label}: Pratique avancée survives the restructure`);
 

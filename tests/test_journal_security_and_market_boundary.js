@@ -5,13 +5,15 @@ const path = require('path');
 const app = fs.readFileSync(path.join(__dirname, '..', 'dist', 'app.js'), 'utf8');
 const core = fs.readFileSync(path.join(__dirname, '..', 'dist', 'dda-core.js'), 'utf8');
 const academy = fs.readFileSync(path.join(__dirname, '..', 'dist', 'academy.html'), 'utf8');
+const practiceProofRenderer = app.match(/function renderPracticeProof\(\) \{[\s\S]*?\n\}/)?.[0] || '';
 
 assert.match(core, /candidateId = String\(raw\.id \|\| ''\).*replace\(\/\[\^A-Za-z0-9\._:-\]\//, 'Journal ids are restricted to a safe identifier alphabet at state normalization');
 assert.match(app, /function escapeHtml\(value\)/, 'Journal has a context-aware HTML escaping helper');
 assert.match(app, /escapeHtml\(entry\.id\)/, 'Journal entry ids are escaped before entering data-id attributes');
 assert.match(app, /escapeHtml\(entry\[field\]\)/, 'Journal free-text fields are escaped before HTML rendering');
 assert.match(app, /escapeHtml\(practice\.feedback \|\| 'Mission tentée localement\.'\)/, 'Practice proof feedback is escaped before HTML rendering');
-assert.match(app, /escapeHtml\(proof\.id \|\| 'locale'\)/, 'Practice proof ids are escaped before HTML rendering');
+assert.match(practiceProofRenderer, /<small>Preuve pédagogique/, 'Practice proof card uses learner-facing copy');
+assert.doesNotMatch(practiceProofRenderer, /proof\.id/, 'Practice proof card does not expose technical proof ids');
 assert.match(app, /el\.innerHTML = ''[\s\S]*p\.textContent = `«/, 'Terminal Journal preview uses DOM textContent rather than interpolated HTML');
 assert.doesNotMatch(app, /data-id="\$\{entry\.id\}"/, 'No raw Journal id remains in an HTML attribute');
 

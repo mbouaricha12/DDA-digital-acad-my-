@@ -6,7 +6,7 @@ const root = path.join(__dirname, '..', 'dist');
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.webmanifest'), 'utf8'));
 
-assert.match(sw, /const CACHE = 'dda-shell-v27';/);
+assert.match(sw, /const CACHE = 'dda-shell-v28';/);
 // Founder-reported production incident (2026-11): app.js and bff-client.js
 // wire up the real auth forms (signup/login) and must never run one
 // version behind the HTML they ship with — see sw.js's CRITICAL_SCRIPTS

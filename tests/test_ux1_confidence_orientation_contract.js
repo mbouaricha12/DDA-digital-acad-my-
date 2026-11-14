@@ -14,7 +14,10 @@ assert(academy.includes('id="topbar-profile-avatar">A</span>'), 'Le topbar doit 
 assert(!/\bRichard\b/.test(academy), 'Aucun prénom de démonstration ne doit rester dans Academy');
 assert(!/\bRichard\b/.test(app), 'Le runtime ne doit pas utiliser un fallback d’identité fictif');
 assert(academy.includes('Profil d’apprentissage'), 'Le profil doit être présenté comme une surface produit');
-assert(academy.includes('Démonstration pédagogique'), 'La limite Premium doit rester honnête sans jargon local');
+// Commercial preparation / public polish mandate (2026-11-14): "Démonstration
+// pédagogique" was removed from Premium's public-facing labels as devaluing
+// jargon — the honesty it stood for is still asserted, just in plainer words.
+assert(academy.includes('pas un abonnement actif'), 'La limite Premium doit rester honnête sans jargon local');
 assert(landing.includes('Aperçu pédagogique'), 'La landing doit qualifier Premium comme aperçu pédagogique');
 assert(styles.includes('top:var(--banner-h,0px)'), 'Le shell ne doit pas réserver 29px à une bannière absente');
 assert(styles.includes('scroll-margin-top:calc(var(--banner-h,0px)'), 'Les ancres doivent utiliser la hauteur réelle du shell');
