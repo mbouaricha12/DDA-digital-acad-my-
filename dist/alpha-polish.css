@@ -3281,6 +3281,14 @@ body.access-mode main{padding-bottom:0}
   #landing .landing-actions{animation-delay:370ms}
   #landing .trust-list.landing-trust{animation-delay:440ms}
 
+  /* Maquette chantier (2026-11-14) — même entrée douce que le hero landing,
+     appliquée aux nouvelles cartes de l'Accueil (parcours + résumé). */
+  #dashboard .dashboard-parcours-card,#dashboard .dashboard-summary-card{animation:dda-hero-in .5s cubic-bezier(.16,.84,.44,1) both}
+  #dashboard .dashboard-parcours-card:nth-child(1),#dashboard .dashboard-summary-card:nth-child(1){animation-delay:0ms}
+  #dashboard .dashboard-parcours-card:nth-child(2),#dashboard .dashboard-summary-card:nth-child(2){animation-delay:60ms}
+  #dashboard .dashboard-parcours-card:nth-child(3),#dashboard .dashboard-summary-card:nth-child(3){animation-delay:120ms}
+  #dashboard .dashboard-summary-card:nth-child(4){animation-delay:180ms}
+
   #landing .landing-aperture .aperture-grid{animation:dda-grid-drift 22s linear infinite;transform:translateY(var(--dda-parallax,0px));will-change:transform}
   #landing .landing-aperture{position:relative}
   #landing .landing-aperture::after{
@@ -3324,3 +3332,5 @@ body.low-data #landing .landing-deck,
 body.low-data #landing .landing-free-proof,
 body.low-data #landing .landing-actions,
 body.low-data #landing .trust-list.landing-trust{animation:none!important;opacity:1!important;transform:none!important}
+body.low-data #dashboard .dashboard-parcours-card,
+body.low-data #dashboard .dashboard-summary-card{animation:none!important;opacity:1!important;transform:none!important}

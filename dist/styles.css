@@ -3328,6 +3328,44 @@ button.brvm-pole-item:hover,button.brvm-pole-item:focus-visible{border-color:rgb
  #dashboard .quick-skill-card h3{max-width:30ch}
 }
 
+/* Maquette chantier (2026-11-14) — rapprochement Accueil : 3 cartes
+   "parcours" (Trading & Marchés / DDA Lab / Produits Digitaux) + 4 cartes
+   de résumé bas de page (Progression / Prochaine leçon / DDA AI / Agenda).
+   Même langage visuel que .quick-skill-card (carte sombre, bordure fine,
+   ombre portée) — pas un second système de carte à maintenir. */
+#dashboard .dashboard-parcours,#dashboard .dashboard-summary{margin:28px 0 24px}
+#dashboard .dashboard-parcours-intro,#dashboard .dashboard-summary-intro{display:grid;gap:8px;max-width:760px;margin-bottom:18px}
+#dashboard .dashboard-parcours-intro .eyebrow,#dashboard .dashboard-summary-intro .eyebrow{margin:0}
+#dashboard .dashboard-parcours-intro h2,#dashboard .dashboard-summary-intro h2{max-width:34ch;margin:0;font-family:Georgia,serif;font-size:clamp(1.3rem,2.6vw,1.9rem);font-weight:400;letter-spacing:-.01em;color:#f4f7fc}
+#dashboard .dashboard-parcours-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+#dashboard .dashboard-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+#dashboard .dashboard-parcours-card{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0;padding:20px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(4,14,28,.38);box-shadow:0 12px 30px rgba(0,0,0,.12);text-align:left;color:inherit;font:inherit;cursor:pointer}
+#dashboard .dashboard-summary-card{display:flex;flex-direction:column;gap:8px;min-width:0;padding:18px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(4,14,28,.38);box-shadow:0 12px 30px rgba(0,0,0,.1)}
+#dashboard .dashboard-parcours-icon,#dashboard .dashboard-summary-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:rgba(226,190,118,.12)}
+#dashboard .dashboard-parcours-icon .icon,#dashboard .dashboard-summary-icon .icon{width:18px;height:18px;color:#e7c77e}
+#dashboard .dashboard-parcours-card strong{font-size:16px;color:#f4f7fc}
+#dashboard .dashboard-parcours-card p{flex:1;margin:0;min-height:40px;color:#b8c6d5;font-size:13px;line-height:1.55}
+#dashboard .dashboard-parcours-card .text-action{color:#e7c77e}
+#dashboard .dashboard-parcours-card-soon{border-color:rgba(180,150,255,.28)}
+#dashboard .dashboard-parcours-card-soon .dashboard-parcours-icon{background:rgba(180,150,255,.14)}
+#dashboard .dashboard-parcours-card-soon .dashboard-parcours-icon .icon{color:#c8b6ff}
+#dashboard .dashboard-summary-card .eyebrow{margin:0;font-size:10px;color:#8498ad}
+#dashboard .dashboard-summary-card strong{margin:0;font-size:15px;line-height:1.3;color:#f4f7fc}
+#dashboard .dashboard-summary-card>span{color:#aab8c8;font-size:12px}
+#dashboard .dashboard-summary-card .text-action{margin-top:auto;padding-top:6px;color:#e7c77e;font-size:12px}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  #dashboard .dashboard-parcours-card,#dashboard .dashboard-summary-card{transition:transform .2s cubic-bezier(.2,.8,.4,1),box-shadow .2s ease,border-color .2s ease}
+  #dashboard .dashboard-parcours-card:hover,#dashboard .dashboard-summary-card:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(0,0,0,.2);border-color:rgba(226,190,118,.32)}
+}
+@media(max-width:860px){
+  #dashboard .dashboard-parcours-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #dashboard .dashboard-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:640px){
+  #dashboard .dashboard-parcours-grid{grid-template-columns:1fr}
+  #dashboard .dashboard-summary-grid{grid-template-columns:1fr}
+}
+
 /* Academy learner experience: calmer lesson navigation, consistent focus and readable long-form study. */
 .lesson-layout{max-width:1180px;margin-inline:auto;padding-inline:clamp(16px,3vw,36px)}
 .lesson-main{min-width:0;max-width:860px;margin-inline:auto;width:100%}

@@ -70,7 +70,7 @@
       if (oauthProvider) window.DDA_OAUTH_PROVIDER = oauthProvider;
       var oauthError = params.get('error') || hashParams.get('error');
       if (oauthError) window.DDA_OAUTH_ERROR = oauthError;
-      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone', 'forex', 'stocks', 'indices', 'crypto']);
+      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone', 'forex', 'stocks', 'indices', 'crypto', 'produits-digitaux']);
       var route = location.hash.slice(1);
       document.documentElement.setAttribute('data-boot-view', knownRoutes.has(route) ? route : 'dashboard');
       var safeHash = knownRoutes.has(route) ? '#' + route : '';
@@ -405,6 +405,33 @@
           </div>
         </article>
 
+        <section class="dashboard-parcours" aria-labelledby="dashboard-parcours-title">
+          <div class="dashboard-parcours-intro">
+            <p class="eyebrow gold">Tes parcours DDA</p>
+            <h2 id="dashboard-parcours-title">Trois piliers, une seule progression suivie.</h2>
+          </div>
+          <div class="dashboard-parcours-grid">
+            <button type="button" class="dashboard-parcours-card" data-view="path">
+              <span class="dashboard-parcours-icon"><svg class="icon"><use href="#icon-chart"/></svg></span>
+              <strong>Trading &amp; Marchés</strong>
+              <p>Le parcours structuré M0 → M9 : lire un marché, construire un plan, avant d’avancer vers le Premium.</p>
+              <span class="text-action">Continuer <span>→</span></span>
+            </button>
+            <button type="button" class="dashboard-parcours-card" data-view="lab">
+              <span class="dashboard-parcours-icon"><svg class="icon"><use href="#icon-spark"/></svg></span>
+              <strong>DDA Lab</strong>
+              <p>Des missions pratiques pour manipuler ce que tu apprends, avant le projet final Premium.</p>
+              <span class="text-action">Explorer <span>→</span></span>
+            </button>
+            <button type="button" class="dashboard-parcours-card dashboard-parcours-card-soon" data-view="produits-digitaux">
+              <span class="dashboard-parcours-icon"><svg class="icon"><use href="#icon-compass"/></svg></span>
+              <strong>Produits Digitaux</strong>
+              <p>Un nouveau pilier en préparation — créer et vendre des produits numériques avec l’IA.</p>
+              <span class="text-action">Aperçu <span>→</span></span>
+            </button>
+          </div>
+        </section>
+
         <section class="dashboard-week-ahead" id="dashboard-week-ahead" aria-label="À faire cette semaine" hidden>
           <p class="eyebrow gold">À faire cette semaine</p>
           <div class="lab-photo-rail dashboard-week-rail" id="dashboard-week-rail"></div>
@@ -534,6 +561,43 @@
               <button type="button" class="text-action" data-view="journal" data-terminal-handoff="true" id="terminal-journal-handoff">Continuer dans le Journal <span>→</span></button>
             </div>
           </div>
+          </div>
+        </section>
+
+        <section class="dashboard-summary" aria-labelledby="dashboard-summary-title">
+          <div class="dashboard-summary-intro">
+            <p class="eyebrow gold">En un coup d’œil</p>
+            <h2 id="dashboard-summary-title">Ta session, ton IA, ta semaine.</h2>
+          </div>
+          <div class="dashboard-summary-grid">
+            <article class="dashboard-summary-card">
+              <span class="dashboard-summary-icon"><svg class="icon"><use href="#icon-progress"/></svg></span>
+              <p class="eyebrow">Progression</p>
+              <strong id="dashboard-card-progress-percent">0%</strong>
+              <span id="dashboard-card-progress-xp">+0 XP</span>
+              <button type="button" class="text-action" data-view="progress">Voir mes progrès <span>→</span></button>
+            </article>
+            <article class="dashboard-summary-card">
+              <span class="dashboard-summary-icon"><svg class="icon"><use href="#icon-target"/></svg></span>
+              <p class="eyebrow">Prochaine leçon</p>
+              <strong id="dashboard-card-next-lesson-title">—</strong>
+              <span id="dashboard-card-next-lesson-module">—</span>
+              <button type="button" class="text-action" id="dashboard-card-next-lesson-go" data-view="lesson">Continuer <span>→</span></button>
+            </article>
+            <article class="dashboard-summary-card">
+              <span class="dashboard-summary-icon"><svg class="icon"><use href="#icon-chat"/></svg></span>
+              <p class="eyebrow">DDA AI</p>
+              <strong>Une question sur ta leçon ?</strong>
+              <span>Réponses contextualisées à ton module en cours.</span>
+              <button type="button" class="text-action" data-view="intelligence">Ouvrir DDA AI <span>→</span></button>
+            </article>
+            <article class="dashboard-summary-card">
+              <span class="dashboard-summary-icon"><svg class="icon"><use href="#icon-calendar"/></svg></span>
+              <p class="eyebrow">Agenda</p>
+              <strong id="dashboard-card-agenda-count">—</strong>
+              <span>Cette semaine, dans ton parcours.</span>
+              <button type="button" class="text-action" data-view="path">Voir mon parcours <span>→</span></button>
+            </article>
           </div>
         </section>
 
@@ -1653,6 +1717,52 @@
         <div class="community-cta">
           <button class="primary-action" id="business-notify" type="button">Être informé au lancement <span>→</span></button>
           <p class="disclosure" id="business-notify-note">Aucune inscription réelle — juste une préférence locale sur cet appareil.</p>
+        </div>
+      </section>
+
+      <section class="view community-view" id="produits-digitaux" aria-labelledby="produits-digitaux-title">
+        <div class="community-hero" role="img" aria-label="Produits Digitaux — aperçu">
+          <img class="photo-fill" src="images/photos/access-two-women-market.jpg" alt="" loading="lazy">
+          <div class="photo-scrim"></div>
+          <div class="community-hero-copy">
+            <p class="eyebrow gold">Pilier en préparation</p>
+            <h1 id="produits-digitaux-title">Produits Digitaux</h1>
+            <p>Créer, construire et vendre des produits numériques avec l’IA — un curriculum complet en cours de finalisation.</p>
+          </div>
+        </div>
+
+        <div class="page-mission" data-mission="produits-digitaux"><div><p class="eyebrow">Mission de cette page</p><strong>Comprendre le pilier à venir, sans contenu fictif affiché comme actif.</strong><span>L’architecture pédagogique (PD0 à PD3 + projet final) est validée en principe ; le curriculum détaillé est encore en cours de finalisation avant toute intégration dans DDA.</span></div><button class="text-action" data-view="path">Voir le parcours Trading &amp; Marchés <span>→</span></button></div>
+        <div class="community-tiles">
+          <div class="community-tile"><svg class="icon"><use href="#icon-compass"/></svg><span>Trouver son offre</span></div>
+          <div class="community-tile"><svg class="icon"><use href="#icon-progress"/></svg><span>Construire avec l’IA</span></div>
+          <div class="community-tile"><svg class="icon"><use href="#icon-spark"/></svg><span>Vendre &amp; automatiser</span></div>
+        </div>
+        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Rien ici n’est actif — aucune leçon Produits Digitaux n’est encore publiée.</p>
+
+        <section class="future-principles intelligence-principles" aria-labelledby="produits-digitaux-principles-title">
+          <p class="eyebrow gold">La règle DDA Produits Digitaux</p>
+          <h2 id="produits-digitaux-principles-title">Un curriculum réel, jamais une leçon inventée pour remplir la page.</h2>
+          <div class="intelligence-boundaries">
+            <article><span class="boundary-label">Il pourra</span><p>Couvrir l’offre, la boutique, la commercialisation et l’automatisation d’un produit numérique, du premier brief au premier client.</p></article>
+            <article><span class="boundary-label boundary-label-muted">Il ne fera jamais</span><p>Afficher une leçon ou un exercice avant que son contenu pédagogique complet n’ait été rédigé et validé.</p></article>
+          </div>
+        </section>
+
+        <section class="community-featured" aria-labelledby="produits-digitaux-featured-title">
+          <p class="eyebrow">Ce qui existe déjà</p>
+          <article class="community-featured-card">
+            <div class="community-featured-copy">
+              <h2 id="produits-digitaux-featured-title">Trading &amp; Marchés — déjà disponible</h2>
+              <p>En attendant, le parcours structuré M0 → M9 reste la façon la plus directe de progresser dans DDA aujourd’hui.</p>
+              <button class="primary-action" data-view="path">Voir le parcours <span>→</span></button>
+            </div>
+            <div class="community-featured-icon"><svg class="icon"><use href="#icon-chart"/></svg></div>
+          </article>
+        </section>
+
+        <div class="community-cta">
+          <button class="primary-action" id="produits-digitaux-notify" type="button">Être informé au lancement <span>→</span></button>
+          <p class="disclosure" id="produits-digitaux-notify-note">Aucune inscription réelle — juste une préférence locale sur cet appareil.</p>
         </div>
       </section>
 

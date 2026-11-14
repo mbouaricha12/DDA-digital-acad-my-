@@ -845,7 +845,7 @@ const titles = {
   membership: 'DDA Premium', 'premium-track': 'Premium Track · P2', 'premium-lab': 'Premium Lab · Risk Plan', 'premium-assessment': 'Premium Assessment · Controlled Decision', support: 'Aide & support', profile: 'Mon profil', community: 'Communauté',
   practice: 'Pratique avancée', intelligence: 'Intelligence DDA', lab: 'DDA Lab',
   forex: 'Forex', stocks: 'Actions', indices: 'Indices', crypto: 'Crypto',
-  live: 'DDA Live', business: 'DDA Business', experts: 'DDA Experts',
+  live: 'DDA Live', business: 'DDA Business', experts: 'DDA Experts', 'produits-digitaux': 'Produits Digitaux',
   // Lesson screen titles are declared once, in LESSON_REGISTRY — never a
   // second hand-maintained list to keep in sync.
   ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.title])),
@@ -1881,6 +1881,15 @@ function renderDashboardWeekAhead(continueTarget) {
   const all = authoredLessons();
   const currentIndex = continueTarget ? all.findIndex(entry => entry.lesson.id === continueTarget.lesson.id) : -1;
   const upcoming = currentIndex === -1 ? [] : all.slice(currentIndex + 1, currentIndex + 3);
+  // Maquette chantier (2026-11-14) — carte "Agenda" du résumé bas de page :
+  // même liste `upcoming` déjà calculée pour le rail de la semaine, jamais
+  // un second calcul d'avancement qui pourrait diverger.
+  const agendaCountEl = document.getElementById('dashboard-card-agenda-count');
+  if (agendaCountEl) {
+    agendaCountEl.textContent = upcoming.length
+      ? `${upcoming.length} leçon${upcoming.length > 1 ? 's' : ''} à venir`
+      : 'Parcours à jour';
+  }
   if (!upcoming.length) {
     section.hidden = true;
     rail.innerHTML = '';
@@ -3156,6 +3165,13 @@ function renderState() {
   document.getElementById('module-percent').textContent = `${progress}%`;
   document.getElementById('module-ring').style.setProperty('--progress', progress);
   document.getElementById('week-xp').textContent = `+${xp} XP`;
+  // Maquette chantier (2026-11-14) — nouvelle carte "Progression" du résumé
+  // bas de page : mêmes valeurs déjà calculées ci-dessus, jamais un second
+  // calcul qui pourrait diverger de module-percent/week-xp.
+  const summaryProgressPercent = document.getElementById('dashboard-card-progress-percent');
+  if (summaryProgressPercent) summaryProgressPercent.textContent = `${progress}%`;
+  const summaryProgressXp = document.getElementById('dashboard-card-progress-xp');
+  if (summaryProgressXp) summaryProgressXp.textContent = `+${xp} XP`;
   const activeDays = countActiveDays(prototypeState.events);
   document.getElementById('active-days').textContent = `${activeDays} jour${activeDays > 1 ? 's' : ''}`;
   const marketVisitDays = countActiveDaysForView(prototypeState.events, 'markets');
@@ -3191,6 +3207,21 @@ function renderState() {
     document.getElementById('terminal-lead-summary').textContent = continueTarget.lesson.summary;
   } else {
     renderTerminalLeadComplete();
+  }
+  // Maquette chantier (2026-11-14) — carte "Prochaine leçon" du résumé bas
+  // de page : mirroir exact de ce que terminal-lead/lesson-primary-action
+  // affichent déjà juste au-dessus (branche "en cours" ou "curriculum
+  // complet" via renderTerminalLeadComplete ci-dessus), jamais une deuxième
+  // logique de calcul qui pourrait diverger de la source déjà affichée.
+  const summaryNextTitle = document.getElementById('dashboard-card-next-lesson-title');
+  const summaryNextModule = document.getElementById('dashboard-card-next-lesson-module');
+  const summaryNextGo = document.getElementById('dashboard-card-next-lesson-go');
+  const primaryActionEl = document.getElementById('lesson-primary-action');
+  if (summaryNextTitle) summaryNextTitle.textContent = document.getElementById('terminal-lead-title').textContent;
+  if (summaryNextModule) summaryNextModule.textContent = document.getElementById('terminal-lead-module').textContent;
+  if (summaryNextGo && primaryActionEl) {
+    summaryNextGo.dataset.view = primaryActionEl.dataset.view;
+    summaryNextGo.innerHTML = primaryActionEl.innerHTML;
   }
   renderTerminalThread(continueTarget);
   renderTerminalMeta(continueTarget);
@@ -4268,6 +4299,7 @@ bindNotifyButton('practice', 'practice-notify', 'practiceNotify', 'la Pratique a
 bindNotifyButton('experts', 'experts-notify', 'expertsNotify', 'DDA Experts');
 bindNotifyButton('live', 'live-notify', 'liveNotify', 'DDA Live');
 bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business');
+bindNotifyButton('produits-digitaux', 'produits-digitaux-notify', 'produitsDigitauxNotify', 'Produits Digitaux');
 
 /* DDA AI Academy chat — a thin UI bridge over the authenticated BFF client.
    The browser never receives a provider key and never invents a reply when the
