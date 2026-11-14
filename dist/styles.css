@@ -3279,12 +3279,37 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
 #dashboard .dashboard-week-ahead{margin:26px 0}
 #dashboard .dashboard-week-ahead .eyebrow{margin:0 0 12px}
 #dashboard .dashboard-week-rail .lab-photo-card-media{aspect-ratio:16/10}
+#dashboard .dashboard-quick-skills{margin:28px 0 24px;padding:24px;border:1px solid rgba(255,255,255,.1);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018))}
+#dashboard .quick-skills-intro{display:grid;gap:8px;max-width:760px;margin-bottom:18px}
+#dashboard .quick-skills-intro .eyebrow{margin:0}
+#dashboard .quick-skills-intro h2{max-width:22ch;margin:0;font-family:var(--dda-serif);font-size:clamp(1.45rem,3vw,2.25rem);line-height:1.08}
+#dashboard .quick-skills-intro p:last-child{max-width:68ch;margin:0;color:#aab8c8;font-size:14px;line-height:1.6}
+#dashboard .quick-skills-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#dashboard .quick-skill-card{display:flex;min-width:0;flex-direction:column;gap:10px;padding:17px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(4,14,28,.38);box-shadow:0 12px 30px rgba(0,0,0,.1)}
+#dashboard .quick-skill-card.quick-skill-gold{border-color:rgba(224,184,94,.35)}
+#dashboard .quick-skill-card.quick-skill-teal{border-color:rgba(84,197,232,.28)}
+#dashboard .quick-skill-card.quick-skill-violet{border-color:rgba(180,150,255,.28)}
+#dashboard .quick-skill-top,.quick-skill-footer{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#dashboard .quick-skill-pillar{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#e7c77e}
+#dashboard .quick-skill-teal .quick-skill-pillar{color:#76d6dc}
+#dashboard .quick-skill-violet .quick-skill-pillar{color:#c8b6ff}
+#dashboard .quick-skill-status{font-size:11px;color:#aab8c8;text-align:right}
+#dashboard .quick-skill-done .quick-skill-status{color:#9fe0b0}
+#dashboard .quick-skill-locked .quick-skill-status{color:#d7b878}
+#dashboard .quick-skill-card h3{max-width:24ch;margin:0;font-size:16px;line-height:1.25}
+#dashboard .quick-skill-card p{min-height:44px;margin:0;color:#b8c6d5;font-size:13px;line-height:1.55}
+#dashboard .quick-skill-footer{margin-top:auto;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)}
+#dashboard .quick-skill-footer>span{font-size:11px;color:#8498ad}
+#dashboard .quick-skill-footer .text-action{min-height:44px;padding:8px 0;color:#e7c77e;white-space:nowrap}
 @media(max-width:640px){
  #dashboard .dashboard-command-head{padding:18px 0 12px}
  #dashboard .terminal-lead{display:flex;flex-direction:column}
  #dashboard .terminal-lead-photo{min-height:190px;order:-1}
  #dashboard .terminal-lead-actions{display:grid;grid-template-columns:1fr}
  #dashboard .terminal-lead-go{width:100%;justify-content:center}
+ #dashboard .dashboard-quick-skills{padding:18px;margin-top:22px}
+ #dashboard .quick-skills-list{grid-template-columns:1fr}
+ #dashboard .quick-skill-card h3{max-width:30ch}
 }
 
 /* Academy learner experience: calmer lesson navigation, consistent focus and readable long-form study. */

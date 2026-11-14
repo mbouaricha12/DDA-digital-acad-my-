@@ -156,6 +156,36 @@ const LESSON_REGISTRY = Object.freeze([
   }
 ]);
 
+// Quick Skills Discovery — une couche d'orientation courte, jamais un second
+// curriculum. Chaque entrée pointe vers une leçon authored et expose une
+// capacité observable ; l'état affiché est dérivé du même progrès que Parcours.
+const QUICK_SKILLS_REGISTRY = Object.freeze([
+  Object.freeze({
+    id: 'quick-observe', pillar: 'Trading', lessonId: 'M0.1', viewId: 'lesson',
+    title: 'Observer avant de chercher un signal',
+    outcome: 'Décrire le rôle des acheteurs et des vendeurs dans un échange.',
+    minutes: 8, tone: 'blue'
+  }),
+  Object.freeze({
+    id: 'quick-zones', pillar: 'Trading', lessonId: 'M0.2', viewId: 'lesson-m02',
+    title: 'Repérer une zone de support ou résistance',
+    outcome: 'Identifier une aire d’observation sans transformer un niveau en certitude.',
+    minutes: 10, tone: 'gold'
+  }),
+  Object.freeze({
+    id: 'quick-brvm', pillar: 'BRVM', lessonId: 'MBRVM.1', viewId: 'lesson-mbrvm1',
+    title: 'Distinguer action et obligation à la BRVM',
+    outcome: 'Expliquer la différence entre une part de propriété et un prêt avec échéance.',
+    minutes: 12, tone: 'teal'
+  }),
+  Object.freeze({
+    id: 'quick-ai', pillar: 'IA', lessonId: 'LAB1', viewId: 'lesson-lab1',
+    title: 'Vérifier ce que l’IA produit',
+    outcome: 'Repérer une limite d’un résultat IA avant de l’utiliser dans un projet.',
+    minutes: 10, tone: 'violet'
+  })
+]);
+
 /* ==========================================================================
    VIDEO REGISTRY — bibliothèque vidéo DDA. Ajouter une vidéo = une entrée
    ici, rien d'autre : la Bibliothèque DDA (#resources) se construit à partir
@@ -1776,6 +1806,35 @@ function renderDashboardWeekAhead(continueTarget) {
   }).join('');
 }
 
+function quickSkillStatus(skill) {
+  const progress = DDALearning.getLessonProgress(prototypeState, skill.lessonId);
+  if (progress.quizComplete) return { key: 'done', label: 'Validée', action: 'Revoir' };
+  const registryEntry = LESSON_REGISTRY.find(entry => entry.id === skill.lessonId);
+  if (registryEntry?.prerequisite && !DDALearning.getLessonProgress(prototypeState, registryEntry.prerequisite).quizComplete) {
+    return { key: 'locked', label: 'Après la compétence précédente', action: 'Voir le parcours' };
+  }
+  if (progress.exerciseComplete || progress.lessonViewed) return { key: 'started', label: 'En cours', action: 'Continuer' };
+  return { key: 'ready', label: 'À commencer', action: 'Commencer' };
+}
+
+function renderQuickSkills() {
+  const container = document.getElementById('quick-skills-list');
+  if (!container) return;
+  container.innerHTML = QUICK_SKILLS_REGISTRY.map(skill => {
+    const status = quickSkillStatus(skill);
+    const target = status.key === 'locked' ? 'path' : skill.viewId;
+    return `<article class="quick-skill-card quick-skill-${skill.tone} quick-skill-${status.key}">
+      <div class="quick-skill-top"><span class="quick-skill-pillar">${escapeHtml(skill.pillar)}</span><span class="quick-skill-status">${escapeHtml(status.label)}</span></div>
+      <h3>${escapeHtml(skill.title)}</h3>
+      <p>${escapeHtml(skill.outcome)}</p>
+      <div class="quick-skill-footer"><span>${skill.minutes} min · objectif concret</span><button type="button" class="text-action" data-quick-skill-view="${target}">${escapeHtml(status.action)} <span>→</span></button></div>
+    </article>`;
+  }).join('');
+  container.querySelectorAll('[data-quick-skill-view]').forEach(button => {
+    button.addEventListener('click', () => showView(button.dataset.quickSkillView));
+  });
+}
+
 function renderDashboardProof(continueTarget, curriculumComplete) {
   const titleEl = document.getElementById('dashboard-proof-title');
   const metaEl = document.getElementById('dashboard-proof-meta');
@@ -2949,6 +3008,7 @@ function renderState() {
   renderTerminalMeta(continueTarget);
   renderDashboardProof(continueTarget, curriculumComplete);
   renderDashboardWeekAhead(continueTarget);
+  renderQuickSkills();
   renderDariusAnalysisTerminal();
   renderTerminalJournalNote();
   renderTerminalSkillmap(continueTarget);
