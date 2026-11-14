@@ -1015,6 +1015,11 @@ a.nav-item[hidden]{display:none}
 /* Premium: the one deliberate dark anchor on this screen — reuses the exact
    "Ouverture DDA" gradient Terminal already uses for its own Premium teaser,
    never a new dark surface invented for this tranche. */
+.plan-price{display:flex;align-items:baseline;gap:6px;margin:14px 0 0}
+.plan-price strong{font-size:26px;color:var(--gold-soft)}
+.plan-price span{font-size:13px;color:rgba(237,231,216,.6)}
+.premium-plan .primary-action{margin-top:18px}
+.premium-plan .secondary-action{margin-top:10px}
 .premium-plan{background:linear-gradient(150deg,var(--navy-900),var(--navy-950));color:#EDE7D8;border-color:var(--navy-900)}
 .premium-plan h2{color:var(--ivory)}
 .premium-plan .eyebrow.gold{color:var(--gold-soft)}
