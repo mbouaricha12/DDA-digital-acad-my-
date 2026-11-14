@@ -23,7 +23,7 @@ assert.match(app, /status\.key === 'locked' \? 'path' : skill\.viewId/);
 assert.match(app, /data-quick-skill-view="\$\{target\}"/);
 assert.match(app, /button\.dataset\.quickSkillView/);
 assert.doesNotMatch(app, /quick-skill-view="[^"]+"[^>]*data-view=/);
-assert.match(app, /renderQuickSkills\(\);/);
+assert.match(app, /renderQuickSkills\(complete\);/);
 assert.doesNotMatch(app, /Produits Digitaux.*data-view/si, 'no inactive digital-products route is presented');
 
 for (const view of ['lesson', 'lesson-m02', 'lesson-mbrvm1', 'lesson-lab1']) {
