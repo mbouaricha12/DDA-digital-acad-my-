@@ -18,7 +18,13 @@ assert.doesNotMatch(html, /href="#landing-future">Voir les principes de communau
 assert.doesNotMatch(html, /href="#landing-future">Lire le cadre d.usage IA/, 'must not promise a dedicated destination that does not exist');
 assert.match(html, />Communauté DDA<\/h3>/, 'landing must expose the Community domain');
 assert.match(html, />DDA AI<\/h3>/, 'landing must expose the AI assistance domain');
-assert.doesNotMatch(html, /bientôt/i, 'landing must not retain unfinished “bientôt” labels');
+// Public polish mandate (2026-11-14) reverses this: "bientôt disponible" is
+// now the deliberately-chosen, warmer phrasing for not-yet-active spaces
+// (replacing the colder "en préparation" labels), so the old blanket ban on
+// "bientôt" is gone. What still matters — a "bientôt" label never promises a
+// destination that doesn't exist — stays covered by the three assertions
+// above (future-label-tag is non-interactive, no dangling #landing-future
+// links).
 assert.match(css, /#landing \.future-label,/, 'landing future labels must have a dedicated visual override');
 assert.match(css, /rgba\(10,20,36,\.96\)/, 'future labels must use a Deep Navy surface');
 assert.match(css, /#landing \.future-label span,/, 'future-label arrows must use the gold accent');

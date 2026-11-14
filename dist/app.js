@@ -811,7 +811,7 @@ window.addEventListener('resize', () => {
 
 const titles = {
   landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon profil', path: 'Mon parcours',
-  progress: 'Progression', journal: 'Journal', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub',
+  progress: 'Mes progrès', journal: 'Journal', resources: 'Ressources', markets: 'Marchés', brokers: 'Broker Hub',
   membership: 'DDA Premium', 'premium-track': 'Premium Track · P2', 'premium-lab': 'Premium Lab · Risk Plan', 'premium-assessment': 'Premium Assessment · Controlled Decision', support: 'Aide & support', profile: 'Mon profil', community: 'Communauté',
   practice: 'Pratique avancée', intelligence: 'Intelligence DDA', lab: 'DDA Lab',
   // Lesson screen titles are declared once, in LESSON_REGISTRY — never a
@@ -1618,6 +1618,7 @@ function renderMarketIntelligence() {
     indices.innerHTML = marketDemo().indices.map((item, i) => `
       <article class="index-card">
         <div class="index-card-head"><strong>${item.label}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Mode pédagogique</span></div>
+        ${item.exampleValue ? `<div class="index-card-example"><strong class="index-card-example-value">${item.exampleValue}</strong><span class="index-card-example-change${String(item.exampleChange).trim().startsWith('-') ? ' is-down' : ' is-up'}">${item.exampleChange}</span><small class="index-card-example-tag">Exemple pédagogique — pas une cotation réelle</small></div>` : ''}
         ${candlestickSpark(i)}
         <p>${item.description}</p>
       </article>
@@ -1735,6 +1736,46 @@ function renderPracticeProof() {
 // Dashboard orientation layer: expose one recent, auditable proof without
 // creating a second progress engine. Practice state and the existing event log
 // remain the only sources; a view opening is never presented as proof.
+// Real photos only, reused from the existing pool (same assets as the Lab
+// photo rail) — picked by module prefix so a lesson's card matches its real
+// module, never a generic stock image unrelated to the content.
+const DASHBOARD_WEEK_PHOTO_BY_MODULE = Object.freeze({
+  M0: 'images/photos/m0-foundations-observe.jpg',
+  M1: 'images/photos/m1-terminal-analysis.jpg',
+  P2: 'images/photos/p2-discipline-review.jpg',
+  MBRVM: 'images/photos/brvm-market-fruits.jpg'
+});
+
+// Founder mockup's "À faire cette semaine" row — the real next 1-2 authored
+// lessons after the current one (authoredLessons() order, same source the
+// Fil de maîtrise and nav shortcuts already use), never a fabricated weekly
+// plan. Hidden entirely once the curriculum is complete (nothing left to do).
+function renderDashboardWeekAhead(continueTarget) {
+  const section = document.getElementById('dashboard-week-ahead');
+  const rail = document.getElementById('dashboard-week-rail');
+  if (!section || !rail) return;
+  const all = authoredLessons();
+  const currentIndex = continueTarget ? all.findIndex(entry => entry.lesson.id === continueTarget.lesson.id) : -1;
+  const upcoming = currentIndex === -1 ? [] : all.slice(currentIndex + 1, currentIndex + 3);
+  if (!upcoming.length) {
+    section.hidden = true;
+    rail.innerHTML = '';
+    return;
+  }
+  section.hidden = false;
+  rail.innerHTML = upcoming.map(({ module, lesson }) => {
+    const moduleKey = lesson.id.split('.')[0];
+    const photo = DASHBOARD_WEEK_PHOTO_BY_MODULE[moduleKey] || DASHBOARD_WEEK_PHOTO_BY_MODULE.M0;
+    const viewId = LESSON_VIEW_ID[lesson.id] || 'lesson';
+    return `
+      <button type="button" class="lab-photo-card" data-view="${viewId}">
+        <div class="lab-photo-card-media"><img class="photo-fill" src="${photo}" alt="" loading="lazy"><div class="photo-scrim"></div></div>
+        <strong>${escapeHtml(learnerLessonTitle(lesson))}</strong>
+        <small>${escapeHtml(module.title)}</small>
+      </button>`;
+  }).join('');
+}
+
 function renderDashboardProof(continueTarget, curriculumComplete) {
   const titleEl = document.getElementById('dashboard-proof-title');
   const metaEl = document.getElementById('dashboard-proof-meta');
@@ -2907,6 +2948,7 @@ function renderState() {
   renderTerminalThread(continueTarget);
   renderTerminalMeta(continueTarget);
   renderDashboardProof(continueTarget, curriculumComplete);
+  renderDashboardWeekAhead(continueTarget);
   renderDariusAnalysisTerminal();
   renderTerminalJournalNote();
   renderTerminalSkillmap(continueTarget);
@@ -3684,6 +3726,39 @@ document.getElementById('premium-waitlist-join')?.addEventListener('click', () =
   prototypeState = DDA.track(prototypeState, 'premium_waitlist_joined', { plan: prototypeState.membership?.plan || 'visitor' });
   document.getElementById('premium-waitlist-form').hidden = true;
   document.getElementById('premium-waitlist-confirmation').hidden = false;
+});
+
+// Commercial activation mandate (2026-11-14): the real "S'abonner" entry
+// point. Asks the BFF for a real Chariow Checkout session and redirects
+// there on success — never a simulated transaction. Today (no
+// CHARIOW_API_KEY/CHARIOW_PREMIUM_PRODUCT_IDS configured in production) the
+// BFF honestly answers "not configured", and this falls back to the exact
+// same local waitlist as before — one funnel, not two.
+function scrollToPremiumWaitlist() {
+  requestAnimationFrame(() => revealLessonAnchor('premium-waitlist-panel')?.scrollIntoView({ behavior: prototypeState.preferences?.lowData ? 'auto' : 'smooth', block: 'start' }));
+}
+document.getElementById('premium-subscribe-cta')?.addEventListener('click', async () => {
+  const button = document.getElementById('premium-subscribe-cta');
+  if (!window.DDABFF?.enabled()) { showView('membership'); scrollToPremiumWaitlist(); return; }
+  const originalLabel = button.innerHTML;
+  button.disabled = true;
+  button.innerHTML = 'Préparation du paiement…';
+  try {
+    const result = await window.DDABFF.startPremiumCheckout();
+    if (result.checkoutUrl) { window.location.href = result.checkoutUrl; return; }
+    showToast(result.error === 'rate_limited'
+      ? 'Trop de tentatives — réessaie dans un instant.'
+      : 'Le paiement en ligne n’est pas encore activé. Ton intérêt est enregistré ci-dessous.');
+    showView('membership');
+    scrollToPremiumWaitlist();
+  } catch {
+    showToast('Le paiement en ligne n’est pas encore disponible. Ton intérêt est enregistré ci-dessous.');
+    showView('membership');
+    scrollToPremiumWaitlist();
+  } finally {
+    button.disabled = false;
+    button.innerHTML = originalLabel;
+  }
 });
 
 document.addEventListener('keydown', event => {
@@ -4617,7 +4692,7 @@ function renderLabCatalog() {
     const label = status === 'locked' && entry.permission === 'premium_track' && canUnlock('premium_track') === false
       ? 'DDA Premium'
       : LAB_STATUS_LABEL[status];
-    [`lab-${entry.id}-status`, `lab-progress-${entry.id}-status`].forEach(id => {
+    [`lab-${entry.id}-status`, `lab-progress-${entry.id}-status`, `lab-photo-${entry.id}-status`].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.textContent = label;
     });

@@ -226,6 +226,23 @@
     return result.body;
   }
 
+  // Commercial activation mandate (2026-11-14): asks the BFF for a real
+  // Chariow Checkout session. Never resolves a fake checkout_url itself —
+  // either the server hands back a real one from the provider, or this
+  // reports exactly why it couldn't (not configured, rate limited, or the
+  // provider failed), so the caller can fall back to the honest local
+  // waitlist instead of pretending a payment flow exists.
+  async function startPremiumCheckout() {
+    const result = await request('/v1/billing/checkout', { method: 'POST' });
+    if (!result.enabled || result.response.status === 401) return { available: false, reason: 'unavailable' };
+    if (result.response.status === 503) return { available: false, reason: 'not_configured' };
+    if (result.response.status === 429) return { available: true, error: 'rate_limited' };
+    if (!result.response.ok) return { available: true, error: result.body?.code || 'checkout_failed' };
+    const checkoutUrl = typeof result.body?.checkout_url === 'string' ? result.body.checkout_url : null;
+    if (!checkoutUrl) return { available: true, error: 'checkout_failed' };
+    return { available: true, checkoutUrl };
+  }
+
   async function logout() {
     const result = await request('/v1/auth/logout', { method: 'POST' });
     if (!result.enabled || result.response.status === 401) return null;
@@ -283,7 +300,7 @@
   window.DDABFF = Object.freeze({
     enabled, register, verifyEmail, exchangeSignupCode, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
     oauthGoogleStartUrl, exchangeOAuthCode,
-    getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, fetchPremiumContent, askAI,
+    getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, fetchPremiumContent, askAI, startPremiumCheckout,
     getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }
   });

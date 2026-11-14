@@ -2,9 +2,15 @@
 (function () {
   'use strict';
   const demo = Object.freeze({
+    // exampleValue/exampleChange are illustrative numbers only — never a real
+    // BRVM quote. They exist purely so the card can show the kind of number
+    // a future, validated source would populate (see
+    // docs/DDA_BRVM_INTEGRATION_ARCHITECTURE_2026-11-13.md); the UI always
+    // pairs them with an explicit "Exemple pédagogique" label (app.js,
+    // renderMarketIntelligence) so they are never mistaken for a live quote.
     indices: Object.freeze([
-      Object.freeze({ label: 'BRVM Composite', description: 'Indice large de la cote BRVM.' }),
-      Object.freeze({ label: 'BRVM 30', description: 'Indice des valeurs les plus liquides de la cote.' })
+      Object.freeze({ label: 'BRVM Composite', description: 'Indice large de la cote BRVM.', exampleValue: '256,84', exampleChange: '+0,68 %' }),
+      Object.freeze({ label: 'BRVM 30', description: 'Indice des valeurs les plus liquides de la cote.', exampleValue: '128,67', exampleChange: '+0,72 %' })
     ]),
     calendar: Object.freeze([]),
     sources: Object.freeze([

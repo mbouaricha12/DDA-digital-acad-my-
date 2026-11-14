@@ -8,6 +8,7 @@ const { checkAuthRateLimit } = require('./rate-limiter');
 const { VALID_ROLES: VALID_ADMIN_ROLES, CONTROL_PLANE_ROLES } = require('./admin-roles-store');
 const { validateAskRequest } = require('./ai-assistant');
 const { PREMIUM_CONTENT, FREE_PREVIEW_IDS } = require('./premium-content');
+const { chariowConfigFromEnv, createChariowCheckout } = require('./chariow');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
@@ -374,7 +375,7 @@ function parsePageParams(url, { maxPerPage = 200 } = {}) {
   return { page, perPage };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, accessAudit = null, rateLimiter = null, progressStore = null, aiAssistant = null, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, accessAudit = null, rateLimiter = null, progressStore = null, aiAssistant = null, chariowConfig = chariowConfigFromEnv(), clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   businessStore = businessStore || {
     exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
@@ -735,6 +736,45 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const snapshot = await currentEntitlements(current.user.user_id);
         if (!hasActivePremium(snapshot, clock())) return sendError(res, 403, 'premium_required', 'An active Premium entitlement is required.', requestId);
         return json(res, 200, { resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true });
+      }
+      // Commercial activation mandate (2026-11-14): the one route that turns
+      // "présenter Premium" into "payer réellement" — creates a real Chariow
+      // Checkout session server-side and hands the frontend a real
+      // checkout_url to redirect to. Never a simulated transaction: if
+      // Chariow isn't configured (no API key or no allowlisted product —
+      // both true in production today), this honestly fails closed with
+      // 503, never a fake success. dda_user_id in custom_metadata comes
+      // ONLY from the authenticated session, never from the request body —
+      // that metadata field is exactly what the Pulse webhook later trusts
+      // to grant premium_track, so a client-supplied value here would be a
+      // privilege-escalation path straight into mapChariowPulse().
+      if (method === 'POST' && path === '/v1/billing/checkout') {
+        const current = await withUser(req, res, requestId); if (!current) return;
+        if (!validateCsrf(req, config, current.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (!chariowConfig.apiKey || !chariowConfig.premiumProductIds.length) {
+          return sendError(res, 503, 'billing_not_configured', 'Premium checkout is not available yet.', requestId);
+        }
+        if (rateLimiter && !await rateLimiter.allow(`billing_checkout:user:${current.user.user_id}`, { windowSeconds: 3600, limit: 5 })) {
+          return sendError(res, 429, 'rate_limited', 'Too many checkout attempts. Please try again later.', requestId);
+        }
+        const [firstName, ...lastNameParts] = String(current.user.display_name || '').trim().split(/\s+/);
+        try {
+          const checkout = await createChariowCheckout({
+            config: chariowConfig,
+            input: {
+              productId: chariowConfig.premiumProductIds[0],
+              email: current.user.email,
+              firstName: firstName || 'Apprenant',
+              lastName: lastNameParts.join(' ') || 'DDA',
+              customMetadata: { dda_user_id: current.user.user_id }
+            }
+          });
+          if (!checkout.checkoutUrl) return sendError(res, 502, 'checkout_unavailable', 'The payment provider did not return a checkout link.', requestId);
+          return json(res, 200, { checkout_url: checkout.checkoutUrl });
+        } catch (error) {
+          logger('chariow_checkout_failed', { requestId, status: error.status || 500 });
+          return sendError(res, 502, 'checkout_unavailable', 'The payment provider could not be reached. Please try again later.', requestId);
+        }
       }
       // Real Premium lesson/lab content (mandate §6 audit, Lot 2): the only
       // place the text, exercises and quiz answers of P2.2/LAB4/LABCAP live

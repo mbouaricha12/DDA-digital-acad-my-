@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.ytimg.com; font-src 'self'; connect-src 'self' https:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="theme-color" content="#081426">
   <title>DDA — Apprendre les marchés, construire des compétences</title>
   <meta name="description" content="Darius Digital Academy transforme l'apprentissage des marchés financiers en un vrai parcours : comprendre, pratiquer, prouver ta progression — pas une liste de vidéos à consommer.">
@@ -89,7 +89,7 @@
       if (location.search || location.hash !== safeHash) history.replaceState(history.state, '', location.pathname + safeHash);
     })();
   </script>
-  <link rel="preload" as="image" href="images/photos/hero-market-woman.jpg" fetchpriority="high">
+  <link rel="preload" as="image" href="images/photos/landing-hero-brand-banner.jpg" fetchpriority="high">
   <link rel="stylesheet" href="styles.min.css">
   <link rel="stylesheet" href="alpha-polish.min.css">
 </head>
@@ -141,25 +141,25 @@
           <details class="public-menu"><summary aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="public-menu-panel">Menu <span>＋</span></summary><div class="public-menu-panel" id="public-menu-panel"><a href="#landing-experience">Apprendre</a><a href="#landing-product">Parcours</a><a href="#landing-free">Formations</a><a href="#landing-faq">Ressources</a><a href="#landing-markets">Market Intelligence</a><a href="community/">Communauté</a><button type="button" class="public-menu-cta" data-view="access">Commencer gratuitement <span>→</span></button></div></details>
         </header>
 
-        <div class="dda-ecosystem-strip" aria-label="Écosystème DDA — statut réel de chaque espace">
+        <!-- Navigation clarity pass (2026-11-14): this strip used to repeat
+             Communauté/Intelligence/Experts/Live/Business — the exact same
+             "coming soon" spaces already presented once, fully, in the
+             #landing-future section below. Trimmed to the 3 chips that are
+             real funnel steps (Lab/Marchés are usable today, Premium is the
+             next discovery step) so a first-time visitor sees one clear set
+             of options at the top, not the same "en préparation" labels
+             twice on one page. Nothing is removed: every dropped chip's
+             destination still exists and is still linked from
+             #landing-future and the public footer. -->
+        <div class="dda-ecosystem-strip" aria-label="Commence ici">
           <div class="dda-ecosystem-track">
             <button type="button" class="dda-ecosystem-chip is-active" data-view="lab"><svg class="icon"><use href="#icon-award"/></svg><span>DDA Lab</span><em>Actif</em></button>
             <button type="button" class="dda-ecosystem-chip is-active" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg><span>Marchés &amp; BRVM</span><em>Actif</em></button>
             <button type="button" class="dda-ecosystem-chip" data-view="membership"><svg class="icon"><use href="#icon-spark"/></svg><span>DDA Premium</span><em>Aperçu pédagogique</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="community"><svg class="icon"><use href="#icon-users"/></svg><span>Communauté</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="intelligence"><svg class="icon"><use href="#icon-compass"/></svg><span>Intelligence DDA</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="experts"><svg class="icon"><use href="#icon-award"/></svg><span>DDA Experts</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="live"><svg class="icon"><use href="#icon-play"/></svg><span>DDA Live</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="business"><svg class="icon"><use href="#icon-buyer"/></svg><span>DDA Business</span><em>En préparation</em></button>
             <!-- Duplicated once so the CSS marquee (translateX(-50%)) loops seamlessly. -->
             <button type="button" class="dda-ecosystem-chip is-active" data-view="lab" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-award"/></svg><span>DDA Lab</span><em>Actif</em></button>
             <button type="button" class="dda-ecosystem-chip is-active" data-view="markets" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-chart"/></svg><span>Marchés &amp; BRVM</span><em>Actif</em></button>
             <button type="button" class="dda-ecosystem-chip" data-view="membership" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-spark"/></svg><span>DDA Premium</span><em>Aperçu pédagogique</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="community" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-users"/></svg><span>Communauté</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="intelligence" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-compass"/></svg><span>Intelligence DDA</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="experts" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-award"/></svg><span>DDA Experts</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="live" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-play"/></svg><span>DDA Live</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="business" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-buyer"/></svg><span>DDA Business</span><em>En préparation</em></button>
           </div>
         </div>
 
@@ -184,13 +184,13 @@
               <a class="text-action landing-secondary" href="commencer/">Découvrir le parcours Free <span>→</span></a>
             </div>
             <div class="landing-start-guide" aria-label="Ton parcours sur DDA">
-              <p><strong>Tu découvres DDA ?</strong> Voici le chemin le plus simple :</p>
+              <p><strong>Découvre ton parcours d’apprentissage.</strong> Tu débutes dans les marchés financiers ? DDA te guide étape par étape pour comprendre les bases, pratiquer et développer tes compétences.</p>
               <ol>
-                <li><span>01</span><b>Commence par Free</b><small>Les bases, sans paiement.</small></li>
-                <li><span>02</span><b>Pratique</b><small>Exercices, quiz et feedback.</small></li>
-                <li><span>03</span><b>Observe tes progrès</b><small>Journal et preuves sur cet appareil.</small></li>
+                <li><span>01</span><b>Apprends les fondamentaux</b><small>Découvre les notions essentielles des marchés financiers à ton rythme.</small></li>
+                <li><span>02</span><b>Mets tes connaissances en pratique</b><small>Exercices, quiz et feedback pédagogique pour mieux comprendre chaque notion.</small></li>
+                <li><span>03</span><b>Construis ta progression</b><small>Suis ton parcours et identifie les compétences que tu développes.</small></li>
               </ol>
-              <small class="landing-start-note">Les espaces marqués « En préparation » ne sont pas encore ouverts. Premium est présenté ici comme une démonstration pédagogique : aucun paiement ni abonnement n’est actif.</small>
+              <small class="landing-start-note">Premium arrive bientôt, avec un accompagnement plus approfondi. En attendant, commence gratuitement, apprends à ton rythme et avance étape par étape.</small>
             </div>
             <ul class="trust-list landing-trust">
               <li><svg class="icon"><use href="#icon-target"/></svg><span><strong>4 outils</strong> de lecture technique</span></li>
@@ -200,12 +200,12 @@
           </div>
 
           <div class="dda-aperture landing-aperture" role="img" aria-label="Aperçu visuel DDA : Terminal d’analyse sur ordinateur et Journal de bord sur smartphone, avec données pédagogiques locales">
-            <img class="photo-fill" src="images/photos/hero-market-woman.jpg" alt="" loading="eager" fetchpriority="high">
+            <img class="photo-fill" src="images/photos/landing-hero-brand-banner.jpg" alt="" loading="eager" fetchpriority="high">
             <div class="photo-scrim"></div>
             <div class="aperture-grid" aria-hidden="true"></div>
             <div class="landing-aperture-top">
               <span class="aperture-kicker">THE DDA METHOD</span>
-              <span class="landing-edition">PRIVATE ALPHA · 2026</span>
+              <span class="landing-edition">DARIUS DIGITAL ACADEMY · 2026</span>
             </div>
             <div class="landing-device-stage" aria-hidden="true">
               <div class="landing-device-laptop">
@@ -254,6 +254,12 @@
           </div>
         </div>
 
+        <!-- Vidéo de présentation (CDCP-OS addendum, issue #240). Reste
+             `hidden` et vide tant qu'aucun ID YouTube réel n'est configuré
+             dans public.js (LANDING_PRESENTATION_VIDEO) — jamais un
+             placeholder visible ou une vidéo fictive. -->
+        <section class="landing-presentation-video" id="landing-presentation-video" aria-label="Vidéo de présentation DDA" hidden></section>
+
         <section class="landing-trust-strip" aria-label="Pourquoi commencer avec DDA"><article><span class="trust-strip-icon">⌁</span><div><strong>Apprendre avant d’agir</strong><small>Une méthode calme, centrée sur la compréhension.</small></div></article><article><span class="trust-strip-icon">◈</span><div><strong>Progression conservée</strong><small>Les exercices validés construisent une trace réelle.</small></div></article><article><span class="trust-strip-icon">◎</span><div><strong>Marchés contextualisés</strong><small>Des séries pédagogiques pour observer de vraies dynamiques, pas des cotations en direct.</small></div></article><article><span class="trust-strip-icon">↗</span><div><strong>Support humain</strong><small>Email, Telegram et WhatsApp officiels quand tu bloques.</small></div></article></section>
 
         <section class="landing-market-strip" id="landing-markets" aria-label="Aperçu des univers étudiés"><div class="market-strip-heading"><span>UNIVERS ÉTUDIÉS</span><a href="#landing-ecosystem">Voir les domaines <b>→</b></a></div><div class="market-strip-grid"><article><span>BRVM COMPOSITE</span><strong>Lecture de structure</strong><small>INDICE · SYNTHÉTIQUE</small><svg class="market-strip-chart" viewBox="0 0 58 20" preserveAspectRatio="none" aria-hidden="true"><path d="M2 14 12 16 20 9 29 12 38 5 47 9 56 3"/></svg></article><article><span>EUR / USD</span><strong>Zones &amp; réactions</strong><small>FOREX · PÉDAGOGIQUE</small><svg class="market-strip-chart" viewBox="0 0 58 20" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8 12 11 20 6 29 13 38 10 47 15 56 7"/></svg></article><article><span>OR / XAUUSD</span><strong>Risque &amp; scénario</strong><small>MATIÈRE · SYNTHÉTIQUE</small><svg class="market-strip-chart" viewBox="0 0 58 20" preserveAspectRatio="none" aria-hidden="true"><path d="M2 12 12 7 20 14 29 9 38 4 47 10 56 6"/></svg></article><article><span>BITCOIN</span><strong>Volatilité &amp; discipline</strong><small>CRYPTO · À VENIR</small><svg class="market-strip-chart is-future" viewBox="0 0 58 20" preserveAspectRatio="none" aria-hidden="true"><path d="M2 16 12 5 20 13 29 7 38 15 47 4 56 11"/></svg></article><article><span>INDICES</span><strong>Contexte macro</strong><small>ÉCONOMIE · À VENIR</small><svg class="market-strip-chart is-future" viewBox="0 0 58 20" preserveAspectRatio="none" aria-hidden="true"><path d="M2 10 12 14 20 6 29 11 38 3 47 8 56 12"/></svg></article></div></section>
@@ -290,7 +296,7 @@
           </div>
           <div class="product-composition">
             <div class="product-window" aria-label="Aperçu visuel du Terminal DDA">
-              <div class="product-window-bar"><span class="window-brand">DDA / TODAY</span><span class="window-state"><i></i> Private Alpha</span></div>
+              <div class="product-window-bar"><span class="window-brand">DDA / TODAY</span><span class="window-state"><i></i> En direct</span></div>
               <div class="product-window-body">
                 <div class="product-window-lead"><span class="eyebrow gold">Prochaine action</span><h3>Comprendre le rôle des zones.</h3><p>Identifier les zones de support et de résistance</p>
                   <div class="product-window-chart" aria-hidden="true">
@@ -343,10 +349,10 @@
         </section>
 
         <section class="landing-ai" id="landing-ai" aria-labelledby="landing-ai-title">
-          <div class="landing-section-head"><p class="eyebrow gold">Intelligence DDA</p><h2 id="landing-ai-title">Une aide pour mieux comprendre les marchés.</h2><p>Un assistant pédagogique qui clarifie une notion, répond à une question et propose la prochaine étape du parcours. <strong>Principe prévu : aucun assistant conversationnel n’est encore actif aujourd’hui.</strong></p></div>
+          <div class="landing-section-head"><p class="eyebrow gold">Intelligence DDA</p><h2 id="landing-ai-title">Une aide pour mieux comprendre les marchés.</h2><p>DDA AI est un assistant pédagogique en cours de déploiement, pensé pour clarifier une notion, répondre à une question et proposer la prochaine étape du parcours.</p></div>
           <div class="ai-preview-composition">
-            <div class="ai-preview-window" aria-label="Exemple illustratif d’une conversation avec l’assistant pédagogique DDA, prévu mais pas encore actif">
-              <div class="ai-preview-bar"><span class="window-brand">DDA / INTELLIGENCE</span><span class="window-state window-state-inactive"><i></i> Aperçu — pas encore actif</span></div>
+            <div class="ai-preview-window" aria-label="Exemple illustratif d’une conversation avec l’assistant pédagogique DDA AI, bientôt disponible">
+              <div class="ai-preview-bar"><span class="window-brand">DDA / INTELLIGENCE</span><span class="window-state window-state-inactive"><i></i> Bientôt disponible</span></div>
               <div class="ai-preview-body">
                 <div class="ai-bubble ai-bubble-user"><span>Apprenant</span><p>Pourquoi le prix rebondit-il souvent sur une zone de support ?</p></div>
                 <div class="ai-bubble ai-bubble-ai"><span>DDA AI</span><p>Parce que plusieurs acteurs ont déjà réagi à ce niveau par le passé — observe comment la zone s’est comportée lors des deux derniers passages avant de formuler ton hypothèse.</p></div>
@@ -366,7 +372,7 @@
           <div class="landing-section-head"><p class="eyebrow gold">DDA Free</p><h2 id="landing-free-title">Une vraie base pour apprendre les marchés, à ton rythme.</h2><p>M0 comprend 3 fondations. M1 ajoute 3 leçons supplémentaires — avec leçon, exercice, quiz et preuve de progression. Aucune carte bancaire requise pour commencer.</p></div>
           <div class="landing-free-grid value-rail"><article><span class="free-number">01</span><h3>Fondamentaux</h3><p>Marchés, acteurs, prix, ordres et premières lectures.</p></article><article><span class="free-number">02</span><h3>Analyse &amp; risque</h3><p>Observer une structure, formuler une hypothèse et reconnaître ses limites.</p></article><article><span class="free-number">03</span><h3>Pratique guidée</h3><p>Exercices, quiz, feedback et retry — pas seulement du contenu à consommer.</p></article><article><span class="free-number">04</span><h3>Progression réelle</h3><p>Journal, preuves validées et aperçu de Market Intelligence pédagogique.</p></article></div>
           <button class="text-action landing-inline-cta" type="button" data-view="access" data-analytics="landing_cta_free" data-funnel-position="free">Commencer gratuitement <span>→</span></button>
-          <div class="landing-plans plan-rail" aria-label="Accès Free et Premium"><article class="landing-plan-card"><p class="eyebrow">Aujourd'hui</p><h3>DDA Free</h3><p class="plan-tagline">Démarrer sérieusement, sans rien débourser.</p><ul><li>Fondamentaux : marchés, acteurs, prix, ordres, premières lectures</li><li>Analyse &amp; risque : observer une structure, formuler une hypothèse</li><li>Pratique guidée : exercices, quiz, feedback, retry</li><li>Progression réelle : Journal, preuves validées, aperçu Market Intelligence</li></ul></article><article class="landing-plan-card landing-plan-card-gold"><p class="eyebrow gold">Démonstration pédagogique</p><h3>DDA Premium</h3><p class="plan-tagline">Des briques déjà construites et accessibles en démonstration — aucun paiement actif.</p><ul><li>Leçons Premium P2 : Le risque avant l’entrée et L’anatomie d’un trade contrôlé</li><li>Risk Plan Lab : validation de scénario, conditions de non-trade</li><li>Assessment Controlled Decision avec preuve de compétence</li><li>Revue hebdomadaire, ressources avancées, pont vers le Journal</li></ul></article></div>
+          <div class="landing-plans plan-rail" aria-label="Accès Free et Premium"><article class="landing-plan-card"><p class="eyebrow">Aujourd'hui</p><h3>DDA Free</h3><p class="plan-tagline">Démarrer sérieusement, sans rien débourser.</p><ul><li>Fondamentaux : marchés, acteurs, prix, ordres, premières lectures</li><li>Analyse &amp; risque : observer une structure, formuler une hypothèse</li><li>Pratique guidée : exercices, quiz, feedback, retry</li><li>Progression réelle : Journal, preuves validées, aperçu Market Intelligence</li></ul></article><article class="landing-plan-card landing-plan-card-gold"><p class="eyebrow gold">Bientôt disponible</p><h3>DDA Premium</h3><p class="plan-tagline">Pour approfondir ta pratique et accélérer ta progression — 12 000 FCFA par mois au lancement, aucun paiement actif pour l’instant.</p><ul><li>Leçons Premium P2 : Le risque avant l’entrée et L’anatomie d’un trade contrôlé</li><li>Risk Plan Lab : validation de scénario, conditions de non-trade</li><li>Assessment Controlled Decision avec preuve de compétence</li><li>Revue hebdomadaire, ressources avancées, pont vers le Journal</li></ul></article></div>
         </section>
 
         <section class="landing-faq" id="landing-faq" aria-labelledby="landing-faq-title">
@@ -393,9 +399,9 @@
                 <div class="landing-market-cards">
                   <button type="button" class="landing-market-card" data-view="markets" aria-label="Ouvrir l’aperçu pédagogique BRVM Composite"><span class="landing-market-card-head"><strong>BRVM Composite</strong><small>INDICE</small></span><svg class="landing-market-sparkline spark-brvm" viewBox="0 0 128 40" aria-hidden="true"><path d="M2 29 18 24 31 27 45 15 59 20 73 11 88 18 102 8 126 12"/></svg><span class="landing-market-card-foot"><small>Série locale · synthétique</small><b aria-hidden="true">↗</b></span></button>
                   <button type="button" class="landing-market-card" data-view="markets" aria-label="Ouvrir l’aperçu pédagogique Forex EUR/USD"><span class="landing-market-card-head"><strong>Forex</strong><small>EUR/USD · PÉDAGO</small></span><svg class="landing-market-sparkline spark-forex" viewBox="0 0 128 40" aria-hidden="true"><path d="M2 15 17 19 31 11 46 23 61 18 76 26 91 14 106 20 126 10"/></svg><span class="landing-market-card-foot"><small>Exemple pédagogique</small><b aria-hidden="true">↗</b></span></button>
-                  <button type="button" class="landing-market-card" data-view="markets" aria-label="Ouvrir l’aperçu éditorial des actions"><span class="landing-market-card-head"><strong>Actions</strong><small>À VENIR</small></span><svg class="landing-market-sparkline spark-actions" viewBox="0 0 128 40" aria-hidden="true"><path d="M2 26 17 13 32 21 47 18 62 27 77 14 92 20 107 11 126 16"/></svg><span class="landing-market-card-foot"><small>Domaine en préparation</small><b aria-hidden="true">↗</b></span></button>
+                  <button type="button" class="landing-market-card" data-view="markets" aria-label="Ouvrir l’aperçu éditorial des actions"><span class="landing-market-card-head"><strong>Actions</strong><small>À VENIR</small></span><svg class="landing-market-sparkline spark-actions" viewBox="0 0 128 40" aria-hidden="true"><path d="M2 26 17 13 32 21 47 18 62 27 77 14 92 20 107 11 126 16"/></svg><span class="landing-market-card-foot"><small>Bientôt disponible</small><b aria-hidden="true">↗</b></span></button>
                   <button type="button" class="landing-market-card" data-view="markets" aria-label="Ouvrir l’aperçu pédagogique des indices BRVM 30"><span class="landing-market-card-head"><strong>Indices</strong><small>BRVM 30</small></span><svg class="landing-market-sparkline spark-indices" viewBox="0 0 128 40" aria-hidden="true"><path d="M2 21 17 25 32 17 47 20 62 12 77 18 92 9 107 15 126 7"/></svg><span class="landing-market-card-foot"><small>Série locale · synthétique</small><b aria-hidden="true">↗</b></span></button>
-                  <button type="button" class="landing-market-card" data-view="markets" aria-label="Ouvrir l’aperçu éditorial des cryptoactifs"><span class="landing-market-card-head"><strong>Crypto</strong><small>À VENIR</small></span><svg class="landing-market-sparkline spark-crypto" viewBox="0 0 128 40" aria-hidden="true"><path d="M2 30 17 9 32 28 47 14 62 23 77 8 92 26 107 12 126 18"/></svg><span class="landing-market-card-foot"><small>Domaine en préparation</small><b aria-hidden="true">↗</b></span></button>
+                  <button type="button" class="landing-market-card" data-view="markets" aria-label="Ouvrir l’aperçu éditorial des cryptoactifs"><span class="landing-market-card-head"><strong>Crypto</strong><small>À VENIR</small></span><svg class="landing-market-sparkline spark-crypto" viewBox="0 0 128 40" aria-hidden="true"><path d="M2 30 17 9 32 28 47 14 62 23 77 8 92 26 107 12 126 18"/></svg><span class="landing-market-card-foot"><small>Bientôt disponible</small><b aria-hidden="true">↗</b></span></button>
                 </div>
                 <p class="landing-market-disclosure">Les cartes ouvrent l’aperçu Market Intelligence aux apprenants; les visiteurs sont orientés vers l’accès DDA. Les tracés ne représentent ni prix, ni performance, ni signal.</p>
               </article>

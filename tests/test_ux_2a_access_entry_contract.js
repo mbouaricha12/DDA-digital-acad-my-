@@ -24,7 +24,12 @@ assert.match(academy, /Je comprends que ma progression est stockée uniquement s
 assert.match(academy, /id="onboarding-form-note"/, 'onboarding explains why calibration fields are requested');
 assert.match(academy, /aria-describedby="onboarding-form-note onboarding-error"/, 'onboarding fields expose accessible context and errors');
 assert.match(academy, /id="progress-next-action"/, 'progression exposes a dedicated next-action control');
-assert.match(academy, /DDA Premium · démonstration pédagogique/, 'membership labels Premium as a local preview');
+// Commercial preparation mandate (2026-11-14): the founder-approved price
+// now shows on the Premium card, and the old "démonstration pédagogique"
+// technical label is gone from public-facing copy — the honesty that
+// matters (not yet a real, billable subscription) is still asserted below
+// via "pas un abonnement actif".
+assert.match(academy, /12 000 FCFA/, 'membership shows the founder-approved Premium price');
 assert.match(academy, /pas un abonnement actif/, 'membership explicitly denies an active subscription');
 assert.match(academy, /href="launch\/"/, 'membership links to commercial preparation');
 assert.match(academy, /data-permission="premium_track" data-premium-target="premium-lab"/, 'the resource CTA points to the protected Risk Lab, not a dead-end toast');
