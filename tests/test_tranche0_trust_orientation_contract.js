@@ -12,7 +12,10 @@ const plan = fs.readFileSync(path.join(root, 'docs', 'DDA_TRANCHE0_NETTOYAGE_CON
 
 assert.match(html, /id="trust-orientation-title"/);
 assert.match(html, /<strong>Free<\/strong>[\s\S]*progression locale/);
-assert.match(html, /<strong>Premium<\/strong>[\s\S]*Démonstration locale/);
+// Commercial positioning correction (2026-11-14): "Démonstration locale" was
+// retired from this public step indicator — Premium is a real, priced offer
+// now, not a demo. The honest payment-readiness note still appears here.
+assert.match(html, /<strong>Premium<\/strong>[\s\S]*Paiement en cours d’activation/);
 assert.match(html, /<strong>Access<\/strong>[\s\S]*à préparer/);
 assert.match(app, /Premium · démonstration locale/);
 assert.match(app, /aucun droit serveur/);
