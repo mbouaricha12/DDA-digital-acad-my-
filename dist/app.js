@@ -1611,7 +1611,53 @@ function renderModulesRecap() {
   if (hidden > 0) container.insertAdjacentHTML('beforeend', `<li class="modules-recap-more"><span class="module-id">…</span><strong>${hidden} modules plus loin</strong><span class="module-pill coming_soon">Progressif</span></li>`);
 }
 
+// Lot 8 (cahier des charges — instruments de marché) : XAUUSD, EURUSD,
+// GBPUSD, USDJPY, US30, BTCUSD. Toujours une lecture serveur fraîche —
+// jamais un chiffre fabriqué ou mis en cache côté client au-delà de cet
+// appel — et jamais bloquant si le BFF ou les fournisseurs ne sont pas
+// configurés : chaque carte retombe honnêtement sur "Bientôt disponible".
+const GLOBAL_MARKET_SYMBOLS = ['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'US30', 'BTCUSD'];
+
+function renderGlobalMarketQuotesSkeleton(grid) {
+  grid.innerHTML = GLOBAL_MARKET_SYMBOLS.map(symbol => `
+    <article class="index-card" data-symbol="${symbol}">
+      <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Bientôt disponible</span></div>
+      <p>Cotation en attente de connexion à un fournisseur de données vérifié.</p>
+    </article>
+  `).join('');
+}
+
+async function renderGlobalMarketQuotes() {
+  const grid = document.getElementById('market-global-grid');
+  if (!grid) return;
+  renderGlobalMarketQuotesSkeleton(grid);
+  if (!window.DDABFF?.enabled()) return;
+  try {
+    const instruments = await window.DDABFF.getMarketQuotes();
+    if (!instruments) return;
+    grid.innerHTML = GLOBAL_MARKET_SYMBOLS.map(symbol => {
+      const quote = instruments[symbol];
+      if (!quote) return '';
+      if (quote.status === 'ok') {
+        const isDown = String(quote.price).trim().startsWith('-');
+        return `<article class="index-card" data-symbol="${symbol}">
+          <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge is-live"><span class="status-dot"></span>Cotation vérifiée</span></div>
+          <div class="index-card-example"><strong class="index-card-example-value">${quote.price}</strong></div>
+          <p>${quote.label} · mis à jour le ${new Date(quote.asOf).toLocaleString('fr-FR')}</p>
+        </article>`;
+      }
+      return `<article class="index-card" data-symbol="${symbol}">
+        <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>${quote.status === 'unavailable' ? 'Indisponible pour le moment' : 'Bientôt disponible'}</span></div>
+        <p>${quote.label || symbol} — cotation en attente de connexion à un fournisseur de données vérifié.</p>
+      </article>`;
+    }).join('');
+  } catch {
+    // Keep the honest "Bientôt disponible" skeleton on any failure — never a stale or fabricated value.
+  }
+}
+
 function renderMarketIntelligence() {
+  renderGlobalMarketQuotes();
   // Keep the public section anchor intact; only the inner grid is data-driven.
   const indices = document.getElementById('market-index-grid');
   if (indices) {

@@ -198,6 +198,14 @@
     return result.body.items;
   }
 
+  async function getMarketQuotes() {
+    const result = await request('/v1/market/quotes');
+    if (!result.enabled) return null;
+    if (!result.response.ok) throw resultError(result, 'market_quotes_failed');
+    if (!result.body || typeof result.body.instruments !== 'object') throw new Error('market_quotes_invalid_response');
+    return result.body.instruments;
+  }
+
   async function updateMe(patch) {
     const result = await request('/v1/me', { method: 'PATCH', body: patch });
     if (!result.enabled || result.response.status === 401) return null;
@@ -298,7 +306,7 @@
   }
 
   window.DDABFF = Object.freeze({
-    enabled, register, verifyEmail, exchangeSignupCode, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
+    enabled, register, verifyEmail, exchangeSignupCode, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, getMarketQuotes, updateMe, logout, issueCsrf,
     oauthGoogleStartUrl, exchangeOAuthCode,
     getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, fetchPremiumContent, askAI, startPremiumCheckout,
     getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
