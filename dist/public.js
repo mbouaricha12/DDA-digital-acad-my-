@@ -60,7 +60,13 @@
     '.landing-proof > *', '.proof-composition > *', '.proof-principles li', '.landing-ecosystem > *',
     '.domain-rail article', '.landing-institution > div', '.landing-demo-grid article',
     '.landing-problem-list li', '.landing-steps-list li', '.landing-plan-card', '.landing-guardrails > *',
-    '.landing-final-cta > *'
+    '.landing-final-cta > *',
+    // Sections added after this reveal system was first wired (DDA Lab/Resources/
+    // Testimonials, FAQ, differentiation/mission bands) never got added to the
+    // selector above, so they rendered fully static while every other section
+    // animated in on scroll — founder-reported inconsistency (2026-11-14).
+    '.landing-differentiation > *', '.landing-ai > *', '.landing-faq > *',
+    '.landing-mission-grid > *', '.landing-mission > *'
   ].join(',');
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const revealObserver = !reducedMotion && 'IntersectionObserver' in window
