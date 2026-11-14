@@ -18,13 +18,23 @@
 // fournisseur dans INSTRUMENT_REGISTRY, jamais un fournisseur unique
 // supposé universel.
 
+// Chantier C (2026-11-14) : extension demandée par le fondateur — 5
+// cryptomonnaies (même fournisseur CoinGecko, même mécanisme honnête,
+// aucun coût supplémentaire) et NAS100 (même fournisseur Twelve Data que
+// US30, même clé, même palier gratuit — un symbole de plus, pas un
+// abonnement de plus). Aucun instrument existant n'est modifié.
 const INSTRUMENT_REGISTRY = Object.freeze({
   XAUUSD: { provider: 'twelvedata', providerSymbol: 'XAU/USD', label: 'Or / Dollar' },
   EURUSD: { provider: 'twelvedata', providerSymbol: 'EUR/USD', label: 'Euro / Dollar' },
   GBPUSD: { provider: 'twelvedata', providerSymbol: 'GBP/USD', label: 'Livre / Dollar' },
   USDJPY: { provider: 'twelvedata', providerSymbol: 'USD/JPY', label: 'Dollar / Yen' },
   US30: { provider: 'twelvedata', providerSymbol: 'DJI', label: 'Indice Dow Jones' },
-  BTCUSD: { provider: 'coingecko', providerSymbol: 'bitcoin', label: 'Bitcoin / Dollar' }
+  NAS100: { provider: 'twelvedata', providerSymbol: 'NDX', label: 'Indice Nasdaq 100' },
+  BTCUSD: { provider: 'coingecko', providerSymbol: 'bitcoin', label: 'Bitcoin / Dollar' },
+  ETHUSD: { provider: 'coingecko', providerSymbol: 'ethereum', label: 'Ethereum / Dollar' },
+  SOLUSD: { provider: 'coingecko', providerSymbol: 'solana', label: 'Solana / Dollar' },
+  BNBUSD: { provider: 'coingecko', providerSymbol: 'binancecoin', label: 'BNB / Dollar' },
+  XRPUSD: { provider: 'coingecko', providerSymbol: 'ripple', label: 'XRP / Dollar' }
 });
 
 function marketDataConfigFromEnv(env = process.env) {

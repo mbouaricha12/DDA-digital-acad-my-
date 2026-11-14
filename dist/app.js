@@ -845,7 +845,7 @@ const titles = {
   membership: 'DDA Premium', 'premium-track': 'Premium Track · P2', 'premium-lab': 'Premium Lab · Risk Plan', 'premium-assessment': 'Premium Assessment · Controlled Decision', support: 'Aide & support', profile: 'Mon profil', community: 'Communauté',
   practice: 'Pratique avancée', intelligence: 'Intelligence DDA', lab: 'DDA Lab',
   forex: 'Forex', stocks: 'Actions', indices: 'Indices', crypto: 'Crypto',
-  live: 'DDA Live', business: 'DDA Business', experts: 'DDA Experts',
+  live: 'DDA Live', business: 'DDA Business', experts: 'DDA Experts', 'produits-digitaux': 'Produits Digitaux',
   // Lesson screen titles are declared once, in LESSON_REGISTRY — never a
   // second hand-maintained list to keep in sync.
   ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.title])),
@@ -1664,17 +1664,42 @@ function renderModulesRecap() {
   if (hidden > 0) container.insertAdjacentHTML('beforeend', `<li class="modules-recap-more"><span class="module-id">…</span><strong>${hidden} modules plus loin</strong><span class="module-pill coming_soon">Progressif</span></li>`);
 }
 
-// Lot 8 (cahier des charges — instruments de marché) : XAUUSD, EURUSD,
-// GBPUSD, USDJPY, US30, BTCUSD. Toujours une lecture serveur fraîche —
+// Lot 8 (cahier des charges — instruments de marché), étendu chantier C
+// (2026-11-14) : XAUUSD, EURUSD, GBPUSD, USDJPY, US30, NAS100, BTCUSD,
+// ETHUSD, SOLUSD, BNBUSD, XRPUSD. Toujours une lecture serveur fraîche —
 // jamais un chiffre fabriqué ou mis en cache côté client au-delà de cet
 // appel — et jamais bloquant si le BFF ou les fournisseurs ne sont pas
 // configurés : chaque carte retombe honnêtement sur "Bientôt disponible".
-const GLOBAL_MARKET_SYMBOLS = ['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'US30', 'BTCUSD'];
+const GLOBAL_MARKET_SYMBOLS = ['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'US30', 'NAS100', 'BTCUSD', 'ETHUSD', 'SOLUSD', 'BNBUSD', 'XRPUSD'];
+
+// Maquette chantier (2026-11-14) : même traitement d'icône que le ticker
+// crypto de la landing (cercle coloré + glyphe CSS, pas de logo de marque
+// externe) étendu aux 11 instruments de la grille Market Intelligence, pour
+// que l'icône d'un symbole soit identique partout sur le site.
+const MARKET_SYMBOL_ICON = {
+  XAUUSD: { glyph: 'Au', cssClass: 'market-symbol-icon-xau' },
+  EURUSD: { glyph: '€', cssClass: 'market-symbol-icon-eur' },
+  GBPUSD: { glyph: '£', cssClass: 'market-symbol-icon-gbp' },
+  USDJPY: { glyph: '¥', cssClass: 'market-symbol-icon-jpy' },
+  US30: { glyph: 'DJ', cssClass: 'market-symbol-icon-us30' },
+  NAS100: { glyph: 'ND', cssClass: 'market-symbol-icon-nas100' },
+  BTCUSD: { glyph: '₿', cssClass: 'market-symbol-icon-btc' },
+  ETHUSD: { glyph: 'Ξ', cssClass: 'market-symbol-icon-eth' },
+  SOLUSD: { glyph: 'S', cssClass: 'market-symbol-icon-sol' },
+  BNBUSD: { glyph: 'B', cssClass: 'market-symbol-icon-bnb' },
+  XRPUSD: { glyph: 'X', cssClass: 'market-symbol-icon-xrp' }
+};
+
+function marketSymbolIconHtml(symbol) {
+  const meta = MARKET_SYMBOL_ICON[symbol];
+  if (!meta) return '';
+  return `<span class="market-symbol-icon ${meta.cssClass}" aria-hidden="true">${meta.glyph}</span>`;
+}
 
 function renderGlobalMarketQuotesSkeleton(grid) {
   grid.innerHTML = GLOBAL_MARKET_SYMBOLS.map(symbol => `
     <article class="index-card" data-symbol="${symbol}">
-      <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Bientôt disponible</span></div>
+      <div class="index-card-head">${marketSymbolIconHtml(symbol)}<strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Bientôt disponible</span></div>
       <p>Cotation en attente de connexion à un fournisseur de données vérifié.</p>
     </article>
   `).join('');
@@ -1694,13 +1719,13 @@ async function renderGlobalMarketQuotes() {
       if (quote.status === 'ok') {
         const isDown = String(quote.price).trim().startsWith('-');
         return `<article class="index-card" data-symbol="${symbol}">
-          <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge is-live"><span class="status-dot"></span>Cotation vérifiée</span></div>
+          <div class="index-card-head">${marketSymbolIconHtml(symbol)}<strong>${symbol}</strong><span class="data-badge is-live"><span class="status-dot"></span>Cotation vérifiée</span></div>
           <div class="index-card-example"><strong class="index-card-example-value">${quote.price}</strong></div>
           <p>${quote.label} · mis à jour le ${new Date(quote.asOf).toLocaleString('fr-FR')}</p>
         </article>`;
       }
       return `<article class="index-card" data-symbol="${symbol}">
-        <div class="index-card-head"><strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>${quote.status === 'unavailable' ? 'Indisponible pour le moment' : 'Bientôt disponible'}</span></div>
+        <div class="index-card-head">${marketSymbolIconHtml(symbol)}<strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>${quote.status === 'unavailable' ? 'Indisponible pour le moment' : 'Bientôt disponible'}</span></div>
         <p>${quote.label || symbol} — cotation en attente de connexion à un fournisseur de données vérifié.</p>
       </article>`;
     }).join('');
@@ -1856,6 +1881,15 @@ function renderDashboardWeekAhead(continueTarget) {
   const all = authoredLessons();
   const currentIndex = continueTarget ? all.findIndex(entry => entry.lesson.id === continueTarget.lesson.id) : -1;
   const upcoming = currentIndex === -1 ? [] : all.slice(currentIndex + 1, currentIndex + 3);
+  // Maquette chantier (2026-11-14) — carte "Agenda" du résumé bas de page :
+  // même liste `upcoming` déjà calculée pour le rail de la semaine, jamais
+  // un second calcul d'avancement qui pourrait diverger.
+  const agendaCountEl = document.getElementById('dashboard-card-agenda-count');
+  if (agendaCountEl) {
+    agendaCountEl.textContent = upcoming.length
+      ? `${upcoming.length} leçon${upcoming.length > 1 ? 's' : ''} à venir`
+      : 'Parcours à jour';
+  }
   if (!upcoming.length) {
     section.hidden = true;
     rail.innerHTML = '';
@@ -1886,11 +1920,21 @@ function quickSkillStatus(skill) {
   return { key: 'ready', label: 'À commencer', action: 'Commencer' };
 }
 
-function renderQuickSkills() {
+function renderQuickSkills(firstLessonComplete) {
   const container = document.getElementById('quick-skills-list');
+  const section = document.getElementById('dashboard-quick-skills');
   if (!container) return;
-  container.innerHTML = QUICK_SKILLS_REGISTRY.map(skill => {
-    const status = quickSkillStatus(skill);
+  const statuses = QUICK_SKILLS_REGISTRY.map(skill => ({ skill, status: quickSkillStatus(skill) }));
+  // Priorité 2 — découverte/parcours : pour un tout nouvel apprenant qui n'a
+  // encore validé aucune leçon, cette grille ajoute 4 boutons concurrents au
+  // seul CTA qui compte ("Reprendre la leçon"). Elle n'apparaît donc qu'une
+  // fois la première leçon validée — sauf si une Quick Skill est déjà en
+  // cours ou validée, pour ne jamais faire disparaître un accès déjà pris.
+  const anySkillAlreadyUnlocked = statuses.some(({ status }) => status.key === 'done');
+  const shouldShow = Boolean(firstLessonComplete) || anySkillAlreadyUnlocked;
+  if (section) section.hidden = !shouldShow;
+  if (!shouldShow) return;
+  container.innerHTML = statuses.map(({ skill, status }) => {
     const target = status.key === 'locked' ? 'path' : skill.viewId;
     return `<article class="quick-skill-card quick-skill-${skill.tone} quick-skill-${status.key}">
       <div class="quick-skill-top"><span class="quick-skill-pillar">${escapeHtml(skill.pillar)}</span><span class="quick-skill-status">${escapeHtml(status.label)}</span></div>
@@ -2742,6 +2786,41 @@ function renderTerminalCrosshair() {
   yLabel.textContent = value.toFixed(1);
   if (readout) readout.textContent = `Séquence ${String(candle.index + 1).padStart(2, '0')} · O ${candle.open.toFixed(1)} · H ${candle.high.toFixed(1)} · B ${candle.low.toFixed(1)} · C ${candle.close.toFixed(1)} · indices sans unité`;
 }
+// Priorité 2 — découverte/parcours : le Terminal d'analyse (chandeliers,
+// Fibonacci, zoom/pan) est un outil avancé, pas la première chose qu'un
+// nouvel apprenant doit affronter. Il reste entièrement fonctionnel et
+// accessible en un clic — seule sa visibilité par défaut change, et
+// uniquement tant que l'apprenant n'a validé aucune leçon. Un apprenant qui
+// l'a déjà ouvert voit son choix explicite respecté à chaque visite.
+const ANALYSIS_TERMINAL_PREF_KEY = 'dda_terminal_expanded_v1';
+
+function isAnalysisTerminalExpanded() {
+  const body = document.getElementById('analysis-terminal-body');
+  return body ? !body.hidden : true;
+}
+
+function setAnalysisTerminalExpanded(expanded, { persist = true } = {}) {
+  const body = document.getElementById('analysis-terminal-body');
+  const toggle = document.getElementById('analysis-terminal-toggle');
+  if (body) body.hidden = !expanded;
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', String(expanded));
+    toggle.innerHTML = expanded
+      ? 'Replier <span class="analysis-terminal-toggle-icon" aria-hidden="true">▲</span>'
+      : 'Déplier <span class="analysis-terminal-toggle-icon" aria-hidden="true">▼</span>';
+  }
+  if (persist) {
+    try { localStorage.setItem(ANALYSIS_TERMINAL_PREF_KEY, expanded ? '1' : '0'); } catch { /* storage is optional */ }
+  }
+}
+
+function applyAnalysisTerminalDefaultState(firstLessonComplete) {
+  let override = null;
+  try { override = localStorage.getItem(ANALYSIS_TERMINAL_PREF_KEY); } catch { /* storage is optional */ }
+  const expanded = override === '1' ? true : override === '0' ? false : Boolean(firstLessonComplete);
+  setAnalysisTerminalExpanded(expanded, { persist: false });
+}
+
 function renderDariusAnalysisTerminal() {
   const svg = document.getElementById('terminal-chart');
   if (!svg) return;
@@ -2919,6 +2998,9 @@ function initDariusAnalysisTerminal() {
     update({ observation });
     showToast('Observation conservée sur cet appareil.');
   });
+  document.getElementById('analysis-terminal-toggle')?.addEventListener('click', () => {
+    setAnalysisTerminalExpanded(!isAnalysisTerminalExpanded());
+  });
   document.getElementById('terminal-practice-validate').addEventListener('click', () => {
     const state = getTerminalState();
     const zones = state.drawings.filter(drawing => drawing.type === 'zone');
@@ -2928,13 +3010,26 @@ function initDariusAnalysisTerminal() {
     const valid = Boolean(zone && height >= 45 && height <= 130 && center >= 100 && center <= 320);
     const attempts = Number(state.practice?.attempts || 0) + 1;
     const status = valid ? 'validated' : 'retry';
+    // Audit Terminal/Journal (chantier A) : la consigne générique "élargis
+    // ou déplace" ne disait jamais LEQUEL des deux ajuster — un apprenant qui
+    // a déjà la bonne largeur mais une zone mal centrée recevait le même
+    // conseil que celui qui a dessiné une zone minuscule. Feedback distinct
+    // par cause réelle d'échec, sans toucher au seuil de validation lui-même.
+    let feedback;
+    if (!zone) {
+      feedback = 'Choisis Zone S/R et glisse sur deux niveaux pour matérialiser une zone avant de vérifier.';
+    } else if (valid) {
+      feedback = 'Bonne lecture : tu as matérialisé une zone, sans la réduire à un prix exact. Preuve conservée localement.';
+    } else if (height < 45) {
+      feedback = 'Ta zone est trop étroite pour représenter une vraie zone d’observation : élargis-la un peu.';
+    } else if (height > 130) {
+      feedback = 'Ta zone est trop large pour rester précise : resserre-la autour de la structure que tu observes.';
+    } else {
+      feedback = 'Ta zone est bien dimensionnée, mais trop excentrée : déplace-la vers la partie centrale du graphique.';
+    }
     const practice = {
       ...(state.practice || {}), status, attempts,
-      feedback: valid
-        ? 'Bonne lecture : tu as matérialisé une zone, sans la réduire à un prix exact. Preuve conservée localement.'
-        : zone
-          ? 'Relis la consigne : élargis ou déplace ta zone vers la partie centrale du graphique, puis réessaie.'
-          : 'Choisis Zone S/R et glisse sur deux niveaux pour matérialiser une zone avant de vérifier.',
+      feedback,
       proof: { id: 'm02-zone-identification', type: 'zone_identification', lessonId: state.practice?.sourceLesson || 'M0.2', status },
       ...(valid ? { completedAt: new Date().toISOString() } : {})
     };
@@ -3070,6 +3165,13 @@ function renderState() {
   document.getElementById('module-percent').textContent = `${progress}%`;
   document.getElementById('module-ring').style.setProperty('--progress', progress);
   document.getElementById('week-xp').textContent = `+${xp} XP`;
+  // Maquette chantier (2026-11-14) — nouvelle carte "Progression" du résumé
+  // bas de page : mêmes valeurs déjà calculées ci-dessus, jamais un second
+  // calcul qui pourrait diverger de module-percent/week-xp.
+  const summaryProgressPercent = document.getElementById('dashboard-card-progress-percent');
+  if (summaryProgressPercent) summaryProgressPercent.textContent = `${progress}%`;
+  const summaryProgressXp = document.getElementById('dashboard-card-progress-xp');
+  if (summaryProgressXp) summaryProgressXp.textContent = `+${xp} XP`;
   const activeDays = countActiveDays(prototypeState.events);
   document.getElementById('active-days').textContent = `${activeDays} jour${activeDays > 1 ? 's' : ''}`;
   const marketVisitDays = countActiveDaysForView(prototypeState.events, 'markets');
@@ -3106,12 +3208,28 @@ function renderState() {
   } else {
     renderTerminalLeadComplete();
   }
+  // Maquette chantier (2026-11-14) — carte "Prochaine leçon" du résumé bas
+  // de page : mirroir exact de ce que terminal-lead/lesson-primary-action
+  // affichent déjà juste au-dessus (branche "en cours" ou "curriculum
+  // complet" via renderTerminalLeadComplete ci-dessus), jamais une deuxième
+  // logique de calcul qui pourrait diverger de la source déjà affichée.
+  const summaryNextTitle = document.getElementById('dashboard-card-next-lesson-title');
+  const summaryNextModule = document.getElementById('dashboard-card-next-lesson-module');
+  const summaryNextGo = document.getElementById('dashboard-card-next-lesson-go');
+  const primaryActionEl = document.getElementById('lesson-primary-action');
+  if (summaryNextTitle) summaryNextTitle.textContent = document.getElementById('terminal-lead-title').textContent;
+  if (summaryNextModule) summaryNextModule.textContent = document.getElementById('terminal-lead-module').textContent;
+  if (summaryNextGo && primaryActionEl) {
+    summaryNextGo.dataset.view = primaryActionEl.dataset.view;
+    summaryNextGo.innerHTML = primaryActionEl.innerHTML;
+  }
   renderTerminalThread(continueTarget);
   renderTerminalMeta(continueTarget);
   renderDashboardProof(continueTarget, curriculumComplete);
   renderDashboardWeekAhead(continueTarget);
-  renderQuickSkills();
+  renderQuickSkills(complete);
   renderDariusAnalysisTerminal();
+  applyAnalysisTerminalDefaultState(complete);
   renderTerminalJournalNote();
   renderTerminalSkillmap(continueTarget);
 
@@ -3465,7 +3583,18 @@ function renderLessonSidecard(viewId) {
     ? `<button type="button" class="primary-action lesson-sidecard-next" data-sidecard-view="${next.viewId}">Leçon suivante : ${escapeHtml(next.title)} <span>→</span></button>`
     : `<button type="button" class="secondary-action lesson-sidecard-next" data-sidecard-view="path">Retourner à mon parcours <span>→</span></button>`;
 
-  card.innerHTML = `${recap}${quiz}${premium}${nextButton}`;
+  // Priorité 2 — découverte : un rappel discret, affiché une seule fois,
+  // juste après que l'apprenant a validé sa toute première leçon (jamais
+  // une pop-up) — pas sur chaque leçon, pour ne pas devenir du bruit.
+  const isFirstLesson = current?.id === activeLessonId;
+  const firstLessonQuizDone = isFirstLesson && DDALearning.getLessonProgress(prototypeState, current.id).quizComplete;
+  const discovery = firstLessonQuizDone ? `
+    <div class="lesson-sidecard-discover">
+      <p class="eyebrow">Pour continuer</p>
+      <p>Découvre aussi <button type="button" class="text-action" data-sidecard-view="lab">DDA Lab</button>, <button type="button" class="text-action" data-sidecard-view="resources">Ressources</button> et <button type="button" class="text-action" data-sidecard-view="community">Communauté</button>.</p>
+    </div>` : '';
+
+  card.innerHTML = `${recap}${quiz}${premium}${nextButton}${discovery}`;
   // Deliberately data-sidecard-view, not the generic [data-view] bindViewButton
   // wires everywhere else: academy.html's static .module-toc (hidden by CSS
   // at this breakpoint, but still physically present in the DOM for narrower
@@ -4170,6 +4299,7 @@ bindNotifyButton('practice', 'practice-notify', 'practiceNotify', 'la Pratique a
 bindNotifyButton('experts', 'experts-notify', 'expertsNotify', 'DDA Experts');
 bindNotifyButton('live', 'live-notify', 'liveNotify', 'DDA Live');
 bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business');
+bindNotifyButton('produits-digitaux', 'produits-digitaux-notify', 'produitsDigitauxNotify', 'Produits Digitaux');
 
 /* DDA AI Academy chat — a thin UI bridge over the authenticated BFF client.
    The browser never receives a provider key and never invents a reply when the
