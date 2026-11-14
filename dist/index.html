@@ -141,25 +141,25 @@
           <details class="public-menu"><summary aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="public-menu-panel">Menu <span>＋</span></summary><div class="public-menu-panel" id="public-menu-panel"><a href="#landing-experience">Apprendre</a><a href="#landing-product">Parcours</a><a href="#landing-free">Formations</a><a href="#landing-faq">Ressources</a><a href="#landing-markets">Market Intelligence</a><a href="community/">Communauté</a><button type="button" class="public-menu-cta" data-view="access">Commencer gratuitement <span>→</span></button></div></details>
         </header>
 
-        <div class="dda-ecosystem-strip" aria-label="Écosystème DDA — statut réel de chaque espace">
+        <!-- Navigation clarity pass (2026-11-14): this strip used to repeat
+             Communauté/Intelligence/Experts/Live/Business — the exact same
+             "coming soon" spaces already presented once, fully, in the
+             #landing-future section below. Trimmed to the 3 chips that are
+             real funnel steps (Lab/Marchés are usable today, Premium is the
+             next discovery step) so a first-time visitor sees one clear set
+             of options at the top, not the same "en préparation" labels
+             twice on one page. Nothing is removed: every dropped chip's
+             destination still exists and is still linked from
+             #landing-future and the public footer. -->
+        <div class="dda-ecosystem-strip" aria-label="Commence ici">
           <div class="dda-ecosystem-track">
             <button type="button" class="dda-ecosystem-chip is-active" data-view="lab"><svg class="icon"><use href="#icon-award"/></svg><span>DDA Lab</span><em>Actif</em></button>
             <button type="button" class="dda-ecosystem-chip is-active" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg><span>Marchés &amp; BRVM</span><em>Actif</em></button>
             <button type="button" class="dda-ecosystem-chip" data-view="membership"><svg class="icon"><use href="#icon-spark"/></svg><span>DDA Premium</span><em>Aperçu pédagogique</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="community"><svg class="icon"><use href="#icon-users"/></svg><span>Communauté</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="intelligence"><svg class="icon"><use href="#icon-compass"/></svg><span>Intelligence DDA</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="experts"><svg class="icon"><use href="#icon-award"/></svg><span>DDA Experts</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="live"><svg class="icon"><use href="#icon-play"/></svg><span>DDA Live</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="business"><svg class="icon"><use href="#icon-buyer"/></svg><span>DDA Business</span><em>En préparation</em></button>
             <!-- Duplicated once so the CSS marquee (translateX(-50%)) loops seamlessly. -->
             <button type="button" class="dda-ecosystem-chip is-active" data-view="lab" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-award"/></svg><span>DDA Lab</span><em>Actif</em></button>
             <button type="button" class="dda-ecosystem-chip is-active" data-view="markets" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-chart"/></svg><span>Marchés &amp; BRVM</span><em>Actif</em></button>
             <button type="button" class="dda-ecosystem-chip" data-view="membership" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-spark"/></svg><span>DDA Premium</span><em>Aperçu pédagogique</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="community" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-users"/></svg><span>Communauté</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="intelligence" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-compass"/></svg><span>Intelligence DDA</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="experts" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-award"/></svg><span>DDA Experts</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="live" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-play"/></svg><span>DDA Live</span><em>En préparation</em></button>
-            <button type="button" class="dda-ecosystem-chip" data-view="business" aria-hidden="true" tabindex="-1"><svg class="icon"><use href="#icon-buyer"/></svg><span>DDA Business</span><em>En préparation</em></button>
           </div>
         </div>
 
