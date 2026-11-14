@@ -52,7 +52,7 @@ const baseConfig = { allowedOrigins: ['http://localhost:8745'], secureCookies: t
       const response = await request(server, 'GET', '/v1/market/quotes');
       assert.equal(response.status, 200);
       const instruments = response.body.instruments;
-      for (const symbol of ['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'US30', 'BTCUSD']) {
+      for (const symbol of ['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'US30', 'NAS100', 'BTCUSD', 'ETHUSD', 'SOLUSD', 'BNBUSD', 'XRPUSD']) {
         assert.equal(instruments[symbol].status, 'not_configured', `${symbol} must be honestly not_configured`);
         assert.equal(instruments[symbol].price, undefined, `${symbol} must never carry a price when unconfigured`);
       }
@@ -95,6 +95,35 @@ const baseConfig = { allowedOrigins: ['http://localhost:8745'], secureCookies: t
     } finally { global.fetch = originalFetch; }
   });
 
+  await test('chantier C (2026-11-14): the 4 newly added CoinGecko cryptos (ETH/SOL/BNB/XRP) and NAS100 resolve real prices without touching the pre-existing instruments', async () => {
+    const auth = makeAuth();
+    const sessions = new MemorySessionStore();
+    const originalFetch = global.fetch;
+    const coinGeckoPrices = { ethereum: { usd: 3200 }, solana: { usd: 180 }, binancecoin: { usd: 580 }, ripple: { usd: 1.1 }, bitcoin: { usd: 68000 } };
+    global.fetch = async (url) => {
+      const str = String(url);
+      if (str.includes('twelvedata')) return { ok: true, status: 200, async json() { return { price: str.includes('NDX') ? '18500' : '1.0875' }; } };
+      const id = decodeURIComponent(str.match(/ids=([^&]+)/)[1]);
+      return { ok: true, status: 200, async json() { return { [id]: coinGeckoPrices[id] }; } };
+    };
+    try {
+      const handler = createBff({ auth, sessions, config: baseConfig, marketDataConfig: { twelveDataApiKey: 'td_test', coinGeckoApiKey: 'cg_test', maxAgeMs: 5 * 60 * 1000 } });
+      const server = http.createServer(handler);
+      await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+      try {
+        const response = await request(server, 'GET', '/v1/market/quotes');
+        assert.equal(response.status, 200);
+        const i = response.body.instruments;
+        assert.equal(i.NAS100.status, 'ok'); assert.equal(i.NAS100.price, 18500);
+        assert.equal(i.ETHUSD.status, 'ok'); assert.equal(i.ETHUSD.price, 3200);
+        assert.equal(i.SOLUSD.status, 'ok'); assert.equal(i.SOLUSD.price, 180);
+        assert.equal(i.BNBUSD.status, 'ok'); assert.equal(i.BNBUSD.price, 580);
+        assert.equal(i.XRPUSD.status, 'ok'); assert.equal(i.XRPUSD.price, 1.1);
+        assert.equal(i.US30.status, 'ok'); assert.equal(i.BTCUSD.status, 'ok');
+      } finally { server.close(); }
+    } finally { global.fetch = originalFetch; }
+  });
+
   await test('one provider failure never takes the other instruments down with it, and never reports a stale/fabricated value', async () => {
     const auth = makeAuth();
     const sessions = new MemorySessionStore();
@@ -118,6 +147,6 @@ const baseConfig = { allowedOrigins: ['http://localhost:8745'], secureCookies: t
     } finally { global.fetch = originalFetch; }
   });
 
-  console.log(`\n${passed}/4 market data contract checks passed`);
-  if (passed !== 4) process.exit(1);
+  console.log(`\n${passed}/5 market data contract checks passed`);
+  if (passed !== 5) process.exit(1);
 })();

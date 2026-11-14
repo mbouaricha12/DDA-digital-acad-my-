@@ -1664,12 +1664,13 @@ function renderModulesRecap() {
   if (hidden > 0) container.insertAdjacentHTML('beforeend', `<li class="modules-recap-more"><span class="module-id">…</span><strong>${hidden} modules plus loin</strong><span class="module-pill coming_soon">Progressif</span></li>`);
 }
 
-// Lot 8 (cahier des charges — instruments de marché) : XAUUSD, EURUSD,
-// GBPUSD, USDJPY, US30, BTCUSD. Toujours une lecture serveur fraîche —
+// Lot 8 (cahier des charges — instruments de marché), étendu chantier C
+// (2026-11-14) : XAUUSD, EURUSD, GBPUSD, USDJPY, US30, NAS100, BTCUSD,
+// ETHUSD, SOLUSD, BNBUSD, XRPUSD. Toujours une lecture serveur fraîche —
 // jamais un chiffre fabriqué ou mis en cache côté client au-delà de cet
 // appel — et jamais bloquant si le BFF ou les fournisseurs ne sont pas
 // configurés : chaque carte retombe honnêtement sur "Bientôt disponible".
-const GLOBAL_MARKET_SYMBOLS = ['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'US30', 'BTCUSD'];
+const GLOBAL_MARKET_SYMBOLS = ['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'US30', 'NAS100', 'BTCUSD', 'ETHUSD', 'SOLUSD', 'BNBUSD', 'XRPUSD'];
 
 function renderGlobalMarketQuotesSkeleton(grid) {
   grid.innerHTML = GLOBAL_MARKET_SYMBOLS.map(symbol => `
@@ -2976,13 +2977,26 @@ function initDariusAnalysisTerminal() {
     const valid = Boolean(zone && height >= 45 && height <= 130 && center >= 100 && center <= 320);
     const attempts = Number(state.practice?.attempts || 0) + 1;
     const status = valid ? 'validated' : 'retry';
+    // Audit Terminal/Journal (chantier A) : la consigne générique "élargis
+    // ou déplace" ne disait jamais LEQUEL des deux ajuster — un apprenant qui
+    // a déjà la bonne largeur mais une zone mal centrée recevait le même
+    // conseil que celui qui a dessiné une zone minuscule. Feedback distinct
+    // par cause réelle d'échec, sans toucher au seuil de validation lui-même.
+    let feedback;
+    if (!zone) {
+      feedback = 'Choisis Zone S/R et glisse sur deux niveaux pour matérialiser une zone avant de vérifier.';
+    } else if (valid) {
+      feedback = 'Bonne lecture : tu as matérialisé une zone, sans la réduire à un prix exact. Preuve conservée localement.';
+    } else if (height < 45) {
+      feedback = 'Ta zone est trop étroite pour représenter une vraie zone d’observation : élargis-la un peu.';
+    } else if (height > 130) {
+      feedback = 'Ta zone est trop large pour rester précise : resserre-la autour de la structure que tu observes.';
+    } else {
+      feedback = 'Ta zone est bien dimensionnée, mais trop excentrée : déplace-la vers la partie centrale du graphique.';
+    }
     const practice = {
       ...(state.practice || {}), status, attempts,
-      feedback: valid
-        ? 'Bonne lecture : tu as matérialisé une zone, sans la réduire à un prix exact. Preuve conservée localement.'
-        : zone
-          ? 'Relis la consigne : élargis ou déplace ta zone vers la partie centrale du graphique, puis réessaie.'
-          : 'Choisis Zone S/R et glisse sur deux niveaux pour matérialiser une zone avant de vérifier.',
+      feedback,
       proof: { id: 'm02-zone-identification', type: 'zone_identification', lessonId: state.practice?.sourceLesson || 'M0.2', status },
       ...(valid ? { completedAt: new Date().toISOString() } : {})
     };
