@@ -4043,7 +4043,10 @@ function bindNotifyButton(viewId, buttonId, prefKey, label) {
 }
 bindNotifyButton('community', 'community-notify', 'communityNotify', 'la Communauté');
 bindNotifyButton('practice', 'practice-notify', 'practiceNotify', 'la Pratique avancée');
-bindNotifyButton('intelligence', 'intelligence-notify', 'intelligenceNotify', 'l’Intelligence DDA');
+// 'intelligence' (DDA AI) was removed from this list (Lot 5, 2026-11-14): the
+// real chat is already built and live just above this button on the same
+// view — a "notify me at launch" CTA under a feature that already works
+// was a leftover from before the chat existed, not an honest pending state.
 bindNotifyButton('experts', 'experts-notify', 'expertsNotify', 'DDA Experts');
 bindNotifyButton('live', 'live-notify', 'liveNotify', 'DDA Live');
 bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business');
