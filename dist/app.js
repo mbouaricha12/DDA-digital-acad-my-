@@ -3728,6 +3728,39 @@ document.getElementById('premium-waitlist-join')?.addEventListener('click', () =
   document.getElementById('premium-waitlist-confirmation').hidden = false;
 });
 
+// Commercial activation mandate (2026-11-14): the real "S'abonner" entry
+// point. Asks the BFF for a real Chariow Checkout session and redirects
+// there on success — never a simulated transaction. Today (no
+// CHARIOW_API_KEY/CHARIOW_PREMIUM_PRODUCT_IDS configured in production) the
+// BFF honestly answers "not configured", and this falls back to the exact
+// same local waitlist as before — one funnel, not two.
+function scrollToPremiumWaitlist() {
+  requestAnimationFrame(() => revealLessonAnchor('premium-waitlist-panel')?.scrollIntoView({ behavior: prototypeState.preferences?.lowData ? 'auto' : 'smooth', block: 'start' }));
+}
+document.getElementById('premium-subscribe-cta')?.addEventListener('click', async () => {
+  const button = document.getElementById('premium-subscribe-cta');
+  if (!window.DDABFF?.enabled()) { showView('membership'); scrollToPremiumWaitlist(); return; }
+  const originalLabel = button.innerHTML;
+  button.disabled = true;
+  button.innerHTML = 'Préparation du paiement…';
+  try {
+    const result = await window.DDABFF.startPremiumCheckout();
+    if (result.checkoutUrl) { window.location.href = result.checkoutUrl; return; }
+    showToast(result.error === 'rate_limited'
+      ? 'Trop de tentatives — réessaie dans un instant.'
+      : 'Le paiement en ligne n’est pas encore activé. Ton intérêt est enregistré ci-dessous.');
+    showView('membership');
+    scrollToPremiumWaitlist();
+  } catch {
+    showToast('Le paiement en ligne n’est pas encore disponible. Ton intérêt est enregistré ci-dessous.');
+    showView('membership');
+    scrollToPremiumWaitlist();
+  } finally {
+    button.disabled = false;
+    button.innerHTML = originalLabel;
+  }
+});
+
 document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;
   if (!document.getElementById('gate-layer').hidden) closeGate();

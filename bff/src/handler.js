@@ -43,7 +43,7 @@ function buildHandler(env = process.env) {
   const rateLimiter = new PostgrestRateLimiter({ supabaseUrl: env.SUPABASE_URL, serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY, logger });
   const chariowConfig = chariowConfigFromEnv(env);
   const aiAssistant = aiAssistantFromEnv(env, { logger });
-  const academyHandler = createBff({ config, auth, sessions, businessStore, billingStore, brvmPublicationStore, adminRoles, accessAudit, rateLimiter, progressStore, aiAssistant, entitlements: billingStore, logger });
+  const academyHandler = createBff({ config, auth, sessions, businessStore, billingStore, brvmPublicationStore, adminRoles, accessAudit, rateLimiter, progressStore, aiAssistant, entitlements: billingStore, chariowConfig, logger });
 
   return async function handler(req, res) {
     if (req.method === 'POST' && new URL(req.url, 'http://bff.local').pathname === '/webhooks/chariow') {
