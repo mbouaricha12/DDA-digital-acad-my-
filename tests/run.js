@@ -100,6 +100,25 @@ async function waitForPageState(page, predicate, { timeout = 10000, description 
   throw new Error(`Timed out waiting for ${description}`);
 }
 
+// The page's global `html{scroll-behavior:smooth}` means a browser-level
+// scroll (scrollIntoViewIfNeeded, or scrollTo without an explicit instant
+// behavior that the browser has already started animating) can still be
+// mid-flight when a test's next step reads window.scrollY or a fixed
+// setTimeout elapses — a longer landing page (more sections) makes that
+// animation take longer, so a short fixed wait that used to be enough can
+// start racing it. This polls for scrollY to stop moving before continuing.
+async function waitForScrollSettled(page, { timeout = 2000 } = {}) {
+  const deadline = Date.now() + timeout;
+  let previous = await page.evaluate(() => window.scrollY);
+  while (Date.now() < deadline) {
+    await new Promise(resolve => setTimeout(resolve, 30));
+    const current = await page.evaluate(() => window.scrollY);
+    if (current === previous) return current;
+    previous = current;
+  }
+  return previous;
+}
+
 async function waitForElementInViewport(page, selector, { timeout = 10000, allowPartial = false } = {}) {
   await page.locator(selector).waitFor({ state: 'attached', timeout });
   const deadline = Date.now() + timeout;
@@ -1689,11 +1708,13 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
     await page.locator('[data-funnel-section="free"]').scrollIntoViewIfNeeded();
     await waitForPageState(page, () => window.DDA.load().events.some(event => event.name === 'landing_section_reached' && event.metadata?.section === 'free'), { description: 'free landing section event' });
+    await waitForScrollSettled(page);
     await page.waitForTimeout(40);
     const freeCardOverlap = await page.evaluate(() => document.body.classList.contains('landing-cta-covering-content'));
     assert.equal(await page.locator('.landing-mobile-cta').isVisible(), !freeCardOverlap, 'sticky CTA should yield whenever readable content intersects its bounds');
 
     await page.evaluate(() => window.scrollTo({ top: 960, behavior: 'instant' }));
+    await waitForPageState(page, () => window.scrollY === 960, { description: 'scroll settled back at 960 after the instant jump' });
     await page.waitForTimeout(40);
     assert.equal(await page.locator('.landing-mobile-cta').isVisible(), true, 'CTA should be visible once a safe interval follows the hero');
     await page.locator('[data-funnel-section="free"]').scrollIntoViewIfNeeded();
