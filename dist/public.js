@@ -244,6 +244,75 @@
   window.addEventListener('scroll', requestCtaSync, { passive: true });
   window.addEventListener('resize', requestCtaSync, { passive: true });
   syncCta();
+
+  /* Vidéo de présentation landing (CDCP-OS addendum, issue #240;
+     docs/DDA_LANDING_VIDEO_SCRIPT_STORYBOARD_2026-11-13.md). Préparation
+     d'intégration uniquement : tant que `url` reste vide ci-dessous, aucun
+     ID n'est fabriqué et #landing-presentation-video reste `hidden` — exactement
+     le même principe qu'une leçon sans `video` field dans dist/app.js, qui
+     ne rend rien plutôt qu'un aperçu cassé ou fictif. Une fois la vidéo
+     finale validée (script/storyboard déjà rédigés), renseigner son URL
+     YouTube ici : aucune autre modification de code n'est nécessaire — le
+     lecteur, le lazy-load, le clic-pour-lire et le CSP sont déjà en place. */
+  const LANDING_PRESENTATION_VIDEO = Object.freeze({
+    url: '',
+    title: 'DDA — Learn Markets. Build Skills. Prove Progress.'
+  });
+  function escapeAttr(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+  }
+  // Same allowed-host/shape rules as dist/lesson-renderer.js's getYouTubeId —
+  // duplicated rather than shared, since this public bundle stays
+  // deliberately independent from the Academy runtime (see file header).
+  function getYouTubeId(rawUrl) {
+    const raw = String(rawUrl || '').trim();
+    if (!raw) return '';
+    try {
+      const url = new URL(raw);
+      const allowedHost = /(^|\.)youtube\.com$/.test(url.hostname) || url.hostname === 'youtu.be' || url.hostname === 'youtube-nocookie.com';
+      if (url.protocol !== 'https:' || !allowedHost) return '';
+      if (url.hostname === 'youtu.be') {
+        const id = url.pathname.replace(/^\//, '').split('/')[0];
+        return /^[\w-]{6,}$/.test(id) ? id : '';
+      }
+      const shortsMatch = url.pathname.match(/^\/shorts\/([\w-]{6,})/);
+      if (shortsMatch) return shortsMatch[1];
+      const embedMatch = url.pathname.match(/^\/embed\/([\w-]{6,})/);
+      if (embedMatch) return embedMatch[1];
+      const v = url.searchParams.get('v');
+      return v && /^[\w-]{6,}$/.test(v) ? v : '';
+    } catch (_) {
+      return '';
+    }
+  }
+  (function mountLandingPresentationVideo() {
+    const section = document.getElementById('landing-presentation-video');
+    if (!section) return;
+    const ytId = getYouTubeId(LANDING_PRESENTATION_VIDEO.url);
+    if (!ytId) return; // no real id configured yet — stays hidden, never a placeholder
+    const label = escapeAttr(LANDING_PRESENTATION_VIDEO.title);
+    section.innerHTML = `<figure class="video-explainer-block video-lite-block" data-video-state="idle">
+      <div class="video-frame video-lite-frame" data-youtube-id="${escapeAttr(ytId)}" data-youtube-title="${label}">
+        <img class="video-lite-thumb" src="https://i.ytimg.com/vi/${escapeAttr(ytId)}/hqdefault.jpg" alt="" loading="lazy">
+        <button type="button" class="video-lite-play" aria-label="Lire : ${label}"><svg class="icon"><use href="#icon-play"/></svg></button>
+      </div>
+      <figcaption class="video-explainer-caption">${label}<span aria-hidden="true"> · </span><a href="https://www.youtube.com/watch?v=${escapeAttr(ytId)}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Ouvrir sur YouTube<span aria-hidden="true"> ↗</span></a></figcaption>
+    </figure>`;
+    section.hidden = false;
+  })();
+  // Click-to-load: same no-autoplay iframe swap as dist/app.js's lesson
+  // video handler — the iframe (and any YouTube script it loads) only
+  // exists in the DOM after a real click.
+  document.addEventListener('click', event => {
+    const playButton = event.target.closest('#landing-presentation-video .video-lite-play');
+    if (!playButton) return;
+    const frame = playButton.closest('.video-lite-frame');
+    const ytId = frame?.dataset.youtubeId;
+    if (!ytId) return;
+    const label = frame.dataset.youtubeTitle || 'Vidéo de présentation DDA';
+    frame.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${ytId}" title="${label}" loading="lazy" allow="fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+  });
+
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }

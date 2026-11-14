@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.ytimg.com; font-src 'self'; connect-src 'self' https:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="theme-color" content="#081426">
   <title>DDA — Apprendre les marchés, construire des compétences</title>
   <meta name="description" content="Darius Digital Academy transforme l'apprentissage des marchés financiers en un vrai parcours : comprendre, pratiquer, prouver ta progression — pas une liste de vidéos à consommer.">
@@ -253,6 +253,12 @@
             <div class="aperture-thread" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
           </div>
         </div>
+
+        <!-- Vidéo de présentation (CDCP-OS addendum, issue #240). Reste
+             `hidden` et vide tant qu'aucun ID YouTube réel n'est configuré
+             dans public.js (LANDING_PRESENTATION_VIDEO) — jamais un
+             placeholder visible ou une vidéo fictive. -->
+        <section class="landing-presentation-video" id="landing-presentation-video" aria-label="Vidéo de présentation DDA" hidden></section>
 
         <section class="landing-trust-strip" aria-label="Pourquoi commencer avec DDA"><article><span class="trust-strip-icon">⌁</span><div><strong>Apprendre avant d’agir</strong><small>Une méthode calme, centrée sur la compréhension.</small></div></article><article><span class="trust-strip-icon">◈</span><div><strong>Progression conservée</strong><small>Les exercices validés construisent une trace réelle.</small></div></article><article><span class="trust-strip-icon">◎</span><div><strong>Marchés contextualisés</strong><small>Des séries pédagogiques pour observer de vraies dynamiques, pas des cotations en direct.</small></div></article><article><span class="trust-strip-icon">↗</span><div><strong>Support humain</strong><small>Email, Telegram et WhatsApp officiels quand tu bloques.</small></div></article></section>
 
