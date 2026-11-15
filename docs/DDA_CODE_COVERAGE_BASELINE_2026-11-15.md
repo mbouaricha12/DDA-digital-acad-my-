@@ -69,6 +69,16 @@ Après intégration des contrats existants de billing, progression et Supabase A
 
 Les contrats exécutés couvrent notamment les échanges PKCE, les erreurs GoTrue, la conservation du partenaire, les écritures de progression et l’idempotence billing.
 
+Après couverture complémentaire des stores business, audit, communauté et market-data :
+
+| Indicateur | Baseline actuelle |
+|---|---:|
+| Statements / Lines | 72,74 % |
+| Branches | 65,65 % |
+| Functions | 65,60 % |
+
+Les stores business, access-audit, community et market-data sont désormais exercés par des réponses PostgREST déterministes et des états `not_configured`/`unavailable`. Le handler serverless est couvert sur son chemin de refus de configuration invalide ; ses chemins d’instanciation avec de vraies variables Supabase restent volontairement hors réseau.
+
 Les modules d’intégration non instanciés — par exemple Supabase Auth, billing, business store, handler HTTP serverless et store de progression PostgREST — apparaissent encore à 0 %. Cela signale une zone à tester, et non un défaut de l’instrumentation.
 
 ### Academy — V8/CDP
