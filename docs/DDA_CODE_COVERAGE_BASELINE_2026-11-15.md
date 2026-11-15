@@ -59,6 +59,16 @@ Résultat après extension du driver :
 | Functions | 57,37 % |
 | Lines | 53,62 % |
 
+Après intégration des contrats existants de billing, progression et Supabase Auth dans le pilote c8 :
+
+| Indicateur | Baseline intégrée |
+|---|---:|
+| Statements / Lines | 62,99 % |
+| Branches | 63,76 % |
+| Functions | 58,47 % |
+
+Les contrats exécutés couvrent notamment les échanges PKCE, les erreurs GoTrue, la conservation du partenaire, les écritures de progression et l’idempotence billing.
+
 Les modules d’intégration non instanciés — par exemple Supabase Auth, billing, business store, handler HTTP serverless et store de progression PostgREST — apparaissent encore à 0 %. Cela signale une zone à tester, et non un défaut de l’instrumentation.
 
 ### Academy — V8/CDP

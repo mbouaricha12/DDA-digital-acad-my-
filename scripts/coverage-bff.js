@@ -5,3 +5,6 @@
 // routes without calling external services.
 require('../tests/test_bff_implementation.js');
 require('./coverage-bff-modules.js');
+require('../tests/test_billing_store.js');
+require('../tests/test_progress_sync.js');
+require('../tests/test_supabase_auth_adapter.js');
