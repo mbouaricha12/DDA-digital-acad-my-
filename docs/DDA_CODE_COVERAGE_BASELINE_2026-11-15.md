@@ -69,17 +69,27 @@ Après intégration des contrats existants de billing, progression et Supabase A
 
 Les contrats exécutés couvrent notamment les échanges PKCE, les erreurs GoTrue, la conservation du partenaire, les écritures de progression et l’idempotence billing.
 
-Après couverture complémentaire des stores business, audit, communauté et market-data :
+Après couverture complémentaire des stores business, audit, communauté et market-data, baseline reproduite au merge de la PR #284 :
 
-| Indicateur | Baseline actuelle |
+| Indicateur | Baseline au merge #284 |
 |---|---:|
 | Statements / Lines | 72,74 % |
 | Branches | 65,65 % |
 | Functions | 65,60 % |
 
-Les stores business, access-audit, community et market-data sont désormais exercés par des réponses PostgREST déterministes et des états `not_configured`/`unavailable`. Le handler serverless est couvert sur son chemin de refus de configuration invalide ; ses chemins d’instanciation avec de vraies variables Supabase restent volontairement hors réseau.
+Résultat après le renforcement local du pilote de couverture (15 novembre 2026) :
 
-Les modules d’intégration non instanciés — par exemple Supabase Auth, billing, business store, handler HTTP serverless et store de progression PostgREST — apparaissent encore à 0 %. Cela signale une zone à tester, et non un défaut de l’instrumentation.
+| Indicateur | Baseline locale actuelle |
+|---|---:|
+| Statements / Lines | 74,77 % |
+| Branches | 68,45 % |
+| Functions | 67,01 % |
+
+Le pilote exerce les contrats Auth, billing, progression, ainsi que des faux PostgREST pour business, access-audit et community, et des faux fournisseurs pour market-data. Les assertions vérifient maintenant les filtres d’owner et méthodes d’export/suppression, l’isolation mémoire inter-utilisateurs, plusieurs réponses d’erreur, les transitions de membership obsolètes/révoquées et l’instanciation valide de `buildHandler` suivie d’une réponse 404 locale. Cette construction n’effectue aucun appel Supabase ; aucun service externe réel n’est utilisé par le pilote.
+
+Ces valeurs ne signifient pas que les modules concernés sont à 0 % : leurs couvertures partielles sont détaillées dans la sortie c8. Elles mesurent l’exécution des scénarios déterministes et ne constituent ni une preuve de conformité RLS sur un projet Supabase distant, ni un test de déploiement réel.
+
+Validation locale de ce suivi : `npm run coverage:bff` reproduit les chiffres ci-dessus ; la suite Product Gate complète (contrats `tests/test_*.js`, cohérence du registre des routes, smoke test et régression navigateur Playwright) termine avec **128 passed, 0 failed**. Les checks GitHub de la PR de suivi restent requis avant toute intégration.
 
 ### Academy — V8/CDP
 
@@ -98,20 +108,22 @@ La métrique Academy est une **couverture de plages runtime V8**, pas encore une
 
 ## Limites assumées
 
-Cette tranche établit une baseline ; elle ne fixe pas encore de seuil bloquant. Les valeurs seraient artificiellement trompeuses avant l’ajout des scénarios manquants pour :
+Cette tranche établit une baseline sans seuil bloquant. Elle ne couvre pas encore exhaustivement les branches suivantes, même si des contrats ciblés existent déjà pour PKCE, erreurs GoTrue, idempotence des livraisons billing et états fournisseurs :
 
-- OAuth/PKCE et erreurs de fournisseur ;
-- webhooks Chariow et idempotence ;
-- PostgREST, billing, sessions et rate limiting en erreur ;
-- multi-onglets et expiration de session ;
-- Firefox/WebKit ;
-- pages institutionnelles supplémentaires et états réseau dégradés.
+- `bff/src/admin-roles-store.js` : les chemins assign/revoke et leurs invariants restent très peu exercés par le pilote c8 ;
+- `bff/src/session-store.js` : expiration, révocation, reprise et erreurs PostgREST nécessitent des scénarios supplémentaires ;
+- `bff/src/handler.js` et `bff/src/app.js` : l’endpoint HTTP du webhook Chariow et plusieurs routes admin/leurs erreurs ne sont pas parcourus par les scénarios actuels ;
+- l’aller-retour complet Google OAuth/PKCE en navigateur, les sessions multi-onglets et les expirations côté client ;
+- les moteurs Firefox/WebKit, ainsi que davantage de pages institutionnelles et d’états réseau dégradés dans le collecteur Academy ;
+- toute validation contre une base Supabase réelle : les tests présents restent locaux, déterministes et fondés sur des mocks.
+
+Le dernier relevé local montre notamment une couverture partielle de `app.js` (59,38 % lignes), `admin-roles-store.js` (48,73 %), `session-store.js` (54,31 %) et `handler.js` (72,50 %). Une ligne couverte ne valide pas à elle seule l’exactitude métier ou la sécurité de toutes les entrées.
 
 Les rapports sont générés en CI et archivés pendant 14 jours comme artefact GitHub Actions. Le dossier `coverage/` est ignoré par Git et aucun rapport généré n’est commité.
 
 ## Étape suivante recommandée
 
-1. Ajouter des pilotes BFF ciblés pour les modules actuellement à 0 %.
-2. Ajouter les routes publiques légales et les branches d’erreur Academy.
-3. Convertir la couverture V8 brute en rapport source avec les sourcemaps si une métrique ligne par ligne devient nécessaire.
-4. Fixer progressivement des seuils séparés, après deux ou trois baselines stables.
+1. Ajouter des scénarios ciblés pour les invariants d’assignation/révocation admin et l’expiration/révocation des sessions.
+2. Couvrir le handler de webhook Chariow et les routes admin restantes avec des requêtes et fournisseurs factices.
+3. Ajouter les routes publiques légales et les branches d’erreur Academy, sans confondre couverture runtime et couverture de source.
+4. Convertir la couverture V8 brute en rapport source avec les sourcemaps si une métrique ligne par ligne devient nécessaire, puis fixer progressivement des seuils séparés après deux ou trois baselines stables.
