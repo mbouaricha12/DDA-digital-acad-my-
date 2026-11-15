@@ -16,6 +16,11 @@ const {
 } = require('../bff/src/chariow');
 const { isHttpsUrl, validPublishedRow, PostgrestBrvmPublicationStore } = require('../bff/src/brvm-publication-store');
 const { PostgrestRateLimiter, checkAuthRateLimit } = require('../bff/src/rate-limiter');
+const { PostgrestBusinessStore, MemoryBusinessStore } = require('../bff/src/business-store');
+const { MemoryAccessAuditStore, PostgrestAccessAuditStore } = require('../bff/src/access-audit-store');
+const { PostgrestCommunityStore } = require('../bff/src/community-store');
+const { marketDataConfigFromEnv, providerConfigured, fetchMarketQuotes } = require('../bff/src/market-data');
+const { buildHandler } = require('../bff/src/handler');
 
 const userId = '11111111-1111-4111-8111-111111111111';
 
@@ -98,6 +103,54 @@ const userId = '11111111-1111-4111-8111-111111111111';
   assert.equal(await checkAuthRateLimit(limiter, 'login', { ip: '127.0.0.1', email: 'learner@example.com' }), true);
   assert.ok(limiterCalls.length >= 3);
   assert.equal(await checkAuthRateLimit(null, 'login', { ip: '127.0.0.1', email: 'learner@example.com' }), true);
+
+  const businessCalls = [];
+  const business = new PostgrestBusinessStore({
+    supabaseUrl: 'https://supabase.example/', serviceRoleKey: 'service-key',
+    fetchImpl: async (url, options) => {
+      businessCalls.push({ url, options });
+      return { ok: true, async text() { return '[]'; } };
+    }
+  });
+  const exported = await business.exportUserData('user-1');
+  assert.deepEqual(Object.keys(exported), ['lesson_progress', 'journal_entries', 'journal_plans', 'preferences']);
+  await business.deleteUserData('user-1');
+  assert.equal(businessCalls.length, 8);
+  const memoryBusiness = new MemoryBusinessStore({ journal_entries: [{ owner_id: 'user-1', note: 'private' }] });
+  assert.equal((await memoryBusiness.exportUserData('user-1')).journal_entries.length, 1);
+  await memoryBusiness.deleteUserData('user-1');
+  assert.equal((await memoryBusiness.exportUserData('user-1')).journal_entries.length, 0);
+
+  const audit = new MemoryAccessAuditStore();
+  const auditEvent = await audit.record({
+    eventName: 'admin_access_granted', resourceType: 'admin_route', actorUserId: 'user-1', requestId: 'request-1',
+    metadata: { route: '/v1/admin/overview', method: 'GET', role: 'owner' }
+  });
+  assert.equal(audit.list().length, 1);
+  assert.equal(auditEvent.metadata.role, 'owner');
+  await assert.rejects(() => audit.record({ eventName: 'invalid', resourceType: 'admin_route', actorUserId: 'user-1', requestId: 'request-2' }), /Unsupported audit event/);
+  const postgrestAudit = new PostgrestAccessAuditStore({
+    supabaseUrl: 'https://supabase.example/', serviceRoleKey: 'service-key',
+    fetchImpl: async () => ({ ok: true, async text() { return JSON.stringify([{ id: 'audit-1' }]); } })
+  });
+  assert.equal((await postgrestAudit.record({ eventName: 'role_assigned', resourceType: 'admin_role', actorUserId: 'user-1', requestId: 'request-3' })).id, 'audit-1');
+
+  const community = new PostgrestCommunityStore({
+    supabaseUrl: 'https://supabase.example/', serviceRoleKey: 'service-key',
+    fetchImpl: async (url, options) => options.method === 'GET'
+      ? { ok: true, async text() { return JSON.stringify([{ post_id: 'post-1', body: 'Bonjour', created_at: '2026-11-15T00:00:00.000Z' }]); } }
+      : { ok: true, async text() { return JSON.stringify([{ post_id: 'post-2', body: 'Publication', created_at: '2026-11-15T00:00:00.000Z' }]); } }
+  });
+  assert.equal((await community.listRecent({ limit: 0 }))[0].authorDisplayName, 'Apprenant DDA');
+  assert.equal((await community.createPost({ userId: 'user-1', authorDisplayName: '  DDA  ', body: ' Publication ' })).body, 'Publication');
+
+  const marketConfig = marketDataConfigFromEnv({ TWELVEDATA_API_KEY: 'td-key', COINGECKO_API_KEY: 'cg-key', MARKET_DATA_MAX_AGE_MS: '60000' });
+  assert.equal(providerConfigured('twelvedata', marketConfig), true);
+  const quotes = await fetchMarketQuotes({ config: marketConfig, fetchImpl: async url => ({ ok: true, async json() { return url.includes('twelvedata') ? { price: '123.45' } : { bitcoin: { usd: 50000 } }; } }) });
+  assert.equal(quotes.XAUUSD.status, 'ok');
+  assert.equal(quotes.BTCUSD.status, 'ok');
+  assert.equal((await fetchMarketQuotes({ config: marketDataConfigFromEnv({}), fetchImpl: async () => { throw new Error('must not call provider'); } })).BTCUSD.status, 'not_configured');
+  assert.throws(() => buildHandler({}), /BFF startup refused/);
 
   console.log('BFF module coverage driver: PASS');
 })().catch(error => { console.error(error.stack || error); process.exitCode = 1; });
