@@ -41,6 +41,7 @@
         <button class="nav-item" data-admin-view="memberships" type="button"><svg class="icon"><use href="#admin-icon-spark"/></svg> Abonnements</button>
         <p class="nav-section-label">Pédagogie</p>
         <button class="nav-item" data-admin-view="content" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Contenu</button>
+        <button class="nav-item" data-admin-view="progress" type="button" hidden id="admin-nav-progress"><svg class="icon"><use href="#admin-icon-progress"/></svg> Progression</button>
       </nav>
       <div class="admin-exit-row">
         <a class="secondary-action" href="academy.html"><svg class="icon"><use href="#admin-icon-home"/></svg> Retour à l’Academy</a>
@@ -65,6 +66,7 @@
       <button class="nav-item" data-admin-view="memberships" type="button"><svg class="icon"><use href="#admin-icon-spark"/></svg> Abonnements</button>
       <p class="nav-section-label">Pédagogie</p>
       <button class="nav-item" data-admin-view="content" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Contenu</button>
+      <button class="nav-item" data-admin-view="progress" type="button" hidden id="admin-nav-progress-mobile"><svg class="icon"><use href="#admin-icon-progress"/></svg> Progression</button>
       <div class="admin-exit-row">
         <a class="secondary-action" href="academy.html"><svg class="icon"><use href="#admin-icon-home"/></svg> Retour à l’Academy</a>
       </div>
@@ -103,7 +105,7 @@
         <p class="admin-role-feedback" id="admin-users-feedback" role="status" hidden></p>
         <div class="admin-table-wrap">
           <table class="admin-table">
-            <thead><tr><th>E-mail</th><th>Nom</th><th>Statut</th><th>Rôle</th><th>Partenaire</th><th>Créé le</th><th>Dernière connexion</th></tr></thead>
+            <thead><tr><th>E-mail</th><th>Nom</th><th>Statut</th><th>Rôle</th><th>Partenaire</th><th>Créé le</th><th>Dernière connexion</th><th>Progression</th></tr></thead>
             <tbody id="admin-users-body"></tbody>
           </table>
         </div>
@@ -128,6 +130,18 @@
           <button class="text-action" id="admin-memberships-prev" type="button">← Précédent</button>
           <span id="admin-memberships-page-label">Page 1</span>
           <button class="text-action" id="admin-memberships-next" type="button">Suivant →</button>
+        </div>
+      </section>
+
+      <section class="view" id="admin-view-progress" aria-labelledby="admin-progress-title">
+        <h1 id="admin-progress-title" class="eyebrow gold">Progression</h1>
+        <p class="admin-role-feedback" id="admin-progress-feedback" role="status" hidden></p>
+        <p class="admin-role-feedback" style="border-color:var(--line);color:var(--muted)" id="admin-progress-subject">Sélectionne un utilisateur depuis l’onglet Utilisateurs pour voir sa progression réelle.</p>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Leçon</th><th>Vue</th><th>Exercice</th><th>Quiz</th><th>Mis à jour</th></tr></thead>
+            <tbody id="admin-progress-body"></tbody>
+          </table>
         </div>
       </section>
 

@@ -991,6 +991,28 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const items = await billingStore.listMemberships({ page, perPage });
         return json(res, 200, { contract: 'dda-admin-memberships-v1', page, per_page: perPage, items });
       }
+      // Per-learner progression — reuses the exact same progressStore the
+      // learner's own GET /v1/progress reads from (bff/src/progress-store.js,
+      // real Supabase lesson_progress/onboarding rows, not a fabricated
+      // aggregate). There is no cross-user "all learners' progress" query:
+      // an admin looks up one real account at a time, from the Users table,
+      // same shape as the learner-facing route above.
+      const adminProgressMatch = path.match(/^\/v1\/admin\/progress\/([^/]+)$/);
+      if (method === 'GET' && adminProgressMatch) {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!progressStore) return sendError(res, 503, 'progress_not_configured', 'Progress sync is not available.', requestId);
+        const targetUserId = decodeURIComponent(adminProgressMatch[1]);
+        const [lessons, onboarding] = await Promise.all([
+          progressStore.listLessons(targetUserId),
+          progressStore.getOnboarding(targetUserId)
+        ]);
+        return json(res, 200, {
+          contract: 'dda-admin-progress-v1',
+          user_id: targetUserId,
+          lessons: Object.fromEntries(lessons.map(row => [row.lesson_id, { lessonViewed: row.lesson_viewed, exerciseComplete: row.exercise_complete, quizComplete: row.quiz_complete, updatedAt: row.updated_at }])),
+          onboarding: onboarding ? { level: onboarding.level, goal: onboarding.goal, time: onboarding.time, complete: onboarding.complete, updatedAt: onboarding.updated_at } : null
+        });
+      }
       // Role assignment/revocation — the invariants (only an owner may grant
       // or revoke, self-elevation impossible, last owner protected) live in
       // adminRoles itself (admin-roles-store.js) and are already tested

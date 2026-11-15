@@ -52,7 +52,7 @@
   const views = document.querySelectorAll('main .view');
   const navButtons = document.querySelectorAll('[data-admin-view]');
   const contextTitle = document.getElementById('admin-context-title');
-  const viewTitles = { overview: 'Aperçu', users: 'Utilisateurs', memberships: 'Abonnements', content: 'Contenu' };
+  const viewTitles = { overview: 'Aperçu', users: 'Utilisateurs', memberships: 'Abonnements', content: 'Contenu', progress: 'Progression' };
 
   function showAdminView(id) {
     views.forEach(view => view.classList.toggle('active', view.id === `admin-view-${id}`));
@@ -269,8 +269,15 @@
         <td>${escapeHtml(user.ref) || '—'}</td>
         <td>${formatDate(user.created_at)}</td>
         <td>${formatDate(user.last_sign_in_at)}</td>
-      </tr>`).join('') || `<tr><td colspan="7">Aucun utilisateur.</td></tr>`;
+        <td><button class="text-action" type="button" data-progress-user-id="${escapeHtml(user.user_id)}" data-progress-email="${escapeHtml(user.email || user.user_id)}">Voir</button></td>
+      </tr>`).join('') || `<tr><td colspan="8">Aucun utilisateur.</td></tr>`;
     body.querySelectorAll('.admin-role-select').forEach(select => select.addEventListener('change', onRoleChange));
+    body.querySelectorAll('[data-progress-user-id]').forEach(button => button.addEventListener('click', () => {
+      document.getElementById('admin-nav-progress').hidden = false;
+      document.getElementById('admin-nav-progress-mobile').hidden = false;
+      showAdminView('progress');
+      loadProgress(button.dataset.progressUserId, button.dataset.progressEmail);
+    }));
     document.getElementById('admin-users-page-label').textContent = total != null ? `Page ${page} · ${total} au total` : `Page ${page}`;
     document.getElementById('admin-users-prev').disabled = page <= 1;
     document.getElementById('admin-users-next').disabled = users.length < usersState.perPage;
@@ -370,6 +377,39 @@
     } catch (error) {
       body.innerHTML = `<tr><td colspan="2">Liste du contenu indisponible (${escapeHtml(error.message)}).</td></tr>`;
     }
+  }
+
+  // ---------- Progression (one real learner at a time) ----------
+  // Reads the exact same rows the learner's own GET /v1/progress exposes to
+  // them (bff/src/app.js, dda-admin-progress-v1) — reached only from a
+  // specific row in Utilisateurs, never a standalone "all learners" list,
+  // because the server has no such aggregate query to honestly back one.
+  async function loadProgress(userId, email) {
+    document.getElementById('admin-progress-subject').textContent = `Progression de ${email}`;
+    setDataFeedback('admin-progress-feedback', '');
+    const body = document.getElementById('admin-progress-body');
+    body.innerHTML = '';
+    let result;
+    try {
+      result = await window.DDABFF.getAdminProgress(userId);
+    } catch {
+      setDataFeedback('admin-progress-feedback', 'Progression indisponible pour le moment. Réessaie plus tard.');
+      return;
+    }
+    if (result.status !== 200) {
+      setDataFeedback('admin-progress-feedback', apiDataError(result.status, 'Progression'));
+      return;
+    }
+    const lessons = Object.entries(result.data.lessons || {});
+    const check = value => value ? '✓' : '—';
+    body.innerHTML = lessons.map(([lessonId, row]) => `
+      <tr>
+        <td>${escapeHtml(lessonId)}</td>
+        <td>${check(row.lessonViewed)}</td>
+        <td>${check(row.exerciseComplete)}</td>
+        <td>${check(row.quizComplete)}</td>
+        <td>${formatDate(row.updatedAt)}</td>
+      </tr>`).join('') || `<tr><td colspan="5">Aucune progression enregistrée pour ce compte.</td></tr>`;
   }
 
   // ---------- Logout ----------

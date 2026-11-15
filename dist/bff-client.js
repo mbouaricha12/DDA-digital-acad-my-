@@ -305,6 +305,10 @@
     return adminRequest(`/v1/admin/memberships?page=${encodeURIComponent(page)}&per_page=${encodeURIComponent(perPage)}`);
   }
 
+  async function getAdminProgress(userId) {
+    return adminRequest(`/v1/admin/progress/${encodeURIComponent(userId)}`);
+  }
+
   // Role mutation — owner-only server-side (bff/src/app.js), never decided
   // here. Returns {enabled, status, data|body} the same way adminRequest
   // does, rather than throwing on 403/409: the UI needs to show *why* a
@@ -329,7 +333,7 @@
     oauthGoogleStartUrl, exchangeOAuthCode,
     getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, fetchPremiumContent, askAI, startPremiumCheckout,
     getCommunityPosts, createCommunityPost,
-    getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
+    getAdminOverview, getAdminUsers, getAdminMemberships, getAdminProgress, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }
   });
 })();
