@@ -33,7 +33,9 @@ for (const key of docs) {
   assert.match(html, /\.\.\/public-docs\.js/);
   assert.match(html, /\.\.\/public-document\.js/);
   assert.match(html, /\.\.\/index\.html/);
-  assert.match(html, /lang="fr"/);
+  // Accept the base French locale and the precise French-France locale used
+  // by the public SEO pages; reject other language declarations.
+  assert.match(html, /lang="fr(?:-FR)?"/);
   assert.match(source, new RegExp(`${key}: \\{`), `shared source missing ${key}`);
 
   const doc = registry.public[key] || registry.legal[key];

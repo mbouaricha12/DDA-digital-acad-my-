@@ -36,17 +36,17 @@ assert.ok(!locs.includes(`${BASE}academy.html`), 'the private Academy entry poin
 
 const commencer = fs.readFileSync(path.join(dist, 'commencer', 'index.html'), 'utf8');
 assert.match(commencer, /<title>Commencer avec DDA Free — Darius Digital Academy<\/title>/);
-assert.match(commencer, /<meta name="description" content="Commencer avec DDA Free : découvrir une leçon, pratiquer avec méthode et suivre une progression locale honnête\.\">/);
+assert.match(commencer, /<meta name="description" content="Commencer gratuitement avec DDA : trois fondations M0, des exercices et une progression pédagogique honnête pour apprendre les marchés\.\">/);
 assert.match(commencer, /<link rel="canonical" href="https:\/\/dariusdigitalacademy\.com\/commencer\/">/);
 assert.match(commencer, /<meta property="og:type" content="website">/);
 assert.match(commencer, /<meta property="og:site_name" content="Darius Digital Academy">/);
 assert.match(commencer, /<meta property="og:title" content="Commencer avec DDA Free — Darius Digital Academy">/);
-assert.match(commencer, /<meta property="og:description" content="Commencer avec DDA Free : découvrir une leçon, pratiquer avec méthode et suivre une progression locale honnête\.\">/);
+assert.match(commencer, /<meta property="og:description" content="Commencer gratuitement avec DDA : trois fondations M0, des exercices et une progression pédagogique honnête pour apprendre les marchés\.\">/);
 assert.match(commencer, /<meta property="og:url" content="https:\/\/dariusdigitalacademy\.com\/commencer\/">/);
 assert.match(commencer, /<meta property="og:image" content="https:\/\/dariusdigitalacademy\.com\/images\/dda-og-image\.jpg">/);
 assert.match(commencer, /<meta name="twitter:card" content="summary_large_image">/);
 assert.match(commencer, /<meta name="twitter:title" content="Commencer avec DDA Free — Darius Digital Academy">/);
-assert.match(commencer, /<meta name="twitter:description" content="Commencer avec DDA Free : découvrir une leçon, pratiquer avec méthode et suivre une progression locale honnête\.\">/);
+assert.match(commencer, /<meta name="twitter:description" content="Commencer gratuitement avec DDA : trois fondations M0, des exercices et une progression pédagogique honnête pour apprendre les marchés\.\">/);
 assert.match(commencer, /<meta name="twitter:image" content="https:\/\/dariusdigitalacademy\.com\/images\/dda-og-image\.jpg">/);
 
 const landing = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
