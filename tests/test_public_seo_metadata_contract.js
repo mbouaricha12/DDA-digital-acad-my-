@@ -10,11 +10,16 @@ const { imageSize } = (() => {
 const root = path.join(__dirname, '..');
 const dist = path.join(root, 'dist');
 const BASE = 'https://dariusdigitalacademy.com/';
-const publicPages = [
+const INDEXABLE_PAGES = [
   'about', 'launch', 'terms', 'privacy', 'cookies', 'imprint', 'risks',
-  'accessibility', 'contact', 'faq', 'live', 'business', 'experts',
-  'community', 'ai'
+  'accessibility', 'contact', 'faq'
 ];
+// Hidden from navigation on the founder's explicit instruction and now also
+// deindexed (noindex, still follow — their internal links stay crawlable):
+// real pages, real code, kept in the repo, just not something Google should
+// surface while they are "à venir" and not reachable from any public nav.
+const COMING_SOON_PAGES = ['live', 'business', 'experts', 'community', 'ai'];
+const publicPages = [...INDEXABLE_PAGES, ...COMING_SOON_PAGES];
 
 const descriptions = new Set();
 for (const slug of publicPages) {
@@ -30,7 +35,11 @@ for (const slug of publicPages) {
 
   const canonical = `${BASE}${slug}/`;
   assert.match(html, new RegExp(`<link rel="canonical" href="${canonical.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}">`), `${slug}: canonical must be absolute and self-referencing`);
-  assert.match(html, /<meta name="robots" content="index, follow">/, `${slug}: public page must remain indexable`);
+  if (COMING_SOON_PAGES.includes(slug)) {
+    assert.match(html, /<meta name="robots" content="noindex, follow">/, `${slug}: "coming soon" page must be deindexed, never indexed while hidden from navigation`);
+  } else {
+    assert.match(html, /<meta name="robots" content="index, follow">/, `${slug}: public page must remain indexable`);
+  }
   assert.match(html, new RegExp(`<meta property="og:url" content="${canonical.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}">`), `${slug}: og:url must be canonical`);
   assert.match(html, /<meta property="og:title" content="[^"]+">/);
   assert.match(html, /<meta property="og:description" content="[^"]+">/);
@@ -53,7 +62,8 @@ const academy = fs.readFileSync(path.join(dist, 'academy.html'), 'utf8');
 assert.match(academy, /<meta name="robots" content="noindex, nofollow">/);
 
 const sitemap = fs.readFileSync(path.join(dist, 'sitemap.xml'), 'utf8');
-for (const slug of publicPages) assert.match(sitemap, new RegExp(`<loc>${BASE}${slug}\/</loc>`), `${slug}: public page must remain in sitemap`);
+for (const slug of INDEXABLE_PAGES) assert.match(sitemap, new RegExp(`<loc>${BASE}${slug}\/</loc>`), `${slug}: public page must remain in sitemap`);
+for (const slug of COMING_SOON_PAGES) assert.doesNotMatch(sitemap, new RegExp(`<loc>${BASE}${slug}\/</loc>`), `${slug}: deindexed "coming soon" page must not be in the sitemap`);
 assert.doesNotMatch(sitemap, /academy\.html/, 'private Academy must not be in sitemap');
 
 const ogPath = path.join(dist, 'images', 'dda-og-image.jpg');
