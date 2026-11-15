@@ -30,7 +30,7 @@ const QUESTIONS = [
 
 function extractAnswer(html, question) {
   const escaped = question.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = html.match(new RegExp(`<h3>${escaped}</h3><p>([\\s\\S]*?)</p>`));
+  const match = html.match(new RegExp(`<h2>${escaped}</h2><p>([\\s\\S]*?)</p>`));
   return match ? match[1] : null;
 }
 function extractSummaryAnswer(html, question) {
