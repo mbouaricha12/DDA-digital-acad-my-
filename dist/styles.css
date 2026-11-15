@@ -1520,7 +1520,17 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .view:not(:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone)){max-width:1520px}
 }
 @media(min-width:1800px){
-  .view:not(:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone)){max-width:1760px}
+  .view:not(:is(#dashboard,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone)){max-width:1760px}
+}
+/* The 1760px ceiling above still centers the Dashboard with real dead
+   space on a wide monitor (2560px+): its card grids (hero, parcours,
+   summary) scale with the viewport via fr/minmax units, so there is no
+   reading-width reason to cap it. #dashboard instead fills the full
+   track after the sidebar at every size from 1440px up, flush against
+   it (no auto-centering gap), with only a soft ceiling far past any
+   realistic monitor so lines never run unbounded on a projector/TV. */
+@media(min-width:1440px){
+  #dashboard.view{max-width:2400px;margin-left:0;margin-right:auto}
 }
 
 
