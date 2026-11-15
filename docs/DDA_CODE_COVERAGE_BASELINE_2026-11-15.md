@@ -48,7 +48,18 @@ Résultat de la première collecte locale :
 | Functions | 47,16 % |
 | Lines | 41,38 % |
 
-Le contrat BFF passe avant la collecte. Les modules d’intégration non instanciés par ce contrat — par exemple Chariow, Supabase Auth, billing et le store de progression PostgREST — apparaissent à 0 %. Cela signale une zone à tester, et non un défaut de l’instrumentation.
+Le contrat BFF et le driver déterministe des modules purs passent avant la collecte. Le driver couvre les validations IA, analytics, Chariow, publications BRVM et rate limiting sans appeler de service externe réel.
+
+Résultat après extension du driver :
+
+| Indicateur | Résultat |
+|---|---:|
+| Statements | 53,62 % |
+| Branches | 62,94 % |
+| Functions | 57,37 % |
+| Lines | 53,62 % |
+
+Les modules d’intégration non instanciés — par exemple Supabase Auth, billing, business store, handler HTTP serverless et store de progression PostgREST — apparaissent encore à 0 %. Cela signale une zone à tester, et non un défaut de l’instrumentation.
 
 ### Academy — V8/CDP
 
