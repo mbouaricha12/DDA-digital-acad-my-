@@ -1,0 +1,58 @@
+[
+  {
+    "id": "VID-INDICATEURS", "title": "Les indicateurs en trading", "module": null,
+    "level": "débutant", "type": "video", "access": "free", "duration": null, "status": "publié",
+    "video_visibility": "public_youtube", "preview": false,
+    "url": "https://youtube.com/shorts/BTipx88k_U8",
+    "description": "Un premier repère pour comprendre à quoi servent les indicateurs techniques."
+  },
+  {
+    "id": "VID-MOYENNES-MOBILES", "title": "Les moyennes mobiles en trading", "module": null,
+    "level": "débutant", "type": "video", "access": "free", "duration": null, "status": "publié",
+    "video_visibility": "public_youtube", "preview": false,
+    "url": "https://youtube.com/shorts/rVd4dF6JaZ4",
+    "description": "Ce que mesure une moyenne mobile, et pourquoi elle lisse le prix plutôt que de le prédire."
+  },
+  {
+    "id": "VID-VOLATILITE-FOREX", "title": "La volatilité sur le Forex", "module": null,
+    "level": "débutant", "type": "video", "access": "free", "duration": null, "status": "publié",
+    "video_visibility": "public_youtube", "preview": false,
+    "url": "https://youtube.com/shorts/HaP-Onie9Lc",
+    "description": "Comprendre pourquoi certaines paires de devises bougent plus vite que d’autres."
+  },
+  {
+    "id": "VID-CRYPTOMONNAIES", "title": "Comprendre les cryptomonnaies", "module": null,
+    "level": "débutant", "type": "video", "access": "free", "duration": null, "status": "publié",
+    "video_visibility": "public_youtube", "preview": false,
+    "url": "https://youtube.com/shorts/yBNc_eQbiow",
+    "description": "Les bases pour situer les cryptomonnaies parmi les actifs étudiés dans DDA."
+  },
+  {
+    "id": "VID-TYPES-DE-TRADERS", "title": "Les types de traders", "module": null,
+    "level": "débutant", "type": "video", "access": "free", "duration": null, "status": "publié",
+    "video_visibility": "public_youtube", "preview": false,
+    "url": "https://youtube.com/shorts/bVJ9n-Etcpc",
+    "description": "Les grandes familles de traders selon leur horizon de temps, pour situer ses propres repères."
+  },
+  {
+    "id": "VID-SUPPORTS-RESISTANCES", "title": "Supports et résistances", "module": "M0.2",
+    "level": "débutant", "type": "video", "access": "free", "duration": null, "status": "publié",
+    "video_visibility": "public_youtube", "preview": false,
+    "url": "https://youtube.com/shorts/pRFqhk55bL4",
+    "description": "Ce qu’est un niveau de support ou de résistance, et pourquoi le prix y réagit souvent."
+  },
+  {
+    "id": "VID-BOUGIES-JAPONAISES", "title": "Les bougies japonaises", "module": null,
+    "level": "débutant", "type": "video", "access": "free", "duration": null, "status": "publié",
+    "video_visibility": "public_youtube", "preview": false,
+    "url": "https://youtube.com/shorts/WDifN6ZKnjY",
+    "description": "Comment lire une bougie japonaise — ouverture, clôture, plus haut et plus bas d’une période."
+  },
+  {
+    "id": "VID-MARCHE-DES-DEVISES", "title": "Le marché des devises", "module": null,
+    "level": "débutant", "type": "video", "access": "free", "duration": null, "status": "publié",
+    "video_visibility": "public_youtube", "preview": false,
+    "url": "https://youtube.com/shorts/bUHsQnIAFuc",
+    "description": "Comment fonctionne le marché des devises (Forex) et qui y échange."
+  }
+]

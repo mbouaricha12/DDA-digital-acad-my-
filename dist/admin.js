@@ -52,7 +52,7 @@
   const views = document.querySelectorAll('main .view');
   const navButtons = document.querySelectorAll('[data-admin-view]');
   const contextTitle = document.getElementById('admin-context-title');
-  const viewTitles = { overview: 'Aperçu', users: 'Utilisateurs', memberships: 'Abonnements', content: 'Contenu', progress: 'Progression' };
+  const viewTitles = { overview: 'Aperçu', users: 'Utilisateurs', memberships: 'Abonnements', content: 'Contenu', resources: 'Ressources', progress: 'Progression' };
 
   function showAdminView(id) {
     views.forEach(view => view.classList.toggle('active', view.id === `admin-view-${id}`));
@@ -66,6 +66,7 @@
     if (id === 'memberships' && !usersState.loaded) loadUsers(1);
     if (id === 'memberships' && !membershipsState.loaded) loadMemberships(1);
     if (id === 'content' && !contentState.loaded) loadContent();
+    if (id === 'resources' && !resourcesState.loaded) loadResources();
   }
 
   navButtons.forEach(button => button.addEventListener('click', () => {
@@ -376,6 +377,33 @@
       </tr>`).join('') || `<tr><td colspan="2">Aucun contenu publié trouvé.</td></tr>`;
     } catch (error) {
       body.innerHTML = `<tr><td colspan="2">Liste du contenu indisponible (${escapeHtml(error.message)}).</td></tr>`;
+    }
+  }
+
+  // ---------- Resources (read-only, mirrors VIDEO_REGISTRY) ----------
+  // Same pattern as loadContent() above: a same-origin static file fetch of
+  // the real, already-published registry (dist/video-registry.json), kept
+  // byte-for-byte in sync with dist/app.js's VIDEO_REGISTRY by
+  // tests/test_video_registry_mirror_contract.js — never a hand-typed second
+  // copy of what the Academy actually serves.
+  const resourcesState = { loaded: false };
+  async function loadResources() {
+    resourcesState.loaded = true;
+    const body = document.getElementById('admin-resources-body');
+    try {
+      const response = await fetch('video-registry.json', { credentials: 'omit' });
+      if (!response.ok) throw new Error(`video-registry.json ${response.status}`);
+      const videos = await response.json();
+      body.innerHTML = videos.map(video => `
+      <tr>
+        <td>${escapeHtml(video.title)}</td>
+        <td>${escapeHtml(video.module) || '—'}</td>
+        <td>${escapeHtml(video.access)}</td>
+        <td>${escapeHtml(video.status)}</td>
+        <td><a href="${escapeHtml(video.url)}" target="_blank" rel="noopener noreferrer">Ouvrir ↗</a></td>
+      </tr>`).join('') || `<tr><td colspan="5">Aucune ressource publiée trouvée.</td></tr>`;
+    } catch (error) {
+      body.innerHTML = `<tr><td colspan="5">Liste des ressources indisponible (${escapeHtml(error.message)}).</td></tr>`;
     }
   }
 

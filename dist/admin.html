@@ -41,6 +41,7 @@
         <button class="nav-item" data-admin-view="memberships" type="button"><svg class="icon"><use href="#admin-icon-spark"/></svg> Abonnements</button>
         <p class="nav-section-label">Pédagogie</p>
         <button class="nav-item" data-admin-view="content" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Contenu</button>
+        <button class="nav-item" data-admin-view="resources" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Ressources</button>
         <button class="nav-item" data-admin-view="progress" type="button" hidden id="admin-nav-progress"><svg class="icon"><use href="#admin-icon-progress"/></svg> Progression</button>
       </nav>
       <div class="admin-exit-row">
@@ -66,6 +67,7 @@
       <button class="nav-item" data-admin-view="memberships" type="button"><svg class="icon"><use href="#admin-icon-spark"/></svg> Abonnements</button>
       <p class="nav-section-label">Pédagogie</p>
       <button class="nav-item" data-admin-view="content" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Contenu</button>
+      <button class="nav-item" data-admin-view="resources" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Ressources</button>
       <button class="nav-item" data-admin-view="progress" type="button" hidden id="admin-nav-progress-mobile"><svg class="icon"><use href="#admin-icon-progress"/></svg> Progression</button>
       <div class="admin-exit-row">
         <a class="secondary-action" href="academy.html"><svg class="icon"><use href="#admin-icon-home"/></svg> Retour à l’Academy</a>
@@ -130,6 +132,17 @@
           <button class="text-action" id="admin-memberships-prev" type="button">← Précédent</button>
           <span id="admin-memberships-page-label">Page 1</span>
           <button class="text-action" id="admin-memberships-next" type="button">Suivant →</button>
+        </div>
+      </section>
+
+      <section class="view" id="admin-view-resources" aria-labelledby="admin-resources-title">
+        <h1 id="admin-resources-title" class="eyebrow gold">Ressources</h1>
+        <p class="admin-role-feedback" style="border-color:var(--line);color:var(--muted)">Liste en lecture seule des vidéos publiques réellement publiées (dist/video-registry.json, miroir vérifié de VIDEO_REGISTRY) — aucune ressource Premium protégée n’apparaît ici.</p>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Titre</th><th>Module</th><th>Accès</th><th>Statut</th><th>Lien</th></tr></thead>
+            <tbody id="admin-resources-body"></tbody>
+          </table>
         </div>
       </section>
 
