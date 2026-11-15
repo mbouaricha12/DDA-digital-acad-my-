@@ -1734,6 +1734,50 @@ async function renderGlobalMarketQuotes() {
   }
 }
 
+// Maquette chantier (2026-11-14) : "Marchés principaux" compact — les 4
+// instruments mis en avant dans la maquette de référence, même source et
+// même honnêteté que la grille Market Intelligence complète ci-dessus
+// (jamais de prix fabriqué ; "Cotation en attente" tant qu'aucun
+// fournisseur n'est connecté).
+const DASHBOARD_MARKETS_SYMBOLS = ['XAUUSD', 'EURUSD', 'US30', 'NAS100'];
+function renderDashboardMarketsWidgetSkeleton(list) {
+  list.innerHTML = DASHBOARD_MARKETS_SYMBOLS.map(symbol => `
+    <li class="dashboard-markets-row" data-symbol="${symbol}">
+      ${marketSymbolIconHtml(symbol)}
+      <span class="dashboard-markets-row-name">${symbol}</span>
+      <span class="dashboard-markets-row-value data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Bientôt disponible</span>
+    </li>
+  `).join('');
+}
+async function renderDashboardMarketsWidget() {
+  const list = document.getElementById('dashboard-markets-list');
+  if (!list) return;
+  renderDashboardMarketsWidgetSkeleton(list);
+  if (!window.DDABFF?.enabled()) return;
+  try {
+    const instruments = await window.DDABFF.getMarketQuotes();
+    if (!instruments) return;
+    list.innerHTML = DASHBOARD_MARKETS_SYMBOLS.map(symbol => {
+      const quote = instruments[symbol];
+      if (!quote) return '';
+      if (quote.status === 'ok') {
+        return `<li class="dashboard-markets-row" data-symbol="${symbol}">
+          ${marketSymbolIconHtml(symbol)}
+          <span class="dashboard-markets-row-name">${symbol}</span>
+          <span class="dashboard-markets-row-value is-live">${quote.price}</span>
+        </li>`;
+      }
+      return `<li class="dashboard-markets-row" data-symbol="${symbol}">
+        ${marketSymbolIconHtml(symbol)}
+        <span class="dashboard-markets-row-name">${symbol}</span>
+        <span class="dashboard-markets-row-value data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>${quote.status === 'unavailable' ? 'Indisponible' : 'Bientôt disponible'}</span>
+      </li>`;
+    }).join('');
+  } catch {
+    // Conserve le squelette honnête "Bientôt disponible" sur tout échec.
+  }
+}
+
 function renderMarketIntelligence() {
   renderGlobalMarketQuotes();
   // Keep the public section anchor intact; only the inner grid is data-driven.
@@ -3227,6 +3271,7 @@ function renderState() {
   renderTerminalMeta(continueTarget);
   renderDashboardProof(continueTarget, curriculumComplete);
   renderDashboardWeekAhead(continueTarget);
+  renderDashboardMarketsWidget();
   renderQuickSkills(complete);
   renderDariusAnalysisTerminal();
   applyAnalysisTerminalDefaultState(complete);

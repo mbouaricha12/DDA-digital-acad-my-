@@ -1731,7 +1731,11 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
       '#landing-proof h2', '#landing-proof p',
       '#landing-free h2', '#landing-free h3',
       '#landing-ecosystem h2', '#landing-ecosystem p',
-      '#landing-future h2', '#landing-future p',
+      // #landing-future is temporarily hidden (founder decision, 2026-11-15:
+      // mask the 5 not-yet-ready public teaser spaces from navigation) — its
+      // copy has zero geometry while hidden, so it is excluded here rather
+      // than asserted against an invisible target. Re-add once the section
+      // is unhidden.
       '#landing-trust h2', '.landing-final-cta h2', '.landing-final-cta p'
     ];
     for (const width of [360, 390, 414]) {
