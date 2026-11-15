@@ -200,6 +200,11 @@ const QUICK_SKILLS_REGISTRY = Object.freeze([
    utilisé). `preview: true` marque un aperçu gratuit d'un module Premium.
    Durées non communiquées par le fondateur : volontairement omises plutôt
    qu'inventées.
+   Mirroré dans dist/video-registry.json (lecture seule) pour le back-office
+   (admin.js, onglet Ressources) — ce fichier-ci reste la source autoritaire
+   pour la lecture/rattachement réel des leçons ; le miroir est vérifié
+   byte-pour-byte par tests/test_video_registry_mirror_contract.js, qui
+   échoue si l'un des deux est modifié sans l'autre.
    ========================================================================== */
 const VIDEO_REGISTRY = Object.freeze([
   {

@@ -71,11 +71,21 @@ function makeAuth(users) {
     async countMembershipsByStatus() { return { active: 2, trial: 0, expired: 1, revoked: 0 }; },
     async listMemberships({ page, perPage }) { return [{ user_id: OWNER, provider: 'chariow', status: 'active', product_id: 'prd_premium', starts_at: '2026-10-01T00:00:00.000Z', ends_at: null, updated_at: '2026-10-20T00:00:00.000Z' }].slice((page - 1) * perPage, (page - 1) * perPage + perPage); }
   };
+  const progressStore = {
+    async listLessons(ownerId) {
+      if (ownerId !== PLAIN) return [];
+      return [{ lesson_id: 'M0.1', lesson_viewed: true, exercise_complete: true, quiz_complete: false, updated_at: '2026-10-22T00:00:00.000Z' }];
+    },
+    async getOnboarding(ownerId) {
+      if (ownerId !== PLAIN) return null;
+      return { level: 'beginner', goal: 'learn', time: '30min', complete: true, updated_at: '2026-10-20T00:00:00.000Z' };
+    }
+  };
   const baseConfig = { allowedOrigins: ['http://localhost:8744'], secureCookies: true, sessionIdleMs: 60 * 60 * 1000, sessionAbsoluteMs: 24 * 60 * 60 * 1000, sessionEncryptionKey: null, emailRedirectTo: 'http://localhost:8744/access' };
 
   // --- 1. Fully wired: owner and admin can reach all three routes, a plain user cannot ---
   {
-    const handler = createBff({ auth, sessions, adminRoles, accessAudit, billingStore, config: baseConfig, clock: () => new Date('2026-10-24T00:00:00.000Z') });
+    const handler = createBff({ auth, sessions, adminRoles, accessAudit, billingStore, progressStore, config: baseConfig, clock: () => new Date('2026-10-24T00:00:00.000Z') });
     const server = http.createServer(handler);
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
     try {
@@ -145,6 +155,22 @@ function makeAuth(users) {
       response = await request(server, 'GET', '/v1/admin/memberships', { cookies: { '__Host-dda_session': plainToken } });
       assert.equal(response.status, 403);
 
+      // --- Per-learner progression: an admin looks up one real account's real rows ---
+      response = await request(server, 'GET', `/v1/admin/progress/${encodeURIComponent(PLAIN)}`, { cookies: { '__Host-dda_session': ownerToken } });
+      assert.equal(response.status, 200);
+      assert.equal(response.body.contract, 'dda-admin-progress-v1');
+      assert.equal(response.body.user_id, PLAIN);
+      assert.deepEqual(response.body.lessons['M0.1'], { lessonViewed: true, exerciseComplete: true, quizComplete: false, updatedAt: '2026-10-22T00:00:00.000Z' });
+      assert.deepEqual(response.body.onboarding, { level: 'beginner', goal: 'learn', time: '30min', complete: true, updatedAt: '2026-10-20T00:00:00.000Z' });
+
+      response = await request(server, 'GET', `/v1/admin/progress/${encodeURIComponent(OWNER)}`, { cookies: { '__Host-dda_session': adminToken } });
+      assert.equal(response.status, 200, 'an admin (not just an owner) can also look up progression');
+      assert.deepEqual(response.body.lessons, {}, 'a real account with no progress rows reports an empty object, never fabricated entries');
+      assert.equal(response.body.onboarding, null);
+
+      response = await request(server, 'GET', `/v1/admin/progress/${encodeURIComponent(PLAIN)}`, { cookies: { '__Host-dda_session': plainToken } });
+      assert.equal(response.status, 403, 'progression lookup refuses a non-admin exactly like the other admin routes');
+
       // --- Role assignment/revocation: owner-only, CSRF-protected, server-derived ---
       response = await request(server, 'POST', '/v1/admin/roles', { ...withCsrf(adminToken), body: { user_id: PLAIN, role: 'admin' } });
       assert.equal(response.status, 403, 'an admin (not an owner) cannot grant a role, even with valid CSRF');
@@ -196,6 +222,19 @@ function makeAuth(users) {
       const response = await request(server, 'GET', '/v1/admin/overview', { cookies: { '__Host-dda_session': ownerToken } });
       assert.equal(response.status, 503, 'a missing admin role store is a configuration error, not an open door');
       assert.equal(response.body.code, 'admin_not_configured');
+    } finally { server.close(); }
+  }
+
+  // --- 2b. Progress store missing: an otherwise-fully-wired admin must still see an honest 503, never an empty 200 ---
+  {
+    const handler = createBff({ auth, sessions, adminRoles, accessAudit, billingStore, config: baseConfig, clock: () => new Date('2026-10-24T00:00:00.000Z') });
+    const server = http.createServer(handler);
+    await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const ownerToken = await loginAs(sessions, OWNER);
+      const response = await request(server, 'GET', `/v1/admin/progress/${encodeURIComponent(PLAIN)}`, { cookies: { '__Host-dda_session': ownerToken } });
+      assert.equal(response.status, 503, 'an unconfigured progress store must fail closed, not report fabricated empty progress');
+      assert.equal(response.body.code, 'progress_not_configured');
     } finally { server.close(); }
   }
 

@@ -228,6 +228,53 @@ async function withBffContext(browser) {
     await context.close();
   });
 
+  await test('the Resources view lists real published videos from the registry mirror, read-only', async () => {
+    const context = await withBffContext(browser);
+    await context.route('https://bff.test/v1/admin/overview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-overview-v1', generated_at: new Date().toISOString(), caller: { user_id: 'admin-1', role: 'admin' }, metrics: {} })
+    }));
+    const page = await context.newPage();
+    await page.goto(ADMIN_BASE);
+    await page.waitForSelector('.admin-metrics');
+    await page.click('.sidebar .nav-item[data-admin-view="resources"]');
+    await page.waitForSelector('#admin-resources-body tr');
+    const text = await page.textContent('#admin-resources-body');
+    assert.match(text, /indicateurs|moyennes mobiles|bougies japonaises/i, 'at least one real, publicly-published video title is listed');
+    const linkHref = await page.getAttribute('#admin-resources-body a', 'href');
+    assert.match(linkHref, /^https:\/\/youtube\.com\//, 'the resource link points at the real YouTube URL, never a fabricated one');
+    await context.close();
+  });
+
+  await test('selecting a learner from Users opens their real progression, drilled down one account at a time', async () => {
+    const context = await withBffContext(browser);
+    await context.route('https://bff.test/v1/admin/overview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-overview-v1', generated_at: new Date().toISOString(), caller: { user_id: 'owner-1', role: 'owner' }, metrics: {} })
+    }));
+    await context.route(/https:\/\/bff\.test\/v1\/admin\/users.*page=1/, route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-users-v1', page: 1, per_page: 20, total: 1, users: [{ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', status: 'active', role: null, created_at: '2026-01-01T00:00:00Z', last_sign_in_at: null }] })
+    }));
+    await context.route('https://bff.test/v1/admin/progress/u1', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-progress-v1', user_id: 'u1', lessons: { 'M0.1': { lessonViewed: true, exerciseComplete: true, quizComplete: false, updatedAt: '2026-10-22T00:00:00Z' } }, onboarding: null })
+    }));
+    const page = await context.newPage();
+    await page.goto(ADMIN_BASE);
+    await page.waitForSelector('.admin-metrics');
+    assert.equal(await page.isHidden('[data-admin-view="progress"]'), true, 'the Progression nav entry stays hidden until a learner is actually selected');
+    await page.click('.sidebar .nav-item[data-admin-view="users"]');
+    await page.waitForSelector('#admin-users-body tr');
+    await page.click('#admin-users-body [data-progress-user-id="u1"]');
+    await page.waitForSelector('#admin-progress-body tr');
+    assert.match(await page.textContent('#admin-progress-subject'), /ada@example\.com/);
+    const text = await page.textContent('#admin-progress-body');
+    assert.match(text, /M0\.1/);
+    assert.match(text, /✓/, 'a completed lesson/exercise is marked, never left blank');
+    await context.close();
+  });
+
   await test('an admin (not an owner) sees roles as read-only tags, never an editable control', async () => {
     const context = await withBffContext(browser);
     await context.route('https://bff.test/v1/admin/overview', route => route.fulfill({
