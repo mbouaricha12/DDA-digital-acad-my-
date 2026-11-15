@@ -369,20 +369,45 @@
           <span>Progresse</span>
         </div>
 
-        <div class="terminal-entry dashboard-command-head">
-          <div>
-            <p class="eyebrow gold">Cockpit du jour · Aujourd’hui dans DDA</p>
-            <h1 id="dashboard-title"><span id="greeting-prefix">Bonjour</span> <span id="dashboard-name">Apprenant</span>.</h1>
-            <p id="personalized-next">Une étape claire pour continuer à progresser.</p>
+        <div class="dashboard-hero">
+          <div class="dashboard-hero-main">
+            <div class="terminal-entry dashboard-command-head">
+              <div>
+                <p class="eyebrow gold">Cockpit du jour · Aujourd’hui dans DDA</p>
+                <h1 id="dashboard-title"><span id="greeting-prefix">Bonjour</span> <span id="dashboard-name">Apprenant</span>.</h1>
+                <p id="personalized-next">Une étape claire pour continuer à progresser.</p>
+              </div>
+            </div>
+            <div class="dashboard-kpi-row" aria-label="Indicateurs du jour">
+              <div class="dashboard-kpi-card"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-target"/></svg></span><div><strong id="dashboard-action-label">—</strong><span>Action du jour</span></div></div>
+              <div class="dashboard-kpi-card dashboard-kpi-gold"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-spark"/></svg></span><div><strong id="week-xp">0 XP</strong><span>XP total</span></div></div>
+              <div class="dashboard-kpi-card"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-check-circle"/></svg></span><div><strong id="dashboard-proof-state-inline">À construire</strong><span>Preuve récente</span></div></div>
+              <div class="dashboard-kpi-card"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-calendar"/></svg></span><div><strong id="active-days">0 jour</strong><span>Activité (7 j)</span></div></div>
+            </div>
           </div>
+          <aside class="dashboard-hero-side" aria-label="Marchés et terminal d’analyse">
+            <div class="dashboard-markets-widget" aria-labelledby="dashboard-markets-title">
+              <div class="dashboard-markets-head">
+                <p class="eyebrow gold" id="dashboard-markets-title">Marchés principaux</p>
+                <button type="button" class="text-action" data-view="markets">Voir tout <span>→</span></button>
+              </div>
+              <ul class="dashboard-markets-list" id="dashboard-markets-list" aria-live="polite"></ul>
+            </div>
+            <button type="button" class="dashboard-terminal-preview" data-view="dashboard" data-scroll-to="analysis-terminal" aria-label="Ouvrir le Terminal d’analyse complet">
+              <div class="dashboard-terminal-preview-head">
+                <span>Terminal d’analyse</span>
+                <span class="demo-data-badge"><span class="status-dot"></span>Pédagogique</span>
+              </div>
+              <svg class="dashboard-terminal-preview-chart" viewBox="0 0 320 120" aria-hidden="true" focusable="false">
+                <polyline points="0,96 28,88 56,92 84,70 112,76 140,52 168,58 196,34 224,40 252,22 280,28 320,10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="0,96 28,88 56,92 84,70 112,76 140,52 168,58 196,34 224,40 252,22 280,28 320,10 320,120 0,120" fill="url(#dashTerminalGrad)" stroke="none"/>
+                <defs><linearGradient id="dashTerminalGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="currentColor" stop-opacity="0.22"/><stop offset="100%" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs>
+              </svg>
+              <span class="dashboard-terminal-preview-cta">Ouvrir le Terminal complet <span>→</span></span>
+            </button>
+          </aside>
         </div>
-        <div class="dashboard-kpi-row" aria-label="Indicateurs du jour">
-          <div class="dashboard-kpi-card"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-target"/></svg></span><div><strong id="dashboard-action-label">—</strong><span>Action du jour</span></div></div>
-          <div class="dashboard-kpi-card dashboard-kpi-gold"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-spark"/></svg></span><div><strong id="week-xp">0 XP</strong><span>XP total</span></div></div>
-          <div class="dashboard-kpi-card"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-check-circle"/></svg></span><div><strong id="dashboard-proof-state-inline">À construire</strong><span>Preuve récente</span></div></div>
-          <div class="dashboard-kpi-card"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-calendar"/></svg></span><div><strong id="active-days">0 jour</strong><span>Activité (7 j)</span></div></div>
-        </div>
-  
+
         <article class="terminal-lead">
           <div>
             <p class="terminal-lead-kicker"><span class="pill" id="lesson-state-pill">En cours</span><span id="terminal-lead-module">Fondations des marchés</span><span class="lesson-index" id="lesson-index-label">LEÇON</span></p>
