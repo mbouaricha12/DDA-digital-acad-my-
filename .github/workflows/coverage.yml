@@ -1,0 +1,68 @@
+name: DDA code coverage
+
+on:
+  pull_request:
+    paths:
+      - 'bff/**'
+      - 'dist/**'
+      - 'scripts/coverage-*.js'
+      - 'tests/**'
+      - 'package.json'
+      - '.github/workflows/coverage.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'bff/**'
+      - 'dist/**'
+      - 'scripts/coverage-*.js'
+      - 'tests/**'
+      - 'package.json'
+      - '.github/workflows/coverage.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    name: BFF and Academy coverage baseline
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+
+      - name: Install Chromium for the Academy V8 collector
+        run: npx playwright install --with-deps chromium
+
+      - name: Check collector syntax
+        run: |
+          node --check scripts/coverage-bff.js
+          node --check scripts/coverage-academy.js
+
+      - name: Collect BFF c8 coverage
+        run: npm run coverage:bff
+
+      - name: Collect Academy V8 coverage
+        run: npm run coverage:academy
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: dda-coverage-${{ github.sha }}
+          path: |
+            coverage/coverage-final.json
+            coverage/lcov.info
+            coverage/lcov-report/
+            coverage/academy-v8.json
+            coverage/academy-summary.json
+          if-no-files-found: error
+          retention-days: 14
