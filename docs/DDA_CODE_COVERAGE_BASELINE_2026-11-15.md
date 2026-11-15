@@ -1,7 +1,8 @@
 # DDA — Instrumentation de couverture BFF et Academy
 
 **Date :** 15 novembre 2026  
-**Branche :** `feat/code-coverage-instrumentation`
+**Branche du relevé actuel :** `fix/bff-coverage-residuals` (base `main` à `28decce`)
+**Branche de la baseline initiale :** `feat/code-coverage-instrumentation`
 
 ## Objectif
 
@@ -21,7 +22,7 @@ npm run coverage:academy
 npm run coverage
 ```
 
-`coverage:bff` réutilise le contrat HTTP BFF existant avec ses faux fournisseurs déterministes. Il produit :
+`coverage:bff` réutilise des contrats HTTP et PostgREST déterministes avec des fournisseurs factices. Il produit :
 
 - `coverage/coverage-final.json` ;
 - `coverage/lcov.info` ;
@@ -35,11 +36,9 @@ npm run coverage
 
 Le collecteur utilise le binaire Playwright téléchargé en CI. En local, il utilise automatiquement `/usr/bin/chromium` ou `/usr/bin/chromium-browser` si le binaire Playwright n’est pas installé. Une variable `PLAYWRIGHT_EXECUTABLE_PATH` permet de choisir explicitement un autre binaire.
 
-## Baseline initiale
+## Historique des baselines BFF
 
-### BFF — c8
-
-Résultat de la première collecte locale :
+### Première collecte locale
 
 | Indicateur | Résultat |
 |---|---:|
@@ -50,7 +49,7 @@ Résultat de la première collecte locale :
 
 Le contrat BFF et le driver déterministe des modules purs passent avant la collecte. Le driver couvre les validations IA, analytics, Chariow, publications BRVM et rate limiting sans appeler de service externe réel.
 
-Résultat après extension du driver :
+### Après extension du driver
 
 | Indicateur | Résultat |
 |---|---:|
@@ -59,9 +58,9 @@ Résultat après extension du driver :
 | Functions | 57,37 % |
 | Lines | 53,62 % |
 
-Après intégration des contrats existants de billing, progression et Supabase Auth dans le pilote c8 :
+### Après intégration des contrats billing, progression et Supabase Auth
 
-| Indicateur | Baseline intégrée |
+| Indicateur | Résultat |
 |---|---:|
 | Statements / Lines | 62,99 % |
 | Branches | 63,76 % |
@@ -69,7 +68,9 @@ Après intégration des contrats existants de billing, progression et Supabase A
 
 Les contrats exécutés couvrent notamment les échanges PKCE, les erreurs GoTrue, la conservation du partenaire, les écritures de progression et l’idempotence billing.
 
-Après couverture complémentaire des stores business, audit, communauté et market-data, baseline reproduite au merge de la PR #284 :
+### Baseline reproduite au merge de la PR #284
+
+Après couverture complémentaire des stores business, audit, communauté et market-data :
 
 | Indicateur | Baseline au merge #284 |
 |---|---:|
@@ -77,21 +78,46 @@ Après couverture complémentaire des stores business, audit, communauté et mar
 | Branches | 65,65 % |
 | Functions | 65,60 % |
 
-Résultat après intégration locale des contrats complémentaires existants (15 novembre 2026) :
+### Baseline locale après les contrats complémentaires intégrés avant cette branche
 
-| Indicateur | Baseline locale actuelle |
+| Indicateur | Résultat sur `main` (`28decce`) |
 |---|---:|
 | Statements / Lines | 84,19 % |
 | Branches | 73,97 % |
 | Functions | 79,05 % |
 
-En plus du driver direct, `coverage-bff.js` réutilise maintenant les contrats déterministes `test_admin_store_postgrest_contract.js`, `test_admin_routes_contract.js`, `test_p3_account_lifecycle.js` et `test_p4_chariow_billing.js`. Cela fait entrer dans la mesure les rôles admin, une partie des opérations de session, l’export/suppression de compte, le contrôle d’accès et la fiabilité du traitement webhook. Le driver direct vérifie aussi les filtres d’owner, l’isolation mémoire, plusieurs erreurs PostgREST/provider et la construction valide de `buildHandler` suivie d’une 404 locale. Ces tests utilisent des faux adaptateurs ou des serveurs localhost ; aucun service Supabase ou billing réel n’est appelé.
+### Relevé actuel — branche `fix/bff-coverage-residuals`
 
-Ces valeurs ne signifient pas que les modules concernés sont à 0 % : leurs couvertures partielles sont détaillées dans la sortie c8. Elles mesurent l’exécution des scénarios déterministes et ne constituent ni une preuve de conformité RLS sur un projet Supabase distant, ni un test de déploiement réel.
+Mesure c8 produite par `npm run coverage:bff` après ajout des scénarios admin, session et wrapper webhook :
 
-Validation locale de ce suivi : `npm run coverage:bff` reproduit les chiffres ci-dessus ; la suite Product Gate complète (contrats `tests/test_*.js`, cohérence du registre des routes, smoke test et régression navigateur Playwright) termine avec **128 passed, 0 failed**. Les checks GitHub de la PR de suivi restent requis avant toute intégration.
+| Indicateur | Résultat actuel |
+|---|---:|
+| Statements | 86,28 % |
+| Branches | 75,54 % |
+| Functions | 84,29 % |
+| Lines | 86,28 % |
 
-### Academy — V8/CDP
+Le pilote `scripts/coverage-bff.js` réutilise les contrats existants, dont `test_admin_store_postgrest_contract.js`, `test_admin_routes_contract.js`, `test_p3_account_lifecycle.js` et `test_p4_chariow_billing.js`, et inclut maintenant `test_serverless_webhook_handler.js`.
+
+Les scénarios ajoutés vérifient :
+
+- les révocations PostgREST de rôles admin : contrôle owner, protection du dernier owner, échec fermé si le compte exact des owners manque, révocation autorisée d’un owner lorsqu’il en reste deux et révocation d’un admin ;
+- `session-store` : création, recherche par hash avec filtres d’expiration/révocation, touch, révocation individuelle et globale, listing, compte exact, erreur PostgREST et réponse sans corps ;
+- le wrapper `/webhooks/chariow` : secret absent (`503`), signature invalide (`401`), exception de flux (`500`), activation valide signée (`202`) et doublon idempotent (`204`). La branche de succès utilise un faux PostgREST local et vérifie que l’identité et les entitlements sont écrits côté serveur.
+
+Ces scénarios ne nécessitent ni connexion Supabase distante, ni appel à Chariow/PostHog. Les tentatives de réseau inattendues échouent explicitement dans le contrat serverless.
+
+La sortie c8 actuelle indique `admin-roles-store.js`, `session-store.js` et `handler.js` à **100 % en statements/lignes**. `session-store.js` et `handler.js` atteignent également **100 % des branches** ; `admin-roles-store.js` conserve des branches non parcourues sur des chemins distincts de la révocation, notamment les erreurs et replis de réponse. `handler.js` affiche aussi 80 % de fonctions, sans ligne ou branche non couverte dans ce relevé.
+
+Ces valeurs ne signifient pas que les autres modules sont à 0 % : leurs couvertures partielles sont détaillées dans la sortie c8. Elles mesurent l’exécution des scénarios déterministes et ne constituent ni une preuve de conformité RLS sur un projet Supabase distant, ni un test de déploiement réel.
+
+## Validation locale
+
+La commande `npm run coverage:bff` termine avec succès et reproduit les pourcentages ci-dessus. Le Product Gate exécuté localement comprend les 112 scripts `tests/test_*.js`, la vérification de cohérence du registre des routes, le smoke test JSDOM et le harness Playwright : **128 passed, 0 failed**. Les checks GitHub de la PR de suivi resteront requis avant toute intégration.
+
+Aucune migration Supabase distante n’a été exécutée dans ce suivi. Aucun schéma ni code produit n’a été modifié : les changements portent sur des contrats de test, le pilote c8 et ce rapport.
+
+## Academy — V8/CDP
 
 Résultat de la première collecte locale :
 
@@ -106,24 +132,22 @@ Routes initiales : `/`, `/commencer/`, `/launch/`, `/about/`, `academy.html#acce
 
 La métrique Academy est une **couverture de plages runtime V8**, pas encore une couverture de lignes source comparable à c8. Elle mesure uniquement les scripts effectivement chargés et exécutés par Chromium dans ces scénarios.
 
-## Limites assumées
+## Limites restantes
 
-Cette tranche établit une baseline sans seuil bloquant. Les nouveaux contrats réduisent plusieurs lacunes, sans rendre la couverture exhaustive :
+Cette tranche établit une baseline sans seuil bloquant et réduit plusieurs lacunes sans rendre la couverture exhaustive :
 
-- `bff/src/admin-roles-store.js` : les routes et invariants sont testés, mais les branches PostgREST de révocation (dont protection du dernier owner) restent à exercer ;
-- `bff/src/session-store.js` : les parcours mémoire et le compte exact PostgREST sont mesurés, mais les écritures, `list`, révocations globales et erreurs PostgREST ne sont pas tous parcourus ;
-- `bff/src/handler.js` : la logique `handleChariowPulse` est couverte avec des doubles, mais le wrapper HTTP serverless `/webhooks/chariow` (lignes 54–75) ne l’est pas encore ; `app.js` conserve aussi des routes/erreurs non couvertes ;
+- `bff/src/admin-roles-store.js` : les branches de révocation et de protection du dernier owner sont couvertes ; restent des branches de validation/constructeur et d’erreur ou de réponse vide du store ;
+- `bff/src/app.js` : une grande partie des routes et erreurs reste à couvrir (`70,35 %` statements/lignes dans la mesure actuelle) ;
+- `bff/src/billing-store.js`, `supabase-auth.js`, `security.js` et d’autres modules conservent des branches non parcourues ;
 - l’aller-retour complet Google OAuth/PKCE en navigateur, les sessions multi-onglets et les expirations côté client ;
 - les moteurs Firefox/WebKit, ainsi que davantage de pages institutionnelles et d’états réseau dégradés dans le collecteur Academy ;
 - toute validation contre une base Supabase réelle : les tests présents restent locaux, déterministes et fondés sur des mocks.
 
-Le dernier relevé local montre notamment : `app.js` 70,35 % lignes, `admin-roles-store.js` 96,63 %, `session-store.js` 74,13 % et `handler.js` 72,50 %. Ces chiffres sont des mesures d’exécution, pas une preuve de conformité RLS ou de comportement sur un projet distant. Une ligne couverte ne valide pas à elle seule l’exactitude métier ou la sécurité de toutes les entrées.
+Une ligne couverte ne valide pas à elle seule l’exactitude métier ou la sécurité de toutes les entrées. Le dernier relevé ne vaut pas preuve RLS et ne remplace pas les tests d’intégration sur un environnement de préproduction dûment autorisé.
 
-Les rapports sont générés en CI et archivés pendant 14 jours comme artefact GitHub Actions. Le dossier `coverage/` est ignoré par Git et aucun rapport généré n’est commité.
+## Étapes suivantes recommandées
 
-## Étape suivante recommandée
-
-1. Compléter les chemins PostgREST `revokeRole` et les opérations de mutation/liste/expiration/révocation de `session-store` avec des réponses factices.
-2. Couvrir le wrapper HTTP serverless Chariow et ses codes d’erreur avec un faux `fetch`/store, puis traiter les dernières branches `app.js`.
-3. Ajouter les routes publiques légales et les branches d’erreur Academy, sans confondre couverture runtime et couverture de source.
-4. Convertir la couverture V8 brute en rapport source avec les sourcemaps si une métrique ligne par ligne devient nécessaire, puis fixer progressivement des seuils séparés après deux ou trois baselines stables.
+1. Revoir les lacunes de `app.js` et `billing-store.js` par risque P0/P1, en ajoutant uniquement les contrats déterministes utiles sans chercher un 100 % artificiel.
+2. Garder la baseline c8 comme contrôle reproductible de CI et faire passer les checks GitHub de la PR avant fusion.
+3. Traiter ensuite les scénarios navigateur Academy et les moteurs additionnels en lots séparés.
+4. N’effectuer aucune migration Supabase distante sans autorisation explicite distincte et sans réconciliation préalable du contrat, du SQL, des RLS, de l’API et des tests.
