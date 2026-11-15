@@ -69,17 +69,27 @@ Après intégration des contrats existants de billing, progression et Supabase A
 
 Les contrats exécutés couvrent notamment les échanges PKCE, les erreurs GoTrue, la conservation du partenaire, les écritures de progression et l’idempotence billing.
 
-Après couverture complémentaire des stores business, audit, communauté et market-data :
+Après couverture complémentaire des stores business, audit, communauté et market-data, baseline reproduite au merge de la PR #284 :
 
-| Indicateur | Baseline actuelle |
+| Indicateur | Baseline au merge #284 |
 |---|---:|
 | Statements / Lines | 72,74 % |
 | Branches | 65,65 % |
 | Functions | 65,60 % |
 
-Les stores business, access-audit, community et market-data sont désormais exercés par des réponses PostgREST déterministes et des états `not_configured`/`unavailable`. Le handler serverless est couvert sur son chemin de refus de configuration invalide ; ses chemins d’instanciation avec de vraies variables Supabase restent volontairement hors réseau.
+Résultat après intégration locale des contrats complémentaires existants (15 novembre 2026) :
 
-Les modules d’intégration non instanciés — par exemple Supabase Auth, billing, business store, handler HTTP serverless et store de progression PostgREST — apparaissent encore à 0 %. Cela signale une zone à tester, et non un défaut de l’instrumentation.
+| Indicateur | Baseline locale actuelle |
+|---|---:|
+| Statements / Lines | 84,19 % |
+| Branches | 73,97 % |
+| Functions | 79,05 % |
+
+En plus du driver direct, `coverage-bff.js` réutilise maintenant les contrats déterministes `test_admin_store_postgrest_contract.js`, `test_admin_routes_contract.js`, `test_p3_account_lifecycle.js` et `test_p4_chariow_billing.js`. Cela fait entrer dans la mesure les rôles admin, une partie des opérations de session, l’export/suppression de compte, le contrôle d’accès et la fiabilité du traitement webhook. Le driver direct vérifie aussi les filtres d’owner, l’isolation mémoire, plusieurs erreurs PostgREST/provider et la construction valide de `buildHandler` suivie d’une 404 locale. Ces tests utilisent des faux adaptateurs ou des serveurs localhost ; aucun service Supabase ou billing réel n’est appelé.
+
+Ces valeurs ne signifient pas que les modules concernés sont à 0 % : leurs couvertures partielles sont détaillées dans la sortie c8. Elles mesurent l’exécution des scénarios déterministes et ne constituent ni une preuve de conformité RLS sur un projet Supabase distant, ni un test de déploiement réel.
+
+Validation locale de ce suivi : `npm run coverage:bff` reproduit les chiffres ci-dessus ; la suite Product Gate complète (contrats `tests/test_*.js`, cohérence du registre des routes, smoke test et régression navigateur Playwright) termine avec **128 passed, 0 failed**. Les checks GitHub de la PR de suivi restent requis avant toute intégration.
 
 ### Academy — V8/CDP
 
@@ -98,20 +108,22 @@ La métrique Academy est une **couverture de plages runtime V8**, pas encore une
 
 ## Limites assumées
 
-Cette tranche établit une baseline ; elle ne fixe pas encore de seuil bloquant. Les valeurs seraient artificiellement trompeuses avant l’ajout des scénarios manquants pour :
+Cette tranche établit une baseline sans seuil bloquant. Les nouveaux contrats réduisent plusieurs lacunes, sans rendre la couverture exhaustive :
 
-- OAuth/PKCE et erreurs de fournisseur ;
-- webhooks Chariow et idempotence ;
-- PostgREST, billing, sessions et rate limiting en erreur ;
-- multi-onglets et expiration de session ;
-- Firefox/WebKit ;
-- pages institutionnelles supplémentaires et états réseau dégradés.
+- `bff/src/admin-roles-store.js` : les routes et invariants sont testés, mais les branches PostgREST de révocation (dont protection du dernier owner) restent à exercer ;
+- `bff/src/session-store.js` : les parcours mémoire et le compte exact PostgREST sont mesurés, mais les écritures, `list`, révocations globales et erreurs PostgREST ne sont pas tous parcourus ;
+- `bff/src/handler.js` : la logique `handleChariowPulse` est couverte avec des doubles, mais le wrapper HTTP serverless `/webhooks/chariow` (lignes 54–75) ne l’est pas encore ; `app.js` conserve aussi des routes/erreurs non couvertes ;
+- l’aller-retour complet Google OAuth/PKCE en navigateur, les sessions multi-onglets et les expirations côté client ;
+- les moteurs Firefox/WebKit, ainsi que davantage de pages institutionnelles et d’états réseau dégradés dans le collecteur Academy ;
+- toute validation contre une base Supabase réelle : les tests présents restent locaux, déterministes et fondés sur des mocks.
+
+Le dernier relevé local montre notamment : `app.js` 70,35 % lignes, `admin-roles-store.js` 96,63 %, `session-store.js` 74,13 % et `handler.js` 72,50 %. Ces chiffres sont des mesures d’exécution, pas une preuve de conformité RLS ou de comportement sur un projet distant. Une ligne couverte ne valide pas à elle seule l’exactitude métier ou la sécurité de toutes les entrées.
 
 Les rapports sont générés en CI et archivés pendant 14 jours comme artefact GitHub Actions. Le dossier `coverage/` est ignoré par Git et aucun rapport généré n’est commité.
 
 ## Étape suivante recommandée
 
-1. Ajouter des pilotes BFF ciblés pour les modules actuellement à 0 %.
-2. Ajouter les routes publiques légales et les branches d’erreur Academy.
-3. Convertir la couverture V8 brute en rapport source avec les sourcemaps si une métrique ligne par ligne devient nécessaire.
-4. Fixer progressivement des seuils séparés, après deux ou trois baselines stables.
+1. Compléter les chemins PostgREST `revokeRole` et les opérations de mutation/liste/expiration/révocation de `session-store` avec des réponses factices.
+2. Couvrir le wrapper HTTP serverless Chariow et ses codes d’erreur avec un faux `fetch`/store, puis traiter les dernières branches `app.js`.
+3. Ajouter les routes publiques légales et les branches d’erreur Academy, sans confondre couverture runtime et couverture de source.
+4. Convertir la couverture V8 brute en rapport source avec les sourcemaps si une métrique ligne par ligne devient nécessaire, puis fixer progressivement des seuils séparés après deux ou trois baselines stables.
