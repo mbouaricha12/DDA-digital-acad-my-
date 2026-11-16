@@ -3473,3 +3473,15 @@ body.low-data #dashboard .dashboard-summary-card{transform:none!important}
 @media(prefers-reduced-motion:reduce){
   #landing .landing-3d-scene{opacity:.72;animation:none!important}
 }
+
+/* Wide-screen reading refinements (2026-11-16).
+   Resources keeps its comfortable two-column reading rail but stops looking
+   like a tablet column on a 2560px monitor: the shelf may use up to 1400px.
+   Lab aligns its intro with the actual content rail instead of centering a
+   760px block above a full-width rail. Mobile and 1440px behaviour unchanged
+   below the breakpoint. */
+@media (min-width:1440px){
+  #resources .library-shelf,
+  #resources .resource-feature{max-width:min(100%,1400px)}
+  #lab .section-intro{margin-inline:0}
+}
