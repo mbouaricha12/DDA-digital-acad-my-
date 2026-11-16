@@ -463,6 +463,13 @@ a.nav-item[hidden]{display:none}
 .community-view{background:linear-gradient(180deg,var(--navy-900),var(--navy-950) 70%);color:#f4f7fc}
 .community-view .eyebrow{color:rgba(244,247,252,.5)}
 .community-hero{position:relative;overflow:hidden;border-radius:20px;min-height:220px;display:flex;align-items:flex-end;padding:22px}
+/* Produits Digitaux has no real "digital products" photo yet — every other
+   stock photo in images/photos/ is already the designated image for a
+   different, unrelated section (Access, Business, Experts…), and reusing
+   one here would just move the mismatch instead of fixing it. A tasteful
+   brand gradient is an honest placeholder until a real photo is supplied;
+   it is never presented as a genuine photograph of anything. */
+.community-hero-no-photo{background:linear-gradient(135deg,#0a1424 0%,#101c2d 55%,#1a2740 100%)}
 .community-hero-copy{position:relative;z-index:1}
 .community-hero-copy h1{color:#fff;font-family:var(--dda-sans);font-weight:800;margin:6px 0;font-size:clamp(24px,5vw,34px)}
 .community-hero-copy p{color:rgba(244,247,252,.72);max-width:44ch;margin:0}
@@ -1534,17 +1541,19 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .view:not(:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone)){max-width:1520px}
 }
 @media(min-width:1800px){
-  .view:not(:is(#dashboard,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone)){max-width:1760px}
+  .view:not(:is(#dashboard,#progress,#resources,#produits-digitaux,#lab,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone)){max-width:1760px}
 }
-/* The 1760px ceiling above still centers the Dashboard with real dead
-   space on a wide monitor (2560px+): its card grids (hero, parcours,
-   summary) scale with the viewport via fr/minmax units, so there is no
-   reading-width reason to cap it. #dashboard instead fills the full
-   track after the sidebar at every size from 1440px up, flush against
-   it (no auto-centering gap), with only a soft ceiling far past any
-   realistic monitor so lines never run unbounded on a projector/TV. */
+/* The 1760px ceiling above still centers these views with real dead space
+   on a wide monitor (2560px+): their card/grid layouts (hero, parcours,
+   summary, badge strips, resource tables) scale with the viewport via
+   fr/minmax units, so there is no reading-width reason to cap them. Each
+   one instead fills the full track after the sidebar at every size from
+   1440px up, flush against it (no auto-centering gap), with only a soft
+   ceiling far past any realistic monitor so lines never run unbounded on
+   a projector/TV. Lesson views are deliberately excluded (see above):
+   their prose column has no independent max-width of its own. */
 @media(min-width:1440px){
-  #dashboard.view{max-width:2400px;margin-left:0;margin-right:auto}
+  #dashboard.view,#progress.view,#resources.view,#produits-digitaux.view,#lab.view{max-width:2400px;margin-left:0;margin-right:auto}
 }
 
 
