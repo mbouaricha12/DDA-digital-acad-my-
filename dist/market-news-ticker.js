@@ -100,9 +100,17 @@
   }
 
   async function getJson(path) {
-    const response = await fetch(`${base}${path}`, { headers: { Accept: 'application/json' } });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
+    // A missing/unreachable BFF must never keep the page in a pending state:
+    // abort quickly so the ticker settles on its honest offline label.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+    try {
+      const response = await fetch(`${base}${path}`, { headers: { Accept: 'application/json' }, signal: controller.signal });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.json();
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   async function init() {

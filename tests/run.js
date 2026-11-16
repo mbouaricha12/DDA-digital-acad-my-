@@ -1333,7 +1333,7 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     }));
     await page.goto(`${BASE}/#landing`);
     await page.waitForLoadState('networkidle');
-    await page.getByText('Avis BRVM — fixture Playwright').waitFor();
+    await page.locator('#brvm-ticker').getByText('Avis BRVM — fixture Playwright').waitFor();
     assert.equal(await page.locator('#brvm-ticker').isHidden(), false, 'at least one verified publication reveals the banner');
     assert.equal(await page.locator('.brvm-ticker-item').count(), 1, 'pending, expired and non-HTTPS rows are all rejected client-side');
     assert.equal(await page.locator('.brvm-ticker-item').first().getAttribute('href'), 'https://source.test/avis.pdf');
