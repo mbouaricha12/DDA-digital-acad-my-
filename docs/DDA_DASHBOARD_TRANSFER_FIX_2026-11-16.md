@@ -53,12 +53,12 @@ Mesure locale, Chromium Playwright, `node scripts/verify-performance.js
 
 | Route | Avant | Après | Budget |
 |---|---:|---:|---:|
-| `academy-dashboard` mobile 390×844 | 1 555 KB | **1 149 KB** | 1 465 KB |
-| `academy-dashboard` desktop 1440×900 | 1 388 KB | **1 149 KB** | 1 465 KB |
+| `academy-dashboard` mobile 390×844 | 1 555 KB | **1 124 KB** | 1 465 KB |
+| `academy-dashboard` desktop 1440×900 | 1 388 KB | **1 124 KB** | 1 465 KB |
 
 La mesure mobile maximale sur cinq chargements successifs est de
-**1 176 849 octets (1 149 KB)**, soit **415 917 octets économisés** par rapport
-au relevé de l'audit et une marge d'environ **316 KB** sous le budget.
+**1 151 019 octets (1 124 KB)**, soit **441 747 octets économisés** par rapport
+au relevé de l'audit et une marge d'environ **341 KB** sous le budget.
 
 Les autres routes mesurées par le script restent inchangées sur ce périmètre.
 Le CLS du Dashboard reste à **0,0001–0,0004** ; la correction du CLS desktop de
