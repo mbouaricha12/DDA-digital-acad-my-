@@ -3418,3 +3418,58 @@ body.low-data #dashboard .dashboard-summary-card{animation:none!important;opacit
 }
 body.low-data #dashboard .dashboard-parcours-card,
 body.low-data #dashboard .dashboard-summary-card{transform:none!important}
+
+/* ======================================================================
+   DDA — Signature éditoriale 2026-11-16
+   Ticker économique honnête + orbite 3D réellement perceptible.
+   ====================================================================== */
+
+.dda-news-ticker{background:#040a12;border-bottom:1px solid rgba(201,154,69,.2);color:#aebdcd;position:relative;z-index:60}
+.dda-news-ticker-inner{display:flex;align-items:center;gap:14px;min-height:34px;padding:0 clamp(16px,4vw,64px);max-width:1600px;margin:0 auto}
+.dda-news-ticker-brand{display:inline-flex;align-items:center;gap:7px;flex:none;color:#e7c878;font-size:.58rem;font-weight:800;letter-spacing:.14em}
+.dda-news-ticker-dot{width:6px;height:6px;border-radius:50%;background:#2fb5a6;box-shadow:0 0 0 3px rgba(47,181,166,.12)}
+.dda-news-ticker[data-state="empty"] .dda-news-ticker-dot{background:#8a97a8;box-shadow:none}
+.dda-news-ticker-viewport{flex:1;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 18px,#000 calc(100% - 18px),transparent);mask-image:linear-gradient(90deg,transparent,#000 18px,#000 calc(100% - 18px),transparent)}
+.dda-news-ticker-track{display:flex;align-items:center;gap:26px;width:max-content;white-space:nowrap;will-change:transform}
+.dda-news-ticker[data-state="ready"] .dda-news-ticker-track{animation:dda-news-scroll 58s linear infinite}
+.dda-news-ticker:hover .dda-news-ticker-track,.dda-news-ticker:focus-within .dda-news-ticker-track{animation-play-state:paused}
+.dda-news-ticker-item{display:inline-flex;align-items:center;gap:8px;color:#c4ced9;text-decoration:none;font-size:.64rem;letter-spacing:.01em}
+.dda-news-ticker-item:hover{color:#fff}
+.dda-news-ticker-cat{flex:none;padding:2px 6px;border:1px solid rgba(201,154,69,.38);border-radius:999px;color:#e7c878;font-size:.52rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.dda-news-ticker-item strong{color:#e9eef3;font-weight:600;font-size:.64rem}
+.dda-news-ticker-meta{color:#7f92a6;font-size:.58rem}
+.dda-news-ticker-freshness{flex:none;color:#8a97a8;font-size:.56rem;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.dda-news-ticker[data-state="ready"] .dda-news-ticker-freshness{color:#7fc9b8}
+.dda-news-ticker-item.is-status{color:#8a97a8;font-style:italic}
+.dda-news-ticker[data-state="empty"] .dda-news-ticker-track{width:100%;overflow:hidden}
+.dda-news-ticker[data-state="empty"] .dda-news-ticker-item.is-status{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@keyframes dda-news-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(max-width:640px){
+  .dda-news-ticker-inner{gap:10px;padding-inline:12px;min-height:32px}
+  .dda-news-ticker-brand{font-size:.52rem;letter-spacing:.1em}
+  .dda-news-ticker-freshness{display:none}
+  .dda-news-ticker-item,.dda-news-ticker-item strong{font-size:.6rem}
+  .dda-news-ticker-meta{font-size:.54rem}
+  .dda-news-ticker[data-state="ready"] .dda-news-ticker-track{animation-duration:78s}
+}
+@media(prefers-reduced-motion:reduce){
+  .dda-news-ticker[data-state="ready"] .dda-news-ticker-track{animation:none!important}
+}
+
+/* Orbite DDA : la scène existait mais restait à 0,44 d'opacité derrière un
+   device-stage plus grand qu'elle — donc quasiment invisible. Elle devient
+   la signature du hero : plus large que le device, plus lumineuse, sans
+   animation de filtre coûteuse (les anneaux continuent de tourner). */
+#landing .landing-3d-scene{width:min(110%,480px);right:-4%;opacity:.86;animation:none;filter:drop-shadow(0 0 30px rgba(42,140,255,.28));mix-blend-mode:screen}
+#landing .landing-3d-scene::before{content:"";position:absolute;z-index:-1;inset:-10%;border-radius:50%;background:radial-gradient(circle at 50% 50%,rgba(4,12,24,.78) 0 34%,rgba(5,16,32,.42) 56%,transparent 72%);pointer-events:none}
+#landing .landing-3d-orbit{border-width:1.5px;border-color:rgba(126,190,255,.55);box-shadow:0 0 26px rgba(42,124,255,.14),inset 0 0 24px rgba(201,154,69,.08)}
+#landing .landing-3d-orbit-middle{border-color:rgba(120,190,255,.62)}
+#landing .landing-3d-orbit-inner{border-color:rgba(240,207,138,.55)}
+#landing .landing-3d-core{box-shadow:0 0 0 12px rgba(201,154,69,.08),0 18px 55px rgba(0,0,0,.36),inset 0 0 28px rgba(255,255,255,.08),0 0 38px rgba(42,140,255,.22)}
+#landing .landing-3d-node{opacity:.95;background:rgba(5,13,24,.92);border-color:rgba(227,189,115,.65);color:#f8f1df;box-shadow:0 0 18px rgba(227,189,115,.18)}
+@media(max-width:860px){
+  #landing .landing-3d-scene{width:108%;right:-3%;opacity:.68}
+}
+@media(prefers-reduced-motion:reduce){
+  #landing .landing-3d-scene{opacity:.72;animation:none!important}
+}
