@@ -57,7 +57,7 @@ const launchDescription = 'DDA : six leçons au catalogue, trois fondations M0 a
 assert.equal(launch.match(/<meta name="description" content="([^"]+)"/)?.[1], launchDescription);
 assert.equal(launch.match(/<meta property="og:description" content="([^"]+)"/)?.[1], launchDescription);
 assert.equal(launch.match(/<meta name="twitter:description" content="([^"]+)"/)?.[1], launchDescription);
-assert.ok(launch.includes('Le catalogue réunit six leçons authored : trois fondations du module M0 sont accessibles en Free; trois leçons M1 supplémentaires nécessitent le droit avancé correspondant et ne font pas partie du périmètre Free actuel'));
+assert.ok(launch.includes('Le catalogue comprend six leçons : trois fondations du module M0 sont accessibles en Free; trois leçons M1 supplémentaires nécessitent le droit avancé correspondant et ne font pas partie du périmètre Free actuel'));
 assert.doesNotMatch(launch, /M0\.1|M1\.1|P2\.1|P2\.2/, 'unnecessary internal lesson IDs must not be exposed on /launch/');
 assert.doesNotMatch(launch, /Le parcours Free disponible comprend six leçons/i, 'the authored six-lesson catalogue must not be described as six Free lessons');
 const app = fs.readFileSync(path.join(dist, 'app.js'), 'utf8');
