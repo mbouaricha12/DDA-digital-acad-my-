@@ -3473,3 +3473,29 @@ body.low-data #dashboard .dashboard-summary-card{transform:none!important}
 @media(prefers-reduced-motion:reduce){
   #landing .landing-3d-scene{opacity:.72;animation:none!important}
 }
+
+
+/* ======================================================================
+   Desktop responsive pass 2026-11-16 - neuf vues restantes.
+   A 2560, ces vues restaient plafonnees a 1760px et centrees. Elles
+   rejoignent maintenant le traitement Dashboard/Progression/Lab, avec des
+   contenus internes bornes pour preserver une lecture confortable.
+   ====================================================================== */
+@media(min-width:1440px){
+  #path.view,#membership.view,#premium-track.view,#journal.view,
+  #markets.view,#community.view,#profile.view,#brokers.view,#support.view{
+    max-width:2400px;
+    margin-left:0;
+    margin-right:auto;
+  }
+  #path .journey,#premium-track .journey{max-width:1400px}
+  #membership .membership-status-line,
+  #membership .trust-orientation-panel,
+  #membership .plan-grid{max-width:2000px}
+  #journal .journal-panel{max-width:2000px}
+  #markets .market-section-rail{max-width:2000px}
+  #community .community-tiles,#community .panel{max-width:2000px}
+  #profile .profile-layout{max-width:2000px}
+  #brokers .panel{max-width:2000px}
+  #support .panel,#support .support-contact{max-width:2000px}
+}
