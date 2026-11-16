@@ -1939,6 +1939,15 @@ function renderDashboardWeekAhead(continueTarget) {
       ? `${upcoming.length} leçon${upcoming.length > 1 ? 's' : ''} à venir`
       : 'Parcours à jour';
   }
+  // Agenda pédagogique : la prochaine échéance réellement authored, jamais
+  // un événement inventé. Le titre vient de la même liste `upcoming` que le
+  // rail de la semaine et le compteur ci-dessus.
+  const agendaMetaEl = document.getElementById('dashboard-card-agenda-meta');
+  if (agendaMetaEl) {
+    agendaMetaEl.textContent = upcoming.length
+      ? `Prochaine : ${upcoming[0].lesson.title}`
+      : 'Aucune échéance restante sur le parcours authored.';
+  }
   if (!upcoming.length) {
     section.hidden = true;
     rail.innerHTML = '';
