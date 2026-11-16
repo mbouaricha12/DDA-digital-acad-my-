@@ -17,6 +17,8 @@ const {
 const { isHttpsUrl, validPublishedRow, PostgrestBrvmPublicationStore } = require('../bff/src/brvm-publication-store');
 const { PostgrestRateLimiter, checkAuthRateLimit } = require('../bff/src/rate-limiter');
 const { PostgrestBusinessStore, MemoryBusinessStore } = require('../bff/src/business-store');
+const { PostgrestBillingStore } = require('../bff/src/billing-store');
+const { PostgrestProgressStore } = require('../bff/src/progress-store');
 const { MemoryAccessAuditStore, PostgrestAccessAuditStore } = require('../bff/src/access-audit-store');
 const { PostgrestCommunityStore } = require('../bff/src/community-store');
 const { marketDataConfigFromEnv, providerConfigured, fetchMarketQuotes } = require('../bff/src/market-data');
@@ -108,6 +110,13 @@ const userId = '11111111-1111-4111-8111-111111111111';
     fetchImpl: async () => ({ ok: true, async text() { return JSON.stringify([row]); } })
   });
   assert.equal((await publicationStore.listPublished()).length, 1);
+  assert.equal(validPublishedRow({ ...row, document_url: 'http://insecure.example/report.pdf' }, new Date('2026-11-15T00:00:00.000Z')), false);
+  assert.equal(validPublishedRow({ ...row, fresh_until: '2026-11-01T00:00:00.000Z' }, new Date('2026-11-15T00:00:00.000Z')), false);
+  const failingPublicationStore = new PostgrestBrvmPublicationStore({
+    supabaseUrl: 'https://supabase.example/', serviceRoleKey: 'service-key',
+    fetchImpl: async () => ({ ok: false, status: 503, async text() { return 'unavailable'; } })
+  });
+  await assert.rejects(() => failingPublicationStore.listPublished(), /brvm_publications_store_failed/);
 
   const limiterCalls = [];
   const limiter = new PostgrestRateLimiter({
@@ -121,6 +130,11 @@ const userId = '11111111-1111-4111-8111-111111111111';
   assert.equal(await checkAuthRateLimit(limiter, 'login', { ip: '127.0.0.1', email: 'learner@example.com' }), true);
   assert.ok(limiterCalls.length >= 3);
   assert.equal(await checkAuthRateLimit(null, 'login', { ip: '127.0.0.1', email: 'learner@example.com' }), true);
+  const failingBilling = new PostgrestBillingStore({
+    supabaseUrl: 'https://supabase.example/', serviceRoleKey: 'service-key',
+    fetchImpl: async () => ({ ok: false, status: 500, async text() { return ''; } })
+  });
+  await assert.rejects(() => failingBilling.has('delivery-1'), /billing store error 500/);
 
   const businessCalls = [];
   const business = new PostgrestBusinessStore({
@@ -230,6 +244,7 @@ const userId = '11111111-1111-4111-8111-111111111111';
     fetchImpl: async () => ({ ok: false, status: 503, async text() { return ''; } })
   });
   await assert.rejects(() => failingCommunity.listRecent(), /community_posts_store_failed/);
+  await assert.rejects(() => community.createPost({ userId: '', body: 'Publication' }), /community_post_requires_user_id/);
   const malformedCommunity = new PostgrestCommunityStore({
     supabaseUrl: 'https://supabase.example/', serviceRoleKey: 'service-key',
     fetchImpl: async () => ({ ok: true, async text() { return '{'; } })
@@ -251,6 +266,11 @@ const userId = '11111111-1111-4111-8111-111111111111';
   assert.equal(isolatedFailures.XAUUSD.status, 'unavailable', 'invalid provider prices must never be surfaced');
   assert.equal(isolatedFailures.BTCUSD.status, 'unavailable', 'provider exceptions must be isolated as unavailable');
   assert.equal((await fetchMarketQuotes({ config: marketDataConfigFromEnv({}), fetchImpl: async () => { throw new Error('must not call provider'); } })).BTCUSD.status, 'not_configured');
+  const failingProgress = new PostgrestProgressStore({
+    supabaseUrl: 'https://supabase.example/', serviceRoleKey: 'service-key',
+    fetchImpl: async () => ({ ok: false, status: 503, async text() { return ''; } })
+  });
+  await assert.rejects(() => failingProgress.listLessons('user-1'), error => error.code === 'progress_store_unavailable' && error.status === 502);
 
   // buildHandler must be constructible with valid server config without making
   // an outbound request. This synthetic GET exercises its serverless wiring

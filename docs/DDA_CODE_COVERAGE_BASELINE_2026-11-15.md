@@ -111,6 +111,18 @@ La sortie c8 actuelle indique `admin-roles-store.js`, `session-store.js` et `han
 
 Ces valeurs ne signifient pas que les autres modules sont à 0 % : leurs couvertures partielles sont détaillées dans la sortie c8. Elles mesurent l’exécution des scénarios déterministes et ne constituent ni une preuve de conformité RLS sur un projet Supabase distant, ni un test de déploiement réel.
 
+### Relevé après ajout des chemins d’erreur BFF
+
+Sur la branche `feat/coverage-bff-error-paths`, le driver couvre en plus les refus de publications BRVM périmées ou non HTTPS, les erreurs billing et progression PostgREST, les erreurs de création communauté et les indisponibilités isolées des fournisseurs de marché.
+
+| Indicateur | Résultat actuel |
+|---|---:|
+| Statements / Lines | **86,35 %** |
+| Branches | **76,04 %** |
+| Functions | **84,81 %** |
+
+La commande `node scripts/coverage-bff-modules.js` et `npm run coverage:bff` passent avec ces scénarios. Les réponses d’erreur sont simulées localement ; aucun service externe n’est appelé.
+
 ## Validation locale
 
 La commande `npm run coverage:bff` termine avec succès et reproduit les pourcentages ci-dessus. Le Product Gate exécuté localement comprend les 112 scripts `tests/test_*.js`, la vérification de cohérence du registre des routes, le smoke test JSDOM et le harness Playwright : **128 passed, 0 failed**. Les checks GitHub de la PR de suivi resteront requis avant toute intégration.
