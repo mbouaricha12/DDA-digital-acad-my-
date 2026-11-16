@@ -22,6 +22,7 @@ for (const loc of locs) {
   const relative = loc.slice(BASE.length);
   const file = relative === '' ? 'index.html' : relative.endsWith('/') ? path.join(relative, 'index.html') : relative;
   assert.ok(fs.existsSync(path.join(dist, file)), `${loc} has no matching file in dist/ (${file})`);
+  assert.match(fs.readFileSync(path.join(dist, file), 'utf8'), /<html lang="fr-FR">/i, `${loc} must declare fr-FR`);
 }
 
 // Every standalone public/legal page from the shared registry must be reachable from the sitemap.
@@ -63,7 +64,10 @@ assert.match(academy, /<meta name="robots" content="noindex, nofollow">/);
 // file is delivered from the real host root and is authoritative for crawlers.
 assert.match(robots, /User-agent:\s*\*/i);
 assert.match(robots, new RegExp(String.raw`Sitemap:\s*${BASE}sitemap\.xml`));
-assert.match(robots, /Disallow:\s*\/academy\.html/);
+// Academy deliberately carries noindex, nofollow. It must not be blocked in
+// robots.txt, otherwise crawlers cannot read the HTML directive and may still
+// index the URL based on external links.
+assert.doesNotMatch(robots, /Disallow:\s*\/academy\.html/i, 'Academy must remain crawlable so search engines can process its noindex directive');
 assert.match(robots, /Disallow:\s*\/go\//);
 assert.doesNotMatch(robots, /Disallow:\s*\/commencer\//i, '/commencer/ must remain crawlable');
 assert.match(robots, /host root/i, 'robots.txt must document that it is served from the real host root');
