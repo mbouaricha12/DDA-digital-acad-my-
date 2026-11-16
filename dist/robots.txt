@@ -6,7 +6,6 @@
 
 User-agent: *
 Allow: /
-Disallow: /academy.html
 Disallow: /go/
 
 Sitemap: https://dariusdigitalacademy.com/sitemap.xml
