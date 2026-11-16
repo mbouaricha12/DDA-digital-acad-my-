@@ -29,11 +29,30 @@ const fakeFetch = async (url, options) => {
   });
   assert.equal(row.status, 'active');
   assert.deepEqual(row.entitlement_snapshot, ENTITLEMENTS);
-  assert.match(calls[1].url, /dda_billing_memberships\?on_conflict=provider,external_id/);
-  assert.equal(calls[1].options.headers.Prefer, 'resolution=merge-duplicates,return=representation');
+  assert.match(calls[1].url, /dda_billing_memberships\?provider=eq\.chariow/);
+  assert.equal(calls[1].options.method, 'GET');
+  assert.match(calls[2].url, /dda_billing_memberships\?on_conflict=provider,external_id/);
+  assert.equal(calls[2].options.headers.Prefer, 'resolution=merge-duplicates,return=representation');
 
   await store.markProcessed('pulse-delivery-1');
-  assert.equal(calls[2].options.method, 'PATCH');
+  assert.equal(calls[3].options.method, 'PATCH');
+  const retryCalls = [];
+  const retryStore = new PostgrestBillingStore({
+    supabaseUrl: 'https://project.supabase.co/',
+    serviceRoleKey: 'service-role-secret',
+    fetchImpl: async (url, options) => {
+      retryCalls.push({ url, options });
+      const body = options.body ? JSON.parse(options.body) : null;
+      if (options.method === 'POST') return { ok: true, async text() { return '[]'; } };
+      if (options.method === 'GET') return { ok: true, async text() { return JSON.stringify([{ processed_status: 'failed' }]); } };
+      if (options.method === 'PATCH') return { ok: true, async text() { return JSON.stringify([body]); } };
+      throw new Error(`unexpected retry request: ${options.method} ${url}`);
+    }
+  });
+  assert.equal(await retryStore.claim('pulse-failed-1', { event: 'successful.sale', payloadSha256: 'a'.repeat(64) }), true);
+  assert.equal(retryCalls[0].options.method, 'POST');
+  assert.equal(retryCalls[1].options.method, 'PATCH');
+  assert.match(retryCalls[1].options.body, /"processed_status":"accepted"/);
   await assert.rejects(() => store.applyChariowTransition({ kind: 'membership_transition', status: 'active', userReference: 'not-a-uuid', productId: 'prd_premium', externalId: 'x' }), /server-owned DDA UUID/);
   console.log('Supabase Chariow billingStore contract: PASS');
 })().catch(error => { console.error(error); process.exitCode = 1; });

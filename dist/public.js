@@ -60,7 +60,13 @@
     '.landing-proof > *', '.proof-composition > *', '.proof-principles li', '.landing-ecosystem > *',
     '.domain-rail article', '.landing-institution > div', '.landing-demo-grid article',
     '.landing-problem-list li', '.landing-steps-list li', '.landing-plan-card', '.landing-guardrails > *',
-    '.landing-final-cta > *'
+    '.landing-final-cta > *',
+    // Sections added after this reveal system was first wired (DDA Lab/Resources/
+    // Testimonials, FAQ, differentiation/mission bands) never got added to the
+    // selector above, so they rendered fully static while every other section
+    // animated in on scroll — founder-reported inconsistency (2026-11-14).
+    '.landing-differentiation > *', '.landing-ai > *', '.landing-faq > *',
+    '.landing-mission-grid > *', '.landing-mission > *'
   ].join(',');
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const revealObserver = !reducedMotion && 'IntersectionObserver' in window
@@ -90,6 +96,41 @@
       if (section && !seen.has(section)) { seen.add(section); track('landing_section_reached', { section }); observer.unobserve(entry.target); }
     }), { threshold: 0.25, rootMargin: '0px 0px -12% 0px' });
     document.querySelectorAll('[data-funnel-section]').forEach(node => observer.observe(node));
+  }
+
+  // Motion design pass — hero visual: a very subtle pointer-move tilt
+  // (desktop/mouse only) and a capped scroll parallax. Both are pure
+  // enhancement on top of a fully-visible, static-by-default visual —
+  // neither can ever hide or block the hero content, and both are skipped
+  // entirely under prefers-reduced-motion or on touch/low-data devices.
+  const heroVisual = document.querySelector('#landing .landing-aperture');
+  const finePointer = window.matchMedia?.('(pointer: fine)').matches;
+  const lowData = document.body.classList.contains('low-data');
+  if (heroVisual && !reducedMotion && !lowData) {
+    if (finePointer) {
+      heroVisual.addEventListener('mousemove', event => {
+        const rect = heroVisual.getBoundingClientRect();
+        const px = (event.clientX - rect.left) / rect.width - 0.5;
+        const py = (event.clientY - rect.top) / rect.height - 0.5;
+        const img = heroVisual.querySelector('.photo-fill');
+        if (img) img.style.transform = `scale(1.03) translate(${px * -8}px, ${py * -8}px)`;
+      });
+      heroVisual.addEventListener('mouseleave', () => {
+        const img = heroVisual.querySelector('.photo-fill');
+        if (img) img.style.transform = '';
+      });
+    }
+    let ticking = false;
+    const applyParallax = () => {
+      ticking = false;
+      const rect = heroVisual.getBoundingClientRect();
+      if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+      const offset = Math.max(-16, Math.min(16, rect.top * -0.04));
+      heroVisual.style.setProperty('--dda-parallax', `${offset}px`);
+    };
+    window.addEventListener('scroll', () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(applyParallax); }
+    }, { passive: true });
   }
 
   const flow = [...document.querySelectorAll('[data-experience-step]')];
@@ -157,7 +198,7 @@
     },
     launch: {
       title: 'Pilote Free et préparation Premium',
-      content: `<p class="public-doc-lead">DDA ouvre d’abord un pilote gratuit contrôlé. Cette page présente ce qui est disponible aujourd’hui, ce qui est en préparation et comment contribuer à une plateforme sérieuse.</p><h3>1. Le pilote DDA Free</h3><p>Le parcours Free disponible comprend six leçons authored, de M0.1 à M1.3, avec exercices, quiz, retry, progression locale, Terminal d’analyse et Journal. L’objectif du pilote est d’observer ce qui est compris et ce qui doit être amélioré avec de vrais apprenants, pas de publier des statistiques avant vérification.</p><h3>2. Supports vidéo en préparation</h3><p>Les scripts pédagogiques des huit leçons prioritaires sont préparés : M0.1, M0.2, M0.3, M1.1, M1.2, M1.3, P2.1 et P2.2. Aucune vidéo n’est annoncée comme publiée tant que le fichier, les sous-titres, les droits, l’hébergement HTTPS et la lecture mobile n’ont pas été vérifiés.</p><h3>3. Premium sans encaissement prématuré</h3><p>L’aperçu Premium local présente P2.1, P2.2, le Risk Plan Lab, Controlled Decision, une preuve pédagogique locale et la Revue hebdomadaire. Il ne s’agit pas encore d’un abonnement payant ni d’une certification officielle. Avant toute vente, DDA doit valider l’identité juridique, Chariow, le BFF, Supabase, les webhooks signés, l’idempotence et la révocation des droits serveur.</p><h3>4. Participer proprement</h3><p>Pour rejoindre le pilote ou signaler une incompréhension, écris à <a href="mailto:dariusdigitalacademy@gmail.com">dariusdigitalacademy@gmail.com</a>. Pour les annonces, utilise le <a href="https://t.me/+Wny_VS9f-blmOWFk" target="_blank" rel="noopener noreferrer">canal Telegram DDA</a> ou la <a href="https://whatsapp.com/channel/0029VbCISPsI1rcb3sbxiI0A" target="_blank" rel="noopener noreferrer">chaîne WhatsApp officielle</a>. Ne partage jamais de donnée sensible dans un canal public.</p>`
+      content: `<p class="public-doc-lead">DDA ouvre d’abord un pilote gratuit contrôlé. Cette page présente ce qui est disponible aujourd’hui, ce qui est en préparation et comment contribuer à une plateforme sérieuse.</p><h3>1. Le pilote DDA Free</h3><p>Le parcours Free disponible comprend six leçons authored : M0 rassemble trois fondations (M0.1 à M0.3) et M1 ajoute trois leçons (M1.1 à M1.3), avec exercices, quiz, retry, progression locale, Terminal d’analyse et Journal. L’objectif du pilote est d’observer ce qui est compris et ce qui doit être amélioré avec de vrais apprenants, pas de publier des statistiques avant vérification.</p><h3>2. Supports vidéo en préparation</h3><p>Les scripts pédagogiques des huit leçons prioritaires sont préparés : M0.1, M0.2, M0.3, M1.1, M1.2, M1.3, P2.1 et P2.2. Aucune vidéo n’est annoncée comme publiée tant que le fichier, les sous-titres, les droits, l’hébergement HTTPS et la lecture mobile n’ont pas été vérifiés.</p><h3>3. Premium sans encaissement prématuré</h3><p>L’aperçu Premium local présente P2.1, P2.2, le Risk Plan Lab, Controlled Decision, une preuve pédagogique locale et la Revue hebdomadaire. Il ne s’agit pas encore d’un abonnement payant ni d’une certification officielle. Avant toute vente, DDA doit valider l’identité juridique, Chariow, le BFF, Supabase, les webhooks signés, l’idempotence et la révocation des droits serveur.</p><h3>4. Participer proprement</h3><p>Pour rejoindre le pilote ou signaler une incompréhension, écris à <a href="mailto:dariusdigitalacademy@gmail.com">dariusdigitalacademy@gmail.com</a>. Pour les annonces, utilise le <a href="https://t.me/+Wny_VS9f-blmOWFk" target="_blank" rel="noopener noreferrer">canal Telegram DDA</a> ou la <a href="https://whatsapp.com/channel/0029VbCISPsI1rcb3sbxiI0A" target="_blank" rel="noopener noreferrer">chaîne WhatsApp officielle</a>. Ne partage jamais de donnée sensible dans un canal public.</p>`
     },
     accessibility: {
       title: 'Accessibilité',
@@ -244,6 +285,13 @@
   window.addEventListener('scroll', requestCtaSync, { passive: true });
   window.addEventListener('resize', requestCtaSync, { passive: true });
   syncCta();
+
+  // Vidéo de présentation landing (CDCP-OS addendum, issue #240) : désormais
+  // un fichier réel auto-hébergé rendu directement en HTML statique
+  // (dist/index.html, <video preload="none">) — plus besoin de montage JS
+  // ni de résolution d'ID YouTube ici ; le navigateur gère le clic-pour-lire
+  // nativement via l'attribut `controls`.
+
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }

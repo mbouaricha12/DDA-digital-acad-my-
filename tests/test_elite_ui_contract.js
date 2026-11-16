@@ -49,7 +49,7 @@ assert.match(css, /#dashboard \.terminal-tool-label\{display:none\}/, 'mobile to
 assert.match(css, /#landing \.landing-market-cards\{display:grid/, 'market cards adapt to a responsive grid');
 assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/, 'reduced-motion preference is respected');
 assert.match(css, /body\.low-data #landing \.landing-3d-scene\{display:none\}/, 'the existing low-data guard for decorative 3D remains');
-assert.match(sw, /const CACHE = 'dda-shell-v27';/, 'PWA cache is bumped for the segmented offline strategy');
+assert.match(sw, /const CACHE = 'dda-shell-v28';/, 'PWA cache is bumped for the segmented offline strategy');
 assert.match(app, /window\.addEventListener\('popstate'/, 'browser Back/Forward is handled by the existing SPA router');
 assert.match(app, /window\.addEventListener\('hashchange'/, 'hash links remain synchronized with application navigation');
 assert.match(app, /history\.back\(\)/, 'in-app Retour uses the native route history when available');
@@ -67,7 +67,7 @@ assert.match(css, /#membership \.plan-card[^\{]*\{[^}]*background:/, 'membership
 assert.match(css, /#profile \.profile-panel[^\{]*\{[^}]*background:/, 'profile and preference forms use the shared dark surface');
 assert.match(css, /#gate-layer \.gate-card[^\{]*\{[^}]*background:/, 'permission overlays use the shared dark surface');
 assert.match(html, /data-scroll-to="analysis-terminal"/, 'Terminal remains a reachable in-dashboard practice destination');
-assert.match(html, /<p class="nav-section-label">Mon travail<\/p>/, 'Progression and Journal have a distinct work/evidence group');
+assert.match(html, /<p class="nav-section-label">Outils avancés<\/p>/, 'Progression and Journal have a distinct, clearly-labelled advanced-tools group (Priorité 2 nav restructure)');
 assert.match(html, /<button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"\/><\/svg> Journal de trading<\/button>/, 'navigation calls the destination Journal de trading, not a second Plan');
 assert.match(css, /#landing \.landing-aperture-copy\{display:none!important\}/, 'decorative hero slogan cannot obscure the product mockups');
 assert.match(css, /#landing \.landing-device-chart-head strong\{[^}]*font:600 8px\//, 'device mockup labels stay at product scale rather than inheriting the hero headline');

@@ -19,7 +19,7 @@ assert.match(academy, /data-layer="academy"/, 'learner app must have its own she
 // Public surface: internal editorial anchors only, with explicit access CTAs.
 const publicNav = landing.match(/<nav class="public-header-nav"[^>]*>[\s\S]*?<\/nav>/)?.[0] || '';
 const publicMenu = landing.match(/<details class="public-menu"[\s\S]*?<\/details>/)?.[0] || '';
-assert.match(publicNav, /href="#landing-experience"/, 'public navigation must stay on landing anchors');
+assert.match(publicNav, /href="#landing-lab"/, 'public navigation must stay on landing anchors');
 assert.doesNotMatch(`${publicNav}${publicMenu}`, /data-view="(dashboard|path|progress|journal|resources|markets|community|intelligence|profile)"/, 'public navigation must not bypass the app boundary');
 assert.doesNotMatch(landing, /class="future-label"[^>]*data-view=/, 'future capabilities must not expose executable routes');
 assert.match(landing, /data-view="access"[^>]*data-analytics="hero_cta_click"/, 'the public funnel must have an explicit measurable access boundary');

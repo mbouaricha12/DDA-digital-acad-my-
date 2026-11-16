@@ -14,6 +14,20 @@
    Ce littéral reste volontairement des données pures (aucune référence
    externe) : le test le réévalue tel quel avec vm.
    ========================================================================== */
+const DDA_VISIBLE_LESSON_TITLES = Object.freeze({
+  'M0.1': 'Leçon en cours — Le trading comme commerce',
+  'M0.2': 'Support & Résistance — Identifier les zones de support et de résistance',
+  'M0.3': 'Lire une tendance — Comprendre les tendances du marché',
+  'M1.1': 'Pourquoi les prix évoluent ? — Comprendre la formation des prix',
+  'M1.2': 'Comment les ordres s’exécutent ? — Comprendre l’exécution des ordres',
+  'M1.3': 'Comment les marchés s’organisent ? — Découvrir les acteurs des marchés financiers',
+  'MBRVM.1': 'Introduction à la BRVM',
+  'P2.1': 'Définir son risque avant une décision',
+  'P2.2': 'Construire une décision maîtrisée'
+});
+function displayLessonTitle(id, fallback = '') {
+  return DDA_VISIBLE_LESSON_TITLES[id] || fallback || 'Leçon';
+}
 const LESSON_REGISTRY = Object.freeze([
   {
     id: 'M0.1', viewId: 'lesson', suffix: '', title: 'Leçon en cours',
@@ -142,6 +156,36 @@ const LESSON_REGISTRY = Object.freeze([
   }
 ]);
 
+// Quick Skills Discovery — une couche d'orientation courte, jamais un second
+// curriculum. Chaque entrée pointe vers une leçon authored et expose une
+// capacité observable ; l'état affiché est dérivé du même progrès que Parcours.
+const QUICK_SKILLS_REGISTRY = Object.freeze([
+  Object.freeze({
+    id: 'quick-observe', pillar: 'Trading', lessonId: 'M0.1', viewId: 'lesson',
+    title: 'Observer avant de chercher un signal',
+    outcome: 'Décrire le rôle des acheteurs et des vendeurs dans un échange.',
+    minutes: 8, tone: 'blue'
+  }),
+  Object.freeze({
+    id: 'quick-zones', pillar: 'Trading', lessonId: 'M0.2', viewId: 'lesson-m02',
+    title: 'Repérer une zone de support ou résistance',
+    outcome: 'Identifier une aire d’observation sans transformer un niveau en certitude.',
+    minutes: 10, tone: 'gold'
+  }),
+  Object.freeze({
+    id: 'quick-brvm', pillar: 'BRVM', lessonId: 'MBRVM.1', viewId: 'lesson-mbrvm1',
+    title: 'Distinguer action et obligation à la BRVM',
+    outcome: 'Expliquer la différence entre une part de propriété et un prêt avec échéance.',
+    minutes: 12, tone: 'teal'
+  }),
+  Object.freeze({
+    id: 'quick-ai', pillar: 'IA', lessonId: 'LAB1', viewId: 'lesson-lab1',
+    title: 'Vérifier ce que l’IA produit',
+    outcome: 'Repérer une limite d’un résultat IA avant de l’utiliser dans un projet.',
+    minutes: 10, tone: 'violet'
+  })
+]);
+
 /* ==========================================================================
    VIDEO REGISTRY — bibliothèque vidéo DDA. Ajouter une vidéo = une entrée
    ici, rien d'autre : la Bibliothèque DDA (#resources) se construit à partir
@@ -156,6 +200,11 @@ const LESSON_REGISTRY = Object.freeze([
    utilisé). `preview: true` marque un aperçu gratuit d'un module Premium.
    Durées non communiquées par le fondateur : volontairement omises plutôt
    qu'inventées.
+   Mirroré dans dist/video-registry.json (lecture seule) pour le back-office
+   (admin.js, onglet Ressources) — ce fichier-ci reste la source autoritaire
+   pour la lecture/rattachement réel des leçons ; le miroir est vérifié
+   byte-pour-byte par tests/test_video_registry_mirror_contract.js, qui
+   échoue si l'un des deux est modifié sans l'autre.
    ========================================================================== */
 const VIDEO_REGISTRY = Object.freeze([
   {
@@ -797,9 +846,11 @@ window.addEventListener('resize', () => {
 
 const titles = {
   landing: 'Découvrir DDA', dashboard: 'Aujourd’hui', access: 'Créer mon profil', path: 'Mon parcours',
-  progress: 'Progression', journal: 'Journal', resources: 'Ressources', markets: 'Marchés & BRVM', brokers: 'Broker Hub',
+  progress: 'Mes progrès', journal: 'Journal', resources: 'Ressources', markets: 'Marchés', brokers: 'Broker Hub',
   membership: 'DDA Premium', 'premium-track': 'Premium Track · P2', 'premium-lab': 'Premium Lab · Risk Plan', 'premium-assessment': 'Premium Assessment · Controlled Decision', support: 'Aide & support', profile: 'Mon profil', community: 'Communauté',
   practice: 'Pratique avancée', intelligence: 'Intelligence DDA', lab: 'DDA Lab',
+  forex: 'Forex', stocks: 'Actions', indices: 'Indices', crypto: 'Crypto',
+  live: 'DDA Live', business: 'DDA Business', experts: 'DDA Experts', 'produits-digitaux': 'Produits Digitaux',
   // Lesson screen titles are declared once, in LESSON_REGISTRY — never a
   // second hand-maintained list to keep in sync.
   ...Object.fromEntries(LESSON_REGISTRY.map(entry => [entry.viewId, entry.title])),
@@ -1028,6 +1079,27 @@ function countActiveDays(events, now = Date.now()) {
     .map(({ event }) => new Date(event.at).toISOString().slice(0, 10))).size;
 }
 
+// Lot 9 (maquette "Mes progrès" — badges/séries) : la vraie série de jours
+// consécutifs, calculée depuis le même journal d'événements que
+// countActiveDays — jamais un second chiffre inventé. Si aujourd'hui n'a
+// pas encore d'activité, la série reste comptée depuis hier (elle n'est
+// rompue qu'après une journée entière sans aucune activité réelle).
+function countCurrentStreak(events, now = Date.now()) {
+  const activeDays = new Set((events || [])
+    .filter(event => LEARNING_ACTIVITY_EVENTS.has(event.name))
+    .map(event => Date.parse(event.at))
+    .filter(Number.isFinite)
+    .map(timestamp => new Date(timestamp).toISOString().slice(0, 10)));
+  const cursor = new Date(now);
+  if (!activeDays.has(cursor.toISOString().slice(0, 10))) cursor.setUTCDate(cursor.getUTCDate() - 1);
+  let streak = 0;
+  while (activeDays.has(cursor.toISOString().slice(0, 10))) {
+    streak += 1;
+    cursor.setUTCDate(cursor.getUTCDate() - 1);
+  }
+  return streak;
+}
+
 // Real, computed from the same event log as countActiveDays — never fabricated —
 // scoped to a single view's own "view_opened" events (e.g. how many distinct days
 // this device has opened Market Intelligence).
@@ -1183,14 +1255,14 @@ function setBffAuthMode(mode) {
   // unlike the local-only prototype mode this label's original wording
   // describes — showing that copy here would tell a real signer-upper
   // something false about where their data goes.
-  if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe) pour retrouver ma progression sur n’importe quel appareil, après avoir confirmé mon adresse e-mail.';
+  if (consentLabel) consentLabel.textContent = 'Je crée un compte sécurisé (e-mail + mot de passe) pour retrouver la progression de mes leçons et mon onboarding après confirmation de mon adresse e-mail. Le Journal, le Terminal, les préférences et mes réponses restent sur cet appareil.';
   if (emailHelp) emailHelp.textContent = login
     ? 'Cette adresse e-mail est transmise au service d’authentification pour ouvrir ta session.'
     : 'Cette adresse e-mail est transmise au service d’authentification pour créer ton compte et t’envoyer le lien de confirmation.';
   if (title) title.textContent = login ? 'Se connecter' : 'Commence ton parcours Free';
   if (step) step.textContent = login ? 'Accès sécurisé' : 'Étape 1 sur 2 · commencer';
   if (note) note.textContent = login
-    ? 'Retrouve ton parcours avec ton compte serveur sécurisé.'
+    ? 'Ouvre ta session DDA. Les leçons et l’onboarding sont liés à ton compte ; le Journal, le Terminal et les réponses restent sur cet appareil.'
     : 'Pas de carte bancaire ni de courtier : deux minutes pour préparer ta première leçon.';
   if (submit) submit.innerHTML = login ? 'Ouvrir ma session <span>→</span>' : 'Recevoir le lien de vérification <span>→</span>';
   if (forgot) forgot.hidden = !login;
@@ -1508,6 +1580,16 @@ function moduleActionLabel(status, renderable) {
   return renderable ? 'Continuer' : 'Ouvrir';
 }
 
+// Internal curriculum IDs remain useful to the engine and analytics, but they
+// are not learner-facing language. Every surface below uses the authored title
+// or a plain sequence label instead of exposing M0.1, P2.2, LAB1, etc.
+function learnerLessonTitle(lessonOrId) {
+  if (lessonOrId && typeof lessonOrId === 'object') return lessonOrId.title || 'cette leçon';
+  const match = DDA.curriculum.modules.flatMap(module => module.lessons.map(lesson => ({ module, lesson })))
+    .find(entry => entry.lesson.id === lessonOrId);
+  return match?.lesson.title || 'cette leçon';
+}
+
 // The Parcours screen is a journey, not a stack of identical cards: one rich
 // "current chapter" for the single authored module, then a compact connected
 // rail for the honestly-labeled modules still to come (never a fake card per
@@ -1581,18 +1663,135 @@ function renderModulesRecap() {
   const visibleModules = modules.slice(0, Math.min(modules.length, Math.max(3, activeIndex + 2)));
   container.innerHTML = visibleModules.map(module => {
     const status = DDALearning.moduleStatus(DDA.curriculum, module.id, prototypeState);
-    return `<li><span class="module-id">${module.id}</span><strong>${module.title}</strong><span class="module-pill ${status}">${MODULE_STATUS_LABEL[status] || status}</span></li>`;
+    return `<li><span class="module-id">Étape ${visibleModules.indexOf(module) + 1}</span><strong>${module.title}</strong><span class="module-pill ${status}">${MODULE_STATUS_LABEL[status] || status}</span></li>`;
   }).join('');
   const hidden = modules.length - visibleModules.length;
   if (hidden > 0) container.insertAdjacentHTML('beforeend', `<li class="modules-recap-more"><span class="module-id">…</span><strong>${hidden} modules plus loin</strong><span class="module-pill coming_soon">Progressif</span></li>`);
 }
 
+// Lot 8 (cahier des charges — instruments de marché), étendu chantier C
+// (2026-11-14) : XAUUSD, EURUSD, GBPUSD, USDJPY, US30, NAS100, BTCUSD,
+// ETHUSD, SOLUSD, BNBUSD, XRPUSD. Toujours une lecture serveur fraîche —
+// jamais un chiffre fabriqué ou mis en cache côté client au-delà de cet
+// appel — et jamais bloquant si le BFF ou les fournisseurs ne sont pas
+// configurés : chaque carte retombe honnêtement sur "Bientôt disponible".
+const GLOBAL_MARKET_SYMBOLS = ['XAUUSD', 'EURUSD', 'GBPUSD', 'USDJPY', 'US30', 'NAS100', 'BTCUSD', 'ETHUSD', 'SOLUSD', 'BNBUSD', 'XRPUSD'];
+
+// Maquette chantier (2026-11-14) : même traitement d'icône que le ticker
+// crypto de la landing (cercle coloré + glyphe CSS, pas de logo de marque
+// externe) étendu aux 11 instruments de la grille Market Intelligence, pour
+// que l'icône d'un symbole soit identique partout sur le site.
+const MARKET_SYMBOL_ICON = {
+  XAUUSD: { glyph: 'Au', cssClass: 'market-symbol-icon-xau' },
+  EURUSD: { glyph: '€', cssClass: 'market-symbol-icon-eur' },
+  GBPUSD: { glyph: '£', cssClass: 'market-symbol-icon-gbp' },
+  USDJPY: { glyph: '¥', cssClass: 'market-symbol-icon-jpy' },
+  US30: { glyph: 'DJ', cssClass: 'market-symbol-icon-us30' },
+  NAS100: { glyph: 'ND', cssClass: 'market-symbol-icon-nas100' },
+  BTCUSD: { glyph: '₿', cssClass: 'market-symbol-icon-btc' },
+  ETHUSD: { glyph: 'Ξ', cssClass: 'market-symbol-icon-eth' },
+  SOLUSD: { glyph: 'S', cssClass: 'market-symbol-icon-sol' },
+  BNBUSD: { glyph: 'B', cssClass: 'market-symbol-icon-bnb' },
+  XRPUSD: { glyph: 'X', cssClass: 'market-symbol-icon-xrp' }
+};
+
+function marketSymbolIconHtml(symbol) {
+  const meta = MARKET_SYMBOL_ICON[symbol];
+  if (!meta) return '';
+  return `<span class="market-symbol-icon ${meta.cssClass}" aria-hidden="true">${meta.glyph}</span>`;
+}
+
+function renderGlobalMarketQuotesSkeleton(grid) {
+  grid.innerHTML = GLOBAL_MARKET_SYMBOLS.map(symbol => `
+    <article class="index-card" data-symbol="${symbol}">
+      <div class="index-card-head">${marketSymbolIconHtml(symbol)}<strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Bientôt disponible</span></div>
+      <p>Cotation en attente de connexion à un fournisseur de données vérifié.</p>
+    </article>
+  `).join('');
+}
+
+async function renderGlobalMarketQuotes() {
+  const grid = document.getElementById('market-global-grid');
+  if (!grid) return;
+  renderGlobalMarketQuotesSkeleton(grid);
+  if (!window.DDABFF?.enabled()) return;
+  try {
+    const instruments = await window.DDABFF.getMarketQuotes();
+    if (!instruments) return;
+    grid.innerHTML = GLOBAL_MARKET_SYMBOLS.map(symbol => {
+      const quote = instruments[symbol];
+      if (!quote) return '';
+      if (quote.status === 'ok') {
+        const isDown = String(quote.price).trim().startsWith('-');
+        return `<article class="index-card" data-symbol="${symbol}">
+          <div class="index-card-head">${marketSymbolIconHtml(symbol)}<strong>${symbol}</strong><span class="data-badge is-live"><span class="status-dot"></span>Cotation vérifiée</span></div>
+          <div class="index-card-example"><strong class="index-card-example-value">${quote.price}</strong></div>
+          <p>${quote.label} · mis à jour le ${new Date(quote.asOf).toLocaleString('fr-FR')}</p>
+        </article>`;
+      }
+      return `<article class="index-card" data-symbol="${symbol}">
+        <div class="index-card-head">${marketSymbolIconHtml(symbol)}<strong>${symbol}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>${quote.status === 'unavailable' ? 'Indisponible pour le moment' : 'Bientôt disponible'}</span></div>
+        <p>${quote.label || symbol} — cotation en attente de connexion à un fournisseur de données vérifié.</p>
+      </article>`;
+    }).join('');
+  } catch {
+    // Keep the honest "Bientôt disponible" skeleton on any failure — never a stale or fabricated value.
+  }
+}
+
+// Maquette chantier (2026-11-14) : "Marchés principaux" compact — les 4
+// instruments mis en avant dans la maquette de référence, même source et
+// même honnêteté que la grille Market Intelligence complète ci-dessus
+// (jamais de prix fabriqué ; "Cotation en attente" tant qu'aucun
+// fournisseur n'est connecté).
+const DASHBOARD_MARKETS_SYMBOLS = ['XAUUSD', 'EURUSD', 'US30', 'NAS100'];
+function renderDashboardMarketsWidgetSkeleton(list) {
+  list.innerHTML = DASHBOARD_MARKETS_SYMBOLS.map(symbol => `
+    <li class="dashboard-markets-row" data-symbol="${symbol}">
+      ${marketSymbolIconHtml(symbol)}
+      <span class="dashboard-markets-row-name">${symbol}</span>
+      <span class="dashboard-markets-row-value data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Bientôt disponible</span>
+    </li>
+  `).join('');
+}
+async function renderDashboardMarketsWidget() {
+  const list = document.getElementById('dashboard-markets-list');
+  if (!list) return;
+  renderDashboardMarketsWidgetSkeleton(list);
+  if (!window.DDABFF?.enabled()) return;
+  try {
+    const instruments = await window.DDABFF.getMarketQuotes();
+    if (!instruments) return;
+    list.innerHTML = DASHBOARD_MARKETS_SYMBOLS.map(symbol => {
+      const quote = instruments[symbol];
+      if (!quote) return '';
+      if (quote.status === 'ok') {
+        return `<li class="dashboard-markets-row" data-symbol="${symbol}">
+          ${marketSymbolIconHtml(symbol)}
+          <span class="dashboard-markets-row-name">${symbol}</span>
+          <span class="dashboard-markets-row-value is-live">${quote.price}</span>
+        </li>`;
+      }
+      return `<li class="dashboard-markets-row" data-symbol="${symbol}">
+        ${marketSymbolIconHtml(symbol)}
+        <span class="dashboard-markets-row-name">${symbol}</span>
+        <span class="dashboard-markets-row-value data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>${quote.status === 'unavailable' ? 'Indisponible' : 'Bientôt disponible'}</span>
+      </li>`;
+    }).join('');
+  } catch {
+    // Conserve le squelette honnête "Bientôt disponible" sur tout échec.
+  }
+}
+
 function renderMarketIntelligence() {
-  const indices = document.getElementById('market-indices');
+  renderGlobalMarketQuotes();
+  // Keep the public section anchor intact; only the inner grid is data-driven.
+  const indices = document.getElementById('market-index-grid');
   if (indices) {
     indices.innerHTML = marketDemo().indices.map((item, i) => `
       <article class="index-card">
         <div class="index-card-head"><strong>${item.label}</strong><span class="data-badge"><svg class="icon"><use href="#icon-blocked"/></svg>Mode pédagogique</span></div>
+        ${item.exampleValue ? `<div class="index-card-example"><strong class="index-card-example-value">${item.exampleValue}</strong><span class="index-card-example-change${String(item.exampleChange).trim().startsWith('-') ? ' is-down' : ' is-up'}">${item.exampleChange}</span><small class="index-card-example-tag">Exemple pédagogique — pas une cotation réelle</small></div>` : ''}
         ${candlestickSpark(i)}
         <p>${item.description}</p>
       </article>
@@ -1673,7 +1872,7 @@ function renderMasteryList() {
     return `
       <article class="mastery-row mastery-row-focused" data-mastery-level="${level}" data-proof-state="${level >= 4 ? 'confirmed' : level >= 3 ? 'practiced' : 'learning'}">
         <div class="mastery-row-head">
-          <div><p class="mastery-lesson">${lesson.id} — ${lesson.title}</p><strong>${lesson.competency.label}</strong></div>
+          <div><p class="mastery-lesson">${lesson.title}</p><strong>${lesson.competency.label}</strong></div>
           <div class="mastery-level">
             <div class="terminal-thread-beads" role="img" aria-label="${beadsAriaLabel(level)}">${renderBeads(level)}</div>
             <span>${COMPETENCY_LEVEL_LABEL[level]}</span>
@@ -1702,14 +1901,111 @@ function renderPracticeProof() {
   }
   const validated = practice.status === 'validated';
   const proof = practice.proof || {};
-  const source = practice.sourceLessonTitle ? `Après la leçon ${practice.sourceLesson} · ${practice.sourceLessonTitle}` : 'Practice Terminal autonome';
+  const source = practice.sourceLessonTitle ? `Après la leçon « ${practice.sourceLessonTitle} »` : 'Practice Terminal autonome';
   const proofType = proof.type === 'zone_identification' ? 'Identification de zone' : 'Mission Practice';
-  container.innerHTML = `<div class="practice-proof-row ${validated ? 'is-validated' : 'is-retry'}"><span class="practice-proof-icon">${validated ? '✓' : '↻'}</span><div><strong>${escapeHtml(proofType)} — Practice Terminal</strong><p>${escapeHtml(source)}</p><p>${escapeHtml(practice.feedback || 'Mission tentée localement.')}</p><small>Preuve ${escapeHtml(proof.id || 'locale')} · ${validated ? 'conservée sur cet appareil.' : 'à reprendre — elle ne compte pas comme compétence acquise.'}</small></div></div>`;
+  container.innerHTML = `<div class="practice-proof-row ${validated ? 'is-validated' : 'is-retry'}"><span class="practice-proof-icon">${validated ? '✓' : '↻'}</span><div><strong>${escapeHtml(proofType)} — Practice Terminal</strong><p>${escapeHtml(source)}</p><p>${escapeHtml(practice.feedback || 'Mission tentée localement.')}</p><small>Preuve pédagogique · ${validated ? 'conservée sur cet appareil.' : 'à reprendre — elle ne compte pas comme compétence acquise.'}</small></div></div>`;
 }
 
 // Dashboard orientation layer: expose one recent, auditable proof without
 // creating a second progress engine. Practice state and the existing event log
 // remain the only sources; a view opening is never presented as proof.
+// Real photos only, reused from the existing pool (same assets as the Lab
+// photo rail) — picked by module prefix so a lesson's card matches its real
+// module, never a generic stock image unrelated to the content.
+const DASHBOARD_WEEK_PHOTO_BY_MODULE = Object.freeze({
+  M0: 'images/photos/m0-foundations-observe.jpg',
+  M1: 'images/photos/m1-terminal-analysis.jpg',
+  P2: 'images/photos/p2-discipline-review.jpg',
+  MBRVM: 'images/photos/brvm-market-fruits.jpg'
+});
+
+// Founder mockup's "À faire cette semaine" row — the real next 1-2 authored
+// lessons after the current one (authoredLessons() order, same source the
+// Fil de maîtrise and nav shortcuts already use), never a fabricated weekly
+// plan. Hidden entirely once the curriculum is complete (nothing left to do).
+function renderDashboardWeekAhead(continueTarget) {
+  const section = document.getElementById('dashboard-week-ahead');
+  const rail = document.getElementById('dashboard-week-rail');
+  if (!section || !rail) return;
+  const all = authoredLessons();
+  const currentIndex = continueTarget ? all.findIndex(entry => entry.lesson.id === continueTarget.lesson.id) : -1;
+  const upcoming = currentIndex === -1 ? [] : all.slice(currentIndex + 1, currentIndex + 3);
+  // Maquette chantier (2026-11-14) — carte "Agenda" du résumé bas de page :
+  // même liste `upcoming` déjà calculée pour le rail de la semaine, jamais
+  // un second calcul d'avancement qui pourrait diverger.
+  const agendaCountEl = document.getElementById('dashboard-card-agenda-count');
+  if (agendaCountEl) {
+    agendaCountEl.textContent = upcoming.length
+      ? `${upcoming.length} leçon${upcoming.length > 1 ? 's' : ''} à venir`
+      : 'Parcours à jour';
+  }
+  // Agenda pédagogique : la prochaine échéance réellement authored, jamais
+  // un événement inventé. Le titre vient de la même liste `upcoming` que le
+  // rail de la semaine et le compteur ci-dessus.
+  const agendaMetaEl = document.getElementById('dashboard-card-agenda-meta');
+  if (agendaMetaEl) {
+    agendaMetaEl.textContent = upcoming.length
+      ? `Prochaine : ${upcoming[0].lesson.title}`
+      : 'Aucune échéance restante sur le parcours authored.';
+  }
+  if (!upcoming.length) {
+    section.hidden = true;
+    rail.innerHTML = '';
+    return;
+  }
+  section.hidden = false;
+  rail.innerHTML = upcoming.map(({ module, lesson }) => {
+    const moduleKey = lesson.id.split('.')[0];
+    const photo = DASHBOARD_WEEK_PHOTO_BY_MODULE[moduleKey] || DASHBOARD_WEEK_PHOTO_BY_MODULE.M0;
+    const viewId = LESSON_VIEW_ID[lesson.id] || 'lesson';
+    return `
+      <button type="button" class="lab-photo-card" data-view="${viewId}">
+        <div class="lab-photo-card-media"><img class="photo-fill" src="${photo}" alt="" loading="lazy"><div class="photo-scrim"></div></div>
+        <strong>${escapeHtml(learnerLessonTitle(lesson))}</strong>
+        <small>${escapeHtml(module.title)}</small>
+      </button>`;
+  }).join('');
+}
+
+function quickSkillStatus(skill) {
+  const progress = DDALearning.getLessonProgress(prototypeState, skill.lessonId);
+  if (progress.quizComplete) return { key: 'done', label: 'Validée', action: 'Revoir' };
+  const registryEntry = LESSON_REGISTRY.find(entry => entry.id === skill.lessonId);
+  if (registryEntry?.prerequisite && !DDALearning.getLessonProgress(prototypeState, registryEntry.prerequisite).quizComplete) {
+    return { key: 'locked', label: 'Après la compétence précédente', action: 'Voir le parcours' };
+  }
+  if (progress.exerciseComplete || progress.lessonViewed) return { key: 'started', label: 'En cours', action: 'Continuer' };
+  return { key: 'ready', label: 'À commencer', action: 'Commencer' };
+}
+
+function renderQuickSkills(firstLessonComplete) {
+  const container = document.getElementById('quick-skills-list');
+  const section = document.getElementById('dashboard-quick-skills');
+  if (!container) return;
+  const statuses = QUICK_SKILLS_REGISTRY.map(skill => ({ skill, status: quickSkillStatus(skill) }));
+  // Priorité 2 — découverte/parcours : pour un tout nouvel apprenant qui n'a
+  // encore validé aucune leçon, cette grille ajoute 4 boutons concurrents au
+  // seul CTA qui compte ("Reprendre la leçon"). Elle n'apparaît donc qu'une
+  // fois la première leçon validée — sauf si une Quick Skill est déjà en
+  // cours ou validée, pour ne jamais faire disparaître un accès déjà pris.
+  const anySkillAlreadyUnlocked = statuses.some(({ status }) => status.key === 'done');
+  const shouldShow = Boolean(firstLessonComplete) || anySkillAlreadyUnlocked;
+  if (section) section.hidden = !shouldShow;
+  if (!shouldShow) return;
+  container.innerHTML = statuses.map(({ skill, status }) => {
+    const target = status.key === 'locked' ? 'path' : skill.viewId;
+    return `<article class="quick-skill-card quick-skill-${skill.tone} quick-skill-${status.key}">
+      <div class="quick-skill-top"><span class="quick-skill-pillar">${escapeHtml(skill.pillar)}</span><span class="quick-skill-status">${escapeHtml(status.label)}</span></div>
+      <h3>${escapeHtml(skill.title)}</h3>
+      <p>${escapeHtml(skill.outcome)}</p>
+      <div class="quick-skill-footer"><span>${skill.minutes} min · objectif concret</span><button type="button" class="text-action" data-quick-skill-view="${target}">${escapeHtml(status.action)} <span>→</span></button></div>
+    </article>`;
+  }).join('');
+  container.querySelectorAll('[data-quick-skill-view]').forEach(button => {
+    button.addEventListener('click', () => showView(button.dataset.quickSkillView));
+  });
+}
+
 function renderDashboardProof(continueTarget, curriculumComplete) {
   const titleEl = document.getElementById('dashboard-proof-title');
   const metaEl = document.getElementById('dashboard-proof-meta');
@@ -1733,7 +2029,7 @@ function renderDashboardProof(continueTarget, curriculumComplete) {
   } else {
     const event = [...(prototypeState.events || [])].reverse().find(item => ['quiz_complete', 'exercise_complete', 'lesson_understood'].includes(item.name));
     if (event) {
-      const lesson = event.metadata?.lesson || 'une leçon';
+      const lesson = learnerLessonTitle(event.metadata?.lesson);
       const labels = { quiz_complete: 'Quiz validé', exercise_complete: 'Exercice complété', lesson_understood: 'Leçon comprise' };
       title = `${labels[event.name]} — ${lesson}.`;
       meta = 'Preuve pédagogique enregistrée dans l’état local de cet appareil.';
@@ -1749,7 +2045,7 @@ function renderDashboardProof(continueTarget, curriculumComplete) {
   if (curriculumComplete) {
     actionEl.textContent = (prototypeState.journal?.entries || []).length === 0 ? 'Ouvrir le Journal' : 'Explorer les marchés';
   } else if (continueTarget) {
-    actionEl.textContent = `Reprendre ${continueTarget.lesson.id}`;
+    actionEl.textContent = `Reprendre « ${learnerLessonTitle(continueTarget.lesson)} »`;
   } else {
     actionEl.textContent = '—';
   }
@@ -1773,14 +2069,14 @@ function renderProgressNextStep() {
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   if (el) {
     el.textContent = next
-      ? `Continuer ${next.lesson.title} (${next.lesson.id}) — ${NEXT_STEP_PHRASE[next.step] || 'continuer'}.`
+      ? `Continuer « ${learnerLessonTitle(next.lesson)} » — ${NEXT_STEP_PHRASE[next.step] || 'continuer'}.`
       : 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.';
   }
   if (action) {
     action.hidden = !next;
     if (next) {
       action.dataset.view = LESSON_VIEW_ID[next.lesson.id] || 'lesson';
-      action.innerHTML = `${next.step === 'lesson' ? 'Commencer' : 'Reprendre'} ${next.lesson.id} · ${next.lesson.title} <span>→</span>`;
+      action.innerHTML = `${next.step === 'lesson' ? 'Commencer' : 'Reprendre'} « ${learnerLessonTitle(next.lesson)} » <span>→</span>`;
     }
   }
   const noteEl = document.getElementById('progress-journal-note');
@@ -1801,9 +2097,12 @@ function renderProgressHero() {
   const startedLabel = `${started}/${totalModules}`;
   const totalXp = DDALearning.totalXp(DDA.curriculum, prototypeState);
   const activeDays = countActiveDays(prototypeState.events);
+  const streak = countCurrentStreak(prototypeState.events);
   startedEl.textContent = startedLabel;
   document.getElementById('progress-total-xp').textContent = String(totalXp);
   document.getElementById('progress-active-days').textContent = String(activeDays);
+  const streakNote = document.getElementById('progress-streak-note');
+  if (streakNote) streakNote.textContent = streak > 0 ? `Série actuelle : ${streak} jour${streak > 1 ? 's' : ''}` : 'Série actuelle : 0 jour';
   const ring = document.getElementById('progress-modules-ring');
   if (ring) ring.style.setProperty('--progress', String(totalModules ? Math.round((started / totalModules) * 100) : 0));
   // Profil mirrors the exact same real values as Progression — never a second,
@@ -1820,6 +2119,36 @@ function renderProgressHero() {
   if (shareModules) shareModules.textContent = `${startedLabel} modules`;
   const shareDays = document.getElementById('share-card-days');
   if (shareDays) shareDays.textContent = `${activeDays} jour${activeDays === 1 ? '' : 's'} actif${activeDays === 1 ? '' : 's'}`;
+}
+
+// Lot 9 (maquette "Mes progrès") : les 3 badges existaient déjà dans le
+// HTML mais n'étaient reliés à aucune logique — ils restaient verrouillés
+// pour toujours, quoi que l'apprenant fasse. Chaque condition ci-dessous
+// réutilise un signal déjà réel et déjà affiché ailleurs (statut de module,
+// quiz validé, entrées de Journal) — jamais une progression inventée.
+function renderBadges() {
+  const row = document.getElementById('badge-foundations')?.closest('.badge-row');
+  if (!row) return;
+  const badges = [
+    { id: 'badge-foundations', unlocked: DDALearning.moduleStatus(DDA.curriculum, 'M0', prototypeState) === DDALearning.MODULE_STATUS.COMPLETED },
+    { id: 'badge-risk', unlocked: DDALearning.getLessonProgress(prototypeState, 'P2.1').quizComplete && DDALearning.getLessonProgress(prototypeState, 'P2.2').quizComplete },
+    { id: 'badge-discipline', unlocked: (prototypeState.journal?.entries || []).length >= 3 }
+  ];
+  let unlockedCount = 0;
+  badges.forEach(badge => {
+    const el = document.getElementById(badge.id);
+    if (!el) return;
+    el.classList.toggle('is-unlocked', badge.unlocked);
+    const use = el.querySelector('.icon use');
+    if (use) use.setAttribute('href', badge.unlocked ? '#icon-award' : '#icon-lock');
+    if (badge.unlocked) unlockedCount += 1;
+  });
+  const note = document.getElementById('badges-note');
+  if (note) {
+    note.innerHTML = unlockedCount === badges.length
+      ? '<svg class="icon"><use href="#icon-award"/></svg> Les 3 badges sont débloqués — bravo pour cette régularité.'
+      : `<svg class="icon"><use href="#icon-compass"/></svg> ${unlockedCount}/${badges.length} badge${unlockedCount > 1 ? 's' : ''} débloqué${unlockedCount > 1 ? 's' : ''} · valide tes prochaines missions pour débloquer les autres`;
+  }
 }
 
 function shareCardText() {
@@ -1925,7 +2254,7 @@ function renderJournalList() {
       .map(([field, label]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(entry[field])}</dd></div>`)
       .join('');
     const sourceView = entry.sourceLesson === 'M0.2' ? 'lesson-m02' : '';
-    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve ${escapeHtml(entry.proofId || 'locale')}</strong><span>${escapeHtml(entry.sourceLesson || 'M0.2')} · ${escapeHtml(entry.proofType || 'zone_identification')}</span>${sourceView ? `<button type="button" class="text-action journal-proof-source" data-view="${sourceView}">Revoir la leçon <span>→</span></button>` : ''}</div>` : '';
+    const proofMeta = entry.terminalSource ? `<div class="journal-proof-meta"><strong>Preuve pédagogique</strong><span>${escapeHtml(learnerLessonTitle(entry.sourceLesson))} · ${escapeHtml(entry.proofType === 'zone_identification' ? 'Identification de zone' : 'Pratique guidée')}</span>${sourceView ? `<button type="button" class="text-action journal-proof-source" data-view="${sourceView}">Revoir la leçon <span>→</span></button>` : ''}</div>` : '';
     const snippet = entry.decision || entry.scenario || entry.context || 'Aucun détail renseigné.';
     const entryNumber = String(entries.length - idx).padStart(2, '0');
     return `
@@ -2337,7 +2666,7 @@ function renderTerminalMeta(continueTarget) {
   const lessonProgress = DDALearning.getLessonProgress(prototypeState, continueTarget.lesson.id);
   const step = DDALearning.lessonNextStep(lessonProgress);
   stepEl.textContent = step === 'review' ? 'leçon terminée' : (NEXT_STEP_PHRASE[step] || '—');
-  document.getElementById('terminal-meta-module').textContent = continueTarget.lesson.id;
+  document.getElementById('terminal-meta-module').textContent = continueTarget.module.title;
   const xpKey = step === 'lesson' ? 'lessonViewed' : step === 'exercise' ? 'exerciseComplete' : step === 'quiz' ? 'quizComplete' : null;
   const nextXp = xpKey && continueTarget.lesson.xp ? continueTarget.lesson.xp[xpKey] : null;
   document.getElementById('terminal-meta-xp').textContent = nextXp ? `+${nextXp} XP` : '—';
@@ -2384,9 +2713,7 @@ function renderTerminalLeadComplete() {
   const indexEl = document.getElementById('lesson-index-label');
   if (indexEl) {
     const completedIds = completedModuleIds();
-    indexEl.textContent = completedIds.length
-      ? `CURRICULUM ${completedIds.join(' + ')} COMPLÉTÉ${completedIds.length > 1 ? 'S' : ''}`
-      : 'CURRICULUM DISPONIBLE COMPLÉTÉ';
+    indexEl.textContent = 'PARCOURS DISPONIBLE · LEÇONS VALIDÉES';
   }
   const moduleEl = document.getElementById('terminal-lead-module');
   if (moduleEl) moduleEl.textContent = last ? last.module.title : 'DDA';
@@ -2412,7 +2739,7 @@ function renderTerminalLeadComplete() {
     if (last) {
       secondary.hidden = false;
       secondary.dataset.view = LESSON_VIEW_ID[last.lesson.id] || 'lesson';
-      secondary.innerHTML = `Revoir ${last.lesson.id} <span>→</span>`;
+      secondary.innerHTML = `Revoir « ${learnerLessonTitle(last.lesson)} » <span>→</span>`;
     } else {
       secondary.hidden = true;
     }
@@ -2517,6 +2844,41 @@ function renderTerminalCrosshair() {
   yLabel.textContent = value.toFixed(1);
   if (readout) readout.textContent = `Séquence ${String(candle.index + 1).padStart(2, '0')} · O ${candle.open.toFixed(1)} · H ${candle.high.toFixed(1)} · B ${candle.low.toFixed(1)} · C ${candle.close.toFixed(1)} · indices sans unité`;
 }
+// Priorité 2 — découverte/parcours : le Terminal d'analyse (chandeliers,
+// Fibonacci, zoom/pan) est un outil avancé, pas la première chose qu'un
+// nouvel apprenant doit affronter. Il reste entièrement fonctionnel et
+// accessible en un clic — seule sa visibilité par défaut change, et
+// uniquement tant que l'apprenant n'a validé aucune leçon. Un apprenant qui
+// l'a déjà ouvert voit son choix explicite respecté à chaque visite.
+const ANALYSIS_TERMINAL_PREF_KEY = 'dda_terminal_expanded_v1';
+
+function isAnalysisTerminalExpanded() {
+  const body = document.getElementById('analysis-terminal-body');
+  return body ? !body.hidden : true;
+}
+
+function setAnalysisTerminalExpanded(expanded, { persist = true } = {}) {
+  const body = document.getElementById('analysis-terminal-body');
+  const toggle = document.getElementById('analysis-terminal-toggle');
+  if (body) body.hidden = !expanded;
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', String(expanded));
+    toggle.innerHTML = expanded
+      ? 'Replier <span class="analysis-terminal-toggle-icon" aria-hidden="true">▲</span>'
+      : 'Déplier <span class="analysis-terminal-toggle-icon" aria-hidden="true">▼</span>';
+  }
+  if (persist) {
+    try { localStorage.setItem(ANALYSIS_TERMINAL_PREF_KEY, expanded ? '1' : '0'); } catch { /* storage is optional */ }
+  }
+}
+
+function applyAnalysisTerminalDefaultState(firstLessonComplete) {
+  let override = null;
+  try { override = localStorage.getItem(ANALYSIS_TERMINAL_PREF_KEY); } catch { /* storage is optional */ }
+  const expanded = override === '1' ? true : override === '0' ? false : Boolean(firstLessonComplete);
+  setAnalysisTerminalExpanded(expanded, { persist: false });
+}
+
 function renderDariusAnalysisTerminal() {
   const svg = document.getElementById('terminal-chart');
   if (!svg) return;
@@ -2694,6 +3056,9 @@ function initDariusAnalysisTerminal() {
     update({ observation });
     showToast('Observation conservée sur cet appareil.');
   });
+  document.getElementById('analysis-terminal-toggle')?.addEventListener('click', () => {
+    setAnalysisTerminalExpanded(!isAnalysisTerminalExpanded());
+  });
   document.getElementById('terminal-practice-validate').addEventListener('click', () => {
     const state = getTerminalState();
     const zones = state.drawings.filter(drawing => drawing.type === 'zone');
@@ -2703,13 +3068,26 @@ function initDariusAnalysisTerminal() {
     const valid = Boolean(zone && height >= 45 && height <= 130 && center >= 100 && center <= 320);
     const attempts = Number(state.practice?.attempts || 0) + 1;
     const status = valid ? 'validated' : 'retry';
+    // Audit Terminal/Journal (chantier A) : la consigne générique "élargis
+    // ou déplace" ne disait jamais LEQUEL des deux ajuster — un apprenant qui
+    // a déjà la bonne largeur mais une zone mal centrée recevait le même
+    // conseil que celui qui a dessiné une zone minuscule. Feedback distinct
+    // par cause réelle d'échec, sans toucher au seuil de validation lui-même.
+    let feedback;
+    if (!zone) {
+      feedback = 'Choisis Zone S/R et glisse sur deux niveaux pour matérialiser une zone avant de vérifier.';
+    } else if (valid) {
+      feedback = 'Bonne lecture : tu as matérialisé une zone, sans la réduire à un prix exact. Preuve conservée localement.';
+    } else if (height < 45) {
+      feedback = 'Ta zone est trop étroite pour représenter une vraie zone d’observation : élargis-la un peu.';
+    } else if (height > 130) {
+      feedback = 'Ta zone est trop large pour rester précise : resserre-la autour de la structure que tu observes.';
+    } else {
+      feedback = 'Ta zone est bien dimensionnée, mais trop excentrée : déplace-la vers la partie centrale du graphique.';
+    }
     const practice = {
       ...(state.practice || {}), status, attempts,
-      feedback: valid
-        ? 'Bonne lecture : tu as matérialisé une zone, sans la réduire à un prix exact. Preuve conservée localement.'
-        : zone
-          ? 'Relis la consigne : élargis ou déplace ta zone vers la partie centrale du graphique, puis réessaie.'
-          : 'Choisis Zone S/R et glisse sur deux niveaux pour matérialiser une zone avant de vérifier.',
+      feedback,
       proof: { id: 'm02-zone-identification', type: 'zone_identification', lessonId: state.practice?.sourceLesson || 'M0.2', status },
       ...(valid ? { completedAt: new Date().toISOString() } : {})
     };
@@ -2791,8 +3169,23 @@ function renderMembershipNextStep(premium) {
   }
   const next = DDALearning.nextActionable(DDA.curriculum, prototypeState);
   el.textContent = next
-    ? `Continuer ${next.lesson.title} (${next.lesson.id}) sur DDA Free — Premium reste disponible en aperçu quand tu voudras l’explorer.`
+    ? `Continuer « ${learnerLessonTitle(next.lesson)} » sur DDA Free — Premium reste disponible en aperçu quand tu voudras l’explorer.`
     : 'Tu as validé les leçons disponibles sur DDA Free — ouvre l’aperçu Premium ci-dessus pour voir ce qu’il débloque dès aujourd’hui.';
+}
+
+// M0 completion must distinguish a real Free → Premium handoff from a normal
+// next-lesson transition. The destination remains the same guarded M1.1 view;
+// only the action language changes so a Free learner knows M0 is complete and
+// that the next click opens an honest Premium preview rather than a broken
+// lesson.
+function renderM0CompletionCta() {
+  const cta = document.querySelector('#result-card-m3 .result-action[data-view="lesson-m11"]');
+  if (!cta) return;
+  const premium = canUnlock('premium_track');
+  cta.innerHTML = premium
+    ? 'Continuer vers Pourquoi les prix évoluent ? <span>→</span>'
+    : 'Découvrir l’aperçu Premium : Pourquoi les prix évoluent ? <span>→</span>';
+  cta.dataset.m0CompletionAccess = premium ? 'premium' : 'free';
 }
 
 function renderState() {
@@ -2830,6 +3223,13 @@ function renderState() {
   document.getElementById('module-percent').textContent = `${progress}%`;
   document.getElementById('module-ring').style.setProperty('--progress', progress);
   document.getElementById('week-xp').textContent = `+${xp} XP`;
+  // Maquette chantier (2026-11-14) — nouvelle carte "Progression" du résumé
+  // bas de page : mêmes valeurs déjà calculées ci-dessus, jamais un second
+  // calcul qui pourrait diverger de module-percent/week-xp.
+  const summaryProgressPercent = document.getElementById('dashboard-card-progress-percent');
+  if (summaryProgressPercent) summaryProgressPercent.textContent = `${progress}%`;
+  const summaryProgressXp = document.getElementById('dashboard-card-progress-xp');
+  if (summaryProgressXp) summaryProgressXp.textContent = `+${xp} XP`;
   const activeDays = countActiveDays(prototypeState.events);
   document.getElementById('active-days').textContent = `${activeDays} jour${activeDays > 1 ? 's' : ''}`;
   const marketVisitDays = countActiveDaysForView(prototypeState.events, 'markets');
@@ -2848,7 +3248,7 @@ function renderState() {
   document.getElementById('personalized-next').textContent = curriculumComplete
     ? 'Toutes les leçons disponibles sont validées. Ton prochain module sera bientôt disponible.'
     : prototypeState.onboarding?.goal
-      ? `Objectif : ${prototypeState.onboarding.goal}. Prochaine étape : terminer ${continueTarget.lesson.id}.`
+      ? `Objectif : ${prototypeState.onboarding.goal}. Prochaine étape : terminer « ${learnerLessonTitle(continueTarget.lesson)} ».`
       : 'Une étape claire pour continuer à progresser.';
 
   if (continueTarget) {
@@ -2866,10 +3266,29 @@ function renderState() {
   } else {
     renderTerminalLeadComplete();
   }
+  // Maquette chantier (2026-11-14) — carte "Prochaine leçon" du résumé bas
+  // de page : mirroir exact de ce que terminal-lead/lesson-primary-action
+  // affichent déjà juste au-dessus (branche "en cours" ou "curriculum
+  // complet" via renderTerminalLeadComplete ci-dessus), jamais une deuxième
+  // logique de calcul qui pourrait diverger de la source déjà affichée.
+  const summaryNextTitle = document.getElementById('dashboard-card-next-lesson-title');
+  const summaryNextModule = document.getElementById('dashboard-card-next-lesson-module');
+  const summaryNextGo = document.getElementById('dashboard-card-next-lesson-go');
+  const primaryActionEl = document.getElementById('lesson-primary-action');
+  if (summaryNextTitle) summaryNextTitle.textContent = document.getElementById('terminal-lead-title').textContent;
+  if (summaryNextModule) summaryNextModule.textContent = document.getElementById('terminal-lead-module').textContent;
+  if (summaryNextGo && primaryActionEl) {
+    summaryNextGo.dataset.view = primaryActionEl.dataset.view;
+    summaryNextGo.innerHTML = primaryActionEl.innerHTML;
+  }
   renderTerminalThread(continueTarget);
   renderTerminalMeta(continueTarget);
   renderDashboardProof(continueTarget, curriculumComplete);
+  renderDashboardWeekAhead(continueTarget);
+  renderDashboardMarketsWidget();
+  renderQuickSkills(complete);
   renderDariusAnalysisTerminal();
+  applyAnalysisTerminalDefaultState(complete);
   renderTerminalJournalNote();
   renderTerminalSkillmap(continueTarget);
 
@@ -2877,6 +3296,7 @@ function renderState() {
   renderPracticeProof();
   renderProgressNextStep();
   renderProgressHero();
+  renderBadges();
   renderCertificatePreview(activeLessonProgress);
   renderJournalList();
   renderWeeklyReview();
@@ -2886,8 +3306,9 @@ function renderState() {
   renderNavCurrentExercise(continueTarget);
 
   // Restore every mounted lesson's progress UI from stored state — one
-  // registry-driven loop covers all of them, ids derived by lessonUiIds.
+  // registry-driven loop covers all of them, ids derived from lessonUiIds.
   mountedLessons.forEach(entry => renderLessonProgressUI(entry.id, entry.meta.lesson, lessonUiIds(entry)));
+  renderM0CompletionCta();
 
   // Lot — Signup coherence: the resume/erase nudge is for a RETURNING
   // learner who opens #access while a prior session already exists. Once
@@ -2924,8 +3345,20 @@ function renderState() {
   document.getElementById('profile-first-name').value = hasProfile ? name : '';
   document.getElementById('profile-error').textContent = '';
   if (hasProfile) {
-
-    document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
+    const persistenceStatus = document.getElementById('profile-persistence-status');
+    const remoteAccount = Boolean(window.DDABFF?.enabled() && remoteUser);
+    if (persistenceStatus) {
+      const storageReady = DDA.storageAvailable();
+      persistenceStatus.textContent = remoteAccount
+        ? (storageReady
+            ? 'Leçons et onboarding liés à ton compte · Journal, Terminal, préférences et réponses sur cet appareil'
+            : 'Leçons et onboarding liés à ton compte · stockage local indisponible pour tes autres données')
+        : (storageReady
+            ? 'Progression locale · enregistrée sur cet appareil'
+            : 'Progression en mémoire · stockage local indisponible');
+      persistenceStatus.classList.toggle('is-warning', !storageReady);
+    }
+    document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · démonstration locale' : 'DDA Free';
     document.getElementById('profile-level').value = prototypeState.onboarding?.level || 'Débutant';
     document.getElementById('profile-goal').value = prototypeState.onboarding?.goal || 'Comprendre les marchés';
     document.getElementById('profile-time').value = prototypeState.onboarding?.time || '10 minutes par jour';
@@ -2935,11 +3368,11 @@ function renderState() {
   const count = prototypeState.events?.length || 0;
   document.getElementById('event-count').textContent = `${count} événement${count > 1 ? 's' : ''}`;
 
-  document.getElementById('sidebar-plan').textContent = premium ? 'DDA Premium · Aperçu' : 'DDA Free';
+  document.getElementById('sidebar-plan').textContent = premium ? 'Premium · démo locale' : 'DDA Free';
   document.querySelectorAll('[data-profile-role]').forEach(node => { node.textContent = premium ? 'Apprenant Premium' : 'Apprenant'; });
-  document.getElementById('membership-status').textContent = premium ? 'DDA Premium · démonstration' : 'DDA Free';
+  document.getElementById('membership-status').textContent = premium ? 'DDA Premium · démonstration locale' : 'DDA Free';
   const membershipStatusNote = document.getElementById('membership-status-note');
-  if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Démonstration pédagogique · aucun achat actif' : 'Disponible maintenant · aucun achat actif';
+  if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Sur cet appareil uniquement · aucun abonnement ni droit serveur' : 'Disponible maintenant · aucun achat actif';
   document.getElementById('free-plan-state').textContent = premium ? 'Inclus avec Premium' : 'Formule active';
   document.getElementById('preview-premium').hidden = premium;
   document.getElementById('revert-free').hidden = !premium;
@@ -3210,7 +3643,18 @@ function renderLessonSidecard(viewId) {
     ? `<button type="button" class="primary-action lesson-sidecard-next" data-sidecard-view="${next.viewId}">Leçon suivante : ${escapeHtml(next.title)} <span>→</span></button>`
     : `<button type="button" class="secondary-action lesson-sidecard-next" data-sidecard-view="path">Retourner à mon parcours <span>→</span></button>`;
 
-  card.innerHTML = `${recap}${quiz}${premium}${nextButton}`;
+  // Priorité 2 — découverte : un rappel discret, affiché une seule fois,
+  // juste après que l'apprenant a validé sa toute première leçon (jamais
+  // une pop-up) — pas sur chaque leçon, pour ne pas devenir du bruit.
+  const isFirstLesson = current?.id === activeLessonId;
+  const firstLessonQuizDone = isFirstLesson && DDALearning.getLessonProgress(prototypeState, current.id).quizComplete;
+  const discovery = firstLessonQuizDone ? `
+    <div class="lesson-sidecard-discover">
+      <p class="eyebrow">Pour continuer</p>
+      <p>Découvre aussi <button type="button" class="text-action" data-sidecard-view="lab">DDA Lab</button>, <button type="button" class="text-action" data-sidecard-view="resources">Ressources</button> et <button type="button" class="text-action" data-sidecard-view="community">Communauté</button>.</p>
+    </div>` : '';
+
+  card.innerHTML = `${recap}${quiz}${premium}${nextButton}${discovery}`;
   // Deliberately data-sidecard-view, not the generic [data-view] bindViewButton
   // wires everywhere else: academy.html's static .module-toc (hidden by CSS
   // at this breakpoint, but still physically present in the DOM for narrower
@@ -3418,6 +3862,16 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
   document.querySelectorAll('.dda-surface').forEach(surface => {
     surface.classList.toggle('is-active', Boolean(surface.querySelector('.view.active')));
   });
+  // The inline boot script sets data-boot-view once from the URL hash present
+  // at initial parse, purely to hide chrome (.mobile-nav/.sidebar/.topbar) or
+  // force a specific view visible (e.g. html[data-boot-view="lab"] #lab) during
+  // the first-paint flash. It never updates again on its own, so once the SPA
+  // router takes over it must keep this attribute in sync with the real active
+  // view — otherwise the view whose id matched the boot hash stays forced
+  // display:block (or chrome stays hidden) for the rest of the session, even
+  // long after the router has moved on to a different view, stacking that
+  // stale view's full height above the real one.
+  document.documentElement.setAttribute('data-boot-view', id);
   [...desktopItems, ...mobileItems].forEach(item => {
     const isActive = item.dataset.view === id;
     item.classList.toggle('active', isActive);
@@ -3598,7 +4052,7 @@ document.getElementById('gate-unlock')?.addEventListener('click', () => {
   mountPremiumLabLessons();
   renderState();
   closeGate();
-  showToast('Accès Premium débloqué en aperçu.');
+  showToast('Démonstration Premium locale activée · aucun droit serveur.');
   if (target) showView(target);
 });
 document.getElementById('gate-close')?.addEventListener('click', closeGate);
@@ -3626,6 +4080,39 @@ document.getElementById('premium-waitlist-join')?.addEventListener('click', () =
   document.getElementById('premium-waitlist-confirmation').hidden = false;
 });
 
+// Commercial activation mandate (2026-11-14): the real "S'abonner" entry
+// point. Asks the BFF for a real Chariow Checkout session and redirects
+// there on success — never a simulated transaction. Today (no
+// CHARIOW_API_KEY/CHARIOW_PREMIUM_PRODUCT_IDS configured in production) the
+// BFF honestly answers "not configured", and this falls back to the exact
+// same local waitlist as before — one funnel, not two.
+function scrollToPremiumWaitlist() {
+  requestAnimationFrame(() => revealLessonAnchor('premium-waitlist-panel')?.scrollIntoView({ behavior: prototypeState.preferences?.lowData ? 'auto' : 'smooth', block: 'start' }));
+}
+document.getElementById('premium-subscribe-cta')?.addEventListener('click', async () => {
+  const button = document.getElementById('premium-subscribe-cta');
+  if (!window.DDABFF?.enabled()) { showView('membership'); scrollToPremiumWaitlist(); return; }
+  const originalLabel = button.innerHTML;
+  button.disabled = true;
+  button.innerHTML = 'Préparation du paiement…';
+  try {
+    const result = await window.DDABFF.startPremiumCheckout();
+    if (result.checkoutUrl) { window.location.href = result.checkoutUrl; return; }
+    showToast(result.error === 'rate_limited'
+      ? 'Trop de tentatives — réessaie dans un instant.'
+      : 'Le paiement en ligne n’est pas encore activé. Ton intérêt est enregistré ci-dessous.');
+    showView('membership');
+    scrollToPremiumWaitlist();
+  } catch {
+    showToast('Le paiement en ligne n’est pas encore disponible. Ton intérêt est enregistré ci-dessous.');
+    showView('membership');
+    scrollToPremiumWaitlist();
+  } finally {
+    button.disabled = false;
+    button.innerHTML = originalLabel;
+  }
+});
+
 document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;
   if (!document.getElementById('gate-layer').hidden) closeGate();
@@ -3639,7 +4126,7 @@ document.getElementById('preview-premium').addEventListener('click', () => {
   mountPremiumLessons();
   mountPremiumLabLessons();
   renderState();
-  showToast('Accès Premium simulé sur cet appareil.');
+  showToast('Démonstration Premium locale activée · aucun abonnement actif.');
 });
 document.getElementById('revert-free').addEventListener('click', () => {
   prototypeState = DDA.setPlan(prototypeState, 'free');
@@ -3860,12 +4347,19 @@ function bindNotifyButton(viewId, buttonId, prefKey, label) {
     showToast(`Tu seras averti localement quand ${label} sera activé.`);
   });
 }
-bindNotifyButton('community', 'community-notify', 'communityNotify', 'la Communauté');
+// 'community' was removed from this list (Lot 7, 2026-11-14): the real
+// posts feed is now built and live on the same view — see initCommunityFeed
+// below — so a "notify me at launch" CTA would contradict a feature that
+// already works, the same incoherence already fixed for DDA AI (Lot 5).
 bindNotifyButton('practice', 'practice-notify', 'practiceNotify', 'la Pratique avancée');
-bindNotifyButton('intelligence', 'intelligence-notify', 'intelligenceNotify', 'l’Intelligence DDA');
+// 'intelligence' (DDA AI) was removed from this list (Lot 5, 2026-11-14): the
+// real chat is already built and live just above this button on the same
+// view — a "notify me at launch" CTA under a feature that already works
+// was a leftover from before the chat existed, not an honest pending state.
 bindNotifyButton('experts', 'experts-notify', 'expertsNotify', 'DDA Experts');
 bindNotifyButton('live', 'live-notify', 'liveNotify', 'DDA Live');
 bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business');
+bindNotifyButton('produits-digitaux', 'produits-digitaux-notify', 'produitsDigitauxNotify', 'Produits Digitaux');
 
 /* DDA AI Academy chat — a thin UI bridge over the authenticated BFF client.
    The browser never receives a provider key and never invents a reply when the
@@ -3999,6 +4493,85 @@ bindNotifyButton('business', 'business-notify', 'businessNotify', 'DDA Business'
     input.value = button.dataset.aiPrompt || '';
     input.focus();
   }));
+})();
+
+/* Lot 7 (Communauté — fil de posts) : un pont fin vers le BFF authentifié,
+   même principe que le chat DDA AI ci-dessus. Jamais un post simulé —
+   si le service n'est pas configuré ou si la session n'est pas active,
+   le fil l'affiche honnêtement plutôt que d'inventer une activité. */
+(function initCommunityFeed() {
+  const list = document.getElementById('community-feed-list');
+  const empty = document.getElementById('community-feed-empty');
+  const form = document.getElementById('community-post-form');
+  const input = document.getElementById('community-post-input');
+  const errorEl = document.getElementById('community-post-error');
+  const submit = document.getElementById('community-post-submit');
+  if (!list || !form || !window.DDABFF) return;
+
+  function renderPosts(posts) {
+    list.querySelectorAll('.community-feed-post').forEach(node => node.remove());
+    if (!posts.length) {
+      empty.hidden = false;
+      empty.innerHTML = '<strong>Aucun post pour le moment.</strong><span>Sois le ou la première à partager une observation.</span>';
+      return;
+    }
+    empty.hidden = true;
+    posts.forEach(post => {
+      const item = document.createElement('div');
+      item.className = 'community-feed-post';
+      const when = new Date(post.createdAt);
+      const whenLabel = Number.isNaN(when.getTime()) ? '' : when.toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      item.innerHTML = `<div class="community-feed-post-head"><strong>${escapeHtml(post.authorDisplayName)}</strong><time>${escapeHtml(whenLabel)}</time></div><p>${escapeHtml(post.body)}</p>`;
+      list.appendChild(item);
+    });
+  }
+
+  async function loadFeed() {
+    if (!window.DDABFF.enabled()) {
+      empty.innerHTML = '<strong>Connecte-toi pour voir le fil.</strong><span>Le fil de la communauté est réservé aux apprenants DDA.</span>';
+      return;
+    }
+    try {
+      const result = await window.DDABFF.getCommunityPosts();
+      if (!result || !result.available) {
+        empty.innerHTML = '<strong>Fil indisponible pour le moment.</strong><span>Réessaie un peu plus tard.</span>';
+        return;
+      }
+      renderPosts(result.posts);
+    } catch {
+      empty.innerHTML = '<strong>Fil indisponible pour le moment.</strong><span>Réessaie un peu plus tard.</span>';
+    }
+  }
+  loadFeed();
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const body = input.value.trim();
+    errorEl.textContent = '';
+    if (!body) { errorEl.textContent = 'Écris un message avant de publier.'; return; }
+    submit.disabled = true;
+    const originalLabel = submit.innerHTML;
+    submit.innerHTML = 'Publication…';
+    try {
+      const result = await window.DDABFF.createCommunityPost(body);
+      if (!result.ok) {
+        errorEl.textContent = result.reason === 'rate_limited'
+          ? 'Trop de posts récemment — réessaie dans un instant.'
+          : result.reason === 'not_configured'
+            ? 'Le fil de la communauté n’est pas encore activé sur ce serveur.'
+            : 'Impossible de publier pour le moment. Réessaie.';
+        return;
+      }
+      input.value = '';
+      await loadFeed();
+      trackEvent('community_post_created', {});
+    } catch {
+      errorEl.textContent = 'Impossible de publier pour le moment. Réessaie.';
+    } finally {
+      submit.disabled = false;
+      submit.innerHTML = originalLabel;
+    }
+  });
 })();
 
 document.getElementById('play-demo').addEventListener('click', event => {
@@ -4557,7 +5130,7 @@ function renderLabCatalog() {
     const label = status === 'locked' && entry.permission === 'premium_track' && canUnlock('premium_track') === false
       ? 'DDA Premium'
       : LAB_STATUS_LABEL[status];
-    [`lab-${entry.id}-status`, `lab-progress-${entry.id}-status`].forEach(id => {
+    [`lab-${entry.id}-status`, `lab-progress-${entry.id}-status`, `lab-photo-${entry.id}-status`].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.textContent = label;
     });
@@ -4750,7 +5323,9 @@ document.getElementById('profile-logout')?.addEventListener('click', async event
   } catch { /* Hide local account data even if revocation cannot be confirmed. */ }
   remoteUser = null;
   serverPremiumConfirmed = null;
-  prototypeState = DDA.setStorageScope(null) || DDA.load();
+  try { localStorage.removeItem('dda-prototype-state-v4'); } catch { /* storage may be unavailable */ }
+  DDA.setStorageScope(null);
+  prototypeState = DDA.clear();
   window.DDARefreshAiHistory?.();
   renderState();
   setBffAuthMode('login');

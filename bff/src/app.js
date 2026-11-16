@@ -5,9 +5,11 @@ const { randomToken, sha256, timingSafeEqualText, parseCookies, serializeCookie,
 const { generateCodeVerifier, computeCodeChallenge } = require('./pkce');
 const { executeIdempotentMutation, validateClientMutationId } = require('./idempotency');
 const { checkAuthRateLimit } = require('./rate-limiter');
-const { VALID_ROLES: VALID_ADMIN_ROLES } = require('./admin-roles-store');
+const { VALID_ROLES: VALID_ADMIN_ROLES, CONTROL_PLANE_ROLES } = require('./admin-roles-store');
 const { validateAskRequest } = require('./ai-assistant');
 const { PREMIUM_CONTENT, FREE_PREVIEW_IDS } = require('./premium-content');
+const { chariowConfigFromEnv, createChariowCheckout } = require('./chariow');
+const { marketDataConfigFromEnv, fetchMarketQuotes } = require('./market-data');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
@@ -127,8 +129,12 @@ function errorBody(code, message, requestId, fieldErrors) {
   return { code, message, request_id: requestId, ...(fieldErrors ? { field_errors: fieldErrors } : {}) };
 }
 
-function sendError(res, status, code, message, requestId, fieldErrors) {
-  return json(res, status, errorBody(code, message, requestId, fieldErrors));
+function sendError(res, status, code, message, requestId, fieldErrors, headers) {
+  return json(res, status, errorBody(code, message, requestId, fieldErrors), headers);
+}
+
+function sendRateLimited(res, requestId, message = 'Too many attempts. Please try again later.') {
+  return sendError(res, 429, 'rate_limited', message, requestId, undefined, { 'Retry-After': '60' });
 }
 
 // P0 auth reliability audit (2026-11): the login handler used to collapse
@@ -370,12 +376,18 @@ function parsePageParams(url, { maxPerPage = 200 } = {}) {
   return { page, perPage };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, rateLimiter = null, progressStore = null, aiAssistant = null, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, accessAudit = null, rateLimiter = null, progressStore = null, aiAssistant = null, chariowConfig = chariowConfigFromEnv(), marketDataConfig = marketDataConfigFromEnv(), communityStore = null, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
+  let marketQuotesCache = null;
   businessStore = businessStore || {
     exportUserData: async () => ({ lesson_progress: [], journal_entries: [], journal_plans: [], preferences: [] }),
     deleteUserData: async () => {}
   };
+  async function recordAccessAudit(input) {
+    if (!accessAudit || typeof accessAudit.record !== 'function') return;
+    try { await accessAudit.record(input); }
+    catch { logger('access_audit_write_failed', { requestId: input.requestId, eventName: input.eventName }); }
+  }
 
   async function currentEntitlements(userId) {
     if (!entitlements || typeof entitlements.getForUser !== 'function') return { membership: null, entitlements: [] };
@@ -428,7 +440,17 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
   async function withUser(req, res, requestId) {
     const state = await currentSession(req);
     if (!state.session) { sendError(res, 401, 'unauthenticated', 'Authentication required.', requestId); return null; }
-    try { return { ...state, user: await auth.getUser(state.session.user_id) }; }
+    try {
+      const user = await auth.getUser(state.session.user_id);
+      if (!user || user.status !== 'active') {
+        try { await sessions.revoke(state.session.session_id, clock()); }
+        catch (error) { logger('inactive_session_revoke_failed', { requestId, status: error.status || 500 }); }
+        setCookies(res, cookieHeaders(config, '', '', true));
+        sendError(res, 401, 'unauthenticated', 'Authentication required.', requestId);
+        return null;
+      }
+      return { ...state, user };
+    }
     catch (error) { logger('get_user_failed', { requestId, status: error.status || 500 }); sendError(res, 401, 'unauthenticated', 'Authentication required.', requestId); return null; }
   }
 
@@ -451,10 +473,12 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       sendError(res, 500, 'internal_error', 'Request could not be processed.', requestId);
       return null;
     }
-    if (role !== 'owner' && role !== 'admin') {
+    if (!CONTROL_PLANE_ROLES.includes(role)) {
+      await recordAccessAudit({ actorUserId: current.user.user_id, eventName: 'admin_access_denied', resourceType: 'admin_route', requestId, metadata: { route: new URL(req.url, 'http://bff.local').pathname, method: req.method || 'GET', role: role || 'none' } });
       sendError(res, 403, 'admin_role_required', 'An owner or admin role is required.', requestId);
       return null;
     }
+    await recordAccessAudit({ actorUserId: current.user.user_id, eventName: 'admin_access_granted', resourceType: 'admin_route', requestId, metadata: { route: new URL(req.url, 'http://bff.local').pathname, method: req.method || 'GET', role } });
     return { ...current, role };
   }
 
@@ -493,6 +517,50 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const items = await brvmPublicationStore.listPublished();
         if (!Array.isArray(items)) throw new Error('brvm_publications_store_invalid_shape');
         return json(res, 200, { items });
+      }
+      // Lot 8 (cahier des charges — instruments de marché) : lecture publique,
+      // jamais de secret exposé, et jamais une cotation non vérifiée par le
+      // serveur. fetchMarketQuotes() renvoie `not_configured`/`unavailable`
+      // par instrument plutôt que de risquer une valeur fabriquée.
+      if (method === 'GET' && path === '/v1/market/quotes') {
+        const cached = marketQuotesCache;
+        if (cached && clock().getTime() - cached.fetchedAt < marketDataConfig.maxAgeMs) {
+          return json(res, 200, { instruments: cached.instruments });
+        }
+        const instruments = await fetchMarketQuotes({ config: marketDataConfig, clock });
+        marketQuotesCache = { instruments, fetchedAt: clock().getTime() };
+        return json(res, 200, { instruments });
+      }
+      // Lot 7 (fil de posts Communauté) : lecture et écriture réelles, jamais
+      // un flux simulé. Lecture réservée aux apprenants authentifiés (comme
+      // le reste de l'app) ; écriture protégée par CSRF + une limite de
+      // fréquence par utilisateur pour éviter le pourriel.
+      if (method === 'GET' && path === '/v1/community/posts') {
+        const current = await withUser(req, res, requestId); if (!current) return;
+        if (!communityStore || typeof communityStore.listRecent !== 'function') {
+          return sendError(res, 503, 'community_unavailable', 'The community feed is not available yet.', requestId);
+        }
+        const posts = await communityStore.listRecent({ limit: 30 });
+        return json(res, 200, { posts });
+      }
+      if (method === 'POST' && path === '/v1/community/posts') {
+        const current = await withUser(req, res, requestId); if (!current) return;
+        if (!validateCsrf(req, config, current.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (!communityStore || typeof communityStore.createPost !== 'function') {
+          return sendError(res, 503, 'community_unavailable', 'The community feed is not available yet.', requestId);
+        }
+        if (rateLimiter && !await rateLimiter.allow(`community_post:user:${current.user.user_id}`, { windowSeconds: 3600, limit: 10 })) {
+          return sendError(res, 429, 'rate_limited', 'Too many posts. Please try again later.', requestId);
+        }
+        const body = await readJson(req);
+        try {
+          const post = await communityStore.createPost({ userId: current.user.user_id, authorDisplayName: current.user.display_name, body: body?.body });
+          return json(res, 201, { post });
+        } catch (error) {
+          if (error.status === 400) return sendError(res, 400, 'community_post_invalid_body', 'Post body must be between 1 and 1000 characters.', requestId);
+          logger('community_post_failed', { requestId });
+          return sendError(res, 502, 'community_post_failed', 'The community feed could not be reached. Please try again later.', requestId);
+        }
       }
       // Google OAuth — start (founder directive, 2026-11): a full-page GET,
       // never a fetch, because this route's whole job is to hand the
@@ -553,7 +621,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         if (typeof auth.exchangeOAuthCode !== 'function') return sendError(res, 503, 'oauth_not_configured', 'Google sign-in is not available yet.', requestId);
         const body = await readJson(req);
         if (typeof body.code !== 'string' || body.code.length < 10) return sendError(res, 400, 'invalid_code', 'This Google sign-in link is invalid or has expired.', requestId);
-        if (!await checkAuthRateLimit(rateLimiter, 'oauth-google-exchange', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'oauth-google-exchange', { ip: clientIp(req) })) return sendRateLimited(res, requestId);
         const cookies = parseCookies(req.headers.cookie || '');
         const codeVerifier = readVerifierCookie(cookies, config, OAUTH_VERIFIER_COOKIE);
         if (!codeVerifier) return sendError(res, 400, 'oauth_verifier_expired', 'This Google sign-in must finish in the same browser tab that started it, and the request must not have expired. Please try "Continue with Google" again.', requestId);
@@ -581,7 +649,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         const validation = validateRegistration(body);
         if (Object.keys(validation.fields).length) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, validation.fields);
-        if (!await checkAuthRateLimit(rateLimiter, 'register', { ip: clientIp(req), email: validation.email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'register', { ip: clientIp(req), email: validation.email })) return sendRateLimited(res, requestId);
         // PKCE (P0 auth reliability audit, 2026-11): a fresh verifier per
         // signup attempt, bound to THIS browser via an httpOnly cookie — see
         // pkce.js. Generated unconditionally (success or failure path below)
@@ -614,7 +682,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const usesCode = typeof body.code === 'string';
         if (usesCode) { if (body.code.length < 10) return sendError(res, 400, 'invalid_code', 'The confirmation code is invalid or expired.', requestId); }
         else if (typeof body.token !== 'string' || body.token.length < 32) return sendError(res, 400, 'invalid_token', 'The token is invalid or expired.', requestId);
-        if (!await checkAuthRateLimit(rateLimiter, 'verify-email', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'verify-email', { ip: clientIp(req) })) return sendRateLimited(res, requestId);
         if (usesCode) {
           const cookies = parseCookies(req.headers.cookie || '');
           const codeVerifier = readVerifierCookie(cookies, config, SIGNUP_VERIFIER_COOKIE);
@@ -630,7 +698,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       if (method === 'POST' && path === '/v1/auth/password-reset/exchange') {
         const body = await readJson(req);
         if (typeof body.code !== 'string' || body.code.length < 10) return sendError(res, 400, 'invalid_code', 'The recovery code is invalid or expired.', requestId);
-        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-exchange', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please request a new link later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-exchange', { ip: clientIp(req) })) return sendRateLimited(res, requestId, 'Too many attempts. Please request a new link later.');
         // PKCE exchange — the heart of this fix (P0 auth reliability audit,
         // 2026-11): without a code_verifier that matches what was sent to
         // /auth/v1/recover, this call is refused BEFORE ever reaching
@@ -651,7 +719,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       if (method === 'POST' && path === '/v1/auth/password-reset/verify') {
         const body = await readJson(req);
         if (typeof body.token !== 'string' || body.token.length < 20) return sendError(res, 400, 'invalid_token', 'The recovery link is invalid or expired.', requestId);
-        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-verify', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please request a new link later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-verify', { ip: clientIp(req) })) return sendRateLimited(res, requestId, 'Too many attempts. Please request a new link later.');
         let provider;
         try { provider = await auth.verifyRecoveryToken(body.token); }
         catch (error) { logger('password_reset_verify_failed', { requestId, status: error.status || 400 }); return sendError(res, 400, 'invalid_token', 'The recovery link is invalid or expired.', requestId); }
@@ -664,7 +732,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         const validation = validateRegistration({ email: body.email, password: body.password });
         if (Object.keys(validation.fields).length) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId);
-        if (!await checkAuthRateLimit(rateLimiter, 'login', { ip: clientIp(req), email: validation.email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'login', { ip: clientIp(req), email: validation.email })) return sendRateLimited(res, requestId);
         let provider;
         try { provider = await auth.login({ email: validation.email, password: body.password }); }
         catch (error) {
@@ -684,7 +752,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         const email = normalizeEmail(body.email);
         if (!/^\S+@\S+\.\S+$/.test(email)) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId);
-        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-request', { ip: clientIp(req), email })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-request', { ip: clientIp(req), email })) return sendRateLimited(res, requestId);
         // PKCE (P0 auth reliability audit, 2026-11): a fresh verifier per
         // recovery attempt, bound to THIS browser via an httpOnly cookie —
         // generated and stored unconditionally (whether or not the account
@@ -698,7 +766,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       if (method === 'POST' && path === '/v1/auth/password-reset/confirm') {
         const body = await readJson(req);
         if (typeof body.password !== 'string' || body.password.length < 12) return sendError(res, 400, 'validation_error', 'Request could not be processed.', requestId, { password: 'too_short' });
-        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-confirm', { ip: clientIp(req) })) return sendError(res, 429, 'rate_limited', 'Too many attempts. Please try again later.', requestId);
+        if (!await checkAuthRateLimit(rateLimiter, 'password-reset-confirm', { ip: clientIp(req) })) return sendRateLimited(res, requestId);
         const current = await withUser(req, res, requestId); if (!current) return;
         if (!config.sessionEncryptionKey || !current.session.provider_access_token_enc) return sendError(res, 401, 'recovery_session_expired', 'The recovery session has expired. Request a new link.', requestId);
         try { await auth.confirmPasswordReset(decrypt(current.session.provider_access_token_enc, config.sessionEncryptionKey), body.password); }
@@ -714,6 +782,45 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const snapshot = await currentEntitlements(current.user.user_id);
         if (!hasActivePremium(snapshot, clock())) return sendError(res, 403, 'premium_required', 'An active Premium entitlement is required.', requestId);
         return json(res, 200, { resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true });
+      }
+      // Commercial activation mandate (2026-11-14): the one route that turns
+      // "présenter Premium" into "payer réellement" — creates a real Chariow
+      // Checkout session server-side and hands the frontend a real
+      // checkout_url to redirect to. Never a simulated transaction: if
+      // Chariow isn't configured (no API key or no allowlisted product —
+      // both true in production today), this honestly fails closed with
+      // 503, never a fake success. dda_user_id in custom_metadata comes
+      // ONLY from the authenticated session, never from the request body —
+      // that metadata field is exactly what the Pulse webhook later trusts
+      // to grant premium_track, so a client-supplied value here would be a
+      // privilege-escalation path straight into mapChariowPulse().
+      if (method === 'POST' && path === '/v1/billing/checkout') {
+        const current = await withUser(req, res, requestId); if (!current) return;
+        if (!validateCsrf(req, config, current.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (!chariowConfig.apiKey || !chariowConfig.premiumProductIds.length) {
+          return sendError(res, 503, 'billing_not_configured', 'Premium checkout is not available yet.', requestId);
+        }
+        if (rateLimiter && !await rateLimiter.allow(`billing_checkout:user:${current.user.user_id}`, { windowSeconds: 3600, limit: 5 })) {
+          return sendError(res, 429, 'rate_limited', 'Too many checkout attempts. Please try again later.', requestId);
+        }
+        const [firstName, ...lastNameParts] = String(current.user.display_name || '').trim().split(/\s+/);
+        try {
+          const checkout = await createChariowCheckout({
+            config: chariowConfig,
+            input: {
+              productId: chariowConfig.premiumProductIds[0],
+              email: current.user.email,
+              firstName: firstName || 'Apprenant',
+              lastName: lastNameParts.join(' ') || 'DDA',
+              customMetadata: { dda_user_id: current.user.user_id }
+            }
+          });
+          if (!checkout.checkoutUrl) return sendError(res, 502, 'checkout_unavailable', 'The payment provider did not return a checkout link.', requestId);
+          return json(res, 200, { checkout_url: checkout.checkoutUrl });
+        } catch (error) {
+          logger('chariow_checkout_failed', { requestId, status: error.status || 500 });
+          return sendError(res, 502, 'checkout_unavailable', 'The payment provider could not be reached. Please try again later.', requestId);
+        }
       }
       // Real Premium lesson/lab content (mandate §6 audit, Lot 2): the only
       // place the text, exercises and quiz answers of P2.2/LAB4/LABCAP live
@@ -884,6 +991,28 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const items = await billingStore.listMemberships({ page, perPage });
         return json(res, 200, { contract: 'dda-admin-memberships-v1', page, per_page: perPage, items });
       }
+      // Per-learner progression — reuses the exact same progressStore the
+      // learner's own GET /v1/progress reads from (bff/src/progress-store.js,
+      // real Supabase lesson_progress/onboarding rows, not a fabricated
+      // aggregate). There is no cross-user "all learners' progress" query:
+      // an admin looks up one real account at a time, from the Users table,
+      // same shape as the learner-facing route above.
+      const adminProgressMatch = path.match(/^\/v1\/admin\/progress\/([^/]+)$/);
+      if (method === 'GET' && adminProgressMatch) {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!progressStore) return sendError(res, 503, 'progress_not_configured', 'Progress sync is not available.', requestId);
+        const targetUserId = decodeURIComponent(adminProgressMatch[1]);
+        const [lessons, onboarding] = await Promise.all([
+          progressStore.listLessons(targetUserId),
+          progressStore.getOnboarding(targetUserId)
+        ]);
+        return json(res, 200, {
+          contract: 'dda-admin-progress-v1',
+          user_id: targetUserId,
+          lessons: Object.fromEntries(lessons.map(row => [row.lesson_id, { lessonViewed: row.lesson_viewed, exerciseComplete: row.exercise_complete, quizComplete: row.quiz_complete, updatedAt: row.updated_at }])),
+          onboarding: onboarding ? { level: onboarding.level, goal: onboarding.goal, time: onboarding.time, complete: onboarding.complete, updatedAt: onboarding.updated_at } : null
+        });
+      }
       // Role assignment/revocation — the invariants (only an owner may grant
       // or revoke, self-elevation impossible, last owner protected) live in
       // adminRoles itself (admin-roles-store.js) and are already tested
@@ -895,9 +1024,10 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const body = await readJson(req);
         const targetUserId = typeof body.user_id === 'string' ? body.user_id.trim() : '';
         if (!targetUserId) return sendError(res, 400, 'validation_error', 'user_id is required.', requestId, { user_id: 'Required.' });
-        if (!VALID_ADMIN_ROLES.includes(body.role)) return sendError(res, 400, 'validation_error', 'role must be owner or admin.', requestId, { role: 'Must be owner or admin.' });
+        if (!VALID_ADMIN_ROLES.includes(body.role)) return sendError(res, 400, 'validation_error', 'role is not supported.', requestId, { role: 'Unsupported role.' });
         try {
           const result = await adminRoles.assignRole(targetUserId, body.role, admin.user.user_id);
+          await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: 'role_assigned', resourceType: 'admin_role', resourceId: targetUserId, requestId, metadata: { route: path, method, role: admin.role, target_user_id: targetUserId, granted_role: body.role } });
           return json(res, 200, { contract: 'dda-admin-roles-v1', ...result });
         } catch (error) {
           if (error.code === 'owner_required') return sendError(res, 403, 'owner_required', error.message, requestId);
@@ -913,6 +1043,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         const targetUserId = decodeURIComponent(revokeRoleMatch[1]);
         try {
           await adminRoles.revokeRole(targetUserId, admin.user.user_id);
+          await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: 'role_revoked', resourceType: 'admin_role', resourceId: targetUserId, requestId, metadata: { route: path, method, role: admin.role, target_user_id: targetUserId } });
           return json(res, 204);
         } catch (error) {
           if (error.code === 'owner_required') return sendError(res, 403, 'owner_required', error.message, requestId);

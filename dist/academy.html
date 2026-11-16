@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr-FR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,13 +15,14 @@
   <meta property="og:locale" content="fr_FR">
   <meta property="og:title" content="DDA — Apprendre les marchés, construire des compétences">
   <meta property="og:description" content="Un système d'apprentissage des marchés financiers structuré autour de la progression des compétences — pas une chaîne de vidéos.">
-  <meta property="og:image" content="images/dda-og-image.jpg">
+  <meta property="og:image" content="https://dariusdigitalacademy.com/images/dda-og-image.jpg">
   <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="600">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Darius Digital Academy — apprendre, pratiquer et prouver sa progression.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="DDA — Apprendre les marchés, construire des compétences">
   <meta name="twitter:description" content="Comprendre les marchés, pratiquer avec méthode, prouver sa progression.">
-  <meta name="twitter:image" content="images/dda-og-image.jpg">
+  <meta name="twitter:image" content="https://dariusdigitalacademy.com/images/dda-og-image.jpg">
   <meta name="color-scheme" content="dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -69,15 +70,15 @@
       if (oauthProvider) window.DDA_OAUTH_PROVIDER = oauthProvider;
       var oauthError = params.get('error') || hashParams.get('error');
       if (oauthError) window.DDA_OAUTH_ERROR = oauthError;
-      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone']);
+      var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone', 'forex', 'stocks', 'indices', 'crypto', 'produits-digitaux']);
       var route = location.hash.slice(1);
       document.documentElement.setAttribute('data-boot-view', knownRoutes.has(route) ? route : 'dashboard');
       var safeHash = knownRoutes.has(route) ? '#' + route : '';
       if (location.search || location.hash !== safeHash) history.replaceState(history.state, '', location.pathname + safeHash);
     })();
   </script>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="alpha-polish.css">
+  <link rel="stylesheet" href="styles.min.css">
+  <link rel="stylesheet" href="alpha-polish.min.css">
 </head>
 <body class="academy-document">
   <a class="skip-link" href="#main-content">Aller au contenu</a>
@@ -130,31 +131,34 @@
         <span class="brand-name">Darius Digital Academy</span>
       </a>
       <nav>
-        <button class="nav-item active" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Mon Espace</button>
+        <button class="nav-item active" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Accueil</button>
 
-        <button class="nav-section-toggle" type="button" id="nav-academy-toggle" aria-expanded="true" aria-controls="nav-academy-group"><svg class="icon"><use href="#icon-book"/></svg> Academy <svg class="icon nav-section-chevron" aria-hidden="true"><use href="#icon-chevron-right"/></svg></button>
+        <p class="nav-section-label">Apprendre</p>
+        <button class="nav-section-toggle" type="button" id="nav-academy-toggle" aria-expanded="true" aria-controls="nav-academy-group"><svg class="icon"><use href="#icon-compass"/></svg> Academy <svg class="icon nav-section-chevron" aria-hidden="true"><use href="#icon-chevron-right"/></svg></button>
         <div class="nav-group" id="nav-academy-group">
           <button class="nav-item nav-subitem" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mes Parcours</button>
           <button class="nav-item nav-subitem" id="nav-current-lesson" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Mes Leçons</button>
           <button class="nav-item nav-subitem" id="nav-current-exercise" data-view="lesson" data-scroll-to="lesson-panel-exercise"><svg class="icon"><use href="#icon-check-circle"/></svg> Exercices &amp; Quiz</button>
-          <button class="nav-item nav-subitem" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
           <button class="nav-item nav-subitem" data-view="progress" data-scroll-to="certificate-panel"><svg class="icon"><use href="#icon-award"/></svg> Certificats</button>
         </div>
+        <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Mes progrès</button>
 
-        <button class="nav-item" data-view="lab"><svg class="icon"><use href="#icon-award"/></svg> DDA Lab</button>
+        <p class="nav-section-label">Découvrir</p>
+        <button class="nav-item" data-view="lab"><svg class="icon"><use href="#icon-spark"/></svg> DDA Lab</button>
         <button class="nav-item" data-view="intelligence"><svg class="icon"><use href="#icon-chat"/></svg> DDA AI<span class="nav-status-tag">Beta</span></button>
-        <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal de trading</button>
-        <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
+        <button class="nav-item" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
         <button class="nav-item" data-view="community"><svg class="icon"><use href="#icon-users"/></svg> Communauté</button>
+        <button class="nav-item" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg> Marchés</button>
 
-        <p class="nav-section-label">Mon travail</p>
-        <button class="nav-item" data-view="dashboard" data-scroll-to="analysis-terminal"><svg class="icon"><use href="#icon-chart"/></svg> Terminal d’analyse</button>
+        <p class="nav-section-label">Outils avancés</p>
+        <button class="nav-item" data-view="dashboard" data-scroll-to="analysis-terminal"><svg class="icon"><use href="#icon-search"/></svg> Terminal d’analyse</button>
         <button class="nav-item" data-view="practice"><svg class="icon"><use href="#icon-target"/></svg> Pratique avancée</button>
-        <button class="nav-item" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg> Marchés & BRVM</button>
+        <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal de trading</button>
         <button class="nav-item" data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg> Broker Hub</button>
-        <p class="nav-section-label">Compte</p>
-        <button class="nav-item" data-view="support"><svg class="icon"><use href="#icon-help"/></svg> Aide & support</button>
+
+        <p class="nav-section-label">Compte &amp; assistance</p>
         <button class="nav-item" data-view="profile"><svg class="icon"><use href="#icon-user"/></svg> Profil</button>
+        <button class="nav-item" data-view="support"><svg class="icon"><use href="#icon-help"/></svg> Aide & support</button>
         <a class="nav-item" href="admin.html" id="sidebar-admin-link" hidden><svg class="icon"><use href="#icon-shield"/></svg> Back-office</a>
       </nav>
       <div class="sidebar-foot">
@@ -179,31 +183,34 @@
         </a>
         <button class="icon-button" type="button" id="mobile-drawer-close" aria-label="Fermer le menu"><svg class="icon"><use href="#icon-close"/></svg></button>
       </div>
-      <button class="nav-item" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Mon Espace</button>
+      <button class="nav-item" data-view="dashboard"><svg class="icon"><use href="#icon-home"/></svg> Accueil</button>
 
-      <button class="nav-section-toggle" type="button" id="drawer-academy-toggle" aria-expanded="true" aria-controls="drawer-academy-group"><svg class="icon"><use href="#icon-book"/></svg> Academy <svg class="icon nav-section-chevron" aria-hidden="true"><use href="#icon-chevron-right"/></svg></button>
+      <p class="nav-section-label">Apprendre</p>
+      <button class="nav-section-toggle" type="button" id="drawer-academy-toggle" aria-expanded="true" aria-controls="drawer-academy-group"><svg class="icon"><use href="#icon-compass"/></svg> Academy <svg class="icon nav-section-chevron" aria-hidden="true"><use href="#icon-chevron-right"/></svg></button>
       <div class="nav-group" id="drawer-academy-group">
         <button class="nav-item nav-subitem" data-view="path"><svg class="icon"><use href="#icon-path"/></svg> Mes Parcours</button>
         <button class="nav-item nav-subitem" id="drawer-current-lesson" data-view="lesson"><svg class="icon"><use href="#icon-play"/></svg> Mes Leçons</button>
         <button class="nav-item nav-subitem" id="drawer-current-exercise" data-view="lesson" data-scroll-to="lesson-panel-exercise"><svg class="icon"><use href="#icon-check-circle"/></svg> Exercices &amp; Quiz</button>
-        <button class="nav-item nav-subitem" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
         <button class="nav-item nav-subitem" data-view="progress" data-scroll-to="certificate-panel"><svg class="icon"><use href="#icon-award"/></svg> Certificats</button>
       </div>
+      <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Mes progrès</button>
 
-      <button class="nav-item" data-view="lab"><svg class="icon"><use href="#icon-award"/></svg> DDA Lab</button>
+      <p class="nav-section-label">Découvrir</p>
+      <button class="nav-item" data-view="lab"><svg class="icon"><use href="#icon-spark"/></svg> DDA Lab</button>
       <button class="nav-item" data-view="intelligence"><svg class="icon"><use href="#icon-chat"/></svg> DDA AI<span class="nav-status-tag">Beta</span></button>
-      <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal de trading</button>
-      <button class="nav-item" data-view="progress"><svg class="icon"><use href="#icon-progress"/></svg> Progression</button>
+      <button class="nav-item" data-view="resources"><svg class="icon"><use href="#icon-book"/></svg> Ressources</button>
       <button class="nav-item" data-view="community"><svg class="icon"><use href="#icon-users"/></svg> Communauté</button>
+      <button class="nav-item" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg> Marchés</button>
 
-      <p class="nav-section-label">Mon travail</p>
-      <button class="nav-item" data-view="dashboard" data-scroll-to="analysis-terminal"><svg class="icon"><use href="#icon-chart"/></svg> Terminal d’analyse</button>
+      <p class="nav-section-label">Outils avancés</p>
+      <button class="nav-item" data-view="dashboard" data-scroll-to="analysis-terminal"><svg class="icon"><use href="#icon-search"/></svg> Terminal d’analyse</button>
       <button class="nav-item" data-view="practice"><svg class="icon"><use href="#icon-target"/></svg> Pratique avancée</button>
-      <button class="nav-item" data-view="markets"><svg class="icon"><use href="#icon-chart"/></svg> Marchés &amp; BRVM</button>
+      <button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"/></svg> Journal de trading</button>
       <button class="nav-item" data-view="brokers"><svg class="icon"><use href="#icon-swap"/></svg> Broker Hub</button>
-      <p class="nav-section-label">Compte</p>
-      <button class="nav-item" data-view="support"><svg class="icon"><use href="#icon-help"/></svg> Aide &amp; support</button>
+
+      <p class="nav-section-label">Compte &amp; assistance</p>
       <button class="nav-item" data-view="profile"><svg class="icon"><use href="#icon-user"/></svg> Profil</button>
+      <button class="nav-item" data-view="support"><svg class="icon"><use href="#icon-help"/></svg> Aide &amp; support</button>
       <a class="nav-item" href="admin.html" id="drawer-admin-link" hidden><svg class="icon"><use href="#icon-shield"/></svg> Back-office</a>
       <div class="sidebar-premium-card">
         <svg class="icon sidebar-premium-icon" aria-hidden="true"><use href="#icon-crown"/></svg>
@@ -342,6 +349,7 @@
 
       <div class="dda-surface dda-app-surface" data-surface="learner-app">
       <section class="view" id="dashboard" aria-labelledby="dashboard-title">
+        <div class="crypto-ticker" id="crypto-ticker" aria-label="Cours crypto en direct" hidden><div class="crypto-ticker-track" id="crypto-ticker-track"></div></div>
         <div class="terminal-thread dashboard-mastery-thread" id="terminal-thread">
           <div class="terminal-thread-copy">
             <p class="eyebrow gold">Fil de maîtrise</p>
@@ -361,20 +369,45 @@
           <span>Progresse</span>
         </div>
 
-        <div class="terminal-entry dashboard-command-head">
-          <div>
-            <p class="eyebrow gold">Cockpit du jour · Aujourd’hui dans DDA</p>
-            <h1 id="dashboard-title"><span id="greeting-prefix">Bonjour</span> <span id="dashboard-name">Apprenant</span>.</h1>
-            <p id="personalized-next">Une étape claire pour continuer à progresser.</p>
+        <div class="dashboard-hero">
+          <div class="dashboard-hero-main">
+            <div class="terminal-entry dashboard-command-head">
+              <div>
+                <p class="eyebrow gold">Cockpit du jour · Aujourd’hui dans DDA</p>
+                <h1 id="dashboard-title"><span id="greeting-prefix">Bonjour</span> <span id="dashboard-name">Apprenant</span>.</h1>
+                <p id="personalized-next">Une étape claire pour continuer à progresser.</p>
+              </div>
+            </div>
+            <div class="dashboard-kpi-row" aria-label="Indicateurs du jour">
+              <div class="dashboard-kpi-card"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-target"/></svg></span><div><strong id="dashboard-action-label">—</strong><span>Action du jour</span></div></div>
+              <div class="dashboard-kpi-card dashboard-kpi-gold"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-spark"/></svg></span><div><strong id="week-xp">0 XP</strong><span>XP total</span></div></div>
+              <div class="dashboard-kpi-card"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-check-circle"/></svg></span><div><strong id="dashboard-proof-state-inline">À construire</strong><span>Preuve récente</span></div></div>
+              <div class="dashboard-kpi-card"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-calendar"/></svg></span><div><strong id="active-days">0 jour</strong><span>Activité (7 j)</span></div></div>
+            </div>
           </div>
+          <aside class="dashboard-hero-side" aria-label="Marchés et terminal d’analyse">
+            <div class="dashboard-markets-widget" aria-labelledby="dashboard-markets-title">
+              <div class="dashboard-markets-head">
+                <p class="eyebrow gold" id="dashboard-markets-title">Marchés principaux</p>
+                <button type="button" class="text-action" data-view="markets">Voir tout <span>→</span></button>
+              </div>
+              <ul class="dashboard-markets-list" id="dashboard-markets-list" aria-live="polite"></ul>
+            </div>
+            <button type="button" class="dashboard-terminal-preview" data-view="dashboard" data-scroll-to="analysis-terminal" aria-label="Ouvrir le Terminal d’analyse complet">
+              <div class="dashboard-terminal-preview-head">
+                <span>Terminal d’analyse</span>
+                <span class="demo-data-badge"><span class="status-dot"></span>Pédagogique</span>
+              </div>
+              <svg class="dashboard-terminal-preview-chart" viewBox="0 0 320 120" aria-hidden="true" focusable="false">
+                <polyline points="0,96 28,88 56,92 84,70 112,76 140,52 168,58 196,34 224,40 252,22 280,28 320,10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="0,96 28,88 56,92 84,70 112,76 140,52 168,58 196,34 224,40 252,22 280,28 320,10 320,120 0,120" fill="url(#dashTerminalGrad)" stroke="none"/>
+                <defs><linearGradient id="dashTerminalGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="currentColor" stop-opacity="0.22"/><stop offset="100%" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs>
+              </svg>
+              <span class="dashboard-terminal-preview-cta">Ouvrir le Terminal complet <span>→</span></span>
+            </button>
+          </aside>
         </div>
-        <div class="dashboard-kpi-row" aria-label="Indicateurs du jour">
-          <div class="dashboard-kpi-card"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-target"/></svg></span><div><strong id="dashboard-action-label">—</strong><span>Action du jour</span></div></div>
-          <div class="dashboard-kpi-card dashboard-kpi-gold"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-spark"/></svg></span><div><strong id="week-xp">0 XP</strong><span>XP total</span></div></div>
-          <div class="dashboard-kpi-card"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-check-circle"/></svg></span><div><strong id="dashboard-proof-state-inline">À construire</strong><span>Preuve récente</span></div></div>
-          <div class="dashboard-kpi-card"><span class="dashboard-kpi-icon"><svg class="icon"><use href="#icon-calendar"/></svg></span><div><strong id="active-days">0 jour</strong><span>Activité (7 j)</span></div></div>
-        </div>
-  
+
         <article class="terminal-lead">
           <div>
             <p class="terminal-lead-kicker"><span class="pill" id="lesson-state-pill">En cours</span><span id="terminal-lead-module">Fondations des marchés</span><span class="lesson-index" id="lesson-index-label">LEÇON</span></p>
@@ -398,6 +431,47 @@
           </div>
         </article>
 
+        <section class="dashboard-parcours" aria-labelledby="dashboard-parcours-title">
+          <div class="dashboard-parcours-intro">
+            <p class="eyebrow gold">Tes parcours DDA</p>
+            <h2 id="dashboard-parcours-title">Trois piliers, une seule progression suivie.</h2>
+          </div>
+          <div class="dashboard-parcours-grid">
+            <button type="button" class="dashboard-parcours-card" data-view="path">
+              <span class="dashboard-parcours-icon"><svg class="icon"><use href="#icon-chart"/></svg></span>
+              <strong>Trading &amp; Marchés</strong>
+              <p>Le parcours structuré M0 → M9 : lire un marché, construire un plan, avant d’avancer vers le Premium.</p>
+              <span class="text-action">Continuer <span>→</span></span>
+            </button>
+            <button type="button" class="dashboard-parcours-card" data-view="lab">
+              <span class="dashboard-parcours-icon"><svg class="icon"><use href="#icon-spark"/></svg></span>
+              <strong>DDA Lab</strong>
+              <p>Des missions pratiques pour manipuler ce que tu apprends, avant le projet final Premium.</p>
+              <span class="text-action">Explorer <span>→</span></span>
+            </button>
+            <button type="button" class="dashboard-parcours-card dashboard-parcours-card-soon" data-view="produits-digitaux">
+              <span class="dashboard-parcours-icon"><svg class="icon"><use href="#icon-plus"/></svg></span>
+              <strong>Produits Digitaux</strong>
+              <p>Un nouveau pilier en préparation — créer et vendre des produits numériques avec l’IA.</p>
+              <span class="text-action">Aperçu <span>→</span></span>
+            </button>
+          </div>
+        </section>
+
+        <section class="dashboard-week-ahead" id="dashboard-week-ahead" aria-label="À faire cette semaine" hidden>
+          <p class="eyebrow gold">À faire cette semaine</p>
+          <div class="lab-photo-rail dashboard-week-rail" id="dashboard-week-rail"></div>
+        </section>
+
+        <section class="dashboard-quick-skills" id="dashboard-quick-skills" aria-labelledby="quick-skills-title">
+          <div class="quick-skills-intro">
+            <p class="eyebrow gold">Quick Skills · départs rapides</p>
+            <h2 id="quick-skills-title">Choisis une compétence que tu peux pratiquer maintenant.</h2>
+            <p>Chaque carte ouvre une leçon déjà disponible dans DDA et annonce une capacité concrète. Les Produits Digitaux restent en préparation : aucune compétence fictive n’est affichée comme active.</p>
+          </div>
+          <div class="quick-skills-list" id="quick-skills-list" aria-live="polite"></div>
+        </section>
+
         <section class="dashboard-proof-strip" aria-labelledby="dashboard-proof-title">
           <div class="dashboard-proof-mark" aria-hidden="true">✓</div>
           <div class="dashboard-proof-copy">
@@ -417,9 +491,13 @@
               <h2 id="analysis-terminal-title">Observer avant de décider.</h2>
               <p>Un espace pédagogique pour manipuler une série historique contrôlée, annoter ton observation et la relier à ton Journal.</p>
             </div>
-            <span class="demo-data-badge"><span class="status-dot"></span>Données pédagogiques</span>
+            <div class="analysis-terminal-head-actions">
+              <span class="demo-data-badge"><span class="status-dot"></span>Données pédagogiques</span>
+              <button type="button" class="text-action analysis-terminal-toggle" id="analysis-terminal-toggle" aria-expanded="true" aria-controls="analysis-terminal-body">Replier <span class="analysis-terminal-toggle-icon" aria-hidden="true">▲</span></button>
+            </div>
           </div>
 
+          <div class="analysis-terminal-body" id="analysis-terminal-body">
           <div class="analysis-terminal-toolbar" role="group" aria-label="Marché et unité de temps">
             <label class="terminal-selector">Marché pédagogique
               <select id="terminal-instrument">
@@ -508,6 +586,44 @@
               <ol><li><b>Observer</b><span>Repère les bougies et la structure.</span></li><li><b>Manipuler</b><span>Zoome, déplace et annote.</span></li><li><b>Justifier</b><span>Conserve ton raisonnement dans le Journal.</span></li></ol>
               <button type="button" class="text-action" data-view="journal" data-terminal-handoff="true" id="terminal-journal-handoff">Continuer dans le Journal <span>→</span></button>
             </div>
+          </div>
+          </div>
+        </section>
+
+        <section class="dashboard-summary" aria-labelledby="dashboard-summary-title">
+          <div class="dashboard-summary-intro">
+            <p class="eyebrow gold">En un coup d’œil</p>
+            <h2 id="dashboard-summary-title">Ta session, ton IA, ta semaine.</h2>
+          </div>
+          <div class="dashboard-summary-grid">
+            <article class="dashboard-summary-card">
+              <span class="dashboard-summary-icon"><svg class="icon"><use href="#icon-progress"/></svg></span>
+              <p class="eyebrow">Progression</p>
+              <strong id="dashboard-card-progress-percent">0%</strong>
+              <span id="dashboard-card-progress-xp">+0 XP</span>
+              <button type="button" class="text-action" data-view="progress">Voir mes progrès <span>→</span></button>
+            </article>
+            <article class="dashboard-summary-card">
+              <span class="dashboard-summary-icon"><svg class="icon"><use href="#icon-clock"/></svg></span>
+              <p class="eyebrow">Prochaine leçon</p>
+              <strong id="dashboard-card-next-lesson-title">—</strong>
+              <span id="dashboard-card-next-lesson-module">—</span>
+              <button type="button" class="text-action" id="dashboard-card-next-lesson-go" data-view="lesson">Continuer <span>→</span></button>
+            </article>
+            <article class="dashboard-summary-card">
+              <span class="dashboard-summary-icon"><svg class="icon"><use href="#icon-chat"/></svg></span>
+              <p class="eyebrow">DDA AI</p>
+              <strong>Une question sur ta leçon ?</strong>
+              <span>Réponses contextualisées à ton module en cours.</span>
+              <button type="button" class="text-action" data-view="intelligence">Ouvrir DDA AI <span>→</span></button>
+            </article>
+            <article class="dashboard-summary-card">
+              <span class="dashboard-summary-icon"><svg class="icon"><use href="#icon-calendar"/></svg></span>
+              <p class="eyebrow">Agenda pédagogique</p>
+              <strong id="dashboard-card-agenda-count">—</strong>
+              <span id="dashboard-card-agenda-meta">Cette semaine, dans ton parcours.</span>
+              <button type="button" class="text-action" data-view="path">Voir mon parcours <span>→</span></button>
+            </article>
           </div>
         </section>
 
@@ -616,6 +732,13 @@
 
       <section class="view" id="lab" aria-labelledby="lab-title">
         <div class="section-intro"><p class="eyebrow gold">DDA Lab · Pilote</p><h1 id="lab-title">IA pour agir.</h1><p>Utiliser l’IA pour produire, organiser et construire un petit projet numérique concret — sans jargon, sans outil payant obligatoire. Les 3 premières leçons sont gratuites ; le livrable complet et le projet final appartiennent à DDA Premium.</p></div>
+        <section class="lab-photo-rail" aria-label="Les 5 leçons du Lab">
+          <button type="button" class="lab-photo-card" data-view="lesson-lab1"><div class="lab-photo-card-media"><img class="photo-fill" src="images/photos/lab-ai-collaboration.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><span class="lab-photo-card-index">01</span></div><strong>Ce que l’IA sait faire</strong><small id="lab-photo-LAB1-status">À commencer</small></button>
+          <button type="button" class="lab-photo-card" data-view="lesson-lab2"><div class="lab-photo-card-media"><img class="photo-fill" src="images/photos/m0-foundations-observe.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><span class="lab-photo-card-index">02</span></div><strong>Formuler une demande claire</strong><small id="lab-photo-LAB2-status">Après la leçon 1</small></button>
+          <button type="button" class="lab-photo-card" data-view="lesson-lab3"><div class="lab-photo-card-media"><img class="photo-fill" src="images/photos/m1-terminal-analysis.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><span class="lab-photo-card-index">03</span></div><strong>Vérifier et corriger</strong><small id="lab-photo-LAB3-status">Après la leçon 2</small></button>
+          <button type="button" class="lab-photo-card" data-view="lesson-lab4"><div class="lab-photo-card-media"><img class="photo-fill" src="images/photos/p2-discipline-review.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><span class="lab-photo-card-index">04</span></div><strong>Produire un livrable</strong><small id="lab-photo-LAB4-status">DDA Premium</small></button>
+          <button type="button" class="lab-photo-card" data-view="lesson-lab-capstone"><div class="lab-photo-card-media"><img class="photo-fill" src="images/photos/path-crystal-forecast.jpg" alt="" loading="lazy"><div class="photo-scrim"></div><span class="lab-photo-card-index">05</span></div><strong>Projet final</strong><small id="lab-photo-LABCAP-status">DDA Premium</small></button>
+        </section>
         <ol class="premium-progress-strip" id="lab-progress-strip" aria-label="Progression du parcours DDA Lab">
           <li data-lab-step="LAB1" data-state="locked"><span class="premium-progress-index">01</span><div><strong>Ce que l’IA sait faire</strong><small id="lab-progress-LAB1-status">À commencer</small></div></li>
           <li data-lab-step="LAB2" data-state="locked"><span class="premium-progress-index">02</span><div><strong>Formuler une demande claire</strong><small id="lab-progress-LAB2-status">Après la leçon 1</small></div></li>
@@ -697,7 +820,7 @@
             <span>Modules amorcés</span>
           </div>
           <div class="progress-stat"><span>XP total</span><strong id="progress-total-xp">0</strong></div>
-          <div class="progress-stat"><span>Jours actifs (7 j)</span><strong id="progress-active-days">0</strong></div>
+          <div class="progress-stat"><span>Jours actifs (7 j)</span><strong id="progress-active-days">0</strong><small id="progress-streak-note"></small></div>
         </div>
         <button class="text-action" id="progress-share-open" type="button"><svg class="icon"><use href="#icon-spark"/></svg> Partager ma progression <span>→</span></button>
 
@@ -746,11 +869,11 @@
         <section class="panel badges-panel">
           <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-award"/></svg> Badges</p><h3>Les prochaines preuves à débloquer</h3></div></div>
           <div class="badge-row">
-            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Fondations validées</span></div>
-            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Risque maîtrisé</span></div>
-            <div class="badge-slot"><svg class="icon"><use href="#icon-lock"/></svg><span>Discipline confirmée</span></div>
+            <div class="badge-slot" id="badge-foundations"><svg class="icon"><use href="#icon-lock"/></svg><span>Fondations validées</span></div>
+            <div class="badge-slot" id="badge-risk"><svg class="icon"><use href="#icon-lock"/></svg><span>Risque maîtrisé</span></div>
+            <div class="badge-slot" id="badge-discipline"><svg class="icon"><use href="#icon-lock"/></svg><span>Discipline confirmée</span></div>
           </div>
-          <span class="future-label"><svg class="icon"><use href="#icon-compass"/></svg> Valide tes premières missions pour débloquer tes badges de progression</span>
+          <span class="future-label" id="badges-note"><svg class="icon"><use href="#icon-compass"/></svg> Valide tes premières missions pour débloquer tes badges de progression</span>
         </section>
       </section>
 
@@ -908,6 +1031,42 @@
         </div>
 
         <div class="library-shelf">
+          <p class="eyebrow library-shelf-label">Rayon téléchargements — à garder hors ligne</p>
+          <ul class="library-list">
+            <li class="library-entry">
+              <div class="resource-icon"><svg class="icon"><use href="#icon-check-circle"/></svg></div>
+              <div class="library-entry-body">
+                <span class="resource-type">PDF · DDA Free</span>
+                <h2>Checklist avant une décision</h2>
+                <p>La même checklist en 6 points que la ressource en ligne, en PDF imprimable.</p>
+                <ul class="resource-meta" aria-label="Métadonnées du PDF"><li>PDF · 1 page</li><li>Débutant</li></ul>
+                <a class="secondary-action dark-action" href="resources/downloads/checklist-avant-decision.pdf" download>Télécharger le PDF</a>
+              </div>
+            </li>
+            <li class="library-entry">
+              <div class="resource-icon"><svg class="icon"><use href="#icon-book"/></svg></div>
+              <div class="library-entry-body">
+                <span class="resource-type">PDF · DDA Free</span>
+                <h2>Glossaire des mots essentiels du marché</h2>
+                <p>Le même glossaire que la ressource en ligne, en PDF à garder sous la main.</p>
+                <ul class="resource-meta" aria-label="Métadonnées du PDF"><li>PDF · 1 page</li><li>Fondations</li></ul>
+                <a class="secondary-action dark-action" href="resources/downloads/glossaire-marches.pdf" download>Télécharger le PDF</a>
+              </div>
+            </li>
+            <li class="library-entry">
+              <div class="resource-icon"><svg class="icon"><use href="#icon-journal"/></svg></div>
+              <div class="library-entry-body">
+                <span class="resource-type">Excel · Modifiable</span>
+                <h2>Journal de trading (modèle)</h2>
+                <p>Les mêmes champs que ton Journal DDA en ligne (avant/pendant/après), prêts à remplir dans un tableur — jamais de colonne de gain ou de perte chiffrée.</p>
+                <ul class="resource-meta" aria-label="Métadonnées du modèle Excel"><li>XLSX</li><li>1 ligne d’exemple</li></ul>
+                <a class="secondary-action dark-action" href="resources/downloads/journal-de-trading-template.xlsx" download>Télécharger le modèle</a>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="library-shelf">
           <p class="eyebrow library-shelf-label">Rayon vidéos — à regarder maintenant</p>
           <ul class="library-list" id="video-shelf-list"></ul>
         </div>
@@ -929,17 +1088,31 @@
       </section>
 
       <section class="view" id="membership" aria-labelledby="membership-title">
-        <div class="section-intro"><p class="eyebrow gold">Accès DDA</p><h1 id="membership-title">Grandir à ton rythme.</h1><p>DDA Free pose les fondations. Premium approfondira la pratique, l’évaluation et la preuve de progression. Aucun paiement n’est activé pour le moment.</p></div>
-        <div class="membership-status-line"><span>Formule actuelle</span><strong id="membership-status">DDA Free</strong><small id="membership-status-note">Disponible maintenant · aucun achat actif</small></div>
+        <div class="section-intro"><p class="eyebrow gold">Accès DDA</p><h1 id="membership-title">Grandir à ton rythme.</h1><p>DDA Free pose les fondations. Approfondis ton apprentissage avec DDA Premium : accède à un parcours plus approfondi, développe tes compétences et renforce ta maîtrise des marchés financiers, pour 12 000 FCFA par mois.</p></div>
+        <div class="membership-status-line"><span>État de l’accès</span><strong id="membership-status">DDA Free</strong><small id="membership-status-note">Disponible maintenant · Aucun paiement actif</small></div>
+        <section class="trust-orientation-panel" aria-labelledby="trust-orientation-title">
+          <div><p class="eyebrow gold">Avant de choisir</p><h2 id="trust-orientation-title">Lis l’état réel de chaque niveau.</h2><p>Cette page oriente ; elle ne crée ni achat ni droit Premium. Le statut affiché dépend de ce qui est réellement opérationnel aujourd’hui.</p></div>
+          <ol class="trust-orientation-steps">
+            <li><span>01</span><div><strong>Free</strong><small>Disponible maintenant · progression locale</small></div></li>
+            <li><span>02</span><div><strong>Premium</strong><small>12 000 FCFA/mois · Paiement en cours d’activation</small></div></li>
+            <li><span>03</span><div><strong>Access</strong><small>Bourses et accès sponsorisés · à préparer</small></div></li>
+          </ol>
+        </section>
 
         <div class="plan-grid">
           <article class="plan-card current-plan"><p class="eyebrow">Ce que tu as aujourd’hui</p><h2>DDA Free</h2><p class="plan-tagline">Pour démarrer sérieusement, sans rien débourser.</p><ul><li>Parcours M0 Fondations et ses leçons</li><li>Exercices, quiz et Fil de maîtrise réel</li><li>Journal &amp; Plan</li><li>Market Intelligence (aperçu)</li></ul><span class="plan-state" id="free-plan-state">Formule active</span></article>
-          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">DDA Premium · démonstration pédagogique</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><p class="premium-local-status">Tu explores ici les briques pédagogiques Premium disponibles : ce n’est pas un abonnement actif.</p><ul><li>Leçons Premium P2 : risque avant entrée et trade contrôlé</li><li>Risk Plan Lab avec validation du scénario et conditions de non-trade</li><li>Assessment Controlled Decision et preuve de compétence</li><li>Revue hebdomadaire, ressources avancées et pont vers le Journal</li></ul><button class="primary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Aucun paiement · aucun renouvellement · aucun accès commercial activé</small><a class="text-action membership-preparation-link" href="launch/">Comprendre la préparation commerciale <span>→</span></a></article>
+          <article class="plan-card premium-plan" id="premium-panel"><p class="eyebrow gold">DDA Premium</p><h2>DDA Premium</h2><p class="plan-tagline">Pour transformer la compréhension en compétence mesurable.</p><div class="plan-price"><strong>12 000 FCFA</strong><span>/ mois</span></div><p class="premium-local-status">Abonnement DDA Premium à 12 000 FCFA par mois. Le paiement en ligne est en cours d’activation technique : inscris-toi ci-dessous pour être averti(e) dès l’ouverture — cette page n’est pas un abonnement actif tant que le paiement réel n’est pas confirmé.</p><ul><li>Leçons Premium P2 : risque avant entrée et trade contrôlé</li><li>Risk Plan Lab avec validation du scénario et conditions de non-trade</li><li>Assessment Controlled Decision et preuve de compétence</li><li>Revue hebdomadaire, ressources avancées et pont vers le Journal</li></ul><button type="button" class="primary-action" id="premium-subscribe-cta">S’abonner — 12 000 FCFA/mois <span>→</span></button><button class="secondary-action" id="preview-premium">Voir l’aperçu Premium <span>→</span></button><button class="secondary-action premium-track-entry" data-view="premium-track">Ouvrir le Premium Track P2 <span>→</span></button><button class="text-action plan-revert" id="revert-free" hidden>Revenir à DDA Free</button><small class="demo-note">Paiement en ligne en cours d’activation · inscription d’intérêt disponible ci-dessous</small><a class="text-action membership-preparation-link" href="launch/">Comprendre la préparation commerciale <span>→</span></a></article>
         </div>
 
+        <section class="panel founder-pack-panel" aria-labelledby="founder-pack-title">
+          <div class="panel-heading"><div><p class="eyebrow gold">Offre de lancement · sous réserve</p><h2 id="founder-pack-title">Pack Fondateur — 3 mois</h2></div></div>
+          <p>Un tarif de lancement est envisagé pour les tout premiers abonnés : <strong>33 000 FCFA pour 3 mois</strong> de DDA Premium. <strong>Ce prix et ses conditions sont sous réserve de confirmation définitive</strong> et ne sont pas encore activés — aucun paiement n’est possible pour ce pack aujourd’hui.</p>
+          <p class="demo-note">Intéressé(e) par le Pack Fondateur ? Enregistre ton intérêt dans le panneau ci-dessous : il sera pris en compte dès l’activation du paiement.</p>
+        </section>
+
         <section class="panel premium-waitlist-panel" id="premium-waitlist-panel" aria-labelledby="premium-waitlist-title">
-          <div class="panel-heading"><div><p class="eyebrow gold">Avant l’activation du paiement</p><h2 id="premium-waitlist-title">Intérêt pour Premium</h2></div></div>
-          <p>Le paiement Premium n’est pas encore activé. Tu peux noter ton intérêt sur cet appareil. Cette préférence reste dans ce navigateur : elle ne crée aucune inscription et n’envoie aucune notification.</p>
+          <div class="panel-heading"><div><p class="eyebrow gold">Avant l’ouverture du paiement</p><h2 id="premium-waitlist-title">Intérêt pour Premium</h2></div></div>
+          <p>Le paiement en ligne de DDA Premium est en cours d’activation technique. Tu peux déjà noter ton intérêt sur cet appareil pour être informé(e) dès l’ouverture. Cette préférence reste dans ce navigateur : elle ne crée aucune inscription et n’envoie aucune notification.</p>
           <div id="premium-waitlist-form">
             <label class="premium-waitlist-consent"><input type="checkbox" id="premium-waitlist-consent"> Je comprends que cette préférence reste enregistrée sur cet appareil et ne déclenche aucune notification.</label>
             <button class="secondary-action" id="premium-waitlist-join" disabled>Enregistrer mon intérêt sur cet appareil</button>
@@ -952,10 +1125,10 @@
           <p class="access-model-intro">Free doit rester utile. Premium doit apporter une profondeur réellement construite. Access préparera plus tard des bourses ou accès sponsorisés — rien n’est encore ouvert ni financé.</p>
           <div class="access-model-grid">
             <article><span class="access-model-kicker">Disponible maintenant</span><h3>DDA Free</h3><p>M0, exercices, feedback, progression, Journal &amp; Plan local et ressources Free.</p><strong>Valeur autonome</strong></article>
-            <article><span class="access-model-kicker gold">Démonstration pédagogique</span><h3>DDA Premium</h3><p>P2 Risque et discipline, leçons authored, Risk Plan Lab, assessment et preuve de compétence.</p><strong>Aucun paiement actif</strong></article>
+            <article><span class="access-model-kicker gold">Premium</span><h3>DDA Premium</h3><p>P2 Risque et discipline, leçons authored, Risk Plan Lab, assessment et preuve de compétence.</p><strong>12 000 FCFA/mois · Paiement en cours d’activation</strong></article>
             <article><span class="access-model-kicker muted">À préparer</span><h3>DDA Access</h3><p>Bourses, tarifs réduits ou accès sponsorisés selon des règles publiées et validées côté serveur.</p><strong>Non disponible aujourd’hui</strong></article>
           </div>
-          <div class="access-model-rules"><strong>Conditions actuelles :</strong> aucun prix, checkout, abonnement ou renouvellement automatique n’est activé. Une modification de l’état local ne pourra jamais constituer un achat ou un droit Premium serveur.</div>
+          <div class="access-model-rules"><strong>Conditions actuelles :</strong> DDA Premium est une offre réelle à 12 000 FCFA/mois ; aucun checkout, abonnement ou renouvellement automatique n’est activé avant la fin de l’activation technique du paiement en ligne. Une modification de l’état local ne pourra jamais constituer un achat ou un droit Premium serveur.</div>
         </section>
 
         <section class="panel membership-roadmap">
@@ -1067,13 +1240,18 @@
       <section class="view" id="markets" aria-labelledby="markets-title">
         <div class="section-intro"><p class="eyebrow gold">Market Intelligence · BRVM</p><h1 id="markets-title">Comprendre avant d’agir.</h1><p>Le pôle BRVM de DDA commence par une information vérifiable : contexte institutionnel, sources officielles et parcours d’apprentissage. Aucun cours n’est inventé et aucune série n’est présentée comme temps réel.</p></div>
         <div class="page-mission" data-mission="markets"><div><p class="eyebrow">Mission de cette page</p><strong>Lire un contexte régional sans le confondre avec un signal.</strong><span>Market Intelligence donne le cadre éditorial ; le Terminal reste l’espace où tu manipules et documentes.</span></div><button class="text-action" data-view="dashboard" data-scroll-to="analysis-terminal">Manipuler une série pédagogique <span>→</span></button></div>
-        <nav class="market-section-rail" aria-label="Accès rapide Market Intelligence"><span>Lire par étape</span><a href="#market-indices">Repères</a><a href="#market-context">Contexte</a><a href="#market-sources">Sources BRVM</a><a href="#market-publications">Publications</a></nav>
+        <nav class="market-section-rail" aria-label="Accès rapide Market Intelligence"><span>Lire par étape</span><a href="#market-global">Instruments suivis</a><a href="#market-indices">Repères</a><a href="#market-context">Contexte</a><a href="#market-sources">Sources BRVM</a><a href="#market-publications">Publications</a></nav>
 
         <div class="market-visit-cue"><svg class="icon"><use href="#icon-compass"/></svg><p>Tu as suivi cet espace <strong id="market-visit-days">1</strong> <span id="market-visit-days-suffix">jour</span> sur cet appareil.</p></div>
 
+        <section class="market-zone" id="market-global">
+          <p class="eyebrow gold zone-label">Instruments suivis</p>
+          <div class="index-grid" id="market-global-grid" aria-label="Instruments de marché suivis (Or, devises, indice, Bitcoin)"></div>
+        </section>
+
         <section class="market-zone" id="market-indices">
           <p class="eyebrow gold zone-label">Vue marché</p>
-          <div class="index-grid" id="market-indices" aria-label="Indices suivis (aperçu)"></div>
+          <div class="index-grid" id="market-index-grid" aria-label="Indices suivis (aperçu)"></div>
         </section>
 
         <section class="market-zone market-zone-brief" id="market-context">
@@ -1138,6 +1316,17 @@
         <section class="market-zone market-zone-reflect">
           <p class="eyebrow gold zone-label">Réfléchir / documenter</p>
           <div class="journal-link-block"><svg class="icon"><use href="#icon-journal"/></svg><p>Un mouvement de marché t’interpelle ? Documente ton observation avant d’agir.</p><button class="secondary-action" data-view="journal">Ouvrir le Journal <span>→</span></button></div>
+        </section>
+
+        <section class="market-zone" aria-labelledby="market-other-universes-title">
+          <p class="eyebrow gold zone-label">Autres univers · en préparation</p>
+          <h2 id="market-other-universes-title">DDA prépare d’autres marchés, un à la fois.</h2>
+          <div class="brvm-pole-grid">
+            <button type="button" class="brvm-pole-item is-planned" data-view="forex"><span>FX</span><div><strong>Forex</strong><small>Univers pédagogique · en préparation</small></div></button>
+            <button type="button" class="brvm-pole-item is-planned" data-view="stocks"><span>ACT</span><div><strong>Actions</strong><small>Univers pédagogique · en préparation</small></div></button>
+            <button type="button" class="brvm-pole-item is-planned" data-view="indices"><span>IDX</span><div><strong>Indices</strong><small>Univers pédagogique · en préparation</small></div></button>
+            <button type="button" class="brvm-pole-item is-planned" data-view="crypto"><span>CRY</span><div><strong>Crypto</strong><small>Univers pédagogique · en préparation</small></div></button>
+          </div>
         </section>
       </section>
 
@@ -1230,19 +1419,31 @@
           <img class="photo-fill" src="images/photos/community-hero-handshake.jpg" alt="" loading="lazy">
           <div class="photo-scrim"></div>
           <div class="community-hero-copy">
-            <p class="eyebrow gold">Aperçu — bientôt disponible</p>
+            <p class="eyebrow gold">Fil de posts · actif</p>
             <h1 id="community-title">La communauté DDA</h1>
-            <p>Apprendre, échanger et progresser avec d’autres apprenants DDA — une fois cette brique activée.</p>
+            <p>Partage une observation, une question ou une avancée avec d’autres apprenants DDA.</p>
           </div>
         </div>
 
-        <div class="page-mission" data-mission="community"><div><p class="eyebrow">Mission de cette page</p><strong>Comprendre les futurs espaces d’échange, sans faux flux.</strong><span>La Communauté prépare les usages collectifs ; elle ne duplique ni le Marché ni le Journal.</span></div><button class="text-action" data-view="path">Revenir au parcours actif <span>→</span></button></div>
+        <div class="page-mission" data-mission="community"><div><p class="eyebrow">Mission de cette page</p><strong>Un fil utile, jamais un flux de bruit.</strong><span>Chaque post reste relié à l’apprentissage ; la Communauté ne duplique ni le Marché ni le Journal.</span></div><button class="text-action" data-view="path">Revenir au parcours actif <span>→</span></button></div>
+
+        <section class="panel community-feed-panel dda-ai-chat-shell" aria-labelledby="community-feed-title">
+          <div class="panel-heading"><div><p class="eyebrow gold">Fil de la communauté</p><h2 id="community-feed-title">Partage une observation, une question ou une avancée.</h2></div></div>
+          <div class="community-feed-list dda-ai-transcript" id="community-feed-list" role="log" aria-live="polite"><div class="community-feed-empty dda-ai-empty" id="community-feed-empty"><strong>Chargement du fil…</strong></div></div>
+          <form id="community-post-form" class="community-post-form dda-ai-composer">
+            <label for="community-post-input">Ton message</label>
+            <textarea id="community-post-input" maxlength="1000" rows="3" placeholder="Ex. J’ai terminé M0.2 aujourd’hui — la notion de support/résistance est plus claire." required></textarea>
+            <div class="community-post-footer dda-ai-composer-footer"><small>1000 caractères maximum · visible par les autres apprenants DDA · aucun signal ni recommandation</small><button class="primary-action" type="submit" id="community-post-submit">Publier <span>→</span></button></div>
+            <p class="form-error" id="community-post-error" role="alert"></p>
+          </form>
+        </section>
+
         <div class="community-tiles">
-          <div class="community-tile"><svg class="icon"><use href="#icon-chat"/></svg><span>Discussions</span></div>
+          <div class="community-tile"><svg class="icon"><use href="#icon-chat"/></svg><span>Discussions par sujet</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-play"/></svg><span>Sessions en direct</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-users"/></svg><span>Groupes d’étude</span></div>
         </div>
-        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Ces espaces ne sont pas encore actifs — DDA ne simule jamais une conversation qui n’existe pas.</p>
+        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Ces espaces plus structurés ne sont pas encore actifs — seul le fil de posts ci-dessus l’est aujourd’hui. DDA ne simule jamais une conversation qui n’existe pas.</p>
 
         <section class="future-principles" aria-labelledby="community-principles-title">
           <p class="eyebrow gold">Le principe de construction</p>
@@ -1275,10 +1476,6 @@
           </div>
         </section>
 
-        <div class="community-cta">
-          <button class="primary-action" id="community-notify" type="button">Être informé au lancement <span>→</span></button>
-          <p class="disclosure" id="community-notify-note">Aucune inscription réelle — juste une préférence locale sur cet appareil.</p>
-        </div>
       </section>
 
       <section class="view community-view" id="practice" aria-labelledby="practice-title">
@@ -1342,7 +1539,7 @@
 
       <section class="view community-view" id="intelligence" aria-labelledby="intelligence-title">
         <div class="community-hero" role="img" aria-label="Intelligence DDA — aperçu">
-          <img class="photo-fill" src="images/photos/hero-market-woman.jpg" alt="" loading="eager" fetchpriority="high">
+          <img class="photo-fill" src="images/photos/lab-ai-collaboration.jpg" alt="" loading="lazy" decoding="async">
           <div class="photo-scrim"></div>
           <div class="community-hero-copy">
             <p class="eyebrow gold">Assistant pédagogique · accès conditionnel</p>
@@ -1353,7 +1550,7 @@
 
         <div class="page-mission" data-mission="intelligence"><div><p class="eyebrow">Mission de cette page</p><strong>Obtenir une aide qui explique, jamais qui décide.</strong><span>Le chat DDA AI s’active avec une session et un BFF configuré ; il ne remplace pas tes validations.</span></div><button class="text-action" data-view="path">Voir le socle de personnalisation <span>→</span></button></div>
         <div class="community-tiles">
-          <div class="community-tile"><svg class="icon"><use href="#icon-compass"/></svg><span>Darius AI</span></div>
+          <div class="community-tile"><svg class="icon"><use href="#icon-compass"/></svg><span>DDA AI</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-path"/></svg><span>Personnalisation</span></div>
           <div class="community-tile"><svg class="icon"><use href="#icon-progress"/></svg><span>Outils intelligents</span></div>
         </div>
@@ -1409,10 +1606,6 @@
           </article>
         </section>
 
-        <div class="community-cta">
-          <button class="primary-action" id="intelligence-notify" type="button">Être informé au lancement <span>→</span></button>
-          <p class="disclosure" id="intelligence-notify-note">Aucune inscription réelle — juste une préférence locale sur cet appareil.</p>
-        </div>
       </section>
 
       <section class="view community-view" id="experts" aria-labelledby="experts-title">
@@ -1553,12 +1746,57 @@
         </div>
       </section>
 
+      <section class="view community-view" id="produits-digitaux" aria-labelledby="produits-digitaux-title">
+        <div class="community-hero community-hero-no-photo">
+          <div class="photo-scrim"></div>
+          <div class="community-hero-copy">
+            <p class="eyebrow gold">Pilier en préparation</p>
+            <h1 id="produits-digitaux-title">Produits Digitaux</h1>
+            <p>Créer, construire et vendre des produits numériques avec l’IA — un curriculum complet en cours de finalisation.</p>
+          </div>
+        </div>
+
+        <div class="page-mission" data-mission="produits-digitaux"><div><p class="eyebrow">Mission de cette page</p><strong>Comprendre le pilier à venir, sans contenu fictif affiché comme actif.</strong><span>L’architecture pédagogique (PD0 à PD3 + projet final) est validée en principe ; le curriculum détaillé est encore en cours de finalisation avant toute intégration dans DDA.</span></div><button class="text-action" data-view="path">Voir le parcours Trading &amp; Marchés <span>→</span></button></div>
+        <div class="community-tiles">
+          <div class="community-tile"><svg class="icon"><use href="#icon-compass"/></svg><span>Trouver son offre</span></div>
+          <div class="community-tile"><svg class="icon"><use href="#icon-progress"/></svg><span>Construire avec l’IA</span></div>
+          <div class="community-tile"><svg class="icon"><use href="#icon-spark"/></svg><span>Vendre &amp; automatiser</span></div>
+        </div>
+        <p class="community-tiles-note"><svg class="icon"><use href="#icon-compass"/></svg> Rien ici n’est actif — aucune leçon Produits Digitaux n’est encore publiée.</p>
+
+        <section class="future-principles intelligence-principles" aria-labelledby="produits-digitaux-principles-title">
+          <p class="eyebrow gold">La règle DDA Produits Digitaux</p>
+          <h2 id="produits-digitaux-principles-title">Un curriculum réel, jamais une leçon inventée pour remplir la page.</h2>
+          <div class="intelligence-boundaries">
+            <article><span class="boundary-label">Il pourra</span><p>Couvrir l’offre, la boutique, la commercialisation et l’automatisation d’un produit numérique, du premier brief au premier client.</p></article>
+            <article><span class="boundary-label boundary-label-muted">Il ne fera jamais</span><p>Afficher une leçon ou un exercice avant que son contenu pédagogique complet n’ait été rédigé et validé.</p></article>
+          </div>
+        </section>
+
+        <section class="community-featured" aria-labelledby="produits-digitaux-featured-title">
+          <p class="eyebrow">Ce qui existe déjà</p>
+          <article class="community-featured-card">
+            <div class="community-featured-copy">
+              <h2 id="produits-digitaux-featured-title">Trading &amp; Marchés — déjà disponible</h2>
+              <p>En attendant, le parcours structuré M0 → M9 reste la façon la plus directe de progresser dans DDA aujourd’hui.</p>
+              <button class="primary-action" data-view="path">Voir le parcours <span>→</span></button>
+            </div>
+            <div class="community-featured-icon"><svg class="icon"><use href="#icon-chart"/></svg></div>
+          </article>
+        </section>
+
+        <div class="community-cta">
+          <button class="primary-action" id="produits-digitaux-notify" type="button">Être informé au lancement <span>→</span></button>
+          <p class="disclosure" id="produits-digitaux-notify-note">Aucune inscription réelle — juste une préférence locale sur cet appareil.</p>
+        </div>
+      </section>
+
       <section class="view" id="profile" aria-labelledby="profile-title">
         <div class="section-intro profile-intro"><p class="eyebrow gold">Espace personnel</p><h1 id="profile-title">Ton profil d’apprentissage.</h1><p>Modifie uniquement ce qui aide DDA à te proposer la prochaine étape utile.</p></div>
         <div class="page-mission" data-mission="profile"><div><p class="eyebrow">Mission de cette page</p><strong>Ajuster ton environnement, pas refaire ton parcours.</strong><span>Retrouve ici tes préférences, ton identité et les repères utiles pour la suite.</span></div><button class="text-action" data-view="progress">Voir mes preuves <span>→</span></button></div>
         <div class="profile-layout">
           <form class="profile-panel" id="profile-form" data-js-submit method="dialog">
-            <!-- "local" here is accurate for the current default (no BFF/server auth enabled). If a future
+<!-- "local" here is accurate for the current default (no BFF/server auth enabled). If a future
                  pass activates real BFF accounts, this copy needs a dynamic check (window.DDABFF?.enabled())
                  rather than being hardcoded to "local" for every visitor. -->
             <div class="profile-identity"><span class="profile-large-avatar" id="profile-large-avatar">A</span><div><p class="eyebrow" id="profile-storage-scope">Profil sur cet appareil</p><h2 id="profile-heading-name">Apprenant</h2><p id="profile-heading-email">Compte local</p><p class="profile-sync-status" id="profile-sync-status" role="status">Mode appareil · non synchronisé</p></div><span class="plan-state" id="profile-plan-badge">DDA Free</span></div>
@@ -1582,7 +1820,7 @@
             <p class="eyebrow gold">Préférences</p><h3>Une expérience adaptée à ton appareil.</h3>
             <label class="preference-row"><span><b>Économie de données</b><small>Réduit mouvements et médias non essentiels.</small></span><input id="profile-low-data" type="checkbox"></label>
             <label class="preference-row"><span><b>Rappels pédagogiques</b><small>Préférence enregistrée seulement ; aucun message n’est envoyé.</small></span><input id="profile-reminders" type="checkbox"></label>
-            <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité.</strong> <span id="profile-storage-disclosure">Tes données sont enregistrées sur cet appareil. Une mesure d’audience pseudonyme peut aider à comprendre comment les visiteurs découvrent DDA ; elle ne contient ni ton nom ni ton e-mail.</span> Aucun courtier ni service publicitaire n’accède à tes réponses.</span></p>
+            <p class="disclosure privacy-note"><svg class="icon"><use href="#icon-shield"/></svg> <span><strong>Confidentialité.</strong> <span id="profile-storage-disclosure">Sans compte connecté, tes données restent sur cet appareil — pas encore de synchronisation multi-appareils. Une mesure d’audience pseudonyme peut aider à comprendre comment les visiteurs découvrent DDA ; elle ne contient ni ton nom ni ton e-mail.</span> Aucun courtier ni service publicitaire n’accède à tes réponses.</span></p>
             <div class="activity-summary"><span>Activité d’apprentissage</span><strong id="event-count">0 événement</strong><small>Un résumé pédagogique de ton parcours, uniquement pour t’aider à reprendre au bon endroit.</small></div>
           </aside>
         </div>
@@ -1672,6 +1910,7 @@
   <script src="dda-analytics.js"></script>
   <script src="bff-client.js"></script>
   <script src="brvm-publications.js"></script>
+  <script src="market-ticker.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

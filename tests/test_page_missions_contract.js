@@ -14,7 +14,7 @@ const missions = {
   markets: 'Lire un contexte régional sans le confondre avec un signal.',
   brokers: 'Filtrer selon ton besoin avant toute comparaison.',
   support: 'Résoudre un blocage précis avant de reprendre.',
-  community: 'Comprendre les futurs espaces d’échange, sans faux flux.',
+  community: 'Un fil utile, jamais un flux de bruit.',
   practice: 'Prolonger une compétence déjà observée.',
   intelligence: 'Obtenir une aide qui explique, jamais qui décide.',
   profile: 'Ajuster ton environnement, pas refaire ton parcours.'

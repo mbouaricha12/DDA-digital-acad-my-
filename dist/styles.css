@@ -169,6 +169,19 @@ body.public-shell .topbar,
 body.public-shell .sidebar,
 body.public-shell .mobile-nav{display:none!important}
 body.public-shell main{padding-bottom:0}
+/* The inline boot script sets data-boot-view before external CSS and app.js.
+   Mirror the access shell here so desktop does not paint the sidebar grid
+   before body.access-mode is applied, which would create a large CLS shift. */
+html[data-boot-view="access"] .sidebar,
+html[data-boot-view="access"] .mobile-nav,
+html[data-boot-view="access"] .mobile-drawer,
+html[data-boot-view="access"] .mobile-drawer-backdrop,
+html[data-boot-view="access"] .topbar .icon-button,
+html[data-boot-view="access"] .topbar-search,
+html[data-boot-view="access"] .topbar-tagline,
+html[data-boot-view="access"] .network-state,
+html[data-boot-view="access"] .topbar-user{display:none!important}
+html[data-boot-view="access"] main{padding-bottom:0}
 .notification-dot{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--gold);right:8px;top:8px;box-shadow:0 0 0 2px var(--navy-950)}
 
 /* ---------- Views ---------- */
@@ -217,6 +230,7 @@ html[data-boot-view="lab"] #lab{display:block}
 .primary-action:hover span{transform:translateX(3px)}
 .primary-action:active{transform:scale(.98)}
 .secondary-action{background:transparent;color:var(--white);border:1px solid var(--line);width:100%}
+a.secondary-action{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 .secondary-action:hover{border-color:var(--blue-2);color:var(--blue-2);transform:translateY(-1px)}
 .secondary-action:active{transform:translateY(0)}
 .text-action{border:0;background:transparent;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:6px 0}
@@ -449,6 +463,13 @@ a.nav-item[hidden]{display:none}
 .community-view{background:linear-gradient(180deg,var(--navy-900),var(--navy-950) 70%);color:#f4f7fc}
 .community-view .eyebrow{color:rgba(244,247,252,.5)}
 .community-hero{position:relative;overflow:hidden;border-radius:20px;min-height:220px;display:flex;align-items:flex-end;padding:22px}
+/* Produits Digitaux has no real "digital products" photo yet — every other
+   stock photo in images/photos/ is already the designated image for a
+   different, unrelated section (Access, Business, Experts…), and reusing
+   one here would just move the mismatch instead of fixing it. A tasteful
+   brand gradient is an honest placeholder until a real photo is supplied;
+   it is never presented as a genuine photograph of anything. */
+.community-hero-no-photo{background:linear-gradient(135deg,#0a1424 0%,#101c2d 55%,#1a2740 100%)}
 .community-hero-copy{position:relative;z-index:1}
 .community-hero-copy h1{color:#fff;font-family:var(--dda-sans);font-weight:800;margin:6px 0;font-size:clamp(24px,5vw,34px)}
 .community-hero-copy p{color:rgba(244,247,252,.72);max-width:44ch;margin:0}
@@ -790,6 +811,7 @@ a.nav-item[hidden]{display:none}
 .progress-stat{padding:18px 16px;background:rgba(255,255,255,.04);display:grid;gap:4px}
 .progress-stat span{color:rgba(244,247,252,.65);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:800}
 .progress-stat strong{font-family:Georgia,serif;font-size:24px;color:#f4f7fc;font-variant-numeric:tabular-nums}
+.progress-stat small{color:rgba(217,164,65,.85);font-size:10.5px;font-weight:700;letter-spacing:.02em}
 .progress-stat.featured{grid-column:1/-1;background:linear-gradient(160deg,var(--navy-950),var(--navy-900));padding:22px 20px}
 .progress-stat.featured span{color:var(--gold-soft)}
 .progress-stat.featured strong{font-size:34px;color:var(--ivory)}
@@ -835,6 +857,14 @@ a.nav-item[hidden]{display:none}
 .badge-slot{display:grid;justify-items:center;gap:8px;padding:18px 10px;border:1px dashed rgba(255,255,255,.14);border-radius:var(--r-md);text-align:center;opacity:.7}
 .badge-slot .icon{color:rgba(244,247,252,.65);width:22px;height:22px}
 .badge-slot span{font-size:11px;color:rgba(244,247,252,.65);font-weight:700}
+.badge-slot.is-unlocked{opacity:1;border-style:solid;border-color:rgba(217,164,65,.5);background:rgba(217,164,65,.08)}
+.badge-slot.is-unlocked .icon{color:#d9a441}
+.badge-slot.is-unlocked span{color:#f4f7fc}
+.community-feed-post{padding:12px 13px;border:1px solid rgba(174,191,213,.14);border-radius:10px;background:rgba(10,20,36,.5)}
+.community-feed-post-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.community-feed-post-head strong{color:#f4f7fc;font-size:13px}
+.community-feed-post-head time{color:#8998aa;font-size:10.5px;white-space:nowrap}
+.community-feed-post p{margin:5px 0 0;color:#dbe4ee;font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
 
 .modules-track{margin-top:16px}
 .modules-track ol{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:8px}
@@ -994,6 +1024,13 @@ a.nav-item[hidden]{display:none}
 .membership-status-line span{color:rgba(244,247,252,.65);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:800}
 .membership-status-line strong{font-family:Georgia,serif;font-size:19px;color:#f4f7fc}
 .membership-status-line small{color:rgba(244,247,252,.65);font-size:12px}
+.trust-orientation-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,1.1fr);gap:24px;align-items:center;margin-bottom:24px;padding:20px;border:1px solid rgba(201,190,170,.28);border-radius:var(--r-lg);background:rgba(255,255,255,.035)}
+.trust-orientation-panel h2{margin:4px 0 8px;color:#f4f7fc;font-size:25px}
+.trust-orientation-panel p:not(.eyebrow){margin:0;color:rgba(244,247,252,.68);font-size:14px;max-width:560px}
+.trust-orientation-steps{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.trust-orientation-steps li{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(8,20,38,.22)}
+.trust-orientation-steps li>span{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;background:rgba(217,164,65,.15);color:var(--gold-soft);font-size:10px;font-weight:900}
+.trust-orientation-steps strong,.trust-orientation-steps small{display:block}.trust-orientation-steps strong{color:#f4f7fc;font-size:13px}.trust-orientation-steps small{margin-top:2px;color:rgba(244,247,252,.6);font-size:11px}
 
 .plan-grid{display:grid;grid-template-columns:1fr;gap:16px}
 .plan-card{padding:24px;border:1px solid rgba(255,255,255,.14);border-radius:var(--r-lg);background:rgba(255,255,255,.04)}
@@ -1007,6 +1044,11 @@ a.nav-item[hidden]{display:none}
 /* Premium: the one deliberate dark anchor on this screen — reuses the exact
    "Ouverture DDA" gradient Terminal already uses for its own Premium teaser,
    never a new dark surface invented for this tranche. */
+.plan-price{display:flex;align-items:baseline;gap:6px;margin:14px 0 0}
+.plan-price strong{font-size:26px;color:var(--gold-soft)}
+.plan-price span{font-size:13px;color:rgba(237,231,216,.6)}
+.premium-plan .primary-action{margin-top:18px}
+.premium-plan .secondary-action{margin-top:10px}
 .premium-plan{background:linear-gradient(150deg,var(--navy-900),var(--navy-950));color:#EDE7D8;border-color:var(--navy-900)}
 .premium-plan h2{color:var(--ivory)}
 .premium-plan .eyebrow.gold{color:var(--gold-soft)}
@@ -1095,8 +1137,19 @@ a.nav-item[hidden]{display:none}
 .index-card-head strong{font-size:15px}
 .index-sparkline{width:100%;height:30px;stroke:rgba(255,255,255,.2);stroke-width:2;stroke-dasharray:3 4;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .index-card p{color:rgba(244,247,252,.65);font-size:13px;margin:0}
+.index-card-example{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.index-card-example-value{font-family:Georgia,serif;font-size:26px;color:var(--ivory)}
+.index-card-example-change{font-size:13px;font-weight:700;padding:2px 8px;border-radius:999px}
+.index-card-example-change.is-up{color:#23c889;background:rgba(35,200,137,.12)}
+.index-card-example-change.is-down{color:#ed6a5a;background:rgba(237,106,90,.12)}
+.index-card-example-tag{flex-basis:100%;color:rgba(244,247,252,.5);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em}
 .data-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:rgba(244,247,252,.65);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:5px 9px;white-space:nowrap}
 .data-badge .icon{width:11px;height:11px}
+.data-badge.is-live{color:#d9a441;border-color:rgba(217,164,65,.4)}
+.landing-premium-note{border-top:1px solid rgba(255,255,255,.12);margin-top:14px;padding-top:14px}
+.landing-premium-note p{margin:0 0 6px}
+.landing-premium-price{font-weight:800;color:#d9a441}
+.landing-premium-note .text-action{margin-top:4px}
 
 .market-brief,.market-calendar{padding:22px;border:1px solid rgba(255,255,255,.14);border-radius:var(--r-md);background:rgba(255,255,255,.04)}
 .market-brief h2,.market-calendar h2{font-size:26px;color:#f4f7fc}
@@ -1131,6 +1184,7 @@ a.nav-item[hidden]{display:none}
 .brvm-publications-note .icon{color:var(--gold-soft);flex:none;margin-top:2px}
 .brvm-publications-head .data-badge{flex:none}
 @media(max-width:760px){
+  .trust-orientation-panel{grid-template-columns:1fr;gap:16px;padding:16px}
   .market-zone-publications{padding:18px}
   .brvm-publications-head{display:grid;gap:12px}
   .brvm-publications-head .data-badge{justify-self:start}
@@ -1257,11 +1311,13 @@ a.nav-item[hidden]{display:none}
 .profile-identity p:last-child{color:rgba(244,247,252,.65);margin:0;font-size:13px}
 .profile-sync-status{display:flex;align-items:center;gap:6px;margin-top:6px!important;color:rgba(244,247,252,.62)!important;font-size:11px!important;line-height:1.4}
 .profile-sync-status:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--muted);box-shadow:0 0 0 3px rgba(255,255,255,.06);flex:none}
-.profile-sync-status[data-state="connected"]{color:#b9e4ca!important}
-.profile-sync-status[data-state="connected"]:before{background:#62c58a;box-shadow:0 0 0 3px rgba(98,197,138,.14)}
-.profile-sync-status[data-state="offline"]{color:#e7c77e!important}
-.profile-sync-status[data-state="offline"]:before{background:var(--gold-soft);box-shadow:0 0 0 3px rgba(231,199,126,.14)}
+.profile-sync-status[data-state="connected"]{color:#b9e4ca!important}.profile-sync-status[data-state="connected"]:before{background:#62c58a;box-shadow:0 0 0 3px rgba(98,197,138,.14)}
+.profile-sync-status[data-state="offline"]{color:#e7c77e!important}.profile-sync-status[data-state="offline"]:before{background:var(--gold-soft);box-shadow:0 0 0 3px rgba(231,199,126,.14)}
 .profile-sync-status[data-state="device"]{color:rgba(244,247,252,.58)!important}
+.profile-identity .persistence-status{display:flex;align-items:center;gap:7px;color:#b8f5d1;margin-top:7px;font-size:12px;font-weight:800;line-height:1.4}
+.profile-identity .persistence-status::before{content:"";width:7px;height:7px;border-radius:50%;background:#55d98b;box-shadow:0 0 0 4px rgba(85,217,139,.12);flex:none}
+.profile-identity .persistence-status.is-warning{color:#ffd58a}
+.profile-identity .persistence-status.is-warning::before{background:#f0b44d;box-shadow:0 0 0 4px rgba(240,180,77,.14)}
 #profile-plan-badge{margin-left:auto;flex:none}
 .profile-progress-strip{display:flex;flex-wrap:wrap;gap:22px;padding:18px 0;border-top:1px solid rgba(255,255,255,.14);border-bottom:1px solid rgba(255,255,255,.14);margin-bottom:8px}
 .profile-progress-strip>div{display:grid;gap:3px;min-width:84px}
@@ -1370,6 +1426,7 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
      sole grid item and is auto-placed into the sidebar's leftover 260px
      track instead of spanning the row, collapsing the whole page width. */
   body.public-shell .app-shell{grid-template-columns:1fr}
+  html[data-boot-view="access"] .app-shell{grid-template-columns:1fr}
   .sidebar{
     display:flex;flex-direction:column;position:sticky;top:var(--banner-h,0px);height:calc(100vh - var(--banner-h,0px));overflow-y:auto;
     padding:32px 20px 22px;border-right:1px solid var(--line-soft);background:var(--navy-900);
@@ -1489,7 +1546,19 @@ input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red)!i
   .view:not(:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone)){max-width:1520px}
 }
 @media(min-width:1800px){
-  .view:not(:is(#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone)){max-width:1760px}
+  .view:not(:is(#dashboard,#progress,#resources,#produits-digitaux,#lab,#lesson,#lesson-m02,#lesson-m03,#lesson-m11,#lesson-m12,#lesson-m13,#lesson-p21,#lesson-p22,#lesson-lab1,#lesson-lab2,#lesson-lab3,#lesson-lab4,#lesson-lab-capstone)){max-width:1760px}
+}
+/* The 1760px ceiling above still centers these views with real dead space
+   on a wide monitor (2560px+): their card/grid layouts (hero, parcours,
+   summary, badge strips, resource tables) scale with the viewport via
+   fr/minmax units, so there is no reading-width reason to cap them. Each
+   one instead fills the full track after the sidebar at every size from
+   1440px up, flush against it (no auto-centering gap), with only a soft
+   ceiling far past any realistic monitor so lines never run unbounded on
+   a projector/TV. Lesson views are deliberately excluded (see above):
+   their prose column has no independent max-width of its own. */
+@media(min-width:1440px){
+  #dashboard.view,#progress.view,#resources.view,#produits-digitaux.view,#lab.view{max-width:2400px;margin-left:0;margin-right:auto}
 }
 
 
@@ -2472,7 +2541,10 @@ body.public-shell{background:var(--dda-ivory);color:#15243a}
 @media(max-width:859px){
   .lesson-actions{
     position:sticky;
-    bottom:calc(70px + var(--safe-b));
+    /* Keep the sticky action bar clear of the fixed mobile navigation. The
+       rendered nav is 68px high; the extra 12px preserves a visible breathing
+       gap after scrollIntoView on narrow phones. */
+    bottom:calc(82px + var(--safe-b));
     z-index:12;
     display:grid;
     grid-template-columns:auto minmax(0,1fr);
@@ -3039,6 +3111,8 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
 .brvm-data-facts dd{margin:7px 0 0;color:#f4f7fc;font-size:13px;line-height:1.45}
 .brvm-pole-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:20px}
 .brvm-pole-item{display:flex;gap:12px;align-items:flex-start;min-height:76px;padding:14px;border:1px solid rgba(255,255,255,.12);background:rgba(7,17,31,.52)}
+button.brvm-pole-item{width:100%;text-align:left;font:inherit;cursor:pointer}
+button.brvm-pole-item:hover,button.brvm-pole-item:focus-visible{border-color:rgba(217,164,65,.5)}
 .brvm-pole-item>span{color:var(--gold-soft);font:700 11px/1 ui-monospace,monospace;letter-spacing:.08em}
 .brvm-pole-item strong{display:block;color:#f4f7fc;font-size:13px}
 .brvm-pole-item small{display:block;margin-top:5px;color:rgba(244,247,252,.58);font-size:11px;line-height:1.4}
@@ -3127,6 +3201,17 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
 #lab .section-intro{max-width:760px;margin-inline:auto;padding:clamp(22px,5vw,48px) 0 24px}
 #lab .section-intro h1{max-width:12ch;font-size:clamp(2.5rem,8vw,5rem);line-height:.98;letter-spacing:-.045em}
 #lab .section-intro>p:last-child{max-width:58ch;font-size:clamp(1rem,2.2vw,1.18rem);line-height:1.65;color:#b8c6d5}
+.lab-photo-rail{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:22px 0;padding:0;list-style:none;border:0;background:none}
+.lab-photo-card{display:flex;flex-direction:column;gap:8px;min-width:0;padding:0;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.025);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.lab-photo-card:hover,.lab-photo-card:focus-visible{border-color:rgba(224,184,94,.45)}
+.lab-photo-card:focus-visible{outline:2px solid #e7c77e;outline-offset:2px}
+.lab-photo-card-media{position:relative;aspect-ratio:4/3;border-radius:12px 12px 0 0;overflow:hidden}
+.lab-photo-card-index{position:absolute;top:8px;left:8px;z-index:1;font-size:11px;font-weight:800;color:#e7c77e}
+.lab-photo-card>strong{padding:0 12px;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.lab-photo-card>small{display:block;padding:0 12px 14px;margin-top:-2px;font-size:11px;line-height:1.4;color:#aab8c8}
+@media(max-width:760px){
+  .lab-photo-rail{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+}
 #lab .premium-progress-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:22px 0;padding:0;list-style:none}
 #lab .premium-progress-strip li{min-width:0;display:flex;gap:10px;align-items:flex-start;padding:14px 12px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.025)}
 #lab .premium-progress-strip li>div{min-width:0}
@@ -3217,9 +3302,24 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
 #dashboard .dda-ecosystem-strip,
 #dashboard .dashboard-mission,
 #dashboard .dashboard-mastery-thread,
-#dashboard .dashboard-kpi-row,
 #dashboard .dashboard-proof-strip,
 #dashboard .dashboard-operating-line{display:none!important}
+/* Lot 2 (founder's full product maquette set, 2026-11-14): the KPI row
+   returns — it was hidden here by UX pass 07 as "product noise", but every
+   value it shows is real (XP, active days, action du jour, preuve récente),
+   never fabricated, and the maquette explicitly asks for a KPI strip under
+   the greeting. Styled fresh below: it never had its own CSS before (only a
+   mobile gap rule), hidden before it was finished. */
+#dashboard .dashboard-kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 0}
+#dashboard .dashboard-kpi-card{display:flex;align-items:center;gap:10px;min-width:0;padding:14px 16px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.025)}
+#dashboard .dashboard-kpi-card.dashboard-kpi-gold{border-color:rgba(224,184,94,.35);background:rgba(224,184,94,.06)}
+#dashboard .dashboard-kpi-icon{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.06);color:#e7c77e}
+#dashboard .dashboard-kpi-card>div{min-width:0}
+#dashboard .dashboard-kpi-card strong{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font-size:14px;line-height:1.3}
+#dashboard .dashboard-kpi-card span:last-child{display:block;margin-top:2px;font-size:11px;color:#aab8c8}
+@media(max-width:760px){
+  #dashboard .dashboard-kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 #dashboard .dashboard-command-head{margin:0 0 18px;padding:22px 0 8px;border:0;background:transparent}
 #dashboard .dashboard-command-head .eyebrow{display:none}
 #dashboard .dashboard-command-head h1{font-size:clamp(1.8rem,5vw,3rem);font-weight:650;letter-spacing:-.045em}
@@ -3230,12 +3330,78 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
 #dashboard .terminal-lead-meta{margin-top:18px}
 #dashboard .terminal-lead-photo{min-height:260px}
 #dashboard .terminal-divider{margin:22px 0}
+#dashboard .dashboard-week-ahead{margin:26px 0}
+#dashboard .dashboard-week-ahead .eyebrow{margin:0 0 12px}
+#dashboard .dashboard-week-rail .lab-photo-card-media{aspect-ratio:16/10}
+#dashboard .dashboard-quick-skills{margin:28px 0 24px;padding:24px;border:1px solid rgba(255,255,255,.1);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018))}
+#dashboard .quick-skills-intro{display:grid;gap:8px;max-width:760px;margin-bottom:18px}
+#dashboard .quick-skills-intro .eyebrow{margin:0}
+#dashboard .quick-skills-intro h2{max-width:22ch;margin:0;font-family:var(--dda-serif);font-size:clamp(1.45rem,3vw,2.25rem);line-height:1.08}
+#dashboard .quick-skills-intro p:last-child{max-width:68ch;margin:0;color:#aab8c8;font-size:14px;line-height:1.6}
+#dashboard .quick-skills-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#dashboard .quick-skill-card{display:flex;min-width:0;flex-direction:column;gap:10px;padding:17px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(4,14,28,.38);box-shadow:0 12px 30px rgba(0,0,0,.1)}
+#dashboard .quick-skill-card.quick-skill-gold{border-color:rgba(224,184,94,.35)}
+#dashboard .quick-skill-card.quick-skill-teal{border-color:rgba(84,197,232,.28)}
+#dashboard .quick-skill-card.quick-skill-violet{border-color:rgba(180,150,255,.28)}
+#dashboard .quick-skill-top,.quick-skill-footer{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#dashboard .quick-skill-pillar{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#e7c77e}
+#dashboard .quick-skill-teal .quick-skill-pillar{color:#76d6dc}
+#dashboard .quick-skill-violet .quick-skill-pillar{color:#c8b6ff}
+#dashboard .quick-skill-status{font-size:11px;color:#aab8c8;text-align:right}
+#dashboard .quick-skill-done .quick-skill-status{color:#9fe0b0}
+#dashboard .quick-skill-locked .quick-skill-status{color:#d7b878}
+#dashboard .quick-skill-card h3{max-width:24ch;margin:0;font-size:16px;line-height:1.25}
+#dashboard .quick-skill-card p{min-height:44px;margin:0;color:#b8c6d5;font-size:13px;line-height:1.55}
+#dashboard .quick-skill-footer{margin-top:auto;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)}
+#dashboard .quick-skill-footer>span{font-size:11px;color:#8498ad}
+#dashboard .quick-skill-footer .text-action{min-height:44px;padding:8px 0;color:#e7c77e;white-space:nowrap}
 @media(max-width:640px){
  #dashboard .dashboard-command-head{padding:18px 0 12px}
  #dashboard .terminal-lead{display:flex;flex-direction:column}
  #dashboard .terminal-lead-photo{min-height:190px;order:-1}
  #dashboard .terminal-lead-actions{display:grid;grid-template-columns:1fr}
  #dashboard .terminal-lead-go{width:100%;justify-content:center}
+ #dashboard .dashboard-quick-skills{padding:18px;margin-top:22px}
+ #dashboard .quick-skills-list{grid-template-columns:1fr}
+ #dashboard .quick-skill-card h3{max-width:30ch}
+}
+
+/* Maquette chantier (2026-11-14) — rapprochement Accueil : 3 cartes
+   "parcours" (Trading & Marchés / DDA Lab / Produits Digitaux) + 4 cartes
+   de résumé bas de page (Progression / Prochaine leçon / DDA AI / Agenda).
+   Même langage visuel que .quick-skill-card (carte sombre, bordure fine,
+   ombre portée) — pas un second système de carte à maintenir. */
+#dashboard .dashboard-parcours,#dashboard .dashboard-summary{margin:28px 0 24px}
+#dashboard .dashboard-parcours-intro,#dashboard .dashboard-summary-intro{display:grid;gap:8px;max-width:760px;margin-bottom:18px}
+#dashboard .dashboard-parcours-intro .eyebrow,#dashboard .dashboard-summary-intro .eyebrow{margin:0}
+#dashboard .dashboard-parcours-intro h2,#dashboard .dashboard-summary-intro h2{max-width:34ch;margin:0;font-family:Georgia,serif;font-size:clamp(1.3rem,2.6vw,1.9rem);font-weight:400;letter-spacing:-.01em;color:#f4f7fc}
+#dashboard .dashboard-parcours-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+#dashboard .dashboard-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+#dashboard .dashboard-parcours-card{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0;padding:20px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(4,14,28,.38);box-shadow:0 12px 30px rgba(0,0,0,.12);text-align:left;color:inherit;font:inherit;cursor:pointer}
+#dashboard .dashboard-summary-card{display:flex;flex-direction:column;gap:8px;min-width:0;padding:18px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(4,14,28,.38);box-shadow:0 12px 30px rgba(0,0,0,.1)}
+#dashboard .dashboard-parcours-icon,#dashboard .dashboard-summary-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:rgba(226,190,118,.12)}
+#dashboard .dashboard-parcours-icon .icon,#dashboard .dashboard-summary-icon .icon{width:18px;height:18px;color:#e7c77e}
+#dashboard .dashboard-parcours-card strong{font-size:16px;color:#f4f7fc}
+#dashboard .dashboard-parcours-card p{flex:1;margin:0;min-height:40px;color:#b8c6d5;font-size:13px;line-height:1.55}
+#dashboard .dashboard-parcours-card .text-action{color:#e7c77e}
+#dashboard .dashboard-parcours-card-soon{border-color:rgba(180,150,255,.28)}
+#dashboard .dashboard-parcours-card-soon .dashboard-parcours-icon{background:rgba(180,150,255,.14)}
+#dashboard .dashboard-parcours-card-soon .dashboard-parcours-icon .icon{color:#c8b6ff}
+#dashboard .dashboard-summary-card .eyebrow{margin:0;font-size:10px;color:#8498ad}
+#dashboard .dashboard-summary-card strong{margin:0;font-size:15px;line-height:1.3;color:#f4f7fc}
+#dashboard .dashboard-summary-card>span{color:#aab8c8;font-size:12px}
+#dashboard .dashboard-summary-card .text-action{margin-top:auto;padding-top:6px;color:#e7c77e;font-size:12px}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  #dashboard .dashboard-parcours-card,#dashboard .dashboard-summary-card{transition:transform .2s cubic-bezier(.2,.8,.4,1),box-shadow .2s ease,border-color .2s ease}
+  #dashboard .dashboard-parcours-card:hover,#dashboard .dashboard-summary-card:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(0,0,0,.2);border-color:rgba(226,190,118,.32)}
+}
+@media(max-width:860px){
+  #dashboard .dashboard-parcours-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #dashboard .dashboard-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:640px){
+  #dashboard .dashboard-parcours-grid{grid-template-columns:1fr}
+  #dashboard .dashboard-summary-grid{grid-template-columns:1fr}
 }
 
 /* Academy learner experience: calmer lesson navigation, consistent focus and readable long-form study. */

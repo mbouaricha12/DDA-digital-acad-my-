@@ -10,9 +10,6 @@
   if (title) title.textContent = doc.title;
   if (content) content.innerHTML = doc.content;
   document.title = `${doc.title} — Darius Digital Academy`;
-  const description = document.querySelector('meta[name="description"]');
-  const lead = content?.querySelector('.public-doc-lead')?.textContent?.trim();
-  if (description && lead) description.setAttribute('content', lead);
   document.querySelectorAll('[data-document-nav]').forEach(link => {
     link.toggleAttribute('aria-current', link.dataset.documentNav === key);
   });

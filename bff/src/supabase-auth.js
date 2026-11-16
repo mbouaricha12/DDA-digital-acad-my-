@@ -2,6 +2,11 @@
 
 const { normalizeEmail } = require('./security');
 
+function displayNameFromMetadata(metadata = {}) {
+  const candidates = [metadata.display_name, metadata.full_name, metadata.name];
+  return candidates.find(value => typeof value === 'string' && value.trim())?.trim() || '';
+}
+
 class SupabaseAuthAdapter {
   constructor({ supabaseUrl, publishableKey, serviceRoleKey, fetchImpl = fetch }) {
     if (!supabaseUrl || !publishableKey || !serviceRoleKey) throw new Error('SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY and SUPABASE_SERVICE_ROLE_KEY are required');
@@ -170,7 +175,7 @@ class SupabaseAuthAdapter {
         user_id: user.id,
         email: user.email,
         email_verified: Boolean(user.email_confirmed_at),
-        display_name: user.user_metadata?.display_name || '',
+        display_name: displayNameFromMetadata(user.user_metadata),
         status: user.banned_until ? 'locked' : 'active',
         ref: user.user_metadata?.ref || null,
         created_at: user.created_at || null,
@@ -185,7 +190,7 @@ class SupabaseAuthAdapter {
       user_id: user.id,
       email: user.email,
       email_verified: Boolean(user.email_confirmed_at),
-      display_name: user.user_metadata?.display_name || '',
+      display_name: displayNameFromMetadata(user.user_metadata),
       status: user.banned_until ? 'locked' : 'active',
       ref: user.user_metadata?.ref || null,
       entitlements: []
@@ -198,7 +203,7 @@ class SupabaseAuthAdapter {
     // can never silently erase the immutable partner ref set at signup.
     const current = await this.adminRequest(`/auth/v1/admin/users/${encodeURIComponent(userId)}`, { method: 'GET' });
     const user = await this.adminRequest(`/auth/v1/admin/users/${encodeURIComponent(userId)}`, { method: 'PUT', body: JSON.stringify({ user_metadata: { ...current.user_metadata, display_name: patch.display_name } }) });
-    return { user_id: user.id, email: user.email, email_verified: Boolean(user.email_confirmed_at), display_name: user.user_metadata?.display_name || '', status: user.banned_until ? 'locked' : 'active', ref: user.user_metadata?.ref || null, entitlements: [] };
+    return { user_id: user.id, email: user.email, email_verified: Boolean(user.email_confirmed_at), display_name: displayNameFromMetadata(user.user_metadata), status: user.banned_until ? 'locked' : 'active', ref: user.user_metadata?.ref || null, entitlements: [] };
   }
 
   async deleteUser(userId) {

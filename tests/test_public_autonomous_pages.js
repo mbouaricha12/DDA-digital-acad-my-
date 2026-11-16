@@ -6,6 +6,7 @@ const vm = require('node:vm');
 const root = path.resolve(__dirname, '..');
 const dist = path.join(root, 'dist');
 const docs = ['about','launch','terms','privacy','cookies','imprint','risks','accessibility','contact','faq'];
+const publicDocPages = [...docs, 'live', 'business', 'experts', 'community', 'ai'];
 const source = fs.readFileSync(path.join(dist, 'public-docs.js'), 'utf8');
 const runtime = fs.readFileSync(path.join(dist, 'public-document.js'), 'utf8');
 const css = fs.readFileSync(path.join(dist, 'public-documents.css'), 'utf8');
@@ -33,7 +34,7 @@ for (const key of docs) {
   assert.match(html, /\.\.\/public-docs\.js/);
   assert.match(html, /\.\.\/public-document\.js/);
   assert.match(html, /\.\.\/index\.html/);
-  assert.match(html, /lang="fr"/);
+  assert.match(html, /<html lang="fr-FR">/);
   assert.match(source, new RegExp(`${key}: \\{`), `shared source missing ${key}`);
 
   const doc = registry.public[key] || registry.legal[key];
@@ -45,4 +46,8 @@ for (const key of docs) {
 }
 const manifest = JSON.parse(fs.readFileSync(path.join(dist,'manus-routes.json'),'utf8'));
 for (const key of docs) assert.ok(manifest.routes.some(route => route.path === `/${key}/`), `manifest missing ${key}`);
+for (const key of publicDocPages) {
+  const html = fs.readFileSync(path.join(dist, key, 'index.html'), 'utf8');
+  assert.match(html, /<a class="public-doc-free-link" href="\.\.\/commencer\/">Commencer gratuitement →<\/a>/, `${key}: visible Free CTA must be present in initial HTML`);
+}
 console.log('RESULT: standalone public pages contract passed');

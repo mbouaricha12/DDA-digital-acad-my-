@@ -198,6 +198,33 @@
     return result.body.items;
   }
 
+  async function getMarketQuotes() {
+    const result = await request('/v1/market/quotes');
+    if (!result.enabled) return null;
+    if (!result.response.ok) throw resultError(result, 'market_quotes_failed');
+    if (!result.body || typeof result.body.instruments !== 'object') throw new Error('market_quotes_invalid_response');
+    return result.body.instruments;
+  }
+
+  async function getCommunityPosts() {
+    const result = await request('/v1/community/posts');
+    if (!result.enabled) return null;
+    if (result.response.status === 503) return { available: false };
+    if (!result.response.ok) throw resultError(result, 'community_posts_failed');
+    if (!Array.isArray(result.body?.posts)) throw new Error('community_posts_invalid_response');
+    return { available: true, posts: result.body.posts };
+  }
+
+  async function createCommunityPost(body) {
+    const result = await request('/v1/community/posts', { method: 'POST', body: { body } });
+    if (!result.enabled || result.response.status === 401) return { ok: false, reason: 'unavailable' };
+    if (result.response.status === 503) return { ok: false, reason: 'not_configured' };
+    if (result.response.status === 429) return { ok: false, reason: 'rate_limited' };
+    if (result.response.status === 400) return { ok: false, reason: 'invalid_body' };
+    if (!result.response.ok) return { ok: false, reason: result.body?.code || 'failed' };
+    return { ok: true, post: result.body.post };
+  }
+
   async function updateMe(patch) {
     const result = await request('/v1/me', { method: 'PATCH', body: patch });
     if (!result.enabled || result.response.status === 401) return null;
@@ -224,6 +251,23 @@
     if (!result.enabled || result.response.status === 401) return null;
     if (!result.response.ok) throw resultError(result, 'bff_onboarding_failed');
     return result.body;
+  }
+
+  // Commercial activation mandate (2026-11-14): asks the BFF for a real
+  // Chariow Checkout session. Never resolves a fake checkout_url itself —
+  // either the server hands back a real one from the provider, or this
+  // reports exactly why it couldn't (not configured, rate limited, or the
+  // provider failed), so the caller can fall back to the honest local
+  // waitlist instead of pretending a payment flow exists.
+  async function startPremiumCheckout() {
+    const result = await request('/v1/billing/checkout', { method: 'POST' });
+    if (!result.enabled || result.response.status === 401) return { available: false, reason: 'unavailable' };
+    if (result.response.status === 503) return { available: false, reason: 'not_configured' };
+    if (result.response.status === 429) return { available: true, error: 'rate_limited' };
+    if (!result.response.ok) return { available: true, error: result.body?.code || 'checkout_failed' };
+    const checkoutUrl = typeof result.body?.checkout_url === 'string' ? result.body.checkout_url : null;
+    if (!checkoutUrl) return { available: true, error: 'checkout_failed' };
+    return { available: true, checkoutUrl };
   }
 
   async function logout() {
@@ -261,6 +305,10 @@
     return adminRequest(`/v1/admin/memberships?page=${encodeURIComponent(page)}&per_page=${encodeURIComponent(perPage)}`);
   }
 
+  async function getAdminProgress(userId) {
+    return adminRequest(`/v1/admin/progress/${encodeURIComponent(userId)}`);
+  }
+
   // Role mutation — owner-only server-side (bff/src/app.js), never decided
   // here. Returns {enabled, status, data|body} the same way adminRequest
   // does, rather than throwing on 403/409: the UI needs to show *why* a
@@ -281,10 +329,11 @@
   }
 
   window.DDABFF = Object.freeze({
-    enabled, register, verifyEmail, exchangeSignupCode, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, updateMe, logout, issueCsrf,
+    enabled, register, verifyEmail, exchangeSignupCode, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, getMarketQuotes, updateMe, logout, issueCsrf,
     oauthGoogleStartUrl, exchangeOAuthCode,
-    getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, fetchPremiumContent, askAI,
-    getAdminOverview, getAdminUsers, getAdminMemberships, assignAdminRole, revokeAdminRole,
+    getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, fetchPremiumContent, askAI, startPremiumCheckout,
+    getCommunityPosts, createCommunityPost,
+    getAdminOverview, getAdminUsers, getAdminMemberships, getAdminProgress, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }
   });
 })();

@@ -1,0 +1,16 @@
+{
+  "name": "dda-learning-os",
+  "private": true,
+  "version": "1.0.0",
+  "description": "DDA Trading & Financial Markets Learning Operating System",
+  "scripts": {
+    "coverage:bff": "c8 --all --include=bff/src --exclude=bff/src/server.js --reporter=text --reporter=json --reporter=lcov node scripts/coverage-bff.js",
+    "coverage:academy": "node scripts/coverage-academy.js",
+    "coverage": "npm run coverage:bff && npm run coverage:academy",
+    "test:e2e": "node tests/run.js"
+  },
+  "devDependencies": {
+    "c8": "^10.1.3",
+    "playwright": "^1.55.0"
+  }
+}
