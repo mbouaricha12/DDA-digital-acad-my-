@@ -3387,8 +3387,8 @@ body.low-data #dashboard .dashboard-summary-card{animation:none!important;opacit
   background:linear-gradient(180deg,rgba(4,10,20,.78) 0%,rgba(4,10,20,.92) 70%,rgba(4,10,20,.97) 100%);
 }
 #dashboard .dashboard-parcours-card > *{position:relative;z-index:1}
-#dashboard .dashboard-parcours-card[data-view="path"]{background-image:url("images/photos/m1-terminal-analysis.jpg")}
-#dashboard .dashboard-parcours-card[data-view="lab"]{background-image:url("images/photos/lab-ai-collaboration.jpg")}
+#dashboard .dashboard-parcours-card[data-view="path"]{background-image:url("images/photos/dashboard-path.webp")}
+#dashboard .dashboard-parcours-card[data-view="lab"]{background-image:url("images/photos/dashboard-lab.webp")}
 /* No real "digital products" photo exists yet in images/photos/ — every
    other stock photo there is already the designated image for a different
    section (Experts reuses family-three-colleagues.jpg). Reusing it here
