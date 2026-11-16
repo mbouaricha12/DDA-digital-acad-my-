@@ -2909,6 +2909,7 @@ function renderState() {
   document.getElementById('profile-heading-name').textContent = name;
   document.getElementById('profile-heading-email').textContent = remoteUser?.email || prototypeState.user?.email || 'Compte local';
   document.getElementById('profile-storage-scope').textContent = remoteUser ? 'Compte DDA' : 'Profil sur cet appareil';
+  renderProfileSyncStatus();
   document.querySelector('.profile-chip small').textContent = remoteUser ? 'Mon profil (compte)' : 'Mon profil (appareil)';
   document.getElementById('profile-storage-disclosure').textContent = remoteUser
     ? 'Les informations de profil et la progression des leçons sont rattachées à ton compte DDA. Le Journal, le Terminal, les préférences et l’historique DDA AI restent sur cet appareil, isolés par compte et non synchronisés.'
@@ -4693,11 +4694,27 @@ document.getElementById('p2-journal-bridge')?.addEventListener('click', event =>
   });
 });
 
+function renderProfileSyncStatus() {
+  const status = document.getElementById('profile-sync-status');
+  if (!status) return;
+  const online = navigator.onLine !== false;
+  if (remoteUser && online) {
+    status.textContent = 'Compte DDA connecté · profil et leçons synchronisables';
+    status.dataset.state = 'connected';
+  } else if (remoteUser) {
+    status.textContent = 'Compte DDA · connexion indisponible';
+    status.dataset.state = 'offline';
+  } else {
+    status.textContent = 'Mode appareil · non synchronisé';
+    status.dataset.state = 'device';
+  }
+}
 function updateNetworkState() {
   const online = navigator.onLine;
   const status = document.getElementById('network-state');
   status.classList.toggle('offline', !online);
   status.querySelector('span').textContent = online ? 'En ligne' : 'Mode hors connexion';
+  renderProfileSyncStatus();
 }
 
 document.getElementById('resume-session').addEventListener('click', () => {

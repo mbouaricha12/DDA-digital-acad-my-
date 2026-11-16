@@ -1255,6 +1255,13 @@ a.nav-item[hidden]{display:none}
 .profile-large-avatar{display:grid;place-items:center;width:64px;height:64px;border-radius:20px;background:linear-gradient(145deg,var(--ivory),#d8c18c);color:var(--navy-950);font-family:Georgia,serif;font-size:22px;font-weight:900;flex:none}
 .profile-identity h2{font-size:24px;margin-bottom:3px}
 .profile-identity p:last-child{color:rgba(244,247,252,.65);margin:0;font-size:13px}
+.profile-sync-status{display:flex;align-items:center;gap:6px;margin-top:6px!important;color:rgba(244,247,252,.62)!important;font-size:11px!important;line-height:1.4}
+.profile-sync-status:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--muted);box-shadow:0 0 0 3px rgba(255,255,255,.06);flex:none}
+.profile-sync-status[data-state="connected"]{color:#b9e4ca!important}
+.profile-sync-status[data-state="connected"]:before{background:#62c58a;box-shadow:0 0 0 3px rgba(98,197,138,.14)}
+.profile-sync-status[data-state="offline"]{color:#e7c77e!important}
+.profile-sync-status[data-state="offline"]:before{background:var(--gold-soft);box-shadow:0 0 0 3px rgba(231,199,126,.14)}
+.profile-sync-status[data-state="device"]{color:rgba(244,247,252,.58)!important}
 #profile-plan-badge{margin-left:auto;flex:none}
 .profile-progress-strip{display:flex;flex-wrap:wrap;gap:22px;padding:18px 0;border-top:1px solid rgba(255,255,255,.14);border-bottom:1px solid rgba(255,255,255,.14);margin-bottom:8px}
 .profile-progress-strip>div{display:grid;gap:3px;min-width:84px}
