@@ -53,11 +53,28 @@ for (const slug of publicPages) {
 }
 
 const launch = fs.readFileSync(path.join(dist, 'launch', 'index.html'), 'utf8');
-// Keep this proof aligned with the authored curriculum now presented by the
-// launch page: six published Free lessons across M0 and M1.
-assert.match(launch, /Le parcours Free disponible comprend six leçons authored/);
+const launchDescription = 'DDA : six leçons au catalogue, trois fondations M0 accessibles en Free et trois leçons M1 soumises au droit avancé correspondant.';
+assert.equal(launch.match(/<meta name="description" content="([^"]+)"/)?.[1], launchDescription);
+assert.equal(launch.match(/<meta property="og:description" content="([^"]+)"/)?.[1], launchDescription);
+assert.equal(launch.match(/<meta name="twitter:description" content="([^"]+)"/)?.[1], launchDescription);
+assert.ok(launch.includes('Le catalogue réunit six leçons authored : trois fondations du module M0 sont accessibles en Free; trois leçons M1 supplémentaires nécessitent le droit avancé correspondant et ne font pas partie du périmètre Free actuel'));
+assert.doesNotMatch(launch, /M0\.1|M1\.1|P2\.1|P2\.2/, 'unnecessary internal lesson IDs must not be exposed on /launch/');
+assert.doesNotMatch(launch, /Le parcours Free disponible comprend six leçons/i, 'the authored six-lesson catalogue must not be described as six Free lessons');
+const app = fs.readFileSync(path.join(dist, 'app.js'), 'utf8');
+for (const id of ['M1.1', 'M1.2', 'M1.3']) {
+  assert.match(app, new RegExp(`id: '${id}'[\\s\\S]{0,350}permission: 'advanced_modules'`), `${id}: public copy must follow its real advanced_modules entitlement`);
+}
 const landing = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
-assert.match(landing, /M0 comprend 3 fondations\. M1 ajoute 3 leçons supplémentaires/);
+const landingDescription = landing.match(/<meta name="description" content="([^"]+)"/)?.[1];
+assert.ok(landingDescription?.includes('DDA Free ouvre trois fondations M0'));
+assert.ok(!descriptions.has(landingDescription), 'homepage description must be unique against other public pages');
+assert.equal(landing.match(/<meta property="og:description" content="([^"]+)"/)?.[1], landingDescription);
+assert.equal(landing.match(/<meta name="twitter:description" content="([^"]+)"/)?.[1], landingDescription);
+assert.ok(landing.includes('DDA Free ouvre les 3 fondations du module M0'));
+assert.ok(landing.includes('ne font pas partie du parcours Free'));
+assert.match(landing, /<img class="photo-fill" src="images\/photos\/landing-hero-brand-banner\.jpg" alt="Bannière de Darius Digital Academy/);
+const documentRuntime = fs.readFileSync(path.join(dist, 'public-document.js'), 'utf8');
+assert.doesNotMatch(documentRuntime, /description\.setAttribute/, 'page runtime must preserve curated route-specific meta descriptions');
 const academy = fs.readFileSync(path.join(dist, 'academy.html'), 'utf8');
 assert.match(academy, /<meta name="robots" content="noindex, nofollow">/);
 
