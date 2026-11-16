@@ -2923,6 +2923,36 @@ body.public-shell .prototype-banner{display:none}
   .dda-ecosystem-chip{padding:6px 10px;font-size:11px}
 }
 
+/* TRANCHE 1 — Hero motion audit.
+   The orbit is a DDA signature, not a hidden background ornament: keep it
+   visible around the product mockup while leaving the editorial copy and
+   aperture labels above it. Phones keep the scene static for battery and
+   reduced-distraction reasons. */
+@media (min-width:900px){
+  #landing .landing-3d-scene{
+    z-index:3;
+    right:5%;
+    width:min(58%,360px);
+    opacity:.72;
+    filter:drop-shadow(0 0 26px rgba(26,139,255,.42));
+  }
+}
+@media (max-width:899px){
+  #landing .landing-3d-scene{
+    z-index:3;
+    right:3%;
+    width:min(72%,320px);
+    opacity:.62;
+    filter:drop-shadow(0 0 20px rgba(26,139,255,.34));
+  }
+}
+@media (max-width:700px){
+  #landing .landing-3d-scene{animation:none!important}
+}
+@media (prefers-reduced-motion:reduce){
+  #landing .landing-3d-scene{animation:none!important}
+}
+
 /* DDA AI Academy chat — live bridge, never a fake assistant surface. */
 .dda-ai-chat-shell{margin:34px 0 0;padding:26px;border:1px solid rgba(203,177,116,.28);border-radius:16px;background:linear-gradient(145deg,rgba(16,35,55,.96),rgba(7,16,28,.98));box-shadow:0 18px 42px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.04)}
 .dda-ai-chat-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:22px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.09)}
