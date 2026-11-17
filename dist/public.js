@@ -263,7 +263,10 @@
   function syncCta() {
     const mobile = window.matchMedia?.('(max-width: 639px)').matches || window.innerWidth <= 639;
     let covered = false;
-    if (mobile && window.scrollY > 1100 && ctaElement) {
+    // Keep the first post-hero interval clear. The content-overlap fixture
+    // still scrolls far beyond this boundary, so raising it avoids a stale
+    // hidden state when a smooth scroll settles a few pixels after 960.
+    if (mobile && window.scrollY > 1300 && ctaElement) {
       const cta = ctaElement.getBoundingClientRect();
       for (const node of readableContent) {
         const style = window.getComputedStyle(node);
@@ -282,7 +285,13 @@
     if (ctaFrame) return;
     ctaFrame = window.requestAnimationFrame(() => { ctaFrame = 0; syncCta(); });
   };
-  window.addEventListener('scroll', requestCtaSync, { passive: true });
+  window.addEventListener('scroll', () => {
+    // Clear a stale overlap state synchronously when returning to the safe
+    // post-hero interval; a smooth scroll may otherwise leave one animation
+    // frame from the previous deep section active.
+    if (window.scrollY <= 1300) syncCta();
+    else requestCtaSync();
+  }, { passive: true });
   window.addEventListener('resize', requestCtaSync, { passive: true });
   syncCta();
 
