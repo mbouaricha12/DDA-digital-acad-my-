@@ -3661,3 +3661,14 @@ body:has(#dashboard.view.active) .topbar{
 .landing-proof-rail article div>span{color:rgba(235,242,250,.68);font-size:9px;font-weight:700;line-height:1.25;letter-spacing:.02em;text-transform:uppercase}
 @media(max-width:860px){.landing-proof-rail{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:16px}.landing-proof-rail article{padding:11px 10px}}
 @media(max-width:420px){.landing-proof-rail{gap:1px}.landing-proof-rail article{gap:8px;padding:10px 8px}.landing-proof-rail strong{font-size:14px}.landing-proof-rail article div>span{font-size:8px}.landing-proof-rail-icon{width:24px;height:24px}}
+.landing-reference-stack{position:absolute;z-index:5;top:84px;right:16px;display:grid;gap:8px;width:min(238px,39%)}
+.landing-reference-stack a{display:grid;grid-template-columns:30px minmax(0,1fr) 16px;align-items:center;gap:9px;min-height:52px;padding:8px 10px;border:1px solid rgba(143,190,226,.28);border-radius:14px;background:rgba(5,17,34,.78);box-shadow:0 10px 22px rgba(0,0,0,.18);color:#f5f7fb;text-decoration:none;backdrop-filter:blur(8px);transition:transform .2s ease,border-color .2s ease,background .2s ease}
+.landing-reference-stack a:hover,.landing-reference-stack a:focus-visible{transform:translateX(-3px);border-color:rgba(217,164,65,.72);background:rgba(10,30,55,.92);outline:0}
+.landing-reference-icon{display:grid;place-items:center;width:28px;height:28px;border:1px solid rgba(217,164,65,.42);border-radius:50%;color:#f1d38c;background:rgba(217,164,65,.12)}
+.landing-reference-icon .icon{width:15px;height:15px}
+.landing-reference-stack a span:nth-child(2){display:grid;gap:3px;min-width:0}
+.landing-reference-stack strong{margin:0;font-family:inherit;font-size:12px;line-height:1.1;white-space:nowrap}
+.landing-reference-stack small{overflow:hidden;color:rgba(226,236,247,.66);font-size:9px;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}
+.landing-reference-stack b{color:#f1d38c;font-size:16px;font-weight:500;text-align:right}
+@media(max-width:899px){.landing-reference-stack{position:relative;top:auto;right:auto;width:100%;margin:12px 0 4px;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.landing-reference-stack a{min-height:48px;padding:7px 8px}.landing-reference-stack strong{font-size:11px}}
+@media(max-width:420px){.landing-reference-stack{grid-template-columns:1fr}.landing-reference-stack a{min-height:45px}}
