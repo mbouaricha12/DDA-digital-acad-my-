@@ -2849,6 +2849,7 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
 @media(prefers-reduced-motion:reduce){.terminal-tool,.terminal-icon-button,.analysis-terminal-toolbar select{transition:none}}
 #terminal-chart .crosshair-label-x{fill:#d9a441;stroke:#f4d58c;stroke-width:.5}#terminal-chart .crosshair-x-label{fill:#101723;font:700 8px ui-monospace,SFMono-Regular,Menlo,monospace;text-anchor:middle}.analysis-terminal-toolbar .terminal-selector select{font-family:inherit;font-size:13px;font-weight:600;line-height:1}.terminal-tool{font-family:inherit;font-size:11px;font-weight:700;line-height:1}.analysis-observation textarea{font-family:inherit;font-size:13px;font-weight:500;line-height:1.55}
 @media(max-width:700px){.terminal-icon-button{width:44px;height:44px;min-width:44px;min-height:44px}}
+.terminal-scenario-meta{display:block;margin-top:5px;color:rgba(223,233,246,.48);font-size:10px;letter-spacing:.04em;line-height:1.4}
 #dashboard .analysis-terminal .analysis-terminal-head h2{color:#fff}.analysis-terminal-legend ol{list-style:none;padding-left:0;counter-reset:terminalStep}.analysis-terminal-legend li{counter-increment:terminalStep}.analysis-terminal-legend li::before{content:counter(terminalStep,decimal-leading-zero);font-variant-numeric:tabular-nums}
 
 

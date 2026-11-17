@@ -1,0 +1,21 @@
+'use strict';
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const root = path.resolve(__dirname, '..');
+const html = fs.readFileSync(path.join(root, 'dist', 'academy.html'), 'utf8');
+const app = fs.readFileSync(path.join(root, 'dist', 'app.js'), 'utf8');
+const css = fs.readFileSync(path.join(root, 'dist', 'styles.css'), 'utf8');
+
+assert.match(html, /data-scenario-id="terminal-m02-zone"/);
+assert.match(html, /data-scenario-version="1\.0"/);
+assert.match(html, /data-dataset-status="synthetic"/);
+assert.match(html, /Scénario terminal-m02-zone · v1\.0 · données synthétiques contrôlées/);
+assert.match(app, /const TERMINAL_SCENARIO = Object\.freeze\(\{ id: 'terminal-m02-zone', version: '1\.0', datasetStatus: 'synthetic' \}\)/);
+assert.match(app, /scenarioId: state\.scenarioId, scenarioVersion: state\.scenarioVersion, datasetStatus: state\.datasetStatus/);
+assert.match(app, /proof: \{ id: 'm02-zone-identification',[\s\S]*scenarioId: state\.scenarioId,[\s\S]*feedback \}/);
+assert.match(app, /scenarioId: fields\.scenarioId, scenarioVersion: fields\.scenarioVersion, datasetStatus: fields\.datasetStatus/);
+assert.match(css, /\.terminal-scenario-meta/);
+assert.match(app, /Preuve conservée localement/);
+assert.doesNotMatch(app, /signal d'achat|signal de vente|recommandation d'achat|recommandation de vente/i);
+console.log('RESULT: Terminal Foundation scenario/proof contract passed');

@@ -2351,7 +2351,7 @@ function openJournalComposer(entry, trigger, draft = null) {
   journalEditingId = entry ? entry.id : null;
   journalComposerTrigger = trigger || null;
   const fields = entry || draft || DDA.emptyJournalEntry();
-  journalComposerMetadata = fields.terminalSource ? { terminalSource: true, sourceLesson: fields.sourceLesson, proofId: fields.proofId, proofType: fields.proofType } : null;
+  journalComposerMetadata = fields.terminalSource ? { terminalSource: true, sourceLesson: fields.sourceLesson, proofId: fields.proofId, proofType: fields.proofType, scenarioId: fields.scenarioId, scenarioVersion: fields.scenarioVersion, datasetStatus: fields.datasetStatus } : null;
   document.getElementById('journal-market').value = fields.market || '';
   document.getElementById('journal-context').value = fields.context || '';
   document.getElementById('journal-scenario').value = fields.scenario || '';
@@ -2768,6 +2768,7 @@ const TERMINAL_SERIES = Object.freeze({
   'EUR/USD pédagogique': [72, 71, 70, 72, 73, 72, 74, 75, 74, 73, 75, 77, 76, 78, 77, 76, 78, 79, 78, 80, 79, 81, 80, 79, 81, 82, 81, 83, 82, 84, 83, 85]
 });
 const TERMINAL_VIEWBOX = Object.freeze({ width: 900, height: 420, left: 58, right: 824, top: 48, bottom: 350 });
+const TERMINAL_SCENARIO = Object.freeze({ id: 'terminal-m02-zone', version: '1.0', datasetStatus: 'synthetic' });
 const terminalInteraction = { tool: 'crosshair', draft: null, crosshair: null, view: null, ready: false };
 function getTerminalState() {
   return {
@@ -2777,7 +2778,10 @@ function getTerminalState() {
     pan: Number(prototypeState.terminal?.pan) || 0,
     drawings: Array.isArray(prototypeState.terminal?.drawings) ? prototypeState.terminal.drawings : [],
     observation: prototypeState.terminal?.observation || '',
-    practice: prototypeState.terminal?.practice || null
+    practice: prototypeState.terminal?.practice || null,
+    scenarioId: prototypeState.terminal?.scenarioId || TERMINAL_SCENARIO.id,
+    scenarioVersion: prototypeState.terminal?.scenarioVersion || TERMINAL_SCENARIO.version,
+    datasetStatus: prototypeState.terminal?.datasetStatus || TERMINAL_SCENARIO.datasetStatus
   };
 }
 function terminalClamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
@@ -2951,7 +2955,10 @@ function terminalJournalDraft() {
     terminalSource: true,
     sourceLesson: proof.lessonId || state.practice?.sourceLesson || 'M0.2',
     proofId: proof.id || 'm02-zone-identification',
-    proofType: proof.type || 'zone_identification'
+    proofType: proof.type || 'zone_identification',
+    scenarioId: state.scenarioId,
+    scenarioVersion: state.scenarioVersion,
+    datasetStatus: state.datasetStatus
   };
 }
 function initDariusAnalysisTerminal() {
@@ -3088,7 +3095,7 @@ function initDariusAnalysisTerminal() {
     const practice = {
       ...(state.practice || {}), status, attempts,
       feedback,
-      proof: { id: 'm02-zone-identification', type: 'zone_identification', lessonId: state.practice?.sourceLesson || 'M0.2', status },
+      proof: { id: 'm02-zone-identification', type: 'zone_identification', lessonId: state.practice?.sourceLesson || 'M0.2', status, scenarioId: state.scenarioId, scenarioVersion: state.scenarioVersion, datasetStatus: state.datasetStatus, feedback },
       ...(valid ? { completedAt: new Date().toISOString() } : {})
     };
     update({ practice });
