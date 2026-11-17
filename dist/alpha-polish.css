@@ -3474,6 +3474,170 @@ body.low-data #dashboard .dashboard-summary-card{transform:none!important}
   #landing .landing-3d-scene{opacity:.72;animation:none!important}
 }
 
+
+/* ======================================================================
+   Desktop responsive pass 2026-11-16 - neuf vues restantes.
+   A 2560, ces vues restaient plafonnees a 1760px et centrees. Elles
+   rejoignent maintenant le traitement Dashboard/Progression/Lab, avec des
+   contenus internes bornes pour preserver une lecture confortable.
+   ====================================================================== */
+@media(min-width:1440px){
+  #path.view,#membership.view,#premium-track.view,#journal.view,
+  #markets.view,#community.view,#profile.view,#brokers.view,#support.view{
+    max-width:2400px;
+    margin-left:0;
+    margin-right:auto;
+  }
+  #path .journey,#premium-track .journey{max-width:1400px}
+  #membership .membership-status-line,
+  #membership .trust-orientation-panel,
+  #membership .plan-grid{max-width:2000px}
+  #journal .journal-panel{max-width:2000px}
+  #markets .market-section-rail{max-width:2000px}
+  #community .community-tiles,#community .panel{max-width:2000px}
+  #profile .profile-layout{max-width:2000px}
+  #brokers .panel{max-width:2000px}
+  #support .panel,#support .support-contact{max-width:2000px}
+}
+
+/* ======================================================================
+   DDA Dashboard — identité Learning OS 2026-11-16
+   Reprise de la composition de la maquette propriétaire : sidebar
+   institutionnelle, hero illustrée, cartes de parcours lisibles, résumé
+   violet/or. Aucune donnée inventée : les composants et identifiants
+   existants restent la source de vérité.
+   ====================================================================== */
+#dashboard{
+  --dda-dash-violet:#8b5cf6;
+  --dda-dash-violet-strong:#6d28d9;
+  --dda-dash-violet-soft:#c4b5fd;
+}
+body:has(#dashboard.view.active) .sidebar{
+  background:linear-gradient(180deg,#0d0a1c 0%,#07101e 55%,#050b16 100%);
+  border-right-color:rgba(139,92,246,.16);
+}
+body:has(#dashboard.view.active) .nav-item.active{
+  background:linear-gradient(90deg,rgba(124,58,237,.95),rgba(109,40,217,.55));
+  color:#fff;
+  border-color:rgba(167,139,250,.38);
+  box-shadow:0 10px 24px -14px rgba(124,58,237,.8);
+}
+body:has(#dashboard.view.active) .nav-item.active .icon{color:#fff}
+body:has(#dashboard.view.active) .topbar{
+  background:rgba(6,9,18,.9);
+  border-bottom-color:rgba(139,92,246,.14);
+}
+#dashboard .dashboard-hero{
+  background:
+    linear-gradient(90deg,rgba(4,8,18,.97) 0%,rgba(4,8,18,.9) 38%,rgba(4,8,18,.35) 68%,rgba(4,8,18,.78) 100%),
+    radial-gradient(circle at 80% 24%,rgba(124,58,237,.35),transparent 58%),
+    url("images/photos/hero-market-woman.jpg");
+  background-size:cover;
+  background-position:center right;
+  border:1px solid rgba(139,92,246,.3);
+  box-shadow:0 30px 80px -40px rgba(0,0,0,.7),inset 0 0 0 1px rgba(139,92,246,.08);
+}
+#dashboard .dashboard-hero::before{opacity:.22}
+#dashboard .dashboard-markets-widget,
+#dashboard .dashboard-terminal-preview{
+  background:rgba(6,10,22,.78);
+  border-color:rgba(139,92,246,.26);
+  backdrop-filter:blur(14px);
+}
+#dashboard .dashboard-terminal-preview-chart{color:#c4b5fd}
+#dashboard .dashboard-parcours-card{
+  border:1px solid rgba(139,92,246,.26);
+  border-radius:18px;
+  box-shadow:0 24px 50px -28px rgba(0,0,0,.7);
+}
+#dashboard .dashboard-parcours-card::before{
+  background:linear-gradient(180deg,rgba(4,8,18,.05) 0%,rgba(4,8,18,.55) 42%,rgba(4,8,18,.92) 100%);
+}
+#dashboard .dashboard-parcours-card .text-action{color:#d8ccff}
+#dashboard .dashboard-parcours-card:hover{
+  border-color:rgba(167,139,250,.55);
+  box-shadow:0 30px 60px -26px rgba(76,29,149,.5);
+}
+#dashboard .dashboard-summary-card{
+  background:linear-gradient(160deg,rgba(26,20,48,.94),rgba(8,14,28,.97));
+  border:1px solid rgba(139,92,246,.24);
+  border-radius:18px;
+}
+#dashboard .dashboard-summary-card .dashboard-summary-icon{
+  color:#c4b5fd;
+  background:rgba(124,58,237,.16);
+  border-color:rgba(167,139,250,.3);
+}
+#dashboard .dashboard-summary-card strong{color:#f5f3ff}
+#dashboard .dashboard-summary-card .eyebrow{color:#a78bfa}
+#dashboard .dashboard-summary-card .text-action{color:#c4b5fd}
+#dashboard .primary-action{
+  background:linear-gradient(135deg,#8b5cf6,#6d28d9);
+  border-color:rgba(196,181,253,.45);
+  box-shadow:0 14px 34px -16px rgba(124,58,237,.65);
+}
+#dashboard .primary-action:hover{background:linear-gradient(135deg,#9f7aea,#7c3aed)}
+@media(max-width:860px){
+  #dashboard .dashboard-hero{
+    background-image:
+      linear-gradient(180deg,rgba(4,8,18,.84),rgba(4,8,18,.97)),
+      url("images/photos/hero-market-woman.jpg");
+    background-position:center;
+  }
+}
+
+
+/* Dashboard 2e passe - densite maquette (2026-11-16).
+   Hero compacte, parcours remontes, agenda pedagogique reel, KPI lisibles.
+   Aucun composant supprime ; ordre visuel uniquement. */
+#dashboard .dashboard-hero{padding:16px 18px;gap:14px;border-radius:18px;margin-bottom:14px}
+#dashboard .dashboard-hero h1{font-size:clamp(1.9rem,3.2vw,2.7rem);line-height:1.02;margin:0 0 6px}
+#dashboard .dashboard-hero .dashboard-hero-main>p{font-size:.92rem;line-height:1.5;margin-bottom:10px}
+#dashboard .dashboard-kpi-card{padding:10px 12px;gap:8px;min-height:0}
+#dashboard .dashboard-kpi-card strong{font-size:.92rem;line-height:1.15;white-space:normal;overflow:visible;text-overflow:clip}
+#dashboard .dashboard-kpi-card span:not(.dashboard-kpi-icon){font-size:.6rem;white-space:normal;line-height:1.25}
+#dashboard .dashboard-markets-widget{padding:11px 12px}
+#dashboard .dashboard-markets-list{gap:5px}
+#dashboard .dashboard-markets-row{font-size:11.5px}
+#dashboard .dashboard-terminal-preview{padding:11px 12px;gap:6px}
+#dashboard .dashboard-terminal-preview-chart{height:52px}
+#dashboard .dashboard-parcours{margin-top:0;margin-bottom:16px}
+#dashboard .dashboard-parcours-grid{gap:12px}
+#dashboard .dashboard-parcours-card{min-height:196px}
+#dashboard .dashboard-parcours .section-intro{margin-bottom:12px}
+#dashboard.view.active{display:flex!important;flex-direction:column;gap:0}
+#dashboard > .crypto-ticker{order:0}
+#dashboard > .dashboard-mastery-thread{order:0}
+#dashboard > .dashboard-operating-line{order:0}
+#dashboard > .dashboard-hero{order:1;margin-bottom:14px}
+#dashboard > .dashboard-parcours{order:2;margin-top:0;margin-bottom:16px}
+#dashboard > .terminal-lead{order:3;margin-top:0}
+#dashboard > .dashboard-week-ahead{order:4}
+#dashboard > .dashboard-quick-skills{order:5}
+#dashboard > .dashboard-proof-strip{order:6}
+#dashboard > .terminal-divider{order:7}
+#dashboard > .analysis-terminal{order:8}
+#dashboard > .dashboard-summary{order:9}
+#dashboard > .dashboard-supporting{order:10}
+@media(max-width:860px){
+  #dashboard .dashboard-hero{padding:16px;gap:14px;margin-bottom:12px}
+  #dashboard .dashboard-hero h1{font-size:clamp(1.9rem,7vw,2.5rem)}
+  #dashboard .dashboard-parcours-card{min-height:180px}
+  #dashboard > .dashboard-parcours{margin-bottom:14px}
+}
+
+
+@media(max-width:320px){
+  #premium-track.view{overflow-x:clip}
+  #premium-track .section-intro h1,
+  #premium-track .section-intro h2{overflow-wrap:anywhere}
+}
+
+
+@media(max-width:320px){
+  body:has(#premium-track.view.active){overflow-x:hidden}
+}
+
 /* Wide-screen reading refinements (2026-11-16).
    Resources keeps its comfortable two-column reading rail but stops looking
    like a tablet column on a 2560px monitor: the shelf may use up to 1400px.
