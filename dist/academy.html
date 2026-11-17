@@ -577,8 +577,9 @@
 
           <div class="analysis-terminal-bottom">
             <div class="analysis-observation">
-              <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-edit"/></svg> Ton observation</p><h3>Qu’est-ce que tu vois ?</h3></div></div>
-              <textarea id="terminal-observation" maxlength="1000" rows="5" placeholder="Décris ce que tu observes : la structure du marché, une zone importante ou une question que tu souhaites approfondir."></textarea>
+              <div class="panel-heading"><div><p class="eyebrow"><svg class="icon"><use href="#icon-edit"/></svg> Observation & hypothèse</p><h3>Sépare les faits de ton interprétation.</h3></div></div>
+              <label class="terminal-reflection-field" for="terminal-observation"><span>Ce que je vois</span><textarea id="terminal-observation" maxlength="1000" rows="4" placeholder="Décris seulement ce que tu observes : structure, répétition, zone ou question."></textarea></label>
+              <label class="terminal-reflection-field" for="terminal-hypothesis"><span>Mon hypothèse à vérifier</span><textarea id="terminal-hypothesis" maxlength="1000" rows="4" placeholder="Formule une lecture provisoire, sans prédire ni transformer l’observation en conseil."></textarea></label>
               <div class="analysis-observation-actions"><button type="button" class="primary-action" id="terminal-save-observation">Conserver localement <span>→</span></button><span id="terminal-observation-state" role="status">Non enregistré</span></div>
             </div>
             <div class="analysis-terminal-legend">

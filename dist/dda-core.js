@@ -632,7 +632,7 @@
   }
 
   function emptyTerminalState() {
-    return { instrument: 'BRVM Composite', timeframe: '1D', zoom: 1, pan: 0, drawings: [], observation: '', practice: null };
+    return { instrument: 'BRVM Composite', timeframe: '1D', zoom: 1, pan: 0, drawings: [], observation: '', hypothesis: '', practice: null };
   }
 
   function sanitizeText(value, maxLength) {
@@ -794,6 +794,7 @@
     terminal.zoom = Number.isFinite(Number(raw.zoom)) ? Math.max(1, Math.min(3, Math.round(Number(raw.zoom)))) : 1;
     terminal.pan = Number.isFinite(Number(raw.pan)) ? Math.max(0, Math.min(200, Math.round(Number(raw.pan)))) : 0;
     terminal.observation = sanitizeText(raw.observation, 1000);
+    terminal.hypothesis = sanitizeText(raw.hypothesis, 1000);
     terminal.drawings = Array.isArray(raw.drawings) ? raw.drawings.slice(-100).map(drawing => {
       if (!drawing || !['zone', 'line', 'fib'].includes(drawing.type)) return null;
       const coords = ['x1', 'y1', 'x2', 'y2'].map(key => Number(drawing[key]));
