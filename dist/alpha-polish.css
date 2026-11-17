@@ -3649,3 +3649,15 @@ body:has(#dashboard.view.active) .topbar{
   #resources .resource-feature{max-width:min(100%,1400px)}
   #lab .section-intro{margin-inline:0}
 }
+
+/* Landing visible proof rail — 2026-11-17.
+   Four real product facts under the hero: no audience claims, no market signals. */
+.landing-proof-rail{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin-top:20px;overflow:hidden;border:1px solid rgba(217,164,65,.3);border-radius:14px;background:rgba(217,164,65,.24);box-shadow:0 14px 30px rgba(0,0,0,.16)}
+.landing-proof-rail article{display:flex;align-items:center;gap:10px;min-width:0;padding:12px 11px;background:rgba(7,19,36,.9)}
+.landing-proof-rail-icon{display:grid;place-items:center;width:27px;height:27px;flex:none;border:1px solid rgba(217,164,65,.45);border-radius:8px;color:#f1d38c;background:rgba(217,164,65,.1)}
+.landing-proof-rail-icon .icon{width:15px;height:15px}
+.landing-proof-rail article div{display:grid;gap:2px;min-width:0}
+.landing-proof-rail strong{color:#f6d98e;font-size:16px;line-height:1;font-variant-numeric:tabular-nums}
+.landing-proof-rail article div>span{color:rgba(235,242,250,.68);font-size:9px;font-weight:700;line-height:1.25;letter-spacing:.02em;text-transform:uppercase}
+@media(max-width:860px){.landing-proof-rail{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:16px}.landing-proof-rail article{padding:11px 10px}}
+@media(max-width:420px){.landing-proof-rail{gap:1px}.landing-proof-rail article{gap:8px;padding:10px 8px}.landing-proof-rail strong{font-size:14px}.landing-proof-rail article div>span{font-size:8px}.landing-proof-rail-icon{width:24px;height:24px}}
