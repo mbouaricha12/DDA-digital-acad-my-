@@ -10,7 +10,7 @@ const polish = fs.readFileSync(path.join(root, 'dist/alpha-polish.css'), 'utf8')
 const core = fs.readFileSync(path.join(root, 'dist/dda-core.js'), 'utf8');
 
 assert.match(landing, /class="landing-free-proof"/, 'landing exposes a concrete Free value block near the hero CTA');
-assert.match(landing, /3 leçons M0/, 'landing names the three genuinely Free foundation lessons');
+assert.match(landing, /3 leçons de fondation/, 'landing names the three genuinely Free foundation lessons without internal codes');
 assert.doesNotMatch(landing, /6 leçons/, 'landing does not promise locked M1 lessons as Free content');
 assert.match(landing, /Exercices &amp; quiz/, 'landing names exercises and quizzes');
 assert.match(landing, /Progression &amp; Journal/, 'landing names local progression and Journal');

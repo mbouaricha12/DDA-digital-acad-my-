@@ -11,10 +11,10 @@ assert.match(html, /class="landing-reference-stack"/, 'hero exposes the referenc
 assert.match(html, /href="#landing-markets"[\s\S]*Marchés &amp; BRVM/, 'markets rail item has a real Landing destination');
 assert.match(html, /href="#landing-lab"[\s\S]*DDA Lab/, 'Lab rail item has a real Landing destination');
 assert.match(html, /Assistant pédagogique · préparation/, 'DDA AI remains honestly marked as preparation');
-assert.match(html, /03[\s\S]*leçons M0 publiées/, 'proof rail states the three published M0 lessons');
+assert.match(html, /03[\s\S]*leçons de fondation publiées/, 'proof rail states the three published M0 lessons');
 assert.match(html, /04[\s\S]*outils du Terminal/, 'proof rail states the four Terminal tools');
 assert.match(html, /01[\s\S]*preuve locale à construire/, 'proof rail frames progress as a local proof, not a fake metric');
-assert.match(html, />0<\/strong>[\s\S]*cotation live ou signal/, 'proof rail makes the no-live-signal boundary explicit');
+assert.match(html, />0<\/strong>[\s\S]*donnée live ou signal/, 'proof rail makes the no-live-signal boundary explicit');
 assert.match(css, /\.landing-proof-rail\{/, 'proof rail has authored visual styling');
 assert.match(css, /@media\(max-width:860px\)/, 'proof rail has a responsive layout');
 assert.match(css, /\.landing-reference-stack\{/, 'reference rail has authored visual styling');

@@ -70,7 +70,7 @@ assert.ok(landingDescription?.includes('DDA Free ouvre trois fondations M0'));
 assert.ok(!descriptions.has(landingDescription), 'homepage description must be unique against other public pages');
 assert.equal(landing.match(/<meta property="og:description" content="([^"]+)"/)?.[1], landingDescription);
 assert.equal(landing.match(/<meta name="twitter:description" content="([^"]+)"/)?.[1], landingDescription);
-assert.ok(landing.includes('DDA Free ouvre les 3 fondations du module M0'));
+assert.ok(landing.includes('DDA Free ouvre trois fondations pour comprendre les marchés'));
 assert.ok(landing.includes('ne font pas partie du parcours Free'));
 assert.match(landing, /<img class="photo-fill" src="images\/photos\/landing-hero-brand-banner\.jpg" alt="Bannière de Darius Digital Academy/);
 const documentRuntime = fs.readFileSync(path.join(dist, 'public-document.js'), 'utf8');
