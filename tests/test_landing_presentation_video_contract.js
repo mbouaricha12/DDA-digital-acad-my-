@@ -24,7 +24,7 @@ const { chromium } = require('playwright');
 const http = require('node:http');
 
 const DIST = path.join(__dirname, '..', 'dist');
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webmanifest': 'application/manifest+json', '.jpg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.mp4': 'video/mp4' };
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webmanifest': 'application/manifest+json', '.jpg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.mp4': 'video/mp4', '.vtt': 'text/vtt' };
 const PORT = 8847;
 
 function startServer() {
@@ -56,6 +56,7 @@ async function test(name, fn) {
   await test('the real video and poster files actually exist in dist/ (never a reference to a missing asset)', async () => {
     assert.ok(fs.existsSync(path.join(DIST, 'videos', 'landing-presentation-60s.mp4')), 'dist/videos/landing-presentation-60s.mp4 must exist');
     assert.ok(fs.existsSync(path.join(DIST, 'images', 'photos', 'landing-presentation-poster.webp')), 'dist/images/photos/landing-presentation-poster.webp must exist');
+    assert.ok(fs.existsSync(path.join(DIST, 'videos', 'landing-presentation-60s.vtt')), 'the video must ship an accessible French captions track');
     const stat = fs.statSync(path.join(DIST, 'videos', 'landing-presentation-60s.mp4'));
     assert.ok(stat.size > 100000, 'the video file must be a real, non-trivial video, not a stub/placeholder');
   });
@@ -73,6 +74,9 @@ async function test(name, fn) {
     const source = video.locator('source');
     assert.equal(await source.getAttribute('src'), 'videos/landing-presentation-60s.mp4');
     assert.equal(await source.getAttribute('type'), 'video/mp4');
+    const captions = video.locator('track[kind="captions"]');
+    assert.equal(await captions.getAttribute('srclang'), 'fr');
+    assert.equal(await captions.getAttribute('src'), 'videos/landing-presentation-60s.vtt');
     await context.close();
   });
 
