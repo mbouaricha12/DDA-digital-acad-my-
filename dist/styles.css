@@ -3035,6 +3035,8 @@ form[data-js-submit] button[type="submit"]:disabled{cursor:not-allowed;opacity:.
 #dashboard .terminal-practice-mission{border-color:var(--dda-line-strong);background:linear-gradient(135deg,rgba(217,164,65,.11),rgba(10,23,40,.62));box-shadow:var(--dda-shadow-brass)}
 #dashboard .analysis-observation,#dashboard .analysis-terminal-legend{border-color:var(--dda-line);background:var(--dda-glass);box-shadow:inset 0 1px rgba(255,255,255,.035)}
 #dashboard .analysis-observation textarea{border-color:var(--dda-line);background:var(--dda-void);transition:border-color var(--dda-duration-fast) var(--dda-ease),box-shadow var(--dda-duration-fast) var(--dda-ease)}
+#dashboard .terminal-reflection-field{display:grid;gap:6px;margin-top:12px;color:rgba(230,238,248,.72);font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+#dashboard .terminal-reflection-field textarea{margin-top:0}
 #dashboard .analysis-observation textarea:focus-visible{outline:0;border-color:var(--dda-line-strong);box-shadow:0 0 0 3px rgba(217,164,65,.12)}
 #dashboard .analysis-observation-actions #terminal-observation-state{color:rgba(230,238,248,.66)}
 

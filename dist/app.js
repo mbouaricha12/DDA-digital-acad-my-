@@ -548,7 +548,9 @@ function bindViewButton(button) {
     });
     if (button.dataset.terminalHandoff === 'true') {
       const observation = document.getElementById('terminal-observation');
+      const hypothesis = document.getElementById('terminal-hypothesis');
       if (observation) saveState({ terminal: { ...getTerminalState(), observation: observation.value.trim() } });
+      if (hypothesis) saveState({ terminal: { ...getTerminalState(), hypothesis: hypothesis.value.trim() } });
     }
     const targetView = button.dataset.view;
     const lazy = window.DDALazyModules;
@@ -2777,6 +2779,7 @@ function getTerminalState() {
     pan: Number(prototypeState.terminal?.pan) || 0,
     drawings: Array.isArray(prototypeState.terminal?.drawings) ? prototypeState.terminal.drawings : [],
     observation: prototypeState.terminal?.observation || '',
+    hypothesis: prototypeState.terminal?.hypothesis || '',
     practice: prototypeState.terminal?.practice || null
   };
 }
@@ -2926,8 +2929,10 @@ function renderDariusAnalysisTerminal() {
   document.getElementById('terminal-zoom-value').textContent = `${state.zoom}×`;
   document.getElementById('terminal-chart-market').textContent = state.instrument;
   const observation = document.getElementById('terminal-observation');
+  const hypothesis = document.getElementById('terminal-hypothesis');
   if (document.activeElement !== observation) observation.value = state.observation;
-  document.getElementById('terminal-observation-state').textContent = state.observation ? 'Observation conservée localement' : 'Non enregistré';
+  if (document.activeElement !== hypothesis) hypothesis.value = state.hypothesis;
+  document.getElementById('terminal-observation-state').textContent = state.observation || state.hypothesis ? 'Observation et hypothèse conservées localement' : 'Non enregistré';
   document.getElementById('terminal-chart-caption').textContent = `${state.instrument} · ${state.timeframe} · série synthétique locale · indices normalisés sans unité · aucune cotation en temps réel.`;
   document.getElementById('terminal-undo-drawing').disabled = state.drawings.length === 0;
   document.getElementById('terminal-clear-drawings').disabled = state.drawings.length === 0;
@@ -2944,9 +2949,9 @@ function terminalJournalDraft() {
   const drawingLabels = state.drawings.map(drawing => ({ zone: 'zone Support/Résistance', line: 'ligne de tendance', fib: 'Fibonacci' }[drawing.type] || 'annotation')).join(', ');
   return {
     market: state.instrument,
-    context: `Observation du Terminal d’analyse — timeframe ${state.timeframe}. Série pédagogique locale contrôlée, sans cotation en temps réel.`,
-    scenario: state.observation,
-    process: `Graphique manipulé en ${state.timeframe}, zoom ${state.zoom}/3${drawingLabels ? `; annotations : ${drawingLabels}` : ''}.`,
+    context: `Observation du Terminal d’analyse — timeframe ${state.timeframe}. Série pédagogique locale contrôlée, sans cotation en temps réel.${state.observation ? ` Fait observé : ${state.observation}` : ''}`,
+    scenario: state.hypothesis || state.observation,
+    process: `Graphique manipulé en ${state.timeframe}, zoom ${state.zoom}/3${drawingLabels ? `; annotations : ${drawingLabels}` : ''}. Hypothèse séparée des faits avant transfert.`,
     note: drawingLabels ? `Annotations conservées dans le Terminal : ${drawingLabels}.` : 'Brouillon transféré depuis le Terminal — complète ton raisonnement avant d’enregistrer.',
     terminalSource: true,
     sourceLesson: proof.lessonId || state.practice?.sourceLesson || 'M0.2',
@@ -3049,12 +3054,13 @@ function initDariusAnalysisTerminal() {
   });
   document.getElementById('terminal-save-observation').addEventListener('click', () => {
     const observation = document.getElementById('terminal-observation').value.trim();
-    if (!observation) {
-      document.getElementById('terminal-observation-state').textContent = 'Écris une observation avant de l’enregistrer.';
+    const hypothesis = document.getElementById('terminal-hypothesis').value.trim();
+    if (!observation && !hypothesis) {
+      document.getElementById('terminal-observation-state').textContent = 'Écris une observation ou une hypothèse avant de l’enregistrer.';
       return;
     }
-    update({ observation });
-    showToast('Observation conservée sur cet appareil.');
+    update({ observation, hypothesis });
+    showToast('Observation et hypothèse conservées sur cet appareil.');
   });
   document.getElementById('analysis-terminal-toggle')?.addEventListener('click', () => {
     setAnalysisTerminalExpanded(!isAnalysisTerminalExpanded());
