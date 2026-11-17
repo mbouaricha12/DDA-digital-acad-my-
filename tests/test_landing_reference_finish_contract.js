@@ -10,6 +10,8 @@ assert.match(html,/class="public-utility-bar"/);
 assert.match(html,/class="landing-trust-strip"/);
 assert.match(html,/class="landing-market-strip"/);
 assert.match(html,/BRVM COMPOSITE/);
+const heroCopy=html.match(/<div class="landing-main-copy">[\s\S]*?<div class="dda-aperture landing-aperture"/)?.[0]||'';
+assert.ok(heroCopy.indexOf('class="landing-actions"')<heroCopy.indexOf('class="landing-free-proof"'),'the hero CTA must appear before the detailed Free proof so the first viewport presents a clear action');
 assert.match(css,/#landing \.landing-trust-strip/);
 assert.match(css,/#landing \.landing-market-strip/);
 // The CTA button uses the shared gold "proof accent" gradient (AURORA
