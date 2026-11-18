@@ -1,0 +1,19 @@
+# DDA — RISK_REGISTER
+
+État au 18 novembre 2026. **P0 = bloque la correction/pilote ou une vente annoncée; P1 = risque important avant/pendant pilote; P2 = amélioration différable.** Owner générique : propriétaire produit/exploitation, sauf indication contraire. Ne pas stocker de secrets dans ce registre.
+
+| ID | Niveau | Risque / preuve | État | Action / sortie attendue |
+|---|---|---|---|---|
+| R-01 | P0 | Une leçon intacte pouvait recevoir un pourcentage initial non nul. Correctif/test en branche, non en production. | En revue | CI, revue propriétaire, PR puis publication; test du domaine officiel et capture prouvant 0 %. |
+| R-02 | P0 pilote | Inscription/authentification réelle, parcours compte et progression multi-appareils non testés avec un compte pilote. | Ouvert | Smoke test supervisé sur compte contrôlé par le propriétaire; journaliser erreurs et résultats, sans recopier de données personnelles. |
+| R-03 | P0 si commercial | Aucun checkout, produit Chariow, paiement ou webhook complet testé en réel. | Bloquant vente | Staging, comptes marchand/Supabase, migrations, tests vente/échec/duplication/expiration/révocation, validation juridique et autorisation expresse. |
+| R-04 | P0 avant toute offre M1; P1 pilote M0 | `canUnlock()` n’impose pas `advanced_modules` côté serveur; les trois fichiers `m1-*.js` répondent anonymement en HTTP 200. Le texte de `/launch/` exclut M1 de Free, mais l’UI gate reste contournable. | Bloquant toute attribution/vente avancée | Dans une PR sécurité séparée, servir les leçons depuis le BFF après authentification et entitlement; retirer les bundles publics; tester non authentifié, authentifié sans droit, et authentifié autorisé (401/403/200). Confirmer le mapping commercial indépendamment. |
+| R-05 | P1 | Disponibilité réelle de Supabase/BFF et migrations non validée en staging/production. | Ouvert | Contrôle de configuration/health et tests authentifiés en environnement autorisé; pas de secret dans Git. |
+| R-06 | P1 | Réponses statiques GitHub Pages sans CSP/HSTS/Referrer-Policy/Permissions-Policy/X-Robots-Tag HTTP détectées. | Ouvert | Vérifier les capacités DNS/CDN/hosting et déployer les headers à cet endroit, puis re-auditer. |
+| R-07 | P1 | Rate limiter d’authentification en mémoire par instance; contournable en environnement multi-instance. | Acceptable mono-instance/test; conditionnel prod | Confirmer le nombre d’instances; distribué Redis/edge/provider si multi-instance. |
+| R-08 | P1 | LCP labo homepage 4,4 s; image héro identifiée, gain estimé 40 KiB. | À optimiser | Profiler ressources et dimensions; prioriser image responsive; mesurer sur la même configuration sans refonte. |
+| R-09 | P1 | Responsive contrôlé en Chromium à plusieurs tailles, mais aucun appareil iOS/Safari physique vérifié. | Ouvert | Test manuel sur un téléphone Android et un iPhone/Safari avant élargissement du pilote. |
+| R-10 | P1 | Plusieurs documents historiques (README auparavant, route map, audit PII septembre) contiennent des affirmations antérieures au BFF actuel. | Partiellement corrigé | README et registres mis à jour; marquer/mettre à jour les docs historiques sans écraser leur audit trail. |
+| R-11 | P1 | DDA AI/Market data sont du code, mais les routes ont des dépendances runtime; marché vérifié `not_configured`, AI non validée. | Non actif/non prouvé | Garder les libellés de démonstration; vérifier configuration, coûts, quotas, fournisseur et parcours avant activation. |
+| R-12 | P2 | Vidéos de leçons annoncées en scripts; fichiers vidéo de cours non prouvés. 8 entrées YouTube sont dans le registre et une vidéo de landing séparée existe. | Transparence requise | Ne pas confondre les 8 scripts avec 8 vidéos réalisées; n’ajouter aucune URL inventée. |
+| R-13 | P2 | INP réel non mesuré par le run Lighthouse laboratoire. | Ouvert | Mesure CrUX/RUM après trafic suffisant ou test utilisateur terrain; éviter de présenter un résultat labo comme p75. |
