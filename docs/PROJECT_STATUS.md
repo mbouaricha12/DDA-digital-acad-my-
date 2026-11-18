@@ -5,6 +5,7 @@
 **Domaine :** `https://dariusdigitalacademy.com`  
 **Branche de référence :** `origin/main` — `01165ab9c893249e69cd09fc627d7bb93b6ddc72`  
 **Branche de travail actuelle :** `audit/dda-launch-readiness-20261118` (non fusionnée)
+**Commit initial du correctif :** `ce86574262355165c93458c93558eee016e9168c` — [PR #300](https://github.com/mbouaricha12/DDA-digital-acad-my-/pull/300), ouverte, non fusionnée.
 
 ## État global
 
@@ -16,7 +17,8 @@
 - README actualisé pour corriger les affirmations d’architecture périmées.
 - Rapport d’audit pré-lancement complet rédigé à `docs/DDA_AUDIT_COMPLET_PRE_LANCEMENT_2026-11-16.md`.
 - Stratégie de travail multi-agent dans `docs/DDA_MULTI_AGENT_HANDOFF_2026-11-18.md`.
-- Le fix et les documents ne sont pas encore vérifiés sur le domaine officiel : ils ne sont pas fusionnés/déployés.
+- PR #300 : CI finale 9 réussis, 2 ignorés, 0 échec/attente; vérification Pages réussie, déploiement Pages non exécuté pour un événement `pull_request`, preview Vercel seulement.
+- Le fix et les documents ne sont pas vérifiés sur le domaine officiel : PR non fusionnée et aucun déploiement production de cette branche.
 
 ## Statut des offres
 
@@ -28,11 +30,11 @@
 ## Points de contrôle avant déclaration « livré »
 
 1. Relire le rapport et les registres (`EXECUTION_LOG`, `DECISION_LOG`, `RISK_REGISTER`).
-2. Vérifier `git status`, `origin/main` et les PR ouvertes #271 et #299 avant tout changement.
+2. Vérifier `git status`, `origin/main` et les PR ouvertes #271, #299 et #300 avant tout changement.
 3. Un agent par branche/worktree; ne pas modifier une zone possédée par une PR concurrente.
 4. CI verte, merge explicitement autorisé, publication réelle, puis vérification sur `dariusdigitalacademy.com` et captures.
 5. Ne jamais inscrire de secret, données de paiement ou identifiants utilisateur dans le dépôt, le rapport ou une PR.
 
 ## Prochaine action
 
-Finaliser la PR de progression/documentation, faire relire ses tests, demander la revue/autorisation de merge au propriétaire et, seulement après merge, contrôler le correctif sur le domaine officiel.
+Faire relire la PR #300 et demander l’autorisation explicite du propriétaire; seulement après merge autorisé, contrôler le correctif sur le domaine officiel et consigner une preuve Visible Delivery.

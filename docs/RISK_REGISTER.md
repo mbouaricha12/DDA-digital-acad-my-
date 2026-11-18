@@ -4,7 +4,7 @@
 
 | ID | Niveau | Risque / preuve | État | Action / sortie attendue |
 |---|---|---|---|---|
-| R-01 | P0 | Une leçon intacte pouvait recevoir un pourcentage initial non nul. Correctif/test en branche, non en production. | En revue | CI, revue propriétaire, PR puis publication; test du domaine officiel et capture prouvant 0 %. |
+| R-01 | P0 | Une leçon intacte pouvait recevoir un pourcentage initial non nul. Correctif et test dédiés dans PR #300; commit initial `ce865742`, non en production. | PR ouverte; CI 9 réussis, 2 ignorés, 0 échec | Revue/autorisation du propriétaire, merge, publication; test du domaine officiel et capture prouvant 0 %. |
 | R-02 | P0 pilote | Inscription/authentification réelle, parcours compte et progression multi-appareils non testés avec un compte pilote. | Ouvert | Smoke test supervisé sur compte contrôlé par le propriétaire; journaliser erreurs et résultats, sans recopier de données personnelles. |
 | R-03 | P0 si commercial | Aucun checkout, produit Chariow, paiement ou webhook complet testé en réel. | Bloquant vente | Staging, comptes marchand/Supabase, migrations, tests vente/échec/duplication/expiration/révocation, validation juridique et autorisation expresse. |
 | R-04 | P0 avant toute offre M1; P1 pilote M0 | `canUnlock()` n’impose pas `advanced_modules` côté serveur; les trois fichiers `m1-*.js` répondent anonymement en HTTP 200. Le texte de `/launch/` exclut M1 de Free, mais l’UI gate reste contournable. | Bloquant toute attribution/vente avancée | Dans une PR sécurité séparée, servir les leçons depuis le BFF après authentification et entitlement; retirer les bundles publics; tester non authentifié, authentifié sans droit, et authentifié autorisé (401/403/200). Confirmer le mapping commercial indépendamment. |

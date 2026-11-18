@@ -174,7 +174,7 @@ La page `/launch/` est cohérente sur le nombre et le périmètre annoncé : six
 
 ## 9. Travail en cours, PR et gouvernance
 
-À la vérification, deux PR indépendantes étaient déjà ouvertes : **#299** (`perf(academy): reduce dashboard image transfer`) et **#271** (revert de la vidéo institutionnelle sur la landing). Ne pas fermer, fusionner ou réécrire leurs branches au titre de cet audit. Le correctif de progression et les présents livrables restent isolés de ces travaux.
+Les PR indépendantes **#299** (`perf(academy): reduce dashboard image transfer`) et **#271** (revert de la vidéo institutionnelle sur la landing) étaient déjà ouvertes; elles restent intactes. Le correctif de progression et le présent audit sont dans la [PR #300](https://github.com/mbouaricha12/DDA-digital-acad-my-/pull/300), dont le commit initial de correction est `ce86574262355165c93458c93558eee016e9168c`; la PR est ouverte et non fusionnée. Ses checks finaux sont **9 réussis, 2 ignorés, 0 échec, 0 en attente**. Le job de vérification Pages a réussi, le job de déploiement Pages est non applicable à l’événement `pull_request`, et Vercel a produit une preview; aucun déploiement de production de cette branche n’a eu lieu.
 
 Le protocole multi-agent détaillé est dans `docs/DDA_MULTI_AGENT_HANDOFF_2026-11-18.md`. Les registres opérationnels datés sont :
 
