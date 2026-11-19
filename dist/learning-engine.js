@@ -53,7 +53,7 @@
     if (lessonProgress.quizComplete) return 100;
     if (lessonProgress.exerciseComplete) return 55;
     if (lessonProgress.lessonViewed) return 25;
-    return 18;
+    return 0;
   }
 
   function lessonXp(lesson, lessonProgress) {
