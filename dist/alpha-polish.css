@@ -1189,7 +1189,7 @@ body.public-shell main{min-height:100vh;background:#061b47}
 #landing .landing-method-composition .landing-experience{max-width:none;margin:0;padding:0}
 #landing .landing-method-composition .landing-presentation-video{max-width:none;margin:0}
 @media(min-width:1024px){
-  #landing .landing-method-composition{grid-template-columns:minmax(0,.72fr) minmax(0,1fr);column-gap:56px;align-items:center}
+  #landing .landing-method-composition{grid-template-columns:minmax(0,.72fr) minmax(0,1fr);column-gap:56px;align-items:start}
 }
 #landing .landing-experience{background:linear-gradient(180deg,rgba(11,22,40,.4),transparent)}
 #landing .experience-heading{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.7fr);column-gap:64px;align-items:end}
@@ -1213,6 +1213,28 @@ body.public-shell main{min-height:100vh;background:#061b47}
 #landing .experience-flow p{max-width:none;color:var(--lp-body);font-size:.88rem;line-height:1.55}
 #landing .experience-status{display:flex;align-items:center;gap:10px;margin:30px 0 0;color:var(--dda-gold-soft);font-size:.84rem;letter-spacing:.04em}
 #landing .experience-status-dot{width:8px;height:8px;border-radius:50%;background:var(--dda-gold);box-shadow:0 0 0 5px rgba(201,154,69,.1)}
+/* ≥1024px: inside .landing-method-composition the method column is only
+   ~58% of the page (room for the video), so the 5-card row that works at
+   full width (331px/card) shrank to 100-168px/card — paragraphs wrapped
+   into 5-6 lines inside rectangles narrower than the text itself. Rather
+   than fight that width, the composition changes shape here: a tight row
+   of 5 compact number+title chips (equal height, no wrapped prose) plus
+   one wide detail line below that elaborates whichever step is active —
+   the same is-active rotation already drives this (public.js), only the
+   layout around it changes. <900px keeps its own vertical-timeline rule
+   further down (with the full paragraph per step, where there is no
+   video stealing width) and is untouched. */
+@media(min-width:1024px){
+  #landing .experience-flow{grid-template-columns:none;display:flex;flex-wrap:wrap;margin:28px 0 0;gap:10px}
+  #landing .experience-flow::before{display:none}
+  #landing .experience-flow li{flex:0 0 auto;min-width:150px;flex-direction:row;align-items:center;gap:10px;padding:14px 16px}
+  #landing .experience-flow li p{display:none}
+  #landing .experience-flow .method-index{width:38px;height:38px;flex:none;font-size:.82rem}
+  #landing .experience-flow h3{font-size:.78rem;letter-spacing:.05em}
+  #landing .experience-status{margin-top:18px;padding:20px 24px;border:1px solid rgba(201,154,69,.22);border-radius:14px;background:linear-gradient(145deg,rgba(201,154,69,.07),rgba(10,20,36,.5));align-items:flex-start;gap:14px}
+  #landing .experience-status span:last-child{color:var(--lp-heading);font-size:1rem;letter-spacing:normal;line-height:1.5}
+  #landing .experience-status-dot{margin-top:7px;flex:none}
+}
 #landing .landing-product{background:linear-gradient(180deg,rgba(13,30,52,.28),transparent)}
 #landing .product-composition{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(220px,.6fr);gap:42px;align-items:end;margin-top:48px}
 #landing .product-window{overflow:hidden;border:1px solid rgba(227,194,127,.32);border-radius:4px;background:#091321;box-shadow:0 24px 70px rgba(0,0,0,.28)}
