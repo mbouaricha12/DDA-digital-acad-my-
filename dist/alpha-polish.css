@@ -3112,7 +3112,8 @@ body.public-shell .prototype-banner{display:none}
   overflow:hidden;margin:0 0 18px;border-radius:14px;
   border:1px solid rgba(217,164,65,.16);background:#070e18;
 }
-.dda-ecosystem-track{display:flex;align-items:center;gap:10px;padding:10px 16px;white-space:nowrap;width:max-content;animation:dda-ticker-scroll 42s linear infinite}
+.dda-ecosystem-track{display:flex;align-items:center;gap:10px;padding:10px 16px;white-space:nowrap;width:max-content;animation:dda-ecosystem-scroll 42s linear infinite}
+@keyframes dda-ecosystem-scroll{from{transform:translateX(0)}to{transform:translateX(-33.3333%)}}
 .dda-ecosystem-strip:hover .dda-ecosystem-track,
 .dda-ecosystem-strip:focus-within .dda-ecosystem-track{animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){.dda-ecosystem-track{animation:none;overflow-x:auto}}
@@ -3923,20 +3924,119 @@ body:has(#dashboard.view.active) .topbar{
 #landing .market-widget-tabs{display:flex;flex-wrap:wrap;gap:6px}
 #landing .market-widget-tabs span{flex:none;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.04);color:#9eabba;font-size:.66rem;font-weight:600;white-space:nowrap}
 #landing .market-widget-tabs span.is-active{background:rgba(217,164,65,.14);color:var(--dda-elite-gold-soft)}
+#landing .market-widget-columns{display:grid;grid-template-columns:minmax(0,1fr) 64px 62px 52px 0;gap:8px;padding:0 14px;margin-bottom:2px;color:#6c7784;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
 #landing .market-widget-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
-#landing .market-widget-list li{display:grid;grid-template-columns:minmax(0,1fr) 64px auto;align-items:center;gap:12px;padding:13px 14px;border:1px solid rgba(174,191,213,.1);border-radius:12px;background:rgba(255,255,255,.015)}
+#landing .market-widget-list li{display:grid;grid-template-columns:minmax(0,1fr) 64px 62px 52px auto;align-items:center;gap:8px;padding:11px 14px;border:1px solid rgba(174,191,213,.1);border-radius:12px;background:rgba(255,255,255,.015)}
 #landing .market-widget-list li.is-future{opacity:.6}
-#landing .market-widget-symbol{display:flex;align-items:center;gap:9px;min-width:0;color:#e7ebef;font-size:.88rem;font-weight:600;line-height:1.25}
+#landing .market-widget-symbol{display:flex;align-items:center;gap:8px;min-width:0;white-space:nowrap;color:#e7ebef;font-size:.8rem;font-weight:600;line-height:1.25}
 #landing .market-widget-note{display:none}
-#landing .market-widget-symbol span{overflow-wrap:anywhere}
+#landing .market-widget-symbol{overflow:hidden;text-overflow:ellipsis}
+#landing .market-widget-value{color:#d7dee6;font-size:.78rem;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+#landing .market-widget-change{font-size:.74rem;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;color:#8d9bad}
+#landing .market-widget-change.is-up{color:#4fd18b}
+#landing .market-widget-change.is-down{color:#e2706f}
 #landing .market-widget-spark{width:64px;height:24px;overflow:visible}
 #landing .market-widget-spark path{fill:none;stroke:var(--blue-2);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 #landing .market-widget-list li.is-future .market-widget-spark path{stroke:#6c7784}
 #landing .market-widget-tag{justify-self:end;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.05);color:#9eabba;font-size:.66rem;font-weight:600;white-space:nowrap}
+@media(max-width:1339px){#landing .market-widget-columns{display:none}#landing .market-widget-list li{grid-template-columns:minmax(0,1fr) 60px 58px auto;gap:8px}#landing .market-widget-spark{display:none}}
 #landing .market-widget-disclaimer{display:flex;align-items:center;gap:7px;margin:2px 0 0;color:#8d9bad;font-size:.66rem;line-height:1.4}
 #landing .market-widget-disclaimer .icon{width:13px;height:13px;flex:none;color:#6c7784}
 
-#landing .landing-hero-features{max-width:1440px;margin:0 auto;padding:0 clamp(20px,5vw,72px) 36px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+#landing .hero-banner-icon{display:inline-flex;flex:none;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:1px solid rgba(217,164,65,.3);color:var(--dda-elite-gold)}
+#landing .hero-banner-icon .icon{width:16px;height:16px}
+
+/* 2026-11-20 — reference maquette: the hero's left column must stay as
+   compact as the scene/widget columns. The detailed numeric stats (formerly
+   .landing-proof-rail inside this column) move to a full-width band right
+   under the hero; this becomes a single thin benefit row, no card frame. */
+#landing .landing-free-proof{margin:22px 0 0;padding:0;border:0;background:none;max-width:none}
+#landing .landing-free-proof ul{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 16px}
+#landing .landing-free-proof li{flex-direction:row;align-items:center;gap:8px}
+#landing .landing-free-proof strong{display:block;font-size:.76rem;line-height:1.25}
+#landing .landing-free-proof li>span:last-child{display:block;font-size:.66rem}
+@media(max-width:1339px){#landing .landing-free-proof ul{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:479px){#landing .landing-free-proof ul{grid-template-columns:1fr}}
+
+#landing .landing-hero-banner{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;max-width:1440px;margin:0 auto 46px;padding:0 clamp(20px,5vw,72px)}
+#landing .landing-hero-banner article{display:flex;align-items:center;gap:14px;padding:20px 18px;border-top:1px solid rgba(217,164,65,.14);border-bottom:1px solid rgba(217,164,65,.14)}
+#landing .landing-hero-banner article+article{border-left:1px solid rgba(217,164,65,.14)}
+#landing .landing-hero-banner strong{display:block;color:#eef1f5;font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums}
+#landing .landing-hero-banner p{margin:2px 0 0;color:#9eabba;font-size:.76rem;line-height:1.3}
+@media(max-width:899px){#landing .landing-hero-banner{grid-template-columns:repeat(2,minmax(0,1fr))}#landing .landing-hero-banner article:nth-child(2n+1){border-left:0}}
+@media(max-width:479px){#landing .landing-hero-banner{grid-template-columns:1fr}#landing .landing-hero-banner article{border-left:0!important}}
+
+@media(min-width:900px) and (max-width:1339px){
+  /* Same cascade bug as the 1340px+ fix below, for the narrower 2-column
+     hero (text column here is ~45% of viewport, not ~34%): the base
+     #landing-title!important rule still sizes off raw vw and breaks the
+     headline one word per line at these widths (e.g. 1024px). */
+  #landing-title{font-size:clamp(2.3rem,4.4vw,3.6rem)!important;max-width:15ch!important}
+}
+@media(min-width:1340px){
+  /* 2026-11-20 correction: the 3-column hero needs near-full viewport width
+     (per the reference) and a wide enough text column for the headline to
+     keep its normal word-wrap — a narrow .6fr column combined with the
+     viewport-relative h1 size was forcing one word per line. */
+  #landing .landing-editorial-shell,
+  #landing .landing-hero-banner{max-width:min(1820px,96vw)}
+  #landing .landing-editorial-shell{grid-template-columns:minmax(400px,.82fr) minmax(300px,.56fr) minmax(320px,.62fr);align-items:start;gap:clamp(24px,2.4vw,44px)}
+  #landing .landing-main-copy{grid-column:1;grid-row:1;max-width:none}
+  #landing .landing-aperture{grid-column:2;grid-row:1;min-height:650px}
+  #landing .landing-market-widget{grid-column:3;grid-row:1}
+  /* Headline sized for this column's real width (not raw vw) so the
+     reference's 2-line + 1-line break survives instead of one word per line.
+     #landing-title carries an !important base rule (styles.css) that a
+     plain #landing h1 override cannot beat, hence the matching selector. */
+  #landing-title{font-size:clamp(2.6rem,3.4vw,4.5rem)!important;max-width:16ch!important}
+  #landing .landing-editorial-shell{gap:clamp(16px,1.6vw,28px)}
+}
+
+/* 2026-11-20 — reference maquette round 3: secondary CTA becomes a real
+   button (icon + label + duration), the benefit row drops to one line per
+   item, and the scene gets an ambient glow instead of a hard rectangle. */
+#landing .landing-secondary{display:inline-flex!important;align-items:center;gap:8px;padding:0 18px;min-height:52px;border:1px solid rgba(216,223,231,.28);border-radius:2px 9px 2px 9px;color:#d8dfe7!important;text-decoration:none}
+#landing .landing-secondary:hover,#landing .landing-secondary:focus-visible{border-color:rgba(217,164,65,.5);outline:0}
+#landing .landing-secondary .icon{width:16px;height:16px;flex:none;color:var(--dda-elite-gold-soft)}
+#landing .landing-secondary b{margin-left:4px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.08);color:#aab5c2;font-size:.68rem;font-weight:700}
+#landing .landing-free-proof li{flex-direction:row;align-items:center}
+#landing .landing-free-proof strong{font-size:.8rem;font-weight:600;line-height:1.3}
+
+#landing .landing-aperture{box-shadow:0 0 0 1px rgba(255,255,255,.03),0 40px 120px -20px rgba(34,128,228,.35),0 0 160px -40px rgba(217,164,65,.22)}
+@media(min-width:1340px){
+  #landing .landing-aperture{margin-right:-28px;z-index:1}
+  #landing .landing-market-widget{position:relative;z-index:2;margin-left:-28px}
+}
+
+#landing .landing-hero-banner{border-radius:999px;border:1px solid rgba(217,164,65,.22);box-shadow:0 0 0 1px rgba(217,164,65,.06),0 0 60px -10px rgba(217,164,65,.18);overflow:hidden;padding-top:0;padding-bottom:0}
+#landing .landing-hero-banner article{padding:16px 18px;border-top:0;border-bottom:0}
+@media(max-width:899px){#landing .landing-hero-banner{border-radius:28px}}
+@media(max-width:479px){#landing .landing-hero-banner{border-radius:20px}}
+
+/* 2026-11-20 — finishing pass (founder-validated Hero, minor polish only):
+   1) fade the scene's edges into the navy backdrop instead of a hard
+      rectangle; 2) ease back the widget's visual weight a touch (column
+      ratio above, plus tighter row padding here) to rebalance the three
+      zones; 3) duplicate the "commence ici" marquee a third time (see the
+      HTML comment) so wide desktops never show its static tail; 4) trim a
+      little mobile vertical spacing without losing legibility. */
+#landing .landing-aperture{
+  -webkit-mask-image:radial-gradient(58% 60% at 50% 48%,#000 58%,transparent 100%);
+  mask-image:radial-gradient(58% 60% at 50% 48%,#000 58%,transparent 100%);
+}
+#landing .market-widget-list li{padding:11px 14px}
+#landing .landing-market-widget{padding:20px 20px 17px}
+@media(max-width:639px){
+  #landing .landing-free-proof{margin-top:16px}
+  #landing .landing-hero-banner{margin-bottom:32px}
+  #landing .landing-actions{margin-bottom:10px}
+}
+
+/* 2026-11-20 — restored per founder: the reference shows a dedicated
+   Academy Free/DDA Lab/DDA AI/Ressources row directly under the Hero
+   (distinct purpose from the later "Nos principaux parcours" section,
+   which stays untouched). */
+#landing .landing-hero-features{max-width:1440px;margin:0 auto;padding:0 clamp(20px,5vw,72px) 30px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 #landing .hero-feature-card{display:flex;flex-direction:column;gap:8px;padding:20px 20px 18px;border:1px solid rgba(174,191,213,.14);border-radius:16px;background:linear-gradient(160deg,rgba(10,20,36,.72),rgba(6,13,23,.82));text-decoration:none;transition:transform .2s ease,border-color .2s ease}
 #landing .hero-feature-card:hover,#landing .hero-feature-card:focus-visible{transform:translateY(-3px);border-color:rgba(217,164,65,.4);outline:0}
 #landing .hero-feature-icon{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:11px;background:rgba(217,164,65,.1);color:var(--dda-elite-gold)}
@@ -3948,28 +4048,6 @@ body:has(#dashboard.view.active) .topbar{
 #landing .hero-feature-status.is-free{background:rgba(70,196,130,.12);color:#5fd999}
 #landing .hero-feature-status.is-live{background:rgba(70,160,230,.12);color:#6cb6f0}
 #landing .hero-feature-status.is-soon{background:rgba(217,164,65,.12);color:var(--dda-elite-gold-soft)}
-@media(max-width:899px){#landing .landing-hero-features{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-bottom:28px}}
+@media(max-width:899px){#landing .landing-hero-features{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-bottom:26px}}
 @media(max-width:479px){#landing .landing-hero-features{grid-template-columns:1fr}}
-
-#landing .landing-hero-banner{max-width:1440px;margin:0 auto 46px;padding:18px clamp(20px,5vw,72px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;border-top:1px solid rgba(217,164,65,.14);border-bottom:1px solid rgba(217,164,65,.14)}
-#landing .landing-hero-banner article{display:flex;align-items:center;gap:12px;min-width:0}
-#landing .hero-banner-icon{display:inline-flex;flex:none;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:1px solid rgba(217,164,65,.3);color:var(--dda-elite-gold)}
-#landing .hero-banner-icon .icon{width:16px;height:16px}
-#landing .landing-hero-banner strong{display:block;color:#eef1f5;font-size:.86rem;font-weight:700}
-#landing .landing-hero-banner p{margin:1px 0 0;color:#9eabba;font-size:.72rem;line-height:1.3}
-@media(max-width:899px){#landing .landing-hero-banner{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}}
-@media(max-width:479px){#landing .landing-hero-banner{grid-template-columns:1fr}}
-
-@media(min-width:1340px){
-  /* 2026-11-20 correction: the 3-column hero needs near-full viewport width
-     (per the reference) and a wide enough text column for the headline to
-     keep its normal word-wrap — a narrow .6fr column combined with the
-     viewport-relative h1 size was forcing one word per line. */
-  #landing .landing-editorial-shell,
-  #landing .landing-hero-features,
-  #landing .landing-hero-banner{max-width:min(1820px,96vw)}
-  #landing .landing-editorial-shell{grid-template-columns:minmax(400px,.8fr) minmax(300px,.52fr) minmax(340px,.72fr);align-items:start;gap:clamp(24px,2.4vw,44px)}
-  #landing .landing-main-copy{grid-column:1;grid-row:1;max-width:none}
-  #landing .landing-aperture{grid-column:2;grid-row:1;min-height:650px}
-  #landing .landing-market-widget{grid-column:3;grid-row:1;margin-top:clamp(42px,5vw,72px)}
-}
+@media(min-width:1340px){#landing .landing-hero-features{max-width:min(1820px,96vw)}}
