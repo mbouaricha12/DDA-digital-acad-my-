@@ -3297,6 +3297,13 @@ body.access-mode main{padding-bottom:0}
     animation:dda-breathe 7s ease-in-out infinite;
   }
   #landing .landing-aperture .photo-fill{transition:transform .25s ease-out}
+/* The brand banner (logo + "Darius Digital Academy — Apprendre, Investir,
+   Bâtir demain") is baked into the photo itself. object-fit:cover was
+   cropping its edges — "DARIUS" read as "RIUS", "IMPACT" as "IMPA" — at
+   every desktop width, since the container's aspect ratio never matches
+   the image's native 2:1. object-fit:contain shows the full banner; the
+   image's own dark-navy background blends into the aperture's gradient. */
+#landing .landing-aperture .photo-fill{object-fit:contain;background:#0b1626}
 
   #landing .landing-method article,
   #landing .product-window,
