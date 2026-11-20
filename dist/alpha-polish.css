@@ -1272,6 +1272,17 @@ body.public-shell main{min-height:100vh;background:#061b47}
 #landing .product-index-number{grid-row:span 2;color:var(--dda-gold-soft);font-size:.72rem;font-weight:800;letter-spacing:.08em}
 #landing .product-index h3{color:var(--lp-heading);font-size:.95rem}
 #landing .product-index p{color:var(--lp-body-soft);font-size:.78rem;line-height:1.5}
+/* Resources shared the exact same numbered-steps look as DDA Lab's module
+   list, even though it holds 3 downloadable files, not a sequence — the
+   file badge read as a step number and "Télécharger" as plain text, no
+   different from Lab's inert "01/02/03". Give it its own 3-column fit,
+   a real file-type tag and a visible download affordance. */
+#landing .resources-index{grid-template-columns:repeat(3,1fr)}
+#landing .resources-index .product-index-number{display:inline-block;grid-row:auto;padding:2px 9px;border:1px solid rgba(217,164,65,.4);border-radius:999px;background:rgba(217,164,65,.1);color:var(--dda-elite-gold-soft);font-size:.64rem}
+#landing .resources-index article{grid-template-columns:1fr;gap:10px;padding:18px 18px 20px 0}
+#landing .resources-index h3{margin-top:2px}
+#landing .resources-index .text-action{margin-top:4px;padding:8px 14px;border:1px solid rgba(217,164,65,.32);border-radius:10px;background:rgba(217,164,65,.08);width:fit-content}
+#landing .resources-index .text-action:hover{background:rgba(217,164,65,.16)}
 #landing .landing-proof{background:#0b1628}
 #landing .proof-composition{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:48px}
 #landing .proof-practice-demo,#landing .proof-measure{min-height:290px;padding:28px;border:1px solid var(--lp-line);background:#091321}
