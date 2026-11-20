@@ -1272,6 +1272,13 @@ body.public-shell main{min-height:100vh;background:#061b47}
 #landing .product-index-number{grid-row:span 2;color:var(--dda-gold-soft);font-size:.72rem;font-weight:800;letter-spacing:.08em}
 #landing .product-index h3{color:var(--lp-heading);font-size:.95rem}
 #landing .product-index p{color:var(--lp-body-soft);font-size:.78rem;line-height:1.5}
+/* #landing-mission ("Notre institution") had no container rule at all: its
+   photo+text grid ran edge-to-edge with zero side gutter at every desktop
+   width, the only section on the page with no margin — breaking the
+   consistent rhythm every other section keeps. Give it the same container
+   treatment (padding + divider) as its siblings, then let it join the same
+   progressive desktop tiers below. */
+#landing #landing-mission{max-width:1200px;margin:0 auto;padding:clamp(56px,7vw,96px) clamp(20px,5vw,72px);border-bottom:1px solid var(--lp-line)}
 /* Resources shared the exact same numbered-steps look as DDA Lab's module
    list, even though it holds 3 downloadable files, not a sequence — the
    file badge read as a step number and "Télécharger" as plain text, no
@@ -3545,7 +3552,9 @@ body.low-data #dashboard .dashboard-summary-card{transform:none!important}
   #landing .landing-presentation-video,
   #landing .landing-trust-strip,
   #landing .landing-market-strip,
-  #landing .landing-ai{
+  #landing .landing-ai,
+  #landing #landing-mission,
+  #landing .landing-guardrails{
     max-width:1560px;
   }
 }
@@ -3559,7 +3568,9 @@ body.low-data #dashboard .dashboard-summary-card{transform:none!important}
   #landing .landing-presentation-video,
   #landing .landing-trust-strip,
   #landing .landing-market-strip,
-  #landing .landing-ai{
+  #landing .landing-ai,
+  #landing #landing-mission,
+  #landing .landing-guardrails{
     max-width:1800px;
   }
 }
