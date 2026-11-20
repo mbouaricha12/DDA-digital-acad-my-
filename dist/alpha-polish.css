@@ -1235,9 +1235,14 @@ body.public-shell main{min-height:100vh;background:#061b47}
   #landing .experience-status span:last-child{color:var(--lp-heading);font-size:1rem;letter-spacing:normal;line-height:1.5}
   #landing .experience-status-dot{margin-top:7px;flex:none}
 }
-#landing .landing-product{background:linear-gradient(180deg,rgba(13,30,52,.28),transparent)}
+/* Direction artistique — Phase 1 (transition Philosophie → Produit) : la
+   bande philosophie est volontairement quasi noire ; le Terminal qui suit
+   doit se sentir "allumé" par contraste plutôt que glisser du même gris
+   plat. Lueur bleue plus marquée en tête de section + lumière interne sur
+   le cadre du Terminal lui-même. */
+#landing .landing-product{background:radial-gradient(ellipse 60% 55% at 28% 0%,rgba(91,143,217,.22),transparent 60%),linear-gradient(180deg,rgba(13,30,52,.4),transparent 55%)}
 #landing .product-composition{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(220px,.6fr);gap:42px;align-items:end;margin-top:48px}
-#landing .product-window{overflow:hidden;border:1px solid rgba(227,194,127,.32);border-radius:4px;background:#091321;box-shadow:0 24px 70px rgba(0,0,0,.28)}
+#landing .product-window{overflow:hidden;border:1px solid rgba(227,194,127,.32);border-radius:4px;background:radial-gradient(ellipse 90% 70% at 50% 0%,rgba(91,143,217,.16),transparent 62%),#091321;box-shadow:0 24px 70px rgba(0,0,0,.28)}
 #landing .product-window-bar{display:flex;justify-content:space-between;gap:16px;padding:14px 18px;border-bottom:1px solid var(--lp-line);font-size:.66rem;letter-spacing:.1em;color:var(--lp-body-soft)}
 #landing .window-state{color:var(--dda-gold-soft)}
 #landing .window-state i{display:inline-block;width:6px;height:6px;margin-right:6px;border-radius:50%;background:var(--blue-2)}
@@ -1359,7 +1364,16 @@ body.public-shell main{min-height:100vh;background:#061b47}
 #landing .landing-free>.landing-inline-cta{display:inline-flex;margin:4px 0 56px}
 #landing .plan-rail{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:0;padding:0;border:0}
 #landing .plan-rail .landing-plan-card{border-radius:0;padding:22px;background:transparent;border:1px solid var(--lp-line)}
-#landing .plan-rail .landing-plan-card-gold{border-color:rgba(201,154,69,.42);background:rgba(201,154,69,.05)}
+/* Direction artistique — Phase 1 (Free/Premium) : deuxième et dernier pic
+   lumineux de la page, juste avant la décision. La carte Premium n'avait
+   qu'une teinte plate à .05 d'opacité — un halo doré réel la distingue
+   maintenant de la carte Free sans changer son contenu ni sa structure. */
+#landing .plan-rail .landing-plan-card-gold{
+  position:relative;
+  border-color:rgba(217,164,65,.5);
+  background:radial-gradient(ellipse 120% 90% at 50% -10%,rgba(217,164,65,.14),transparent 60%),rgba(201,154,69,.05);
+  box-shadow:0 30px 70px rgba(0,0,0,.3),0 0 50px rgba(217,164,65,.1);
+}
 #landing .plan-rail .landing-plan-card h3{font-family:var(--dda-serif);font-size:1.7rem}
 #landing .landing-ecosystem{display:grid;grid-template-columns:1fr .8fr;grid-template-areas:"copy photo" "domains domains";gap:46px;background:linear-gradient(165deg,#0f1c30,#07111f)}
 #landing .ecosystem-copy{grid-area:copy;align-self:end}
@@ -1716,12 +1730,17 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 #landing .landing-actions .primary-action:hover,#landing .landing-final-cta .primary-action:hover{transform:translateY(-2px);box-shadow:0 13px 28px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.32)}
 #landing .landing-secondary{color:#d8dfe7!important}
 #landing .landing-secondary span{color:var(--dda-elite-gold-soft)}
+/* Direction artistique — Phase 1 (Hero) : la maquette éclaire son visuel
+   depuis l'intérieur (lueur du globe derrière le sujet) ; le rendu réel
+   n'avait qu'un reflet gris très discret (.16 d'opacité, ellipse étroite).
+   Une vraie source de lumière bleu-or, centrée derrière le mockup produit,
+   sans ajouter d'élément ni changer la composition existante. */
 #landing .landing-aperture{
   min-height:520px;
   overflow:hidden;
   border:1px solid rgba(189,204,221,.18);
   border-radius:18px;
-  background:radial-gradient(ellipse at 76% 23%,rgba(102,128,153,.16),transparent 34%),linear-gradient(145deg,#0a1422 0%,#0a1727 66%,#0b1b2d 100%);
+  background:radial-gradient(ellipse 85% 70% at 55% 32%,rgba(91,143,217,.34),rgba(91,143,217,.08) 48%,transparent 68%),radial-gradient(ellipse at 78% 18%,rgba(240,207,138,.16),transparent 40%),linear-gradient(145deg,#0a1422 0%,#0a1727 66%,#0b1b2d 100%);
   box-shadow:0 26px 64px rgba(0,0,0,.24);
 }
 #landing .landing-aperture .photo-scrim{background:linear-gradient(180deg,rgba(6,13,23,.2),rgba(6,13,23,.52) 46%,rgba(6,13,23,.94))}
