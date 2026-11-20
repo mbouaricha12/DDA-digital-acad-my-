@@ -1184,15 +1184,21 @@ body.public-shell main{min-height:100vh;background:#061b47}
 #landing .experience-heading .eyebrow{grid-column:1/-1}
 #landing .experience-heading h2{grid-column:1}
 #landing .experience-heading>p:last-child{grid-column:2;grid-row:2}
-#landing .experience-flow{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin:58px 0 0;padding:0;list-style:none}
-#landing .experience-flow::before{content:"";position:absolute;left:7%;right:7%;top:28px;height:1px;background:linear-gradient(90deg,var(--lp-blue-2),rgba(201,154,69,.2),var(--lp-blue-2));opacity:.6}
-#landing .experience-flow li{position:relative;z-index:1;display:flex;flex-direction:column;gap:18px;min-width:0;padding:0 14px 0 0;background:none;border:0;border-radius:0;transition:opacity .28s ease,transform .28s ease}
+/* Discover→Improve, 900px+: at 331px/card the paragraph was capped at 18ch
+   (~152px) inside a card with zero top/left padding — text and the step
+   circle sat flush against the border, leaving ~165px of dead space to
+   the right of every card. Real padding + a real column gap turn these
+   into genuine cards; the connecting line's top offset is recomputed to
+   stay centered on the circle once padding pushes it down. */
+#landing .experience-flow{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:22px;margin:58px 0 0;padding:0;list-style:none}
+#landing .experience-flow::before{content:"";position:absolute;left:7%;right:7%;top:54px;height:1px;background:linear-gradient(90deg,var(--lp-blue-2),rgba(201,154,69,.2),var(--lp-blue-2));opacity:.6}
+#landing .experience-flow li{position:relative;z-index:1;display:flex;flex-direction:column;gap:16px;min-width:0;padding:26px 24px 28px;background:none;border:0;border-radius:0;transition:opacity .28s ease,transform .28s ease}
 #landing .experience-flow li:not(.is-active){opacity:.52}
 #landing .experience-flow li.is-active{opacity:1;transform:translateY(-6px)}
 #landing .experience-flow .method-index{display:grid;place-items:center;width:56px;height:56px;margin:0;border:1px solid var(--lp-line);border-radius:50%;background:var(--lp-bg);color:var(--dda-gold-soft);font-size:1rem;transition:background .28s ease,border-color .28s ease,box-shadow .28s ease}
 #landing .experience-flow li.is-active .method-index{border-color:var(--dda-gold);background:var(--lp-card-2);box-shadow:0 0 0 8px rgba(201,154,69,.08)}
 #landing .experience-flow h3{color:var(--lp-heading);font-size:1.05rem;letter-spacing:.08em;text-transform:uppercase}
-#landing .experience-flow p{max-width:18ch;color:var(--lp-body);font-size:.84rem;line-height:1.5}
+#landing .experience-flow p{max-width:none;color:var(--lp-body);font-size:.88rem;line-height:1.55}
 #landing .experience-status{display:flex;align-items:center;gap:10px;margin:30px 0 0;color:var(--dda-gold-soft);font-size:.84rem;letter-spacing:.04em}
 #landing .experience-status-dot{width:8px;height:8px;border-radius:50%;background:var(--dda-gold);box-shadow:0 0 0 5px rgba(201,154,69,.1)}
 #landing .landing-product{background:linear-gradient(180deg,rgba(13,30,52,.28),transparent)}
