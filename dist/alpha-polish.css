@@ -1368,11 +1368,12 @@ body.public-shell main{min-height:100vh;background:#061b47}
    lumineux de la page, juste avant la décision. La carte Premium n'avait
    qu'une teinte plate à .05 d'opacité — un halo doré réel la distingue
    maintenant de la carte Free sans changer son contenu ni sa structure. */
-#landing .plan-rail .landing-plan-card-gold{
+#landing .plan-rail .landing-plan-card.landing-plan-card-gold{
   position:relative;
-  border-color:rgba(217,164,65,.5);
-  background:radial-gradient(ellipse 120% 90% at 50% -10%,rgba(217,164,65,.14),transparent 60%),rgba(201,154,69,.05);
-  box-shadow:0 30px 70px rgba(0,0,0,.3),0 0 50px rgba(217,164,65,.1);
+  border-color:rgba(217,164,65,.5)!important;
+  background-image:radial-gradient(ellipse 120% 90% at 50% -10%,rgba(217,164,65,.22),transparent 60%),linear-gradient(145deg,rgba(17,42,68,.91),rgba(7,18,31,.95)),repeating-linear-gradient(130deg,transparent 0 17px,rgba(215,231,242,.025) 18px,transparent 19px 37px)!important;
+  background-blend-mode:normal,normal,screen!important;
+  box-shadow:0 30px 70px rgba(0,0,0,.3),0 0 50px rgba(217,164,65,.14),0 0 0 1px rgba(216,174,97,.035) inset,0 1px rgba(255,255,255,.08) inset!important;
 }
 #landing .plan-rail .landing-plan-card h3{font-family:var(--dda-serif);font-size:1.7rem}
 #landing .landing-ecosystem{display:grid;grid-template-columns:1fr .8fr;grid-template-areas:"copy photo" "domains domains";gap:46px;background:linear-gradient(165deg,#0f1c30,#07111f)}
