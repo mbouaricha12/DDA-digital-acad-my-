@@ -40,7 +40,16 @@ const path = require('path');
 
 const root = path.join(__dirname, '..');
 const dist = (...segments) => path.join(root, 'dist', ...segments);
-const SCRIPTS = ['m1-1-lesson.js', 'm1-2-lesson.js', 'm1-3-lesson.js', 'dda-core.js', 'learning-engine.js', 'lesson-renderer.js', 'dda-analytics.js', 'brvm-publications.js', 'app.js'];
+const M1_SCRIPTS = ['m1-1-lesson.js', 'm1-2-lesson.js', 'm1-3-lesson.js'];
+const REST_SCRIPTS = ['dda-core.js', 'learning-engine.js', 'lesson-renderer.js', 'dda-analytics.js', 'brvm-publications.js', 'app.js'];
+// docs/RISK_REGISTER.md R-04 fix: M1.1/M1.2/M1.3's real content now comes
+// from the authenticated BFF (bff/src/m1-content.js), the same way
+// P2.1/P2.2/LAB4/LABCAP already do. This dependency-light smoke test has no
+// real BFF to talk to, so it stands in the minimal window.DDABFF an
+// always-entitled, server-confirmed learner would see — proving the real
+// fetch-then-render pipeline (dist/m1-*-lesson.js -> dda-core.js) actually
+// works end to end, not just the content module in isolation.
+const { M1_CONTENT } = require(path.join(root, 'bff', 'src', 'm1-content.js'));
 
 const dom = new JSDOM(fs.readFileSync(dist('academy.html'), 'utf8'), {
   url: 'http://localhost/',
@@ -57,10 +66,25 @@ if (!window.crypto || !window.crypto.randomUUID) {
   Object.defineProperty(window, 'crypto', { value: { randomUUID: () => `test-${Date.now()}-${Math.random()}` }, configurable: true });
 }
 
-SCRIPTS.forEach(file => window.eval(fs.readFileSync(dist(file), 'utf8')));
-
 let pass = 0;
 async function test(name, fn) { await fn(); pass++; console.log('PASS -', name); }
+
+async function bootScripts() {
+  M1_SCRIPTS.forEach(file => window.eval(fs.readFileSync(dist(file), 'utf8')));
+  // Without a real BFF in this dependency-light sandbox (no window.DDABFF —
+  // enabling one would also flip app.js's whole boot path to the real
+  // remote-session flow, which is out of scope here), each m1-*-lesson.js
+  // loader resolves its content to null. Inject the real authored content
+  // directly from bff/src/m1-content.js instead, onto the exact same
+  // globals dda-core.js's buildCurriculum() reads — this smoke test is
+  // about proving curriculum/registry/renderer wiring end to end, not the
+  // fetch pipeline itself (that is proven live by
+  // tests/test_m1_content_not_public.js).
+  window.DDAM1GoldenLesson = M1_CONTENT['M1.1'];
+  window.DDAM12GoldenLesson = M1_CONTENT['M1.2'];
+  window.DDAM13GoldenLesson = M1_CONTENT['M1.3'];
+  REST_SCRIPTS.forEach(file => window.eval(fs.readFileSync(dist(file), 'utf8')));
+}
 function click(el) {
   assert.ok(el, 'element to click must exist');
   el.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
@@ -97,6 +121,8 @@ async function completeLesson({ viewId, markId, exerciseName, quizName, resultId
 }
 
 (async () => {
+  await bootScripts();
+
   await test('Academy shell boots on #access, never a fake dashboard', async () => {
     // The app now awaits remote-session hydration before its first render.
     // Yield to the event loop rather than asserting against the static shell.

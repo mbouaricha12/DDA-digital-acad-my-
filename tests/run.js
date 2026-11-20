@@ -36,6 +36,11 @@ const { chromium } = require('playwright');
 // real quiz buttons, etc.) in BFF mode mock /v1/premium/content/:id with
 // this real data, the exact same content the BFF now serves.
 const { PREMIUM_CONTENT } = require('../bff/src/premium-content.js');
+// docs/RISK_REGISTER.md R-04 fix: M1.1/M1.2/M1.3's real content moved off
+// the public dist/m1-*-lesson.js files the same way — tests that need M1
+// content actually loaded (e.g. the end-of-curriculum check below) mock
+// /v1/m1/content/:id in BFF mode with this real data.
+const { M1_CONTENT } = require('../bff/src/m1-content.js');
 
 const DIST = path.join(__dirname, '..', 'dist');
 const PORT = 8743;
@@ -1174,30 +1179,65 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
 
   await test('M1.3 completed leaves no phantom lesson and keeps M2 honestly coming soon', async () => {
     const context = await freshContext(browser);
+    // docs/RISK_REGISTER.md R-04 fix: M1.1/M1.2/M1.3's real content now
+    // only ever arrives from the authenticated BFF (never embedded in the
+    // public bundle any more), so this learner's claimed M1 completion is
+    // only honest with a real, server-confirmed advanced_modules
+    // entitlement behind it — exactly the additive, membership-independent
+    // grant the admin-entitlements layer exists to make possible. Local
+    // plan stays 'free': the point of this fixture is that an entitlement
+    // can unlock advanced_modules on its own, with no Premium plan at all.
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    await context.route('https://bff.test/v1/m1/preview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ resource: 'm1_preview', entitlement: 'advanced_modules', server_authorized: true })
+    }));
+    for (const id of ['M1.1', 'M1.2', 'M1.3']) {
+      await context.route(`https://bff.test/v1/m1/content/${id}`, route => route.fulfill({
+        status: 200, contentType: 'application/json', body: JSON.stringify({ lesson: M1_CONTENT[id] })
+      }));
+    }
+    // A deliberately narrow lessons object (only the 6 authored M0/M1 ids —
+    // never seedLocalLearner's full id set, which also seeds a default,
+    // untouched 'MBRVM.1' key): any key at all for 'MBRVM.1' makes
+    // bootAcademyAfterSessionCheck's savedLessons check
+    // (/^MBRVM\./.test(id)) true, which lazy-loads the independent BRVM
+    // lesson and makes it a second, legitimate "next actionable" item —
+    // not a bug, but not what this fixture is testing either. Written to
+    // all three storage-scope keys because hydrateRemoteSession() switches
+    // to the BFF user-id-keyed namespace (DDA.setStorageScope('u1')) the
+    // moment /v1/me resolves — a seed at only the unscoped key would be
+    // invisible there.
     await context.addInitScript(() => {
       const done = { lessonViewed: true, exerciseComplete: true, quizComplete: true };
-      localStorage.setItem('dda-prototype-state-v4', JSON.stringify({
+      const seededState = JSON.stringify({
         schemaVersion: 4,
-        user: { id: 'complete-path', name: 'Ada', email: 'ada@example.com', mode: 'device-demo' },
+        user: { id: 'u1', name: 'Ada', email: 'ada@example.com', mode: 'device-demo' },
         membership: { plan: 'free', status: 'demo' },
         onboarding: { level: 'Débutant', goal: 'Comprendre les marchés', time: '10 minutes par jour', complete: true },
-        lessons: {
-          'M0.1': done,
-          'M0.2': done,
-          'M0.3': done,
-          'M1.1': done,
-          'M1.2': done,
-          'M1.3': done
-        },
+        lessons: { 'M0.1': done, 'M0.2': done, 'M0.3': done, 'M1.1': done, 'M1.2': done, 'M1.3': done },
         journal: { entries: [], plan: {} },
         preferences: { lowData: false, reminders: false },
         events: [],
         acquisition: {},
         updatedAt: null
-      }));
+      });
+      ['dda-prototype-state-v4', 'dda-prototype-state-v4:guest', 'dda-prototype-state-v4:user:u1']
+        .forEach(key => localStorage.setItem(key, seededState));
     });
     const page = await context.newPage();
     await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    // The M1 lazy group's own fetch (triggered because saved progress
+    // already names an M1.* lesson — see bootAcademyAfterSessionCheck in
+    // dist/app.js) is asynchronous; give it a moment to resolve and
+    // refresh the curriculum before reading module status below.
+    await page.waitForFunction(() => window.DDA?.curriculum?.modules?.find(m => m.id === 'M1')?.lessons?.length === 3);
+    await page.waitForSelector('#dashboard.view.active');
 
     const productState = await page.evaluate(() => ({
       active: document.querySelector('.view.active')?.id,
