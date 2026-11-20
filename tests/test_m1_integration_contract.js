@@ -1,5 +1,9 @@
 const assert = require('assert');
-const lesson = require('../dist/m1-1-lesson.js');
+// docs/RISK_REGISTER.md R-04 fix: the real M1.1 content moved off the
+// public dist/m1-1-lesson.js file onto the authenticated BFF — see
+// bff/src/m1-content.js and tests/test_m1_content_not_public.js.
+const { M1_CONTENT } = require('../bff/src/m1-content.js');
+const lesson = M1_CONTENT['M1.1'];
 
 let pass = 0;
 function test(name, fn) { fn(); pass++; console.log('PASS -', name); }

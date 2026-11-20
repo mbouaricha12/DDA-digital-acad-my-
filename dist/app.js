@@ -479,33 +479,35 @@ function mountLesson(entry) {
   if (entry.id === 'P2.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff premium-handoff"><p class="eyebrow gold">Après les leçons</p><h3>Practice Lab — Build the Risk Plan</h3><p>Construis un plan dans un scénario pédagogique synthétique, puis fais vérifier ta décision.</p><button type="button" class="secondary-action" data-view="premium-lab">Ouvrir le Practice Lab <span>→</span></button></section>');
   main.dataset.ddaLessonMounted = 'true';
 }
-// Lot 2 (mandate §6 audit): a Premium lesson's real content now arrives
-// from the authenticated BFF, never embedded in this public bundle. A
-// learner can reach this point with `canUnlock('premium_track')` true but
-// the content genuinely missing in exactly two honest cases: a local/pilot
-// session with no BFF configured (there is no server left to fetch real
-// content from — the old "embed it anyway" fallback is exactly the leak
-// this fix closes, so it is no longer available here either) or a
-// server-confirmed Premium learner whose content fetch itself failed
-// (network/BFF outage). Both get this same honest message — never a
-// fabricated placeholder that would resemble the real lesson, and never a
-// silently blank view.
-function renderPremiumContentUnavailable(viewId, title) {
+// Lot 2 (mandate §6 audit), extended by the docs/RISK_REGISTER.md R-04 fix
+// to advanced_modules: a gated lesson's real content now arrives from the
+// authenticated BFF, never embedded in this public bundle. A learner can
+// reach this point with canUnlock(permission) true but the content
+// genuinely missing in exactly two honest cases: a local/pilot session
+// with no BFF configured (there is no server left to fetch real content
+// from — the old "embed it anyway" fallback is exactly the leak this fix
+// closes, so it is no longer available here either) or a server-confirmed
+// learner whose content fetch itself failed (network/BFF outage). Both get
+// this same honest message — never a fabricated placeholder that would
+// resemble the real lesson, and never a silently blank view.
+const GATED_CONTENT_LABELS = Object.freeze({ premium_track: 'Contenu Premium', advanced_modules: 'Contenu avancé' });
+function renderPremiumContentUnavailable(viewId, title, permission = 'premium_track') {
   const main = document.getElementById(`${viewId}-main`);
   if (!main || main.dataset.ddaLessonMounted === 'true' || main.dataset.ddaPremiumUnavailable === 'true') return;
   main.dataset.ddaPremiumUnavailable = 'true';
+  const label = GATED_CONTENT_LABELS[permission] || GATED_CONTENT_LABELS.premium_track;
   const reason = window.DDABFF?.enabled()
-    ? 'Nous n’avons pas pu charger le contenu réel de cette leçon Premium depuis le serveur. Réessaie dans un instant.'
-    : 'Cette leçon Premium nécessite une connexion au serveur DDA pour charger son contenu réel, qui n’est plus jamais inclus dans l’application elle-même.';
-  main.insertAdjacentHTML('beforeend', `<section class="lesson-premium-unavailable"><p class="eyebrow gold">Contenu Premium</p><h2>${title ? `${title} est ` : ''}temporairement indisponible</h2><p>${reason}</p><button type="button" class="secondary-action" data-view="path">Retour à mon parcours</button></section>`);
+    ? `Nous n’avons pas pu charger le contenu réel de cette leçon depuis le serveur. Réessaie dans un instant.`
+    : `Cette leçon nécessite une connexion au serveur DDA pour charger son contenu réel, qui n’est plus jamais inclus dans l’application elle-même.`;
+  main.insertAdjacentHTML('beforeend', `<section class="lesson-premium-unavailable"><p class="eyebrow gold">${label}</p><h2>${title ? `${title} est ` : ''}temporairement indisponible</h2><p>${reason}</p><button type="button" class="secondary-action" data-view="path">Retour à mon parcours</button></section>`);
   main.querySelectorAll('[data-view]').forEach(bindViewButton);
 }
 mountedLessons.forEach(entry => {
-  if (entry.permission === 'premium_track' && !canUnlock('premium_track')) return;
+  if ((entry.permission === 'premium_track' || entry.permission === 'advanced_modules') && !canUnlock(entry.permission)) return;
   mountLesson(entry);
 });
-LESSON_REGISTRY.filter(entry => entry.permission === 'premium_track' && !mountedLessons.some(m => m.id === entry.id)).forEach(entry => {
-  if (canUnlock('premium_track')) renderPremiumContentUnavailable(entry.viewId, entry.title);
+LESSON_REGISTRY.filter(entry => (entry.permission === 'premium_track' || entry.permission === 'advanced_modules') && !mountedLessons.some(m => m.id === entry.id)).forEach(entry => {
+  if (canUnlock(entry.permission)) renderPremiumContentUnavailable(entry.viewId, entry.title, entry.permission);
 });
 function refreshMountedLessons() {
   mountedLessons = LESSON_REGISTRY

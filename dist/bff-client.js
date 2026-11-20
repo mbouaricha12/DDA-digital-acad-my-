@@ -182,6 +182,30 @@
     return { enabled: true, status: 200, lesson: result.body?.lesson || null };
   }
 
+  // Server-side advanced_modules entitlement check (docs/RISK_REGISTER.md
+  // R-04 fix) — mirrors hasServerPremiumEntitlement() exactly: a plain
+  // boolean, never throws on the expected "not entitled" case, and a
+  // network/5xx failure or a disabled BFF fails closed to false.
+  async function hasServerAdvancedModulesAccess() {
+    try {
+      const result = await request('/v1/m1/preview');
+      if (!result.enabled || result.response.status === 401) return false;
+      return result.response.ok && result.body?.server_authorized === true;
+    } catch {
+      return false;
+    }
+  }
+
+  // Real M1 lesson content (docs/RISK_REGISTER.md R-04 fix — see
+  // bff/src/m1-content.js). Mirrors fetchPremiumContent()'s shape exactly.
+  async function fetchM1Content(lessonId) {
+    const result = await request(`/v1/m1/content/${encodeURIComponent(lessonId)}`);
+    if (!result.enabled) return { enabled: false };
+    if ([401, 403, 404].includes(result.response.status)) return { enabled: true, status: result.response.status, lesson: null };
+    if (!result.response.ok) throw resultError(result, 'm1_content_failed');
+    return { enabled: true, status: 200, lesson: result.body?.lesson || null };
+  }
+
   async function askAI(message, history) {
     const result = await request('/v1/ai/ask', { method: 'POST', body: { message, history } });
     if (!result.enabled || result.response.status === 401) return { available: false };
@@ -331,7 +355,7 @@
   window.DDABFF = Object.freeze({
     enabled, register, verifyEmail, exchangeSignupCode, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, getMarketQuotes, updateMe, logout, issueCsrf,
     oauthGoogleStartUrl, exchangeOAuthCode,
-    getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, fetchPremiumContent, askAI, startPremiumCheckout,
+    getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, fetchPremiumContent, hasServerAdvancedModulesAccess, fetchM1Content, askAI, startPremiumCheckout,
     getCommunityPosts, createCommunityPost,
     getAdminOverview, getAdminUsers, getAdminMemberships, getAdminProgress, assignAdminRole, revokeAdminRole,
     get baseUrl() { return configuredBase; }

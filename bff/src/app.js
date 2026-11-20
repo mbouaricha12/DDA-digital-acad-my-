@@ -9,6 +9,7 @@ const { VALID_ROLES: VALID_ADMIN_ROLES, CONTROL_PLANE_ROLES } = require('./admin
 const { VALID_ENTITLEMENTS } = require('./entitlements-store');
 const { validateAskRequest } = require('./ai-assistant');
 const { PREMIUM_CONTENT, FREE_PREVIEW_IDS } = require('./premium-content');
+const { M1_CONTENT } = require('./m1-content');
 const { chariowConfigFromEnv, createChariowCheckout } = require('./chariow');
 const { marketDataConfigFromEnv, fetchMarketQuotes } = require('./market-data');
 
@@ -409,15 +410,39 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
     }
     return {
       membership,
+      membershipEntitlements,
+      adminEntitlements: adminGranted,
       entitlements: Array.from(new Set([...membershipEntitlements, ...adminGranted]))
     };
   }
 
-  function hasActivePremium(snapshot, now) {
+  // Checks one entitlement key against the two independent sources
+  // currentEntitlements() merges: a real, currently-fresh Chariow membership
+  // (re-checked here against status/revocation/expiry at read time, since
+  // the stored membershipEntitlements snapshot can go stale between
+  // webhook events), OR an admin-granted row (entitlementsStore already
+  // filtered that one for active status/expiry in currentEntitlements()
+  // itself). Either source alone is sufficient — this is what makes the
+  // admin-granted layer genuinely additive: an admin grant must unlock real
+  // content on its own, with no live Chariow membership required at all.
+  function hasEntitlement(snapshot, now, key) {
+    if (snapshot.adminEntitlements.includes(key)) return true;
     const membership = snapshot.membership;
     if (!membership || !['active', 'trial'].includes(membership.status) || membership.revoked_at) return false;
     if (membership.ends_at && new Date(membership.ends_at).getTime() <= now.getTime()) return false;
-    return snapshot.entitlements.includes('premium_track');
+    return snapshot.membershipEntitlements.includes(key);
+  }
+
+  function hasActivePremium(snapshot, now) {
+    return hasEntitlement(snapshot, now, 'premium_track');
+  }
+
+  // M1.1-M1.3 are reserved for the advanced_modules entitlement (CDCP-OS
+  // §4.2, arbitrage D1 Option B) — never DDA Free. See
+  // bff/src/m1-content.js's header comment and docs/RISK_REGISTER.md R-04
+  // for why this check exists and what it closes.
+  function hasAdvancedModulesAccess(snapshot, now) {
+    return hasEntitlement(snapshot, now, 'advanced_modules');
   }
 
   async function createSession(userId, provider, req) {
@@ -856,6 +881,28 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
           if (!hasActivePremium(snapshot, clock())) return sendError(res, 403, 'premium_required', 'An active Premium entitlement is required.', requestId);
         }
         return json(res, 200, { lesson: PREMIUM_CONTENT[lessonId] });
+      }
+      // Real M1 lesson content (docs/RISK_REGISTER.md R-04): the only place
+      // M1.1/M1.2/M1.3's text, exercises and quiz answers live now — see
+      // bff/src/m1-content.js's header comment for why this route exists.
+      // Mirrors /v1/premium/preview and /v1/premium/content/:lessonId
+      // exactly, but gated on hasAdvancedModulesAccess() instead — M1 has no
+      // free-preview lesson (unlike P2.1), so every M1.* id requires it.
+      if (method === 'GET' && path === '/v1/m1/preview') {
+        const current = await withUser(req, res, requestId); if (!current) return;
+        const snapshot = await currentEntitlements(current.user.user_id);
+        if (!hasAdvancedModulesAccess(snapshot, clock())) return sendError(res, 403, 'advanced_modules_required', 'An active advanced_modules entitlement is required.', requestId);
+        return json(res, 200, { resource: 'm1_preview', entitlement: 'advanced_modules', server_authorized: true });
+      }
+      if (method === 'GET' && path.startsWith('/v1/m1/content/')) {
+        const lessonId = path.slice('/v1/m1/content/'.length);
+        if (!LESSON_ID.test(lessonId) || !Object.prototype.hasOwnProperty.call(M1_CONTENT, lessonId)) {
+          return sendError(res, 404, 'not_found', 'Unknown lesson id.', requestId);
+        }
+        const current = await withUser(req, res, requestId); if (!current) return;
+        const snapshot = await currentEntitlements(current.user.user_id);
+        if (!hasAdvancedModulesAccess(snapshot, clock())) return sendError(res, 403, 'advanced_modules_required', 'An active advanced_modules entitlement is required.', requestId);
+        return json(res, 200, { lesson: M1_CONTENT[lessonId] });
       }
       if (method === 'POST' && path === '/v1/ai/ask') {
         const current = await withUser(req, res, requestId); if (!current) return;
