@@ -1178,7 +1178,19 @@ body.public-shell main{min-height:100vh;background:#061b47}
 #landing .differentiation-statement em{color:var(--dda-gold-soft);font-style:normal}
 #landing .philosophy-band-copy .differentiation-note{max-width:48ch;margin-top:22px;color:var(--lp-body);font-size:1rem;line-height:1.65}
 #landing .landing-philosophy-band .landing-inline-cta{white-space:nowrap;margin-bottom:4px}
-#landing .landing-experience,#landing .landing-product,#landing .landing-proof,#landing .landing-ecosystem{max-width:1200px;margin:0 auto;padding:clamp(56px,7vw,96px) clamp(20px,5vw,72px);border-bottom:1px solid var(--lp-line)}
+#landing .landing-product,#landing .landing-proof,#landing .landing-ecosystem{max-width:1200px;margin:0 auto;padding:clamp(56px,7vw,96px) clamp(20px,5vw,72px);border-bottom:1px solid var(--lp-line)}
+/* Fidélité maquette : la vidéo de présentation et la méthode Discover→Improve
+   forment un seul bloc asymétrique (vidéo ~42% / méthode ~58%) dans la
+   référence, pas deux sections pleine largeur empilées — c'est la cause
+   concrète de l'effet "sections juxtaposées" identifié dans l'audit visuel.
+   Le wrapper porte maintenant toute la largeur/le padding/la bordure ;
+   les deux <section> internes deviennent de simples colonnes de grille. */
+#landing .landing-method-composition{max-width:1200px;margin:0 auto;padding:clamp(56px,7vw,96px) clamp(20px,5vw,72px);border-bottom:1px solid var(--lp-line);display:grid;gap:48px}
+#landing .landing-method-composition .landing-experience{max-width:none;margin:0;padding:0}
+#landing .landing-method-composition .landing-presentation-video{max-width:none;margin:0}
+@media(min-width:1024px){
+  #landing .landing-method-composition{grid-template-columns:minmax(0,.72fr) minmax(0,1fr);column-gap:56px;align-items:center}
+}
 #landing .landing-experience{background:linear-gradient(180deg,rgba(11,22,40,.4),transparent)}
 #landing .experience-heading{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.7fr);column-gap:64px;align-items:end}
 #landing .experience-heading .eyebrow{grid-column:1/-1}
@@ -1367,7 +1379,7 @@ body.public-shell main{min-height:100vh;background:#061b47}
  #landing .future-editorial-grid article+article{padding-left:0;border-left:0}
 }
 @media (max-width:420px){
- #landing .landing-philosophy-band,#landing .landing-experience,#landing .landing-product,#landing .landing-proof,#landing .landing-free,#landing .landing-ecosystem{padding-inline:18px}
+ #landing .landing-philosophy-band,#landing .landing-method-composition,#landing .landing-product,#landing .landing-proof,#landing .landing-free,#landing .landing-ecosystem{padding-inline:18px}
  #landing .product-window-body{padding:18px} #landing .product-index,#landing .value-rail,#landing .proof-principles{grid-template-columns:1fr}
  #landing .product-index article+article,#landing .value-rail article+article,#landing .proof-principles li+li{padding-left:0;border-left:0;border-top:1px solid var(--lp-line);padding-top:16px}
  #landing .proof-ring{width:120px;height:120px}
@@ -1377,7 +1389,7 @@ body.public-shell main{min-height:100vh;background:#061b47}
   #landing .value-rail{row-gap:12px}
 }
 @media(max-width:899px){
-  #landing .landing-experience,#landing .landing-product,#landing .landing-proof,#landing .landing-ecosystem,#landing .landing-free{padding-block:52px}
+  #landing .landing-method-composition,#landing .landing-product,#landing .landing-proof,#landing .landing-ecosystem,#landing .landing-free{padding-block:52px}
   #landing .product-composition,#landing .proof-composition{margin-top:30px}
   #landing .product-index{margin-top:30px}
   #landing .product-window-body{padding:18px;gap:12px}
@@ -1535,7 +1547,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
   }
   #landing .landing-editorial-shell,
   #landing .landing-philosophy-band,
-  #landing .landing-experience,
+  #landing .landing-method-composition,
   #landing .landing-product,
   #landing .landing-proof,
   #landing .landing-free,
@@ -1806,7 +1818,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
   #landing .domain-rail .landing-market-group{grid-column:auto}
   #landing .landing-market-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
   #landing .landing-market-card{min-height:116px}
-  #landing .landing-experience,#landing .landing-product,#landing .landing-proof,#landing .landing-ecosystem,#landing .landing-free{padding-block:clamp(54px,8vw,72px)}
+  #landing .landing-method-composition,#landing .landing-product,#landing .landing-proof,#landing .landing-ecosystem,#landing .landing-free{padding-block:clamp(54px,8vw,72px)}
 }
 @media(max-width:700px){
   #dashboard .analysis-terminal-tools{top:66px;display:grid;grid-template-columns:minmax(0,1fr);gap:5px;padding:6px;border-radius:13px}
@@ -2755,12 +2767,10 @@ body.public-shell .prototype-banner{display:none}
 .market-symbol-icon-xrp{background:#3AA6D9}
 #landing .utility-pulse{width:6px;height:6px;border-radius:50%;background:var(--blue-2);box-shadow:0 0 0 4px rgba(41,197,207,.12)}
 #landing .public-header{background:rgba(6,13,23,.72);backdrop-filter:blur(16px)}
-#landing .landing-presentation-video{max-width:1200px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,72px)}
 #landing .dda-video{margin:0;max-width:100%;aspect-ratio:16/9;background:#05060a;border-radius:18px;overflow:hidden;border:1px solid var(--lp-line)}
 #landing .dda-video video{width:100%;height:100%;display:block;object-fit:cover;background:#05060a}
-@media(max-width:639px){
-  #landing .landing-presentation-video{padding:20px 16px}
-}
+#landing .landing-method-composition .experience-heading{grid-template-columns:1fr}
+#landing .landing-method-composition .experience-heading>p:last-child{grid-column:1;grid-row:auto}
 #landing .landing-trust-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:0;max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,72px);border-bottom:1px solid var(--lp-line);background-color:#07111e;background-image:repeating-linear-gradient(135deg,transparent 0 18px,rgba(240,207,138,.018) 19px,transparent 20px 40px)}
 #landing .landing-trust-strip article{display:flex;align-items:flex-start;gap:12px;min-width:0;padding:20px 18px 20px 0;border-right:1px solid var(--lp-line)}
 #landing .landing-trust-strip article+article{padding-left:18px}
@@ -3544,12 +3554,11 @@ body.low-data #dashboard .dashboard-summary-card{transform:none!important}
    ====================================================================== */
 @media(min-width:1440px){
   #landing .landing-philosophy-band,
-  #landing .landing-experience,
+  #landing .landing-method-composition,
   #landing .landing-product,
   #landing .landing-proof,
   #landing .landing-ecosystem,
   #landing .landing-free,
-  #landing .landing-presentation-video,
   #landing .landing-trust-strip,
   #landing .landing-market-strip,
   #landing .landing-ai,
@@ -3560,12 +3569,11 @@ body.low-data #dashboard .dashboard-summary-card{transform:none!important}
 }
 @media(min-width:1800px){
   #landing .landing-philosophy-band,
-  #landing .landing-experience,
+  #landing .landing-method-composition,
   #landing .landing-product,
   #landing .landing-proof,
   #landing .landing-ecosystem,
   #landing .landing-free,
-  #landing .landing-presentation-video,
   #landing .landing-trust-strip,
   #landing .landing-market-strip,
   #landing .landing-ai,
@@ -3765,8 +3773,8 @@ body:has(#dashboard.view.active) .topbar{
   #landing .landing-reference-stack{right:20px;top:74px;width:min(258px,42%)}
   #landing .landing-3d-scene{right:10%;width:min(64%,390px);opacity:.82}
 }
-#landing .landing-presentation-video{border-top:1px solid rgba(216,174,97,.14);border-bottom:1px solid rgba(216,174,97,.12);background:linear-gradient(145deg,rgba(7,21,37,.84),rgba(3,10,18,.72))}
-#landing .landing-presentation-video .landing-section-head{max-width:760px;margin:0 auto 22px}
+#landing .landing-presentation-video{border:1px solid rgba(216,174,97,.14);border-radius:18px;padding:28px;background:linear-gradient(145deg,rgba(7,21,37,.84),rgba(3,10,18,.72))}
+#landing .landing-presentation-video .landing-section-head{max-width:none;margin:0 0 22px}
 #landing .landing-presentation-video .landing-section-head h2{margin-bottom:10px}
 #landing .dda-video{border-color:rgba(216,174,97,.38);box-shadow:0 24px 70px rgba(0,0,0,.36),0 0 42px rgba(34,128,228,.12)}
 .public-footer{padding-top:48px;gap:28px 20px}

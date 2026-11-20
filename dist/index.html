@@ -273,14 +273,32 @@
              (aucune voix off), preload="none" pour ne rien télécharger avant
              le clic, pas d'autoplay, même origine donc aucun assouplissement
              de la CSP n'est nécessaire. -->
-        <section class="landing-presentation-video" id="landing-presentation-video" aria-label="Vidéo de présentation DDA">
-          <div class="landing-section-head"><p class="eyebrow gold">Présentation DDA</p><h2>Voir la méthode avant de commencer.</h2><p>Une présentation courte de l’académie, de ses exercices et de sa progression — sans signal de marché ni promesse de résultat.</p></div>
-          <figure class="dda-video">
-            <video controls playsinline preload="none" poster="images/photos/landing-presentation-poster.webp" width="1920" height="1080" aria-label="Présentation de Darius Digital Academy (60 secondes)">
-              <source src="videos/landing-presentation-60s.mp4" type="video/mp4">
-            </video>
-          </figure>
-        </section>
+        <div class="landing-method-composition">
+          <section class="landing-presentation-video" id="landing-presentation-video" aria-label="Vidéo de présentation DDA">
+            <div class="landing-section-head"><p class="eyebrow gold">Présentation DDA</p><h2>Voir la méthode avant de commencer.</h2><p>Une présentation courte de l’académie, de ses exercices et de sa progression — sans signal de marché ni promesse de résultat.</p></div>
+            <figure class="dda-video">
+              <video controls playsinline preload="none" poster="images/photos/landing-presentation-poster.webp" width="1920" height="1080" aria-label="Présentation de Darius Digital Academy (60 secondes)">
+                <source src="videos/landing-presentation-60s.mp4" type="video/mp4">
+              </video>
+            </figure>
+          </section>
+
+          <section class="landing-experience" id="landing-experience" aria-labelledby="landing-experience-title">
+            <div class="landing-section-head experience-heading">
+              <p class="eyebrow gold">L'expérience DDA</p>
+              <h2 id="landing-experience-title">Un système qui transforme la curiosité en compétence.</h2>
+              <p>Chaque étape a une fonction claire. Le mouvement reste calme, lisible et orienté vers la prochaine preuve.</p>
+            </div>
+            <ol class="landing-steps-list experience-flow" aria-label="Les étapes de la boucle DDA">
+              <li class="is-active" data-experience-step="0"><span class="method-index">01</span><div><h3>Discover</h3><p>Comprendre où commencer, selon ton niveau réel.</p></div></li>
+              <li data-experience-step="1"><span class="method-index">02</span><div><h3>Learn</h3><p>Acquérir les fondamentaux, une notion observée à la fois.</p></div></li>
+              <li data-experience-step="2"><span class="method-index">03</span><div><h3>Practice</h3><p>Mettre chaque notion en application, avec feedback et retry.</p></div></li>
+              <li data-experience-step="3"><span class="method-index">04</span><div><h3>Analyze</h3><p>Comprendre tes erreurs et ta progression réelle.</p></div></li>
+              <li data-experience-step="4"><span class="method-index">05</span><div><h3>Improve</h3><p>Continuer à construire, une prochaine action à la fois.</p></div></li>
+            </ol>
+            <p class="experience-status" aria-live="polite"><span class="experience-status-dot"></span><span data-experience-status>Discover — commencer par une question claire.</span></p>
+          </section>
+        </div>
 
         <section class="landing-trust-strip" aria-label="Pourquoi commencer avec DDA"><article><span class="trust-strip-icon">⌁</span><div><strong>Apprendre avant d’agir</strong><small>Une méthode calme, centrée sur la compréhension.</small></div></article><article><span class="trust-strip-icon">◈</span><div><strong>Progression conservée</strong><small>Les exercices validés construisent une trace réelle.</small></div></article><article><span class="trust-strip-icon">◎</span><div><strong>Marchés contextualisés</strong><small>Des séries pédagogiques pour observer de vraies dynamiques, pas des cotations en direct.</small></div></article><article><span class="trust-strip-icon">↗</span><div><strong>Support humain</strong><small>Email, Telegram et WhatsApp officiels quand tu bloques.</small></div></article></section>
 
@@ -293,22 +311,6 @@
             <p class="differentiation-note">Learn Markets. Build Skills. Prove Progress. Une méthode qui transforme une notion en pratique, puis en preuve.</p>
           </div>
           <button class="text-action landing-inline-cta" type="button" data-view="access" data-analytics="landing_cta_differentiation" data-funnel-position="differentiation">Commencer gratuitement <span>→</span></button>
-        </section>
-
-        <section class="landing-experience" id="landing-experience" aria-labelledby="landing-experience-title">
-          <div class="landing-section-head experience-heading">
-            <p class="eyebrow gold">L'expérience DDA</p>
-            <h2 id="landing-experience-title">Un système qui transforme la curiosité en compétence.</h2>
-            <p>Chaque étape a une fonction claire. Le mouvement reste calme, lisible et orienté vers la prochaine preuve.</p>
-          </div>
-          <ol class="landing-steps-list experience-flow" aria-label="Les étapes de la boucle DDA">
-            <li class="is-active" data-experience-step="0"><span class="method-index">01</span><div><h3>Discover</h3><p>Comprendre où commencer, selon ton niveau réel.</p></div></li>
-            <li data-experience-step="1"><span class="method-index">02</span><div><h3>Learn</h3><p>Acquérir les fondamentaux, une notion observée à la fois.</p></div></li>
-            <li data-experience-step="2"><span class="method-index">03</span><div><h3>Practice</h3><p>Mettre chaque notion en application, avec feedback et retry.</p></div></li>
-            <li data-experience-step="3"><span class="method-index">04</span><div><h3>Analyze</h3><p>Comprendre tes erreurs et ta progression réelle.</p></div></li>
-            <li data-experience-step="4"><span class="method-index">05</span><div><h3>Improve</h3><p>Continuer à construire, une prochaine action à la fois.</p></div></li>
-          </ol>
-          <p class="experience-status" aria-live="polite"><span class="experience-status-dot"></span><span data-experience-status>Discover — commencer par une question claire.</span></p>
         </section>
 
         <section class="landing-product" id="landing-product" aria-labelledby="landing-product-title">
