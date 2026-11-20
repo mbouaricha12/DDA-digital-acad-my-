@@ -3913,9 +3913,9 @@ body:has(#dashboard.view.active) .topbar{
    under the Hero scene, reproducing the reference composition with real
    DDA destinations and the site's existing pedagogical market categories
    (no live or invented quotes). */
-#landing .landing-market-widget{grid-column:1/-1;display:flex;flex-direction:column;gap:13px;min-width:0;padding:18px 18px 16px;border:1px solid rgba(189,204,221,.16);border-radius:18px;background:linear-gradient(160deg,rgba(10,20,36,.92),rgba(6,13,23,.96));box-shadow:0 20px 50px rgba(0,0,0,.28)}
+#landing .landing-market-widget{grid-column:1/-1;display:flex;flex-direction:column;gap:16px;min-width:0;padding:24px 24px 20px;border:1px solid rgba(189,204,221,.16);border-radius:18px;background:linear-gradient(160deg,rgba(10,20,36,.92),rgba(6,13,23,.96));box-shadow:0 20px 50px rgba(0,0,0,.28)}
 #landing .market-widget-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-#landing .market-widget-title{display:flex;align-items:center;gap:8px;color:#eef1f5;font:600 .82rem/1.2 var(--dda-sans,system-ui,sans-serif)}
+#landing .market-widget-title{display:flex;align-items:center;gap:9px;color:#eef1f5;font:600 .98rem/1.2 var(--dda-sans,system-ui,sans-serif)}
 #landing .market-widget-title .icon{width:16px;height:16px;color:var(--dda-elite-gold)}
 #landing .market-widget-title em{color:#8d9bad;font-style:normal;font-weight:500}
 #landing .market-widget-flag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid rgba(217,164,65,.3);border-radius:999px;background:rgba(217,164,65,.08);color:var(--dda-elite-gold-soft);font-size:.64rem;font-weight:600;white-space:nowrap}
@@ -3924,15 +3924,15 @@ body:has(#dashboard.view.active) .topbar{
 #landing .market-widget-tabs span{flex:none;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.04);color:#9eabba;font-size:.66rem;font-weight:600;white-space:nowrap}
 #landing .market-widget-tabs span.is-active{background:rgba(217,164,65,.14);color:var(--dda-elite-gold-soft)}
 #landing .market-widget-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
-#landing .market-widget-list li{display:grid;grid-template-columns:minmax(0,1fr) 46px auto;align-items:center;gap:8px;padding:9px 10px;border:1px solid rgba(174,191,213,.1);border-radius:12px;background:rgba(255,255,255,.015)}
+#landing .market-widget-list li{display:grid;grid-template-columns:minmax(0,1fr) 64px auto;align-items:center;gap:12px;padding:13px 14px;border:1px solid rgba(174,191,213,.1);border-radius:12px;background:rgba(255,255,255,.015)}
 #landing .market-widget-list li.is-future{opacity:.6}
-#landing .market-widget-symbol{display:flex;align-items:center;gap:7px;min-width:0;color:#e7ebef;font-size:.73rem;font-weight:600;line-height:1.25}
+#landing .market-widget-symbol{display:flex;align-items:center;gap:9px;min-width:0;color:#e7ebef;font-size:.88rem;font-weight:600;line-height:1.25}
 #landing .market-widget-note{display:none}
 #landing .market-widget-symbol span{overflow-wrap:anywhere}
-#landing .market-widget-spark{width:46px;height:20px;overflow:visible}
+#landing .market-widget-spark{width:64px;height:24px;overflow:visible}
 #landing .market-widget-spark path{fill:none;stroke:var(--blue-2);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 #landing .market-widget-list li.is-future .market-widget-spark path{stroke:#6c7784}
-#landing .market-widget-tag{justify-self:end;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.05);color:#9eabba;font-size:.6rem;font-weight:600;white-space:nowrap}
+#landing .market-widget-tag{justify-self:end;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.05);color:#9eabba;font-size:.66rem;font-weight:600;white-space:nowrap}
 #landing .market-widget-disclaimer{display:flex;align-items:center;gap:7px;margin:2px 0 0;color:#8d9bad;font-size:.66rem;line-height:1.4}
 #landing .market-widget-disclaimer .icon{width:13px;height:13px;flex:none;color:#6c7784}
 
@@ -3961,8 +3961,15 @@ body:has(#dashboard.view.active) .topbar{
 @media(max-width:479px){#landing .landing-hero-banner{grid-template-columns:1fr}}
 
 @media(min-width:1340px){
-  #landing .landing-editorial-shell{grid-template-columns:minmax(0,.6fr) minmax(380px,.66fr) minmax(300px,.42fr);align-items:start;gap:clamp(24px,3vw,40px)}
-  #landing .landing-main-copy{grid-column:1;grid-row:1}
+  /* 2026-11-20 correction: the 3-column hero needs near-full viewport width
+     (per the reference) and a wide enough text column for the headline to
+     keep its normal word-wrap — a narrow .6fr column combined with the
+     viewport-relative h1 size was forcing one word per line. */
+  #landing .landing-editorial-shell,
+  #landing .landing-hero-features,
+  #landing .landing-hero-banner{max-width:min(1820px,96vw)}
+  #landing .landing-editorial-shell{grid-template-columns:minmax(400px,.8fr) minmax(300px,.52fr) minmax(340px,.72fr);align-items:start;gap:clamp(24px,2.4vw,44px)}
+  #landing .landing-main-copy{grid-column:1;grid-row:1;max-width:none}
   #landing .landing-aperture{grid-column:2;grid-row:1;min-height:650px}
   #landing .landing-market-widget{grid-column:3;grid-row:1;margin-top:clamp(42px,5vw,72px)}
 }
