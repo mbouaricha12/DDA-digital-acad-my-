@@ -89,7 +89,7 @@
       if (location.search || location.hash !== safeHash) history.replaceState(history.state, '', location.pathname + safeHash);
     })();
   </script>
-  <link rel="preload" as="image" href="images/photos/landing-hero-globe-africa.jpg" fetchpriority="high">
+  <link rel="preload" as="image" href="images/photos/landing-hero-scene.jpg" fetchpriority="high">
   <link rel="stylesheet" href="styles.min.css">
   <link rel="stylesheet" href="alpha-polish.min.css">
 </head>
@@ -207,20 +207,10 @@
             </ul>
           </div>
 
-          <div class="dda-aperture landing-aperture" role="img" aria-label="Aperçu visuel DDA : Terminal d’analyse sur ordinateur et Journal de bord sur smartphone, avec données pédagogiques locales">
-            <img class="photo-fill" src="images/photos/landing-hero-globe-africa.jpg" alt="Globe lumineux centré sur l'Afrique, avec des bougies de marché en arrière-plan." loading="eager" fetchpriority="high">
+          <div class="dda-aperture landing-aperture" role="img" aria-label="Un apprenant DDA devant un globe lumineux centré sur l'Afrique, avec des bougies de marché en arrière-plan">
+            <img class="photo-fill" src="images/photos/landing-hero-scene.jpg" alt="Un apprenant DDA confiant devant un globe lumineux centré sur l'Afrique, avec des bougies de marché en arrière-plan." loading="eager" fetchpriority="high">
             <div class="photo-scrim"></div>
             <div class="aperture-grid" aria-hidden="true"></div>
-            <div class="landing-aperture-top">
-              <span class="aperture-kicker">THE DDA METHOD</span>
-              <span class="landing-edition">DARIUS DIGITAL ACADEMY · 2026</span>
-            </div>
-            <div class="landing-reference-stack" aria-label="Espaces DDA disponibles et en préparation">
-              <a href="#landing-markets"><span class="landing-reference-icon"><svg class="icon"><use href="#icon-chart"/></svg></span><span><strong>Marchés &amp; BRVM</strong><small>Comprendre et analyser</small></span><b>→</b></a>
-              <a href="#landing-lab"><span class="landing-reference-icon"><svg class="icon"><use href="#icon-award"/></svg></span><span><strong>DDA Lab</strong><small>Pratiquer avec des scénarios</small></span><b>→</b></a>
-              <a href="#landing-ai"><span class="landing-reference-icon"><svg class="icon"><use href="#icon-spark"/></svg></span><span><strong>DDA AI</strong><small>Assistant pédagogique · préparation</small></span><b>→</b></a>
-              <a href="#landing-resources"><span class="landing-reference-icon"><svg class="icon"><use href="#icon-path"/></svg></span><span><strong>Ressources DDA</strong><small>Outils concrets à télécharger</small></span><b>→</b></a>
-            </div>
             <div class="landing-device-stage" aria-hidden="true">
               <div class="landing-device-laptop">
                 <div class="landing-laptop-screen">
@@ -257,16 +247,48 @@
               <span class="landing-3d-node landing-3d-node-two">PRACTICE</span>
               <span class="landing-3d-node landing-3d-node-three">PROVE</span>
             </div>
-            <div class="landing-aperture-copy">
-              <strong>Learn Markets.</strong>
-              <em>Build Skills.<br>Prove Progress.</em>
-            </div>
             <div class="landing-signal" aria-hidden="true">
               <span></span><span></span><span></span><span></span><span></span>
             </div>
             <div class="aperture-thread" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
           </div>
+
+          <aside class="landing-market-widget" aria-label="Aperçu des marchés (données pédagogiques)">
+            <div class="market-widget-head">
+              <span class="market-widget-title"><svg class="icon"><use href="#icon-chart"/></svg>Aperçu des marchés <em>(pédagogique)</em></span>
+              <span class="market-widget-flag"><i></i>Données simulées</span>
+            </div>
+            <div class="market-widget-tabs" role="tablist" aria-label="Catégories de marchés">
+              <span class="is-active" role="tab" aria-selected="true">Principaux</span>
+              <span role="tab" aria-selected="false">Forex</span>
+              <span role="tab" aria-selected="false">Matières premières</span>
+              <span role="tab" aria-selected="false">Indices</span>
+              <span role="tab" aria-selected="false">BRVM</span>
+            </div>
+            <ul class="market-widget-list">
+              <li><span class="market-widget-symbol"><span class="market-symbol-icon market-symbol-icon-brvm" aria-hidden="true">BR</span>BRVM Composite</span><span class="market-widget-note">Lecture de structure</span><svg class="market-widget-spark" viewBox="0 0 58 20" preserveAspectRatio="none" aria-hidden="true"><path d="M2 14 12 16 20 9 29 12 38 5 47 9 56 3"/></svg><span class="market-widget-tag">Synthétique</span></li>
+              <li><span class="market-widget-symbol"><span class="market-symbol-icon market-symbol-icon-eur" aria-hidden="true">€</span>EUR / USD</span><span class="market-widget-note">Zones &amp; réactions</span><svg class="market-widget-spark" viewBox="0 0 58 20" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8 12 11 20 6 29 13 38 10 47 15 56 7"/></svg><span class="market-widget-tag">Pédagogique</span></li>
+              <li><span class="market-widget-symbol"><span class="market-symbol-icon market-symbol-icon-xau" aria-hidden="true">Au</span>Or / XAUUSD</span><span class="market-widget-note">Risque &amp; scénario</span><svg class="market-widget-spark" viewBox="0 0 58 20" preserveAspectRatio="none" aria-hidden="true"><path d="M2 12 12 7 20 14 29 9 38 4 47 10 56 6"/></svg><span class="market-widget-tag">Synthétique</span></li>
+              <li class="is-future"><span class="market-widget-symbol"><span class="market-symbol-icon market-symbol-icon-btc" aria-hidden="true">₿</span>Bitcoin</span><span class="market-widget-note">Volatilité &amp; discipline</span><svg class="market-widget-spark" viewBox="0 0 58 20" preserveAspectRatio="none" aria-hidden="true"><path d="M2 16 12 5 20 13 29 7 38 15 47 4 56 11"/></svg><span class="market-widget-tag">À venir</span></li>
+              <li class="is-future"><span class="market-widget-symbol"><span class="market-symbol-icon market-symbol-icon-nas100" aria-hidden="true">ND</span>Indices</span><span class="market-widget-note">Contexte macro</span><svg class="market-widget-spark" viewBox="0 0 58 20" preserveAspectRatio="none" aria-hidden="true"><path d="M2 10 12 14 20 6 29 11 38 3 47 8 56 12"/></svg><span class="market-widget-tag">À venir</span></li>
+            </ul>
+            <p class="market-widget-disclaimer"><svg class="icon"><use href="#icon-shield"/></svg>Données à but éducatif, non destinées au trading réel.</p>
+          </aside>
         </div>
+
+        <section class="landing-hero-features" aria-label="Commencer avec DDA">
+          <a class="hero-feature-card" href="#landing-free"><span class="hero-feature-icon"><svg class="icon"><use href="#icon-book"/></svg></span><h3>Academy Free</h3><p>Les fondamentaux des marchés, accessibles à tous.</p><span class="hero-feature-status is-free"><svg class="icon"><use href="#icon-check-circle"/></svg>Gratuit</span></a>
+          <a class="hero-feature-card" href="#landing-lab"><span class="hero-feature-icon"><svg class="icon"><use href="#icon-award"/></svg></span><h3>DDA Lab</h3><p>Pratique, exercices et mises en situation réelles.</p><span class="hero-feature-status is-live"><svg class="icon"><use href="#icon-check-circle"/></svg>Disponible</span></a>
+          <a class="hero-feature-card" href="#landing-ai"><span class="hero-feature-icon"><svg class="icon"><use href="#icon-spark"/></svg></span><h3>DDA AI</h3><p>Ton assistant pédagogique (non prédictif).</p><span class="hero-feature-status is-soon">Bientôt</span></a>
+          <a class="hero-feature-card" href="#landing-resources"><span class="hero-feature-icon"><svg class="icon"><use href="#icon-path"/></svg></span><h3>Ressources</h3><p>Fiches, guides, plans et outils d'apprentissage.</p><span class="hero-feature-status is-live"><svg class="icon"><use href="#icon-check-circle"/></svg>Disponible</span></a>
+        </section>
+
+        <section class="landing-hero-banner" aria-label="L'esprit DDA">
+          <article><span class="hero-banner-icon"><svg class="icon"><use href="#icon-users"/></svg></span><div><strong>100 %</strong><p>Pédagogique</p></div></article>
+          <article><span class="hero-banner-icon"><svg class="icon"><use href="#icon-compass"/></svg></span><div><strong>Parcours structuré</strong><p>Du débutant à l'autonome</p></div></article>
+          <article><span class="hero-banner-icon"><svg class="icon"><use href="#icon-chart"/></svg></span><div><strong>Marchés locaux &amp; internationaux</strong><p>BRVM, Forex, Actions, Indices</p></div></article>
+          <article><span class="hero-banner-icon"><svg class="icon"><use href="#icon-pin"/></svg></span><div><strong>Conçu pour l'Afrique</strong><p>Accessible, concret et orienté pratique</p></div></article>
+        </section>
 
         <!-- Vidéo de présentation institutionnelle (60s) — fichier réel
              auto-hébergé (dist/videos/), sous-titres incrustés dans l'image
