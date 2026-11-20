@@ -3544,7 +3544,8 @@ body.low-data #dashboard .dashboard-summary-card{transform:none!important}
   #landing .landing-free,
   #landing .landing-presentation-video,
   #landing .landing-trust-strip,
-  #landing .landing-market-strip{
+  #landing .landing-market-strip,
+  #landing .landing-ai{
     max-width:1560px;
   }
 }
@@ -3557,9 +3558,17 @@ body.low-data #dashboard .dashboard-summary-card{transform:none!important}
   #landing .landing-free,
   #landing .landing-presentation-video,
   #landing .landing-trust-strip,
-  #landing .landing-market-strip{
+  #landing .landing-market-strip,
+  #landing .landing-ai{
     max-width:1800px;
   }
+}
+/* #landing-ai (DDA AI), #landing-lab and #landing-resources share the
+   .landing-ai container. Once it is wide, the ai-guardrail-list's 3 items
+   (DDA AI only) had room for a single row instead of a lone 3rd card
+   stranded under 2 others. */
+@media(min-width:1440px){
+  #landing .ai-guardrail-list{grid-template-columns:repeat(3,1fr)}
 }
 
 /* ======================================================================
