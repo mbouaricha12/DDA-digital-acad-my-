@@ -6,6 +6,7 @@ const { generateCodeVerifier, computeCodeChallenge } = require('./pkce');
 const { executeIdempotentMutation, validateClientMutationId } = require('./idempotency');
 const { checkAuthRateLimit } = require('./rate-limiter');
 const { VALID_ROLES: VALID_ADMIN_ROLES, CONTROL_PLANE_ROLES } = require('./admin-roles-store');
+const { VALID_ENTITLEMENTS } = require('./entitlements-store');
 const { validateAskRequest } = require('./ai-assistant');
 const { PREMIUM_CONTENT, FREE_PREVIEW_IDS } = require('./premium-content');
 const { chariowConfigFromEnv, createChariowCheckout } = require('./chariow');
@@ -376,7 +377,7 @@ function parsePageParams(url, { maxPerPage = 200 } = {}) {
   return { page, perPage };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, accessAudit = null, rateLimiter = null, progressStore = null, aiAssistant = null, chariowConfig = chariowConfigFromEnv(), marketDataConfig = marketDataConfigFromEnv(), communityStore = null, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, accessAudit = null, rateLimiter = null, progressStore = null, entitlementsStore = null, aiAssistant = null, chariowConfig = chariowConfigFromEnv(), marketDataConfig = marketDataConfigFromEnv(), communityStore = null, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   let marketQuotesCache = null;
   businessStore = businessStore || {
@@ -390,11 +391,25 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
   }
 
   async function currentEntitlements(userId) {
-    if (!entitlements || typeof entitlements.getForUser !== 'function') return { membership: null, entitlements: [] };
-    const snapshot = await entitlements.getForUser(userId);
+    const snapshot = (entitlements && typeof entitlements.getForUser === 'function') ? await entitlements.getForUser(userId) : null;
+    const membership = snapshot?.membership || null;
+    const membershipEntitlements = Array.isArray(snapshot?.entitlements) ? snapshot.entitlements : [];
+    // Admin-granted entitlements (dda_entitlements, entitlements-store.js) are
+    // additive only — they can never suppress or override a real,
+    // membership-derived entitlement, only extend access beyond it. A row
+    // past its expires_at or marked 'suspended' contributes nothing, exactly
+    // as if it had never been granted.
+    let adminGranted = [];
+    if (entitlementsStore && typeof entitlementsStore.listForUser === 'function') {
+      const now = clock();
+      const rows = await entitlementsStore.listForUser(userId);
+      adminGranted = rows
+        .filter(row => row.status === 'active' && (!row.expires_at || new Date(row.expires_at) > now))
+        .map(row => row.entitlement_key);
+    }
     return {
-      membership: snapshot?.membership || null,
-      entitlements: Array.isArray(snapshot?.entitlements) ? snapshot.entitlements : []
+      membership,
+      entitlements: Array.from(new Set([...membershipEntitlements, ...adminGranted]))
     };
   }
 
@@ -1012,6 +1027,75 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
           lessons: Object.fromEntries(lessons.map(row => [row.lesson_id, { lessonViewed: row.lesson_viewed, exerciseComplete: row.exercise_complete, quizComplete: row.quiz_complete, updatedAt: row.updated_at }])),
           onboarding: onboarding ? { level: onboarding.level, goal: onboarding.goal, time: onboarding.time, complete: onboarding.complete, updatedAt: onboarding.updated_at } : null
         });
+      }
+      // Admin-granted entitlements (dda_entitlements) — complements the
+      // membership-derived entitlements computed in billing-store.js, never
+      // replaces them (see currentEntitlements above). Granting/revoking is
+      // owner-only, exactly like role assignment: handing out Premium access
+      // for free is the same risk class as granting the admin role itself.
+      // Reading the list is open to any admin, like the other admin reads.
+      const adminEntitlementsUserMatch = path.match(/^\/v1\/admin\/entitlements\/([^/]+)$/);
+      if (method === 'GET' && adminEntitlementsUserMatch) {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!entitlementsStore) return sendError(res, 503, 'entitlements_not_configured', 'Entitlement management is not available.', requestId);
+        const targetUserId = decodeURIComponent(adminEntitlementsUserMatch[1]);
+        const rows = await entitlementsStore.listForUser(targetUserId);
+        return json(res, 200, {
+          contract: 'dda-admin-entitlements-v1',
+          user_id: targetUserId,
+          valid_entitlements: VALID_ENTITLEMENTS,
+          grants: rows.map(row => ({ entitlement_key: row.entitlement_key, status: row.status, granted_by: row.granted_by, reason: row.reason, expires_at: row.expires_at, updated_at: row.updated_at }))
+        });
+      }
+      if (method === 'POST' && path === '/v1/admin/entitlements') {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!validateCsrf(req, config, admin.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (admin.role !== 'owner') return sendError(res, 403, 'owner_required', 'Only an owner may grant an entitlement.', requestId);
+        if (!entitlementsStore) return sendError(res, 503, 'entitlements_not_configured', 'Entitlement management is not available.', requestId);
+        const body = await readJson(req);
+        const targetUserId = typeof body.user_id === 'string' ? body.user_id.trim() : '';
+        const entitlementKey = typeof body.entitlement_key === 'string' ? body.entitlement_key.trim() : '';
+        const reason = typeof body.reason === 'string' ? body.reason.trim() : '';
+        const expiresAt = typeof body.expires_at === 'string' && body.expires_at ? body.expires_at : null;
+        if (!targetUserId) return sendError(res, 400, 'validation_error', 'user_id is required.', requestId, { user_id: 'Required.' });
+        if (!VALID_ENTITLEMENTS.includes(entitlementKey)) return sendError(res, 400, 'validation_error', 'entitlement_key is not supported.', requestId, { entitlement_key: 'Unsupported entitlement.' });
+        if (!reason) return sendError(res, 400, 'validation_error', 'reason is required.', requestId, { reason: 'Required — a manual grant must always be traceable.' });
+        const row = await entitlementsStore.grant(targetUserId, entitlementKey, { grantedBy: admin.user.user_id, reason, expiresAt });
+        await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: 'entitlement_granted', resourceType: 'admin_entitlement', resourceId: targetUserId, requestId, metadata: { route: path, method, role: admin.role, target_user_id: targetUserId, entitlement_key: entitlementKey } });
+        return json(res, 200, { contract: 'dda-admin-entitlements-v1', entitlement_key: row.entitlement_key, status: row.status, expires_at: row.expires_at });
+      }
+      const adminEntitlementMutationMatch = path.match(/^\/v1\/admin\/entitlements\/([^/]+)\/([^/]+)$/);
+      if (method === 'PATCH' && adminEntitlementMutationMatch) {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!validateCsrf(req, config, admin.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (admin.role !== 'owner') return sendError(res, 403, 'owner_required', 'Only an owner may suspend or reactivate an entitlement.', requestId);
+        if (!entitlementsStore) return sendError(res, 503, 'entitlements_not_configured', 'Entitlement management is not available.', requestId);
+        const [, targetUserId, entitlementKey] = adminEntitlementMutationMatch;
+        const body = await readJson(req);
+        if (!['active', 'suspended'].includes(body.status)) return sendError(res, 400, 'validation_error', 'status must be "active" or "suspended".', requestId, { status: 'Unsupported status.' });
+        try {
+          const row = await entitlementsStore.setStatus(decodeURIComponent(targetUserId), decodeURIComponent(entitlementKey), body.status);
+          await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: body.status === 'suspended' ? 'entitlement_suspended' : 'entitlement_reactivated', resourceType: 'admin_entitlement', resourceId: decodeURIComponent(targetUserId), requestId, metadata: { route: path, method, role: admin.role, target_user_id: decodeURIComponent(targetUserId), entitlement_key: decodeURIComponent(entitlementKey) } });
+          return json(res, 200, { contract: 'dda-admin-entitlements-v1', entitlement_key: row.entitlement_key, status: row.status });
+        } catch (error) {
+          if (error.code === 'entitlement_not_found') return sendError(res, 404, 'not_found', error.message, requestId);
+          throw error;
+        }
+      }
+      if (method === 'DELETE' && adminEntitlementMutationMatch) {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!validateCsrf(req, config, admin.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (admin.role !== 'owner') return sendError(res, 403, 'owner_required', 'Only an owner may revoke an entitlement.', requestId);
+        if (!entitlementsStore) return sendError(res, 503, 'entitlements_not_configured', 'Entitlement management is not available.', requestId);
+        const [, targetUserId, entitlementKey] = adminEntitlementMutationMatch;
+        try {
+          await entitlementsStore.revoke(decodeURIComponent(targetUserId), decodeURIComponent(entitlementKey));
+          await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: 'entitlement_revoked', resourceType: 'admin_entitlement', resourceId: decodeURIComponent(targetUserId), requestId, metadata: { route: path, method, role: admin.role, target_user_id: decodeURIComponent(targetUserId), entitlement_key: decodeURIComponent(entitlementKey) } });
+          return json(res, 204);
+        } catch (error) {
+          if (error.code === 'entitlement_not_found') return sendError(res, 404, 'not_found', error.message, requestId);
+          throw error;
+        }
       }
       // Role assignment/revocation — the invariants (only an owner may grant
       // or revoke, self-elevation impossible, last owner protected) live in
