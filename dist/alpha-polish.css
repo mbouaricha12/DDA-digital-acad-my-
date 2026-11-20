@@ -3501,6 +3501,44 @@ body.low-data #dashboard .dashboard-summary-card{transform:none!important}
 }
 
 /* ======================================================================
+   Landing publique — vraie largeur desktop 2026-11-20
+   Le plafond de 1200px (voir regles plus haut) laisse une marge morte
+   enorme a 1600/1920/2560px : la landing a l'air d'un mobile agrandi sur
+   un ecran d'ordinateur. On elargit progressivement, comme deja fait pour
+   le dashboard et les autres vues authentifiees, sans toucher au mobile
+   ni au tablet (regle inchangee sous 1440px). Les colonnes internes
+   (landing-section-head, ecosystem-copy, etc.) ont deja leur propre
+   max-width en ch, donc elargir le conteneur ne degrade pas la lecture :
+   il donne plus de place aux grilles (fr/minmax) et aux visuels.
+   ====================================================================== */
+@media(min-width:1440px){
+  #landing .landing-philosophy-band,
+  #landing .landing-experience,
+  #landing .landing-product,
+  #landing .landing-proof,
+  #landing .landing-ecosystem,
+  #landing .landing-free,
+  #landing .landing-presentation-video,
+  #landing .landing-trust-strip,
+  #landing .landing-market-strip{
+    max-width:1560px;
+  }
+}
+@media(min-width:1800px){
+  #landing .landing-philosophy-band,
+  #landing .landing-experience,
+  #landing .landing-product,
+  #landing .landing-proof,
+  #landing .landing-ecosystem,
+  #landing .landing-free,
+  #landing .landing-presentation-video,
+  #landing .landing-trust-strip,
+  #landing .landing-market-strip{
+    max-width:1800px;
+  }
+}
+
+/* ======================================================================
    DDA Dashboard — identité Learning OS 2026-11-16
    Reprise de la composition de la maquette propriétaire : sidebar
    institutionnelle, hero illustrée, cartes de parcours lisibles, résumé
