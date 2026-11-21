@@ -8,9 +8,13 @@ const root = path.join(__dirname, '..');
 const app = fs.readFileSync(path.join(root, 'dist', 'app.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'dist', 'academy.html'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'dist', 'sw.js'), 'utf8');
-const m11 = require('../dist/m1-1-lesson.js');
-const m12 = require('../dist/m1-2-lesson.js');
-const m13 = require('../dist/m1-3-lesson.js');
+// docs/RISK_REGISTER.md R-04 fix: the real M1 content moved off the public
+// dist/m1-*-lesson.js files onto the authenticated BFF — see
+// bff/src/m1-content.js and tests/test_m1_content_not_public.js.
+const { M1_CONTENT } = require('../bff/src/m1-content.js');
+const m11 = M1_CONTENT['M1.1'];
+const m12 = M1_CONTENT['M1.2'];
+const m13 = M1_CONTENT['M1.3'];
 
 let pass = 0;
 function test(name, fn) { fn(); pass++; console.log('PASS -', name); }
