@@ -16,8 +16,11 @@ assert(!/\bRichard\b/.test(app), 'Le runtime ne doit pas utiliser un fallback d�
 assert(academy.includes('Profil d’apprentissage'), 'Le profil doit être présenté comme une surface produit');
 // Commercial preparation / public polish mandate (2026-11-14): "Démonstration
 // pédagogique" was removed from Premium's public-facing labels as devaluing
-// jargon — the honesty it stood for is still asserted, just in plainer words.
-assert(academy.includes('pas un abonnement actif'), 'La limite Premium doit rester honnête sans jargon local');
+// jargon. Chariow checkout went live in production 2026-11-21, so the
+// honesty guard that matters is no longer "not yet a real subscription" —
+// it's that access is never granted by local state, only by a confirmed
+// real payment (see test_free_premium_access_contract.js).
+assert(academy.includes('accordé uniquement après confirmation réelle du paiement'), 'La limite Premium doit rester honnête sans jargon local');
 // Commercial positioning correction (2026-11-14): Premium is a real offer to
 // launch, not a future/preview feature — "Aperçu pédagogique" was retired in
 // favour of the real price, so Premium is never presented as devalued.

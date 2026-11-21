@@ -16,8 +16,12 @@ const app = fs.readFileSync(path.join(root, 'dist', 'app.js'), 'utf8');
 assert.match(html, /class="landing-device-stage" aria-hidden="true"/, 'hero device preview is decorative and hidden from assistive technology');
 assert.match(html, /landing-device-laptop/, 'landing hero shows the desktop terminal mockup');
 assert.match(html, /landing-device-phone/, 'landing hero shows the mobile journal mockup');
-assert.match(html, /pédagogiques locales/i, 'hero preview identifies its synthetic educational series');
-assert.match(html, /<strong>4 outils<\/strong> de lecture technique/, 'the trust strip shows only the verifiable count of four terminal tools');
+assert.match(html, /données pédagogiques/i, 'hero preview labels its market widget as educational data');
+assert.match(html, /données simulées/i, 'hero preview\'s market widget flag discloses the data is simulated');
+assert.match(html, /class="landing-trust-strip"/, 'the landing trust strip is present');
+for (const claim of ['Apprendre avant d’agir', 'Progression conservée', 'Marchés contextualisés', 'Support humain']) {
+  assert.ok(html.includes(claim), `trust strip makes the verifiable claim "${claim}"`);
+}
 
 const marketCards = [...html.matchAll(/class="landing-market-card" data-view="markets"/g)];
 assert.equal(marketCards.length, 5, 'the landing has five market-learning cards');

@@ -72,7 +72,11 @@ assert.equal(landing.match(/<meta property="og:description" content="([^"]+)"/)?
 assert.equal(landing.match(/<meta name="twitter:description" content="([^"]+)"/)?.[1], landingDescription);
 assert.ok(landing.includes('DDA Free ouvre trois fondations pour comprendre les marchés'));
 assert.ok(landing.includes('ne font pas partie du parcours Free'));
-assert.match(landing, /<img class="photo-fill" src="images\/photos\/landing-hero-brand-banner\.jpg" alt="Bannière de Darius Digital Academy/);
+// Hero convergence pass (2026-11-20/21, founder-approved): the banner photo
+// was replaced by the validated scene photo (learner + Africa globe); the
+// SEO/accessibility requirement that matters is a real, descriptive alt
+// text on the hero image, not this specific filename.
+assert.match(landing, /<img class="photo-fill" src="images\/photos\/landing-hero-scene\.jpg" alt="[^"]{20,}"/, 'hero image has a real, descriptive alt text');
 const documentRuntime = fs.readFileSync(path.join(dist, 'public-document.js'), 'utf8');
 assert.doesNotMatch(documentRuntime, /description\.setAttribute/, 'page runtime must preserve curated route-specific meta descriptions');
 const academy = fs.readFileSync(path.join(dist, 'academy.html'), 'utf8');
