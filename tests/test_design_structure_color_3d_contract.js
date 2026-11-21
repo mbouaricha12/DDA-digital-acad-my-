@@ -1,9 +1,14 @@
 'use strict';
 /*
  * fix/design-structure-color-3d-alignment — contract for the founder's
- * reference-maquette alignment pass: CTA color (gold, not blue), the DDA AI
- * sidebar entry (a real, already-built, Free-tier feature that was missing
- * from primary navigation), and the landing 3D orbit scene staying intact.
+ * reference-maquette alignment pass: CTA color (gold, not blue) and the
+ * DDA AI sidebar entry (a real, already-built, Free-tier feature that was
+ * missing from primary navigation).
+ *
+ * The landing 3D orbit scene this contract used to also lock
+ * (data-3d-scene="dda-orbit") was removed 2026-11-21: it was permanently
+ * hidden behind the real hero photo and never reached production. See
+ * tests/test_landing_3d_contract.js for its replacement coverage.
  */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -60,9 +65,6 @@ const drawerMatch = academyHtml.match(/<nav class="mobile-drawer"[\s\S]*?<\/nav>
 assert.ok(drawerMatch, 'the mobile drawer markup is present');
 assert.match(drawerMatch[0], /data-view="intelligence"/, 'the mobile drawer links directly to DDA AI (view#intelligence)');
 
-// -- Landing 3D orbit scene stays intact (not touched by this pass) --
 assert.match(academyHtml, /<!doctype html>/i, 'sanity: academy.html parses as a document');
-const indexHtml = fs.readFileSync(path.join(root, 'dist', 'index.html'), 'utf8');
-assert.match(indexHtml, /data-3d-scene="dda-orbit"/, 'the landing 3D orbit scene is still mounted');
 
 console.log('RESULT: design structure/color/3D alignment contract passed');

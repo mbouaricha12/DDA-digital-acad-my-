@@ -3,12 +3,15 @@
 /*
  * DDA — Hero signature contract (2026-11-16).
  *
- * Locks the two visible outcomes of this tranche without pretending a live
- * economic-news feed exists:
- *  - the 3D orbit scene is actually visible (not left at the old 0.44 opacity
- *    behind a larger device stage);
- *  - the market/economic ticker is honest: real BFF paths only, explicit
- *    empty/offline states, no fabricated headline or fake "live" claim.
+ * Locks the visible outcome of this tranche without pretending a live
+ * economic-news feed exists: the market/economic ticker is honest — real
+ * BFF paths only, explicit empty/offline states, no fabricated headline or
+ * fake "live" claim.
+ *
+ * The 3D orbit scene this contract used to also lock (.landing-3d-scene)
+ * was removed 2026-11-21 along with the rest of the hidden hero device
+ * mockup (see test_landing_3d_contract.js) — it was permanently masked
+ * behind the real hero photo and never reached production.
  */
 
 const assert = require('assert/strict');
@@ -26,7 +29,6 @@ assert.match(html, /src="market-news-ticker\.js"/, 'The ticker script must be lo
 
 assert.match(css, /\.dda-news-ticker\[data-state="ready"\] \.dda-news-ticker-track\{animation:dda-news-scroll/, 'The ticker must animate only when real items are present');
 assert.match(css, /\.dda-news-ticker\[data-state="empty"\]/, 'The ticker must have an explicit empty state');
-assert.match(css, /#landing \.landing-3d-scene\{width:min\(110%,480px\);right:-4%;opacity:\.86/, 'The orbit scene must be visibly lifted above the old 0.44 opacity');
 
 assert.match(ticker, /\/v1\/publications\/brvm/, 'The ticker must use the verified BRVM publication endpoint');
 assert.match(ticker, /\/v1\/market\/quotes/, 'The ticker must use the configured market-quotes endpoint');

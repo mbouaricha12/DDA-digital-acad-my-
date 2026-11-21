@@ -23,9 +23,6 @@ assert.match(css,/#landing \.landing-market-strip/);
 // secondary accent elsewhere.
 assert.match(css,/\.primary-action,\.public-start,\.landing-mobile-cta button[^{]*\{\s*border:1px solid rgba\(240,207,138,\.6\);\s*background:linear-gradient\(112deg,#f6c860/);
 assert.doesNotMatch(css,/\#landing \.public-start\{background:linear-gradient/);
-// landing-3d-core/orbit/node keep their gold base + blue glow overlay
-// (AURORA tokens); no green override duplicates these selectors.
-assert.doesNotMatch(css,/\#landing \.landing-3d-core\{border-color/);
 assert.doesNotMatch(css,/#(?:77c96e|a4e48e|83d18b|9ce59d|80c99b|8fd796|58d99b)\b/i);
 assert.doesNotMatch(js,/'.landing-experience',\s*'\.experience-flow/);
 console.log('RESULT: landing reference finish contract passed');
