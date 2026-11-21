@@ -1780,6 +1780,147 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 /* Low-poly device mockups: CSS/SVG only, no WebGL, external feed, or remote image. */
 #landing .landing-aperture-top,#landing .landing-aperture-copy{z-index:4}
 
+/* Hero reconception (2026-11) — trading/fintech environment behind the Hero
+   figure. CSS/SVG only, no WebGL/Three.js/canvas: a rotating-globe layer
+   (reusing the existing landing-hero-globe-africa.jpg already shipped and
+   cached for the final-CTA section — zero new image weight), a one-shot
+   SVG data-line draw-in, a small pulsing candlestick cluster, and a few
+   soft particles. The figure itself is a real photo (transparent WebP,
+   background removed, no AI-altered face) layered on top so it reads as lit
+   BY the scene rather than pasted over it. Every animation here is additive
+   motion on top of what prefers-reduced-motion already disables below.*/
+/* Hero layout recomposition (2026-11-21, founder-directed): a single shared
+   visual wrapper — .fintech-stage — owns the globe, the trading overlays and
+   the figure, so they read as ONE composition rather than independently
+   floating absolute children of the aperture. The aperture's own legacy
+   elements (.photo-scrim, .aperture-grid, .landing-signal, .aperture-thread)
+   stay siblings of .fintech-stage, untouched — they carry their own tested
+   ambient-light/grid-drift contract (see "DDA Aurora..." in tests/run.js)
+   and are not part of this recomposition. */
+#landing .landing-fintech-scene{isolation:isolate}
+#landing .landing-fintech-scene .fintech-stage{position:absolute;inset:0;z-index:1}
+/* Ambiance lumineuse derrière toute la scène — halo radial discret, pas un
+   nouvel élément visible en soi, sans changer l'identité bleu nuit/or. */
+#landing .landing-fintech-scene .fintech-stage::before{
+  content:"";position:absolute;inset:-6%;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 32% 42%,rgba(46,140,255,.16),transparent 58%),radial-gradient(ellipse at 78% 70%,rgba(240,207,138,.1),transparent 54%);
+  animation:dda-fintech-bg-parallax 34s ease-in-out infinite;will-change:transform;
+}
+/* Globe : derrière et légèrement à gauche du personnage (voir .fintech-figure
+   plus bas) — les deux appartiennent à la même composition, le personnage
+   chevauche naturellement le bord droit du globe. */
+#landing .landing-fintech-scene .fintech-stage .fintech-globe{
+  position:absolute;top:6%;left:0;height:90%;aspect-ratio:1/1;border-radius:50%;pointer-events:none;
+  background-image:url("images/photos/landing-hero-globe-small.webp");
+  background-size:cover;background-position:center;background-repeat:no-repeat;
+  box-shadow:0 0 86px 16px rgba(46,140,255,.4),0 0 160px 44px rgba(240,207,138,.16);
+  opacity:.95;z-index:1;animation:dda-fintech-globe-sway 24s ease-in-out infinite;will-change:transform;
+}
+/* Thin rotating orbit ring around the globe — reinforces the "chandeliers/
+   données en orbite" idea without adding a heavy new element. */
+#landing .landing-fintech-scene .fintech-stage .fintech-globe::after{
+  content:"";position:absolute;inset:-7%;border-radius:50%;z-index:0;pointer-events:none;
+  border:1px dashed rgba(240,207,138,.3);animation:dda-fintech-ring-spin 38s linear infinite;
+}
+/* Rotation très lente du globe : un reflet (sheen) qui balaie lentement la
+   sphère de gauche à droite, plutôt qu'une vraie rotation 2D de la photo
+   (qui ferait pivoter l'Afrique hors axe) — l'illusion d'un globe qui
+   tourne, sans jamais désaxer l'image. */
+#landing .landing-fintech-scene .fintech-stage .fintech-globe .fintech-globe-sheen{
+  position:absolute;inset:0;border-radius:50%;overflow:hidden;pointer-events:none;z-index:1;
+  background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.14) 46%,rgba(255,255,255,.22) 50%,rgba(255,255,255,.14) 54%,transparent 70%);
+  background-size:260% 100%;background-position:120% 0;
+  animation:dda-fintech-globe-spin-sheen 220s linear infinite;mix-blend-mode:overlay;will-change:background-position;
+}
+/* Pulsation lumineuse subtile autour de l'Afrique (zone mise en évidence
+   par le crop de la photo du globe). */
+#landing .landing-fintech-scene .fintech-stage .fintech-globe .fintech-africa-glow{
+  position:absolute;left:44%;top:20%;width:48%;height:56%;border-radius:50%;pointer-events:none;z-index:1;
+  background:radial-gradient(ellipse at center,rgba(240,207,138,.35),transparent 68%);
+  animation:dda-fintech-africa-pulse 5.2s ease-in-out infinite;mix-blend-mode:screen;
+}
+/* Points lumineux qui circulent sur la trajectoire de l'anneau orbital. */
+#landing .landing-fintech-scene .fintech-stage .fintech-globe .fintech-orbit-dot{
+  position:absolute;inset:-7%;border-radius:50%;pointer-events:none;z-index:2;
+  animation:dda-fintech-ring-spin 46s linear infinite;
+}
+#landing .landing-fintech-scene .fintech-stage .fintech-globe .fintech-orbit-dot::before{
+  content:"";position:absolute;top:-2px;left:50%;width:4px;height:4px;border-radius:50%;
+  transform:translateX(-50%);background:#f6d78a;box-shadow:0 0 7px 2px rgba(240,207,138,.8);
+}
+#landing .landing-fintech-scene .fintech-stage .fintech-globe .fintech-orbit-dot-b{
+  animation-duration:64s;animation-direction:reverse;
+}
+#landing .landing-fintech-scene .fintech-stage .fintech-globe .fintech-orbit-dot-b::before{
+  top:auto;bottom:-2px;background:#78d2ff;box-shadow:0 0 7px 2px rgba(120,210,255,.8);
+}
+#landing .landing-fintech-scene .fintech-stage .fintech-dataline{position:absolute;inset:4% 4% auto 4%;height:34%;width:92%;z-index:2;opacity:.6;overflow:visible;pointer-events:none}
+#landing .landing-fintech-scene .fintech-stage .fintech-dataline path{fill:none;stroke:rgba(240,207,138,.86);stroke-width:2;stroke-linecap:round;stroke-dasharray:620;stroke-dashoffset:620;animation:dda-fintech-line-draw 2.2s cubic-bezier(.4,0,.2,1) .4s both}
+#landing .landing-fintech-scene .fintech-stage .fintech-dataline path.fintech-dataline-accent{stroke:rgba(120,210,255,.6);stroke-width:1.5;animation-delay:.7s}
+/* Candlestick cluster between the globe and the figure (echoing the candles
+   already baked into the globe photo) — each "candle" is a thin wick
+   (::before) plus a body, not a flat bar. */
+#landing .landing-fintech-scene .fintech-stage .fintech-candles{position:absolute;top:12%;right:18%;height:42%;width:20%;z-index:2;opacity:.85;pointer-events:none}
+#landing .landing-fintech-scene .fintech-stage .fintech-candles i{position:absolute;bottom:0;width:6px;border-radius:1px;transform-origin:bottom;animation:dda-fintech-candle-pulse 3.6s ease-in-out infinite alternate;will-change:transform}
+#landing .landing-fintech-scene .fintech-stage .fintech-candles i::before{content:"";position:absolute;left:50%;top:-35%;bottom:-25%;width:1px;transform:translateX(-50%);background:inherit;opacity:.7}
+#landing .landing-fintech-scene .fintech-stage .fintech-candles i:nth-child(odd){background:#42d6a4}
+#landing .landing-fintech-scene .fintech-stage .fintech-candles i:nth-child(even){background:#e56060}
+#landing .landing-fintech-scene .fintech-stage .fintech-candles i:nth-child(1){left:0;height:38%}
+#landing .landing-fintech-scene .fintech-stage .fintech-candles i:nth-child(2){left:14%;height:60%;animation-delay:.2s}
+#landing .landing-fintech-scene .fintech-stage .fintech-candles i:nth-child(3){left:28%;height:48%;animation-delay:.4s}
+#landing .landing-fintech-scene .fintech-stage .fintech-candles i:nth-child(4){left:42%;height:72%;animation-delay:.6s}
+#landing .landing-fintech-scene .fintech-stage .fintech-candles i:nth-child(5){left:56%;height:50%;animation-delay:.8s}
+#landing .landing-fintech-scene .fintech-stage .fintech-candles i:nth-child(6){left:70%;height:64%;animation-delay:1s}
+#landing .landing-fintech-scene .fintech-stage .fintech-candles i:nth-child(7){left:84%;height:44%;animation-delay:1.2s}
+#landing .landing-fintech-scene .fintech-stage .fintech-candles i:nth-child(8){left:96%;height:58%;animation-delay:1.4s}
+#landing .landing-fintech-scene .fintech-stage .fintech-particles{position:absolute;inset:0;z-index:2;pointer-events:none}
+#landing .landing-fintech-scene .fintech-stage .fintech-particles i{position:absolute;width:4px;height:4px;border-radius:50%;background:#bfe3ff;box-shadow:0 0 8px 2px rgba(120,210,255,.75);animation:dda-fintech-particle-pulse 4.2s ease-in-out infinite}
+#landing .landing-fintech-scene .fintech-stage .fintech-particles i:nth-child(1){top:10%;left:12%;animation-delay:0s}
+#landing .landing-fintech-scene .fintech-stage .fintech-particles i:nth-child(2){top:18%;left:58%;animation-delay:.9s;background:#f6d78a;box-shadow:0 0 8px 2px rgba(240,207,138,.75)}
+#landing .landing-fintech-scene .fintech-stage .fintech-particles i:nth-child(3){top:48%;left:6%;animation-delay:1.8s}
+#landing .landing-fintech-scene .fintech-stage .fintech-particles i:nth-child(4){top:68%;left:74%;animation-delay:2.4s;background:#f6d78a;box-shadow:0 0 8px 2px rgba(240,207,138,.75)}
+#landing .landing-fintech-scene .fintech-stage .fintech-particles i:nth-child(5){top:6%;left:42%;animation-delay:3.2s}
+#landing .landing-fintech-scene .fintech-stage .fintech-particles i:nth-child(6){top:30%;left:4%;animation-delay:1.3s;background:#f6d78a;box-shadow:0 0 8px 2px rgba(240,207,138,.75)}
+#landing .landing-fintech-scene .fintech-stage .fintech-particles i:nth-child(7){top:82%;left:40%;animation-delay:2.9s}
+/* Personnage : fort impact visuel, ancré en bas à droite du stage, chevauche
+   naturellement le bord droit du globe (silhouette bien visible, jamais
+   étirée — object-fit:contain préserve l'aspect réel de la photo). */
+#landing .landing-fintech-scene .fintech-stage .fintech-figure{position:absolute;right:2%;bottom:0;left:auto;width:auto;height:100%;max-width:70%;object-fit:contain;object-position:bottom right;z-index:3;filter:drop-shadow(0 18px 30px rgba(0,0,0,.45));animation:dda-fintech-figure-parallax 34s ease-in-out infinite;will-change:transform}
+#landing .landing-fintech-scene .photo-scrim{z-index:2}
+@keyframes dda-fintech-globe-sway{0%,100%{transform:rotate(-2deg) scale(1)}50%{transform:rotate(2deg) scale(1.015)}}
+@keyframes dda-fintech-ring-spin{to{transform:rotate(360deg)}}
+@keyframes dda-fintech-line-draw{to{stroke-dashoffset:0}}
+@keyframes dda-fintech-candle-pulse{0%{transform:scaleY(.86) translateY(0)}100%{transform:scaleY(1) translateY(-3px)}}
+@keyframes dda-fintech-particle-pulse{0%,100%{opacity:.15;transform:scale(.8)}50%{opacity:.85;transform:scale(1.2)}}
+@keyframes dda-fintech-globe-spin-sheen{to{background-position:-140% 0}}
+@keyframes dda-fintech-africa-pulse{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.07)}}
+/* Parallax léger : l'ambiance d'arrière-plan dérive très lentement et dans
+   le sens opposé au globe (qui a déjà sa propre oscillation via
+   dda-fintech-globe-sway), créant une sensation de profondeur entre les
+   trois plans (arrière-plan / globe / personnage) sans dépendre du scroll
+   ou de la souris — un simple décalage CSS à amplitude minime. */
+/* Pixel offsets, not percentages: a percentage translate() is resolved
+   against the element's own box size on every frame, which can defeat a
+   pure compositor-only animation. Fixed px deltas keep this GPU-only. */
+@keyframes dda-fintech-bg-parallax{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(-9px,6px,0)}}
+@keyframes dda-fintech-figure-parallax{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(4px,-3px,0)}}
+/* The figure photo is a tall 3/4-body crop (~0.63 aspect) — sizing it by
+   WIDTH in a portrait/near-square aperture (tablet/mobile) overflows the
+   box height and gets clipped to a zoomed-in torso with her face cut off.
+   Size it by HEIGHT here instead, same as the landscape desktop rule. A
+   deliberate vertical layout, not the desktop composition shrunk down. */
+@media(min-width:900px) and (max-width:1339px){
+  #landing .landing-fintech-scene .fintech-stage .fintech-globe{top:6%;left:50%;height:auto;width:80%;transform:translateX(-50%)}
+  #landing .landing-fintech-scene .fintech-stage .fintech-candles{top:28%;right:8%;left:8%;width:auto}
+  #landing .landing-fintech-scene .fintech-stage .fintech-figure{right:auto;left:50%;transform:translateX(-50%);width:auto;height:96%;max-width:76%}
+}
+@media(max-width:699px){
+  #landing .landing-fintech-scene .fintech-stage .fintech-dataline,#landing .landing-fintech-scene .fintech-stage .fintech-particles{display:none}
+  #landing .landing-fintech-scene .fintech-stage .fintech-globe{top:4%;left:50%;height:auto;width:84%;transform:translateX(-50%)}
+  #landing .landing-fintech-scene .fintech-stage .fintech-candles{top:30%;right:8%;left:8%;width:auto;height:22%}
+  #landing .landing-fintech-scene .fintech-stage .fintech-figure{right:auto;left:50%;transform:translateX(-50%);width:auto;height:98%;max-width:82%}
+}
+
 /* Editorial, non-live market cards reuse the existing Market Intelligence destination. */
 #landing .domain-rail .landing-section-head h3{max-width:30ch;color:#e7ebef}
 #landing .domain-rail .landing-market-intro{max-width:68ch;margin:14px 0 22px;color:#9eabba;font-size:.9rem;line-height:1.65}
@@ -2220,6 +2361,11 @@ body.low-data .view:not(#path) :is(.panel,.access-card,.profile-panel,.preferenc
   #landing .landing-aperture{transition:none!important}
   .view.active :is(.journey-current,.landing-market-card,.landing-plan-card,.plan-card,.journal-entry-card,.resource-feature,.broker-row,.community-tile,.chevron-row){transition:none!important;transform:none!important}
   .primary-action,.public-start,.landing-mobile-cta button{transition:none!important}
+  #landing .landing-fintech-scene .fintech-globe,#landing .landing-fintech-scene .fintech-globe::after,#landing .landing-fintech-scene .fintech-candles i,#landing .landing-fintech-scene .fintech-particles i,#landing .landing-fintech-scene .fintech-globe-sheen,#landing .landing-fintech-scene .fintech-africa-glow,#landing .landing-fintech-scene .fintech-orbit-dot,#landing .landing-fintech-scene .fintech-stage::before{animation:none!important;transform:none!important}
+  /* .fintech-figure keeps its layout transform (translateX(-50%) centering on
+     tablet/mobile) under reduced motion — only its parallax drift stops. */
+  #landing .landing-fintech-scene .fintech-figure{animation:none!important}
+  #landing .landing-fintech-scene .fintech-dataline path{animation:none!important;stroke-dashoffset:0!important}
 }
 
 
@@ -3827,9 +3973,14 @@ body:has(#dashboard.view.active) .topbar{
      viewport-relative h1 size was forcing one word per line. */
   #landing .landing-editorial-shell,
   #landing .landing-hero-banner{max-width:min(1820px,96vw)}
-  #landing .landing-editorial-shell{grid-template-columns:minmax(400px,.82fr) minmax(300px,.56fr) minmax(320px,.62fr);align-items:start;gap:clamp(24px,2.4vw,44px)}
+  /* Hero reconception (2026-11-21, founder-corrected): the figure+globe
+     scene needs a real landscape stage, not a narrow tall panel — the
+     aperture column goes from a ~.56fr sliver to the dominant column, with
+     copy and the market widget narrowed to make room, matching the
+     reference composition the founder approved. */
+  #landing .landing-editorial-shell{grid-template-columns:minmax(380px,.66fr) minmax(480px,1fr) minmax(260px,.44fr);align-items:start;gap:clamp(20px,2vw,36px)}
   #landing .landing-main-copy{grid-column:1;grid-row:1;max-width:none}
-  #landing .landing-aperture{grid-column:2;grid-row:1;min-height:650px}
+  #landing .landing-aperture{grid-column:2;grid-row:1;min-height:560px}
   #landing .landing-market-widget{grid-column:3;grid-row:1}
   /* Headline sized for this column's real width (not raw vw) so the
      reference's 2-line + 1-line break survives instead of one word per line.
