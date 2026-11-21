@@ -518,7 +518,17 @@ function refreshMountedLessons() {
     const main = document.getElementById(`${entry.viewId}-main`);
     const wasMounted = main?.dataset.ddaLessonMounted === 'true';
     mountLesson(entry);
-    if (!wasMounted) bindRegistryQuestions(entry);
+    // Matches mountPremiumLessons()/mountPremiumLabLessons(): a quiz's own
+    // correct-answer handler binds the [data-view] CTA inside the result
+    // card it reveals, but every OTHER [data-view] button rendered upfront
+    // by mountLesson() (module-toc links, "leçon précédente", a result
+    // card for a lesson whose quiz hasn't been attempted yet, …) needs this
+    // bulk bind — missing here, an M1/advanced_modules lesson's result CTA
+    // stayed an inert, unbound button once mounted via this function.
+    if (!wasMounted && main) {
+      bindRegistryQuestions(entry);
+      main.querySelectorAll('[data-view]').forEach(bindViewButton);
+    }
   });
   LESSON_REGISTRY.filter(entry => entry.permission === 'premium_track' && !mountedLessons.some(m => m.id === entry.id)).forEach(entry => {
     if (canUnlock('premium_track')) renderPremiumContentUnavailable(entry.viewId, entry.title);
@@ -4057,6 +4067,16 @@ document.getElementById('gate-unlock')?.addEventListener('click', () => {
   prototypeState = DDA.track(prototypeState, 'plan_preview', { plan: 'premium' });
   mountPremiumLessons();
   mountPremiumLabLessons();
+  // R-04 fix (docs/RISK_REGISTER.md): M1.1-M1.3's real content now arrives
+  // the same way Premium's does — fetched from the authenticated BFF into
+  // window.DDAM1GoldenLesson/etc. and picked up by buildCurriculum() — but,
+  // unlike premium_track, advanced_modules had no refresh call wired into
+  // this handler, so an M1 lesson stayed permanently unmounted (empty
+  // #lesson-m1x-main) even after this same gate just unlocked it.
+  // refreshMountedLessons() re-evaluates every LESSON_REGISTRY entry
+  // against the now-current entitlements and mounts anything newly
+  // unlockable, advanced_modules included.
+  refreshMountedLessons();
   renderState();
   closeGate();
   showToast('Démonstration Premium locale activée · aucun droit serveur.');
