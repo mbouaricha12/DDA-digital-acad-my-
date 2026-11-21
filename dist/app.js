@@ -1915,8 +1915,8 @@ function renderPracticeProof() {
 // photo rail) — picked by module prefix so a lesson's card matches its real
 // module, never a generic stock image unrelated to the content.
 const DASHBOARD_WEEK_PHOTO_BY_MODULE = Object.freeze({
-  M0: 'images/photos/m0-foundations-observe.jpg',
-  M1: 'images/photos/m1-terminal-analysis.jpg',
+  M0: 'images/photos/m0-foundations-observe.webp',
+  M1: 'images/photos/m1-terminal-analysis.webp',
   P2: 'images/photos/p2-discipline-review.jpg',
   MBRVM: 'images/photos/brvm-market-fruits.jpg'
 });

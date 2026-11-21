@@ -1,4 +1,4 @@
-const CACHE = 'dda-shell-v28';
+const CACHE = 'dda-shell-v29';
 
 // Critical shell only. Optional authored modules are cached at first use by the
 // runtime strategy, preserving the lazy-loading benefit on first installation.
@@ -19,6 +19,9 @@ const CORE = [
   './images/photos/path-crystal-forecast.jpg',
   './images/photos/progress-trader-poster.jpg',
   './images/photos/terminal-desk-trading.jpg',
+  './images/photos/lab-ai-collaboration.webp',
+  './images/photos/m0-foundations-observe.webp',
+  './images/photos/m1-terminal-analysis.webp',
   './images/photos/brvm-market-fruits.jpg',
   './images/photos/brokers-trading-floor.jpg',
   './images/photos/family-three-colleagues.jpg',
