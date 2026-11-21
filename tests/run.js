@@ -1110,6 +1110,19 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('the landing "ecosystem" strip never shows a feature as "Actif" unless it is genuinely rendered — regression guard for the misleading banner fixed 2026-11-21', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/`);
+    const strip = page.locator('.dda-ecosystem-strip');
+    if (await strip.count() > 0) {
+      assert.equal(await strip.first().isVisible(), false, 'the ecosystem strip\'s chips are hardcoded "Actif"/price labels (DDA Lab, Marchés & BRVM, DDA Premium) — it must stay hidden until those claims are genuinely true, never shown by accident');
+    }
+    const visibleActiveChips = page.locator('.dda-ecosystem-chip:visible');
+    assert.equal(await visibleActiveChips.count(), 0, 'no chip claiming "Actif" may ever be visible on the public landing page while the strip is not a validated, real status indicator');
+    await context.close();
+  });
+
   await test('#access still shows its chrome as before (landing does not leak into other views)', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
