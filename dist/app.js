@@ -346,6 +346,34 @@ async function refreshServerPremiumEntitlement() {
   }
 }
 
+// Chariow checkout return (Revenue & Activation, 2026-11): the webhook that
+// actually grants the entitlement is delivered to the BFF asynchronously —
+// it can land before OR after the learner's browser is bounced back here —
+// so a single refreshServerPremiumEntitlement() right on return can race a
+// webhook that hasn't arrived yet and wrongly show "still Free". Poll a
+// handful of times with a short delay instead of either a false negative or
+// a spinner with no end. Never fabricates success: if the server still
+// hasn't confirmed after the window, the message says so honestly and tells
+// the learner access activates automatically once it does.
+async function handleCheckoutReturn() {
+  const returning = window.DDA_CHECKOUT_RETURN === true;
+  delete window.DDA_CHECKOUT_RETURN;
+  if (!returning || !window.DDABFF?.enabled()) return;
+  showView('membership');
+  showToast('Vérification de ton paiement en cours…');
+  const attempts = 5;
+  const delayMs = 2500;
+  for (let i = 0; i < attempts; i += 1) {
+    await refreshServerPremiumEntitlement();
+    if (serverPremiumConfirmed === true) {
+      showToast('Paiement confirmé — ton accès DDA Premium est activé.');
+      return;
+    }
+    if (i < attempts - 1) await new Promise(resolve => setTimeout(resolve, delayMs));
+  }
+  showToast('Ton paiement est en cours de traitement. L’accès Premium s’active automatiquement dès confirmation — recharge cette page dans un instant si besoin.');
+}
+
 // Résolution runtime du registre contre le curriculum réel : une leçon
 // déclarée mais absente du curriculum (fichier authored non chargé) n'est pas
 // montée — les boucles ci-dessous ne consomment que mountedLessons.
@@ -3339,7 +3367,17 @@ function renderState() {
   document.getElementById('resume-device').hidden = !prototypeState.user || !document.getElementById('onboarding-form').hidden;
   document.body.classList.toggle('low-data', Boolean(prototypeState.preferences.lowData));
 
-  const premium = prototypeState.membership?.plan === 'premium';
+  // Revenue & Activation (2026-11): when the BFF is enabled, this display
+  // flag must track the SAME authority canUnlock('premium_track') already
+  // uses (serverPremiumConfirmed) — never the local, learner-editable demo
+  // plan. Before this, a real paying customer whose content correctly
+  // unlocked via the server check still saw "DDA Free" / "aucun achat
+  // actif" everywhere on this view (membership-status, sidebar-plan,
+  // profile-plan-badge): content access was secure, but the status shown
+  // back to them was simply wrong. The local demo toggle (serverPremium
+  // false, BFF off) is unaffected.
+  const serverPremium = window.DDABFF?.enabled() && serverPremiumConfirmed === true;
+  const premium = serverPremium || prototypeState.membership?.plan === 'premium';
   const hasProfile = Boolean(prototypeState.user);
   document.getElementById('profile-form').hidden = !hasProfile;
   document.querySelector('.preference-panel').hidden = !hasProfile;
@@ -3375,7 +3413,7 @@ function renderState() {
             : 'Progression en mémoire · stockage local indisponible');
       persistenceStatus.classList.toggle('is-warning', !storageReady);
     }
-    document.getElementById('profile-plan-badge').textContent = premium ? 'DDA Premium · démonstration locale' : 'DDA Free';
+    document.getElementById('profile-plan-badge').textContent = premium ? (serverPremium ? 'DDA Premium' : 'DDA Premium · démonstration locale') : 'DDA Free';
     document.getElementById('profile-level').value = prototypeState.onboarding?.level || 'Débutant';
     document.getElementById('profile-goal').value = prototypeState.onboarding?.goal || 'Comprendre les marchés';
     document.getElementById('profile-time').value = prototypeState.onboarding?.time || '10 minutes par jour';
@@ -3385,14 +3423,19 @@ function renderState() {
   const count = prototypeState.events?.length || 0;
   document.getElementById('event-count').textContent = `${count} événement${count > 1 ? 's' : ''}`;
 
-  document.getElementById('sidebar-plan').textContent = premium ? 'Premium · démo locale' : 'DDA Free';
+  document.getElementById('sidebar-plan').textContent = premium ? (serverPremium ? 'Premium' : 'Premium · démo locale') : 'DDA Free';
   document.querySelectorAll('[data-profile-role]').forEach(node => { node.textContent = premium ? 'Apprenant Premium' : 'Apprenant'; });
-  document.getElementById('membership-status').textContent = premium ? 'DDA Premium · démonstration locale' : 'DDA Free';
+  document.getElementById('membership-status').textContent = premium ? (serverPremium ? 'DDA Premium' : 'DDA Premium · démonstration locale') : 'DDA Free';
   const membershipStatusNote = document.getElementById('membership-status-note');
-  if (membershipStatusNote) membershipStatusNote.textContent = premium ? 'Sur cet appareil uniquement · aucun abonnement ni droit serveur' : 'Disponible maintenant · aucun achat actif';
+  if (membershipStatusNote) membershipStatusNote.textContent = serverPremium
+    ? 'Abonnement actif · confirmé par paiement réel'
+    : (premium ? 'Sur cet appareil uniquement · aucun abonnement ni droit serveur' : 'Disponible maintenant · aucun achat actif');
   document.getElementById('free-plan-state').textContent = premium ? 'Inclus avec Premium' : 'Formule active';
   document.getElementById('preview-premium').hidden = premium;
-  document.getElementById('revert-free').hidden = !premium;
+  // Reverting to Free only makes sense for the local demo toggle — a real
+  // server-confirmed subscription cannot be "reverted" from the browser;
+  // hiding it here avoids implying a paying customer can cancel this way.
+  document.getElementById('revert-free').hidden = !premium || serverPremium;
   document.querySelector('.current-plan').classList.toggle('is-included', premium);
   document.querySelector('.premium-plan').classList.toggle('is-active', premium);
   document.querySelectorAll('.premium-gate').forEach(button => {
@@ -4118,13 +4161,14 @@ function scrollToPremiumWaitlist() {
 }
 document.getElementById('premium-subscribe-cta')?.addEventListener('click', async () => {
   const button = document.getElementById('premium-subscribe-cta');
+  trackEvent('premium_subscribe_cta_clicked', { view: 'membership' });
   if (!window.DDABFF?.enabled()) { showView('membership'); scrollToPremiumWaitlist(); return; }
   const originalLabel = button.innerHTML;
   button.disabled = true;
   button.innerHTML = 'Préparation du paiement…';
   try {
     const result = await window.DDABFF.startPremiumCheckout();
-    if (result.checkoutUrl) { window.location.href = result.checkoutUrl; return; }
+    if (result.checkoutUrl) { trackEvent('premium_checkout_started', { view: 'membership' }); window.location.href = result.checkoutUrl; return; }
     showToast(result.error === 'rate_limited'
       ? 'Trop de tentatives — réessaie dans un instant.'
       : 'Le paiement en ligne n’est pas encore activé. Ton intérêt est enregistré ci-dessous.');
@@ -5492,6 +5536,7 @@ async function bootAcademyAfterSessionCheck() {
     writeDdaHistory(activeViewId, 'replace');
   }
   await handleBffVerificationToken();
+  await handleCheckoutReturn();
 }
 bootAcademyAfterSessionCheck();
 

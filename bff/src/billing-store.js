@@ -11,12 +11,26 @@ function eventTime(value) {
   return Number.isFinite(time) ? time : null;
 }
 
+// Revenue & Activation (2026-11), Phase 2/3 — real gap found while building
+// the renewal/reactivation test matrix: this used to block EVERY transition
+// out of 'expired' or 'revoked' except another 'revoked' one. That is the
+// right call for 'revoked' (a chargeback/fraud revocation must require a
+// human to reinstate, never an automatic webhook — the existing
+// "revoked license must not reactivate" invariant below is unchanged), but
+// wrong for 'expired': a subscription naturally lapses at the end of a
+// billing period, and the learner paying again later (a genuine, newer
+// successful.sale — Chariow has no separate "renewal" event, see chariow.js)
+// must be allowed to restore access. Before this fix, once a membership hit
+// 'expired' it could never be reactivated by any webhook again — a real,
+// unjustified permanent loss of access for anyone whose renewal happened to
+// arrive after the account had already lapsed.
 function acceptsTransition(current, transition) {
   if (!current) return true;
   const incomingTime = eventTime(transition.occurredAt);
   const currentTime = eventTime(current.provider_event_at);
   if (incomingTime !== null && currentTime !== null && incomingTime <= currentTime) return false;
-  if (['expired', 'revoked'].includes(current.status) && transition.status !== 'revoked') return false;
+  if (current.status === 'revoked' && transition.status !== 'revoked') return false;
+  if (current.status === 'expired' && !['active', 'trial', 'revoked'].includes(transition.status)) return false;
   return true;
 }
 
