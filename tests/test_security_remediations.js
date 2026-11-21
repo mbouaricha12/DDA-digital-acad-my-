@@ -65,5 +65,16 @@ function request(server, method, path, { body, cookies = {} } = {}) {
   assert.equal(acceptsTransition(base, { status: 'active', occurredAt: '2026-11-10T11:00:00.000Z' }), false, 'revoked license must not reactivate');
   assert.equal(acceptsTransition({ status: 'active', provider_event_at: '2026-11-10T12:00:00.000Z' }, { status: 'active', occurredAt: '2026-11-10T11:00:00.000Z' }), false, 'stale event must be rejected');
   assert.equal(acceptsTransition({ status: 'expired', provider_event_at: '2026-11-10T10:00:00.000Z' }, { status: 'revoked', occurredAt: '2026-11-10T11:00:00.000Z' }), true, 'newer revocation may strengthen terminal state');
+  // Revenue & Activation (2026-11), Phase 2/3 — a real bug found while
+  // building the renewal/reactivation test matrix: before this fix, an
+  // 'expired' membership could never be reactivated by ANY later webhook,
+  // including a genuinely new, newer paid renewal (Chariow re-fires
+  // successful.sale for a renewal — see bff/src/chariow.js's comment on why
+  // there is no separate renewal event). 'revoked' intentionally stays
+  // terminal (fraud/chargeback — the assertion above is unchanged); only
+  // 'expired' (a natural lapse) may be reactivated.
+  assert.equal(acceptsTransition({ status: 'expired', provider_event_at: '2026-11-10T10:00:00.000Z' }, { status: 'active', occurredAt: '2026-11-10T11:00:00.000Z' }), true, 'a genuine, newer renewal must reactivate an expired (not revoked) membership');
+  assert.equal(acceptsTransition({ status: 'expired', provider_event_at: '2026-11-10T10:00:00.000Z' }, { status: 'active', occurredAt: '2026-11-10T09:00:00.000Z' }), false, 'a stale "renewal" event older than the expiration itself must still be rejected');
+  assert.equal(acceptsTransition({ status: 'expired', provider_event_at: '2026-11-10T10:00:00.000Z' }, { status: 'pending', occurredAt: '2026-11-10T11:00:00.000Z' }), false, 'a merely pending sale must not disturb an expired membership — only a real active/trial renewal or a revocation may');
   console.log('Security remediation contracts: PASS');
 })().catch(error => { console.error(error); process.exitCode = 1; });

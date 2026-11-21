@@ -1021,6 +1021,22 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('Revenue & Activation Phase 6: Premium funnel events (membership view + CTA click + checkout start) are now forwardable, not stuck in the local debug queue', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await completeSignupFlow(page, { firstName: 'Ada', email: 'ada@example.com' });
+    await page.click('.sidebar .sidebar-premium-card [data-view="membership"]');
+    await page.click('#premium-subscribe-cta');
+    const queue = await page.evaluate(() => window.DDAAnalytics.getDebugQueue());
+    const viewed = queue.filter(e => e.localName === 'view_opened' && e.props?.view === 'membership').pop();
+    assert.ok(viewed, 'a membership view_opened should have reached the adapter');
+    assert.equal(viewed.externalName, 'view_opened', 'the Premium page visit step of the funnel must now be forwardable');
+    const clicked = queue.find(e => e.localName === 'premium_subscribe_cta_clicked');
+    assert.ok(clicked, 'clicking the subscribe CTA should fire a trackEvent, even when the BFF is disabled and it falls back to the waitlist');
+    assert.equal(clicked.externalName, 'premium_subscribe_cta_clicked');
+    await context.close();
+  });
+
   await test('purely local product-analytics events (e.g. exercise_attempt) never reach the external event map', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();

@@ -29,7 +29,21 @@
     // plan and any dashboard built from it will look for.
     signup_started: 'signup_started',
     signup_completed: 'signup_completed',
-    quiz_complete: 'lesson_completed'
+    quiz_complete: 'lesson_completed',
+    // Revenue & Activation (2026-11), Phase 6 — the Premium funnel's first
+    // three steps (visit → CTA click → checkout start) were trackEvent()
+    // calls that already fired locally but, like signup_started/completed
+    // before this map picked them up, never left the local debug queue.
+    // view_opened already fires for every real navigation with a `view`
+    // property already restricted to the SAFE_PROP_VALUES.view allowlist
+    // below (which includes 'membership') — forwarding it costs nothing new,
+    // it only lets through what was already deliberately allow-listed.
+    // Payment success/failure and activation are tracked server-side
+    // instead (bff/src/chariow.js's handleChariowPulse -> trackServerEvent),
+    // since that is the only place a webhook's outcome is genuinely known.
+    view_opened: 'view_opened',
+    premium_subscribe_cta_clicked: 'premium_subscribe_cta_clicked',
+    premium_checkout_started: 'premium_checkout_started'
   };
   const SAFE_PROP_KEYS = ['source', 'medium', 'campaign', 'content', 'referrer', 'broker', 'section', 'position', 'view', 'lesson'];
   const SAFE_PROP_VALUES = {

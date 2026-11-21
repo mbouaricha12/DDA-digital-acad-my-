@@ -70,6 +70,16 @@
       if (oauthProvider) window.DDA_OAUTH_PROVIDER = oauthProvider;
       var oauthError = params.get('error') || hashParams.get('error');
       if (oauthError) window.DDA_OAUTH_ERROR = oauthError;
+      // Chariow checkout return (Revenue & Activation, 2026-11): our own
+      // `checkout=return` marker, baked into CHARIOW_CHECKOUT_REDIRECT_URL
+      // server-side — never something Chariow itself is trusted to set —
+      // so a learner coming back from a real payment lands on #membership
+      // and app.js knows to show a "verifying your payment" state and
+      // re-poll the server entitlement, instead of silently showing the
+      // stale pre-payment status. Stashed the same way as the OAuth/
+      // recovery markers above, for the same reason: history.replaceState
+      // below wipes the query string before app.js ever runs.
+      if (params.get('checkout') === 'return') window.DDA_CHECKOUT_RETURN = true;
       var knownRoutes = new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'lesson-p21', 'lesson-p22', 'premium-track', 'premium-lab', 'premium-assessment', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'lab', 'lesson-lab1', 'lesson-lab2', 'lesson-lab3', 'lesson-lab4', 'lesson-lab-capstone', 'forex', 'stocks', 'indices', 'crypto', 'produits-digitaux']);
       var route = location.hash.slice(1);
       document.documentElement.setAttribute('data-boot-view', knownRoutes.has(route) ? route : 'dashboard');
