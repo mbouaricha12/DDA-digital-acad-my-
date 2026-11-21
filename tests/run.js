@@ -1575,8 +1575,8 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
         viewsWithLightField: views.filter(node => getComputedStyle(node).backgroundImage.includes('radial-gradient')).length,
         viewCount: views.length,
         apertureLight: style('#landing .landing-aperture .photo-scrim').backgroundImage,
-        stageMotion: style('#landing .landing-device-stage').animationName,
-        reflectionMotion: getComputedStyle(get('#landing .landing-device-stage'), '::before').animationName,
+        stageMotion: style('#landing .landing-aperture .aperture-grid').animationName,
+        reflectionMotion: getComputedStyle(get('#landing .landing-aperture'), '::after').animationName,
         glass: style('#landing .landing-market-card').backdropFilter,
         action: style('#landing .landing-actions .primary-action').backgroundImage,
         landingFeatureBackground: style('#landing .landing-free-grid article').backgroundImage
@@ -1588,22 +1588,22 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     const academyLightFields = await academyPage.evaluate(() => [...document.querySelectorAll('.view')].filter(node => getComputedStyle(node).backgroundImage.includes('radial-gradient')).length);
     assert.ok(academyLightFields >= 24, 'the route light field should apply throughout the Academy views');
     assert.match(visuals.apertureLight, /radial-gradient/, 'the DDA Aperture has a custom instrument-light treatment');
-    assert.match(visuals.stageMotion, /dda-aperture-float/, 'the laptop/phone stage has gentle 3D movement');
+    assert.match(visuals.stageMotion, /dda-grid-drift/, 'the Aperture grid has gentle ambient movement');
     assert.match(visuals.glass, /blur\(8px\)/, 'market cards use restrained glass on desktop');
     assert.match(visuals.action, /linear-gradient/, 'the landing action uses the DDA electric-blue finish');
     assert.match(visuals.landingFeatureBackground, /linear-gradient/, 'feature modules use smoked glass rather than a generic light card');
 
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    const reducedMotion = await page.locator('#landing .landing-device-stage').evaluate(node => getComputedStyle(node).animationName);
-    assert.equal(reducedMotion, 'none', 'reduced-motion turns off decorative 3D movement');
-    const reducedReflection = await page.locator('#landing .landing-device-stage').evaluate(node => getComputedStyle(node, '::before').animationName);
-    assert.equal(reducedReflection, 'none', 'reduced-motion also stops the reflected light animation');
+    const reducedMotion = await page.locator('#landing .landing-aperture .aperture-grid').evaluate(node => getComputedStyle(node).animationName);
+    assert.equal(reducedMotion, 'none', 'reduced-motion turns off the ambient Aperture grid movement');
+    const reducedReflection = await page.locator('#landing .landing-aperture').evaluate(node => getComputedStyle(node, '::after').animationName);
+    assert.equal(reducedReflection, 'none', 'reduced-motion also stops the Aperture light-breathe animation');
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.evaluate(() => document.body.classList.add('low-data'));
-    const lowDataMotion = await page.locator('#landing .landing-device-stage').evaluate(node => getComputedStyle(node).animationName);
-    assert.equal(lowDataMotion, 'none', 'low-data mode keeps the scene static');
-    const lowDataReflection = await page.locator('#landing .landing-device-stage').evaluate(node => getComputedStyle(node, '::before').animationName);
-    assert.equal(lowDataReflection, 'none', 'low-data mode also stops the reflected light animation');
+    const lowDataMotion = await page.locator('#landing .landing-aperture .aperture-grid').evaluate(node => getComputedStyle(node).animationName);
+    assert.equal(lowDataMotion, 'none', 'low-data mode keeps the Aperture grid static');
+    const lowDataReflection = await page.locator('#landing .landing-aperture').evaluate(node => getComputedStyle(node, '::after').animationName);
+    assert.equal(lowDataReflection, 'none', 'low-data mode also stops the Aperture light-breathe animation');
     await context.close();
   });
 

@@ -13,9 +13,6 @@ const css = fs.readFileSync(path.join(root, 'dist', 'alpha-polish.css'), 'utf8')
 const sw = fs.readFileSync(path.join(root, 'dist', 'sw.js'), 'utf8');
 const app = fs.readFileSync(path.join(root, 'dist', 'app.js'), 'utf8');
 
-assert.match(html, /class="landing-device-stage" aria-hidden="true"/, 'hero device preview is decorative and hidden from assistive technology');
-assert.match(html, /landing-device-laptop/, 'landing hero shows the desktop terminal mockup');
-assert.match(html, /landing-device-phone/, 'landing hero shows the mobile journal mockup');
 assert.match(html, /données pédagogiques/i, 'hero preview labels its market widget as educational data');
 assert.match(html, /données simulées/i, 'hero preview\'s market widget flag discloses the data is simulated');
 assert.match(html, /class="landing-trust-strip"/, 'the landing trust strip is present');
@@ -52,7 +49,6 @@ assert.match(css, /#dashboard \.analysis-terminal-tools\{position:sticky/, 'the 
 assert.match(css, /#dashboard \.terminal-tool-label\{display:none\}/, 'mobile tools are icon-first while accessible names remain on buttons');
 assert.match(css, /#landing \.landing-market-cards\{display:grid/, 'market cards adapt to a responsive grid');
 assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/, 'reduced-motion preference is respected');
-assert.match(css, /body\.low-data #landing \.landing-3d-scene\{display:none\}/, 'the existing low-data guard for decorative 3D remains');
 assert.match(sw, /const CACHE = 'dda-shell-v28';/, 'PWA cache is bumped for the segmented offline strategy');
 assert.match(app, /window\.addEventListener\('popstate'/, 'browser Back/Forward is handled by the existing SPA router');
 assert.match(app, /window\.addEventListener\('hashchange'/, 'hash links remain synchronized with application navigation');
@@ -73,14 +69,9 @@ assert.match(css, /#gate-layer \.gate-card[^\{]*\{[^}]*background:/, 'permission
 assert.match(html, /data-scroll-to="analysis-terminal"/, 'Terminal remains a reachable in-dashboard practice destination');
 assert.match(html, /<p class="nav-section-label">Outils avancés<\/p>/, 'Progression and Journal have a distinct, clearly-labelled advanced-tools group (Priorité 2 nav restructure)');
 assert.match(html, /<button class="nav-item" data-view="journal"><svg class="icon"><use href="#icon-journal"\/><\/svg> Journal de trading<\/button>/, 'navigation calls the destination Journal de trading, not a second Plan');
-assert.match(css, /#landing \.landing-aperture-copy\{display:none!important\}/, 'decorative hero slogan cannot obscure the product mockups');
-assert.match(css, /#landing \.landing-device-chart-head strong\{[^}]*font:600 8px\//, 'device mockup labels stay at product scale rather than inheriting the hero headline');
+assert.match(css, /#landing \.landing-aperture-copy\{display:none!important\}/, 'decorative hero slogan cannot obscure the hero photo');
 assert.match(css, /#progress \.mastery-context-note\{[^}]*background:rgba\(10,20,36,\.78\)/, 'future skill context uses the same calm dark surface as the rest of Progression');
 assert.match(css, /#progress \.view-photo-band \.photo-fill\{filter:saturate\(\.68\) brightness\(\.8\)\}/, 'the Progress hero image keeps its texture with DDA color visibly present');
-assert.match(css, /#landing \.landing-device-stage::before\{/, 'the laptop and phone mockups receive a reflected DDA light pool');
-assert.match(css, /@keyframes dda-aperture-float/, 'the Aperture has a slow, low-amplitude 3D motion');
-assert.match(css, /body\.low-data #landing \.landing-device-stage\{animation:none!important\}/, 'low-data mode disables decorative 3D motion');
-assert.match(css, /body\.low-data #landing \.landing-device-stage::before\{animation:none!important\}/, 'low-data mode disables the reflected light animation');
 assert.match(css, /#landing \.landing-market-card\{backdrop-filter:blur\(8px\)/, 'market preview cards use the DDA smoked-glass treatment');
 
 console.log('RESULT: Elite UI visual contract passed');
