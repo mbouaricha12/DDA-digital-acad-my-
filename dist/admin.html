@@ -43,6 +43,7 @@
         <button class="nav-item" data-admin-view="content" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Contenu</button>
         <button class="nav-item" data-admin-view="resources" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Ressources</button>
         <button class="nav-item" data-admin-view="progress" type="button" hidden id="admin-nav-progress"><svg class="icon"><use href="#admin-icon-progress"/></svg> Progression</button>
+        <button class="nav-item" data-admin-view="entitlements" type="button" hidden id="admin-nav-entitlements"><svg class="icon"><use href="#admin-icon-spark"/></svg> Entitlements</button>
       </nav>
       <div class="admin-exit-row">
         <a class="secondary-action" href="academy.html"><svg class="icon"><use href="#admin-icon-home"/></svg> Retour à l’Academy</a>
@@ -69,6 +70,7 @@
       <button class="nav-item" data-admin-view="content" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Contenu</button>
       <button class="nav-item" data-admin-view="resources" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Ressources</button>
       <button class="nav-item" data-admin-view="progress" type="button" hidden id="admin-nav-progress-mobile"><svg class="icon"><use href="#admin-icon-progress"/></svg> Progression</button>
+      <button class="nav-item" data-admin-view="entitlements" type="button" hidden id="admin-nav-entitlements-mobile"><svg class="icon"><use href="#admin-icon-spark"/></svg> Entitlements</button>
       <div class="admin-exit-row">
         <a class="secondary-action" href="academy.html"><svg class="icon"><use href="#admin-icon-home"/></svg> Retour à l’Academy</a>
       </div>
@@ -107,7 +109,7 @@
         <p class="admin-role-feedback" id="admin-users-feedback" role="status" hidden></p>
         <div class="admin-table-wrap">
           <table class="admin-table">
-            <thead><tr><th>E-mail</th><th>Nom</th><th>Statut</th><th>Rôle</th><th>Partenaire</th><th>Créé le</th><th>Dernière connexion</th><th>Progression</th></tr></thead>
+            <thead><tr><th>E-mail</th><th>Nom</th><th>Statut</th><th>Rôle</th><th>Partenaire</th><th>Créé le</th><th>Dernière connexion</th><th>Progression</th><th>Entitlements</th></tr></thead>
             <tbody id="admin-users-body"></tbody>
           </table>
         </div>
@@ -156,6 +158,33 @@
             <tbody id="admin-progress-body"></tbody>
           </table>
         </div>
+      </section>
+
+      <section class="view" id="admin-view-entitlements" aria-labelledby="admin-entitlements-title">
+        <h1 id="admin-entitlements-title" class="eyebrow gold">Entitlements</h1>
+        <p class="admin-role-feedback" style="border-color:var(--line);color:var(--muted)" id="admin-entitlements-subject">Sélectionne un utilisateur depuis l’onglet Utilisateurs pour gérer ses entitlements accordés à la main.</p>
+        <p class="admin-role-feedback" id="admin-entitlements-feedback" role="status" hidden></p>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Entitlement</th><th>Statut</th><th>Attribué par</th><th>Raison</th><th>Expire le</th><th>Mis à jour</th><th></th></tr></thead>
+            <tbody id="admin-entitlements-body"></tbody>
+          </table>
+        </div>
+        <form id="admin-entitlements-grant-form" class="admin-grant-form" hidden>
+          <p class="eyebrow gold" style="margin-top:28px">Accorder un entitlement</p>
+          <label for="admin-entitlements-key">Entitlement</label>
+          <select id="admin-entitlements-key" required>
+            <option value="premium_track">premium_track</option>
+            <option value="resources_premium">resources_premium</option>
+            <option value="certificate_preview">certificate_preview</option>
+            <option value="advanced_modules">advanced_modules</option>
+          </select>
+          <label for="admin-entitlements-reason">Raison (obligatoire, tracée)</label>
+          <textarea id="admin-entitlements-reason" maxlength="500" placeholder="Ex. : geste commercial, incident technique à compenser…"></textarea>
+          <label for="admin-entitlements-expires">Expire le (optionnel)</label>
+          <input type="date" id="admin-entitlements-expires">
+          <button class="primary-action" type="submit">Accorder</button>
+        </form>
       </section>
 
       <section class="view" id="admin-view-content" aria-labelledby="admin-content-title">

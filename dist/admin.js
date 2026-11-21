@@ -52,7 +52,7 @@
   const views = document.querySelectorAll('main .view');
   const navButtons = document.querySelectorAll('[data-admin-view]');
   const contextTitle = document.getElementById('admin-context-title');
-  const viewTitles = { overview: 'Aperçu', users: 'Utilisateurs', memberships: 'Abonnements', content: 'Contenu', resources: 'Ressources', progress: 'Progression' };
+  const viewTitles = { overview: 'Aperçu', users: 'Utilisateurs', memberships: 'Abonnements', content: 'Contenu', resources: 'Ressources', progress: 'Progression', entitlements: 'Entitlements' };
 
   function showAdminView(id) {
     views.forEach(view => view.classList.toggle('active', view.id === `admin-view-${id}`));
@@ -271,13 +271,20 @@
         <td>${formatDate(user.created_at)}</td>
         <td>${formatDate(user.last_sign_in_at)}</td>
         <td><button class="text-action" type="button" data-progress-user-id="${escapeHtml(user.user_id)}" data-progress-email="${escapeHtml(user.email || user.user_id)}">Voir</button></td>
-      </tr>`).join('') || `<tr><td colspan="8">Aucun utilisateur.</td></tr>`;
+        <td><button class="text-action" type="button" data-entitlements-user-id="${escapeHtml(user.user_id)}" data-entitlements-email="${escapeHtml(user.email || user.user_id)}">Gérer</button></td>
+      </tr>`).join('') || `<tr><td colspan="9">Aucun utilisateur.</td></tr>`;
     body.querySelectorAll('.admin-role-select').forEach(select => select.addEventListener('change', onRoleChange));
     body.querySelectorAll('[data-progress-user-id]').forEach(button => button.addEventListener('click', () => {
       document.getElementById('admin-nav-progress').hidden = false;
       document.getElementById('admin-nav-progress-mobile').hidden = false;
       showAdminView('progress');
       loadProgress(button.dataset.progressUserId, button.dataset.progressEmail);
+    }));
+    body.querySelectorAll('[data-entitlements-user-id]').forEach(button => button.addEventListener('click', () => {
+      document.getElementById('admin-nav-entitlements').hidden = false;
+      document.getElementById('admin-nav-entitlements-mobile').hidden = false;
+      showAdminView('entitlements');
+      loadEntitlements(button.dataset.entitlementsUserId, button.dataset.entitlementsEmail);
     }));
     document.getElementById('admin-users-page-label').textContent = total != null ? `Page ${page} · ${total} au total` : `Page ${page}`;
     document.getElementById('admin-users-prev').disabled = page <= 1;
@@ -439,6 +446,105 @@
         <td>${formatDate(row.updatedAt)}</td>
       </tr>`).join('') || `<tr><td colspan="5">Aucune progression enregistrée pour ce compte.</td></tr>`;
   }
+
+  // ---------- Entitlements (owner-granted, additive to real Chariow membership) ----------
+  // GET/POST/PATCH /v1/admin/entitlements* (bff/src/app.js, entitlements-store.js):
+  // owner-only mutation, CSRF-protected, mandatory audit-logged "reason". The
+  // grant form only renders for an owner (mirrors roleCell's owner-gating),
+  // because the server would 403 any admin attempt anyway — same reasoning
+  // that already governs the role dropdown above.
+  const entitlementsState = { userId: null, email: null };
+  function entitlementStatusTag(status) {
+    return `<span class="admin-status-tag" data-status="${escapeHtml(status)}">${escapeHtml(status)}</span>`;
+  }
+  async function loadEntitlements(userId, email) {
+    entitlementsState.userId = userId;
+    entitlementsState.email = email;
+    document.getElementById('admin-entitlements-subject').textContent = `Entitlements de ${email}`;
+    setDataFeedback('admin-entitlements-feedback', '');
+    const body = document.getElementById('admin-entitlements-body');
+    body.innerHTML = '';
+    const form = document.getElementById('admin-entitlements-grant-form');
+    form.hidden = callerRole !== 'owner';
+    let result;
+    try {
+      result = await window.DDABFF.getAdminEntitlements(userId);
+    } catch {
+      setDataFeedback('admin-entitlements-feedback', 'Entitlements indisponibles pour le moment. Réessaie plus tard.');
+      return;
+    }
+    if (result.status !== 200) {
+      setDataFeedback('admin-entitlements-feedback', apiDataError(result.status, 'Entitlements'));
+      return;
+    }
+    renderEntitlementsBody(result.data.grants || []);
+  }
+  function renderEntitlementsBody(entitlements) {
+    const body = document.getElementById('admin-entitlements-body');
+    body.innerHTML = entitlements.map(row => `
+      <tr>
+        <td>${escapeHtml(row.entitlement_key)}</td>
+        <td>${entitlementStatusTag(row.status)}</td>
+        <td>${escapeHtml(row.granted_by) || '—'}</td>
+        <td>${escapeHtml(row.reason) || '—'}</td>
+        <td>${formatDate(row.expires_at)}</td>
+        <td>${formatDate(row.updated_at)}</td>
+        <td>${callerRole === 'owner' ? `<button class="text-action" type="button" data-entitlement-key="${escapeHtml(row.entitlement_key)}" data-entitlement-status="${escapeHtml(row.status)}">${row.status === 'active' ? 'Suspendre' : 'Réactiver'}</button>` : ''}</td>
+      </tr>`).join('') || `<tr><td colspan="7">Aucun entitlement accordé à la main pour ce compte.</td></tr>`;
+    body.querySelectorAll('[data-entitlement-key]').forEach(button => button.addEventListener('click', () => onEntitlementStatusToggle(button)));
+  }
+  async function onEntitlementStatusToggle(button) {
+    const key = button.dataset.entitlementKey;
+    const nextStatus = button.dataset.entitlementStatus === 'active' ? 'suspended' : 'active';
+    const email = entitlementsState.email;
+    const confirmMessage = nextStatus === 'suspended'
+      ? `Suspendre l'entitlement "${key}" pour ${email} ?`
+      : `Réactiver l'entitlement "${key}" pour ${email} ?`;
+    if (!window.confirm(confirmMessage)) return;
+    setDataFeedback('admin-entitlements-feedback', '');
+    const result = await window.DDABFF.setAdminEntitlementStatus(entitlementsState.userId, key, nextStatus);
+    if (!result.enabled) return;
+    if (result.status === 200) {
+      loadEntitlements(entitlementsState.userId, entitlementsState.email);
+      return;
+    }
+    const messages = {
+      403: 'Seul un owner peut modifier les entitlements.',
+      404: 'Entitlement introuvable pour ce compte.',
+      400: 'Statut invalide.'
+    };
+    setDataFeedback('admin-entitlements-feedback', messages[result.status] || 'La modification a échoué.');
+  }
+  document.getElementById('admin-entitlements-grant-form')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const key = document.getElementById('admin-entitlements-key').value;
+    const reason = document.getElementById('admin-entitlements-reason').value.trim();
+    const expiresAt = document.getElementById('admin-entitlements-expires').value || undefined;
+    const email = entitlementsState.email;
+    if (!reason) {
+      setDataFeedback('admin-entitlements-feedback', 'La raison est obligatoire — elle est tracée dans l’audit.');
+      return;
+    }
+    if (!window.confirm(`Accorder l'entitlement "${key}" à ${email} ?\nRaison : ${reason}`)) return;
+    setDataFeedback('admin-entitlements-feedback', '');
+    const result = await window.DDABFF.grantAdminEntitlement({ userId: entitlementsState.userId, entitlementKey: key, reason, expiresAt });
+    if (!result.enabled) return;
+    if (result.status === 200 || result.status === 201) {
+      document.getElementById('admin-entitlements-reason').value = '';
+      document.getElementById('admin-entitlements-expires').value = '';
+      // loadEntitlements() clears this feedback element as soon as it starts
+      // (same as every other load*() in this file) — await it first, then
+      // show the success message, or it is wiped before anyone sees it.
+      await loadEntitlements(entitlementsState.userId, entitlementsState.email);
+      setDataFeedback('admin-entitlements-feedback', `Entitlement "${key}" accordé.`, 'success');
+      return;
+    }
+    const messages = {
+      403: 'Seul un owner peut accorder un entitlement.',
+      400: 'Entitlement ou raison invalide.'
+    };
+    setDataFeedback('admin-entitlements-feedback', messages[result.status] || 'L’attribution a échoué.');
+  });
 
   // ---------- Logout ----------
   document.getElementById('admin-logout')?.addEventListener('click', async () => {

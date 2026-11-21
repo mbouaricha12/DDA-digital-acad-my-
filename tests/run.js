@@ -2707,6 +2707,92 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('an owner can view, grant, and suspend/reactivate a user\'s admin-granted entitlements; a non-owner admin never sees the grant form', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/security/csrf', route => route.fulfill({ status: 204 }));
+    await context.route('https://bff.test/v1/admin/overview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-overview-v1', generated_at: new Date().toISOString(), caller: { user_id: 'owner-1', role: 'owner' }, metrics: {} })
+    }));
+    await context.route('https://bff.test/v1/admin/users*', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-users-v1', page: 1, per_page: 20, total: 1, users: [
+        { user_id: 'u1', email: 'learner@example.com', display_name: 'Learner', status: 'active', role: null, ref: null, created_at: '2026-09-01T00:00:00.000Z', last_sign_in_at: null }
+      ] })
+    }));
+    let grants = [{ entitlement_key: 'premium_track', status: 'active', granted_by: 'owner-1', reason: 'geste commercial', expires_at: null, updated_at: '2026-11-01T00:00:00.000Z' }];
+    let lastGrantBody = null;
+    let lastPatchBody = null;
+    await context.route('https://bff.test/v1/admin/entitlements/u1', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-entitlements-v1', user_id: 'u1', valid_entitlements: ['premium_track', 'resources_premium', 'certificate_preview', 'advanced_modules'], grants })
+    }));
+    await context.route('https://bff.test/v1/admin/entitlements', route => {
+      lastGrantBody = JSON.parse(route.request().postData());
+      grants = [...grants, { entitlement_key: lastGrantBody.entitlement_key, status: 'active', granted_by: 'owner-1', reason: lastGrantBody.reason, expires_at: lastGrantBody.expires_at || null, updated_at: new Date().toISOString() }];
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ contract: 'dda-admin-entitlements-v1', entitlement_key: lastGrantBody.entitlement_key, status: 'active', expires_at: lastGrantBody.expires_at || null }) });
+    });
+    await context.route('https://bff.test/v1/admin/entitlements/u1/premium_track', route => {
+      lastPatchBody = JSON.parse(route.request().postData());
+      grants = grants.map(row => row.entitlement_key === 'premium_track' ? { ...row, status: lastPatchBody.status } : row);
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ contract: 'dda-admin-entitlements-v1', entitlement_key: 'premium_track', status: lastPatchBody.status }) });
+    });
+    const page = await context.newPage();
+    page.on('dialog', dialog => dialog.accept());
+    await page.goto(`${BASE}/admin.html`);
+    await page.click('[data-admin-view="users"]');
+    await page.waitForSelector('#admin-users-body tr');
+    await page.click('[data-entitlements-user-id="u1"]');
+    await page.waitForSelector('#admin-view-entitlements.active');
+    assert.match(await page.textContent('#admin-entitlements-subject'), /learner@example\.com/);
+    await page.waitForSelector('#admin-entitlements-body tr');
+    assert.match(await page.textContent('#admin-entitlements-body'), /premium_track/);
+    assert.equal(await page.locator('#admin-entitlements-grant-form').isHidden(), false, 'the grant form renders for an owner');
+    await page.selectOption('#admin-entitlements-key', 'resources_premium');
+    await page.click('#admin-entitlements-grant-form button[type=submit]');
+    await waitForText(page, '#admin-entitlements-feedback', { includes: 'obligatoire' });
+    assert.equal(lastGrantBody, null, 'an empty reason is rejected client-side — no request is ever sent');
+    await page.fill('#admin-entitlements-reason', 'incident technique à compenser');
+    await page.click('#admin-entitlements-grant-form button[type=submit]');
+    await waitForText(page, '#admin-entitlements-feedback', { includes: 'accordé' });
+    assert.equal(lastGrantBody?.entitlement_key, 'resources_premium');
+    assert.equal(lastGrantBody?.reason, 'incident technique à compenser');
+    assert.match(await page.textContent('#admin-entitlements-body'), /resources_premium/);
+    await page.click('#admin-entitlements-body [data-entitlement-key="premium_track"]');
+    await waitForText(page, '#admin-entitlements-body', { includes: 'suspended' });
+    assert.equal(lastPatchBody?.status, 'suspended');
+    await context.close();
+  });
+
+  await test('a non-owner admin never sees the entitlements grant form', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/security/csrf', route => route.fulfill({ status: 204 }));
+    await context.route('https://bff.test/v1/admin/overview', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-overview-v1', generated_at: new Date().toISOString(), caller: { user_id: 'admin-1', role: 'admin' }, metrics: {} })
+    }));
+    await context.route('https://bff.test/v1/admin/users*', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-users-v1', page: 1, per_page: 20, total: 1, users: [
+        { user_id: 'u1', email: 'learner@example.com', display_name: 'Learner', status: 'active', role: null, ref: null, created_at: '2026-09-01T00:00:00.000Z', last_sign_in_at: null }
+      ] })
+    }));
+    await context.route('https://bff.test/v1/admin/entitlements/u1', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ contract: 'dda-admin-entitlements-v1', user_id: 'u1', valid_entitlements: ['premium_track'], grants: [] })
+    }));
+    const page = await context.newPage();
+    await page.goto(`${BASE}/admin.html`);
+    await page.click('[data-admin-view="users"]');
+    await page.waitForSelector('#admin-users-body tr');
+    await page.click('[data-entitlements-user-id="u1"]');
+    await page.waitForSelector('#admin-view-entitlements.active');
+    assert.equal(await page.locator('#admin-entitlements-grant-form').isHidden(), true, 'a non-owner admin never sees the grant form — the server would 403 it anyway');
+    await context.close();
+  });
+
   await test('the back-office header search filters the real admin sidebar items, and the profile chip shows the real connected admin name/role from /v1/me, never a fake identity', async () => {
     const context = await freshContext(browser);
     await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });

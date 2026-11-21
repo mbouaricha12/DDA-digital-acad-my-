@@ -352,12 +352,34 @@
     return mutateAdminRole(`/v1/admin/roles/${encodeURIComponent(userId)}`, { method: 'DELETE' });
   }
 
+  // Admin-granted entitlements (bff/src/app.js /v1/admin/entitlements*,
+  // owner-only mutation, additive to the real Chariow-membership
+  // entitlements — see bff/src/entitlements-store.js). Reads use
+  // adminRequest's {enabled, status, data} shape; grant/suspend/reactivate
+  // reuse mutateAdminRole's {enabled, status, data} shape for the same
+  // reason role mutation does: the UI needs to show *why* a grant failed
+  // (not an owner, invalid entitlement, missing reason), not just that it did.
+  async function getAdminEntitlements(userId) {
+    return adminRequest(`/v1/admin/entitlements/${encodeURIComponent(userId)}`);
+  }
+
+  async function grantAdminEntitlement({ userId, entitlementKey, reason, expiresAt }) {
+    const body = { user_id: userId, entitlement_key: entitlementKey, reason };
+    if (expiresAt) body.expires_at = expiresAt;
+    return mutateAdminRole('/v1/admin/entitlements', { method: 'POST', body });
+  }
+
+  async function setAdminEntitlementStatus(userId, entitlementKey, status) {
+    return mutateAdminRole(`/v1/admin/entitlements/${encodeURIComponent(userId)}/${encodeURIComponent(entitlementKey)}`, { method: 'PATCH', body: { status } });
+  }
+
   window.DDABFF = Object.freeze({
     enabled, register, verifyEmail, exchangeSignupCode, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, getMarketQuotes, updateMe, logout, issueCsrf,
     oauthGoogleStartUrl, exchangeOAuthCode,
     getProgress, saveLessonProgress, saveOnboardingProgress, hasServerPremiumEntitlement, fetchPremiumContent, hasServerAdvancedModulesAccess, fetchM1Content, askAI, startPremiumCheckout,
     getCommunityPosts, createCommunityPost,
     getAdminOverview, getAdminUsers, getAdminMemberships, getAdminProgress, assignAdminRole, revokeAdminRole,
+    getAdminEntitlements, grantAdminEntitlement, setAdminEntitlementStatus,
     get baseUrl() { return configuredBase; }
   });
 })();
