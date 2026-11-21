@@ -14,8 +14,10 @@ assert.match(html, /id="trust-orientation-title"/);
 assert.match(html, /<strong>Free<\/strong>[\s\S]*progression locale/);
 // Commercial positioning correction (2026-11-14): "Démonstration locale" was
 // retired from this public step indicator — Premium is a real, priced offer
-// now, not a demo. The honest payment-readiness note still appears here.
-assert.match(html, /<strong>Premium<\/strong>[\s\S]*Paiement en cours d’activation/);
+// now, not a demo. Chariow checkout went live 2026-11-21, so this step
+// indicator now names the real payment provider instead of "en cours
+// d'activation".
+assert.match(html, /<strong>Premium<\/strong>[\s\S]*Paiement sécurisé via Chariow/);
 assert.match(html, /<strong>Access<\/strong>[\s\S]*à préparer/);
 assert.match(app, /Premium · démonstration locale/);
 assert.match(app, /aucun droit serveur/);
