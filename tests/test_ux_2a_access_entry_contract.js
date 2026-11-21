@@ -9,13 +9,19 @@ const app = fs.readFileSync(path.join(root, 'dist/app.js'), 'utf8');
 const polish = fs.readFileSync(path.join(root, 'dist/alpha-polish.css'), 'utf8');
 const core = fs.readFileSync(path.join(root, 'dist/dda-core.js'), 'utf8');
 
+// Hero convergence pass (2026-11-20, founder-approved): the Free value
+// block's three bullets were changed from naming internal lesson codes to
+// three outcome-focused benefits — "Apprendre à ton rythme / Pratiquer en
+// conditions réelles / Développer des compétences durables" — per the
+// founder's explicit "rangée de bénéfices" request. The "6 leçons" guard
+// (never promise locked M1 content as Free) still applies to the new copy.
 assert.match(landing, /class="landing-free-proof"/, 'landing exposes a concrete Free value block near the hero CTA');
-assert.match(landing, /3 leçons de fondation/, 'landing names the three genuinely Free foundation lessons without internal codes');
+assert.match(landing, /Apprendre à ton rythme/, 'landing names the founder-approved "learn at your own pace" benefit');
+assert.match(landing, /Pratiquer en conditions réelles/, 'landing names the founder-approved "practice in realistic conditions" benefit');
+assert.match(landing, /Développer des compétences durables/, 'landing names the founder-approved "build durable skills" benefit');
 assert.doesNotMatch(landing, /6 leçons/, 'landing does not promise locked M1 lessons as Free content');
-assert.match(landing, /Exercices &amp; quiz/, 'landing names exercises and quizzes');
-assert.match(landing, /Progression &amp; Journal/, 'landing names local progression and Journal');
 assert.match(landing, /sans carte bancaire/, 'landing removes payment anxiety near the CTA');
-assert.match(academy, /id="access-form-title">Commence ton parcours Free/, 'access form names the Free journey');
+assert.match(academy, /id="access-form-title">Commence ton parcours <em>Free<\/em>/, 'access form names the Free journey');
 assert.match(academy, /id="access-form-note"/, 'access form explains the local journey');
 assert.match(academy, /Sans compte serveur, tes données restent sur cet appareil/, 'local storage is described conditionally, not as the only account mode');
 assert.match(academy, /class="access-back-link" href="\.\/index\.html"/, 'the public access screen has a clear route back to the site');
@@ -25,12 +31,13 @@ assert.match(academy, /id="onboarding-form-note"/, 'onboarding explains why cali
 assert.match(academy, /aria-describedby="onboarding-form-note onboarding-error"/, 'onboarding fields expose accessible context and errors');
 assert.match(academy, /id="progress-next-action"/, 'progression exposes a dedicated next-action control');
 // Commercial preparation mandate (2026-11-14): the founder-approved price
-// now shows on the Premium card, and the old "démonstration pédagogique"
-// technical label is gone from public-facing copy — the honesty that
-// matters (not yet a real, billable subscription) is still asserted below
-// via "pas un abonnement actif".
+// shows on the Premium card. Chariow checkout went live in production
+// 2026-11-21, so the honesty guard that matters now is no longer "not yet
+// a real subscription" but "access is never granted by local state, only
+// by a confirmed server-side payment" (see test_free_premium_access_contract.js
+// for the matching access-model-rules assertion).
 assert.match(academy, /12 000 FCFA/, 'membership shows the founder-approved Premium price');
-assert.match(academy, /pas un abonnement actif/, 'membership explicitly denies an active subscription');
+assert.match(academy, /accordé uniquement après confirmation réelle du paiement/, 'membership explicitly ties access to a confirmed real payment, never local state');
 assert.match(academy, /href="launch\/"/, 'membership links to commercial preparation');
 assert.match(academy, /data-permission="premium_track" data-premium-target="premium-lab"/, 'the resource CTA points to the protected Risk Lab, not a dead-end toast');
 assert.match(academy, /Intérêt pour Premium/, 'the local interest preference is not presented as a real waiting list');

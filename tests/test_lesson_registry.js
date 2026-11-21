@@ -53,12 +53,15 @@ const coreCtx = {
   console,
   localStorage: { getItem: () => null, setItem: () => {}, removeItem: () => {} },
   crypto: { randomUUID: () => 'test-visitor' },
-  // M1.1/M1.2/M1.3 are authored in their own files and promoted into the
-  // curriculum by dda-core.js via these globals — same mechanism as the
-  // browser scripts.
-  DDAM1GoldenLesson: require('../dist/m1-1-lesson.js'),
-  DDAM12GoldenLesson: require('../dist/m1-2-lesson.js'),
-  DDAM13GoldenLesson: require('../dist/m1-3-lesson.js'),
+  // M1.1/M1.2/M1.3's real content no longer lives in dist/m1-*-lesson.js
+  // (docs/RISK_REGISTER.md R-04 fix) — it is fetched from the authenticated
+  // BFF at runtime (bff/src/m1-content.js). This structural test validates
+  // the registry against the REAL authored content, so it loads it from
+  // there directly, exactly as dist/m1-*-lesson.js would have populated
+  // these globals once their fetch succeeded.
+  DDAM1GoldenLesson: require('../bff/src/m1-content.js').M1_CONTENT['M1.1'],
+  DDAM12GoldenLesson: require('../bff/src/m1-content.js').M1_CONTENT['M1.2'],
+  DDAM13GoldenLesson: require('../bff/src/m1-content.js').M1_CONTENT['M1.3'],
   // MBRVM.1 is authored in its own file and promoted the same way — its own
   // independent module, between M1 and M2 in curriculum order.
   DDAMBRVM1Lesson: require('../dist/mbrvm-1-lesson.js')

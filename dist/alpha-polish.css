@@ -646,6 +646,8 @@ body.access-mode .prototype-banner{
 #access .access-card .text-action{color:#94a3b8}
 #access h1,
 #access .access-card h2{color:#f8fafc}
+#access .access-card h2 em{color:#d9a441;font-style:normal}
+#access h1 em{color:#d9a441;font-style:normal}
 #access .eyebrow.gold{color:#d9a441}
 #access .trust-list li{color:#f8fafc}
 #access .trust-list .icon{color:#6cb8ff}
@@ -673,16 +675,16 @@ body.access-mode .prototype-banner{
 #access .access-card select:focus{border-color:#6cb8ff;box-shadow:0 0 0 3px rgba(108,184,255,.14);outline:0}
 #access .access-card .consent input{accent-color:#1769d1}
 #access .access-card .primary-action{
-  background:#1769d1;
-  color:#fff;
+  background:linear-gradient(135deg,#e3c27f,#d9a441);
+  color:#1a1206;
   border:1px solid transparent;
-  box-shadow:none;
+  box-shadow:0 12px 28px rgba(201,139,30,.28);
 }
 #access .access-card .primary-action:hover,
 #access .access-card .primary-action:focus-visible{
-  background:#1d73df;
+  background:linear-gradient(135deg,#e9cd95,#e0ac4c);
   border-color:#d9a441;
-  box-shadow:0 0 0 3px rgba(217,164,65,.14);
+  box-shadow:0 0 0 3px rgba(217,164,65,.14),0 12px 28px rgba(201,139,30,.28);
 }
 #access .access-card .secondary-action{color:#f8fafc;border-color:rgba(255,255,255,.18)}
 #access .access-card .text-action:hover{color:#f8fafc}
@@ -1172,32 +1174,112 @@ body.public-shell main{min-height:100vh;background:#061b47}
 #landing .landing-section-head{padding-inline:0}
 #landing .landing-section-head h2{max-width:22ch}
 #landing .landing-section-head>p:last-child{max-width:58ch;color:var(--lp-body);line-height:1.6}
-#landing .landing-philosophy-band{max-width:1200px;margin:0 auto;padding:clamp(64px,10vw,132px) clamp(20px,5vw,72px);display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:28px;align-items:end;border-top:1px solid var(--lp-line);border-bottom:1px solid var(--lp-line)}
-#landing .philosophy-band-copy{max-width:680px}
-#landing .differentiation-statement{font-family:var(--dda-serif);font-size:clamp(2.35rem,6vw,5.4rem);line-height:.98;letter-spacing:-.045em;color:var(--lp-heading)}
+#landing .landing-philosophy-band{max-width:1320px;margin:0 auto;padding:clamp(56px,8vw,96px) clamp(20px,5vw,72px);display:grid;grid-template-columns:minmax(0,1.05fr) auto minmax(260px,.85fr);column-gap:clamp(28px,4vw,56px);align-items:center;border-top:1px solid var(--lp-line);border-bottom:1px solid var(--lp-line)}
+#landing .philosophy-band-copy{max-width:560px}
+#landing .philosophy-band-copy .differentiation-mark{display:block;margin-bottom:10px}
+#landing .differentiation-statement{font-family:var(--dda-serif);font-size:clamp(2rem,4.4vw,3.6rem);line-height:1.04;letter-spacing:-.03em;color:var(--lp-heading)}
 #landing .differentiation-statement em{color:var(--dda-gold-soft);font-style:normal}
-#landing .philosophy-band-copy .differentiation-note{max-width:48ch;margin-top:22px;color:var(--lp-body);font-size:1rem;line-height:1.65}
-#landing .landing-philosophy-band .landing-inline-cta{white-space:nowrap;margin-bottom:4px}
-#landing .landing-experience,#landing .landing-product,#landing .landing-proof,#landing .landing-ecosystem{max-width:1200px;margin:0 auto;padding:clamp(56px,7vw,96px) clamp(20px,5vw,72px);border-bottom:1px solid var(--lp-line)}
+#landing .philosophy-band-copy .differentiation-note{max-width:48ch;margin-top:16px;color:var(--lp-body);font-size:.92rem;line-height:1.6}
+#landing .landing-philosophy-band .landing-inline-cta{display:inline-flex;white-space:nowrap;margin-top:20px}
+#landing .philosophy-band-mark{display:grid;place-items:center;width:clamp(96px,10vw,148px);height:clamp(96px,10vw,148px);border-radius:50%;background:radial-gradient(ellipse 80% 80% at 50% 45%,rgba(91,143,217,.22),transparent 72%);color:var(--dda-gold-soft)}
+#landing .philosophy-band-mark .icon{width:46%;height:46%}
+#landing .philosophy-band-values{display:flex;flex-direction:column;gap:18px;margin:0;padding:0;list-style:none}
+#landing .philosophy-band-values li{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;padding-top:16px;border-top:1px solid var(--lp-line)}
+#landing .philosophy-band-values li:first-child{padding-top:0;border-top:0}
+#landing .philosophy-band-values .icon{width:20px;height:20px;margin-top:2px;color:var(--dda-gold-soft)}
+#landing .philosophy-band-values strong{display:block;margin-bottom:4px;color:var(--lp-heading);font-size:.94rem}
+#landing .philosophy-band-values p{margin:0;color:var(--lp-body-soft);font-size:.8rem;line-height:1.5}
+#landing .landing-product,#landing .landing-proof,#landing .landing-ecosystem,#landing .landing-pathways{max-width:1200px;margin:0 auto;padding:clamp(56px,7vw,96px) clamp(20px,5vw,72px);border-bottom:1px solid var(--lp-line)}
+#landing .landing-pathways{display:grid;grid-template-columns:minmax(220px,.68fr) minmax(0,1.32fr);column-gap:48px;align-items:start}
+#landing .pathways-copy{max-width:320px}
+#landing .pathways-copy h2{margin-top:10px}
+#landing .pathways-copy .landing-inline-cta{display:inline-flex;margin-top:22px}
+#landing .pathways-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+#landing .pathway-card{position:relative;display:flex;flex-direction:column;gap:10px;padding:22px 20px 56px;border:1px solid var(--lp-line);border-radius:14px;background:linear-gradient(165deg,rgba(18,42,69,.78),rgba(8,19,34,.88));text-decoration:none;transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease}
+#landing .pathway-card:hover,#landing .pathway-card:focus-visible{border-color:rgba(92,184,255,.4);transform:translateY(-3px);box-shadow:0 18px 40px rgba(0,0,0,.24),0 0 24px rgba(22,126,245,.12)}
+#landing .pathway-card-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:rgba(91,143,217,.14);color:var(--lp-blue-2)}
+#landing .pathway-card-icon .icon{width:20px;height:20px}
+#landing .pathway-card h3{margin:0;color:var(--lp-heading);font-family:var(--dda-serif);font-size:1.1rem;line-height:1.2}
+#landing .pathway-card p{margin:0;color:var(--lp-body-soft);font-size:.8rem;line-height:1.5}
+#landing .pathway-card b{position:absolute;right:20px;bottom:20px;color:var(--dda-gold-soft);font-size:1.1rem;font-style:normal}
+@media(max-width:1023px){
+  #landing .landing-pathways{grid-template-columns:1fr}
+  #landing .pathways-grid{grid-template-columns:repeat(2,1fr);margin-top:28px}
+}
+@media(max-width:639px){
+  #landing .pathways-grid{grid-template-columns:1fr}
+}
+/* Fidélité maquette : la vidéo de présentation et la méthode Discover→Improve
+   forment un seul bloc asymétrique (vidéo ~42% / méthode ~58%) dans la
+   référence, pas deux sections pleine largeur empilées — c'est la cause
+   concrète de l'effet "sections juxtaposées" identifié dans l'audit visuel.
+   Le wrapper porte maintenant toute la largeur/le padding/la bordure ;
+   les deux <section> internes deviennent de simples colonnes de grille. */
+#landing .landing-method-composition{max-width:1200px;margin:0 auto;padding:clamp(56px,7vw,96px) clamp(20px,5vw,72px);border-bottom:1px solid var(--lp-line);display:grid;gap:48px}
+#landing .landing-method-composition .landing-experience{max-width:none;margin:0;padding:0}
+#landing .landing-method-composition .landing-presentation-video{max-width:none;margin:0}
+@media(min-width:1024px){
+  #landing .landing-method-composition{grid-template-columns:minmax(0,.72fr) minmax(0,1fr);column-gap:56px;align-items:start}
+}
 #landing .landing-experience{background:linear-gradient(180deg,rgba(11,22,40,.4),transparent)}
 #landing .experience-heading{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.7fr);column-gap:64px;align-items:end}
 #landing .experience-heading .eyebrow{grid-column:1/-1}
 #landing .experience-heading h2{grid-column:1}
 #landing .experience-heading>p:last-child{grid-column:2;grid-row:2}
-#landing .experience-flow{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin:58px 0 0;padding:0;list-style:none}
-#landing .experience-flow::before{content:"";position:absolute;left:7%;right:7%;top:28px;height:1px;background:linear-gradient(90deg,var(--lp-blue-2),rgba(201,154,69,.2),var(--lp-blue-2));opacity:.6}
-#landing .experience-flow li{position:relative;z-index:1;display:flex;flex-direction:column;gap:18px;min-width:0;padding:0 14px 0 0;background:none;border:0;border-radius:0;transition:opacity .28s ease,transform .28s ease}
+/* Discover→Improve, 900px+: at 331px/card the paragraph was capped at 18ch
+   (~152px) inside a card with zero top/left padding — text and the step
+   circle sat flush against the border, leaving ~165px of dead space to
+   the right of every card. Real padding + a real column gap turn these
+   into genuine cards; the connecting line's top offset is recomputed to
+   stay centered on the circle once padding pushes it down. */
+#landing .experience-flow{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:22px;margin:58px 0 0;padding:0;list-style:none}
+#landing .experience-flow::before{content:"";position:absolute;left:7%;right:7%;top:54px;height:1px;background:linear-gradient(90deg,var(--lp-blue-2),rgba(201,154,69,.2),var(--lp-blue-2));opacity:.6}
+#landing .experience-flow li{position:relative;z-index:1;display:flex;flex-direction:column;gap:16px;min-width:0;padding:26px 24px 28px;background:none;border:0;border-radius:0;transition:opacity .28s ease,transform .28s ease}
 #landing .experience-flow li:not(.is-active){opacity:.52}
 #landing .experience-flow li.is-active{opacity:1;transform:translateY(-6px)}
 #landing .experience-flow .method-index{display:grid;place-items:center;width:56px;height:56px;margin:0;border:1px solid var(--lp-line);border-radius:50%;background:var(--lp-bg);color:var(--dda-gold-soft);font-size:1rem;transition:background .28s ease,border-color .28s ease,box-shadow .28s ease}
 #landing .experience-flow li.is-active .method-index{border-color:var(--dda-gold);background:var(--lp-card-2);box-shadow:0 0 0 8px rgba(201,154,69,.08)}
 #landing .experience-flow h3{color:var(--lp-heading);font-size:1.05rem;letter-spacing:.08em;text-transform:uppercase}
-#landing .experience-flow p{max-width:18ch;color:var(--lp-body);font-size:.84rem;line-height:1.5}
+#landing .experience-flow p{max-width:none;color:var(--lp-body);font-size:.88rem;line-height:1.55}
 #landing .experience-status{display:flex;align-items:center;gap:10px;margin:30px 0 0;color:var(--dda-gold-soft);font-size:.84rem;letter-spacing:.04em}
 #landing .experience-status-dot{width:8px;height:8px;border-radius:50%;background:var(--dda-gold);box-shadow:0 0 0 5px rgba(201,154,69,.1)}
-#landing .landing-product{background:linear-gradient(180deg,rgba(13,30,52,.28),transparent)}
-#landing .product-composition{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(220px,.6fr);gap:42px;align-items:end;margin-top:48px}
-#landing .product-window{overflow:hidden;border:1px solid rgba(227,194,127,.32);border-radius:4px;background:#091321;box-shadow:0 24px 70px rgba(0,0,0,.28)}
+/* ≥1024px: inside .landing-method-composition the method column is only
+   ~58% of the page (room for the video), so the 5-card row that works at
+   full width (331px/card) shrank to 100-168px/card — paragraphs wrapped
+   into 5-6 lines inside rectangles narrower than the text itself. Rather
+   than fight that width, the composition changes shape here: a tight row
+   of 5 compact number+title chips (equal height, no wrapped prose) plus
+   one wide detail line below that elaborates whichever step is active —
+   the same is-active rotation already drives this (public.js), only the
+   layout around it changes. <900px keeps its own vertical-timeline rule
+   further down (with the full paragraph per step, where there is no
+   video stealing width) and is untouched. */
+@media(min-width:1024px){
+  #landing .experience-flow{grid-template-columns:none;display:flex;flex-wrap:wrap;margin:28px 0 0;gap:10px}
+  #landing .experience-flow::before{display:none}
+  #landing .experience-flow li{flex:0 0 auto;min-width:150px;flex-direction:row;align-items:center;gap:10px;padding:14px 16px}
+  #landing .experience-flow li p{display:none}
+  #landing .experience-flow .method-index{width:38px;height:38px;flex:none;font-size:.82rem}
+  #landing .experience-flow h3{font-size:.78rem;letter-spacing:.05em}
+  #landing .experience-status{margin-top:18px;padding:20px 24px;border:1px solid rgba(201,154,69,.22);border-radius:14px;background:linear-gradient(145deg,rgba(201,154,69,.07),rgba(10,20,36,.5));align-items:flex-start;gap:14px}
+  #landing .experience-status span:last-child{color:var(--lp-heading);font-size:1rem;letter-spacing:normal;line-height:1.5}
+  #landing .experience-status-dot{margin-top:7px;flex:none}
+}
+/* Direction artistique — Phase 1 (transition Philosophie → Produit) : la
+   bande philosophie est volontairement quasi noire ; le Terminal qui suit
+   doit se sentir "allumé" par contraste plutôt que glisser du même gris
+   plat. Lueur bleue plus marquée en tête de section + lumière interne sur
+   le cadre du Terminal lui-même. */
+#landing .landing-product{background:radial-gradient(ellipse 60% 55% at 28% 0%,rgba(91,143,217,.22),transparent 60%),linear-gradient(180deg,rgba(13,30,52,.4),transparent 55%)}
+#landing .product-composition{position:relative;z-index:1;display:grid;grid-template-columns:minmax(260px,.82fr) minmax(0,1.18fr);gap:48px;align-items:center}
+#landing .product-copy{max-width:420px}
+#landing .product-copy h2{margin-top:10px}
+#landing .product-copy>p{margin-top:16px;color:var(--lp-body);font-size:.96rem;line-height:1.6}
+#landing .product-copy-cta{display:inline-flex;align-items:center;gap:10px;margin-top:26px;border:1px solid var(--dda-gold);border-radius:999px;padding:12px 22px;background:transparent;color:var(--lp-heading);font:inherit;font-weight:700;cursor:pointer;transition:background .2s ease,transform .2s ease}
+#landing .product-copy-cta:hover{background:rgba(217,164,65,.1);transform:translateY(-1px)}
+#landing .product-copy-cta span{color:var(--dda-gold-soft)}
+#landing .product-copy-note{margin-top:16px;color:var(--lp-body-soft);font-size:.78rem;line-height:1.55}
+#landing .product-window{overflow:hidden;border:1px solid rgba(227,194,127,.32);border-radius:4px;background:radial-gradient(ellipse 90% 70% at 50% 0%,rgba(91,143,217,.16),transparent 62%),#091321;box-shadow:0 24px 70px rgba(0,0,0,.28)}
 #landing .product-window-bar{display:flex;justify-content:space-between;gap:16px;padding:14px 18px;border-bottom:1px solid var(--lp-line);font-size:.66rem;letter-spacing:.1em;color:var(--lp-body-soft)}
 #landing .window-state{color:var(--dda-gold-soft)}
 #landing .window-state i{display:inline-block;width:6px;height:6px;margin-right:6px;border-radius:50%;background:var(--blue-2)}
@@ -1246,26 +1328,51 @@ body.public-shell main{min-height:100vh;background:#061b47}
 @media(max-width:820px){
   #landing .ai-preview-composition{grid-template-columns:1fr}
 }
-#landing .landing-faq{max-width:900px;margin:0 auto;padding:clamp(72px,9vw,120px) clamp(20px,5vw,72px)}
-#landing .landing-faq-list{margin-top:28px;border-top:1px solid var(--lp-line)}
-#landing .landing-faq-list details{border-bottom:1px solid var(--lp-line);padding:18px 0}
-#landing .landing-faq-list summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px;min-height:44px;color:var(--lp-heading);font-weight:700}
+#landing .landing-faq{position:relative;max-width:1200px;margin:0 auto;padding:clamp(72px,9vw,120px) clamp(20px,5vw,72px);display:grid;grid-template-columns:minmax(140px,.3fr) minmax(0,1fr);column-gap:56px;align-items:start}
+#landing .faq-mark{display:grid;place-items:center;align-self:center;width:clamp(120px,14vw,180px);height:clamp(120px,14vw,180px);border-radius:50%;background:radial-gradient(ellipse 80% 80% at 50% 45%,rgba(91,143,217,.2),transparent 72%);color:var(--dda-gold-soft)}
+#landing .faq-mark .icon{width:44%;height:44%}
+#landing .landing-section-head{grid-column:2}
+#landing .landing-faq-list{grid-column:2;margin-top:28px;border-top:0;display:flex;flex-direction:column;gap:14px}
+#landing .landing-faq-list details{border:1px solid var(--lp-line);border-radius:14px;padding:18px 22px;background:rgba(255,255,255,.015)}
+#landing .landing-faq-list details[open]{border-color:rgba(217,164,65,.35)}
+#landing .landing-faq-list summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px;min-height:28px;color:var(--lp-heading);font-weight:700}
 #landing .landing-faq-list summary::-webkit-details-marker{display:none}
 #landing .landing-faq-list summary:before{content:"+";display:inline-block;width:16px;color:var(--dda-gold-soft);font-weight:900}
 #landing .landing-faq-list details[open] summary:before{content:"–"}
 #landing .landing-faq-list details p{margin:10px 0 0;padding-left:28px;color:var(--lp-body);line-height:1.6}
-#landing .landing-faq-more{margin-top:20px}
+#landing .landing-faq-more{grid-column:2;margin-top:20px}
+@media(max-width:899px){
+  #landing .landing-faq{grid-template-columns:1fr}
+  #landing .faq-mark{display:none}
+  #landing .landing-section-head,#landing .landing-faq-list,#landing .landing-faq-more{grid-column:1}
+}
 #landing .product-window-evidence strong{color:var(--blue-2);font-size:.95rem}
-#landing .product-caption{padding-bottom:8px}
-#landing .product-caption-index{display:block;margin-bottom:18px;color:var(--dda-gold-soft);font-size:.68rem;letter-spacing:.14em;font-weight:800}
-#landing .product-caption p{color:var(--lp-heading);font-family:var(--dda-serif);font-size:clamp(1.3rem,2.5vw,2.2rem);line-height:1.05}
-#landing .product-caption .product-caption-note{margin-top:18px;color:var(--lp-body-soft);font-family:var(--dda-sans);font-size:.82rem;line-height:1.55}
-#landing .product-index{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:48px;padding:0;border-top:1px solid var(--lp-line)}
+#landing .landing-product{position:relative}
+#landing .product-composition::before{content:"";position:absolute;inset:-6% -8%;z-index:0;pointer-events:none;opacity:.5;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 420' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%235d8fd9' stroke-width='2' opacity='.55'%3E%3Cpath d='M40 260v120m-14-96h28v52H26zM110 220v160m-14-124h28v66H96zM180 180v200m-14-150h28v88H166zM250 300v80m-14-56h28v28H236zM320 150v230m-14-180h28v110H306zM390 240v140m-14-104h28v56H376z'/%3E%3C/g%3E%3Cg fill='none' stroke='%23d9a441' stroke-width='2' opacity='.4'%3E%3Cpath d='M860 230v150m-14-112h28v62H846zM930 170v210m-14-164h28v98H916zM1000 280v100m-14-70h28v34H986zM1070 190v190m-14-144h28v82H1056zM1140 250v130m-14-96h28v50H1126z'/%3E%3C/g%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;background-size:100% 100%}
+#landing .product-index{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:48px;padding:0;border-top:1px solid var(--lp-line)}
 #landing .product-index article{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;padding:18px 18px 0 0;background:transparent;border:0;border-radius:0}
 #landing .product-index article+article{border-left:1px solid var(--lp-line);padding-left:18px}
 #landing .product-index-number{grid-row:span 2;color:var(--dda-gold-soft);font-size:.72rem;font-weight:800;letter-spacing:.08em}
 #landing .product-index h3{color:var(--lp-heading);font-size:.95rem}
 #landing .product-index p{color:var(--lp-body-soft);font-size:.78rem;line-height:1.5}
+/* #landing-mission ("Notre institution") had no container rule at all: its
+   photo+text grid ran edge-to-edge with zero side gutter at every desktop
+   width, the only section on the page with no margin — breaking the
+   consistent rhythm every other section keeps. Give it the same container
+   treatment (padding + divider) as its siblings, then let it join the same
+   progressive desktop tiers below. */
+#landing #landing-mission{max-width:1200px;margin:0 auto;padding:clamp(56px,7vw,96px) clamp(20px,5vw,72px);border-bottom:1px solid var(--lp-line)}
+/* Resources shared the exact same numbered-steps look as DDA Lab's module
+   list, even though it holds 3 downloadable files, not a sequence — the
+   file badge read as a step number and "Télécharger" as plain text, no
+   different from Lab's inert "01/02/03". Give it its own 3-column fit,
+   a real file-type tag and a visible download affordance. */
+#landing .resources-index{grid-template-columns:repeat(3,1fr)}
+#landing .resources-index .product-index-number{display:inline-block;grid-row:auto;padding:2px 9px;border:1px solid rgba(217,164,65,.4);border-radius:999px;background:rgba(217,164,65,.1);color:var(--dda-elite-gold-soft);font-size:.64rem}
+#landing .resources-index article{grid-template-columns:1fr;gap:10px;padding:18px 18px 20px 0}
+#landing .resources-index h3{margin-top:2px}
+#landing .resources-index .text-action{margin-top:4px;padding:8px 14px;border:1px solid rgba(217,164,65,.32);border-radius:10px;background:rgba(217,164,65,.08);width:fit-content}
+#landing .resources-index .text-action:hover{background:rgba(217,164,65,.16)}
 #landing .landing-proof{background:#0b1628}
 #landing .proof-composition{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:48px}
 #landing .proof-practice-demo,#landing .proof-measure{min-height:290px;padding:28px;border:1px solid var(--lp-line);background:#091321}
@@ -1300,8 +1407,27 @@ body.public-shell main{min-height:100vh;background:#061b47}
 #landing .value-rail p{color:var(--lp-body-soft);font-size:.78rem;line-height:1.5}
 #landing .landing-free>.landing-inline-cta{display:inline-flex;margin:4px 0 56px}
 #landing .plan-rail{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:0;padding:0;border:0}
-#landing .plan-rail .landing-plan-card{border-radius:0;padding:22px;background:transparent;border:1px solid var(--lp-line)}
-#landing .plan-rail .landing-plan-card-gold{border-color:rgba(201,154,69,.42);background:rgba(201,154,69,.05)}
+#landing .plan-rail .landing-plan-card{position:relative;border-radius:16px;padding:32px 28px;background:transparent;border:1px solid var(--lp-line)}
+#landing .plan-card-icon{display:grid;place-items:center;width:52px;height:52px;margin-bottom:18px;border-radius:14px;background:rgba(91,143,217,.14);color:var(--lp-blue-2)}
+#landing .plan-card-icon .icon{width:26px;height:26px}
+#landing .landing-plan-card-gold .plan-card-icon{background:rgba(217,164,65,.14);color:var(--dda-gold-soft)}
+#landing .plan-badge{display:inline-flex;margin-bottom:6px;padding:5px 14px;border-radius:999px;background:rgba(91,143,217,.14);font-size:.68rem}
+#landing .landing-plan-card-gold .plan-badge{background:rgba(217,164,65,.16)}
+#landing .plan-rail .landing-plan-card ul{list-style:none;margin:20px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+#landing .plan-rail .landing-plan-card li{position:relative;padding-left:28px;color:var(--lp-body);font-size:.88rem;line-height:1.5}
+#landing .plan-rail .landing-plan-card li::before{content:"";position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:rgba(79,191,130,.16);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234fbf82' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4 10-10'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;background-size:11px 11px}
+#landing .landing-plan-card-gold li::before{background-color:rgba(217,164,65,.16);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e3c27f' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4 10-10'/%3E%3C/svg%3E")}
+/* Direction artistique — Phase 1 (Free/Premium) : deuxième et dernier pic
+   lumineux de la page, juste avant la décision. La carte Premium n'avait
+   qu'une teinte plate à .05 d'opacité — un halo doré réel la distingue
+   maintenant de la carte Free sans changer son contenu ni sa structure. */
+#landing .plan-rail .landing-plan-card.landing-plan-card-gold{
+  position:relative;
+  border-color:rgba(217,164,65,.5)!important;
+  background-image:radial-gradient(ellipse 120% 90% at 50% -10%,rgba(217,164,65,.22),transparent 60%),linear-gradient(145deg,rgba(17,42,68,.91),rgba(7,18,31,.95)),repeating-linear-gradient(130deg,transparent 0 17px,rgba(215,231,242,.025) 18px,transparent 19px 37px)!important;
+  background-blend-mode:normal,normal,screen!important;
+  box-shadow:0 30px 70px rgba(0,0,0,.3),0 0 50px rgba(217,164,65,.14),0 0 0 1px rgba(216,174,97,.035) inset,0 1px rgba(255,255,255,.08) inset!important;
+}
 #landing .plan-rail .landing-plan-card h3{font-family:var(--dda-serif);font-size:1.7rem}
 #landing .landing-ecosystem{display:grid;grid-template-columns:1fr .8fr;grid-template-areas:"copy photo" "domains domains";gap:46px;background:linear-gradient(165deg,#0f1c30,#07111f)}
 #landing .ecosystem-copy{grid-area:copy;align-self:end}
@@ -1317,6 +1443,11 @@ body.public-shell main{min-height:100vh;background:#061b47}
 #landing .domain-rail .landing-domain-groups article{padding:0 18px 0 0;border:0;border-top:1px solid var(--lp-line);border-radius:0;background:transparent}
 #landing .domain-rail .landing-domain-groups article+article{padding-left:18px;border-left:1px solid var(--lp-line)}
 #landing .domain-rail .domain-label{margin:16px 0 10px;color:var(--dda-gold-soft);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+#landing .domain-rail .domain-summary-card{display:flex;gap:16px;align-items:flex-start}
+#landing .domain-rail .domain-summary-card .domain-label{margin:0 0 6px}
+#landing .domain-summary-icon{display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:12px;background:rgba(217,164,65,.14);color:var(--dda-gold-soft)}
+#landing .domain-summary-icon .icon{width:20px;height:20px}
+#landing .domain-summary-text{margin:0 0 12px;color:var(--lp-body-soft);font-size:.82rem;line-height:1.5}
 #landing .domain-rail .landing-domain-groups article div{display:flex;flex-wrap:wrap;gap:6px 12px}
 #landing .domain-rail .landing-domain-groups span{color:var(--lp-body);font-size:.78rem}
 #landing .future-editorial-grid{gap:0}
@@ -1335,6 +1466,7 @@ body.public-shell main{min-height:100vh;background:#061b47}
  #landing .experience-flow{grid-template-columns:1fr;gap:0;margin-top:38px} #landing .experience-flow::before{left:28px;right:auto;top:28px;bottom:28px;width:1px;height:auto;background:linear-gradient(180deg,var(--lp-blue-2),rgba(201,154,69,.2),var(--lp-blue-2))}
  #landing .experience-flow li{display:grid;grid-template-columns:56px 1fr;gap:16px;padding:0 0 26px} #landing .experience-flow p{max-width:30ch}
  #landing .product-composition,#landing .proof-composition{grid-template-columns:1fr;gap:24px} #landing .product-window-body{grid-template-columns:1fr} #landing .product-window-lead{grid-row:auto}
+ #landing .product-composition::before{opacity:.16;inset:0}
  #landing .product-index,#landing .proof-principles,#landing .value-rail{grid-template-columns:1fr 1fr} #landing .product-index article:nth-child(odd),#landing .value-rail article:nth-child(odd),#landing .proof-principles li:nth-child(odd){padding-left:0;border-left:0}
  #landing .product-index article:nth-child(n+3),#landing .value-rail article:nth-child(n+3),#landing .proof-principles li:nth-child(n+3){border-top:1px solid var(--lp-line);padding-top:18px}
  #landing .proof-measure{align-items:flex-start;flex-direction:column} #landing .plan-rail{grid-template-columns:1fr}
@@ -1343,7 +1475,7 @@ body.public-shell main{min-height:100vh;background:#061b47}
  #landing .future-editorial-grid article+article{padding-left:0;border-left:0}
 }
 @media (max-width:420px){
- #landing .landing-philosophy-band,#landing .landing-experience,#landing .landing-product,#landing .landing-proof,#landing .landing-free,#landing .landing-ecosystem{padding-inline:18px}
+ #landing .landing-philosophy-band,#landing .landing-method-composition,#landing .landing-product,#landing .landing-proof,#landing .landing-free,#landing .landing-ecosystem,#landing .landing-pathways{padding-inline:18px}
  #landing .product-window-body{padding:18px} #landing .product-index,#landing .value-rail,#landing .proof-principles{grid-template-columns:1fr}
  #landing .product-index article+article,#landing .value-rail article+article,#landing .proof-principles li+li{padding-left:0;border-left:0;border-top:1px solid var(--lp-line);padding-top:16px}
  #landing .proof-ring{width:120px;height:120px}
@@ -1353,7 +1485,7 @@ body.public-shell main{min-height:100vh;background:#061b47}
   #landing .value-rail{row-gap:12px}
 }
 @media(max-width:899px){
-  #landing .landing-experience,#landing .landing-product,#landing .landing-proof,#landing .landing-ecosystem,#landing .landing-free{padding-block:52px}
+  #landing .landing-method-composition,#landing .landing-product,#landing .landing-proof,#landing .landing-ecosystem,#landing .landing-pathways,#landing .landing-free{padding-block:52px}
   #landing .product-composition,#landing .proof-composition{margin-top:30px}
   #landing .product-index{margin-top:30px}
   #landing .product-window-body{padding:18px;gap:12px}
@@ -1511,7 +1643,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
   }
   #landing .landing-editorial-shell,
   #landing .landing-philosophy-band,
-  #landing .landing-experience,
+  #landing .landing-method-composition,
   #landing .landing-product,
   #landing .landing-proof,
   #landing .landing-free,
@@ -1735,9 +1867,9 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
 #landing .landing-market-sparkline.spark-actions{stroke:#b9aa83;opacity:.56}
 #landing .landing-market-sparkline.spark-indices{stroke:#91a6b7}
 #landing .landing-market-sparkline.spark-crypto{stroke:#b78f86;opacity:.52}
-#landing .landing-market-card-foot{display:flex;align-items:center;justify-content:space-between;gap:5px;color:#8e9bac}
-#landing .landing-market-card-foot small{font-size:.56rem;line-height:1.25}
-#landing .landing-market-card-foot b{color:#c9b27b;font-size:.9rem;font-weight:500}
+#landing .landing-market-card-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:10px;padding:7px 10px;border:1px solid rgba(217,164,65,.28);border-radius:999px;color:#c9b27b;background:rgba(217,164,65,.06)}
+#landing .landing-market-card-foot small{font-size:.56rem;line-height:1.25;letter-spacing:.02em}
+#landing .landing-market-card-foot b{color:#c9b27b;font-size:.78rem;font-weight:700;font-style:normal}
 #landing .landing-market-disclosure{max-width:88ch;margin:12px 0 0;color:#8593a4;font-size:.73rem;line-height:1.55}
 #landing .domain-rail .landing-domain-groups article:not(.landing-market-group)>div{display:flex;flex-wrap:wrap;gap:8px}
 #landing .domain-rail .landing-domain-groups article:not(.landing-market-group)>div span{padding:5px 9px;border:1px solid rgba(174,191,213,.11);border-radius:999px;color:#9ba8b8;font-size:.72rem}
@@ -1782,7 +1914,7 @@ body.low-data #progress .mastery-level::before,body.low-data #progress .mastery-
   #landing .domain-rail .landing-market-group{grid-column:auto}
   #landing .landing-market-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
   #landing .landing-market-card{min-height:116px}
-  #landing .landing-experience,#landing .landing-product,#landing .landing-proof,#landing .landing-ecosystem,#landing .landing-free{padding-block:clamp(54px,8vw,72px)}
+  #landing .landing-method-composition,#landing .landing-product,#landing .landing-proof,#landing .landing-ecosystem,#landing .landing-pathways,#landing .landing-free{padding-block:clamp(54px,8vw,72px)}
 }
 @media(max-width:700px){
   #dashboard .analysis-terminal-tools{top:66px;display:grid;grid-template-columns:minmax(0,1fr);gap:5px;padding:6px;border-radius:13px}
@@ -2108,10 +2240,16 @@ button:disabled{cursor:not-allowed}
 }
 #landing .landing-aperture .photo-scrim{
   background:
-    radial-gradient(ellipse 34% 30% at 17% 72%,rgba(34,132,255,.29),transparent 78%),
-    radial-gradient(ellipse 38% 28% at 78% 48%,rgba(10,157,242,.20),transparent 78%),
-    linear-gradient(180deg,rgba(6,13,23,.12),rgba(6,13,23,.34) 42%,rgba(6,13,23,.88));
+    radial-gradient(ellipse 60% 40% at 50% 8%,rgba(34,132,255,.1),transparent 70%),
+    linear-gradient(180deg,rgba(6,13,23,.1),transparent 30%,transparent 62%,rgba(6,13,23,.5));
 }
+/* Direction artistique — le globe Afrique fourni par le founder doit être le
+   visuel dominant du Hero, comme dans la maquette (une photo nette, pas un
+   fond estompé). Le mockup de laptop/téléphone 3D masquait la photo et n'a
+   pas d'équivalent dans la référence : masqué ici, sans toucher au DOM ni
+   aux déclarations d'animation (tests de mouvement inchangés). */
+#landing .landing-device-stage{display:none}
+#landing .landing-3d-scene{display:none}
 #landing .landing-device-stage{animation:dda-aperture-float 9s cubic-bezier(.45,0,.55,1) infinite;}
 #landing .landing-device-stage::before{
   content:"";position:absolute;z-index:0;inset:20% 3% 1%;border-radius:50%;pointer-events:none;
@@ -2219,7 +2357,7 @@ body.low-data .view:not(#path) :is(.panel,.access-card,.profile-panel,.preferenc
   background:linear-gradient(145deg,rgba(18,42,69,.78),rgba(8,19,34,.88));
   box-shadow:0 16px 38px rgba(0,0,0,.2),0 0 24px rgba(22,126,245,.07),inset 0 1px rgba(255,255,255,.05);
 }
-#landing .experience-flow li.is-active{border-color:rgba(65,162,255,.44);background:linear-gradient(145deg,rgba(23,71,117,.66),rgba(9,22,39,.88));box-shadow:0 0 28px rgba(24,128,244,.12),inset 0 1px rgba(255,255,255,.08)}
+#landing .experience-flow li.is-active{border-color:rgba(217,164,65,.5);background:linear-gradient(145deg,rgba(40,34,15,.5),rgba(9,22,39,.88));box-shadow:0 0 28px rgba(217,164,65,.14),inset 0 1px rgba(255,255,255,.08)}
 #landing .landing-market-card{backdrop-filter:blur(8px) saturate(120%)}
 #landing .landing-market-card:hover,#landing .landing-market-card:focus-visible{border-color:rgba(92,184,255,.65);box-shadow:0 16px 34px rgba(0,0,0,.24),0 0 28px rgba(22,126,245,.18),inset 0 1px rgba(255,255,255,.08)}
 #landing .landing-free-grid article:hover,#landing .product-index article:hover,#landing .landing-future-grid article:hover{border-color:rgba(92,184,255,.4);box-shadow:0 18px 40px rgba(0,0,0,.24),0 0 24px rgba(22,126,245,.12),inset 0 1px rgba(255,255,255,.07)}
@@ -2731,12 +2869,10 @@ body.public-shell .prototype-banner{display:none}
 .market-symbol-icon-xrp{background:#3AA6D9}
 #landing .utility-pulse{width:6px;height:6px;border-radius:50%;background:var(--blue-2);box-shadow:0 0 0 4px rgba(41,197,207,.12)}
 #landing .public-header{background:rgba(6,13,23,.72);backdrop-filter:blur(16px)}
-#landing .landing-presentation-video{max-width:1200px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,72px)}
 #landing .dda-video{margin:0;max-width:100%;aspect-ratio:16/9;background:#05060a;border-radius:18px;overflow:hidden;border:1px solid var(--lp-line)}
 #landing .dda-video video{width:100%;height:100%;display:block;object-fit:cover;background:#05060a}
-@media(max-width:639px){
-  #landing .landing-presentation-video{padding:20px 16px}
-}
+#landing .landing-method-composition .experience-heading{grid-template-columns:1fr}
+#landing .landing-method-composition .experience-heading>p:last-child{grid-column:1;grid-row:auto}
 #landing .landing-trust-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:0;max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,72px);border-bottom:1px solid var(--lp-line);background-color:#07111e;background-image:repeating-linear-gradient(135deg,transparent 0 18px,rgba(240,207,138,.018) 19px,transparent 20px 40px)}
 #landing .landing-trust-strip article{display:flex;align-items:flex-start;gap:12px;min-width:0;padding:20px 18px 20px 0;border-right:1px solid var(--lp-line)}
 #landing .landing-trust-strip article+article{padding-left:18px}
@@ -2758,7 +2894,15 @@ body.public-shell .prototype-banner{display:none}
 #landing .market-strip-chart.is-future{stroke:#8a97a8;opacity:.45}
 #landing .landing-aperture .landing-device-stage{filter:drop-shadow(0 22px 26px rgba(0,0,0,.32))}
 #landing .landing-philosophy-band{background:linear-gradient(110deg,#0a1826,#07111e 60%,#0d1f33)}
-#landing .landing-final-cta{background:radial-gradient(circle at 70% 0%,rgba(37,136,255,.16),transparent 38%),repeating-linear-gradient(135deg,transparent 0 18px,rgba(240,207,138,.018) 19px,transparent 20px 40px),#07111e}
+#landing .landing-final-cta{position:relative;background:radial-gradient(circle at 70% 0%,rgba(37,136,255,.16),transparent 38%),repeating-linear-gradient(135deg,transparent 0 18px,rgba(240,207,138,.018) 19px,transparent 20px 40px),#07111e}
+#landing .landing-final-cta::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(90deg,#07111e 0%,rgba(7,17,30,.74) 36%,rgba(7,17,30,.12) 64%,transparent 100%),url("images/photos/landing-hero-globe-africa.jpg");background-repeat:no-repeat;background-position:left center,right center;background-size:100% 100%,68% 100%}
+#landing .landing-final-cta>*{position:relative;z-index:1}
+#landing .final-cta-trust{display:flex;flex-wrap:wrap;gap:32px;margin:36px 0 0;padding:0;list-style:none}
+#landing .final-cta-trust li{display:flex;align-items:center;gap:12px}
+#landing .final-cta-trust .icon{width:22px;height:22px;color:var(--dda-gold-soft)}
+#landing .final-cta-trust strong{display:block;color:var(--lp-heading);font-size:.88rem}
+#landing .final-cta-trust small{color:var(--lp-body-soft);font-size:.78rem}
+@media(max-width:639px){#landing .final-cta-trust{gap:18px 28px}}
 @media(max-width:899px){
   #landing .landing-trust-strip{grid-template-columns:1fr 1fr;gap:0}
   #landing .landing-trust-strip article:nth-child(2){border-right:0}
@@ -2968,7 +3112,8 @@ body.public-shell .prototype-banner{display:none}
   overflow:hidden;margin:0 0 18px;border-radius:14px;
   border:1px solid rgba(217,164,65,.16);background:#070e18;
 }
-.dda-ecosystem-track{display:flex;align-items:center;gap:10px;padding:10px 16px;white-space:nowrap;width:max-content;animation:dda-ticker-scroll 42s linear infinite}
+.dda-ecosystem-track{display:flex;align-items:center;gap:10px;padding:10px 16px;white-space:nowrap;width:max-content;animation:dda-ecosystem-scroll 42s linear infinite}
+@keyframes dda-ecosystem-scroll{from{transform:translateX(0)}to{transform:translateX(-33.3333%)}}
 .dda-ecosystem-strip:hover .dda-ecosystem-track,
 .dda-ecosystem-strip:focus-within .dda-ecosystem-track{animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){.dda-ecosystem-track{animation:none;overflow-x:auto}}
@@ -3297,6 +3442,13 @@ body.access-mode main{padding-bottom:0}
     animation:dda-breathe 7s ease-in-out infinite;
   }
   #landing .landing-aperture .photo-fill{transition:transform .25s ease-out}
+/* The brand banner (logo + "Darius Digital Academy — Apprendre, Investir,
+   Bâtir demain") is baked into the photo itself. object-fit:cover was
+   cropping its edges — "DARIUS" read as "RIUS", "IMPACT" as "IMPA" — at
+   every desktop width, since the container's aspect ratio never matches
+   the image's native 2:1. object-fit:contain shows the full banner; the
+   image's own dark-navy background blends into the aperture's gradient. */
+#landing .landing-aperture .photo-fill{object-fit:cover;object-position:32% 35%;background:#0b1626}
 
   #landing .landing-method article,
   #landing .product-window,
@@ -3356,6 +3508,11 @@ body.low-data #dashboard .dashboard-summary-card{animation:none!important;opacit
   content:'';position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.5;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60' viewBox='0 0 120 60'%3E%3Cg fill='none' stroke='%23e2be76' stroke-opacity='.14' stroke-width='2'%3E%3Cpath d='M0 46 12 40 24 44 36 30 48 34 60 20 72 24 84 10 96 16 108 4 120 8'/%3E%3C/g%3E%3C/svg%3E");
   background-repeat:repeat-x;background-position:bottom;background-size:240px 60px;
+}
+#dashboard .dashboard-hero::after{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(100deg,rgba(6,15,30,.95) 0%,rgba(6,15,30,.65) 34%,rgba(6,15,30,.08) 66%,transparent 100%),url("images/photos/landing-hero-founder-desk.jpg");
+  background-repeat:no-repeat;background-position:left center,center 30%;background-size:100% 100%,cover;
 }
 #dashboard .dashboard-hero-main{position:relative;z-index:1;min-width:0}
 #dashboard .dashboard-hero-side{position:relative;z-index:1;display:flex;flex-direction:column;gap:14px;min-width:0}
@@ -3498,6 +3655,55 @@ body.low-data #dashboard .dashboard-summary-card{transform:none!important}
   #profile .profile-layout{max-width:2000px}
   #brokers .panel{max-width:2000px}
   #support .panel,#support .support-contact{max-width:2000px}
+}
+
+/* ======================================================================
+   Landing publique — vraie largeur desktop 2026-11-20
+   Le plafond de 1200px (voir regles plus haut) laisse une marge morte
+   enorme a 1600/1920/2560px : la landing a l'air d'un mobile agrandi sur
+   un ecran d'ordinateur. On elargit progressivement, comme deja fait pour
+   le dashboard et les autres vues authentifiees, sans toucher au mobile
+   ni au tablet (regle inchangee sous 1440px). Les colonnes internes
+   (landing-section-head, ecosystem-copy, etc.) ont deja leur propre
+   max-width en ch, donc elargir le conteneur ne degrade pas la lecture :
+   il donne plus de place aux grilles (fr/minmax) et aux visuels.
+   ====================================================================== */
+@media(min-width:1440px){
+  #landing .landing-philosophy-band,
+  #landing .landing-method-composition,
+  #landing .landing-product,
+  #landing .landing-proof,
+  #landing .landing-ecosystem,
+  #landing .landing-free,
+  #landing .landing-trust-strip,
+  #landing .landing-market-strip,
+  #landing .landing-ai,
+  #landing #landing-mission,
+  #landing .landing-guardrails{
+    max-width:1560px;
+  }
+}
+@media(min-width:1800px){
+  #landing .landing-philosophy-band,
+  #landing .landing-method-composition,
+  #landing .landing-product,
+  #landing .landing-proof,
+  #landing .landing-ecosystem,
+  #landing .landing-free,
+  #landing .landing-trust-strip,
+  #landing .landing-market-strip,
+  #landing .landing-ai,
+  #landing #landing-mission,
+  #landing .landing-guardrails{
+    max-width:1800px;
+  }
+}
+/* #landing-ai (DDA AI), #landing-lab and #landing-resources share the
+   .landing-ai container. Once it is wide, the ai-guardrail-list's 3 items
+   (DDA AI only) had room for a single row instead of a lone 3rd card
+   stranded under 2 others. */
+@media(min-width:1440px){
+  #landing .ai-guardrail-list{grid-template-columns:repeat(3,1fr)}
 }
 
 /* ======================================================================
@@ -3683,8 +3889,8 @@ body:has(#dashboard.view.active) .topbar{
   #landing .landing-reference-stack{right:20px;top:74px;width:min(258px,42%)}
   #landing .landing-3d-scene{right:10%;width:min(64%,390px);opacity:.82}
 }
-#landing .landing-presentation-video{border-top:1px solid rgba(216,174,97,.14);border-bottom:1px solid rgba(216,174,97,.12);background:linear-gradient(145deg,rgba(7,21,37,.84),rgba(3,10,18,.72))}
-#landing .landing-presentation-video .landing-section-head{max-width:760px;margin:0 auto 22px}
+#landing .landing-presentation-video{border:1px solid rgba(216,174,97,.14);border-radius:18px;padding:28px;background:linear-gradient(145deg,rgba(7,21,37,.84),rgba(3,10,18,.72))}
+#landing .landing-presentation-video .landing-section-head{max-width:none;margin:0 0 22px}
 #landing .landing-presentation-video .landing-section-head h2{margin-bottom:10px}
 #landing .dda-video{border-color:rgba(216,174,97,.38);box-shadow:0 24px 70px rgba(0,0,0,.36),0 0 42px rgba(34,128,228,.12)}
 .public-footer{padding-top:48px;gap:28px 20px}
@@ -3699,3 +3905,149 @@ body:has(#dashboard.view.active) .topbar{
 
 @media(max-width:639px){#landing .landing-aperture{height:350px;min-height:350px;overflow:hidden}}
 @media(max-width:420px){#landing .landing-aperture{height:350px;min-height:350px}}
+
+/* Hero scene (2026-11-20 reference mockup): the photo is the visual, not a
+   framed card — drop the border/shadow so it blends into the navy backdrop. */
+#landing .landing-aperture{border:0;box-shadow:none}
+
+/* Market widget (C), feature strip (D) and trust banner (E) sit alongside /
+   under the Hero scene, reproducing the reference composition with real
+   DDA destinations and the site's existing pedagogical market categories
+   (no live or invented quotes). */
+#landing .landing-market-widget{grid-column:1/-1;display:flex;flex-direction:column;gap:16px;min-width:0;padding:24px 24px 20px;border:1px solid rgba(189,204,221,.16);border-radius:18px;background:linear-gradient(160deg,rgba(10,20,36,.92),rgba(6,13,23,.96));box-shadow:0 20px 50px rgba(0,0,0,.28)}
+#landing .market-widget-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#landing .market-widget-title{display:flex;align-items:center;gap:9px;color:#eef1f5;font:600 .98rem/1.2 var(--dda-sans,system-ui,sans-serif)}
+#landing .market-widget-title .icon{width:16px;height:16px;color:var(--dda-elite-gold)}
+#landing .market-widget-title em{color:#8d9bad;font-style:normal;font-weight:500}
+#landing .market-widget-flag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid rgba(217,164,65,.3);border-radius:999px;background:rgba(217,164,65,.08);color:var(--dda-elite-gold-soft);font-size:.64rem;font-weight:600;white-space:nowrap}
+#landing .market-widget-flag i{width:6px;height:6px;border-radius:50%;background:#e25757}
+#landing .market-widget-tabs{display:flex;flex-wrap:wrap;gap:6px}
+#landing .market-widget-tabs span{flex:none;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.04);color:#9eabba;font-size:.66rem;font-weight:600;white-space:nowrap}
+#landing .market-widget-tabs span.is-active{background:rgba(217,164,65,.14);color:var(--dda-elite-gold-soft)}
+#landing .market-widget-columns{display:grid;grid-template-columns:minmax(0,1fr) 64px 62px 52px 0;gap:8px;padding:0 14px;margin-bottom:2px;color:#6c7784;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+#landing .market-widget-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+#landing .market-widget-list li{display:grid;grid-template-columns:minmax(0,1fr) 64px 62px 52px auto;align-items:center;gap:8px;padding:11px 14px;border:1px solid rgba(174,191,213,.1);border-radius:12px;background:rgba(255,255,255,.015)}
+#landing .market-widget-list li.is-future{opacity:.6}
+#landing .market-widget-symbol{display:flex;align-items:center;gap:8px;min-width:0;white-space:nowrap;color:#e7ebef;font-size:.8rem;font-weight:600;line-height:1.25}
+#landing .market-widget-note{display:none}
+#landing .market-widget-symbol{overflow:hidden;text-overflow:ellipsis}
+#landing .market-widget-value{color:#d7dee6;font-size:.78rem;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+#landing .market-widget-change{font-size:.74rem;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;color:#8d9bad}
+#landing .market-widget-change.is-up{color:#4fd18b}
+#landing .market-widget-change.is-down{color:#e2706f}
+#landing .market-widget-spark{width:64px;height:24px;overflow:visible}
+#landing .market-widget-spark path{fill:none;stroke:var(--blue-2);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#landing .market-widget-list li.is-future .market-widget-spark path{stroke:#6c7784}
+#landing .market-widget-tag{justify-self:end;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.05);color:#9eabba;font-size:.66rem;font-weight:600;white-space:nowrap}
+@media(max-width:1339px){#landing .market-widget-columns{display:none}#landing .market-widget-list li{grid-template-columns:minmax(0,1fr) 60px 58px auto;gap:8px}#landing .market-widget-spark{display:none}}
+#landing .market-widget-disclaimer{display:flex;align-items:center;gap:7px;margin:2px 0 0;color:#8d9bad;font-size:.66rem;line-height:1.4}
+#landing .market-widget-disclaimer .icon{width:13px;height:13px;flex:none;color:#6c7784}
+
+#landing .hero-banner-icon{display:inline-flex;flex:none;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:1px solid rgba(217,164,65,.3);color:var(--dda-elite-gold)}
+#landing .hero-banner-icon .icon{width:16px;height:16px}
+
+/* 2026-11-20 — reference maquette: the hero's left column must stay as
+   compact as the scene/widget columns. The detailed numeric stats (formerly
+   .landing-proof-rail inside this column) move to a full-width band right
+   under the hero; this becomes a single thin benefit row, no card frame. */
+#landing .landing-free-proof{margin:22px 0 0;padding:0;border:0;background:none;max-width:none}
+#landing .landing-free-proof ul{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 16px}
+#landing .landing-free-proof li{flex-direction:row;align-items:center;gap:8px}
+#landing .landing-free-proof strong{display:block;font-size:.76rem;line-height:1.25}
+#landing .landing-free-proof li>span:last-child{display:block;font-size:.66rem}
+@media(max-width:1339px){#landing .landing-free-proof ul{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:479px){#landing .landing-free-proof ul{grid-template-columns:1fr}}
+
+#landing .landing-hero-banner{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;max-width:1440px;margin:0 auto 46px;padding:0 clamp(20px,5vw,72px)}
+#landing .landing-hero-banner article{display:flex;align-items:center;gap:14px;padding:20px 18px;border-top:1px solid rgba(217,164,65,.14);border-bottom:1px solid rgba(217,164,65,.14)}
+#landing .landing-hero-banner article+article{border-left:1px solid rgba(217,164,65,.14)}
+#landing .landing-hero-banner strong{display:block;color:#eef1f5;font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums}
+#landing .landing-hero-banner p{margin:2px 0 0;color:#9eabba;font-size:.76rem;line-height:1.3}
+@media(max-width:899px){#landing .landing-hero-banner{grid-template-columns:repeat(2,minmax(0,1fr))}#landing .landing-hero-banner article:nth-child(2n+1){border-left:0}}
+@media(max-width:479px){#landing .landing-hero-banner{grid-template-columns:1fr}#landing .landing-hero-banner article{border-left:0!important}}
+
+@media(min-width:900px) and (max-width:1339px){
+  /* Same cascade bug as the 1340px+ fix below, for the narrower 2-column
+     hero (text column here is ~45% of viewport, not ~34%): the base
+     #landing-title!important rule still sizes off raw vw and breaks the
+     headline one word per line at these widths (e.g. 1024px). */
+  #landing-title{font-size:clamp(2.3rem,4.4vw,3.6rem)!important;max-width:15ch!important}
+}
+@media(min-width:1340px){
+  /* 2026-11-20 correction: the 3-column hero needs near-full viewport width
+     (per the reference) and a wide enough text column for the headline to
+     keep its normal word-wrap — a narrow .6fr column combined with the
+     viewport-relative h1 size was forcing one word per line. */
+  #landing .landing-editorial-shell,
+  #landing .landing-hero-banner{max-width:min(1820px,96vw)}
+  #landing .landing-editorial-shell{grid-template-columns:minmax(400px,.82fr) minmax(300px,.56fr) minmax(320px,.62fr);align-items:start;gap:clamp(24px,2.4vw,44px)}
+  #landing .landing-main-copy{grid-column:1;grid-row:1;max-width:none}
+  #landing .landing-aperture{grid-column:2;grid-row:1;min-height:650px}
+  #landing .landing-market-widget{grid-column:3;grid-row:1}
+  /* Headline sized for this column's real width (not raw vw) so the
+     reference's 2-line + 1-line break survives instead of one word per line.
+     #landing-title carries an !important base rule (styles.css) that a
+     plain #landing h1 override cannot beat, hence the matching selector. */
+  #landing-title{font-size:clamp(2.6rem,3.4vw,4.5rem)!important;max-width:16ch!important}
+  #landing .landing-editorial-shell{gap:clamp(16px,1.6vw,28px)}
+}
+
+/* 2026-11-20 — reference maquette round 3: secondary CTA becomes a real
+   button (icon + label + duration), the benefit row drops to one line per
+   item, and the scene gets an ambient glow instead of a hard rectangle. */
+#landing .landing-secondary{display:inline-flex!important;align-items:center;gap:8px;padding:0 18px;min-height:52px;border:1px solid rgba(216,223,231,.28);border-radius:2px 9px 2px 9px;color:#d8dfe7!important;text-decoration:none}
+#landing .landing-secondary:hover,#landing .landing-secondary:focus-visible{border-color:rgba(217,164,65,.5);outline:0}
+#landing .landing-secondary .icon{width:16px;height:16px;flex:none;color:var(--dda-elite-gold-soft)}
+#landing .landing-secondary b{margin-left:4px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.08);color:#aab5c2;font-size:.68rem;font-weight:700}
+#landing .landing-free-proof li{flex-direction:row;align-items:center}
+#landing .landing-free-proof strong{font-size:.8rem;font-weight:600;line-height:1.3}
+
+#landing .landing-aperture{box-shadow:0 0 0 1px rgba(255,255,255,.03),0 40px 120px -20px rgba(34,128,228,.35),0 0 160px -40px rgba(217,164,65,.22)}
+@media(min-width:1340px){
+  #landing .landing-aperture{margin-right:-28px;z-index:1}
+  #landing .landing-market-widget{position:relative;z-index:2;margin-left:-28px}
+}
+
+#landing .landing-hero-banner{border-radius:999px;border:1px solid rgba(217,164,65,.22);box-shadow:0 0 0 1px rgba(217,164,65,.06),0 0 60px -10px rgba(217,164,65,.18);overflow:hidden;padding-top:0;padding-bottom:0}
+#landing .landing-hero-banner article{padding:16px 18px;border-top:0;border-bottom:0}
+@media(max-width:899px){#landing .landing-hero-banner{border-radius:28px}}
+@media(max-width:479px){#landing .landing-hero-banner{border-radius:20px}}
+
+/* 2026-11-20 — finishing pass (founder-validated Hero, minor polish only):
+   1) fade the scene's edges into the navy backdrop instead of a hard
+      rectangle; 2) ease back the widget's visual weight a touch (column
+      ratio above, plus tighter row padding here) to rebalance the three
+      zones; 3) duplicate the "commence ici" marquee a third time (see the
+      HTML comment) so wide desktops never show its static tail; 4) trim a
+      little mobile vertical spacing without losing legibility. */
+#landing .landing-aperture{
+  -webkit-mask-image:radial-gradient(58% 60% at 50% 48%,#000 58%,transparent 100%);
+  mask-image:radial-gradient(58% 60% at 50% 48%,#000 58%,transparent 100%);
+}
+#landing .market-widget-list li{padding:11px 14px}
+#landing .landing-market-widget{padding:20px 20px 17px}
+@media(max-width:639px){
+  #landing .landing-free-proof{margin-top:16px}
+  #landing .landing-hero-banner{margin-bottom:32px}
+  #landing .landing-actions{margin-bottom:10px}
+}
+
+/* 2026-11-20 — restored per founder: the reference shows a dedicated
+   Academy Free/DDA Lab/DDA AI/Ressources row directly under the Hero
+   (distinct purpose from the later "Nos principaux parcours" section,
+   which stays untouched). */
+#landing .landing-hero-features{max-width:1440px;margin:0 auto;padding:0 clamp(20px,5vw,72px) 30px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+#landing .hero-feature-card{display:flex;flex-direction:column;gap:8px;padding:20px 20px 18px;border:1px solid rgba(174,191,213,.14);border-radius:16px;background:linear-gradient(160deg,rgba(10,20,36,.72),rgba(6,13,23,.82));text-decoration:none;transition:transform .2s ease,border-color .2s ease}
+#landing .hero-feature-card:hover,#landing .hero-feature-card:focus-visible{transform:translateY(-3px);border-color:rgba(217,164,65,.4);outline:0}
+#landing .hero-feature-icon{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:11px;background:rgba(217,164,65,.1);color:var(--dda-elite-gold)}
+#landing .hero-feature-icon .icon{width:19px;height:19px}
+#landing .hero-feature-card h3{margin:2px 0 0;color:#eef1f5;font-size:1rem;font-weight:700}
+#landing .hero-feature-card p{margin:0;flex:1;color:#9eabba;font-size:.8rem;line-height:1.45}
+#landing .hero-feature-status{display:inline-flex;align-self:flex-start;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:.66rem;font-weight:700}
+#landing .hero-feature-status .icon{width:11px;height:11px}
+#landing .hero-feature-status.is-free{background:rgba(70,196,130,.12);color:#5fd999}
+#landing .hero-feature-status.is-live{background:rgba(70,160,230,.12);color:#6cb6f0}
+#landing .hero-feature-status.is-soon{background:rgba(217,164,65,.12);color:var(--dda-elite-gold-soft)}
+@media(max-width:899px){#landing .landing-hero-features{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-bottom:26px}}
+@media(max-width:479px){#landing .landing-hero-features{grid-template-columns:1fr}}
+@media(min-width:1340px){#landing .landing-hero-features{max-width:min(1820px,96vw)}}

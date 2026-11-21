@@ -6,6 +6,7 @@ const { createBff, CSRF_COOKIE } = require('../bff/src/app');
 const { MemorySessionStore } = require('../bff/src/session-store');
 const { MemoryAdminRolesStore } = require('../bff/src/admin-roles-store');
 const { MemoryAccessAuditStore } = require('../bff/src/access-audit-store');
+const { MemoryEntitlementsStore } = require('../bff/src/entitlements-store');
 const { sha256, randomToken } = require('../bff/src/security');
 
 function request(server, method, path, { body, headers = {}, cookies = {} } = {}) {
@@ -85,7 +86,8 @@ function makeAuth(users) {
 
   // --- 1. Fully wired: owner and admin can reach all three routes, a plain user cannot ---
   {
-    const handler = createBff({ auth, sessions, adminRoles, accessAudit, billingStore, progressStore, config: baseConfig, clock: () => new Date('2026-10-24T00:00:00.000Z') });
+    const entitlementsStore = new MemoryEntitlementsStore();
+    const handler = createBff({ auth, sessions, adminRoles, accessAudit, billingStore, progressStore, entitlementsStore, config: baseConfig, clock: () => new Date('2026-10-24T00:00:00.000Z') });
     const server = http.createServer(handler);
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
     try {
@@ -170,6 +172,60 @@ function makeAuth(users) {
 
       response = await request(server, 'GET', `/v1/admin/progress/${encodeURIComponent(PLAIN)}`, { cookies: { '__Host-dda_session': plainToken } });
       assert.equal(response.status, 403, 'progression lookup refuses a non-admin exactly like the other admin routes');
+
+      // --- Admin-granted entitlements: owner-only mutation, admin-readable list ---
+      response = await request(server, 'GET', `/v1/admin/entitlements/${encodeURIComponent(PLAIN)}`, { cookies: { '__Host-dda_session': adminToken } });
+      assert.equal(response.status, 200, 'an admin (not just an owner) can list a user\'s entitlement grants');
+      assert.equal(response.body.contract, 'dda-admin-entitlements-v1');
+      assert.deepEqual(response.body.grants, [], 'no grants yet — an empty list, never fabricated');
+      assert.ok(response.body.valid_entitlements.includes('premium_track'), 'the real whitelist is exposed so the UI never invents a key');
+
+      response = await request(server, 'POST', '/v1/admin/entitlements', { ...withCsrf(adminToken), body: { user_id: PLAIN, entitlement_key: 'premium_track', reason: 'Goodwill access' } });
+      assert.equal(response.status, 403, 'an admin (not an owner) cannot grant an entitlement, even with valid CSRF');
+      assert.equal(response.body.code, 'owner_required');
+
+      response = await request(server, 'POST', '/v1/admin/entitlements', { cookies: { '__Host-dda_session': ownerToken }, body: { user_id: PLAIN, entitlement_key: 'premium_track', reason: 'Goodwill access' } });
+      assert.equal(response.status, 403, 'no CSRF token at all is refused even for the real owner');
+      assert.equal(response.body.code, 'csrf_failed');
+
+      response = await request(server, 'POST', '/v1/admin/entitlements', { ...withCsrf(ownerToken), body: { user_id: PLAIN, entitlement_key: 'not_a_real_entitlement', reason: 'test' } });
+      assert.equal(response.status, 400, 'an invented entitlement key is rejected, never silently coerced');
+      assert.equal(response.body.code, 'validation_error');
+
+      response = await request(server, 'POST', '/v1/admin/entitlements', { ...withCsrf(ownerToken), body: { user_id: PLAIN, entitlement_key: 'premium_track' } });
+      assert.equal(response.status, 400, 'a grant with no reason is rejected — every manual grant must stay traceable');
+      assert.equal(response.body.field_errors?.reason, 'Required — a manual grant must always be traceable.');
+
+      response = await request(server, 'POST', '/v1/admin/entitlements', { ...withCsrf(ownerToken), body: { user_id: PLAIN, entitlement_key: 'premium_track', reason: 'Goodwill access for a founding member' } });
+      assert.equal(response.status, 200, 'the owner can grant a real entitlement with a reason');
+      assert.equal(response.body.entitlement_key, 'premium_track');
+      assert.equal(response.body.status, 'active');
+
+      response = await request(server, 'GET', `/v1/admin/entitlements/${encodeURIComponent(PLAIN)}`, { cookies: { '__Host-dda_session': ownerToken } });
+      assert.equal(response.body.grants.length, 1);
+      assert.equal(response.body.grants[0].granted_by, OWNER, 'the grant is attributed to the real acting owner, never a client-supplied value');
+
+      response = await request(server, 'PATCH', `/v1/admin/entitlements/${encodeURIComponent(PLAIN)}/premium_track`, { ...withCsrf(adminToken), body: { status: 'suspended' } });
+      assert.equal(response.status, 403, 'an admin cannot suspend an entitlement either — owner-only');
+
+      response = await request(server, 'PATCH', `/v1/admin/entitlements/${encodeURIComponent(PLAIN)}/premium_track`, { ...withCsrf(ownerToken), body: { status: 'suspended' } });
+      assert.equal(response.status, 200, 'the owner can suspend a grant without deleting its history');
+      assert.equal(response.body.status, 'suspended');
+
+      response = await request(server, 'PATCH', `/v1/admin/entitlements/${encodeURIComponent(PLAIN)}/resources_premium`, { ...withCsrf(ownerToken), body: { status: 'active' } });
+      assert.equal(response.status, 404, 'suspending/reactivating a grant that was never made fails honestly, not silently');
+
+      response = await request(server, 'DELETE', `/v1/admin/entitlements/${encodeURIComponent(PLAIN)}/premium_track`, { ...withCsrf(adminToken) });
+      assert.equal(response.status, 403, 'an admin cannot revoke an entitlement either — owner-only');
+
+      response = await request(server, 'DELETE', `/v1/admin/entitlements/${encodeURIComponent(PLAIN)}/premium_track`, { ...withCsrf(ownerToken) });
+      assert.equal(response.status, 204, 'the owner can revoke the grant entirely');
+
+      response = await request(server, 'GET', `/v1/admin/entitlements/${encodeURIComponent(PLAIN)}`, { cookies: { '__Host-dda_session': ownerToken } });
+      assert.deepEqual(response.body.grants, [], 'the revoked grant is actually gone, not just hidden');
+
+      response = await request(server, 'GET', `/v1/admin/entitlements/${encodeURIComponent(PLAIN)}`, { cookies: { '__Host-dda_session': plainToken } });
+      assert.equal(response.status, 403, 'entitlements listing refuses a non-admin exactly like the other admin routes');
 
       // --- Role assignment/revocation: owner-only, CSRF-protected, server-derived ---
       response = await request(server, 'POST', '/v1/admin/roles', { ...withCsrf(adminToken), body: { user_id: PLAIN, role: 'admin' } });

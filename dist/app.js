@@ -479,33 +479,35 @@ function mountLesson(entry) {
   if (entry.id === 'P2.2') main.insertAdjacentHTML('beforeend', '<section class="lesson-practice-handoff premium-handoff"><p class="eyebrow gold">Après les leçons</p><h3>Practice Lab — Build the Risk Plan</h3><p>Construis un plan dans un scénario pédagogique synthétique, puis fais vérifier ta décision.</p><button type="button" class="secondary-action" data-view="premium-lab">Ouvrir le Practice Lab <span>→</span></button></section>');
   main.dataset.ddaLessonMounted = 'true';
 }
-// Lot 2 (mandate §6 audit): a Premium lesson's real content now arrives
-// from the authenticated BFF, never embedded in this public bundle. A
-// learner can reach this point with `canUnlock('premium_track')` true but
-// the content genuinely missing in exactly two honest cases: a local/pilot
-// session with no BFF configured (there is no server left to fetch real
-// content from — the old "embed it anyway" fallback is exactly the leak
-// this fix closes, so it is no longer available here either) or a
-// server-confirmed Premium learner whose content fetch itself failed
-// (network/BFF outage). Both get this same honest message — never a
-// fabricated placeholder that would resemble the real lesson, and never a
-// silently blank view.
-function renderPremiumContentUnavailable(viewId, title) {
+// Lot 2 (mandate §6 audit), extended by the docs/RISK_REGISTER.md R-04 fix
+// to advanced_modules: a gated lesson's real content now arrives from the
+// authenticated BFF, never embedded in this public bundle. A learner can
+// reach this point with canUnlock(permission) true but the content
+// genuinely missing in exactly two honest cases: a local/pilot session
+// with no BFF configured (there is no server left to fetch real content
+// from — the old "embed it anyway" fallback is exactly the leak this fix
+// closes, so it is no longer available here either) or a server-confirmed
+// learner whose content fetch itself failed (network/BFF outage). Both get
+// this same honest message — never a fabricated placeholder that would
+// resemble the real lesson, and never a silently blank view.
+const GATED_CONTENT_LABELS = Object.freeze({ premium_track: 'Contenu Premium', advanced_modules: 'Contenu avancé' });
+function renderPremiumContentUnavailable(viewId, title, permission = 'premium_track') {
   const main = document.getElementById(`${viewId}-main`);
   if (!main || main.dataset.ddaLessonMounted === 'true' || main.dataset.ddaPremiumUnavailable === 'true') return;
   main.dataset.ddaPremiumUnavailable = 'true';
+  const label = GATED_CONTENT_LABELS[permission] || GATED_CONTENT_LABELS.premium_track;
   const reason = window.DDABFF?.enabled()
-    ? 'Nous n’avons pas pu charger le contenu réel de cette leçon Premium depuis le serveur. Réessaie dans un instant.'
-    : 'Cette leçon Premium nécessite une connexion au serveur DDA pour charger son contenu réel, qui n’est plus jamais inclus dans l’application elle-même.';
-  main.insertAdjacentHTML('beforeend', `<section class="lesson-premium-unavailable"><p class="eyebrow gold">Contenu Premium</p><h2>${title ? `${title} est ` : ''}temporairement indisponible</h2><p>${reason}</p><button type="button" class="secondary-action" data-view="path">Retour à mon parcours</button></section>`);
+    ? `Nous n’avons pas pu charger le contenu réel de cette leçon depuis le serveur. Réessaie dans un instant.`
+    : `Cette leçon nécessite une connexion au serveur DDA pour charger son contenu réel, qui n’est plus jamais inclus dans l’application elle-même.`;
+  main.insertAdjacentHTML('beforeend', `<section class="lesson-premium-unavailable"><p class="eyebrow gold">${label}</p><h2>${title ? `${title} est ` : ''}temporairement indisponible</h2><p>${reason}</p><button type="button" class="secondary-action" data-view="path">Retour à mon parcours</button></section>`);
   main.querySelectorAll('[data-view]').forEach(bindViewButton);
 }
 mountedLessons.forEach(entry => {
-  if (entry.permission === 'premium_track' && !canUnlock('premium_track')) return;
+  if ((entry.permission === 'premium_track' || entry.permission === 'advanced_modules') && !canUnlock(entry.permission)) return;
   mountLesson(entry);
 });
-LESSON_REGISTRY.filter(entry => entry.permission === 'premium_track' && !mountedLessons.some(m => m.id === entry.id)).forEach(entry => {
-  if (canUnlock('premium_track')) renderPremiumContentUnavailable(entry.viewId, entry.title);
+LESSON_REGISTRY.filter(entry => (entry.permission === 'premium_track' || entry.permission === 'advanced_modules') && !mountedLessons.some(m => m.id === entry.id)).forEach(entry => {
+  if (canUnlock(entry.permission)) renderPremiumContentUnavailable(entry.viewId, entry.title, entry.permission);
 });
 function refreshMountedLessons() {
   mountedLessons = LESSON_REGISTRY
@@ -516,7 +518,17 @@ function refreshMountedLessons() {
     const main = document.getElementById(`${entry.viewId}-main`);
     const wasMounted = main?.dataset.ddaLessonMounted === 'true';
     mountLesson(entry);
-    if (!wasMounted) bindRegistryQuestions(entry);
+    // Matches mountPremiumLessons()/mountPremiumLabLessons(): a quiz's own
+    // correct-answer handler binds the [data-view] CTA inside the result
+    // card it reveals, but every OTHER [data-view] button rendered upfront
+    // by mountLesson() (module-toc links, "leçon précédente", a result
+    // card for a lesson whose quiz hasn't been attempted yet, …) needs this
+    // bulk bind — missing here, an M1/advanced_modules lesson's result CTA
+    // stayed an inert, unbound button once mounted via this function.
+    if (!wasMounted && main) {
+      bindRegistryQuestions(entry);
+      main.querySelectorAll('[data-view]').forEach(bindViewButton);
+    }
   });
   LESSON_REGISTRY.filter(entry => entry.permission === 'premium_track' && !mountedLessons.some(m => m.id === entry.id)).forEach(entry => {
     if (canUnlock('premium_track')) renderPremiumContentUnavailable(entry.viewId, entry.title);
@@ -4055,6 +4067,16 @@ document.getElementById('gate-unlock')?.addEventListener('click', () => {
   prototypeState = DDA.track(prototypeState, 'plan_preview', { plan: 'premium' });
   mountPremiumLessons();
   mountPremiumLabLessons();
+  // R-04 fix (docs/RISK_REGISTER.md): M1.1-M1.3's real content now arrives
+  // the same way Premium's does — fetched from the authenticated BFF into
+  // window.DDAM1GoldenLesson/etc. and picked up by buildCurriculum() — but,
+  // unlike premium_track, advanced_modules had no refresh call wired into
+  // this handler, so an M1 lesson stayed permanently unmounted (empty
+  // #lesson-m1x-main) even after this same gate just unlocked it.
+  // refreshMountedLessons() re-evaluates every LESSON_REGISTRY entry
+  // against the now-current entitlements and mounts anything newly
+  // unlockable, advanced_modules included.
+  refreshMountedLessons();
   renderState();
   closeGate();
   showToast('Démonstration Premium locale activée · aucun droit serveur.');
