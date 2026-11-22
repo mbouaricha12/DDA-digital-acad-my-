@@ -4145,7 +4145,11 @@ document.getElementById('premium-waitlist-join')?.addEventListener('click', () =
   const consent = document.getElementById('premium-waitlist-consent')?.checked === true;
   if (!consent) return;
   prototypeState = DDA.joinPremiumWaitlist(prototypeState, true);
-  prototypeState = DDA.track(prototypeState, 'premium_waitlist_joined', { plan: prototypeState.membership?.plan || 'visitor' });
+  // Final pre-launch audit (2026-11): this bypassed trackEvent()'s single
+  // choke point to the analytics adapter, so a waitlist join never reached
+  // PostHog even though 'premium_waitlist_joined' was already allow-listed
+  // in dda-analytics.js's FORWARDABLE_EVENTS -- it just never got there.
+  trackEvent('premium_waitlist_joined', { plan: prototypeState.membership?.plan || 'visitor' });
   document.getElementById('premium-waitlist-form').hidden = true;
   document.getElementById('premium-waitlist-confirmation').hidden = false;
 });

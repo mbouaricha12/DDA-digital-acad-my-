@@ -2736,6 +2736,21 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('Final pre-launch audit (2026-11): joining the Premium waitlist now actually reaches the analytics forwarding choke point, not just the local record', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#membership`);
+    await page.waitForSelector('#membership.view.active');
+    await page.check('#premium-waitlist-consent');
+    await page.click('#premium-waitlist-join');
+    await page.waitForSelector('#premium-waitlist-confirmation:not([hidden])');
+    const entry = await page.evaluate(() => window.DDAAnalytics.getDebugQueue().find(e => e.localName === 'premium_waitlist_joined'));
+    assert.ok(entry, 'premium_waitlist_joined must reach DDAAnalytics.send(), not just DDA.track()');
+    assert.equal(entry.externalName, 'premium_waitlist_joined', 'it was already allow-listed in FORWARDABLE_EVENTS -- the bug was never reaching that choke point at all');
+    await context.close();
+  });
+
   console.log('\n-- S. Attribution partenaire (ref) + export CSV admin --');
 
   await test('a valid ref= param is captured once into state.acquisition.partnerRef, lowercased, and survives a later visit with a different ref', async () => {
