@@ -6,7 +6,7 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const migrationDir = path.join(root, 'supabase', 'migrations');
 const files = fs.readdirSync(migrationDir).filter(file => /^\d{4}_.+\.sql$/.test(file)).sort();
-assert.deepEqual(files, ['0001_identity_sessions.sql', '0002_business_entities.sql', '0003_rls_and_privileges.sql', '0004_chariow_billing.sql', '0005_brvm_publications.sql', '0006_select_own_grants.sql', '0007_admin_roles.sql', '0008_rate_limiting.sql', '0009_instructor_roles_access_audit.sql', '0010_community_posts.sql', '0011_entitlements.sql'], 'P3/P4/P5/P6/P7/P8/P9/P10/P11 migration order is explicit and deterministic');
+assert.deepEqual(files, ['0001_identity_sessions.sql', '0002_business_entities.sql', '0003_rls_and_privileges.sql', '0004_chariow_billing.sql', '0005_brvm_publications.sql', '0006_select_own_grants.sql', '0007_admin_roles.sql', '0008_rate_limiting.sql', '0009_instructor_roles_access_audit.sql', '0010_community_posts.sql', '0011_entitlements.sql', '0012_dda_resources_storage_lockdown.sql'], 'P3/P4/P5/P6/P7/P8/P9/P10/P11/P12 migration order is explicit and deterministic');
 const combined = files.map(file => fs.readFileSync(path.join(migrationDir, file), 'utf8')).join('\n');
 for (const table of ['dda_profiles', 'dda_sessions', 'memberships', 'onboarding', 'lesson_progress', 'terminal_state', 'journal_entries', 'journal_plans', 'premium_progress', 'preferences', 'audit_events', 'dda_admin_roles']) {
   assert.match(combined, new RegExp(`public\\.${table}\\b`), `${table} is represented in versioned SQL`);
@@ -46,6 +46,9 @@ assert.match(combined, /create policy dda_admin_roles_deny_all on public\.dda_ad
 for (const grant of [/grant select on table public\.dda_admin_roles/, /grant insert on table public\.dda_admin_roles/, /grant update[^;]* on table public\.dda_admin_roles/]) {
   assert.doesNotMatch(combined, grant, 'dda_admin_roles must never receive any grant to anon/authenticated, under any clause');
 }
+// The 'dda-resources' Storage bucket is server-only: a RESTRICTIVE policy is ANDed with
+// any permissive policy, so no later policy can accidentally expose it to the browser.
+assert.match(combined, /create policy dda_resources_bucket_no_browser_access\s+on storage\.objects\s+as restrictive\s+for all\s+to anon, authenticated\s+using \(bucket_id <> 'dda-resources'\)\s+with check \(bucket_id <> 'dda-resources'\)/, 'dda-resources bucket is denied to anon/authenticated by a restrictive policy');
 const replay = fs.readFileSync(path.join(root, 'scripts', 'replay_p3_migrations.sh'), 'utf8');
 assert.match(replay, /DATABASE_URL/, 'replay requires an explicit database URL');
 assert.match(replay, /Refusing to run against a Supabase-hosted URL/, 'replay refuses remote Supabase URLs');
