@@ -1,35 +1,31 @@
 'use strict';
 
-const fs = require('node:fs');
-const path = require('node:path');
 const crypto = require('node:crypto');
 
 /* ==========================================================================
-   MEMBER / PREMIUM RESOURCES — library catalogue (final pre-launch audit,
-   2026-11) + its follow-up ("passage à l'implémentation concrète").
+   MEMBER / PREMIUM RESOURCES — library catalogue metadata (final pre-launch
+   audit, 2026-11) + its "administration totalement autonome" follow-up.
 
-   This mirrors bff/src/entitlements-store.js's own two-class pattern
-   exactly (MemoryXStore for tests/local dev, PostgrestXStore for
-   production) so an Owner can add/edit/publish/unpublish/delete a
-   resource through the admin UI (GET/POST/PATCH/DELETE
-   /v1/admin/resources — see bff/src/app.js) WITHOUT a code change or
-   redeploy. Metadata lives in Supabase (dda_resources,
-   supabase/migrations/0012_resources.sql); the actual file bytes live
-   outside dist/, under DEFAULT_STORAGE_DIR, and are only ever streamed by
-   the authenticated GET /v1/resources/:id/download route after the exact
-   same hasActivePremium() check every other Premium route already uses —
-   never a public, permanent static URL.
+   Mirrors bff/src/entitlements-store.js's two-class pattern exactly
+   (MemoryResourcesStore for tests/local dev, PostgrestResourcesStore for
+   production) so an Owner can add/edit/publish/unpublish/delete a resource
+   through the admin UI (GET/POST/PATCH/DELETE /v1/admin/resources — see
+   bff/src/app.js) WITHOUT a code change or redeploy. This module holds
+   ONLY metadata; the actual file bytes are a separate concern, uploaded by
+   the Owner straight from the admin UI (desktop or phone) and stored in a
+   private Supabase Storage bucket — see bff/src/resources-storage.js's
+   header for why that is a separate module and how it stays protected.
 
-   Adding a real resource today needs: (1) create its metadata row through
-   the admin UI, (2) commit the matching file under bff/resources-storage/
-   with the exact file name entered in the admin form, and push. No other
-   code change, no redeploy beyond that push (which the file commit already
-   requires) -- see the admin UI's own inline help text.
+   A resource is created here with no file at all (file: null) -- the
+   admin UI then calls POST /v1/admin/resources/:id/file to attach one.
+   Publishing a resource with no file is allowed at the metadata layer
+   (this store does not know about storage) but GET /v1/resources/:id/
+   download in app.js refuses honestly (404 resource_file_missing) rather
+   than serve nothing silently.
    ========================================================================== */
 
 const VALID_MEMBERSHIP = ['free', 'premium'];
 const VALID_STATUS = ['draft', 'published'];
-const DEFAULT_STORAGE_DIR = path.join(__dirname, '..', 'resources-storage');
 
 function validationError(field, message) {
   return Object.assign(new Error(message), { code: 'invalid_resource', status: 400, field });
@@ -46,7 +42,9 @@ function normalizeInput(data, { partial = false } = {}) {
     const value = typeof data[key] === 'string' ? data[key].trim() : data[key];
     if (!value) throw validationError(key, `${key} is required.`);
   };
-  ['name', 'category', 'membershipRequired', 'file'].forEach(key => { if (!partial || key in data) required(key); });
+  // `file` is deliberately NOT required here -- it is attached afterward
+  // via the file-upload route, never at metadata-creation time.
+  ['name', 'category', 'membershipRequired'].forEach(key => { if (!partial || key in data) required(key); });
   if ('name' in data) out.name = String(data.name).trim();
   if ('description' in data) out.description = String(data.description || '').trim();
   if ('category' in data) out.category = String(data.category).trim();
@@ -57,8 +55,8 @@ function normalizeInput(data, { partial = false } = {}) {
     out.membershipRequired = data.membershipRequired;
   }
   if ('type' in data) out.type = String(data.type || 'pdf').trim();
-  if ('file' in data) out.file = String(data.file).trim();
-  if ('mimeType' in data) out.mimeType = String(data.mimeType || 'application/octet-stream').trim();
+  if ('file' in data) out.file = data.file ? String(data.file).trim() : null;
+  if ('mimeType' in data) out.mimeType = data.mimeType ? String(data.mimeType).trim() : null;
   if ('coverImage' in data) out.coverImage = data.coverImage ? String(data.coverImage).trim() : null;
   if ('status' in data) {
     if (!VALID_STATUS.includes(data.status)) throw validationError('status', 'status must be "draft" or "published".');
@@ -84,7 +82,7 @@ class MemoryResourcesStore {
   async create(data) {
     const clean = normalizeInput(data);
     const now = new Date().toISOString();
-    const row = { id: crypto.randomUUID(), status: 'draft', order: 0, level: '', tags: [], mimeType: 'application/octet-stream', coverImage: null, type: 'pdf', ...clean, created_at: now, updated_at: now };
+    const row = { id: crypto.randomUUID(), status: 'draft', order: 0, level: '', tags: [], file: null, mimeType: null, coverImage: null, type: 'pdf', ...clean, created_at: now, updated_at: now };
     this.rows.set(row.id, row);
     return row;
   }
@@ -177,17 +175,4 @@ class PostgrestResourcesStore {
   }
 }
 
-// Streams the file to `res` only after the caller has already verified the
-// requester's membership for this exact resource -- this does not itself
-// re-check entitlement, by design (the route handler owns that decision).
-function streamResourceFile(resource, res, { storageDir = DEFAULT_STORAGE_DIR, fsImpl = fs } = {}) {
-  const filePath = path.join(storageDir, resource.file);
-  if (!filePath.startsWith(storageDir)) return false; // defends resource.file against path traversal
-  if (!fsImpl.existsSync(filePath)) return false;
-  res.setHeader('Content-Type', resource.mimeType || 'application/octet-stream');
-  res.setHeader('Content-Disposition', `attachment; filename="${resource.file.replace(/[^\w.\-]/g, '_')}"`);
-  fsImpl.createReadStream(filePath).pipe(res);
-  return true;
-}
-
-module.exports = { MemoryResourcesStore, PostgrestResourcesStore, streamResourceFile, DEFAULT_STORAGE_DIR, VALID_MEMBERSHIP, VALID_STATUS };
+module.exports = { MemoryResourcesStore, PostgrestResourcesStore, VALID_MEMBERSHIP, VALID_STATUS };

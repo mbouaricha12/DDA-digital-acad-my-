@@ -415,6 +415,33 @@
     return mutateAdminRole(`/v1/admin/resources/${encodeURIComponent(id)}`, { method: 'DELETE' });
   }
 
+  // File upload/replace ("administration autonome" follow-up, 2026-11):
+  // the File object from <input type="file"> is sent as the raw request
+  // body (fetch() supports a File/Blob body directly -- no multipart
+  // encoding needed), bypassing request()'s JSON handling entirely since
+  // a File is not a plain object it should try to stringify. Mirrors
+  // mutateAdminRole's {enabled, status, data} shape so the UI can show
+  // exactly why an upload failed (wrong type, too large, not an owner).
+  async function uploadAdminResourceFile(id, file) {
+    if (!enabled()) return { enabled: false };
+    await issueCsrf();
+    const csrf = readCookie('__Host-dda_csrf');
+    const response = await fetch(`${configuredBase}/v1/admin/resources/${encodeURIComponent(id)}/file`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': file.type || 'application/octet-stream',
+        'X-Resource-File-Name': encodeURIComponent(file.name || 'ressource'),
+        ...(csrf ? { 'X-CSRF-Token': csrf } : {})
+      },
+      body: file
+    });
+    let data = null;
+    try { data = await response.json(); } catch { data = null; }
+    return { enabled: true, status: response.status, data };
+  }
+
   window.DDABFF = Object.freeze({
     enabled, register, verifyEmail, exchangeSignupCode, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, getMarketQuotes, updateMe, logout, issueCsrf,
     oauthGoogleStartUrl, exchangeOAuthCode,
@@ -422,7 +449,7 @@
     getCommunityPosts, createCommunityPost,
     getAdminOverview, getAdminUsers, getAdminMemberships, getAdminProgress, assignAdminRole, revokeAdminRole,
     getAdminEntitlements, grantAdminEntitlement, setAdminEntitlementStatus,
-    listResources, downloadResource, getAdminResources, createAdminResource, updateAdminResource, deleteAdminResource,
+    listResources, downloadResource, getAdminResources, createAdminResource, updateAdminResource, deleteAdminResource, uploadAdminResourceFile,
     get baseUrl() { return configuredBase; }
   });
 })();

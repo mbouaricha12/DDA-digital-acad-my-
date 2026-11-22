@@ -152,14 +152,28 @@
 
       <section class="view" id="admin-view-library" aria-labelledby="admin-library-title">
         <h1 id="admin-library-title" class="eyebrow gold">Bibliothèque DDA</h1>
-        <p class="admin-role-feedback" style="border-color:var(--line);color:var(--muted)">Ajoute, publie, dépublie ou supprime une ressource de la bibliothèque (Free ou Premium) — visible immédiatement pour les apprenants une fois publiée, sans intervention développeur. Les lectures sont ouvertes à tout admin ; seul un Owner peut créer, modifier ou supprimer. Avant de publier une ressource, le fichier exact (même nom) doit être déposé sous <code>bff/resources-storage/</code> et déployé — une ressource publiée sans fichier correspondant échoue honnêtement au téléchargement plutôt que de servir un contenu vide.</p>
+        <p class="admin-role-feedback" style="border-color:var(--line);color:var(--muted)">Ajoute, publie, dépublie ou supprime une ressource de la bibliothèque (Free ou Premium) — visible immédiatement pour les apprenants une fois publiée, sans intervention développeur. Importe le fichier (PDF, ZIP, XLSX, DOCX, CSV, TXT, PNG, JPG — 4&nbsp;Mo max) directement depuis cet écran, sur ordinateur ou téléphone ; il est stocké dans un espace privé, jamais exposé publiquement. Les lectures sont ouvertes à tout admin ; seul un Owner peut créer, modifier, importer un fichier ou supprimer.</p>
         <p class="admin-role-feedback" id="admin-library-feedback" role="status" hidden></p>
+        <div class="admin-library-toolbar">
+          <input type="search" id="admin-library-search" placeholder="Rechercher par nom ou catégorie…" aria-label="Rechercher une ressource">
+          <select id="admin-library-filter-access" aria-label="Filtrer par accès">
+            <option value="">Tout accès</option>
+            <option value="free">Free</option>
+            <option value="premium">Premium</option>
+          </select>
+          <select id="admin-library-filter-status" aria-label="Filtrer par statut">
+            <option value="">Tout statut</option>
+            <option value="published">Publiée</option>
+            <option value="draft">Brouillon</option>
+          </select>
+        </div>
         <div class="admin-table-wrap">
           <table class="admin-table">
             <thead><tr><th>Nom</th><th>Catégorie</th><th>Accès</th><th>Fichier</th><th>Statut</th><th>Mis à jour</th><th></th></tr></thead>
             <tbody id="admin-library-body"></tbody>
           </table>
         </div>
+        <input type="file" id="admin-library-replace-input" hidden accept=".pdf,.zip,.xlsx,.docx,.csv,.txt,.png,.jpg,.jpeg">
         <form id="admin-library-create-form" class="admin-grant-form">
           <p class="eyebrow gold" style="margin-top:28px">Ajouter une ressource (créée en brouillon)</p>
           <label for="admin-library-name">Nom</label>
@@ -177,8 +191,8 @@
           </select>
           <label for="admin-library-type">Type</label>
           <input id="admin-library-type" maxlength="20" value="pdf" placeholder="pdf, xlsx, zip…">
-          <label for="admin-library-file">Nom exact du fichier déposé sur le serveur</label>
-          <input id="admin-library-file" required maxlength="200" placeholder="ex. indicateur-vwap.pdf">
+          <label for="admin-library-file">Fichier (PDF, ZIP, XLSX, DOCX, CSV, TXT, PNG, JPG — 4&nbsp;Mo max)</label>
+          <input type="file" id="admin-library-file" accept=".pdf,.zip,.xlsx,.docx,.csv,.txt,.png,.jpg,.jpeg">
           <button class="primary-action" type="submit">Créer en brouillon</button>
         </form>
       </section>
