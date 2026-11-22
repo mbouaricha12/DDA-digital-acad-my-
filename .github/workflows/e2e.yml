@@ -54,6 +54,7 @@ jobs:
           node tests/test_rls_policy_audit.js
           node scripts/audit_rls_policies.js
           node tests/test_premium_p2_contract.js
+          node tests/test_premium_resources_protection.js
           node tests/verify_route_register_consistency.js
           git diff --check
 

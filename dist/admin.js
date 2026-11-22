@@ -52,7 +52,7 @@
   const views = document.querySelectorAll('main .view');
   const navButtons = document.querySelectorAll('[data-admin-view]');
   const contextTitle = document.getElementById('admin-context-title');
-  const viewTitles = { overview: 'Aperçu', users: 'Utilisateurs', memberships: 'Abonnements', content: 'Contenu', resources: 'Ressources', progress: 'Progression', entitlements: 'Entitlements' };
+  const viewTitles = { overview: 'Aperçu', users: 'Utilisateurs', memberships: 'Abonnements', content: 'Contenu', resources: 'Ressources', library: 'Bibliothèque', progress: 'Progression', entitlements: 'Entitlements' };
 
   function showAdminView(id) {
     views.forEach(view => view.classList.toggle('active', view.id === `admin-view-${id}`));
@@ -67,6 +67,7 @@
     if (id === 'memberships' && !membershipsState.loaded) loadMemberships(1);
     if (id === 'content' && !contentState.loaded) loadContent();
     if (id === 'resources' && !resourcesState.loaded) loadResources();
+    if (id === 'library') loadLibrary();
   }
 
   navButtons.forEach(button => button.addEventListener('click', () => {
@@ -413,6 +414,128 @@
       body.innerHTML = `<tr><td colspan="5">Liste des ressources indisponible (${escapeHtml(error.message)}).</td></tr>`;
     }
   }
+
+  // ---------- Bibliothèque DDA (final pre-launch audit follow-up, 2026-11) ----------
+  // Real CRUD against bff/src/premium-resources-store.js's catalogue — not
+  // the read-only video mirror above. Reads are open to any admin; create/
+  // publish/unpublish/delete are owner-only, enforced server-side
+  // (bff/src/app.js's withAdmin + `role !== 'owner'` checks) — this UI just
+  // reflects that by hiding the form and action buttons for a non-owner.
+  const libraryState = { items: [] };
+  function libraryUploadErrorMessage(status, data) {
+    if (status === 413) return 'Fichier trop volumineux (4 Mo maximum).';
+    if (status === 415) return data?.message || 'Type de fichier non autorisé.';
+    if (status === 403) return 'Seul un owner peut importer un fichier.';
+    if (status === 404) return 'Ressource introuvable — recharge la page.';
+    return 'L’import du fichier a échoué.';
+  }
+  function renderLibraryRows() {
+    const search = document.getElementById('admin-library-search').value.trim().toLowerCase();
+    const accessFilter = document.getElementById('admin-library-filter-access').value;
+    const statusFilter = document.getElementById('admin-library-filter-status').value;
+    const filtered = libraryState.items.filter(item => {
+      if (accessFilter && item.membershipRequired !== accessFilter) return false;
+      if (statusFilter && item.status !== statusFilter) return false;
+      if (search && !`${item.name} ${item.category}`.toLowerCase().includes(search)) return false;
+      return true;
+    });
+    const body = document.getElementById('admin-library-body');
+    body.innerHTML = filtered.map(item => `
+      <tr>
+        <td>${escapeHtml(item.name)}</td>
+        <td>${escapeHtml(item.category)}</td>
+        <td><span class="admin-status-tag" data-status="${item.membershipRequired === 'premium' ? 'suspended' : 'active'}">${item.membershipRequired === 'premium' ? 'Premium' : 'Free'}</span></td>
+        <td>${item.file ? escapeHtml(item.file) : '<em>Aucun fichier</em>'}</td>
+        <td><span class="admin-status-tag" data-status="${item.status === 'published' ? 'active' : 'suspended'}">${item.status === 'published' ? 'Publiée' : 'Brouillon'}</span></td>
+        <td>${formatDate(item.updated_at)}</td>
+        <td>${callerRole === 'owner' ? `
+          <button class="text-action" type="button" data-library-replace="${escapeHtml(item.id)}">${item.file ? 'Remplacer le fichier' : 'Importer un fichier'}</button>
+          <button class="text-action" type="button" data-library-toggle="${escapeHtml(item.id)}" data-library-status="${escapeHtml(item.status)}">${item.status === 'published' ? 'Dépublier' : 'Publier'}</button>
+          <button class="text-action" type="button" data-library-delete="${escapeHtml(item.id)}">Supprimer</button>` : ''}</td>
+      </tr>`).join('') || `<tr><td colspan="7">${libraryState.items.length ? 'Aucune ressource ne correspond à ta recherche.' : 'Aucune ressource dans la bibliothèque pour le moment.'}</td></tr>`;
+    const replaceInput = document.getElementById('admin-library-replace-input');
+    body.querySelectorAll('[data-library-replace]').forEach(button => button.addEventListener('click', () => {
+      replaceInput.dataset.libraryReplaceTarget = button.dataset.libraryReplace;
+      replaceInput.click();
+    }));
+    body.querySelectorAll('[data-library-toggle]').forEach(button => button.addEventListener('click', async () => {
+      const nextStatus = button.dataset.libraryStatus === 'published' ? 'draft' : 'published';
+      setDataFeedback('admin-library-feedback', '');
+      const result = await window.DDABFF.updateAdminResource(button.dataset.libraryToggle, { status: nextStatus });
+      if (!result.enabled) return;
+      if (result.status === 200) { loadLibrary(); return; }
+      setDataFeedback('admin-library-feedback', result.status === 403 ? 'Seul un owner peut publier ou dépublier une ressource.' : 'La mise à jour a échoué.');
+    }));
+    body.querySelectorAll('[data-library-delete]').forEach(button => button.addEventListener('click', async () => {
+      if (!window.confirm('Supprimer définitivement cette ressource et son fichier ?')) return;
+      setDataFeedback('admin-library-feedback', '');
+      const result = await window.DDABFF.deleteAdminResource(button.dataset.libraryDelete);
+      if (!result.enabled) return;
+      if (result.status === 204) { loadLibrary(); return; }
+      setDataFeedback('admin-library-feedback', result.status === 403 ? 'Seul un owner peut supprimer une ressource.' : 'La suppression a échoué.');
+    }));
+  }
+  async function loadLibrary() {
+    setDataFeedback('admin-library-feedback', '');
+    document.getElementById('admin-library-create-form').hidden = callerRole !== 'owner';
+    let result;
+    try { result = await window.DDABFF.getAdminResources(); }
+    catch { setDataFeedback('admin-library-feedback', 'Bibliothèque indisponible pour le moment. Réessaie plus tard.'); return; }
+    if (result.status !== 200) { setDataFeedback('admin-library-feedback', apiDataError(result.status, 'Bibliothèque')); return; }
+    libraryState.items = result.data.items || [];
+    renderLibraryRows();
+  }
+  ['admin-library-search', 'admin-library-filter-access', 'admin-library-filter-status'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', renderLibraryRows);
+    document.getElementById(id)?.addEventListener('change', renderLibraryRows);
+  });
+  document.getElementById('admin-library-replace-input')?.addEventListener('change', async event => {
+    const file = event.target.files[0];
+    const resourceId = event.target.dataset.libraryReplaceTarget;
+    event.target.value = '';
+    if (!file || !resourceId) return;
+    setDataFeedback('admin-library-feedback', 'Import en cours…', 'status');
+    const result = await window.DDABFF.uploadAdminResourceFile(resourceId, file);
+    if (!result.enabled) return;
+    if (result.status === 200) { setDataFeedback('admin-library-feedback', ''); loadLibrary(); return; }
+    setDataFeedback('admin-library-feedback', libraryUploadErrorMessage(result.status, result.data));
+  });
+  document.getElementById('admin-library-create-form')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const fileInput = document.getElementById('admin-library-file');
+    const file = fileInput.files[0];
+    const payload = {
+      name: document.getElementById('admin-library-name').value.trim(),
+      description: document.getElementById('admin-library-description').value.trim(),
+      category: document.getElementById('admin-library-category').value.trim(),
+      level: document.getElementById('admin-library-level').value.trim(),
+      membershipRequired: document.getElementById('admin-library-membership').value,
+      type: document.getElementById('admin-library-type').value.trim() || 'pdf'
+    };
+    setDataFeedback('admin-library-feedback', '');
+    const result = await window.DDABFF.createAdminResource(payload);
+    if (!result.enabled) return;
+    if (result.status !== 200) {
+      const messages = { 400: `Champ invalide : ${result.data?.message || 'vérifie le formulaire.'}`, 403: 'Seul un owner peut ajouter une ressource.' };
+      setDataFeedback('admin-library-feedback', messages[result.status] || 'La création a échoué.');
+      return;
+    }
+    if (file) {
+      setDataFeedback('admin-library-feedback', 'Création réussie — import du fichier en cours…', 'status');
+      const uploadResult = await window.DDABFF.uploadAdminResourceFile(result.data.item.id, file);
+      if (uploadResult.enabled && uploadResult.status !== 200) {
+        setDataFeedback('admin-library-feedback', `Ressource créée en brouillon, mais ${libraryUploadErrorMessage(uploadResult.status, uploadResult.data)}`);
+        event.target.reset();
+        document.getElementById('admin-library-type').value = 'pdf';
+        loadLibrary();
+        return;
+      }
+    }
+    setDataFeedback('admin-library-feedback', '');
+    event.target.reset();
+    document.getElementById('admin-library-type').value = 'pdf';
+    loadLibrary();
+  });
 
   // ---------- Progression (one real learner at a time) ----------
   // Reads the exact same rows the learner's own GET /v1/progress exposes to

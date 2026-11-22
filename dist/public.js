@@ -47,6 +47,17 @@
     if (event) track(event === 'hero_cta_click' ? 'hero_cta_click' : event, { view, position: button.dataset.funnelPosition });
     window.location.assign(destination(view));
   }));
+  // DDA Funnel Audit (2026-11): a handful of secondary CTAs are real <a href>
+  // links to a static page (e.g. "Découvrir le parcours Free" -> commencer/),
+  // not SPA routes — they carry data-analytics/data-funnel-position exactly
+  // like the [data-view] buttons above, but [data-view] is what the handler
+  // above keys on, so these were never tracked at all (not a missing
+  // EVENT_NAMES entry — no listener ever ran). track() is synchronous
+  // (localStorage write + a fire-and-forget send), so it completes before
+  // the native link navigation proceeds; no preventDefault needed.
+  document.querySelectorAll('[data-analytics]:not([data-view])').forEach(link => link.addEventListener('click', () => {
+    track(link.dataset.analytics, { view: 'landing', position: link.dataset.funnelPosition });
+  }));
 
   /* DDA Visual Identity V2 — progressive reveals for the public editorial shell.
      .landing-main-copy (the hero promise) is deliberately NOT in this list: it
@@ -257,8 +268,19 @@
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && legalDialog?.open) legalDialog.close(); });
 
   const ctaElement = document.querySelector('.landing-mobile-cta');
-  const readableContent = [...landing.querySelectorAll('h1,h2,h3,h4,p,li,small,summary,button,a,blockquote,figcaption,span')]
-    .filter(node => !node.closest('.landing-mobile-cta') && !node.closest('.landing-inline-cta') && !node.closest('[aria-hidden="true"]') && node.textContent.trim());
+  // Perf (2026-11 funnel audit): this scan (~550 nodes, 3 closest() walks
+  // each) only matters once a mobile visitor has scrolled past 1300px — on
+  // every other load (desktop, or a mobile visit that never scrolls that
+  // far) it was pure dead weight on the main thread during initial render.
+  // Built lazily, once, on first actual need instead of eagerly at load.
+  let readableContent = null;
+  function getReadableContent() {
+    if (!readableContent) {
+      readableContent = [...landing.querySelectorAll('h1,h2,h3,h4,p,li,small,summary,button,a,blockquote,figcaption,span')]
+        .filter(node => !node.closest('.landing-mobile-cta') && !node.closest('.landing-inline-cta') && !node.closest('[aria-hidden="true"]') && node.textContent.trim());
+    }
+    return readableContent;
+  }
   let ctaFrame = 0;
   function syncCta() {
     const mobile = window.matchMedia?.('(max-width: 639px)').matches || window.innerWidth <= 639;
@@ -268,7 +290,7 @@
     // hidden state when a smooth scroll settles a few pixels after 960.
     if (mobile && window.scrollY > 1300 && ctaElement) {
       const cta = ctaElement.getBoundingClientRect();
-      for (const node of readableContent) {
+      for (const node of getReadableContent()) {
         const style = window.getComputedStyle(node);
         if (style.display === 'none' || style.visibility === 'hidden') continue;
         const rect = node.getBoundingClientRect();

@@ -21,6 +21,7 @@ assert.deepEqual(good.tables.sort(), [
   'public.dda_entitlements',
   'public.dda_profiles',
   'public.dda_rate_limit_counters',
+  'public.dda_resources',
   'public.dda_sessions',
   'public.journal_entries',
   'public.journal_plans',

@@ -54,6 +54,28 @@ const fakeFetch = async (url, options) => {
   assert.equal(retryCalls[1].options.method, 'PATCH');
   assert.match(retryCalls[1].options.body, /"processed_status":"accepted"/);
   await assert.rejects(() => store.applyChariowTransition({ kind: 'membership_transition', status: 'active', userReference: 'not-a-uuid', productId: 'prd_premium', externalId: 'x' }), /server-owned DDA UUID/);
+
+  // DDA Funnel Audit (2026-11): applyChariowTransition must flag a
+  // reactivation of an expired membership as is_renewal=true (so the funnel
+  // can distinguish a win-back from a brand-new purchase), and never flag a
+  // genuinely fresh purchase (no prior row) as a renewal.
+  assert.equal(row.is_renewal, false, 'a first-ever purchase (no prior row) must not be flagged as a renewal');
+
+  const renewalFetch = async (url, options) => {
+    const body = options.body ? JSON.parse(options.body) : null;
+    if (options.method === 'GET') return { ok: true, async text() { return JSON.stringify([{ status: 'expired', provider_event_at: '2026-10-01T00:00:00.000Z' }]); } };
+    if (options.method === 'POST') return { ok: true, async text() { return JSON.stringify([body]); } };
+    throw new Error(`unexpected renewal-fetch request: ${options.method} ${url}`);
+  };
+  const renewalStore = new PostgrestBillingStore({ supabaseUrl: 'https://project.supabase.co/', serviceRoleKey: 'service-role-secret', fetchImpl: renewalFetch });
+  const renewalRow = await renewalStore.applyChariowTransition({
+    kind: 'membership_transition', status: 'active', provider: 'chariow', event: 'successful.sale',
+    userReference: '11111111-1111-4111-8111-111111111111', productId: 'prd_premium',
+    externalId: 'sal_2', saleId: 'sal_2', licenseId: null,
+    customer: { externalCustomerId: 'cus_1' }, occurredAt: '2026-11-15T20:00:00.000Z'
+  });
+  assert.equal(renewalRow.is_renewal, true, 'reactivating an expired membership with a newer successful.sale must be flagged as a renewal');
+
   console.log('Supabase Chariow billingStore contract: PASS');
 })().catch(error => { console.error(error); process.exitCode = 1; });
 

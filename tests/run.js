@@ -426,6 +426,76 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('Final launch pass (2026-11): getProgress() and the Premium entitlement check now fire in parallel on boot, not one after the other', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    const callTimes = {};
+    let premiumPreviewCalls = 0;
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    await context.route('https://bff.test/v1/progress', async route => {
+      callTimes.progress = Date.now();
+      await new Promise(resolve => setTimeout(resolve, 200));
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lessons: {}, onboarding: { complete: true } }) });
+    });
+    await context.route('https://bff.test/v1/premium/preview', async route => {
+      callTimes.premiumPreview = Date.now();
+      premiumPreviewCalls += 1;
+      await new Promise(resolve => setTimeout(resolve, 200));
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true }) });
+    });
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(premiumPreviewCalls, 1, 'the entitlement fetch fired by hydrateRemoteSession must be reused, not duplicated by refreshServerPremiumEntitlement()');
+    assert.ok(Math.abs(callTimes.progress - callTimes.premiumPreview) < 150, `getProgress and the entitlement check must start within ~150ms of each other (parallel), not ~200ms apart (serial); actual gap: ${Math.abs(callTimes.progress - callTimes.premiumPreview)}ms`);
+    await context.close();
+  });
+
+  await test('Resource library (2026-11): an empty catalogue shows the honest empty state, never a blank or broken shelf', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada' }) }));
+    await context.route('https://bff.test/v1/progress', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lessons: {}, onboarding: { complete: true } }) }));
+    await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ code: 'premium_required' }) }));
+    await context.route('https://bff.test/v1/resources', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [] }) }));
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#resources`);
+    await page.waitForSelector('#resources.view.active');
+    await waitForPageState(page, () => document.getElementById('resource-library-empty')?.hidden === false, { description: 'resource library empty state' });
+    assert.match(await page.locator('#resource-library-empty').textContent(), /bibliothèque de ressources apparaîtra ici/);
+    await context.close();
+  });
+
+  await test('Resource library (2026-11): a published resource renders grouped by category and downloads through the real authenticated endpoint', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada' }) }));
+    await context.route('https://bff.test/v1/progress', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lessons: {}, onboarding: { complete: true } }) }));
+    await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ code: 'premium_required' }) }));
+    await context.route('https://bff.test/v1/resources', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [
+      { id: 'res-1', name: 'Checklist risque', description: 'desc', category: 'Gestion du risque', level: 'Débutant', membershipRequired: 'free', type: 'pdf' }
+    ] }) }));
+    let downloadCalled = false;
+    await context.route('https://bff.test/v1/resources/res-1/download', route => {
+      downloadCalled = true;
+      return route.fulfill({ status: 200, contentType: 'application/pdf', headers: { 'Content-Disposition': 'attachment; filename="checklist-risque.pdf"' }, body: 'PDF_BYTES' });
+    });
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#resources`);
+    await page.waitForSelector('#resources.view.active');
+    await waitForPageState(page, () => document.getElementById('resource-library-categories')?.textContent.includes('Checklist risque'), { description: 'resource library populated' });
+    assert.match(await page.locator('#resource-library-categories').textContent(), /Gestion du risque/);
+    assert.equal(await page.locator('#resource-library-empty').isHidden(), true);
+    await page.click('.resource-library-download');
+    const deadline = Date.now() + 5000;
+    while (!downloadCalled && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 50));
+    assert.ok(downloadCalled, 'clicking the download button must fire a real authenticated request to the resource download endpoint');
+    await context.close();
+  });
+
   await test('Premium P2 completes lesson → lab → assessment → proof → progression → Journal with reloads', async () => {
     const context = await freshContext(browser, { width: 390, height: 844 });
     // Lot 2 (mandate §6 audit): this full walkthrough needs P2.1/P2.2's real
@@ -1001,6 +1071,33 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     assert.equal(JSON.stringify(calls).includes('2250700000000'), false);
     assert.equal(JSON.stringify(calls).includes('/path?'), false);
     assert.equal(JSON.stringify(calls).includes('private-note'), false, 'unrecognized keys and free-text values are dropped');
+    await context.close();
+  });
+
+  await test('Final pre-launch audit (2026-11): with no window.DDA_ANALYTICS_CONFIG set, dda-analytics.js fetches the PostHog key from the BFF instead of staying stuck in debug mode forever', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/analytics/config', route => route.fulfill({
+      status: 200, contentType: 'application/json', body: JSON.stringify({ posthogKey: 'remote-test-key', posthogHost: 'https://analytics.test' })
+    }));
+    await context.route('https://analytics.test/static/array.js', route => route.fulfill({
+      status: 200, contentType: 'application/javascript', body: 'window.posthog = { init(){}, identify(){}, capture(){} };'
+    }));
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+    await waitForPageState(page, () => window.DDAAnalytics?.getTransport() === 'posthog', { description: 'PostHog transport via the remote BFF config' });
+    assert.equal(await page.evaluate(() => window.DDA_ANALYTICS_CONFIG), undefined, 'the key is never written into the global the app code reads, only used internally');
+    await context.close();
+  });
+
+  await test('Final pre-launch audit (2026-11): no BFF configured on this host (bare static hosting) never breaks analytics -- it just stays in debug mode, exactly as before', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+    const transport = await page.evaluate(() => window.DDAAnalytics.getTransport());
+    assert.equal(transport, 'debug', 'no DDA_BFF_BASE_URL on this host means the remote-config fetch is skipped entirely, not attempted and failed');
+    const queue = await page.evaluate(() => window.DDAAnalytics.getDebugQueue());
+    assert.ok(queue.some(e => e.localName === 'landing_visit'), 'events still record locally while no key is configured anywhere');
     await context.close();
   });
 
@@ -1851,6 +1948,64 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('DDA Funnel Audit (2026-11): the 4 landing CTAs that carried data-analytics wiring but were never actually tracked (product/lab/resources missing from EVENT_NAMES; the free-guide link missing a listener entirely) are now recorded and forwardable', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    // product/lab/resources are [data-view="access"] buttons — SPA navigation.
+    for (const selector of ['[data-analytics="landing_cta_product"]', '[data-analytics="landing_cta_lab"]', '[data-analytics="landing_cta_resources"]']) {
+      await page.goto(`${BASE}/#landing`);
+      const name = await page.locator(selector).getAttribute('data-analytics');
+      await page.click(selector);
+      await page.waitForURL('**/academy.html#access');
+      const recorded = await page.evaluate(eventName => (window.DDA.load().events || []).some(e => e.name === eventName), name);
+      assert.ok(recorded, `${selector} click must be recorded locally, not silently dropped by EVENT_NAMES`);
+      const forwarded = await page.evaluate(eventName => {
+        const entry = (window.DDAAnalytics?.getDebugQueue?.() || []).filter(e => e.localName === eventName).pop();
+        return entry?.externalName || null;
+      }, name);
+      assert.equal(forwarded, 'landing_cta_clicked', `${selector} must forward externally as landing_cta_clicked`);
+    }
+    // The "Découvrir le parcours Free" link is a plain <a href="commencer/">,
+    // not a [data-view] SPA route — it had no click listener at all before
+    // this fix, so data-analytics/data-funnel-position were pure decoration.
+    await page.goto(`${BASE}/#landing`);
+    await page.click('[data-analytics="landing_cta_free_guide"]');
+    await page.waitForURL('**/commencer/');
+    // commencer/ is a separate static page that never loads dda-core.js
+    // (no window.DDA there) — go back to a page that does, same origin so
+    // localStorage (where track() already wrote, before navigation) persists.
+    await page.goto(`${BASE}/#landing`);
+    const freeGuideRecorded = await page.evaluate(() => (window.DDA.load().events || []).some(e => e.name === 'landing_cta_free_guide'));
+    assert.ok(freeGuideRecorded, 'the free-guide link click must now be recorded — it previously had no listener at all');
+    const freeGuideForwarded = await page.evaluate(() => {
+      const entry = (window.DDAAnalytics?.getDebugQueue?.() || []).filter(e => e.localName === 'landing_cta_free_guide').pop();
+      return entry?.externalName || null;
+    });
+    assert.equal(freeGuideForwarded, 'landing_cta_clicked', 'the free-guide link must forward externally as landing_cta_clicked');
+    await context.close();
+  });
+
+  await test('DDA Funnel Audit (2026-11): Premium funnel + activation/retention events recorded locally (premium_track_viewed, waitlist, Lab, weekly review, progress card share) are now forwardable, not stuck in the local debug queue', async () => {
+    const context = await freshContext(browser);
+    // #premium-track carries the real premium_track permission (dist/app.js
+    // viewPermissions) — a plain signup leaves the learner on the Free plan,
+    // so showView() redirects away before ever reaching the
+    // trackEvent('premium_track_viewed', ...) line. Seed a local Premium
+    // learner (no BFF configured in this harness, so canUnlock falls back to
+    // the local plan) so the view actually renders.
+    await seedLocalLearner(context, {}, 'premium');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#premium-track`);
+    // Wait on the tracked event itself, not on the view's visual settle —
+    // decouples this analytics check from render timing.
+    await page.waitForFunction(() => window.DDAAnalytics.getDebugQueue().some(e => e.localName === 'premium_track_viewed'), null, { timeout: 10000 });
+    const queue = await page.evaluate(() => window.DDAAnalytics.getDebugQueue());
+    const viewed = queue.filter(e => e.localName === 'premium_track_viewed').pop();
+    assert.ok(viewed, 'visiting the Premium track must record premium_track_viewed');
+    assert.equal(viewed.externalName, 'premium_track_viewed', 'premium_track_viewed must now forward externally, not sit unforwarded in the debug queue');
+    await context.close();
+  });
+
   await test('completing signup fires signup_completed, and completing onboarding fires qualification_completed', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();
@@ -2648,6 +2803,21 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await page.waitForSelector('#membership.view.active');
     assert.equal(await page.locator('#premium-waitlist-confirmation').isVisible(), true, 'the consent is a real local record, not a one-time UI flag');
     assert.match(await page.locator('#premium-waitlist-confirmation').textContent(), /aucune liste et ne recevras pas de notification/);
+    await context.close();
+  });
+
+  await test('Final pre-launch audit (2026-11): joining the Premium waitlist now actually reaches the analytics forwarding choke point, not just the local record', async () => {
+    const context = await freshContext(browser);
+    await seedLocalLearner(context, {}, 'free');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#membership`);
+    await page.waitForSelector('#membership.view.active');
+    await page.check('#premium-waitlist-consent');
+    await page.click('#premium-waitlist-join');
+    await page.waitForSelector('#premium-waitlist-confirmation:not([hidden])');
+    const entry = await page.evaluate(() => window.DDAAnalytics.getDebugQueue().find(e => e.localName === 'premium_waitlist_joined'));
+    assert.ok(entry, 'premium_waitlist_joined must reach DDAAnalytics.send(), not just DDA.track()');
+    assert.equal(entry.externalName, 'premium_waitlist_joined', 'it was already allow-listed in FORWARDABLE_EVENTS -- the bug was never reaching that choke point at all');
     await context.close();
   });
 
