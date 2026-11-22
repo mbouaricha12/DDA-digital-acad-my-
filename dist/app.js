@@ -303,6 +303,10 @@ let lastSignupAttempt = null;
 // Premium content to show (serverPremiumConfirmed starts null → false),
 // which is correct: nothing server-authorized has been seen yet either way.
 let serverPremiumConfirmed = null;
+// Perf (2026-11): set by hydrateRemoteSession() to let the entitlement
+// fetch run in parallel with getProgress() instead of starting only after
+// hydrateRemoteSession fully returns -- see its own comment.
+let pendingEntitlementFetch = null;
 function canUnlock(permission) {
   if (permission === 'premium_track' && window.DDABFF?.enabled()) {
     return serverPremiumConfirmed === true;
@@ -311,7 +315,13 @@ function canUnlock(permission) {
 }
 async function refreshServerPremiumEntitlement() {
   if (!window.DDABFF?.enabled() || !remoteUser) { serverPremiumConfirmed = null; return; }
-  serverPremiumConfirmed = await window.DDABFF.hasServerPremiumEntitlement();
+  if (pendingEntitlementFetch) {
+    const fetchPromise = pendingEntitlementFetch;
+    pendingEntitlementFetch = null;
+    serverPremiumConfirmed = await fetchPromise;
+  } else {
+    serverPremiumConfirmed = await window.DDABFF.hasServerPremiumEntitlement();
+  }
   // Lot 2 (mandate §6 audit): P2.2/LAB4/LABCAP's real content is never
   // shipped to the browser until the server has actually confirmed this —
   // fetch it now, before mounting anything, so mountPremiumLessons()/
@@ -1237,6 +1247,18 @@ async function hydrateRemoteSession() {
     const accountState = DDA.setStorageScope(user.user_id);
     if (!accountState) throw new Error('bff_user_identity_invalid');
     remoteUser = user;
+    // Perf (2026-11 final launch pass): identity (getMe) must resolve first,
+    // but progress and the Premium entitlement check both only need
+    // remoteUser -- they never depended on each other. They used to run
+    // fully in series (this getProgress(), then a separate
+    // hasServerPremiumEntitlement() call only after this whole function
+    // returned), costing one full extra network round trip on every boot
+    // and login. Firing the entitlement fetch here, in parallel with
+    // getProgress() below, and having refreshServerPremiumEntitlement()
+    // reuse it removes that round trip without touching its fail-closed
+    // error handling (a rejection here still propagates to the same catch
+    // there, exactly as before).
+    if (window.DDABFF?.enabled()) pendingEntitlementFetch = window.DDABFF.hasServerPremiumEntitlement();
     let nextState = {
       ...accountState,
       user: {

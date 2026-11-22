@@ -426,6 +426,34 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('Final launch pass (2026-11): getProgress() and the Premium entitlement check now fire in parallel on boot, not one after the other', async () => {
+    const context = await freshContext(browser, { width: 390, height: 844 });
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    const callTimes = {};
+    let premiumPreviewCalls = 0;
+    await context.route('https://bff.test/v1/me', route => route.fulfill({
+      status: 200, contentType: 'application/json',
+      body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada', ref: null })
+    }));
+    await context.route('https://bff.test/v1/progress', async route => {
+      callTimes.progress = Date.now();
+      await new Promise(resolve => setTimeout(resolve, 200));
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lessons: {}, onboarding: { complete: true } }) });
+    });
+    await context.route('https://bff.test/v1/premium/preview', async route => {
+      callTimes.premiumPreview = Date.now();
+      premiumPreviewCalls += 1;
+      await new Promise(resolve => setTimeout(resolve, 200));
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ resource: 'premium_preview', entitlement: 'premium_track', server_authorized: true }) });
+    });
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#dashboard`);
+    await page.waitForSelector('#dashboard.view.active');
+    assert.equal(premiumPreviewCalls, 1, 'the entitlement fetch fired by hydrateRemoteSession must be reused, not duplicated by refreshServerPremiumEntitlement()');
+    assert.ok(Math.abs(callTimes.progress - callTimes.premiumPreview) < 150, `getProgress and the entitlement check must start within ~150ms of each other (parallel), not ~200ms apart (serial); actual gap: ${Math.abs(callTimes.progress - callTimes.premiumPreview)}ms`);
+    await context.close();
+  });
+
   await test('Premium P2 completes lesson → lab → assessment → proof → progression → Journal with reloads', async () => {
     const context = await freshContext(browser, { width: 390, height: 844 });
     // Lot 2 (mandate §6 audit): this full walkthrough needs P2.1/P2.2's real

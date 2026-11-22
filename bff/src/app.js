@@ -13,6 +13,7 @@ const { M1_CONTENT } = require('./m1-content');
 const { chariowConfigFromEnv, createChariowCheckout } = require('./chariow');
 const { marketDataConfigFromEnv, fetchMarketQuotes } = require('./market-data');
 const { analyticsConfigFromEnv } = require('./analytics');
+const { createPremiumResourcesStore } = require('./premium-resources-store');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
@@ -379,7 +380,7 @@ function parsePageParams(url, { maxPerPage = 200 } = {}) {
   return { page, perPage };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, accessAudit = null, rateLimiter = null, progressStore = null, entitlementsStore = null, aiAssistant = null, chariowConfig = chariowConfigFromEnv(), marketDataConfig = marketDataConfigFromEnv(), communityStore = null, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, accessAudit = null, rateLimiter = null, progressStore = null, entitlementsStore = null, aiAssistant = null, chariowConfig = chariowConfigFromEnv(), marketDataConfig = marketDataConfigFromEnv(), communityStore = null, premiumResourcesStore = createPremiumResourcesStore(), clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   let marketQuotesCache = null;
   businessStore = businessStore || {
@@ -894,6 +895,29 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
           if (!hasActivePremium(snapshot, clock())) return sendError(res, 403, 'premium_required', 'An active Premium entitlement is required.', requestId);
         }
         return json(res, 200, { lesson: PREMIUM_CONTENT[lessonId] });
+      }
+      // Final pre-launch audit (2026-11), Chantier 3 -- see
+      // premium-resources-store.js's header for why this exists. Metadata
+      // is safe to list to any authenticated learner (titles/descriptions
+      // are not secrets, and this is how the UI shows a Premium resource as
+      // locked rather than just absent); only the actual file download
+      // below is membership-gated.
+      if (method === 'GET' && path === '/v1/resources') {
+        const current = await withUser(req, res, requestId); if (!current) return;
+        return json(res, 200, { items: premiumResourcesStore.listResources() });
+      }
+      if (method === 'GET' && path.startsWith('/v1/resources/') && path.endsWith('/download')) {
+        const resourceId = path.slice('/v1/resources/'.length, -'/download'.length);
+        const resource = premiumResourcesStore.findResource(resourceId);
+        if (!resource) return sendError(res, 404, 'not_found', 'Unknown resource id.', requestId);
+        const current = await withUser(req, res, requestId); if (!current) return;
+        if (resource.membershipRequired === 'premium') {
+          const snapshot = await currentEntitlements(current.user.user_id);
+          if (!hasActivePremium(snapshot, clock())) return sendError(res, 403, 'premium_required', 'An active Premium entitlement is required.', requestId);
+        }
+        const streamed = premiumResourcesStore.streamResource(resource, res);
+        if (!streamed) return sendError(res, 404, 'resource_file_missing', 'This resource is not available right now.', requestId);
+        return undefined;
       }
       // Real M1 lesson content (docs/RISK_REGISTER.md R-04): the only place
       // M1.1/M1.2/M1.3's text, exercises and quiz answers live now — see
