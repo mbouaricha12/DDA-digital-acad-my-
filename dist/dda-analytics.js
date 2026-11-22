@@ -156,10 +156,35 @@
       } catch { resolve(false); }
     });
   }
+  // Pre-launch funnel audit (2026-11): window.DDA_ANALYTICS_CONFIG was read
+  // here but nothing in the static dist/ bundle ever set it -- there is no
+  // build step to inject a key into static HTML. The BFF already holds
+  // POSTHOG_API_KEY server-side (bff/src/analytics.js) for webhook events;
+  // this fetches that same public/client-safe capture key at runtime
+  // instead of requiring one to be hardcoded or templated in. No key
+  // configured yet -> this returns `posthogKey: null` and stays in 'debug'
+  // transport, exactly as before.
+  async function fetchRemoteConfig() {
+    const base = String((typeof window !== 'undefined' && window.DDA_BFF_BASE_URL) || '').trim().replace(/\/+$/, '');
+    if (!base) return null;
+    try {
+      const response = await fetch(`${base}/v1/analytics/config`, { credentials: 'omit' });
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data && typeof data === 'object' ? data : null;
+    } catch { return null; }
+  }
   async function init() {
     if (initAttempted) return;
     initAttempted = true;
-    const { posthogKey, posthogHost } = config();
+    let { posthogKey, posthogHost } = config();
+    if (!posthogKey) {
+      const remote = await fetchRemoteConfig();
+      if (remote && remote.posthogKey) {
+        posthogKey = remote.posthogKey;
+        posthogHost = remote.posthogHost || posthogHost;
+      }
+    }
     if (!posthogKey) return;
     try {
       const host = posthogHost || 'https://us.i.posthog.com';

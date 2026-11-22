@@ -1004,6 +1004,33 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('Final pre-launch audit (2026-11): with no window.DDA_ANALYTICS_CONFIG set, dda-analytics.js fetches the PostHog key from the BFF instead of staying stuck in debug mode forever', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/analytics/config', route => route.fulfill({
+      status: 200, contentType: 'application/json', body: JSON.stringify({ posthogKey: 'remote-test-key', posthogHost: 'https://analytics.test' })
+    }));
+    await context.route('https://analytics.test/static/array.js', route => route.fulfill({
+      status: 200, contentType: 'application/javascript', body: 'window.posthog = { init(){}, identify(){}, capture(){} };'
+    }));
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+    await waitForPageState(page, () => window.DDAAnalytics?.getTransport() === 'posthog', { description: 'PostHog transport via the remote BFF config' });
+    assert.equal(await page.evaluate(() => window.DDA_ANALYTICS_CONFIG), undefined, 'the key is never written into the global the app code reads, only used internally');
+    await context.close();
+  });
+
+  await test('Final pre-launch audit (2026-11): no BFF configured on this host (bare static hosting) never breaks analytics -- it just stays in debug mode, exactly as before', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    await page.goto(`${BASE}/#landing`);
+    const transport = await page.evaluate(() => window.DDAAnalytics.getTransport());
+    assert.equal(transport, 'debug', 'no DDA_BFF_BASE_URL on this host means the remote-config fetch is skipped entirely, not attempted and failed');
+    const queue = await page.evaluate(() => window.DDAAnalytics.getDebugQueue());
+    assert.ok(queue.some(e => e.localName === 'landing_visit'), 'events still record locally while no key is configured anywhere');
+    await context.close();
+  });
+
   await test('signup forwards to the adapter as onboarding_completed without level/goal/name/email', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();

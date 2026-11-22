@@ -12,6 +12,7 @@ const { PREMIUM_CONTENT, FREE_PREVIEW_IDS } = require('./premium-content');
 const { M1_CONTENT } = require('./m1-content');
 const { chariowConfigFromEnv, createChariowCheckout } = require('./chariow');
 const { marketDataConfigFromEnv, fetchMarketQuotes } = require('./market-data');
+const { analyticsConfigFromEnv } = require('./analytics');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
@@ -550,6 +551,18 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         return json(res, 204, undefined);
       }
       if (method === 'GET' && path === '/healthz') return json(res, 200, { status: 'ok' });
+      // Pre-launch funnel audit (2026-11): dda-analytics.js was reading
+      // window.DDA_ANALYTICS_CONFIG, but nothing in the static dist/ bundle
+      // ever set it -- there is no build step to inject an env var into a
+      // static HTML file. PostHog's capture ("project API") key is designed
+      // to be public/client-embeddable (it is write-only and rate-limited,
+      // the same key already sent to PostHog by trackServerEvent below), so
+      // serving it here is not a secret leak. Still returns `posthogKey:
+      // null` honestly until POSTHOG_API_KEY is actually set.
+      if (method === 'GET' && path === '/v1/analytics/config') {
+        const { apiKey, host } = analyticsConfigFromEnv();
+        return json(res, 200, { posthogKey: apiKey || null, posthogHost: host });
+      }
       if (method === 'GET' && path === '/v1/publications/brvm') {
         if (!brvmPublicationStore || typeof brvmPublicationStore.listPublished !== 'function') {
           return sendError(res, 503, 'publications_unavailable', 'Verified publications are not available.', requestId);
