@@ -89,7 +89,7 @@
       if (location.search || location.hash !== safeHash) history.replaceState(history.state, '', location.pathname + safeHash);
     })();
   </script>
-  <link rel="preload" as="image" href="images/photos/landing-hero-scene.jpg" fetchpriority="high">
+  <link rel="preload" as="image" href="images/photos/landing-hero-woman.webp" fetchpriority="high">
   <link rel="stylesheet" href="styles.min.css">
   <link rel="stylesheet" href="alpha-polish.min.css">
 </head>
@@ -206,8 +206,22 @@
             </section>
           </div>
 
-          <div class="dda-aperture landing-aperture" role="img" aria-label="Un apprenant DDA devant un globe lumineux centré sur l'Afrique, avec des bougies de marché en arrière-plan">
-            <img class="photo-fill" src="images/photos/landing-hero-scene.jpg" alt="Un apprenant DDA confiant devant un globe lumineux centré sur l'Afrique, avec des bougies de marché en arrière-plan." loading="eager" fetchpriority="high">
+          <div class="dda-aperture landing-aperture landing-fintech-scene" role="img" aria-label="Une experte DDA confiante devant un globe financier numérique mettant l'Afrique en lumière, entourée de graphiques de marché">
+            <div class="fintech-stage">
+              <div class="fintech-globe" aria-hidden="true">
+                <i class="fintech-globe-sheen"></i>
+                <i class="fintech-africa-glow"></i>
+                <i class="fintech-orbit-dot fintech-orbit-dot-a"></i>
+                <i class="fintech-orbit-dot fintech-orbit-dot-b"></i>
+              </div>
+              <svg class="fintech-dataline" aria-hidden="true" viewBox="0 0 300 140" preserveAspectRatio="none">
+                <path d="M0,112 L34,96 L68,104 L102,64 L136,78 L170,40 L204,54 L238,24 L300,8"></path>
+                <path class="fintech-dataline-accent" d="M0,128 L30,118 L64,124 L96,100 L130,110 L164,86 L198,96 L232,70 L300,54"></path>
+              </svg>
+              <div class="fintech-candles" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="fintech-particles" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <img class="fintech-figure" src="images/photos/landing-hero-woman.webp" alt="Une experte DDA, confiante et accessible, intégrée à une scène de plateforme financière numérique" loading="eager" fetchpriority="high">
+            </div>
             <div class="photo-scrim"></div>
             <div class="aperture-grid" aria-hidden="true"></div>
             <div class="landing-signal" aria-hidden="true">

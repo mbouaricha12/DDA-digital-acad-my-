@@ -72,11 +72,12 @@ assert.equal(landing.match(/<meta property="og:description" content="([^"]+)"/)?
 assert.equal(landing.match(/<meta name="twitter:description" content="([^"]+)"/)?.[1], landingDescription);
 assert.ok(landing.includes('DDA Free ouvre trois fondations pour comprendre les marchés'));
 assert.ok(landing.includes('ne font pas partie du parcours Free'));
-// Hero convergence pass (2026-11-20/21, founder-approved): the banner photo
-// was replaced by the validated scene photo (learner + Africa globe); the
-// SEO/accessibility requirement that matters is a real, descriptive alt
-// text on the hero image, not this specific filename.
-assert.match(landing, /<img class="photo-fill" src="images\/photos\/landing-hero-scene\.jpg" alt="[^"]{20,}"/, 'hero image has a real, descriptive alt text');
+// Hero reconception (2026-11-21, founder-approved): the figure photo is now
+// layered over a CSS/SVG fintech scene (globe + candlesticks + data-line),
+// not a single flat banner image. The SEO/accessibility requirement that
+// matters is a real, descriptive alt text on the hero figure, not a
+// specific filename.
+assert.match(landing, /<img class="fintech-figure" src="images\/photos\/landing-hero-woman\.webp" alt="[^"]{20,}"/, 'hero figure has a real, descriptive alt text');
 const documentRuntime = fs.readFileSync(path.join(dist, 'public-document.js'), 'utf8');
 assert.doesNotMatch(documentRuntime, /description\.setAttribute/, 'page runtime must preserve curated route-specific meta descriptions');
 const academy = fs.readFileSync(path.join(dist, 'academy.html'), 'utf8');

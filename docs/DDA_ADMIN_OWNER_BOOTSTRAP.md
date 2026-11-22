@@ -2,6 +2,10 @@
 
 ## Statut
 
+**Exécutée le 2026-11-21** (audit Admin/Owner, mandat Revenue & Activation) : le rôle `owner` a été attribué au compte `dariusdigitalacademy@gmail.com`, seule ligne de `dda_admin_roles` en production. Le back-office (`admin.html`) est maintenant accessible à ce compte. Les sections ci-dessous restent la procédure de référence si un second `owner` doit un jour être bootstrappé sur un autre projet Supabase.
+
+## Statut (historique)
+
 Cette procédure est **manuelle et volontairement hors code**. Aucune migration, aucun script et aucune route du BFF ne peut créer ou attribuer le rôle `owner` : lui seul peut exister sans qu'un `owner` déjà en place ne l'ait accordé (`dda_admin_roles.assignRole` — voir `bff/src/admin-roles-store.js` — refuse toute attribution si l'appelant n'est pas déjà `owner`). Le bootstrap initial casse volontairement cette règle une seule fois, à la main, directement en base — jamais via une API exposée au navigateur.
 
 Aucun compte fictif n'est créé par cette procédure. Le compte qui reçoit le rôle `owner` doit être un compte réel, créé par toi via le parcours d'inscription normal de DDA (le même que celui d'un apprenant), pour que l'authentification (mot de passe, session, vérification d'email) reste strictement celle déjà auditée.
@@ -37,5 +41,5 @@ Une fois cette première ligne posée, tu es seul capable d'accorder le rôle `a
 
 ## Ce que cette procédure ne fait pas
 
-- Elle ne crée aucune route `/v1/admin/roles` — aucune n'existe encore (seules des routes de **consultation** existent à ce stade : `/v1/admin/overview`, `/v1/admin/users`, `/v1/admin/memberships`).
+- Elle ne remplace pas `POST /v1/admin/roles` / `DELETE /v1/admin/roles/:id` (implémentées depuis, voir `bff/src/app.js` et `bff/src/admin-roles-store.js`) — ces routes gèrent tout attribution/retrait **après** le premier `owner` ; elles exigent déjà d'être soi-même `owner` et ne peuvent pas créer le tout premier.
 - Elle ne contourne aucune authentification : ton compte `owner` se connecte exactement comme n'importe quel compte DDA (email + mot de passe, session BFF, cookies `__Host-`), et les routes `/v1/admin/*` ne changent rien à cela — elles ajoutent une seconde vérification (le rôle), jamais un raccourci d'identité.
