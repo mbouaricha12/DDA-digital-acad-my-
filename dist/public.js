@@ -47,6 +47,17 @@
     if (event) track(event === 'hero_cta_click' ? 'hero_cta_click' : event, { view, position: button.dataset.funnelPosition });
     window.location.assign(destination(view));
   }));
+  // DDA Funnel Audit (2026-11): a handful of secondary CTAs are real <a href>
+  // links to a static page (e.g. "Découvrir le parcours Free" -> commencer/),
+  // not SPA routes — they carry data-analytics/data-funnel-position exactly
+  // like the [data-view] buttons above, but [data-view] is what the handler
+  // above keys on, so these were never tracked at all (not a missing
+  // EVENT_NAMES entry — no listener ever ran). track() is synchronous
+  // (localStorage write + a fire-and-forget send), so it completes before
+  // the native link navigation proceeds; no preventDefault needed.
+  document.querySelectorAll('[data-analytics]:not([data-view])').forEach(link => link.addEventListener('click', () => {
+    track(link.dataset.analytics, { view: 'landing', position: link.dataset.funnelPosition });
+  }));
 
   /* DDA Visual Identity V2 — progressive reveals for the public editorial shell.
      .landing-main-copy (the hero promise) is deliberately NOT in this list: it

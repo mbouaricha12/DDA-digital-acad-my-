@@ -25,7 +25,7 @@ const secret = 'whsec_test_secret';
 const ddaUserId = '22222222-2222-4222-8222-222222222222';
 const config = chariowConfigFromEnv({ CHARIOW_PREMIUM_PRODUCT_IDS: 'prd_premium' });
 
-function sendPulse(body, { trackEvent, deliveryId = `delivery-${body.event}` } = {}) {
+function sendPulse(body, { trackEvent, applyEvent = async () => {}, deliveryId = `delivery-${body.event}` } = {}) {
   const payload = Buffer.from(JSON.stringify(body));
   const sig = `sha256=${crypto.createHmac('sha256', secret).update(payload).digest('hex')}`;
   const seen = new Set();
@@ -36,7 +36,7 @@ function sendPulse(body, { trackEvent, deliveryId = `delivery-${body.event}` } =
   return handleChariowPulse({
     headers: { 'x-chariow-signature': sig, 'x-pulse-event': body.event, 'x-pulse-delivery-id': deliveryId },
     async *[Symbol.asyncIterator]() { yield payload; }
-  }, { secret, config, idempotencyStore: store, applyEvent: async () => {}, trackEvent });
+  }, { secret, config, idempotencyStore: store, applyEvent, trackEvent });
 }
 
 function pulseBody(event, { key = 'sale', id = `${key}-1` } = {}) {
@@ -66,6 +66,34 @@ function pulseBody(event, { key = 'sale', id = `${key}-1` } = {}) {
   const revokedCalls = [];
   await sendPulse(pulseBody('license.revoked', { key: 'license' }), { trackEvent: async (n, d, p) => revokedCalls.push(p) });
   assert.equal(revokedCalls[0].reason, 'revoked');
+
+  // DDA Funnel Audit (2026-11): 'successful.sale' fires identically for a
+  // first purchase and a win-back renewal (acceptsTransition in
+  // billing-store.js allows an 'expired' membership to reactivate). Without
+  // the `is_renewal` property carried through from applyEvent's return
+  // value, the two are indistinguishable in analytics. Confirmed both ways.
+  const renewalCalls = [];
+  await sendPulse(pulseBody('successful.sale', { id: 'sale-renewal' }), {
+    applyEvent: async () => ({ is_renewal: true }),
+    trackEvent: async (n, d, p) => renewalCalls.push(p)
+  });
+  assert.equal(renewalCalls[0].is_renewal, true, 'a reactivation of an expired membership must be flagged as a renewal, not a silent first purchase');
+
+  const firstPurchaseCalls = [];
+  await sendPulse(pulseBody('successful.sale', { id: 'sale-first' }), {
+    applyEvent: async () => ({ is_renewal: false }),
+    trackEvent: async (n, d, p) => firstPurchaseCalls.push(p)
+  });
+  assert.equal(firstPurchaseCalls[0].is_renewal, false, 'a genuine first purchase must not be mislabeled as a renewal');
+
+  // license.activated must never carry is_renewal — that property is only
+  // meaningful for 'successful.sale', where the ambiguity actually exists.
+  const activatedCalls = [];
+  await sendPulse(pulseBody('license.activated', { key: 'license' }), {
+    applyEvent: async () => ({ is_renewal: true }),
+    trackEvent: async (n, d, p) => activatedCalls.push(p)
+  });
+  assert.equal('is_renewal' in activatedCalls[0], false, 'is_renewal is only meaningful for successful.sale');
 
   // Events the Pulse map does not consider monetization-worthy (abandoned/failed
   // sale) must never reach trackEvent at all — no event name would be honest.

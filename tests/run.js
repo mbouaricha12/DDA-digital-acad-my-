@@ -1851,6 +1851,64 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('DDA Funnel Audit (2026-11): the 4 landing CTAs that carried data-analytics wiring but were never actually tracked (product/lab/resources missing from EVENT_NAMES; the free-guide link missing a listener entirely) are now recorded and forwardable', async () => {
+    const context = await freshContext(browser);
+    const page = await context.newPage();
+    // product/lab/resources are [data-view="access"] buttons — SPA navigation.
+    for (const selector of ['[data-analytics="landing_cta_product"]', '[data-analytics="landing_cta_lab"]', '[data-analytics="landing_cta_resources"]']) {
+      await page.goto(`${BASE}/#landing`);
+      const name = await page.locator(selector).getAttribute('data-analytics');
+      await page.click(selector);
+      await page.waitForURL('**/academy.html#access');
+      const recorded = await page.evaluate(eventName => (window.DDA.load().events || []).some(e => e.name === eventName), name);
+      assert.ok(recorded, `${selector} click must be recorded locally, not silently dropped by EVENT_NAMES`);
+      const forwarded = await page.evaluate(eventName => {
+        const entry = (window.DDAAnalytics?.getDebugQueue?.() || []).filter(e => e.localName === eventName).pop();
+        return entry?.externalName || null;
+      }, name);
+      assert.equal(forwarded, 'landing_cta_clicked', `${selector} must forward externally as landing_cta_clicked`);
+    }
+    // The "Découvrir le parcours Free" link is a plain <a href="commencer/">,
+    // not a [data-view] SPA route — it had no click listener at all before
+    // this fix, so data-analytics/data-funnel-position were pure decoration.
+    await page.goto(`${BASE}/#landing`);
+    await page.click('[data-analytics="landing_cta_free_guide"]');
+    await page.waitForURL('**/commencer/');
+    // commencer/ is a separate static page that never loads dda-core.js
+    // (no window.DDA there) — go back to a page that does, same origin so
+    // localStorage (where track() already wrote, before navigation) persists.
+    await page.goto(`${BASE}/#landing`);
+    const freeGuideRecorded = await page.evaluate(() => (window.DDA.load().events || []).some(e => e.name === 'landing_cta_free_guide'));
+    assert.ok(freeGuideRecorded, 'the free-guide link click must now be recorded — it previously had no listener at all');
+    const freeGuideForwarded = await page.evaluate(() => {
+      const entry = (window.DDAAnalytics?.getDebugQueue?.() || []).filter(e => e.localName === 'landing_cta_free_guide').pop();
+      return entry?.externalName || null;
+    });
+    assert.equal(freeGuideForwarded, 'landing_cta_clicked', 'the free-guide link must forward externally as landing_cta_clicked');
+    await context.close();
+  });
+
+  await test('DDA Funnel Audit (2026-11): Premium funnel + activation/retention events recorded locally (premium_track_viewed, waitlist, Lab, weekly review, progress card share) are now forwardable, not stuck in the local debug queue', async () => {
+    const context = await freshContext(browser);
+    // #premium-track carries the real premium_track permission (dist/app.js
+    // viewPermissions) — a plain signup leaves the learner on the Free plan,
+    // so showView() redirects away before ever reaching the
+    // trackEvent('premium_track_viewed', ...) line. Seed a local Premium
+    // learner (no BFF configured in this harness, so canUnlock falls back to
+    // the local plan) so the view actually renders.
+    await seedLocalLearner(context, {}, 'premium');
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#premium-track`);
+    // Wait on the tracked event itself, not on the view's visual settle —
+    // decouples this analytics check from render timing.
+    await page.waitForFunction(() => window.DDAAnalytics.getDebugQueue().some(e => e.localName === 'premium_track_viewed'), null, { timeout: 10000 });
+    const queue = await page.evaluate(() => window.DDAAnalytics.getDebugQueue());
+    const viewed = queue.filter(e => e.localName === 'premium_track_viewed').pop();
+    assert.ok(viewed, 'visiting the Premium track must record premium_track_viewed');
+    assert.equal(viewed.externalName, 'premium_track_viewed', 'premium_track_viewed must now forward externally, not sit unforwarded in the debug queue');
+    await context.close();
+  });
+
   await test('completing signup fires signup_completed, and completing onboarding fires qualification_completed', async () => {
     const context = await freshContext(browser);
     const page = await context.newPage();

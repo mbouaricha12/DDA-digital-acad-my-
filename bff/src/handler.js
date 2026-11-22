@@ -62,9 +62,7 @@ function buildHandler(env = process.env) {
           secret: chariowConfig.pulseSecret,
           config: chariowConfig,
           idempotencyStore: billingStore,
-          applyEvent: async event => {
-            await billingStore.applyChariowTransition(event);
-          },
+          applyEvent: async event => billingStore.applyChariowTransition(event),
           trackEvent: (name, distinctId, properties) => trackServerEvent(name, distinctId, properties)
         });
         res.writeHead(result.status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });

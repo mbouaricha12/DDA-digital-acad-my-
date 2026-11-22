@@ -185,7 +185,7 @@ async function handleChariowPulse(req, { secret, idempotencyStore, applyEvent, c
     const mapped = mapChariowPulse(payload, headers, config);
     if (!idempotencyStore?.claim) await idempotencyStore?.add(deliveryId, { event: mapped.event, receivedAt: new Date().toISOString(), payloadSha256 });
     if (mapped.kind === 'membership_transition') {
-      await applyEvent?.(mapped);
+      const applied = await applyEvent?.(mapped);
       const monetizationEvent = MONETIZATION_EVENT_BY_PULSE[mapped.event];
       // Analytics is observational only — it must never affect the delivery's
       // outcome, so a failure here is swallowed rather than retried/alerted.
@@ -193,6 +193,12 @@ async function handleChariowPulse(req, { secret, idempotencyStore, applyEvent, c
         try {
           await trackEvent(monetizationEvent, mapped.userReference, {
             productId: mapped.productId,
+            // DDA Funnel Audit (2026-11): Chariow fires the same
+            // 'successful.sale' for a first purchase and a win-back renewal
+            // (see billing-store.js's applyChariowTransition) — without
+            // this flag the two are indistinguishable in analytics and
+            // retention/renewal can never be measured from the data alone.
+            ...(mapped.event === 'successful.sale' ? { is_renewal: Boolean(applied?.is_renewal) } : {}),
             ...(mapped.event === 'license.expired' ? { reason: 'expired' } : {}),
             ...(mapped.event === 'license.revoked' ? { reason: 'revoked' } : {})
           });

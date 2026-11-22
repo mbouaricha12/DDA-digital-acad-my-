@@ -128,6 +128,14 @@ class PostgrestBillingStore {
     const current = existingRows[0] || null;
     if (!acceptsTransition(current, transition)) return current;
     const active = transition.status === 'active';
+    // DDA Funnel Audit (2026-11): Chariow has no distinct renewal event — a
+    // genuine win-back (an expired membership reactivated by a newer
+    // successful.sale, see acceptsTransition above) posts the exact same
+    // 'successful.sale' as a brand-new first purchase. Without this flag,
+    // retention/renewal is literally unmeasurable: the two look identical in
+    // analytics. Attached to the RETURNED object only, never written to the
+    // row itself — dda_billing_memberships has no such column.
+    const isRenewal = active && current?.status === 'expired';
     const row = {
       user_id: transition.userReference,
       provider: 'chariow',
@@ -149,7 +157,9 @@ class PostgrestBillingStore {
       headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
       body: JSON.stringify(row)
     });
-    return rows[0] || null;
+    const result = rows[0] || null;
+    if (result) result.is_renewal = isRenewal;
+    return result;
   }
 
   async getForUser(userId) {
