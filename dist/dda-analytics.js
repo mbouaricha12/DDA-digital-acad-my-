@@ -11,6 +11,18 @@
     landing_cta_free: 'landing_cta_clicked',
     landing_cta_final: 'landing_cta_clicked',
     landing_cta_mobile_sticky: 'landing_cta_clicked',
+    // DDA Funnel Audit (2026-11): these 4 CTAs (the "Découvrir le parcours
+    // Free" guide link, "Découvrir le Terminal DDA", the Lab section's CTA,
+    // and "Accéder à la bibliothèque complète") carry the same
+    // data-analytics/data-funnel-position wiring as every other tracked
+    // landing CTA (see dist/public.js's generic [data-view] click handler)
+    // but were never added to EVENT_NAMES in dda-core.js — DDA.track()
+    // silently drops any event not in that allowlist, so every click on
+    // these 4 buttons was being recorded nowhere, not even locally.
+    landing_cta_free_guide: 'landing_cta_clicked',
+    landing_cta_product: 'landing_cta_clicked',
+    landing_cta_lab: 'landing_cta_clicked',
+    landing_cta_resources: 'landing_cta_clicked',
     // Renamed from the legacy external name 'dda_signup' (Lot H) to match
     // the DDA Product & Conversion Alignment Audit's event dictionary —
     // same local event, same data, only the name sent to PostHog changes.
@@ -43,13 +55,36 @@
     // since that is the only place a webhook's outcome is genuinely known.
     view_opened: 'view_opened',
     premium_subscribe_cta_clicked: 'premium_subscribe_cta_clicked',
-    premium_checkout_started: 'premium_checkout_started'
+    premium_checkout_started: 'premium_checkout_started',
+    // DDA Funnel Audit (2026-11) — the rest of the Premium funnel (pre- and
+    // post-purchase) was already tracked locally (EVENT_NAMES in
+    // dda-core.js) but, like signup_started/completed and the Phase 6 trio
+    // above before this map picked them up, never left the local debug
+    // queue: Premium page views, module starts and waitlist signups (the
+    // pre-purchase signals), plus the Lab/assessment/weekly-review/
+    // progress-card-share events that measure activation and retention
+    // AFTER purchase — exactly the funnel stages this audit asks to make
+    // measurable end to end. Their free-text metadata (proof/module/lab/
+    // assessment/skill/nextAction) is not in SAFE_PROP_KEYS below and is
+    // deliberately left out rather than allow-listing every value by hand;
+    // only the event itself (with distinct_id) needs to reach PostHog for
+    // these to be countable.
+    premium_track_viewed: 'premium_track_viewed',
+    premium_module_started: 'premium_module_started',
+    premium_waitlist_joined: 'premium_waitlist_joined',
+    premium_lab_attempted: 'premium_lab_attempted',
+    premium_lab_validated: 'premium_lab_validated',
+    premium_assessment_completed: 'premium_assessment_completed',
+    premium_proof_created: 'premium_proof_created',
+    premium_review_opened: 'premium_review_opened',
+    premium_weekly_review_completed: 'premium_weekly_review_completed',
+    progress_card_shared: 'progress_card_shared'
   };
   const SAFE_PROP_KEYS = ['source', 'medium', 'campaign', 'content', 'referrer', 'broker', 'section', 'position', 'view', 'lesson'];
   const SAFE_PROP_VALUES = {
     broker: new Set(['Deriv', 'HFM', 'Weltrade', 'XM']),
     section: new Set(['differentiation', 'free']),
-    position: new Set(['differentiation', 'final', 'free', 'hero', 'mobile_sticky']),
+    position: new Set(['differentiation', 'final', 'free', 'hero', 'mobile_sticky', 'product', 'lab', 'resources']),
     view: new Set(['landing', 'access', 'dashboard', 'path', 'lesson', 'lesson-m02', 'lesson-m03', 'lesson-m11', 'lesson-m12', 'lesson-m13', 'lesson-mbrvm1', 'progress', 'journal', 'resources', 'membership', 'markets', 'brokers', 'support', 'community', 'practice', 'intelligence', 'profile', 'back']),
     lesson: new Set(['M0.1', 'M0.2', 'M0.3', 'M1.1', 'M1.2', 'M1.3', 'MBRVM.1', 'P2.1', 'P2.2', 'LAB1', 'LAB2', 'LAB3', 'LAB4', 'LABCAP'])
   };
@@ -121,10 +156,35 @@
       } catch { resolve(false); }
     });
   }
+  // Pre-launch funnel audit (2026-11): window.DDA_ANALYTICS_CONFIG was read
+  // here but nothing in the static dist/ bundle ever set it -- there is no
+  // build step to inject a key into static HTML. The BFF already holds
+  // POSTHOG_API_KEY server-side (bff/src/analytics.js) for webhook events;
+  // this fetches that same public/client-safe capture key at runtime
+  // instead of requiring one to be hardcoded or templated in. No key
+  // configured yet -> this returns `posthogKey: null` and stays in 'debug'
+  // transport, exactly as before.
+  async function fetchRemoteConfig() {
+    const base = String((typeof window !== 'undefined' && window.DDA_BFF_BASE_URL) || '').trim().replace(/\/+$/, '');
+    if (!base) return null;
+    try {
+      const response = await fetch(`${base}/v1/analytics/config`, { credentials: 'omit' });
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data && typeof data === 'object' ? data : null;
+    } catch { return null; }
+  }
   async function init() {
     if (initAttempted) return;
     initAttempted = true;
-    const { posthogKey, posthogHost } = config();
+    let { posthogKey, posthogHost } = config();
+    if (!posthogKey) {
+      const remote = await fetchRemoteConfig();
+      if (remote && remote.posthogKey) {
+        posthogKey = remote.posthogKey;
+        posthogHost = remote.posthogHost || posthogHost;
+      }
+    }
     if (!posthogKey) return;
     try {
       const host = posthogHost || 'https://us.i.posthog.com';

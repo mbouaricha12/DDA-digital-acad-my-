@@ -12,6 +12,9 @@ const { PREMIUM_CONTENT, FREE_PREVIEW_IDS } = require('./premium-content');
 const { M1_CONTENT } = require('./m1-content');
 const { chariowConfigFromEnv, createChariowCheckout } = require('./chariow');
 const { marketDataConfigFromEnv, fetchMarketQuotes } = require('./market-data');
+const { analyticsConfigFromEnv } = require('./analytics');
+const { MemoryResourcesStore } = require('./premium-resources-store');
+const { MemoryFileStorage, validateUpload } = require('./resources-storage');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
@@ -260,6 +263,23 @@ async function readJson(req, maxBytes = 64 * 1024) {
   return body;
 }
 
+// Raw binary body reader for file uploads (final pre-launch audit
+// follow-up, 2026-11) -- mirrors readJson's streaming-abort-on-overflow
+// shape exactly, but returns the bytes untouched instead of parsing JSON.
+// Aborting the moment the limit is crossed (rather than buffering the
+// whole request first) means an oversized upload never fully lands in
+// memory before being rejected.
+async function readRawBody(req, maxBytes) {
+  let total = 0;
+  const chunks = [];
+  for await (const chunk of req) {
+    total += chunk.length;
+    if (total > maxBytes) throw Object.assign(new Error('payload too large'), { status: 413, code: 'file_too_large' });
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
 function cookieHeaders(config, sessionToken, csrfToken, clear = false) {
   const base = { secure: config.secureCookies, sameSite: 'None', path: '/' };
   if (clear) return [
@@ -378,7 +398,7 @@ function parsePageParams(url, { maxPerPage = 200 } = {}) {
   return { page, perPage };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, accessAudit = null, rateLimiter = null, progressStore = null, entitlementsStore = null, aiAssistant = null, chariowConfig = chariowConfigFromEnv(), marketDataConfig = marketDataConfigFromEnv(), communityStore = null, clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, accessAudit = null, rateLimiter = null, progressStore = null, entitlementsStore = null, aiAssistant = null, chariowConfig = chariowConfigFromEnv(), marketDataConfig = marketDataConfigFromEnv(), communityStore = null, premiumResourcesStore = new MemoryResourcesStore(), resourceFileStorage = new MemoryFileStorage(), resourceUploadMaxBytes = 4 * 1024 * 1024, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   let marketQuotesCache = null;
   businessStore = businessStore || {
@@ -550,6 +570,18 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         return json(res, 204, undefined);
       }
       if (method === 'GET' && path === '/healthz') return json(res, 200, { status: 'ok' });
+      // Pre-launch funnel audit (2026-11): dda-analytics.js was reading
+      // window.DDA_ANALYTICS_CONFIG, but nothing in the static dist/ bundle
+      // ever set it -- there is no build step to inject an env var into a
+      // static HTML file. PostHog's capture ("project API") key is designed
+      // to be public/client-embeddable (it is write-only and rate-limited,
+      // the same key already sent to PostHog by trackServerEvent below), so
+      // serving it here is not a secret leak. Still returns `posthogKey:
+      // null` honestly until POSTHOG_API_KEY is actually set.
+      if (method === 'GET' && path === '/v1/analytics/config') {
+        const { apiKey, host } = analyticsConfigFromEnv();
+        return json(res, 200, { posthogKey: apiKey || null, posthogHost: host });
+      }
       if (method === 'GET' && path === '/v1/publications/brvm') {
         if (!brvmPublicationStore || typeof brvmPublicationStore.listPublished !== 'function') {
           return sendError(res, 503, 'publications_unavailable', 'Verified publications are not available.', requestId);
@@ -881,6 +913,126 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
           if (!hasActivePremium(snapshot, clock())) return sendError(res, 403, 'premium_required', 'An active Premium entitlement is required.', requestId);
         }
         return json(res, 200, { lesson: PREMIUM_CONTENT[lessonId] });
+      }
+      // Final pre-launch audit (2026-11), Chantier 3 -- see
+      // premium-resources-store.js's header for why this exists. Metadata
+      // is safe to list to any authenticated learner (titles/descriptions
+      // are not secrets, and this is how the UI shows a Premium resource as
+      // locked rather than just absent); only the actual file download
+      // below is membership-gated.
+      if (method === 'GET' && path === '/v1/resources') {
+        const current = await withUser(req, res, requestId); if (!current) return;
+        const items = (await premiumResourcesStore.listPublished()).map(({ id, name, description, category, level, tags, membershipRequired, type, coverImage }) => ({ id, name, description, category, level, tags, membershipRequired, type, coverImage }));
+        return json(res, 200, { items });
+      }
+      if (method === 'GET' && path.startsWith('/v1/resources/') && path.endsWith('/download')) {
+        const resourceId = path.slice('/v1/resources/'.length, -'/download'.length);
+        const resource = await premiumResourcesStore.get(resourceId);
+        if (!resource || resource.status !== 'published') return sendError(res, 404, 'not_found', 'Unknown resource id.', requestId);
+        const current = await withUser(req, res, requestId); if (!current) return;
+        if (resource.membershipRequired === 'premium') {
+          const snapshot = await currentEntitlements(current.user.user_id);
+          if (!hasActivePremium(snapshot, clock())) return sendError(res, 403, 'premium_required', 'An active Premium entitlement is required.', requestId);
+        }
+        const file = await resourceFileStorage.download(resourceId);
+        if (!file) return sendError(res, 404, 'resource_file_missing', 'This resource is not available right now.', requestId);
+        res.setHeader('Content-Type', resource.mimeType || file.mimeType || 'application/octet-stream');
+        res.setHeader('Content-Disposition', `attachment; filename="${(resource.file || 'ressource').replace(/[^\w.\-]/g, '_')}"`);
+        res.statusCode = 200;
+        res.end(file.buffer);
+        return undefined;
+      }
+      // Owner/admin catalogue management (final pre-launch audit follow-up,
+      // 2026-11; file upload added the same day in the "administration
+      // autonome" follow-up): lets Richard add/edit/publish/unpublish/
+      // delete a resource AND upload/replace its file, entirely through
+      // the admin UI (desktop or phone) -- no developer, no manual file
+      // placement, no redeploy. Reads are open to any admin/owner like the
+      // entitlements admin routes above; mutations are owner-only, same
+      // reasoning as granting an entitlement.
+      if (method === 'GET' && path === '/v1/admin/resources') {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        return json(res, 200, { items: await premiumResourcesStore.listAll() });
+      }
+      if (method === 'POST' && path === '/v1/admin/resources') {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!validateCsrf(req, config, admin.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (admin.role !== 'owner') return sendError(res, 403, 'owner_required', 'Only an owner may add a resource.', requestId);
+        const body = await readJson(req);
+        try {
+          const row = await premiumResourcesStore.create(body);
+          await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: 'resource_created', resourceType: 'admin_resource', resourceId: row.id, requestId, metadata: { route: path, method, role: admin.role, name: row.name } });
+          return json(res, 200, { item: row });
+        } catch (error) {
+          if (error.code === 'invalid_resource') return sendError(res, 400, 'validation_error', error.message, requestId, { [error.field]: error.message });
+          throw error;
+        }
+      }
+      const adminResourceMatch = path.match(/^\/v1\/admin\/resources\/([^/]+)$/);
+      if (method === 'PATCH' && adminResourceMatch) {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!validateCsrf(req, config, admin.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (admin.role !== 'owner') return sendError(res, 403, 'owner_required', 'Only an owner may edit a resource.', requestId);
+        const resourceId = decodeURIComponent(adminResourceMatch[1]);
+        const body = await readJson(req);
+        try {
+          const row = await premiumResourcesStore.update(resourceId, body);
+          await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: body.status ? `resource_${body.status}` : 'resource_updated', resourceType: 'admin_resource', resourceId, requestId, metadata: { route: path, method, role: admin.role } });
+          return json(res, 200, { item: row });
+        } catch (error) {
+          if (error.code === 'resource_not_found') return sendError(res, 404, 'not_found', error.message, requestId);
+          if (error.code === 'invalid_resource') return sendError(res, 400, 'validation_error', error.message, requestId, { [error.field]: error.message });
+          throw error;
+        }
+      }
+      // File upload/replace (2026-11, "administration autonome" follow-up):
+      // the Owner's browser sends the raw file bytes as the request body
+      // (no multipart parsing needed -- fetch() can send a File/Blob
+      // directly), with its MIME type as Content-Type and its original
+      // name in X-Resource-File-Name. Re-uploading to the same resource id
+      // overwrites the previous file at the same storage key (x-upsert),
+      // which is exactly what "replace a file without losing the
+      // resource's metadata" needs -- the dda_resources row is only ever
+      // patched for file_name/mime_type here, never recreated.
+      const adminResourceFileMatch = path.match(/^\/v1\/admin\/resources\/([^/]+)\/file$/);
+      if (method === 'POST' && adminResourceFileMatch) {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!validateCsrf(req, config, admin.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (admin.role !== 'owner') return sendError(res, 403, 'owner_required', 'Only an owner may upload a resource file.', requestId);
+        const resourceId = decodeURIComponent(adminResourceFileMatch[1]);
+        const resource = await premiumResourcesStore.get(resourceId);
+        if (!resource) return sendError(res, 404, 'not_found', 'Unknown resource id.', requestId);
+        const mimeType = String(req.headers['content-type'] || '').split(';', 1)[0].trim().toLowerCase();
+        const originalName = (() => { try { return decodeURIComponent(String(req.headers['x-resource-file-name'] || '')).trim(); } catch { return ''; } })().slice(0, 200) || 'ressource';
+        let buffer;
+        try { buffer = await readRawBody(req, resourceUploadMaxBytes); }
+        catch (error) { if (error.status === 413) return sendError(res, 413, 'file_too_large', error.message, requestId); throw error; }
+        try {
+          validateUpload(mimeType, buffer.length, { maxBytes: resourceUploadMaxBytes, fileName: originalName });
+          await resourceFileStorage.upload(resourceId, buffer, mimeType);
+          const row = await premiumResourcesStore.update(resourceId, { file: originalName, mimeType });
+          await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: 'resource_file_uploaded', resourceType: 'admin_resource', resourceId, requestId, metadata: { route: path, method, role: admin.role, bytes: buffer.length, mimeType } });
+          return json(res, 200, { item: row });
+        } catch (error) {
+          if (error.code === 'unsupported_file_type') return sendError(res, 415, 'unsupported_file_type', error.message, requestId);
+          if (error.code === 'file_too_large') return sendError(res, 413, 'file_too_large', error.message, requestId);
+          throw error;
+        }
+      }
+      if (method === 'DELETE' && adminResourceMatch) {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!validateCsrf(req, config, admin.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (admin.role !== 'owner') return sendError(res, 403, 'owner_required', 'Only an owner may delete a resource.', requestId);
+        const resourceId = decodeURIComponent(adminResourceMatch[1]);
+        try {
+          await premiumResourcesStore.remove(resourceId);
+          await resourceFileStorage.remove(resourceId).catch(() => {});
+          await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: 'resource_deleted', resourceType: 'admin_resource', resourceId, requestId, metadata: { route: path, method, role: admin.role } });
+          return json(res, 204);
+        } catch (error) {
+          if (error.code === 'resource_not_found') return sendError(res, 404, 'not_found', error.message, requestId);
+          throw error;
+        }
       }
       // Real M1 lesson content (docs/RISK_REGISTER.md R-04): the only place
       // M1.1/M1.2/M1.3's text, exercises and quiz answers live now — see
