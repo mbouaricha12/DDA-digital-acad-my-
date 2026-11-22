@@ -36,18 +36,30 @@ const ALLOWED_TYPES = Object.freeze({
 });
 
 function unsupportedTypeError(mimeType) {
-  return Object.assign(new Error(`Unsupported file type: ${mimeType}. Allowed: ${[...new Set(Object.values(ALLOWED_TYPES))].join(', ')}.`), { code: 'unsupported_file_type', status: 415 });
+  return Object.assign(new Error(`Unsupported file type: ${mimeType}. Allowed: ${[...new Set(Object.values(ALLOWED_TYPES))].join(', ')}, ex5.`), { code: 'unsupported_file_type', status: 415 });
 }
 
 function tooLargeError(maxBytes) {
   return Object.assign(new Error(`File exceeds the ${Math.round(maxBytes / 1024 / 1024)} MB limit.`), { code: 'file_too_large', status: 413 });
 }
 
-function validateUpload(mimeType, size, { maxBytes }) {
+// MetaTrader 5 compiled binaries (.ex5) have no registered MIME type: a
+// browser's File.type for this extension is almost always '' (unrecognized
+// extension), occasionally 'application/octet-stream'. Both are generic
+// "unknown binary" markers a renamed/disguised file could also send, so
+// this exception is gated on the extension of the caller-declared file
+// name (X-Resource-File-Name) AND one of these generic types -- it never
+// widens acceptance of any other MIME type already in ALLOWED_TYPES, and
+// the file's binary content is never inspected or altered either way.
+const EX5_EXTENSION = '.ex5';
+const EX5_GENERIC_MIME_TYPES = Object.freeze(new Set(['', 'application/octet-stream']));
+
+function validateUpload(mimeType, size, { maxBytes, fileName = '' }) {
   const normalizedType = String(mimeType || '').split(';', 1)[0].trim().toLowerCase();
-  if (!ALLOWED_TYPES[normalizedType]) throw unsupportedTypeError(normalizedType || '(none)');
+  const isEx5 = String(fileName || '').trim().toLowerCase().endsWith(EX5_EXTENSION) && EX5_GENERIC_MIME_TYPES.has(normalizedType);
+  if (!isEx5 && !ALLOWED_TYPES[normalizedType]) throw unsupportedTypeError(normalizedType || '(none)');
   if (size > maxBytes) throw tooLargeError(maxBytes);
-  return normalizedType;
+  return isEx5 ? 'ex5' : normalizedType;
 }
 
 // Never accepts a caller-supplied storage path — the resource id (already

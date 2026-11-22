@@ -302,6 +302,32 @@ async function createAuthedCookie(sessions, userId) {
     });
   });
 
+  await test('a MetaTrader .ex5 upload is accepted with the generic Content-Type a browser actually sends for it', async () => {
+    await withServer([], async (server, sessions, adminRoles, ids, store, storage) => {
+      const { cookie, csrf } = await ownerSetup(server, sessions);
+      const response = await request(server, `/v1/admin/resources/${ids.ghost}/file`, {
+        method: 'POST', cookie, csrf, rawBody: 'FAKE_EX5_BINARY_BYTES',
+        headers: { 'Content-Type': '', 'X-Resource-File-Name': encodeURIComponent('SMC-BOT PRO.ex5') }
+      });
+      assert.equal(response.status, 200);
+      const item = JSON.parse(response.body).item;
+      assert.equal(item.file, 'SMC-BOT PRO.ex5');
+      const stored = await storage.download(ids.ghost);
+      assert.equal(stored.buffer.toString(), 'FAKE_EX5_BINARY_BYTES', 'the binary bytes must reach storage unaltered');
+    });
+  });
+
+  await test('a non-.ex5 file cannot slip through under the generic octet-stream exception', async () => {
+    await withServer([], async (server, sessions, adminRoles, ids) => {
+      const { cookie, csrf } = await ownerSetup(server, sessions);
+      const response = await request(server, `/v1/admin/resources/${ids.free}/file`, {
+        method: 'POST', cookie, csrf, rawBody: 'MZ_FAKE_EXE_BYTES',
+        headers: { 'Content-Type': 'application/octet-stream', 'X-Resource-File-Name': encodeURIComponent('not-an-indicator.exe') }
+      });
+      assert.equal(response.status, 415);
+    });
+  });
+
   await test('replacing a resource\'s file keeps its metadata (name, category, status) untouched', async () => {
     await withServer([], async (server, sessions, adminRoles, ids, store) => {
       const { cookie, csrf } = await ownerSetup(server, sessions);

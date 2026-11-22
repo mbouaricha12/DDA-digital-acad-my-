@@ -1008,7 +1008,7 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
         try { buffer = await readRawBody(req, resourceUploadMaxBytes); }
         catch (error) { if (error.status === 413) return sendError(res, 413, 'file_too_large', error.message, requestId); throw error; }
         try {
-          validateUpload(mimeType, buffer.length, { maxBytes: resourceUploadMaxBytes });
+          validateUpload(mimeType, buffer.length, { maxBytes: resourceUploadMaxBytes, fileName: originalName });
           await resourceFileStorage.upload(resourceId, buffer, mimeType);
           const row = await premiumResourcesStore.update(resourceId, { file: originalName, mimeType });
           await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: 'resource_file_uploaded', resourceType: 'admin_resource', resourceId, requestId, metadata: { route: path, method, role: admin.role, bytes: buffer.length, mimeType } });
