@@ -3982,6 +3982,7 @@ function showView(id, recordEvent = true, historyMode = 'auto') {
     currentView = id;
   }
   if (id === 'markets') loadBrvmPublications();
+  if (id === 'resources') renderResourceLibrary();
   if (recordEvent) trackEvent('view_opened', { view: id });
   if (recordEvent && VIEW_TO_LESSON_ID[id]) trackEvent('lesson_started', { lesson: VIEW_TO_LESSON_ID[id] });
   if (LESSON_VIEW_IDS.has(id)) {
@@ -4044,6 +4045,64 @@ function renderVideoShelf() {
       </div>
     </li>`).join('');
 }
+
+// Member/Premium resource library (final pre-launch audit follow-up,
+// 2026-11): fetched live from the BFF-managed catalogue (see
+// bff/src/premium-resources-store.js) -- never a hardcoded list, so an
+// Owner-added resource shows up here with no code change. Grouped by
+// category; each card is honestly labeled Free or "Accès Premium requis"
+// and never claims to be downloadable before the real entitlement check
+// server-side confirms it (the button always tries the real authenticated
+// download -- a Free learner clicking a Premium card simply gets the same
+// honest 403-driven message a gated lesson already shows elsewhere).
+async function renderResourceLibrary() {
+  const empty = document.getElementById('resource-library-empty');
+  const container = document.getElementById('resource-library-categories');
+  if (!empty || !container || !window.DDABFF?.enabled()) return;
+  const result = await window.DDABFF.listResources();
+  const items = result.enabled && result.status === 200 ? result.items : [];
+  if (!items.length) { empty.hidden = false; container.innerHTML = ''; return; }
+  empty.hidden = true;
+  const byCategory = new Map();
+  items.forEach(item => { const list = byCategory.get(item.category) || []; list.push(item); byCategory.set(item.category, list); });
+  container.innerHTML = [...byCategory.entries()].map(([category, resources]) => `
+    <div class="resource-library-category">
+      <h3 class="resource-library-category-title">${category}</h3>
+      <ul class="library-list">
+        ${resources.map(item => `
+          <li class="library-entry">
+            <div class="resource-icon"><svg class="icon"><use href="#icon-${item.membershipRequired === 'premium' ? 'shield' : 'check-circle'}"/></svg></div>
+            <div class="library-entry-body">
+              <span class="resource-type">${item.type?.toUpperCase() || 'Document'} · ${item.membershipRequired === 'premium' ? 'DDA Premium' : 'DDA Free'}</span>
+              <h2>${item.name}</h2>
+              <p>${item.description || ''}</p>
+              <ul class="resource-meta" aria-label="Métadonnées de la ressource">${item.level ? `<li>${item.level}</li>` : ''}</ul>
+              <button type="button" class="secondary-action dark-action resource-library-download" data-resource-id="${item.id}">Télécharger</button>
+            </div>
+          </li>`).join('')}
+      </ul>
+    </div>`).join('');
+}
+document.getElementById('resource-library-categories')?.addEventListener('click', async event => {
+  const button = event.target.closest('.resource-library-download');
+  if (!button) return;
+  const originalLabel = button.textContent;
+  button.disabled = true;
+  button.textContent = 'Téléchargement…';
+  try {
+    const result = await window.DDABFF.downloadResource(button.dataset.resourceId);
+    if (!result.ok) {
+      showToast(result.status === 403 ? 'Cette ressource nécessite DDA Premium.' : 'Cette ressource est momentanément indisponible.');
+      return;
+    }
+    const url = URL.createObjectURL(result.blob);
+    const link = document.createElement('a');
+    link.href = url; link.download = result.filename; document.body.appendChild(link); link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  } catch { showToast('Le téléchargement a échoué. Réessaie dans un instant.'); }
+  finally { button.disabled = false; button.textContent = originalLabel; }
+});
 
 const resources = {
   checklist: { title: 'Checklist avant une décision', label: 'Guide · DDA Free', body: '<ol><li>Ai-je compris le contexte du marché ?</li><li>Mon scénario est-il écrit clairement ?</li><li>Où mon idée devient-elle invalide ?</li><li>Quel risque suis-je prêt à accepter ?</li><li>Est-ce une décision prévue ou impulsive ?</li><li>Puis-je justifier mon choix sans parler de gain ?</li></ol>' },

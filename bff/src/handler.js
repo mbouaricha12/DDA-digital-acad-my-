@@ -20,6 +20,7 @@ const { PostgrestRateLimiter } = require('./rate-limiter');
 const { chariowConfigFromEnv, handleChariowPulse } = require('./chariow');
 const { marketDataConfigFromEnv } = require('./market-data');
 const { PostgrestCommunityStore } = require('./community-store');
+const { PostgrestResourcesStore } = require('./premium-resources-store');
 const { trackServerEvent } = require('./analytics');
 const { aiAssistantFromEnv } = require('./ai-assistant');
 
@@ -48,8 +49,9 @@ function buildHandler(env = process.env) {
   const chariowConfig = chariowConfigFromEnv(env);
   const marketDataConfig = marketDataConfigFromEnv(env);
   const communityStore = new PostgrestCommunityStore({ supabaseUrl: env.SUPABASE_URL, serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY });
+  const premiumResourcesStore = new PostgrestResourcesStore({ supabaseUrl: env.SUPABASE_URL, serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY });
   const aiAssistant = aiAssistantFromEnv(env, { logger });
-  const academyHandler = createBff({ config, auth, sessions, businessStore, billingStore, brvmPublicationStore, adminRoles, accessAudit, rateLimiter, progressStore, entitlementsStore, aiAssistant, entitlements: billingStore, chariowConfig, marketDataConfig, communityStore, logger });
+  const academyHandler = createBff({ config, auth, sessions, businessStore, billingStore, brvmPublicationStore, adminRoles, accessAudit, rateLimiter, progressStore, entitlementsStore, aiAssistant, entitlements: billingStore, chariowConfig, marketDataConfig, communityStore, premiumResourcesStore, logger });
 
   return async function handler(req, res) {
     if (req.method === 'POST' && new URL(req.url, 'http://bff.local').pathname === '/webhooks/chariow') {

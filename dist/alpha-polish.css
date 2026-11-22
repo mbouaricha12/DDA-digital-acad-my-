@@ -4049,3 +4049,9 @@ body:has(#dashboard.view.active) .topbar{
 @media(max-width:899px){#landing .landing-hero-features{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-bottom:26px}}
 @media(max-width:479px){#landing .landing-hero-features{grid-template-columns:1fr}}
 @media(min-width:1340px){#landing .landing-hero-features{max-width:min(1820px,96vw)}}
+
+/* Resource library (final pre-launch audit follow-up, 2026-11) */
+.resource-library-empty{padding:18px 20px;border:1px dashed var(--dda-elite-line,rgba(255,255,255,.15));border-radius:12px;color:var(--muted-2,#5B6B7E);font-size:.95rem}
+.resource-library-category{margin-top:22px}
+.resource-library-category:first-child{margin-top:0}
+.resource-library-category-title{font-size:1rem;font-weight:700;letter-spacing:.01em;margin-bottom:10px;padding-left:14px;border-left:2px solid var(--dda-gold,#C99A45)}

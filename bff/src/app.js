@@ -13,7 +13,7 @@ const { M1_CONTENT } = require('./m1-content');
 const { chariowConfigFromEnv, createChariowCheckout } = require('./chariow');
 const { marketDataConfigFromEnv, fetchMarketQuotes } = require('./market-data');
 const { analyticsConfigFromEnv } = require('./analytics');
-const { createPremiumResourcesStore } = require('./premium-resources-store');
+const { MemoryResourcesStore, streamResourceFile } = require('./premium-resources-store');
 
 const SESSION_COOKIE = '__Host-dda_session';
 const CSRF_COOKIE = '__Host-dda_csrf';
@@ -380,7 +380,7 @@ function parsePageParams(url, { maxPerPage = 200 } = {}) {
   return { page, perPage };
 }
 
-function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, accessAudit = null, rateLimiter = null, progressStore = null, entitlementsStore = null, aiAssistant = null, chariowConfig = chariowConfigFromEnv(), marketDataConfig = marketDataConfigFromEnv(), communityStore = null, premiumResourcesStore = createPremiumResourcesStore(), clock = () => new Date(), logger = () => {} }) {
+function createBff({ config = configFromEnv(), auth, sessions, entitlements = null, billingStore = null, businessStore, brvmPublicationStore = null, mutationStore = null, adminRoles = null, accessAudit = null, rateLimiter = null, progressStore = null, entitlementsStore = null, aiAssistant = null, chariowConfig = chariowConfigFromEnv(), marketDataConfig = marketDataConfigFromEnv(), communityStore = null, premiumResourcesStore = new MemoryResourcesStore(), resourcesStorageDir = undefined, clock = () => new Date(), logger = () => {} }) {
   if (!auth || !sessions) throw new Error('auth and sessions adapters are required');
   let marketQuotesCache = null;
   businessStore = businessStore || {
@@ -904,20 +904,77 @@ function createBff({ config = configFromEnv(), auth, sessions, entitlements = nu
       // below is membership-gated.
       if (method === 'GET' && path === '/v1/resources') {
         const current = await withUser(req, res, requestId); if (!current) return;
-        return json(res, 200, { items: premiumResourcesStore.listResources() });
+        const items = (await premiumResourcesStore.listPublished()).map(({ id, name, description, category, level, tags, membershipRequired, type, coverImage }) => ({ id, name, description, category, level, tags, membershipRequired, type, coverImage }));
+        return json(res, 200, { items });
       }
       if (method === 'GET' && path.startsWith('/v1/resources/') && path.endsWith('/download')) {
         const resourceId = path.slice('/v1/resources/'.length, -'/download'.length);
-        const resource = premiumResourcesStore.findResource(resourceId);
-        if (!resource) return sendError(res, 404, 'not_found', 'Unknown resource id.', requestId);
+        const resource = await premiumResourcesStore.get(resourceId);
+        if (!resource || resource.status !== 'published') return sendError(res, 404, 'not_found', 'Unknown resource id.', requestId);
         const current = await withUser(req, res, requestId); if (!current) return;
         if (resource.membershipRequired === 'premium') {
           const snapshot = await currentEntitlements(current.user.user_id);
           if (!hasActivePremium(snapshot, clock())) return sendError(res, 403, 'premium_required', 'An active Premium entitlement is required.', requestId);
         }
-        const streamed = premiumResourcesStore.streamResource(resource, res);
+        const streamed = streamResourceFile(resource, res, resourcesStorageDir ? { storageDir: resourcesStorageDir } : undefined);
         if (!streamed) return sendError(res, 404, 'resource_file_missing', 'This resource is not available right now.', requestId);
         return undefined;
+      }
+      // Owner/admin catalogue management (final pre-launch audit follow-up,
+      // 2026-11): lets Richard add/edit/publish/unpublish/delete a resource
+      // through the admin UI, no developer or redeploy needed beyond
+      // committing the matching file once under bff/resources-storage/
+      // (see premium-resources-store.js's header). Reads are open to any
+      // admin/owner like the entitlements admin routes above; mutations are
+      // owner-only, same reasoning as granting an entitlement.
+      if (method === 'GET' && path === '/v1/admin/resources') {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        return json(res, 200, { items: await premiumResourcesStore.listAll() });
+      }
+      if (method === 'POST' && path === '/v1/admin/resources') {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!validateCsrf(req, config, admin.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (admin.role !== 'owner') return sendError(res, 403, 'owner_required', 'Only an owner may add a resource.', requestId);
+        const body = await readJson(req);
+        try {
+          const row = await premiumResourcesStore.create(body);
+          await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: 'resource_created', resourceType: 'admin_resource', resourceId: row.id, requestId, metadata: { route: path, method, role: admin.role, name: row.name } });
+          return json(res, 200, { item: row });
+        } catch (error) {
+          if (error.code === 'invalid_resource') return sendError(res, 400, 'validation_error', error.message, requestId, { [error.field]: error.message });
+          throw error;
+        }
+      }
+      const adminResourceMatch = path.match(/^\/v1\/admin\/resources\/([^/]+)$/);
+      if (method === 'PATCH' && adminResourceMatch) {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!validateCsrf(req, config, admin.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (admin.role !== 'owner') return sendError(res, 403, 'owner_required', 'Only an owner may edit a resource.', requestId);
+        const resourceId = decodeURIComponent(adminResourceMatch[1]);
+        const body = await readJson(req);
+        try {
+          const row = await premiumResourcesStore.update(resourceId, body);
+          await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: body.status ? `resource_${body.status}` : 'resource_updated', resourceType: 'admin_resource', resourceId, requestId, metadata: { route: path, method, role: admin.role } });
+          return json(res, 200, { item: row });
+        } catch (error) {
+          if (error.code === 'resource_not_found') return sendError(res, 404, 'not_found', error.message, requestId);
+          if (error.code === 'invalid_resource') return sendError(res, 400, 'validation_error', error.message, requestId, { [error.field]: error.message });
+          throw error;
+        }
+      }
+      if (method === 'DELETE' && adminResourceMatch) {
+        const admin = await withAdmin(req, res, requestId); if (!admin) return;
+        if (!validateCsrf(req, config, admin.cookies)) return sendError(res, 403, 'csrf_failed', 'CSRF validation failed.', requestId);
+        if (admin.role !== 'owner') return sendError(res, 403, 'owner_required', 'Only an owner may delete a resource.', requestId);
+        const resourceId = decodeURIComponent(adminResourceMatch[1]);
+        try {
+          await premiumResourcesStore.remove(resourceId);
+          await recordAccessAudit({ actorUserId: admin.user.user_id, eventName: 'resource_deleted', resourceType: 'admin_resource', resourceId, requestId, metadata: { route: path, method, role: admin.role } });
+          return json(res, 204);
+        } catch (error) {
+          if (error.code === 'resource_not_found') return sendError(res, 404, 'not_found', error.message, requestId);
+          throw error;
+        }
       }
       // Real M1 lesson content (docs/RISK_REGISTER.md R-04): the only place
       // M1.1/M1.2/M1.3's text, exercises and quiz answers live now — see

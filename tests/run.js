@@ -454,6 +454,48 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  await test('Resource library (2026-11): an empty catalogue shows the honest empty state, never a blank or broken shelf', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada' }) }));
+    await context.route('https://bff.test/v1/progress', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lessons: {}, onboarding: { complete: true } }) }));
+    await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ code: 'premium_required' }) }));
+    await context.route('https://bff.test/v1/resources', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [] }) }));
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#resources`);
+    await page.waitForSelector('#resources.view.active');
+    await waitForPageState(page, () => document.getElementById('resource-library-empty')?.hidden === false, { description: 'resource library empty state' });
+    assert.match(await page.locator('#resource-library-empty').textContent(), /bibliothèque de ressources apparaîtra ici/);
+    await context.close();
+  });
+
+  await test('Resource library (2026-11): a published resource renders grouped by category and downloads through the real authenticated endpoint', async () => {
+    const context = await freshContext(browser);
+    await context.addInitScript(() => { window.DDA_BFF_BASE_URL = 'https://bff.test'; });
+    await context.route('https://bff.test/v1/me', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ user_id: 'u1', email: 'ada@example.com', display_name: 'Ada' }) }));
+    await context.route('https://bff.test/v1/progress', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ lessons: {}, onboarding: { complete: true } }) }));
+    await context.route('https://bff.test/v1/premium/preview', route => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ code: 'premium_required' }) }));
+    await context.route('https://bff.test/v1/resources', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [
+      { id: 'res-1', name: 'Checklist risque', description: 'desc', category: 'Gestion du risque', level: 'Débutant', membershipRequired: 'free', type: 'pdf' }
+    ] }) }));
+    let downloadCalled = false;
+    await context.route('https://bff.test/v1/resources/res-1/download', route => {
+      downloadCalled = true;
+      return route.fulfill({ status: 200, contentType: 'application/pdf', headers: { 'Content-Disposition': 'attachment; filename="checklist-risque.pdf"' }, body: 'PDF_BYTES' });
+    });
+    const page = await context.newPage();
+    await page.goto(`${ACADEMY_BASE}#resources`);
+    await page.waitForSelector('#resources.view.active');
+    await waitForPageState(page, () => document.getElementById('resource-library-categories')?.textContent.includes('Checklist risque'), { description: 'resource library populated' });
+    assert.match(await page.locator('#resource-library-categories').textContent(), /Gestion du risque/);
+    assert.equal(await page.locator('#resource-library-empty').isHidden(), true);
+    await page.click('.resource-library-download');
+    const deadline = Date.now() + 5000;
+    while (!downloadCalled && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 50));
+    assert.ok(downloadCalled, 'clicking the download button must fire a real authenticated request to the resource download endpoint');
+    await context.close();
+  });
+
   await test('Premium P2 completes lesson → lab → assessment → proof → progression → Journal with reloads', async () => {
     const context = await freshContext(browser, { width: 390, height: 844 });
     // Lot 2 (mandate §6 audit): this full walkthrough needs P2.1/P2.2's real

@@ -373,6 +373,48 @@
     return mutateAdminRole(`/v1/admin/entitlements/${encodeURIComponent(userId)}/${encodeURIComponent(entitlementKey)}`, { method: 'PATCH', body: { status } });
   }
 
+  // Member/Premium resource library (final pre-launch audit follow-up,
+  // 2026-11) — bff/src/app.js's GET /v1/resources (metadata) and
+  // GET /v1/resources/:id/download (the file). The download is fetched as
+  // a blob rather than a plain <a href>, since the BFF lives on a
+  // different origin and the response body is never JSON here.
+  async function listResources() {
+    const result = await request('/v1/resources');
+    if (!result.enabled) return { enabled: false };
+    if (!result.response.ok) return { enabled: true, status: result.response.status, items: [] };
+    return { enabled: true, status: 200, items: result.body?.items || [] };
+  }
+
+  async function downloadResource(id) {
+    if (!enabled()) return { ok: false, status: 0 };
+    const response = await fetch(`${configuredBase}/v1/resources/${encodeURIComponent(id)}/download`, { credentials: 'include', headers: { Accept: '*/*' } });
+    if (!response.ok) return { ok: false, status: response.status };
+    const disposition = response.headers.get('Content-Disposition') || '';
+    const filename = /filename="([^"]+)"/.exec(disposition)?.[1] || 'ressource';
+    return { ok: true, blob: await response.blob(), filename };
+  }
+
+  // Admin catalogue management — owner-only mutations, never decided here
+  // (bff/src/app.js withAdmin + the `role !== 'owner'` checks on each
+  // mutation route). Same {enabled, status, data} shape as the entitlements
+  // admin calls above, for the same reason: the UI needs to show *why* a
+  // create/update/delete failed, not just that it did.
+  async function getAdminResources() {
+    return adminRequest('/v1/admin/resources');
+  }
+
+  async function createAdminResource(data) {
+    return mutateAdminRole('/v1/admin/resources', { method: 'POST', body: data });
+  }
+
+  async function updateAdminResource(id, patch) {
+    return mutateAdminRole(`/v1/admin/resources/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch });
+  }
+
+  async function deleteAdminResource(id) {
+    return mutateAdminRole(`/v1/admin/resources/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  }
+
   window.DDABFF = Object.freeze({
     enabled, register, verifyEmail, exchangeSignupCode, verifyRecoveryToken, exchangeRecoveryCode, login, requestPasswordReset, confirmPasswordReset, getMe, getBrvmPublications, getMarketQuotes, updateMe, logout, issueCsrf,
     oauthGoogleStartUrl, exchangeOAuthCode,
@@ -380,6 +422,7 @@
     getCommunityPosts, createCommunityPost,
     getAdminOverview, getAdminUsers, getAdminMemberships, getAdminProgress, assignAdminRole, revokeAdminRole,
     getAdminEntitlements, grantAdminEntitlement, setAdminEntitlementStatus,
+    listResources, downloadResource, getAdminResources, createAdminResource, updateAdminResource, deleteAdminResource,
     get baseUrl() { return configuredBase; }
   });
 })();

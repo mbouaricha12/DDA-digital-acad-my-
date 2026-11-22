@@ -52,7 +52,7 @@
   const views = document.querySelectorAll('main .view');
   const navButtons = document.querySelectorAll('[data-admin-view]');
   const contextTitle = document.getElementById('admin-context-title');
-  const viewTitles = { overview: 'Aperçu', users: 'Utilisateurs', memberships: 'Abonnements', content: 'Contenu', resources: 'Ressources', progress: 'Progression', entitlements: 'Entitlements' };
+  const viewTitles = { overview: 'Aperçu', users: 'Utilisateurs', memberships: 'Abonnements', content: 'Contenu', resources: 'Ressources', library: 'Bibliothèque', progress: 'Progression', entitlements: 'Entitlements' };
 
   function showAdminView(id) {
     views.forEach(view => view.classList.toggle('active', view.id === `admin-view-${id}`));
@@ -67,6 +67,7 @@
     if (id === 'memberships' && !membershipsState.loaded) loadMemberships(1);
     if (id === 'content' && !contentState.loaded) loadContent();
     if (id === 'resources' && !resourcesState.loaded) loadResources();
+    if (id === 'library') loadLibrary();
   }
 
   navButtons.forEach(button => button.addEventListener('click', () => {
@@ -413,6 +414,72 @@
       body.innerHTML = `<tr><td colspan="5">Liste des ressources indisponible (${escapeHtml(error.message)}).</td></tr>`;
     }
   }
+
+  // ---------- Bibliothèque DDA (final pre-launch audit follow-up, 2026-11) ----------
+  // Real CRUD against bff/src/premium-resources-store.js's catalogue — not
+  // the read-only video mirror above. Reads are open to any admin; create/
+  // publish/unpublish/delete are owner-only, enforced server-side
+  // (bff/src/app.js's withAdmin + `role !== 'owner'` checks) — this UI just
+  // reflects that by hiding the form and action buttons for a non-owner.
+  async function loadLibrary() {
+    setDataFeedback('admin-library-feedback', '');
+    document.getElementById('admin-library-create-form').hidden = callerRole !== 'owner';
+    const body = document.getElementById('admin-library-body');
+    let result;
+    try { result = await window.DDABFF.getAdminResources(); }
+    catch { setDataFeedback('admin-library-feedback', 'Bibliothèque indisponible pour le moment. Réessaie plus tard.'); return; }
+    if (result.status !== 200) { setDataFeedback('admin-library-feedback', apiDataError(result.status, 'Bibliothèque')); return; }
+    const items = result.data.items || [];
+    body.innerHTML = items.map(item => `
+      <tr>
+        <td>${escapeHtml(item.name)}</td>
+        <td>${escapeHtml(item.category)}</td>
+        <td><span class="admin-status-tag" data-status="${item.membershipRequired === 'premium' ? 'suspended' : 'active'}">${item.membershipRequired === 'premium' ? 'Premium' : 'Free'}</span></td>
+        <td>${escapeHtml(item.file)}</td>
+        <td><span class="admin-status-tag" data-status="${item.status === 'published' ? 'active' : 'suspended'}">${item.status === 'published' ? 'Publiée' : 'Brouillon'}</span></td>
+        <td>${formatDate(item.updated_at)}</td>
+        <td>${callerRole === 'owner' ? `<button class="text-action" type="button" data-library-toggle="${escapeHtml(item.id)}" data-library-status="${escapeHtml(item.status)}">${item.status === 'published' ? 'Dépublier' : 'Publier'}</button> <button class="text-action" type="button" data-library-delete="${escapeHtml(item.id)}">Supprimer</button>` : ''}</td>
+      </tr>`).join('') || `<tr><td colspan="7">Aucune ressource dans la bibliothèque pour le moment.</td></tr>`;
+    body.querySelectorAll('[data-library-toggle]').forEach(button => button.addEventListener('click', async () => {
+      const nextStatus = button.dataset.libraryStatus === 'published' ? 'draft' : 'published';
+      setDataFeedback('admin-library-feedback', '');
+      const result = await window.DDABFF.updateAdminResource(button.dataset.libraryToggle, { status: nextStatus });
+      if (!result.enabled) return;
+      if (result.status === 200) { loadLibrary(); return; }
+      setDataFeedback('admin-library-feedback', result.status === 403 ? 'Seul un owner peut publier ou dépublier une ressource.' : 'La mise à jour a échoué.');
+    }));
+    body.querySelectorAll('[data-library-delete]').forEach(button => button.addEventListener('click', async () => {
+      if (!window.confirm('Supprimer définitivement cette ressource de la bibliothèque ?')) return;
+      setDataFeedback('admin-library-feedback', '');
+      const result = await window.DDABFF.deleteAdminResource(button.dataset.libraryDelete);
+      if (!result.enabled) return;
+      if (result.status === 204) { loadLibrary(); return; }
+      setDataFeedback('admin-library-feedback', result.status === 403 ? 'Seul un owner peut supprimer une ressource.' : 'La suppression a échoué.');
+    }));
+  }
+  document.getElementById('admin-library-create-form')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const payload = {
+      name: document.getElementById('admin-library-name').value.trim(),
+      description: document.getElementById('admin-library-description').value.trim(),
+      category: document.getElementById('admin-library-category').value.trim(),
+      level: document.getElementById('admin-library-level').value.trim(),
+      membershipRequired: document.getElementById('admin-library-membership').value,
+      type: document.getElementById('admin-library-type').value.trim() || 'pdf',
+      file: document.getElementById('admin-library-file').value.trim()
+    };
+    setDataFeedback('admin-library-feedback', '');
+    const result = await window.DDABFF.createAdminResource(payload);
+    if (!result.enabled) return;
+    if (result.status === 200) {
+      event.target.reset();
+      document.getElementById('admin-library-type').value = 'pdf';
+      loadLibrary();
+      return;
+    }
+    const messages = { 400: `Champ invalide : ${result.data?.message || 'vérifie le formulaire.'}`, 403: 'Seul un owner peut ajouter une ressource.' };
+    setDataFeedback('admin-library-feedback', messages[result.status] || 'La création a échoué.');
+  });
 
   // ---------- Progression (one real learner at a time) ----------
   // Reads the exact same rows the learner's own GET /v1/progress exposes to

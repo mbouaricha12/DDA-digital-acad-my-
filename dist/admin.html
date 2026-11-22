@@ -42,6 +42,7 @@
         <p class="nav-section-label">Pédagogie</p>
         <button class="nav-item" data-admin-view="content" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Contenu</button>
         <button class="nav-item" data-admin-view="resources" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Ressources</button>
+        <button class="nav-item" data-admin-view="library" type="button"><svg class="icon"><use href="#admin-icon-spark"/></svg> Bibliothèque</button>
         <button class="nav-item" data-admin-view="progress" type="button" hidden id="admin-nav-progress"><svg class="icon"><use href="#admin-icon-progress"/></svg> Progression</button>
         <button class="nav-item" data-admin-view="entitlements" type="button" hidden id="admin-nav-entitlements"><svg class="icon"><use href="#admin-icon-spark"/></svg> Entitlements</button>
       </nav>
@@ -69,6 +70,7 @@
       <p class="nav-section-label">Pédagogie</p>
       <button class="nav-item" data-admin-view="content" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Contenu</button>
       <button class="nav-item" data-admin-view="resources" type="button"><svg class="icon"><use href="#admin-icon-shield"/></svg> Ressources</button>
+      <button class="nav-item" data-admin-view="library" type="button"><svg class="icon"><use href="#admin-icon-spark"/></svg> Bibliothèque</button>
       <button class="nav-item" data-admin-view="progress" type="button" hidden id="admin-nav-progress-mobile"><svg class="icon"><use href="#admin-icon-progress"/></svg> Progression</button>
       <button class="nav-item" data-admin-view="entitlements" type="button" hidden id="admin-nav-entitlements-mobile"><svg class="icon"><use href="#admin-icon-spark"/></svg> Entitlements</button>
       <div class="admin-exit-row">
@@ -146,6 +148,39 @@
             <tbody id="admin-resources-body"></tbody>
           </table>
         </div>
+      </section>
+
+      <section class="view" id="admin-view-library" aria-labelledby="admin-library-title">
+        <h1 id="admin-library-title" class="eyebrow gold">Bibliothèque DDA</h1>
+        <p class="admin-role-feedback" style="border-color:var(--line);color:var(--muted)">Ajoute, publie, dépublie ou supprime une ressource de la bibliothèque (Free ou Premium) — visible immédiatement pour les apprenants une fois publiée, sans intervention développeur. Les lectures sont ouvertes à tout admin ; seul un Owner peut créer, modifier ou supprimer. Avant de publier une ressource, le fichier exact (même nom) doit être déposé sous <code>bff/resources-storage/</code> et déployé — une ressource publiée sans fichier correspondant échoue honnêtement au téléchargement plutôt que de servir un contenu vide.</p>
+        <p class="admin-role-feedback" id="admin-library-feedback" role="status" hidden></p>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Nom</th><th>Catégorie</th><th>Accès</th><th>Fichier</th><th>Statut</th><th>Mis à jour</th><th></th></tr></thead>
+            <tbody id="admin-library-body"></tbody>
+          </table>
+        </div>
+        <form id="admin-library-create-form" class="admin-grant-form">
+          <p class="eyebrow gold" style="margin-top:28px">Ajouter une ressource (créée en brouillon)</p>
+          <label for="admin-library-name">Nom</label>
+          <input id="admin-library-name" required maxlength="200">
+          <label for="admin-library-description">Description</label>
+          <textarea id="admin-library-description" maxlength="2000"></textarea>
+          <label for="admin-library-category">Catégorie</label>
+          <input id="admin-library-category" required maxlength="80" placeholder="Ex. : Trading & Analyse, Gestion du risque, Intelligence artificielle…">
+          <label for="admin-library-level">Niveau (optionnel)</label>
+          <input id="admin-library-level" maxlength="40" placeholder="Ex. : Débutant, Avancé">
+          <label for="admin-library-membership">Accès</label>
+          <select id="admin-library-membership" required>
+            <option value="free">Free</option>
+            <option value="premium">Premium</option>
+          </select>
+          <label for="admin-library-type">Type</label>
+          <input id="admin-library-type" maxlength="20" value="pdf" placeholder="pdf, xlsx, zip…">
+          <label for="admin-library-file">Nom exact du fichier déposé sur le serveur</label>
+          <input id="admin-library-file" required maxlength="200" placeholder="ex. indicateur-vwap.pdf">
+          <button class="primary-action" type="submit">Créer en brouillon</button>
+        </form>
       </section>
 
       <section class="view" id="admin-view-progress" aria-labelledby="admin-progress-title">
