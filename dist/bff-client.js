@@ -285,7 +285,8 @@
   // waitlist instead of pretending a payment flow exists.
   async function startPremiumCheckout() {
     const result = await request('/v1/billing/checkout', { method: 'POST' });
-    if (!result.enabled || result.response.status === 401) return { available: false, reason: 'unavailable' };
+    if (!result.enabled) return { available: false, reason: 'no_bff' };
+    if (result.response.status === 401) return { available: false, reason: 'auth_required' };
     if (result.response.status === 503) return { available: false, reason: 'not_configured' };
     if (result.response.status === 429) return { available: true, error: 'rate_limited' };
     if (!result.response.ok) return { available: true, error: result.body?.code || 'checkout_failed' };

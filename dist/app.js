@@ -4237,23 +4237,62 @@ document.getElementById('premium-waitlist-join')?.addEventListener('click', () =
 
 // Commercial activation mandate (2026-11-14): the real "S'abonner" entry
 // point. Asks the BFF for a real Chariow Checkout session and redirects
-// there on success — never a simulated transaction. Today (no
-// CHARIOW_API_KEY/CHARIOW_PREMIUM_PRODUCT_IDS configured in production) the
-// BFF honestly answers "not configured", and this falls back to the exact
-// same local waitlist as before — one funnel, not two.
+// there on success — never a simulated transaction. If Chariow itself isn't
+// configured, the BFF honestly answers "not configured" and this falls back
+// to the local waitlist.
 function scrollToPremiumWaitlist() {
   requestAnimationFrame(() => revealLessonAnchor('premium-waitlist-panel')?.scrollIntoView({ behavior: prototypeState.preferences?.lowData ? 'auto' : 'smooth', block: 'start' }));
+}
+// Direct-from-homepage Premium CTA fix (2026-11-23): a visitor who lands on
+// #membership straight from the public homepage, never having created an
+// account, got the exact same "payment not available" message as a
+// genuinely unconfigured Chariow -- because startPremiumCheckout() used to
+// collapse "not logged in" (401) and "no BFF at all" into one bucket. That
+// silently told a would-be payer to join a waitlist instead of just asking
+// them to sign in. This flag survives the page reload a sign-up's email
+// verification causes (localStorage, not a JS variable) so checkout resumes
+// automatically the moment the visitor is actually authenticated -- no
+// change to the checkout/entitlement mechanism itself, only to which screen
+// a logged-out click lands on first.
+const PENDING_PREMIUM_CHECKOUT_KEY = 'dda-pending-premium-checkout';
+async function maybeResumePendingPremiumCheckout() {
+  let pending = false;
+  try { pending = localStorage.getItem(PENDING_PREMIUM_CHECKOUT_KEY) === '1'; } catch { /* storage is optional */ }
+  if (!pending) return false;
+  try { localStorage.removeItem(PENDING_PREMIUM_CHECKOUT_KEY); } catch { /* storage is optional */ }
+  if (!window.DDABFF?.enabled()) return false;
+  showView('membership');
+  showToast('Finalisation de ton abonnement Premium…');
+  try {
+    const result = await window.DDABFF.startPremiumCheckout();
+    if (result.checkoutUrl) { trackEvent('premium_checkout_started', { view: 'membership', resumed: true }); window.location.href = result.checkoutUrl; return true; }
+  } catch { /* fall through to the honest waitlist below */ }
+  scrollToPremiumWaitlist();
+  showToast('Ton compte est prêt. Le paiement en ligne n’est pas encore activé — ton intérêt est enregistré ci-dessous.');
+  return true;
 }
 document.getElementById('premium-subscribe-cta')?.addEventListener('click', async () => {
   const button = document.getElementById('premium-subscribe-cta');
   trackEvent('premium_subscribe_cta_clicked', { view: 'membership' });
   if (!window.DDABFF?.enabled()) { showView('membership'); scrollToPremiumWaitlist(); return; }
+  if (!prototypeState.user) {
+    try { localStorage.setItem(PENDING_PREMIUM_CHECKOUT_KEY, '1'); } catch { /* storage is optional */ }
+    showToast('Crée ton compte ou connecte-toi pour continuer ton abonnement Premium.');
+    showView('access');
+    return;
+  }
   const originalLabel = button.innerHTML;
   button.disabled = true;
   button.innerHTML = 'Préparation du paiement…';
   try {
     const result = await window.DDABFF.startPremiumCheckout();
     if (result.checkoutUrl) { trackEvent('premium_checkout_started', { view: 'membership' }); window.location.href = result.checkoutUrl; return; }
+    if (result.reason === 'auth_required') {
+      try { localStorage.setItem(PENDING_PREMIUM_CHECKOUT_KEY, '1'); } catch { /* storage is optional */ }
+      showToast('Ta session a expiré — reconnecte-toi pour continuer ton abonnement Premium.');
+      showView('access');
+      return;
+    }
     showToast(result.error === 'rate_limited'
       ? 'Trop de tentatives — réessaie dans un instant.'
       : 'Le paiement en ligne n’est pas encore activé. Ton intérêt est enregistré ci-dessous.');
@@ -4848,7 +4887,8 @@ document.getElementById('signup-form').addEventListener('submit', async event =>
         document.getElementById('bff-auth-status').textContent = '';
         revealAdminLinkIfAdmin();
         refreshServerPremiumEntitlement();
-        showOnboardingAfterRemoteAuth(user);
+        const resumedCheckout = await maybeResumePendingPremiumCheckout();
+        if (!resumedCheckout) showOnboardingAfterRemoteAuth(user);
       }
     } catch (authError) {
       error.textContent = authErrorMessage(authError, { signup: bffAuthMode === 'signup' });
@@ -5603,6 +5643,7 @@ async function bootAcademyAfterSessionCheck() {
   renderState();
   renderMarketIntelligence();
   revealAdminLinkIfAdmin();
+  if (prototypeState.user) await maybeResumePendingPremiumCheckout();
 
   const initialView = BOOT_HASH_VIEW;
   if (initialView && document.getElementById(initialView)) {

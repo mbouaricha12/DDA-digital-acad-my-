@@ -23,6 +23,11 @@
     landing_cta_product: 'landing_cta_clicked',
     landing_cta_lab: 'landing_cta_clicked',
     landing_cta_resources: 'landing_cta_clicked',
+    // Homepage commercial visibility (2026-11-23): distinct external name
+    // (not 'landing_cta_clicked') so a Premium click is countable on its own,
+    // separately from every Free-path CTA that shares that bucket.
+    hero_premium_cta_click: 'premium_cta_clicked',
+    landing_cta_premium: 'premium_cta_clicked',
     // Renamed from the legacy external name 'dda_signup' (Lot H) to match
     // the DDA Product & Conversion Alignment Audit's event dictionary —
     // same local event, same data, only the name sent to PostHog changes.

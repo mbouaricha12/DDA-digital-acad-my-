@@ -3414,3 +3414,9 @@ button.brvm-pole-item:hover,button.brvm-pole-item:focus-visible{border-color:rgb
 .lesson-main p{line-height:1.72}
 .lesson-main :is(.learning-check,.exercise-block,.quiz-block){scroll-margin-top:90px}
 @media(max-width:720px){.lesson-layout{padding-inline:14px}.lesson-quick-nav{gap:4px 12px}.module-toc{padding:10px 12px}.module-toc-status{font-size:9px}.lesson-main p{font-size:15px;line-height:1.68}}
+
+/* Homepage/Premium commercial CTA hardening (2026-11-23): the subscribe
+   button text must stay on one line on narrow phones, and the Premium
+   Track P2 entry must read as clearly secondary to "S'abonner". */
+.premium-subscribe-cta-main{white-space:nowrap}
+.landing-plan-card-gold .plan-premium-cta{margin-top:10px}
