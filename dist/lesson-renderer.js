@@ -444,7 +444,7 @@
       <div class="lesson-tab-panel" id="lesson-panel-exercise${suffix}" role="tabpanel" aria-labelledby="lesson-tab-exercise${suffix}" data-lesson-panel="exercise" hidden>${practiceBlocks.map(renderBlock).join('\n')}
       </div>` : '';
     return `
-      <div class="lesson-hero-media" aria-label="Support principal de la leçon">${lesson.video ? renderVideoSurface(lesson.video, `lesson-video${suffix}`) : `<div class="video-explainer-block video-explainer-fallback lesson-guided-thumbnail" data-video-state="missing"><div class="video-fallback-panel guided-fallback" role="status"><svg class="icon"><use href="#icon-book"/></svg><strong>Séquence pédagogique guidée</strong><span>Aucune vidéo publiée pour cette leçon. Le contenu, le schéma et l’exercice restent disponibles ci-dessous.</span></div></div>`}</div>
+      ${lesson.video ? `<div class="lesson-hero-media" aria-label="Support principal de la leçon">${renderVideoSurface(lesson.video, `lesson-video${suffix}`)}</div>` : ''}
       ${tabsNav}
       <div class="lesson-intro-grid">
         <div class="lesson-intro-copy">
