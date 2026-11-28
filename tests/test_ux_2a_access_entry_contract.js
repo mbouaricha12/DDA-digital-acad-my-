@@ -36,7 +36,7 @@ assert.match(academy, /id="progress-next-action"/, 'progression exposes a dedica
 // a real subscription" but "access is never granted by local state, only
 // by a confirmed server-side payment" (see test_free_premium_access_contract.js
 // for the matching access-model-rules assertion).
-assert.match(academy, /12 000 FCFA/, 'membership shows the founder-approved Premium price');
+assert.match(academy, /15 000 FCFA/, 'membership shows the founder-approved Premium price');
 assert.match(academy, /accordé uniquement après confirmation réelle du paiement/, 'membership explicitly ties access to a confirmed real payment, never local state');
 assert.match(academy, /href="launch\/"/, 'membership links to commercial preparation');
 assert.match(academy, /data-permission="premium_track" data-premium-target="premium-lab"/, 'the resource CTA points to the protected Risk Lab, not a dead-end toast');
