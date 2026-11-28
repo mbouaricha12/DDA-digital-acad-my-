@@ -8,10 +8,12 @@ const root = path.join(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const landing = read('dist/index.html');
 const academy = read('dist/academy.html');
+const privacy = read('dist/privacy/index.html');
+const cookies = read('dist/cookies/index.html');
 const consent = read('dist/dda-consent.js');
 const analytics = read('dist/dda-analytics.js');
 
-for (const [name, html] of [['landing', landing], ['academy', academy]]) {
+for (const [name, html] of [['landing', landing], ['academy', academy], ['privacy', privacy], ['cookies', cookies]]) {
   assert.match(html, /dda-consent\.css/, name + ' loads consent styles');
   assert.match(html, /dda-consent\.js/, name + ' loads consent manager');
   assert.doesNotMatch(html, /googletagmanager\.com\/gtm\.js/, name + ' must not load GTM before consent');
