@@ -104,6 +104,7 @@
   let transport = 'debug';
   let initAttempted = false;
   let analyticsConsent = false;
+  let posthogScript = null;
 
   function config() { return (typeof window !== 'undefined' && window.DDA_ANALYTICS_CONFIG) || {}; }
   function pushDebug(entry) {
@@ -151,8 +152,12 @@
         const script = document.createElement('script');
         script.src = `${host.replace(/\/$/, '')}/static/array.js`;
         script.async = true;
-        script.onload = () => resolve(true);
-        script.onerror = () => resolve(false);
+        posthogScript = script;
+        script.onload = () => {
+          if (!analyticsConsent) { script.remove(); posthogScript = null; resolve(false); return; }
+          resolve(true);
+        };
+        script.onerror = () => { posthogScript = null; resolve(false); };
         document.head.appendChild(script);
       } catch { resolve(false); }
     });
@@ -186,11 +191,12 @@
         posthogHost = remote.posthogHost || posthogHost;
       }
     }
+    if (!analyticsConsent) { initAttempted = false; return; }
     if (!posthogKey) return;
     try {
       const host = posthogHost || 'https://us.i.posthog.com';
       const loaded = await loadPosthogScript(host);
-      if (loaded && typeof window.posthog !== 'undefined' && typeof window.posthog.init === 'function') {
+      if (loaded && analyticsConsent && typeof window.posthog !== 'undefined' && typeof window.posthog.init === 'function') {
         window.posthog.init(posthogKey, { api_host: host, autocapture: false, capture_pageview: false, disable_session_recording: true });
         transport = 'posthog';
       }
@@ -217,9 +223,12 @@
     analyticsConsent = allowed === true;
     if (!analyticsConsent) {
       transport = 'debug';
+      if (posthogScript && !window.posthog) { posthogScript.remove(); posthogScript = null; initAttempted = false; }
+      if (typeof window.posthog !== 'undefined' && typeof window.posthog.opt_out_capturing === 'function') window.posthog.opt_out_capturing();
       return;
     }
     if (typeof window.posthog !== 'undefined' && typeof window.posthog.capture === 'function') {
+      if (typeof window.posthog.opt_in_capturing === 'function') window.posthog.opt_in_capturing();
       transport = 'posthog';
       return;
     }
