@@ -479,6 +479,19 @@ Le modèle commercial V2.1 demeure l'autorité.
 | B2B | Licences/cohortes | V3 | Isolation locataire et conformité |
 | Events/Partnerships | Opportunités ponctuelles | Futur | Validation séparée |
 
+### 12.1 Cadrage Freemium / Premium — proposition à valider
+
+Le modèle Freemium est retenu comme hypothèse de conversion progressive, sans dégrader la valeur de DDA Free et sans créer de limitations artificielles. Cette section est documentaire : elle n’active aucun quota, aucune permission, aucun entitlement et aucun paiement.
+
+- **DDA Free** doit rester autonome : fondamentaux, leçons authored, exercices, quiz, feedback, progression, Journal & Plan personnel, ressources Free et Terminal pédagogique synthétique.
+- **DDA Premium** doit ajouter une profondeur effectivement disponible : P2 Risk & Discipline, Risk Plan Lab, Controlled Decision Assessment et ressources avancées réellement opérées.
+- **DDA Access** reste futur : bourses, tarifs réduits ou accès sponsorisés uniquement après définition de critères publiables, financement identifié et décision côté serveur.
+- **DDA AI, analyses sauvegardées synchronisées et fonctions avancées** sont des capacités à mesurer avant toute commercialisation ; leurs limites devront être centralisées côté BFF et jamais décidées par le navigateur.
+- Les données personnelles, le Journal et la progression ne doivent pas être supprimés ou rendus inaccessibles par l’atteinte d’un quota fonctionnel.
+- Toute activation Premium commerciale exige une session serveur, un entitlement serveur, des webhooks Chariow signés et idempotents, ainsi que la gestion de l’expiration et de la révocation.
+
+Les quotas proposés, messages de limite, règles de sécurité et décisions attendues sont détaillés dans `DDA_FREEMIUM_PREMIUM_MATRIX_DRAFT.md`. Ils restent soumis à validation du propriétaire et ne constituent pas une autorisation d’implémentation.
+
 ### Roadmap produit (extrait transmis)
 
 > ⚠️ _Le tableau de roadmap est visiblement tronqué en tête dans le collage (les premières lignes et l'en-tête manquent) ; reproduction fidèle des lignes reçues._
