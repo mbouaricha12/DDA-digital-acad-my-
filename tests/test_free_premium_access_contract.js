@@ -13,6 +13,7 @@ assert.match(html, /DDA Premium/);
 assert.match(html, /DDA Access/);
 assert.match(html, /Aucun paiement actif/);
 assert.match(html, /Non disponible aujourd’hui/);
+assert.match(html, /id="premium-subscribe-cta"[^>]*disabled[^>]*>Premium — bientôt disponible/, 'Premium checkout CTA must remain visibly disabled before activation');
 // Founder-approved launch price (2026-11-14 commercial preparation mandate):
 // 15 000 FCFA/month, shown as a commercial reference only. Chariow checkout
 // is not activated by this contract — the invariant is that access is never
