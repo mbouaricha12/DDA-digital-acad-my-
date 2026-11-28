@@ -7,7 +7,7 @@
 .dda-consent-copy p,.dda-consent-settings p{max-width:650px;margin:0;color:#c2cad5;font-size:13px;line-height:1.55}
 .dda-consent-copy a{display:inline-block;margin-top:7px;color:#d9bc82;font-size:12px;text-decoration:underline;text-underline-offset:3px}
 .dda-consent-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
-.dda-consent-button{min-height:42px;padding:0 14px;border:1px solid rgba(255,255,255,.2);border-radius:9px;background:transparent;color:#f7f7f4;font:600 12px/1.2 inherit;cursor:pointer}
+.dda-consent-button{min-height:42px;padding:0 14px;border:1px solid rgba(255,255,255,.2);border-radius:9px;background:transparent;color:#f7f7f4;font-family:inherit;font-size:12px;font-weight:600;line-height:1.2;cursor:pointer}
 .dda-consent-button:hover{border-color:#d9bc82}
 .dda-consent-button:focus-visible,.dda-consent-copy a:focus-visible,.dda-consent-option input:focus-visible{outline:2px solid #e3c17e;outline-offset:3px}
 .dda-consent-button--primary{border-color:#d6b777;background:#d6b777;color:#101827}
