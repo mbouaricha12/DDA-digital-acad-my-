@@ -10,10 +10,11 @@ const landing = read('dist/index.html');
 const academy = read('dist/academy.html');
 const privacy = read('dist/privacy/index.html');
 const cookies = read('dist/cookies/index.html');
+const publicPages = ['dist/about/index.html','dist/accessibility/index.html','dist/contact/index.html','dist/faq/index.html','dist/imprint/index.html','dist/launch/index.html','dist/risks/index.html','dist/terms/index.html','dist/ai/index.html','dist/live/index.html','dist/business/index.html','dist/experts/index.html','dist/community/index.html','dist/commencer/index.html'].map(read);
 const consent = read('dist/dda-consent.js');
 const analytics = read('dist/dda-analytics.js');
 
-for (const [name, html] of [['landing', landing], ['academy', academy], ['privacy', privacy], ['cookies', cookies]]) {
+for (const [name, html] of [['landing', landing], ['academy', academy], ['privacy', privacy], ['cookies', cookies], ...publicPages.map((html, index) => ['public-' + index, html])]) {
   assert.match(html, /dda-consent\.css/, name + ' loads consent styles');
   assert.match(html, /dda-consent\.js/, name + ' loads consent manager');
   assert.doesNotMatch(html, /googletagmanager\.com\/gtm\.js/, name + ' must not load GTM before consent');
