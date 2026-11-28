@@ -28,6 +28,7 @@
 
   let consent = readConsent();
   let gtmLoaded = !!document.querySelector('script[data-dda-gtm]');
+  let googleConsentInitialized = false;
   let panel;
 
   function consentPayload() {
@@ -41,14 +42,17 @@
   function setGoogleConsent() {
     if (!window.dataLayer) window.dataLayer = [];
     window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
-    window.gtag('consent', 'default', {
-      analytics_storage: 'denied',
-      ad_storage: 'denied',
-      ad_user_data: 'denied',
-      ad_personalization: 'denied',
-      functionality_storage: 'granted',
-      security_storage: 'granted'
-    });
+    if (!googleConsentInitialized) {
+      window.gtag('consent', 'default', {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        functionality_storage: 'granted',
+        security_storage: 'granted'
+      });
+      googleConsentInitialized = true;
+    }
     window.gtag('consent', 'update', {
       analytics_storage: consent.analytics ? 'granted' : 'denied',
       ad_storage: consent.marketing ? 'granted' : 'denied',
@@ -117,7 +121,7 @@
         '<div class="dda-consent-copy"><span class="dda-consent-kicker">VOTRE CONFIDENTIALITÉ</span>' +
           '<h2>Vous gardez le contrôle de vos données.</h2>' +
           '<p>DDA utilise des outils de mesure d’audience facultatifs pour comprendre les visites et améliorer la plateforme. Aucun suivi Google ou PostHog facultatif n’est activé sans votre choix.</p>' +
-          '<a href="cookies/">En savoir plus sur les cookies</a>' +
+          '<a href="/cookies/">En savoir plus sur les cookies</a>' +
         '</div>' +
         '<div class="dda-consent-actions">' +
           '<button type="button" class="dda-consent-button dda-consent-button--quiet" data-consent="reject">Tout refuser</button>' +
