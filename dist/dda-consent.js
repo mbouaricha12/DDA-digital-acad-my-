@@ -120,7 +120,7 @@
       '<div class="dda-consent-banner" role="region" aria-label="Préférences de confidentialité" aria-live="polite">' +
         '<div class="dda-consent-copy"><span class="dda-consent-kicker">VOTRE CONFIDENTIALITÉ</span>' +
           '<h2>Vous gardez le contrôle de vos données.</h2>' +
-          '<p>DDA utilise des outils de mesure d’audience facultatifs pour comprendre les visites et améliorer la plateforme. Aucun suivi Google ou PostHog facultatif n’est activé sans votre choix.</p>' +
+          '<p>DDA utilise des outils facultatifs pour comprendre les visites et améliorer la plateforme. La mesure d’audience et le marketing peuvent être acceptés séparément ; les balises correspondantes restent désactivées sans votre choix.</p>' +
           '<a href="/cookies/">En savoir plus sur les cookies</a>' +
         '</div>' +
         '<div class="dda-consent-actions">' +
