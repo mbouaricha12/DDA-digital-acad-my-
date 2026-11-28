@@ -5,10 +5,9 @@
  * DDA AI sidebar entry (a real, already-built, Free-tier feature that was
  * missing from primary navigation).
  *
- * The landing 3D orbit scene this contract used to also lock
- * (data-3d-scene="dda-orbit") was removed 2026-11-21: it was permanently
- * hidden behind the real hero photo and never reached production. See
- * tests/test_landing_3d_contract.js for its replacement coverage.
+ * The landing 3D orbit scene is now an authored WebGL layer around the real
+ * hero photo. See tests/test_landing_3d_contract.js and the browser check in
+ * tests/run.js; the Progression proof halo remains a separate visual.
  */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
