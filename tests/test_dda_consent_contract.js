@@ -34,6 +34,8 @@ assert.match(consent, /dda:consent-changed/, 'consent changes are broadcast');
 
 assert.match(analytics, /setConsent\(allowed\)/, 'PostHog exposes a consent gate');
 assert.match(analytics, /if \(!analyticsConsent \|\| initAttempted\) return;/, 'PostHog initialization waits for explicit analytics consent');
+assert.match(analytics, /opt_out_capturing/, 'PostHog capture is disabled when analytics consent is withdrawn');
+assert.match(analytics, /if \(!analyticsConsent\) \{ initAttempted = false; return; \}/, 'late configuration responses cannot initialize PostHog after withdrawal');
 
 for (const file of ['dist/index.html', 'dist/academy.html', 'dist/commencer/index.html', 'dist/privacy/index.html', 'dist/cookies/index.html', 'dist/about/index.html', 'dist/accessibility/index.html', 'dist/contact/index.html', 'dist/faq/index.html', 'dist/imprint/index.html', 'dist/launch/index.html', 'dist/risks/index.html', 'dist/terms/index.html', 'dist/ai/index.html', 'dist/live/index.html', 'dist/business/index.html', 'dist/experts/index.html', 'dist/community/index.html']) {
   const html = read(file);
