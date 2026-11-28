@@ -157,7 +157,7 @@
           if (!analyticsConsent) { script.remove(); posthogScript = null; resolve(false); return; }
           resolve(true);
         };
-        script.onerror = () => { posthogScript = null; resolve(false); };
+        script.onerror = () => { posthogScript = null; initAttempted = false; resolve(false); };
         document.head.appendChild(script);
       } catch { resolve(false); }
     });
@@ -224,11 +224,11 @@
     if (!analyticsConsent) {
       transport = 'debug';
       if (posthogScript && !window.posthog) { posthogScript.remove(); posthogScript = null; initAttempted = false; }
-      if (typeof window.posthog !== 'undefined' && typeof window.posthog.opt_out_capturing === 'function') window.posthog.opt_out_capturing();
+      try { if (typeof window.posthog !== 'undefined' && typeof window.posthog.opt_out_capturing === 'function') window.posthog.opt_out_capturing(); } catch {}
       return;
     }
     if (typeof window.posthog !== 'undefined' && typeof window.posthog.capture === 'function') {
-      if (typeof window.posthog.opt_in_capturing === 'function') window.posthog.opt_in_capturing();
+      try { if (typeof window.posthog.opt_in_capturing === 'function') window.posthog.opt_in_capturing(); } catch {}
       transport = 'posthog';
       return;
     }
