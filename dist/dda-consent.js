@@ -13,6 +13,8 @@
     try {
       const value = JSON.parse(localStorage.getItem(CONSENT_KEY) || 'null');
       if (!value || value.version !== CONSENT_VERSION) return null;
+      const savedAt = Date.parse(typeof value.updatedAt === 'string' ? value.updatedAt : '');
+      if (!savedAt || Date.now() - savedAt > 180 * 24 * 60 * 60 * 1000) return null;
       return {
         necessary: true,
         analytics: value.analytics === true,
