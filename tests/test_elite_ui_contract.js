@@ -49,7 +49,7 @@ assert.match(css, /#dashboard \.analysis-terminal-tools\{position:sticky/, 'the 
 assert.match(css, /#dashboard \.terminal-tool-label\{display:none\}/, 'mobile tools are icon-first while accessible names remain on buttons');
 assert.match(css, /#landing \.landing-market-cards\{display:grid/, 'market cards adapt to a responsive grid');
 assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/, 'reduced-motion preference is respected');
-assert.match(sw, /const CACHE = 'dda-shell-v28';/, 'PWA cache is bumped for the segmented offline strategy');
+assert.match(sw, /const CACHE = 'dda-shell-v29';/, 'PWA cache is bumped for the segmented offline strategy');
 assert.match(app, /window\.addEventListener\('popstate'/, 'browser Back/Forward is handled by the existing SPA router');
 assert.match(app, /window\.addEventListener\('hashchange'/, 'hash links remain synchronized with application navigation');
 assert.match(app, /history\.back\(\)/, 'in-app Retour uses the native route history when available');
