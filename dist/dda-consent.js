@@ -66,6 +66,7 @@
     if (!consent || (!consent.analytics && !consent.marketing)) return;
     setGoogleConsent();
     if (gtmLoaded) return;
+    window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
     const script = document.createElement('script');
     script.async = true;
     script.src = 'https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent(GTM_ID);
