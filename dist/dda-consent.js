@@ -3,7 +3,7 @@
 
   // DDA privacy-first consent gate. Optional Google tags and PostHog remain
   // disabled until the visitor explicitly opts in.
-  const GTM_ID = 'GTM-M9PMLN9N';
+  const GTM_ID = 'GTM-TRR25PJT';
   const CONSENT_KEY = 'dda-consent-v1';
   const CONSENT_VERSION = 1;
   const hasDocument = typeof document !== 'undefined';
@@ -65,6 +65,9 @@
   function loadGtmIfAllowed() {
     if (!consent || (!consent.analytics && !consent.marketing)) return;
     setGoogleConsent();
+    // Browser regression tests seed an explicit analytics choice but must not
+    // contact the live GTM container or send production traffic.
+    if (window.__DDA_TEST_MODE__) return;
     if (gtmLoaded) return;
     window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
     const script = document.createElement('script');
