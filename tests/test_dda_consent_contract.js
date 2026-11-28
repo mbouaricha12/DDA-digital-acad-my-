@@ -22,7 +22,7 @@ for (const [name, html] of [['landing', landing], ['academy', academy], ['privac
   assert.match(html, /data-dda-open-consent/, name + ' exposes a way to reopen preferences');
 }
 
-assert.match(consent, /GTM-M9PMLN9N/, 'the approved GTM container is configured');
+assert.match(consent, /GTM-TRR25PJT/, 'the approved GTM container is configured');
 assert.match(consent, /analytics_storage:\s*'denied'/, 'Google analytics consent defaults to denied');
 assert.match(consent, /ad_storage:\s*'denied'/, 'Google advertising consent defaults to denied');
 assert.match(consent, /data-consent="reject"/, 'visitors can refuse optional tracking');
