@@ -13,6 +13,7 @@ const cookies = read('dist/cookies/index.html');
 const publicPages = ['dist/about/index.html','dist/accessibility/index.html','dist/contact/index.html','dist/faq/index.html','dist/imprint/index.html','dist/launch/index.html','dist/risks/index.html','dist/terms/index.html','dist/ai/index.html','dist/live/index.html','dist/business/index.html','dist/experts/index.html','dist/community/index.html','dist/commencer/index.html'].map(read);
 const consent = read('dist/dda-consent.js');
 const analytics = read('dist/dda-analytics.js');
+const serviceWorker = read('dist/sw.js');
 
 for (const [name, html] of [['landing', landing], ['academy', academy], ['privacy', privacy], ['cookies', cookies], ...publicPages.map((html, index) => ['public-' + index, html])]) {
   assert.match(html, /dda-consent\.css/, name + ' loads consent styles');
@@ -34,6 +35,8 @@ assert.match(consent, /dda:consent-changed/, 'consent changes are broadcast');
 
 assert.match(analytics, /setConsent\(allowed\)/, 'PostHog exposes a consent gate');
 assert.match(analytics, /if \(!analyticsConsent \|\| initAttempted\) return;/, 'PostHog initialization waits for explicit analytics consent');
+assert.match(serviceWorker, /'\.\/dda-consent\.js', '\.\/dda-consent\.css'/, 'consent assets are included in the offline shell cache');
+assert.match(serviceWorker, /dda-shell-v29/, 'service worker cache version is bumped for the new shell assets');
 assert.match(analytics, /opt_out_capturing/, 'PostHog capture is disabled when analytics consent is withdrawn');
 assert.match(analytics, /if \(!analyticsConsent\) \{ initAttempted = false; return; \}/, 'late configuration responses cannot initialize PostHog after withdrawal');
 
