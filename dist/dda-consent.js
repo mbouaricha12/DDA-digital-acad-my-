@@ -98,7 +98,11 @@
       window.DDAAnalytics.setConsent(!!(consent && consent.analytics));
     }
     window.dispatchEvent(new CustomEvent('dda:consent-changed', { detail: consentPayload() }));
-    if (panel) panel.hidden = true;
+    if (panel) {
+      panel.hidden = true;
+      const banner = panel.closest('.dda-consent-banner');
+      if (banner) banner.hidden = true;
+    }
   }
 
   function mount() {
