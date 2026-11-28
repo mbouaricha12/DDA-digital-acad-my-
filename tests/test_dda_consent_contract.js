@@ -29,6 +29,7 @@ assert.match(consent, /data-consent="accept"/, 'visitors can accept optional tra
 assert.match(consent, /data-consent="settings"/, 'visitors can personalize their choice');
 assert.match(consent, /localStorage\.setItem\(CONSENT_KEY/, 'the consent choice is persisted locally');
 assert.match(consent, /loadGtmIfAllowed/, 'GTM loading is gated by consent');
+assert.match(consent, /'gtm.start': Date.now\(\), event: 'gtm.js'/, 'the standard GTM bootstrap event is queued before the container script');
 assert.match(consent, /dda:consent-changed/, 'consent changes are broadcast');
 
 assert.match(analytics, /setConsent\(allowed\)/, 'PostHog exposes a consent gate');
