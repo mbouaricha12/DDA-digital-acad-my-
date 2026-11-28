@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://i.ytimg.com; font-src 'self'; connect-src 'self' https:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="theme-color" content="#081426">
   <title>DDA Academy — Apprendre, pratiquer, prouver</title>
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "@id": "https://dariusdigitalacademy.com/academy.html#webpage", "url": "https://dariusdigitalacademy.com/academy.html", "name": "DDA Academy — Apprendre, pratiquer, prouver", "description": "Darius Digital Academy transforme l'apprentissage des marchés financiers en un vrai parcours : comprendre, pratiquer, prouver ta progression — pas une liste de vidéos à consommer.", "inLanguage": "fr-FR", "isPartOf": {"@id": "https://dariusdigitalacademy.com/#website"}}</script>
@@ -89,6 +89,7 @@
   </script>
   <link rel="stylesheet" href="styles.min.css">
   <link rel="stylesheet" href="alpha-polish.min.css">
+  <link rel="stylesheet" href="dda-consent.css">
 </head>
 <body class="academy-document">
   <a class="skip-link" href="#main-content">Aller au contenu</a>
@@ -1853,6 +1854,7 @@
         <a href="about/">À propos de DDA</a>
         <a href="faq/">FAQ — page dédiée</a>
         <a href="launch/">Pilote &amp; préparation</a>
+        <button type="button" data-dda-open-consent>Préférences cookies</button>
       </nav>
       <small>Pour les annonces générales, utilise Telegram ou WhatsApp. Pour une demande personnelle, privilégie l’e-mail.</small>
     </footer>
@@ -1927,5 +1929,6 @@
   <script src="brvm-publications.js"></script>
   <script src="market-ticker.js"></script>
   <script src="app.js"></script>
+  <script src="dda-consent.js"></script>
 </body>
 </html>

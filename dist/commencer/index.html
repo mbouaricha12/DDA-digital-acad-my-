@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="theme-color" content="#07111f">
   <meta name="robots" content="index, follow">
   <meta name="description" content="Commencer gratuitement avec DDA : trois fondations M0, des exercices et une progression pédagogique honnête pour apprendre les marchés.">
@@ -25,6 +26,7 @@
   <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "@id": "https://dariusdigitalacademy.com/commencer/#webpage", "url": "https://dariusdigitalacademy.com/commencer/", "name": "Commencer avec DDA Free — Darius Digital Academy", "description": "Commencer gratuitement avec DDA : trois fondations M0, des exercices et une progression pédagogique honnête pour apprendre les marchés.", "inLanguage": "fr-FR", "isPartOf": {"@id": "https://dariusdigitalacademy.com/#website"}}</script>
   <link rel="icon" href="../images/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="stylesheet" href="commencer.css">
+  <link rel="stylesheet" href="../dda-consent.css">
 </head>
 <body class="commencer-page">
   <header class="commencer-header">
@@ -94,6 +96,7 @@
     </section>
   </main>
 
-  <footer class="commencer-footer"><span>© 2026 Darius Digital Academy</span><nav aria-label="Liens secondaires"><a href="../about/">À propos</a><a href="../faq/">FAQ</a><a href="../terms/">CGU</a><a href="../privacy/">Confidentialité</a><a href="mailto:dariusdigitalacademy@gmail.com">Contact</a></nav><span>Afrique francophone · Vocation internationale</span></footer>
+  <footer class="commencer-footer"><span>© 2026 Darius Digital Academy</span><nav aria-label="Liens secondaires"><a href="../about/">À propos</a><a href="../faq/">FAQ</a><a href="../terms/">CGU</a><a href="../privacy/">Confidentialité</a><a href="mailto:dariusdigitalacademy@gmail.com">Contact</a><button type="button" data-dda-open-consent>Préférences cookies</button></nav><span>Afrique francophone · Vocation internationale</span></footer>
+  <script src="../dda-consent.js"></script>
 </body>
 </html>

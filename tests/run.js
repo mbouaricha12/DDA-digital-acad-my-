@@ -81,7 +81,23 @@ async function test(name, fn) {
 }
 
 async function freshContext(browser, viewport) {
-  return browser.newContext(viewport ? { viewport } : undefined);
+  const context = await browser.newContext(viewport ? { viewport } : undefined);
+  // Simulate a returning visitor who has explicitly enabled analytics. This
+  // keeps the consent banner from covering mobile controls in product E2E
+  // tests while exercising the consent-aware analytics path. Live GTM is
+  // deliberately disabled by the test-only flag.
+  await context.addInitScript(() => {
+    window.__DDA_TEST_MODE__ = true;
+    try {
+      localStorage.setItem('dda-consent-v1', JSON.stringify({
+        version: 1,
+        analytics: true,
+        marketing: false,
+        updatedAt: new Date().toISOString()
+      }));
+    } catch (_) {}
+  });
+  return context;
 }
 
 async function waitForText(page, selector, { includes, expected, timeout = 10000 } = {}) {

@@ -103,6 +103,8 @@
   } catch {}
   let transport = 'debug';
   let initAttempted = false;
+  let analyticsConsent = false;
+  let posthogScript = null;
 
   function config() { return (typeof window !== 'undefined' && window.DDA_ANALYTICS_CONFIG) || {}; }
   function pushDebug(entry) {
@@ -150,8 +152,12 @@
         const script = document.createElement('script');
         script.src = `${host.replace(/\/$/, '')}/static/array.js`;
         script.async = true;
-        script.onload = () => resolve(true);
-        script.onerror = () => resolve(false);
+        posthogScript = script;
+        script.onload = () => {
+          if (!analyticsConsent) { script.remove(); posthogScript = null; resolve(false); return; }
+          resolve(true);
+        };
+        script.onerror = () => { posthogScript = null; initAttempted = false; resolve(false); };
         document.head.appendChild(script);
       } catch { resolve(false); }
     });
@@ -175,7 +181,7 @@
     } catch { return null; }
   }
   async function init() {
-    if (initAttempted) return;
+    if (!analyticsConsent || initAttempted) return;
     initAttempted = true;
     let { posthogKey, posthogHost } = config();
     if (!posthogKey) {
@@ -185,11 +191,12 @@
         posthogHost = remote.posthogHost || posthogHost;
       }
     }
+    if (!analyticsConsent) { initAttempted = false; return; }
     if (!posthogKey) return;
     try {
       const host = posthogHost || 'https://us.i.posthog.com';
       const loaded = await loadPosthogScript(host);
-      if (loaded && typeof window.posthog !== 'undefined' && typeof window.posthog.init === 'function') {
+      if (loaded && analyticsConsent && typeof window.posthog !== 'undefined' && typeof window.posthog.init === 'function') {
         window.posthog.init(posthogKey, { api_host: host, autocapture: false, capture_pageview: false, disable_session_recording: true });
         transport = 'posthog';
       }
@@ -212,6 +219,20 @@
     } catch {}
     pushDebug(entry);
   }
-  window.DDAAnalytics = Object.freeze({ init, send, getDebugQueue() { return debugQueue.slice(); }, getTransport() { return transport; } });
-  init();
+  function setConsent(allowed) {
+    analyticsConsent = allowed === true;
+    if (!analyticsConsent) {
+      transport = 'debug';
+      if (posthogScript && !window.posthog) { posthogScript.remove(); posthogScript = null; initAttempted = false; }
+      try { if (typeof window.posthog !== 'undefined' && typeof window.posthog.opt_out_capturing === 'function') window.posthog.opt_out_capturing(); } catch {}
+      return;
+    }
+    if (typeof window.posthog !== 'undefined' && typeof window.posthog.capture === 'function') {
+      try { if (typeof window.posthog.opt_in_capturing === 'function') window.posthog.opt_in_capturing(); } catch {}
+      transport = 'posthog';
+      return;
+    }
+    init();
+  }
+  window.DDAAnalytics = Object.freeze({ init, send, setConsent, getDebugQueue() { return debugQueue.slice(); }, getTransport() { return transport; } });
 })();
