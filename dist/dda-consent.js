@@ -49,7 +49,8 @@
         ad_user_data: 'denied',
         ad_personalization: 'denied',
         functionality_storage: 'granted',
-        security_storage: 'granted'
+        security_storage: 'granted',
+        wait_for_update: 500
       });
       googleConsentInitialized = true;
     }
@@ -75,7 +76,6 @@
     };
     (document.head || document.documentElement).appendChild(script);
     gtmLoaded = true;
-    window.dataLayer.push({ event: 'dda_consent_granted', dda_consent: consentPayload() });
   }
 
   function applyConsent() {
@@ -98,7 +98,6 @@
         ad_user_data: 'denied',
         ad_personalization: 'denied'
       });
-      window.dataLayer.push({ event: 'dda_consent_withdrawn' });
     }
     if (window.DDAAnalytics && typeof window.DDAAnalytics.setConsent === 'function') {
       window.DDAAnalytics.setConsent(!!(consent && consent.analytics));
