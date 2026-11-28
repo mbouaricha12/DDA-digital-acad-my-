@@ -1256,6 +1256,73 @@ async function seedLocalLearner(context, lessonProgress = {}, membershipPlan = '
     await context.close();
   });
 
+  console.log('\n-- I. Landing — scène WebGL réelle --');
+
+  await test('landing 3D scene runs WebGL perspective on desktop/mobile and respects visibility, motion and data preferences', async () => {
+    const webglBrowser = await chromium.launch({ args: ['--enable-webgl', '--ignore-gpu-blocklist', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+    try {
+      for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+        const context = await webglBrowser.newContext({ viewport });
+        const page = await context.newPage();
+        const pageErrors = [];
+        page.on('pageerror', error => pageErrors.push(error.message));
+        try {
+          await page.emulateMedia({ reducedMotion: 'no-preference' });
+          await page.goto(`${BASE}/#landing`);
+          await page.locator('[data-landing-3d-canvas]').waitFor({ state: 'attached' });
+          await page.waitForFunction(() => {
+            const scene = document.querySelector('#landing .landing-3d-scene');
+            return scene?.dataset.sceneState === 'webgl' && Number(scene.dataset.sceneFrames || 0) > 1;
+          }, null, { timeout: 10000 });
+
+          const rendered = await page.evaluate(() => {
+            const scene = document.querySelector('#landing .landing-3d-scene');
+            const canvas = scene.querySelector('canvas');
+            const rect = canvas.getBoundingClientRect();
+            return {
+              state: scene.dataset.sceneState,
+              mode: scene.dataset.sceneMode,
+              frames: Number(scene.dataset.sceneFrames || 0),
+              width: Math.round(rect.width),
+              height: Math.round(rect.height),
+              bufferWidth: canvas.width,
+              bufferHeight: canvas.height,
+              visibleInFirstFold: rect.top < window.innerHeight && rect.bottom > 0,
+              horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth,
+              hasWebGL: Boolean(canvas.getContext('webgl'))
+            };
+          });
+          assert.equal(rendered.state, 'webgl', 'the scene must initialize the shader-based renderer');
+          assert.equal(rendered.mode, 'animated', 'default motion preference runs the 3D scene');
+          assert.ok(rendered.frames > 1, 'the perspective scene must render multiple animation frames');
+          assert.ok(rendered.width > 200 && rendered.height > 150, 'the scene must have visible desktop/mobile dimensions');
+          assert.ok(rendered.bufferWidth > 0 && rendered.bufferHeight > 0 && rendered.hasWebGL, 'the canvas must own a live WebGL drawing buffer');
+          assert.equal(rendered.horizontalOverflow, false, 'the reflowed hero must not introduce horizontal overflow');
+          if (viewport.width < 500) assert.equal(rendered.visibleInFirstFold, true, 'mobile visitors should see the 3D scene in the first viewport');
+
+          await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+          await page.waitForFunction(() => document.querySelector('.landing-3d-scene')?.dataset.sceneMode === 'paused-offscreen');
+          await page.waitForTimeout(250);
+          const pausedFrames = await page.locator('.landing-3d-scene').getAttribute('data-scene-frames');
+          await page.waitForTimeout(250);
+          assert.equal(await page.locator('.landing-3d-scene').getAttribute('data-scene-frames'), pausedFrames, 'offscreen animation must stop advancing frames');
+
+          await page.evaluate(() => window.scrollTo(0, 0));
+          await page.waitForFunction(() => document.querySelector('.landing-3d-scene')?.dataset.sceneMode === 'animated');
+          await page.emulateMedia({ reducedMotion: 'reduce' });
+          await page.waitForFunction(() => document.querySelector('.landing-3d-scene')?.dataset.sceneMode === 'static-reduced-motion');
+          await page.evaluate(() => document.body.classList.add('low-data'));
+          await page.waitForFunction(() => document.querySelector('.landing-3d-scene')?.dataset.sceneMode === 'static-low-data');
+          assert.deepEqual(pageErrors, [], 'the scene must not raise browser runtime errors');
+        } finally {
+          await context.close();
+        }
+      }
+    } finally {
+      await webglBrowser.close();
+    }
+  });
+
   console.log('\n-- J. Full funnel proof: landing → access → onboarding → M0.1 → activation --');
 
   await test('a single visitorId is traceable end-to-end through the full acquisition funnel', async () => {

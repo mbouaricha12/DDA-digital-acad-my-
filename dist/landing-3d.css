@@ -1,0 +1,56 @@
+/* DDA Aurora — additive landing follow-up. This stylesheet is scoped to #landing. */
+#landing .landing-fintech-scene .fintech-stage{isolation:isolate}
+#landing .landing-fintech-scene .landing-3d-scene{position:absolute;z-index:2;top:3%;left:0;width:90%;height:92%;overflow:hidden;pointer-events:none;opacity:.76;mix-blend-mode:screen}
+#landing .landing-fintech-scene .landing-3d-canvas{position:absolute;inset:0;display:block;width:100%;height:100%;opacity:1}
+#landing .landing-fintech-scene .landing-3d-orbit{position:absolute;top:50%;left:50%;width:82%;height:42%;border:1px solid rgba(69,166,255,.46);border-radius:50%;box-shadow:0 0 20px rgba(38,136,255,.22),inset 0 0 16px rgba(38,136,255,.1);transform:translate(-50%,-50%) rotateX(62deg) rotateZ(-17deg)}
+#landing .landing-fintech-scene .landing-3d-orbit-b{width:68%;height:72%;border-color:rgba(242,185,74,.44);transform:translate(-50%,-50%) rotateY(62deg) rotateZ(24deg)}
+#landing .landing-fintech-scene .landing-3d-orbit-c{width:94%;height:52%;border-color:rgba(57,214,207,.34);transform:translate(-50%,-50%) rotateX(70deg) rotateZ(38deg)}
+#landing .landing-fintech-scene .landing-3d-core{position:absolute;top:50%;left:50%;width:22%;aspect-ratio:1;border:1px solid rgba(111,196,255,.58);border-radius:50%;background:radial-gradient(circle at 35% 28%,rgba(80,183,255,.36),rgba(9,39,73,.18) 62%,transparent 72%);box-shadow:0 0 44px rgba(30,135,255,.3);transform:translate(-50%,-50%)}
+#landing .landing-fintech-scene .landing-3d-bars{position:absolute;left:20%;right:13%;bottom:8%;height:24%;display:flex;align-items:flex-end;justify-content:center;gap:3.2%}
+#landing .landing-fintech-scene .landing-3d-bars i{width:5%;height:42%;border:1px solid rgba(65,157,255,.45);border-radius:2px 2px 0 0;background:linear-gradient(180deg,rgba(47,153,255,.62),rgba(22,85,158,.1));box-shadow:0 0 9px rgba(37,136,255,.2)}
+#landing .landing-fintech-scene .landing-3d-bars i:nth-child(2n){height:61%}
+#landing .landing-fintech-scene .landing-3d-bars i:nth-child(3n){height:76%;border-color:rgba(242,185,74,.5);background:linear-gradient(180deg,rgba(242,185,74,.72),rgba(161,99,22,.12))}
+#landing .landing-fintech-scene .landing-3d-bars i:nth-child(5n){height:92%}
+#landing .landing-fintech-scene .landing-3d-scene[data-scene-state="webgl"] .landing-3d-orbit,
+#landing .landing-fintech-scene .landing-3d-scene[data-scene-state="webgl"] .landing-3d-core,
+#landing .landing-fintech-scene .landing-3d-scene[data-scene-state="webgl"] .landing-3d-bars{display:none}
+#landing .landing-fintech-scene .landing-3d-scene[data-scene-state="fallback"] .landing-3d-canvas{display:none}
+#landing .landing-fintech-scene .fintech-figure{z-index:3}
+
+/* Keep the human-led hero and its real product UI in the same first-screen story. */
+@media(max-width:639px){
+  #landing .landing-editorial-shell{grid-template-columns:minmax(0,1fr);min-height:0;align-items:start;gap:10px;padding:18px 16px 16px}
+  #landing .landing-main-copy{max-width:none}
+  #landing .landing-masthead{display:none}
+  #landing .landing-main-copy>.eyebrow.gold{margin:0 0 12px;font-size:.7rem;line-height:1.35}
+  #landing-title{max-width:16ch!important;margin:0 0 12px;font-size:clamp(1.95rem,7.7vw,2.48rem)!important;line-height:1.04!important;letter-spacing:-.035em}
+  #landing .landing-deck{max-width:44ch;margin:0 0 15px;font-size:.95rem;line-height:1.5}
+  #landing .landing-actions{display:grid;grid-template-columns:1fr;gap:9px;margin:14px 0 4px}
+  #landing .landing-actions .primary-action,#landing .landing-actions .landing-secondary{width:100%;min-height:48px;justify-content:center}
+  #landing .landing-aperture{height:clamp(310px,88vw,350px);min-height:310px;margin:0 2px;overflow:hidden}
+  #landing .landing-fintech-scene .landing-3d-scene{top:5%;left:0;width:90%;height:86%;opacity:.7}
+  #landing .landing-market-widget{grid-column:auto;margin:8px 0 0;padding:15px;gap:11px}
+  #landing .landing-market-widget .market-widget-tabs{gap:5px}
+  #landing .landing-market-widget .market-widget-tabs span{padding:5px 8px;font-size:.62rem}
+}
+@media(min-width:640px) and (max-width:899px){
+  #landing .landing-editorial-shell{min-height:0;gap:22px;padding:34px 26px 24px}
+  #landing .landing-aperture{min-height:390px}
+}
+
+/* One compact evidence band replaces the duplicated numeric rows, keeping
+   every verified fact and Free benefit visible exactly once. */
+#landing .landing-proof-band{display:grid;grid-template-columns:minmax(250px,.82fr) minmax(0,1.18fr);align-items:stretch;gap:16px;max-width:1440px;margin:0 auto 24px;padding:0 clamp(20px,5vw,72px)}
+#landing .landing-proof-band .landing-free-proof{display:flex;align-items:center;max-width:none;margin:0;padding:18px 20px;border:1px solid rgba(74,157,232,.24);border-radius:16px;background:linear-gradient(145deg,rgba(11,31,53,.78),rgba(7,18,32,.72));box-shadow:0 14px 32px rgba(0,0,0,.16)}
+#landing .landing-proof-band .landing-free-proof ul{display:grid;grid-template-columns:1fr;gap:10px;width:100%;margin:0;padding:0;list-style:none}
+#landing .landing-proof-band .landing-free-proof li{display:flex;align-items:center;gap:9px;margin:0}
+#landing .landing-proof-band .landing-free-proof strong{color:#e9eef5;font-size:.77rem;line-height:1.35}
+#landing .landing-proof-band .landing-free-proof-icon{display:grid;place-items:center;width:28px;height:28px;flex:none;border:1px solid rgba(242,185,74,.34);border-radius:9px;background:rgba(242,185,74,.08);color:#f4cb78}
+#landing .landing-proof-band .landing-proof-rail{grid-template-columns:repeat(2,minmax(0,1fr));align-content:stretch;margin:0;border-color:rgba(78,145,201,.28);border-radius:16px;background:rgba(24,97,155,.12);box-shadow:0 14px 32px rgba(0,0,0,.16)}
+#landing .landing-proof-band .landing-proof-rail article{min-height:62px;padding:12px 14px;background:linear-gradient(145deg,rgba(10,27,47,.94),rgba(7,18,32,.95))}
+#landing .landing-proof-band .landing-proof-rail-icon{border-color:rgba(87,168,235,.35);background:rgba(33,121,196,.12);color:#8bc9f2}
+#landing .landing-hero-features{margin-top:0}
+@media(max-width:899px){#landing .landing-proof-band{grid-template-columns:1fr;gap:10px;margin-bottom:20px;padding-inline:20px}}
+@media(max-width:479px){#landing .landing-proof-band{padding-inline:16px}#landing .landing-proof-band .landing-free-proof{padding:15px 16px}#landing .landing-proof-band .landing-proof-rail article{min-height:58px;padding:10px 9px}}
+@media(prefers-reduced-motion:reduce){#landing .landing-3d-orbit{animation:none!important}}
+@media(hover:none){#landing .landing-3d-scene{opacity:.68}}

@@ -92,6 +92,7 @@
   <link rel="preload" as="image" href="images/photos/landing-hero-woman.webp" fetchpriority="high">
   <link rel="stylesheet" href="styles.min.css">
   <link rel="stylesheet" href="alpha-polish.min.css">
+  <link rel="stylesheet" href="landing-3d.css">
 </head>
 <body class="public-document">
   <a class="skip-link" href="#public-shell">Aller au contenu</a>
@@ -191,19 +192,6 @@
               <button class="primary-action" type="button" data-view="access" data-analytics="hero_cta_click" data-funnel-position="hero">Commencer gratuitement <span>→</span></button>
               <a class="text-action landing-secondary" href="#landing-experience"><svg class="icon"><use href="#icon-play"/></svg>Voir la méthode DDA<b>1 min</b></a>
             </div>
-            <div class="landing-free-proof" aria-label="Ce que comprend DDA Free aujourd’hui">
-              <ul>
-                <li><span class="landing-free-proof-icon"><svg class="icon"><use href="#icon-progress"/></svg></span><strong>Apprendre à ton rythme</strong></li>
-                <li><span class="landing-free-proof-icon"><svg class="icon"><use href="#icon-target"/></svg></span><strong>Pratiquer en conditions réelles</strong></li>
-                <li><span class="landing-free-proof-icon"><svg class="icon"><use href="#icon-compass"/></svg></span><strong>Développer des compétences durables</strong></li>
-              </ul>
-            </div>
-            <section class="landing-proof-rail" aria-label="Ce qui est disponible aujourd’hui dans DDA Free">
-              <article><span class="landing-proof-rail-icon"><svg class="icon"><use href="#icon-book"/></svg></span><div><strong>03</strong><span>leçons de fondation publiées</span></div></article>
-              <article><span class="landing-proof-rail-icon"><svg class="icon"><use href="#icon-chart"/></svg></span><div><strong>04</strong><span>outils du Terminal</span></div></article>
-              <article><span class="landing-proof-rail-icon"><svg class="icon"><use href="#icon-progress"/></svg></span><div><strong>01</strong><span>preuve locale à construire</span></div></article>
-              <article><span class="landing-proof-rail-icon"><svg class="icon"><use href="#icon-shield"/></svg></span><div><strong>0</strong><span>donnée live ou signal</span></div></article>
-            </section>
           </div>
 
           <div class="dda-aperture landing-aperture landing-fintech-scene" role="img" aria-label="Une experte DDA confiante devant un globe financier numérique mettant l'Afrique en lumière, entourée de graphiques de marché">
@@ -213,6 +201,12 @@
                 <i class="fintech-africa-glow"></i>
                 <i class="fintech-orbit-dot fintech-orbit-dot-a"></i>
                 <i class="fintech-orbit-dot fintech-orbit-dot-b"></i>
+              </div>
+              <div class="landing-3d-scene" data-3d-scene="dda-orbit" data-scene-state="initializing" data-scene-mode="pending" aria-hidden="true">
+                <canvas class="landing-3d-canvas" data-landing-3d-canvas></canvas>
+                <i class="landing-3d-orbit landing-3d-orbit-a"></i><i class="landing-3d-orbit landing-3d-orbit-b"></i><i class="landing-3d-orbit landing-3d-orbit-c"></i>
+                <i class="landing-3d-core"></i>
+                <span class="landing-3d-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
               </div>
               <svg class="fintech-dataline" aria-hidden="true" viewBox="0 0 300 140" preserveAspectRatio="none">
                 <path d="M0,112 L34,96 L68,104 L102,64 L136,78 L170,40 L204,54 L238,24 L300,8"></path>
@@ -254,18 +248,27 @@
           </aside>
         </div>
 
+        <section class="landing-proof-band" aria-label="Preuves et contenu DDA Free">
+          <div class="landing-free-proof" aria-label="Ce que comprend DDA Free aujourd’hui">
+            <ul>
+              <li><span class="landing-free-proof-icon"><svg class="icon"><use href="#icon-progress"/></svg></span><strong>Apprendre à ton rythme</strong></li>
+              <li><span class="landing-free-proof-icon"><svg class="icon"><use href="#icon-target"/></svg></span><strong>Pratiquer en conditions réelles</strong></li>
+              <li><span class="landing-free-proof-icon"><svg class="icon"><use href="#icon-compass"/></svg></span><strong>Développer des compétences durables</strong></li>
+            </ul>
+          </div>
+          <section class="landing-proof-rail" aria-label="Ce qui est disponible aujourd’hui dans DDA Free">
+            <article><span class="landing-proof-rail-icon"><svg class="icon"><use href="#icon-book"/></svg></span><div><strong>03</strong><span>leçons de fondation publiées</span></div></article>
+            <article><span class="landing-proof-rail-icon"><svg class="icon"><use href="#icon-chart"/></svg></span><div><strong>04</strong><span>outils du Terminal</span></div></article>
+            <article><span class="landing-proof-rail-icon"><svg class="icon"><use href="#icon-progress"/></svg></span><div><strong>01</strong><span>preuve locale à construire</span></div></article>
+            <article><span class="landing-proof-rail-icon"><svg class="icon"><use href="#icon-shield"/></svg></span><div><strong>0</strong><span>donnée live ou signal</span></div></article>
+          </section>
+        </section>
+
         <section class="landing-hero-features" aria-label="Commencer avec DDA">
           <a class="hero-feature-card" href="#landing-free"><span class="hero-feature-icon"><svg class="icon"><use href="#icon-book"/></svg></span><h3>Academy Free</h3><p>Les fondamentaux des marchés, accessibles à tous.</p><span class="hero-feature-status is-free"><svg class="icon"><use href="#icon-check-circle"/></svg>Gratuit</span></a>
           <a class="hero-feature-card" href="#landing-lab"><span class="hero-feature-icon"><svg class="icon"><use href="#icon-award"/></svg></span><h3>DDA Lab</h3><p>Pratique, exercices et mises en situation réelles.</p><span class="hero-feature-status is-live"><svg class="icon"><use href="#icon-check-circle"/></svg>Disponible</span></a>
           <a class="hero-feature-card" href="#landing-ai"><span class="hero-feature-icon"><svg class="icon"><use href="#icon-spark"/></svg></span><h3>DDA AI</h3><p>Ton assistant pédagogique (non prédictif).</p><span class="hero-feature-status is-soon">Bientôt</span></a>
           <a class="hero-feature-card" href="#landing-resources"><span class="hero-feature-icon"><svg class="icon"><use href="#icon-path"/></svg></span><h3>Ressources</h3><p>Fiches, guides, plans et outils d'apprentissage.</p><span class="hero-feature-status is-live"><svg class="icon"><use href="#icon-check-circle"/></svg>Disponible</span></a>
-        </section>
-
-        <section class="landing-hero-banner" aria-label="Ce qui est réellement disponible aujourd’hui dans DDA Free">
-          <article><span class="hero-banner-icon"><svg class="icon"><use href="#icon-book"/></svg></span><div><strong>03</strong><p>Leçons de fondation publiées</p></div></article>
-          <article><span class="hero-banner-icon"><svg class="icon"><use href="#icon-chart"/></svg></span><div><strong>04</strong><p>Outils du Terminal</p></div></article>
-          <article><span class="hero-banner-icon"><svg class="icon"><use href="#icon-progress"/></svg></span><div><strong>01</strong><p>Preuve locale à construire</p></div></article>
-          <article><span class="hero-banner-icon"><svg class="icon"><use href="#icon-shield"/></svg></span><div><strong>0</strong><p>Donnée live ou signal présenté comme réel</p></div></article>
         </section>
 
         <!-- Vidéo de présentation institutionnelle (60s) — fichier réel
@@ -532,6 +535,7 @@
   <script src="brvm-publications.js"></script>
   <script src="dda-core.js"></script>
   <script src="dda-analytics.js"></script>
+  <script src="landing-3d.js"></script>
   <script src="public.js"></script>
   <script src="landing-ticker.js"></script>
   <script src="market-ticker.js"></script>

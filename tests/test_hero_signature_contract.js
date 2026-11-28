@@ -8,10 +8,9 @@
  * BFF paths only, explicit empty/offline states, no fabricated headline or
  * fake "live" claim.
  *
- * The 3D orbit scene this contract used to also lock (.landing-3d-scene)
- * was removed 2026-11-21 along with the rest of the hidden hero device
- * mockup (see test_landing_3d_contract.js) — it was permanently masked
- * behind the real hero photo and never reached production.
+ * The 3D orbit scene now runs as a live WebGL layer around the existing
+ * human-led hero photo. It is verified by test_landing_3d_contract.js and
+ * the real-browser regression in tests/run.js.
  */
 
 const assert = require('assert/strict');
